@@ -2,14 +2,16 @@ Package: ecotoneClassifyR
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
-Authors@R: person(
-    "Selina", "Baldauf",
-    role = c("aut", "cre"),
-    email = "selina.baldauf@fu-berlin.de",
-    comment = NULL
+Authors@R: c(
+    person("Selina", "Baldauf", , "selina.baldauf@fu-berlin.de", role = c("aut", "cre")),
+    person("Britta", "Tietjen", , "britta.tietjen@fu-berlin.de", role = c("aut"))
   )
 Description: More about what it does (maybe more than one line).
     Continuation lines should be indented.
-License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+License: GPL (>= 3)
+RoxygenNote: 7.3.2
+Imports: 
+    omnibus,
+    zoo
