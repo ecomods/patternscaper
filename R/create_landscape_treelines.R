@@ -10,7 +10,7 @@
 #' @param rotation Numeric. Rotation angle in degrees (default: 0).
 #'
 #' @return A matrix with values 0 (non-mangrove) and 1 (mangrove).
-create_sharp_treeline <- function(
+create_landscape_sharp_treeline <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
@@ -55,8 +55,7 @@ create_sharp_treeline <- function(
 #' @param rotation Numeric. Degrees to rotate the landscape (default is 0).
 #'
 #' @return A matrix representing the diffuse treeline landscape, where 1 indicates mangrove (tree) and 0 indicates saltmarsh.
-#' @export
-create_diffuse_treeline <- function(
+create_landscape_diffuse_treeline <- function(
   width = 100,
   height = 100,
   steepness = 1,
@@ -109,7 +108,7 @@ create_diffuse_treeline <- function(
 #' @param rotation Numeric. Degrees to rotate the landscape (default is 0).
 #'
 #' @return A matrix with values 0 (non-mangrove) and 1 (mangrove).
-create_curvy_treeline <- function(
+create_landscape_curvy_treeline <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,

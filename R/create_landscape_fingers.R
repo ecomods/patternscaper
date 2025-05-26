@@ -14,7 +14,7 @@
 #' @param rotation Numeric. Degrees to rotate the landscape (default: 0).
 #'
 #' @return A matrix representing the landscape with fingers.
-create_fingers <- function(
+create_landscape_fingers <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
@@ -35,7 +35,7 @@ create_fingers <- function(
   }
 
   # Get base landscape with sharp treeline
-  landscape <- create_sharp_treeline(
+  landscape <- create_landscape_sharp_treeline(
     width_actual,
     height_actual,
     treeline_position
@@ -99,7 +99,7 @@ create_fingers <- function(
 #' @param rotation Numeric. Rotation angle in degrees (default: 0).
 #'
 #' @return A binary matrix representing the landscape with bent fingers.
-create_bent_fingers <- function(
+create_landscape_bent_fingers <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
@@ -121,7 +121,7 @@ create_bent_fingers <- function(
   }
 
   # Get base landscape with sharp treeline
-  landscape <- create_sharp_treeline(
+  landscape <- create_landscape_sharp_treeline(
     width_actual,
     height_actual,
     treeline_position

@@ -15,7 +15,7 @@
 #' @param rotation Rotation angle in degrees (default: 0)
 #'
 #' @return A matrix representing the landscape with clusters
-create_clusters <- function(
+create_landscape_clusters <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
@@ -32,7 +32,7 @@ create_clusters <- function(
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
   # Get base landscape with sharp treeline
-  landscape <- create_sharp_treeline(
+  landscape <- create_landscape_sharp_treeline(
     width_actual,
     height_actual,
     treeline_position

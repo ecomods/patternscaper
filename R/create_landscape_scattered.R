@@ -11,7 +11,7 @@
 #' @param rotation Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).
 #'
 #' @return A matrix representing the scattered landscape, where 1 indicates trees and 0 indicates no trees.
-create_random_scatter <- function(
+create_landscape_random_scatter <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
@@ -24,7 +24,7 @@ create_random_scatter <- function(
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
   # Get base landscape with sharp treeline
-  landscape <- create_sharp_treeline(
+  landscape <- create_landscape_sharp_treeline(
     width_actual,
     height_actual,
     treeline_position

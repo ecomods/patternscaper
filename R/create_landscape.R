@@ -87,14 +87,14 @@ create_landscape <- function(
   # Call the appropriate function based on the pattern
   landscape <- switch(
     matched,
-    sharp = create_sharp_treeline(...),
-    diffuse = create_diffuse_treeline(...),
-    curvy = create_curvy_treeline(...),
-    scattered = create_random_scatter(...),
-    clusters = create_clusters(...),
-    fingers = create_fingers(...),
-    bent_fingers = create_bent_fingers(...),
-    sine_bands = create_sine_bands(...)
+    sharp = create_landscape_sharp_treeline(...),
+    diffuse = create_landscape_diffuse_treeline(...),
+    curvy = create_landscape_curvy_treeline(...),
+    scattered = create_landscape_random_scatter(...),
+    clusters = create_landscape_clusters(...),
+    fingers = create_landscape_fingers(...),
+    bent_fingers = create_landscape_bent_fingers(...),
+    sine_bands = create_landscape_sine_bands(...)
   )
 
   # Check if landscape was created successfully

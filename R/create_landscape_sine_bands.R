@@ -16,7 +16,7 @@
 #' @param rotation Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).
 #'
 #' @return A matrix representing the sine bands landscape, where 1 indicates mangrove (tree) and 0 indicates saltmarsh.
-create_sine_bands <- function(
+create_landscape_sine_bands <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
