@@ -85,6 +85,11 @@ devtools::build()
 
 ### Contributing
 
+#### Issue tracking
+
+If you find a bug or have a feature request, please open an issue on the [GitHub Issues page](https://github.com/ecomods/ecotoneClassifyR/issues).
+Add smaller, active todos to the [Active TODOs issue](https://github.com/ecomods/ecotoneClassifyR/issues/1), for bigger bugs or features, please open a new issue.
+
 #### Via GitHub Desktop
 
 1. **Clone the repository** to your local machine using GitHub Desktop:
