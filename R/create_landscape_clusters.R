@@ -25,8 +25,7 @@ create_landscape_clusters <- function(
   scatter_zone_prop = 0.3,
   elongation_x = 1,
   elongation_y = 1,
-  rotation = 0,
-  seed = 123
+  rotation = 0
 ) {
   # Input validation
   if (!is.numeric(width) || width <= 0)
@@ -71,55 +70,42 @@ create_landscape_clusters <- function(
         treeline_position
       )
 
-      # Calculate the "safe area" - the portion that will remain visible after
-      # rotation and cropping
-      # For non-rotated landscapes, this is the entire area
-      # For rotated landscapes, this is the central portion
-      start_col <- max(1, ceiling((width_actual - width) / 2))
-      end_col <- start_col + width - 1
-
-      start_row <- max(1, ceiling((height_actual - height) / 2))
-      end_row <- start_row + height - 1
-
-      # Check if safe area is valid
-      if (start_row >= end_row || start_col >= end_col) {
-        stop("Invalid safe area dimensions. Check width and height parameters.")
-      }
-
-      # Define treeline and scatter zone within the safe area
-      safe_area_height <- end_row - start_row + 1
-
-      # Calculate treeline position within the safe area
-      treeline_row <- start_row + round(safe_area_height * treeline_position)
-
-      # Calculate scatter zone end within the safe area
-      scatter_zone_end <- min(
-        end_row,
-        treeline_row + round(safe_area_height * scatter_zone_prop)
-      )
-
-      # Ensure we have a valid scatter zone
-      if (treeline_row >= scatter_zone_end) {
-        warning(
-          "Scatter zone too small or treeline position too high. Adjusting parameters."
+      # Define scatter zone
+      if (rotation == 0) {
+        treeline_row <- round(height_actual * treeline_position)
+        scatter_zone_end <- min(
+          height_actual,
+          treeline_row + round(height_actual * scatter_zone_prop)
         )
-        scatter_zone_end <- min(end_row, treeline_row + 2) # Ensure at least 2 rows for scatter zone
-      }
-
-      # Generate random cluster centers in the safe area only
-      cluster_centers <- data.frame(
-        row = sample(
-          (treeline_row + 1):scatter_zone_end,
-          num_clusters,
-          replace = TRUE
-        ),
-        col = sample(
-          start_col:end_col,
-          num_clusters,
-          replace = TRUE
+        # Generate random cluster centers
+        cluster_centers <- data.frame(
+          row = sample(
+            (treeline_row + 1):scatter_zone_end,
+            num_clusters,
+            replace = TRUE
+          ),
+          col = sample(1:width_actual, num_clusters, replace = TRUE)
         )
-      )
-
+      } else {
+        treeline_row <- round(height_actual * treeline_position)
+        scatter_zone_end <- min(
+          round(5 / 6 * height_actual),
+          treeline_row + round((5 / 6 * height_actual) * scatter_zone_prop)
+        )
+        # Generate random cluster centers
+        cluster_centers <- data.frame(
+          row = sample(
+            (treeline_row + 1):scatter_zone_end,
+            num_clusters,
+            replace = TRUE
+          ),
+          col = sample(
+            (round(1 / 6 * width_actual) + 1):round(5 / 6 * width_actual),
+            num_clusters,
+            replace = TRUE
+          )
+        )
+      }
       # Create clusters around centers
       for (i in 1:nrow(cluster_centers)) {
         center_row <- cluster_centers$row[i]
