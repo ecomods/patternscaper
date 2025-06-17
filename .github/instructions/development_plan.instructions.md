@@ -38,6 +38,53 @@ What the user can do with the package:
 - Trained neural network model that can be used for further classification tasks
 - Cross-validation results for model evaluation
 
+### Complete Workflow Example
+
+```r
+# Generate artificial landscapes in a list for training
+training_landscapes <- generate_training_landscapes(
+  n = 50,                           # Number of landscapes per type
+  types = c("sharp", "scattered"),  # Types to generate
+  width = 100, height = 100         # Dimensions
+)
+
+# Calculate metrics for all landscapes
+metrics <- calculate_landscape_metrics(training_landscapes)
+
+# Select the most sensitive metrics
+metrics_selected <- evaluate_landscape_metrics(
+  metrics,
+  method = "lin_mod_r2",
+  metrics_number = 15,
+  plot = TRUE                      # Create visualization of metrics
+)
+
+# Train the neural network model
+model <- train_nn(
+  metrics,
+  metrics_selected,
+  test = TRUE                      # Perform cross-validation
+)
+
+# Read in a real landscape image
+image <- terra::rast("data-raw/satellite_images/Picture9.png")
+
+# Classify the landscape
+classification <- apply_nn(
+  image,
+  nn_model = model,
+  test_data = metrics, 
+  metric_list = metrics_selected
+)
+
+# View classification results
+print(classification)
+# A tibble: 1 × 5
+# landscape_name predicted_class confidence sharp scattered warning
+# <chr>          <chr>               <dbl> <dbl>    <dbl> <chr>
+# 1 Picture9       scattered            0.83  0.17     0.83 NA
+```
+
 ## Functionality details
 
 ### Generate synthetic landscapes
@@ -46,17 +93,38 @@ The package will provide one function to generate synthetic landscapes with diff
 
 The landscapes that can be generated include:
 
-- sharp treelines: a sharp transition between two vegetation types, e.g. mangroves and salt marsh, with no ecotone zone in between.
-- diffuse treelines: a gradual transition between the two vegetation types
-- curvy treelines: a transition with a sharp but curvy treeline
-- fingers: a transition zone where one vegetation type, e.g. the mangrove trees, grows finger-like into the other vegetation type, e.g. the salt marsh. These fingers can be straight or bent.
-- scattered trees: a landscape where trees are randomly scattered in the salt marsh
-- sine bands: parallel bands of vegetation types, e.g. mangroves and salt marsh, that are arranged in a sine wave pattern in the ecotone.
-- clustered trees: a landscape where trees are clustered in the salt marsh.
+- **sharp treelines**: A sharp transition between two vegetation types, e.g. mangroves and salt marsh, with no ecotone zone in between.
+  - **Algorithm**: Simple horizontal division of landscape with all pixels above treeline_position = 1, below = 0
+  - **Key parameters**: width, height, treeline_position (0-1), rotation (degrees)
+
+- **diffuse treelines**: A gradual transition between the two vegetation types.
+  - **Algorithm**: Probability of tree presence decreases with row index using formula: prob = 1 - (normalized_row)^steepness
+  - **Key parameters**: width, height, steepness (controls transition rate), rotation
+
+- **curvy treelines**: A transition with a sharp but curvy treeline.
+  - **Algorithm**: Uses sine wave to create undulating boundary following formula: i > (treeline_row + sin(2π*j/sine_length) \* sine_height)
+  - **Key parameters**: width, height, treeline_position, sine_length (wavelength, default: 20), sine_height (amplitude, default: 5)
+
+- **fingers**: A transition zone where one vegetation type grows finger-like into the other.
+  - **Straight Fingers Algorithm**: Creates rectangular extensions from treeline evenly distributed across landscape width
+  - **Bent Fingers Algorithm**: Similar to straight fingers but uses sine function to create bending effect
+  - **Key parameters**: width, height, treeline_position, num_fingers (default: 5), finger_width (pixels, default: 3), finger_length_prop (proportion of height, default: 0.3)
+
+- **scattered trees**: A landscape where trees are randomly scattered in one vegetation type.
+  - **Algorithm**: Creates sharp treeline base landscape with random tree placement below treeline based on scatter_density
+  - **Key parameters**: width, height, treeline_position, scatter_density (0-1), scatter_zone_prop (proportion of height)
+
+- **sine bands**: Parallel bands of vegetation types arranged in a sine wave pattern.
+  - **Algorithm**: Generates wavy bands parallel to treeline with each band following a sine wave pattern
+  - **Key parameters**: width, height, treeline_position, band_thickness (default: 3), band_spacing (default: 10), frequency (2π/100 recommended for 100×100), amplitude (default: 5), noise (TRUE/FALSE), noise_sd (default: 1)
+
+- **clustered trees**: A landscape where trees are clustered.
+  - **Algorithm**: Places specified number of cluster centers in scatter zone with decreasing tree probability based on distance from centers using formula: 1-(dist/radius)²
+  - **Key parameters**: width, height, treeline_position, num_clusters (default: 5), cluster_radius (default: 5), scatter_zone_prop, elongation_x/y (for elliptical clusters, default: 1), seed (for reproducibility)
 
 All landscapes can be created in different sizes and with different parameters, such as the density of trees, the curvature of treelines, or the size of the fingers. The user can also specify the resolution of the landscape, which will determine the size of the pixels in the raster image. In addition, each landscape can also be created in a rotated version, because also rotated landscapes should be classified correctly by the neural network.
 
-To make it easy for the user to generate training landscapes, the package will also provide a function to generate a set of synthetic landscapes with different ecotone characteristics. The user can specify the number of landscapes they want to generate and the type of landscapes they want to include in the set. Then, this function will call the landscape generation function multiple times and return a list of generated landscapes.
+To make it easy for the user to generate training landscapes, the package will also provide a function to generate a set of synthetic landscapes with different ecotone characteristics (function `generate_training_landscapes`). The user can specify the number of landscapes they want to generate and the type of landscapes they want to include in the set. Then, this function will call the landscape generation function multiple times and return a list of generated landscapes.
 
 ### Plot landscapes
 
@@ -71,19 +139,65 @@ There are different options to select which metrics to calculate:
 - Select metric via their name: The users can get a list of all available metrics and select the ones they want to calculate.
 - Use a default selection of metrics: By default, the package will calculate all metrics available and then select the ones that are most sensitive to the ecotone patterns. For this, there is a function that will be called and that will return a list of the most sensitive metrics.
 
+#### Metrics Table Format
+
+The metrics table will be a standardized tibble with the following structure:
+
+```r
+# Example structure of metrics tibble
+tibble(
+  landscape_name = c("landscape1", "landscape1", "landscape2", ...),  # Unique landscape identifier
+  type = c("sharp", "sharp", "scattered", ...),                       # Categorical landscape type (for training)
+  metric = c("lsm_c_ai", "lsm_c_np", "lsm_c_ai", ...),               # Metric name from landscapemetrics
+  class = c(1, 1, 1, ...),                                            # Class value (if class-level metric)  
+  value = c(0.82, 15, 0.65, ...)                                      # Computed metric value
+)
+```
+
 ### Find sensitive landscape metrics
 
-The function takes calculated landscape metrics (ecological measurements of landscape patterns) and identifies which metrics are most useful for distinguishing between different landscape types. This can be done by different methods:
+The package provides a function `evaluate_landscape_metrics()` that analyzes calculated landscape metrics to identify which are most effective at distinguishing between different ecotone patterns. The function supports multiple selection methods, each with different statistical approaches:
 
-- "coeffvar_all" (default): Ranks metrics by their coefficient of variation (standard deviation/mean) across all landscapes
-- "lin_mod_p": Ranks metrics by p-values from linear models testing for differences between landscape types
-- "lin_mod_r2": Ranks metrics by R² values from linear models, showing how much variance is explained by landscape type
-- "mean_groups": Selects metrics that show the largest and smallest deviations from the overall mean for each landscape type
+#### Currently implemented methods:
+
+1. **"coeffvar_all"** (Default method):
+   - Calculates coefficient of variation (CV = standard deviation/mean) for each metric across all landscapes
+   - Ranks metrics by CV and selects the top N with highest variability
+   - Formula: `CV = sd_types$all / means_types$all`
+   - Best for: Identifying metrics with the highest relative variability across all landscape types
+
+2. **"linmod"** (Linear model p-value method):
+   - Fits a linear model for each metric with landscape type as predictor 
+   - Ranks metrics by p-values from ANOVA test
+   - Formula: `lm(value ~ type)` followed by `anova(model)$"Pr(>F)"[1]`
+   - Best for: Finding metrics that show statistically significant differences between landscape types
+
+3. **"mean_groups"** (Mean differences method):
+   - Calculates relative deviation from overall mean for each metric and landscape type
+   - For each landscape type, selects metrics with largest positive and negative deviations
+   - Formula: `rel_mean_diff = (means_types[, 1:num_types] - means_types$all) / means_types$all`
+   - Best for: Identifying characteristic metrics for specific landscape patterns
+
+#### Parameters:
+
+- `calculated_metrics`: Dataframe containing previously calculated metrics
+- `metrics_number`: Number of top metrics to return (default: 10)
+- `method`: Selection method to use (default: "coeffvar_all")
+
+#### Output:
+
+Returns a character vector containing the names of the most sensitive metrics for distinguishing between landscape types.
+
+#### Visualization:
+
+The package will also provide a function to visualize the results of the sensitive metrics detection. The visualization will show the selected metrics and their values for each landscape type, allowing the user to see which metrics are most effective at distinguishing between different ecotone patterns. In this way, the user can compare the selected top metrics from the 
+evaluation function and compare it to the visualization of the metrics for each landscape type.
 
 ### Train the neural network
 
 The function to train the neural network will:
 
+- Scale the input features (landscape metrics) to a range of 0-1 using the `scale()` function
 - Create a neural network model using the nnet package (single-hidden-layer neural network)
 - Process metrics data for neural network training
 - Handle normalization of input features
@@ -94,6 +208,24 @@ The function to train the neural network will:
 ### Classify landscapes
 
 The package provides a function to classify landscapes using a neural network (using the `nnet` function from the `nnet` package). The user can train the neural network on their own landscapes or on the generated synthetic landscapes. The function will take the landscape metrics as input and return a classification table with the predicted classes and probabilities for each landscape.
+
+#### Classification Output Format
+
+Classification results will be returned as a tibble with:
+
+```r
+# Example structure of classification results
+tibble(
+  landscape_name = c("landscape1", "landscape2", ...),                # Landscape identifier
+  predicted_class = c("sharp", "scattered", ...),                     # Primary classification
+  confidence = c(0.85, 0.72, ...),                                    # Classification confidence
+  sharp = c(0.85, 0.15, ...),                                         # Class probability for "sharp"
+  scattered = c(0.10, 0.72, ...),                                     # Class probability for "scattered"
+  clustered = c(0.05, 0.13, ...)                                      # Class probability for "clustered"
+  # Additional columns for other landscape types
+  warning = c(NA, "Low classification confidence", ...)               # Warning messages if applicable
+)
+```
 
 ## Development and Documentation
 
@@ -108,6 +240,9 @@ The package provides a function to classify landscapes using a neural network (u
 multilayer classification that can also consider e.g. vegetation height or density.
 - Support more landscape metrics that are not from the `landscapemetrics` package.
 - Support for other types of NNs
+- Idea for additional evaluation:
+  - **"lin_mod_r2"** method: Will rank metrics by R² values, showing how much variance is explained by landscape type
+- Parallel processing support for large raster datasets to improve performance
 
 # Development plan
 
@@ -139,10 +274,32 @@ The package will follow a process-based organization with logical grouping of fu
 
 ### Input/Output Support
 
-- Support for all raster formats compatible with the landscapemetrics package
-  (SpatRaster, Raster* Layer/Stack/Brick, stars objects)
+- Standardized support for terra's SpatRaster objects only
 - Binary and multi-class classifications (continuous data support planned for future versions)
 - Model persistence using readr::read_rds and readr::write_rds
+
+### Input Data Specifications
+
+#### Raster Requirements
+
+- **Size limitations**: The package supports rasters of any size, though processing time increases with raster dimensions. For optimal performance, rasters smaller than 5000x5000 pixels are recommended. The package will issue warnings when processing very large rasters (>10000x10000 pixels) that may cause memory or performance issues.
+
+- **Coordinate systems**: Coordinate systems are optional for input rasters.
+  - With coordinate system: Landscape metrics will have real-world units (e.g., meters, square kilometers)
+  - Without coordinate system: Metrics will use pixel units (e.g., pixel count, pixel area)
+  - Both approaches are fully supported by the underlying landscapemetrics calculations
+
+- **Class labels**: 
+  - Supports both binary (0/1) and multi-class classifications
+  - Labels can be either numeric values or strings (e.g., "mangrove"/"saltmarsh" or 1/2)
+  - For multi-class: each unique value represents a different vegetation type or landscape feature
+  - NA values are supported and will be handled appropriately by the metrics calculations
+  
+- **File formats**:
+  - Input will be standardized on terra's SpatRaster objects only
+  - Users with other formats must first convert to SpatRaster using terra::rast()
+  - All file formats supported by terra::rast() function (GeoTIFF, IMG, ascii grid, etc.)
+  - This standardization provides better performance, simplifies code, and ensures forward compatibility as the R spatial ecosystem moves away from the older raster package
 
 ## Development Phases
 
