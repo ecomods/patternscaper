@@ -10,7 +10,6 @@
 #' @param num_fingers Integer. Number of fingers to create (default: 5).
 #' @param finger_width Integer. Width of each finger in columns (default: 3).
 #' @param finger_length_prop Numeric. Proportion of height for finger length (default: 0.3).
-#' @param cropped Logical. Whether to crop the landscape after rotation (default: FALSE).
 #' @param rotation Numeric. Degrees to rotate the landscape (default: 0).
 #' @param as_raster Logical. Whether to return the landscape as a raster (default: TRUE).
 #' @param crs Character. Coordinate reference system for the raster (default: NULL).
@@ -23,7 +22,6 @@ create_landscape_fingers <- function(
   num_fingers = 5,
   finger_width = 3,
   finger_length_prop = 0.3,
-  cropped = FALSE,
   rotation = 0,
   as_raster = TRUE,
   crs = NULL
@@ -31,12 +29,6 @@ create_landscape_fingers <- function(
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
-
-  # if rotated, the landscape will be cropped. Therefore we set
-  # the cropped parameter to TRUE
-  if (rotation != 0) {
-    cropped <- TRUE
-  }
 
   # Get base landscape with sharp treeline
   landscape <- create_landscape_sharp_treeline(
@@ -47,7 +39,7 @@ create_landscape_fingers <- function(
   )
 
   # Calculate finger parameters
-  if (!cropped) {
+  if (rotation == 0) {
     treeline_row <- round(height_actual * treeline_position)
     finger_length <- round(height_actual * finger_length_prop)
     finger_positions <- round(seq(
