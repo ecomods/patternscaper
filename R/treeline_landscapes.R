@@ -123,6 +123,8 @@ create_landscape_diffuse_treeline <- function(
 #' @param sine_length Numeric. Wavelength of sinusoidal curve in pixels (default: 20).
 #' @param sine_height Numeric. Amplitude of sinusoidal curve in pixels (default: 5).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
+#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param crs Character. Coordinate reference system (default: NULL).
 #'
 #' @return SpatRaster. Binary landscape with curvy treeline.
 #' @export
@@ -132,11 +134,47 @@ create_landscape_curvy_treeline <- function(
   treeline_position = 0.5,
   sine_length = 20,
   sine_height = 5,
-  rotation = 0
+  rotation = 0,
+  as_raster = TRUE,
+  crs = NULL
 ) {
-  # 1. Calculates treeline row position
-  # 2. Creates matrix where cells above curvy treeline = 1, below = 0
-  # 3. Uses sine wave to create undulating boundary using formula i > (treeline_row + sin(2π*j/sine_length) * sine_height)
-  # 4. Converts to raster and rotates if needed
-  # 5. Returns the resulting landscape
+  # calculate width and height of the actual landscape to produce
+  # in case of rotation, the landscape needs to be larger
+  height_actual <- ifelse(rotation == 0, height, height * 1.5)
+  width_actual <- ifelse(rotation == 0, width, width * 1.5)
+
+  # Convert position from proportion to row number
+  treeline_row <- round(height_actual * treeline_position)
+
+  # Create the landscape matrix
+  landscape <- matrix(0, nrow = height_actual, ncol = width_actual)
+  # Fill in mangrove area (1) based on sine wave around treeline position
+  #sine_height determines how many cells around tree_line are affected
+  #sine_length dtermines the lenght of the wave
+  for (i in 1:height_actual) {
+    for (j in 1:width_actual) {
+      landscape[i, j] <- ifelse(
+        i > (treeline_row + sin(2 * pi * j / sine_length) * sine_height),
+        1,
+        0
+      )
+    }
+  }
+
+  # Rotate the landscape, crop and fill NAs if specified
+  if (rotation != 0) {
+    landscape <- rotate_and_crop_landscape(
+      landscape,
+      rotation,
+      width,
+      height
+    )
+  }
+
+  # Convert to SpatRaster if requested
+  if (as_raster) {
+    return(matrix_to_raster(landscape, crs = crs))
+  }
+
+  return(landscape)
 }
