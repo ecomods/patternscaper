@@ -29,18 +29,44 @@ validate_raster <- function(
 #' Converts a binary matrix to a SpatRaster object.
 #'
 #' @param matrix Matrix. Binary landscape matrix to convert.
-#' @param resolution Numeric. Spatial resolution of output raster (default: 1).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #'
 #' @return SpatRaster. Raster representation of input matrix.
-#' @export
+#' @internal
 matrix_to_raster <- function(
   matrix,
-  resolution = 1,
   crs = NULL
 ) {
-  # 1. Convert binary matrix to SpatRaster object
-  # 2. Set resolution if provided
-  # 3. Set CRS if provided
-  # 4. Return the resulting SpatRaster
+  if (!is.matrix(matrix)) {
+    stop("Input must be a matrix")
+  }
+
+  # Convert matrix to SpatRaster
+  raster <- terra::rast(matrix)
+
+  # Set coordinate reference system if provided
+  if (!is.null(crs)) {
+    terra::crs(raster) <- crs
+  }
+
+  return(raster)
+}
+
+
+#' Ensure Landscape is a SpatRaster
+#' Validates that the input landscape is either a matrix or a SpatRaster object.
+#'
+#' @param landscape Matrix or SpatRaster. The landscape to validate.
+#' @return SpatRaster. Converted or validated SpatRaster object.
+#'
+#' @internal
+ensure_spatraster <- function(landscape) {
+  if (is.matrix(landscape)) {
+    message("Converting matrix to SpatRaster...")
+    return(matrix_to_raster(landscape))
+  } else if (class(landscape)[1] == "SpatRaster") {
+    return(landscape)
+  } else {
+    stop("Input must be either a matrix or SpatRaster object")
+  }
 }
