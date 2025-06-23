@@ -17,7 +17,78 @@ plot_landscape <- function(
   legend_title = "Value",
   show_legend = TRUE
 ) {
-  # Function implementation will go here
+  # Use the ensure_spatraster function to handle matrix inputs
+  landscape <- ensure_spatraster(landscape)
+
+  # Convert raster to data frame for plotting
+  df <- terra::as.data.frame(landscape, xy = TRUE)
+  names(df)[3] <- "value" # Rename the value column
+
+  # Determine if data is categorical/discrete
+  unique_values <- unique(df$value[!is.na(df$value)])
+  is_discrete <- length(unique_values) < 10 &&
+    all(unique_values == round(unique_values))
+
+  # If the values are discrete, convert to factor
+  if (is_discrete) {
+    df$value <- factor(df$value, levels = unique_values)
+  }
+
+  # Set up default color scale if not provided
+  if (is.null(color_scale)) {
+    # Define a standard palette of 10 distinct colors
+    standard_palette <- c(
+      "#005C29", # dark green (forest)
+      "#E5E59F", # light yellow/beige (saltmarsh)
+      "#8DA0CB", # periwinkle blue
+      "#E78AC3", # pink
+      "#A6D854", # lime green
+      "#FFD92F", # yellow
+      "#E5C494", # tan
+      "#B3B3B3", # gray
+      "#7570B3", # purple
+      "#D95F02" # orange
+    )
+
+    if (is_discrete) {
+      # For all categorical data, select the needed number of colors from the palette
+      n_colors <- length(unique_values)
+      color_scale <- standard_palette[1:min(n_colors, 10)]
+    } else {
+      # For continuous data, use a viridis gradient
+      color_scale <- viridisLite::viridis(100)
+    }
+  }
+
+  # Create base plot
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y, fill = value)) +
+    ggplot2::geom_raster() +
+    ggplot2::coord_equal(expand = FALSE) +
+    ggplot2::labs(title = title) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      axis.title = ggplot2::element_blank(),
+      legend.position = if (show_legend) "right" else "none"
+    )
+
+  # Apply appropriate color scale based on data type
+  if (is_discrete) {
+    p <- p +
+      ggplot2::scale_fill_manual(
+        values = color_scale,
+        name = legend_title,
+        na.value = "grey80"
+      )
+  } else {
+    p <- p +
+      ggplot2::scale_fill_gradientn(
+        colours = color_scale,
+        name = legend_title,
+        na.value = "grey80"
+      )
+  }
+
+  return(p)
 }
 
 #' Plot Multiple Landscapes
