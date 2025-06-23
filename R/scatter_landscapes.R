@@ -9,8 +9,11 @@
 #' @param scatter_zone_prop Numeric. Proportion of height for scatter zone (default: 0.5).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
+#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param crs Character. Coordinate reference system (default: NULL).
+#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
-#' @return SpatRaster. Binary landscape with randomly scattered trees below treeline.
+#' @return SpatRaster or List with landscape and metadata
 #' @export
 create_landscape_scattered_trees <- function(
   width = 100,
@@ -21,7 +24,8 @@ create_landscape_scattered_trees <- function(
   rotation = 0,
   seed = NULL,
   as_raster = TRUE,
-  crs = NULL
+  crs = NULL,
+  add_metadata = FALSE
 ) {
   # If seed is not provided, set it to current time
   if (is.null(seed)) {
@@ -66,12 +70,32 @@ create_landscape_scattered_trees <- function(
     )
   }
 
-  # Convert to SpatRaster if requested
-  if (as_raster) {
-    return(matrix_to_raster(landscape, crs = crs))
+  # Get the result either as matrix or SpatRaster
+  result <- if (as_raster) {
+    matrix_to_raster(landscape, crs = crs)
+  } else {
+    landscape
   }
 
-  return(landscape)
+  # Return with metadata if requested
+  if (add_metadata) {
+    return(list(
+      landscape = result,
+      type = "scattered",
+      params = list(
+        width = width,
+        height = height,
+        treeline_position = treeline_position,
+        scatter_density = scatter_density,
+        scatter_zone_prop = scatter_zone_prop,
+        rotation = rotation,
+        seed = seed,
+        crs = crs
+      )
+    ))
+  } else {
+    return(result)
+  }
 }
 
 #' Create a Landscape with Clustered Trees
@@ -90,8 +114,9 @@ create_landscape_scattered_trees <- function(
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
+#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
-#' @return SpatRaster. Binary landscape with clustered trees.
+#' @return SpatRaster or List with landscape and metadata
 #' @export
 create_landscape_clustered_trees <- function(
   width = 100,
@@ -105,7 +130,8 @@ create_landscape_clustered_trees <- function(
   seed = NULL,
   rotation = 0,
   as_raster = TRUE,
-  crs = NULL
+  crs = NULL,
+  add_metadata = FALSE
 ) {
   # If seed is not provided, set it to current time
   if (is.null(seed)) {
@@ -151,7 +177,7 @@ create_landscape_clustered_trees <- function(
     stop("'seed' must be an integer")
   }
 
-  tryCatch(
+  result <- tryCatch(
     {
       set.seed(seed)
       # Calculate dimensions based on rotation
@@ -203,7 +229,7 @@ create_landscape_clustered_trees <- function(
         )
       }
       # Create clusters around centers
-      for (i in 1:nrow(cluster_centers)) {
+      for (i in seq_len(nrow(cluster_centers))) {
         center_row <- cluster_centers$row[i]
         center_col <- cluster_centers$col[i]
 
@@ -245,18 +271,41 @@ create_landscape_clustered_trees <- function(
         )
       }
 
-      # Convert to SpatRaster if requested
+      # Get the result either as matrix or SpatRaster
       if (as_raster) {
         landscape <- matrix_to_raster(
           landscape,
           crs = crs
         )
       }
-      return(landscape)
+      landscape
     },
     error = function(e) {
       # Add context to the error for easier debugging
       stop("Error in create_landscape_clusters: ", e$message, call. = FALSE)
     }
   )
+
+  # Return with metadata if requested
+  if (add_metadata) {
+    return(list(
+      landscape = result,
+      type = "clustered",
+      params = list(
+        width = width,
+        height = height,
+        treeline_position = treeline_position,
+        num_clusters = num_clusters,
+        cluster_radius = cluster_radius,
+        scatter_zone_prop = scatter_zone_prop,
+        elongation_x = elongation_x,
+        elongation_y = elongation_y,
+        seed = seed,
+        rotation = rotation,
+        crs = crs
+      )
+    ))
+  } else {
+    return(result)
+  }
 }

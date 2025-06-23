@@ -8,8 +8,9 @@
 #'        "curvy", "fingers", "bent_fingers", "scattered", "sine_bands", "clusters"
 #' @param ... Parameters passed to specific landscape functions. See the documentation
 #'        of the individual functions for details on required and optional parameters.
+#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
-#' @return SpatRaster. Generated landscape of specified pattern.
+#' @return SpatRaster or List with landscape and metadata
 #'
 #' @seealso
 #' \code{\link{create_landscape_sharp_treeline}} for "sharp" pattern parameters
@@ -41,6 +42,14 @@
 #'   finger_width = 5
 #' )
 #'
+#' # Create a landscape with metadata
+#' landscape_with_metadata <- create_landscape(
+#'   "scattered",
+#'   width = 100,
+#'   height = 100,
+#'   add_metadata = TRUE
+#' )
+#'
 #' @export
 create_landscape <- function(
   pattern = c(
@@ -53,7 +62,8 @@ create_landscape <- function(
     "clustered",
     "sine_bands"
   ),
-  ...
+  ...,
+  add_metadata = FALSE
 ) {
   # Define valid patterns
   valid_patterns <- eval(formals()$pattern)
@@ -91,17 +101,24 @@ create_landscape <- function(
     )
   }
 
-  # Call the appropriate function based on the pattern
+  # Extract the dots arguments
+  dots <- list(...)
+  # Add the add_metadata parameter if it's not already in dots
+  if (!"add_metadata" %in% names(dots)) {
+    dots$add_metadata <- add_metadata
+  }
+
+  # Call the appropriate function based on the pattern with metadata parameter
   landscape <- switch(
     matched,
-    sharp = create_landscape_sharp_treeline(...),
-    diffuse = create_landscape_diffuse_treeline(...),
-    curvy = create_landscape_curvy_treeline(...),
-    fingers = create_landscape_fingers(...),
-    bent_fingers = create_landscape_bent_fingers(...),
-    scattered = create_landscape_scattered_trees(...),
-    clustered = create_landscape_clustered_trees(...),
-    sine_bands = create_landscape_sine_bands(...)
+    sharp = do.call(create_landscape_sharp_treeline, dots),
+    diffuse = do.call(create_landscape_diffuse_treeline, dots),
+    curvy = do.call(create_landscape_curvy_treeline, dots),
+    fingers = do.call(create_landscape_fingers, dots),
+    bent_fingers = do.call(create_landscape_bent_fingers, dots),
+    scattered = do.call(create_landscape_scattered_trees, dots),
+    clustered = do.call(create_landscape_clustered_trees, dots),
+    sine_bands = do.call(create_landscape_sine_bands, dots)
   )
 
   # Check if landscape was created successfully
@@ -110,6 +127,15 @@ create_landscape <- function(
       "Failed to create landscape with pattern '",
       matched,
       "'. Check that all required parameters are provided."
+    )
+  }
+
+  # If we didn't get metadata but need it, add it here
+  if (add_metadata && !is.list(landscape)) {
+    landscape <- list(
+      landscape = landscape,
+      type = matched,
+      params = dots[setdiff(names(dots), "add_metadata")] # Exclude add_metadata from params
     )
   }
 

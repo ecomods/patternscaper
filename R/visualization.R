@@ -17,6 +17,12 @@ plot_landscape <- function(
   legend_title = "Value",
   show_legend = TRUE
 ) {
+  # Check if landscape has metadata structure
+  has_metadata <- has_landscape_metadata(landscape)
+  # extract the landscape data if it has metadata
+  if (has_metadata) {
+    landscape <- get_landscape(landscape)
+  }
   # Use the ensure_spatraster function to handle matrix inputs
   landscape <- ensure_spatraster(landscape)
 
@@ -113,7 +119,7 @@ plot_landscape_list <- function(
   ncol = NULL,
   legend_title = "Value",
   show_legend = TRUE,
-  show_type = FALSE
+  show_type = TRUE
 ) {
   # Validate input is a list
   if (!is.list(landscape_list)) {
@@ -121,8 +127,7 @@ plot_landscape_list <- function(
   }
 
   # Check if the list contains metadata structures (from generate_training_landscapes)
-  has_metadata <- !is.null(landscape_list[[1]]$landscape) &&
-    !is.null(landscape_list[[1]]$type)
+  has_metadata <- has_landscape_metadata(landscape_list)
 
   # If we have metadata structure, extract landscape types and the landscapes
   if (has_metadata) {
@@ -135,6 +140,7 @@ plot_landscape_list <- function(
 
   # Generate titles
   if (is.null(titles)) {
+    # if list is named, us the names as titles
     if (has_metadata) {
       # Use types as titles when available and no custom titles provided
       titles <- types

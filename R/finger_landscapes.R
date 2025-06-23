@@ -13,8 +13,9 @@
 #' @param rotation Numeric. Degrees to rotate the landscape (default: 0).
 #' @param as_raster Logical. Whether to return the landscape as a raster (default: TRUE).
 #' @param crs Character. Coordinate reference system for the raster (default: NULL).
+#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
-#' @return A matrix representing the landscape with fingers.
+#' @return A matrix, SpatRaster, or List with landscape and metadata
 create_landscape_fingers <- function(
   width = 100,
   height = 100,
@@ -24,7 +25,8 @@ create_landscape_fingers <- function(
   finger_length_prop = 0.3,
   rotation = 0,
   as_raster = TRUE,
-  crs = NULL
+  crs = NULL,
+  add_metadata = FALSE
 ) {
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
@@ -77,12 +79,33 @@ create_landscape_fingers <- function(
       height
     )
   }
-  # Convert to raster if requested
-  if (as_raster) {
-    return(matrix_to_raster(landscape, crs = crs))
+
+  # Get the result either as matrix or SpatRaster
+  result <- if (as_raster) {
+    matrix_to_raster(landscape, crs = crs)
+  } else {
+    landscape
   }
 
-  return(landscape)
+  # Return with metadata if requested
+  if (add_metadata) {
+    return(list(
+      landscape = result,
+      type = "fingers",
+      params = list(
+        width = width,
+        height = height,
+        treeline_position = treeline_position,
+        num_fingers = num_fingers,
+        finger_width = finger_width,
+        finger_length_prop = finger_length_prop,
+        rotation = rotation,
+        crs = crs
+      )
+    ))
+  } else {
+    return(result)
+  }
 }
 
 #' Create a Landscape with Bent Finger-like Extensions
@@ -99,8 +122,9 @@ create_landscape_fingers <- function(
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
+#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
-#' @return SpatRaster. Binary landscape with bent finger-like extensions.
+#' @return SpatRaster or List with landscape and metadata
 #' @export
 create_landscape_bent_fingers <- function(
   width = 100,
@@ -112,7 +136,8 @@ create_landscape_bent_fingers <- function(
   bend_factor = 3,
   rotation = 0,
   as_raster = TRUE,
-  crs = NULL
+  crs = NULL,
+  add_metadata = FALSE
 ) {
   # calculate width and height of the actual landscape to produce
   # in case of rotation, the landscape needs to be larger
@@ -164,10 +189,31 @@ create_landscape_bent_fingers <- function(
     )
   }
 
-  # Convert to SpatRaster if requested
-  if (as_raster) {
-    return(matrix_to_raster(landscape, crs = crs))
+  # Get the result either as matrix or SpatRaster
+  result <- if (as_raster) {
+    matrix_to_raster(landscape, crs = crs)
+  } else {
+    landscape
   }
 
-  return(landscape)
+  # Return with metadata if requested
+  if (add_metadata) {
+    return(list(
+      landscape = result,
+      type = "bent_fingers",
+      params = list(
+        width = width,
+        height = height,
+        treeline_position = treeline_position,
+        num_fingers = num_fingers,
+        finger_width = finger_width,
+        finger_length_prop = finger_length_prop,
+        bend_factor = bend_factor,
+        rotation = rotation,
+        crs = crs
+      )
+    ))
+  } else {
+    return(result)
+  }
 }

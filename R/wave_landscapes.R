@@ -15,8 +15,9 @@
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
 #' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
+#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
-#' @return SpatRaster. Binary landscape with parallel sine-wave bands.
+#' @return SpatRaster or List with landscape and metadata
 #' @export
 create_landscape_sine_bands <- function(
   width = 100,
@@ -31,7 +32,8 @@ create_landscape_sine_bands <- function(
   rotation = 0,
   seed = NULL,
   as_raster = TRUE,
-  crs = NULL
+  crs = NULL,
+  add_metadata = FALSE
 ) {
   # Set seed if provided
   if (!is.null(seed)) {
@@ -95,10 +97,34 @@ create_landscape_sine_bands <- function(
     )
   }
 
-  # Convert to SpatRaster if requested
-  if (as_raster) {
-    return(matrix_to_raster(landscape, crs = crs))
+  # Get the result either as matrix or SpatRaster
+  result <- if (as_raster) {
+    matrix_to_raster(landscape, crs = crs)
+  } else {
+    landscape
   }
 
-  return(landscape)
+  # Return with metadata if requested
+  if (add_metadata) {
+    return(list(
+      landscape = result,
+      type = "sine_bands",
+      params = list(
+        width = width,
+        height = height,
+        treeline_position = treeline_position,
+        band_thickness = band_thickness,
+        band_spacing = band_spacing,
+        frequency = frequency,
+        amplitude = amplitude,
+        noise = noise,
+        noise_sd = noise_sd,
+        rotation = rotation,
+        seed = seed,
+        crs = crs
+      )
+    ))
+  } else {
+    return(result)
+  }
 }

@@ -8,8 +8,9 @@
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
+#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
-#' @return SpatRaster. Binary landscape with sharp treeline (1 above treeline, 0 below).
+#' @return SpatRaster or List with landscape and metadata
 #' @export
 create_landscape_sharp_treeline <- function(
   width = 100,
@@ -17,7 +18,8 @@ create_landscape_sharp_treeline <- function(
   treeline_position = 0.5,
   rotation = 0,
   as_raster = TRUE,
-  crs = NULL
+  crs = NULL,
+  add_metadata = FALSE
 ) {
   # calculate width and height of the actual landscape to produce
   # in case of rotation, the landscape needs to be larger
@@ -42,10 +44,30 @@ create_landscape_sharp_treeline <- function(
       height
     )
   }
-  if (as_raster) {
-    return(matrix_to_raster(landscape))
+
+  # Get the result either as matrix or SpatRaster
+  result <- if (as_raster) {
+    matrix_to_raster(landscape, crs = crs)
+  } else {
+    landscape
   }
-  return(landscape)
+
+  # Return with metadata if requested
+  if (add_metadata) {
+    return(list(
+      landscape = result,
+      type = "sharp",
+      params = list(
+        width = width,
+        height = height,
+        treeline_position = treeline_position,
+        rotation = rotation,
+        crs = crs
+      )
+    ))
+  } else {
+    return(result)
+  }
 }
 
 #' Create a Landscape with Diffuse Treeline
@@ -59,8 +81,9 @@ create_landscape_sharp_treeline <- function(
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
 #' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
+#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
-#' @return SpatRaster. Binary landscape with diffuse treeline (decreasing probability with row).
+#' @return SpatRaster or List with landscape and metadata
 #' @export
 create_landscape_diffuse_treeline <- function(
   width = 100,
@@ -69,7 +92,8 @@ create_landscape_diffuse_treeline <- function(
   rotation = 0,
   seed = NULL,
   as_raster = TRUE,
-  crs = NULL
+  crs = NULL,
+  add_metadata = FALSE
 ) {
   # Set seed to current time if not  provided
   if (!is.null(seed)) {
@@ -107,10 +131,30 @@ create_landscape_diffuse_treeline <- function(
     )
   }
 
-  if (as_raster) {
-    return(matrix_to_raster(landscape, crs = crs))
+  # Get the result either as matrix or SpatRaster
+  result <- if (as_raster) {
+    matrix_to_raster(landscape, crs = crs)
+  } else {
+    landscape
   }
-  return(landscape)
+
+  # Return with metadata if requested
+  if (add_metadata) {
+    return(list(
+      landscape = result,
+      type = "diffuse",
+      params = list(
+        width = width,
+        height = height,
+        steepness = steepness,
+        rotation = rotation,
+        seed = seed,
+        crs = crs
+      )
+    ))
+  } else {
+    return(result)
+  }
 }
 
 #' Create a Landscape with Curvy Treeline
@@ -125,8 +169,9 @@ create_landscape_diffuse_treeline <- function(
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
+#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
-#' @return SpatRaster. Binary landscape with curvy treeline.
+#' @return SpatRaster or List with landscape and metadata
 #' @export
 create_landscape_curvy_treeline <- function(
   width = 100,
@@ -136,7 +181,8 @@ create_landscape_curvy_treeline <- function(
   sine_height = 5,
   rotation = 0,
   as_raster = TRUE,
-  crs = NULL
+  crs = NULL,
+  add_metadata = FALSE
 ) {
   # calculate width and height of the actual landscape to produce
   # in case of rotation, the landscape needs to be larger
@@ -171,10 +217,29 @@ create_landscape_curvy_treeline <- function(
     )
   }
 
-  # Convert to SpatRaster if requested
-  if (as_raster) {
-    return(matrix_to_raster(landscape, crs = crs))
+  # Get the result either as matrix or SpatRaster
+  result <- if (as_raster) {
+    matrix_to_raster(landscape, crs = crs)
+  } else {
+    landscape
   }
 
-  return(landscape)
+  # Return with metadata if requested
+  if (add_metadata) {
+    return(list(
+      landscape = result,
+      type = "curvy",
+      params = list(
+        width = width,
+        height = height,
+        treeline_position = treeline_position,
+        sine_length = sine_length,
+        sine_height = sine_height,
+        rotation = rotation,
+        crs = crs
+      )
+    ))
+  } else {
+    return(result)
+  }
 }

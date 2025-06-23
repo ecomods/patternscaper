@@ -80,18 +80,27 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 ### `ensure_spatraster`
 
 **Input:**
-- `landscape` (matrix or SpatRaster): Landscape to ensure is in SpatRaster format
+- `landscape` (matrix, SpatRaster, or list with metadata): Landscape to ensure is in SpatRaster format
+- `extract_from_metadata` (logical): Whether to extract just the SpatRaster or return metadata structure (default: TRUE)
 - `silent` (logical): Whether to suppress conversion message (default: TRUE)
 - `crs` (character): CRS to use if converting from matrix (default: NULL)
 
 **Output:**
-- SpatRaster: Input landscape converted to SpatRaster if needed
+- If extract_from_metadata=TRUE: SpatRaster object (regardless of input format)
+- If extract_from_metadata=FALSE: Either SpatRaster object or list with landscape metadata structure
 
 **Description:**
-1. Checks the input type
-2. If already a SpatRaster, returns as is
-3. If matrix, converts to SpatRaster with given CRS
-4. If neither, throws an error
+1. Checks if the input has a metadata structure (list with landscape, type, params)
+2. If input has metadata and extract_from_metadata=TRUE:
+   a. Extracts the landscape component
+   b. Ensures it's a SpatRaster (converting from matrix if needed)
+   c. Returns just the SpatRaster object
+3. If input has metadata and extract_from_metadata=FALSE:
+   a. Ensures the landscape component is a SpatRaster (converting from matrix if needed)
+   b. Returns the complete metadata structure with the landscape as a SpatRaster
+4. If input is a plain matrix, converts to SpatRaster with given CRS
+5. If input is already a SpatRaster, returns it unchanged
+6. If input is none of the above, throws an error
 
 ### `fill_na_with_nearest`
 
@@ -107,6 +116,72 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 2. For each NA cell, searches for nearest non-NA cells within max_distance
 3. Replaces NA values with values from nearest non-NA cells
 4. Returns filled landscape raster
+
+### `add_landscape_metadata`
+
+**Input:**
+- `landscape` (SpatRaster or matrix): Landscape to add metadata to
+- `type` (character): Type of landscape pattern (default: NA)
+- `params` (list): Parameters used to create the landscape (default: empty list)
+
+**Output:**
+- List: A structure with landscape, type, and params components
+
+**Description:**
+1. Checks if input already has metadata structure
+2. If it does, updates existing metadata with new values (with warning)
+3. Otherwise, creates new metadata structure with provided values
+4. Returns the completed metadata structure
+
+### `has_landscape_metadata`
+
+**Input:**
+- `x` (object): Object to check for metadata structure
+
+**Output:**
+- Logical: TRUE if the object has metadata structure, FALSE otherwise
+
+**Description:**
+1. Checks if the object is a list with a 'landscape' component
+2. Verifies that the landscape component is either a matrix or SpatRaster
+3. Returns TRUE if both conditions are met, FALSE otherwise
+
+### `get_landscape`
+
+**Input:**
+- `x` (object): Object containing landscape (with or without metadata)
+
+**Output:**
+- SpatRaster or matrix: The landscape data
+
+**Description:**
+1. If input has metadata structure, extracts just the landscape component
+2. Otherwise, returns the input unchanged
+3. Does not perform format conversion
+
+### `get_landscape_type`
+
+**Input:**
+- `x` (object): Object containing landscape (with or without metadata)
+
+**Output:**
+- Character: The landscape type or NA if not available
+
+**Description:**
+1. If input has metadata structure, extracts the type component
+2. Otherwise, returns NA
+
+### `get_landscape_params`
+
+**Input:**
+- `x` (object): Object containing landscape (with or without metadata)
+
+**Output:**
+- List: The landscape parameters or empty list if not available
+
+**Description:**
+1. If input has metadata structure, extracts the params component
+2. Otherwise, returns an empty list
 
 ## Landscape Generation Functions
 
@@ -313,7 +388,7 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 ### `create_landscape`
 
 **Input:**
-- `type` (character): Type of landscape to generate (options: "sharp", "diffuse", "curvy", "fingers", "bent_fingers", "scattered", "sine_bands", "clustered")
+- `pattern` (character): Type of landscape to generate (options: "sharp", "diffuse", "curvy", "fingers", "bent_fingers", "scattered", "sine_bands", "clustered")
 - `...` (various): Parameters specific to the landscape type
 - `width` (integer): Width of the landscape in pixels (default: 100)
 - `height` (integer): Height of the landscape in pixels (default: 100)
@@ -322,7 +397,7 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - `crs` (character): Coordinate reference system (default: NULL)
 
 **Output:**
-- SpatRaster: Generated landscape of specified type
+- SpatRaster: Generated landscape of specified pattern
 
 **Description:**
 1. Validates input parameters
@@ -484,6 +559,23 @@ This document outlines all the functions required for the EcotoneClassifyR packa
    c. Standardizes output format
 3. Combines results into a single tibble
 4. Returns the standardized metrics table
+
+### `calculate_metric` (internal)
+
+**Input:**
+- `landscape` (SpatRaster or matrix): The landscape to analyze
+- `function_name` (character): The name of the landscapemetrics function to call
+
+**Output:**
+- data.frame: Results from the metric calculation or NULL if calculation fails
+
+**Description:**
+1. Converts input to SpatRaster using ensure_spatraster if needed
+2. Attempts to calculate the specified metric by dynamically calling the function
+3. Returns the metric calculation results as a data frame
+4. Returns NULL if the calculation fails, with a warning message
+
+This is an internal utility function used by `calculate_landscape_metrics` to handle individual metric calculations with proper error handling.
 
 ### `evaluate_landscape_metrics`
 
