@@ -16,4 +16,5 @@ Imports:
     landscapemetrics,
     omnibus,
     patchwork,
+    purrr,
     zoo
