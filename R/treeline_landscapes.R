@@ -57,6 +57,8 @@ create_landscape_sharp_treeline <- function(
 #' @param steepness Numeric. Steepness of the transition (default: 2).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
+#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param crs Character. Coordinate reference system (default: NULL).
 #'
 #' @return SpatRaster. Binary landscape with diffuse treeline (decreasing probability with row).
 #' @export
@@ -65,14 +67,50 @@ create_landscape_diffuse_treeline <- function(
   height = 100,
   steepness = 2,
   rotation = 0,
-  seed = NULL
+  seed = NULL,
+  as_raster = TRUE,
+  crs = NULL
 ) {
-  # 1. If seed is not NULL, sets random seed
-  # 2. Creates a matrix where probability of tree presence decreases with row index
-  # 3. For each cell, assigns 1 with probability = 1 - (normalized_row)^steepness
-  # 4. Converts matrix to raster
-  # 5. If rotation != 0, rotates landscape
-  # 6. Returns the resulting landscape
+  # Set seed to current time if not  provided
+  if (!is.null(seed)) {
+    set.seed(as.integer(Sys.time()))
+  }
+
+  # calculate width and height of the actual landscape to produce
+  # in case of rotation, the landscape needs to be larger
+  height_actual <- ifelse(rotation == 0, height, height * 1.5)
+  width_actual <- ifelse(rotation == 0, width, width * 1.5)
+
+  # Create empty landscape
+  landscape <- matrix(0, nrow = height_actual, ncol = width_actual)
+
+  # Fill with tree cover probability that decreases from 1 to 0 with increasing row index
+  for (i in 1:height_actual) {
+    # Normalize row index [0,1] starting at 0
+    normalized_row <- (i - 1) / (height_actual - 1)
+    # Calculate probability for tree cover (starts 1 and decreases to 0)
+    prob <- 1 - normalized_row^steepness
+    for (j in 1:width_actual) {
+      if (stats::runif(1) < prob) {
+        landscape[i, j] <- 1
+      }
+    }
+  }
+
+  # Rotate the landscape, crop and fill NAs if specified
+  if (rotation != 0) {
+    landscape <- rotate_and_crop_landscape(
+      landscape,
+      rotation,
+      width,
+      height
+    )
+  }
+
+  if (as_raster) {
+    return(matrix_to_raster(landscape, crs = crs))
+  }
+  return(landscape)
 }
 
 #' Create a Landscape with Curvy Treeline
