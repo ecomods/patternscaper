@@ -37,21 +37,22 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - `landscape` (matrix or SpatRaster): Landscape to rotate
 - `angle` (numeric): Rotation angle in degrees (default: 0)
 - `fill_value` (numeric): Value to fill new cells created during rotation (default: NA)
+- `as_raster` (logical): Whether to return a SpatRaster object (default: TRUE)
 
 **Output:**
-- SpatRaster: Rotated landscape with NA cells cropped out
+- If as_raster=TRUE: SpatRaster with rotated landscape and NA cells cropped out
+- If as_raster=FALSE: Matrix with rotated landscape and NA cells cropped out
 
 **Description:**
-1. Converts input to SpatRaster if not already
+1. Converts input to appropriate format for processing
 2. Rotates the landscape by the specified angle
 3. Crops the result to remove NA cells at the edges
-4. Returns the rotated and cropped landscape
+4. Returns in the requested format (matrix or SpatRaster)
 
 ### `matrix_to_raster`
 
 **Input:**
 - `matrix` (matrix): Binary landscape matrix to convert
-- `resolution` (numeric): Spatial resolution of output raster (default: 1)
 - `crs` (character): Coordinate reference system (default: NULL)
 
 **Output:**
@@ -59,9 +60,38 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 
 **Description:**
 1. Converts binary matrix to SpatRaster object
-2. Sets resolution if provided
 3. Sets CRS if provided
 4. Returns the resulting SpatRaster
+
+### `raster_to_matrix`
+
+**Input:**
+- `raster` (SpatRaster): Raster to convert to matrix
+- `keep_dim` (logical): Whether to preserve the original dimensions (default: TRUE)
+
+**Output:**
+- matrix: Matrix representation of input raster
+
+**Description:**
+1. Extracts the values from the raster
+2. Reshapes into a matrix with original dimensions (if keep_dim=TRUE)
+3. Returns the matrix
+
+### `ensure_spatraster`
+
+**Input:**
+- `landscape` (matrix or SpatRaster): Landscape to ensure is in SpatRaster format
+- `silent` (logical): Whether to suppress conversion message (default: TRUE)
+- `crs` (character): CRS to use if converting from matrix (default: NULL)
+
+**Output:**
+- SpatRaster: Input landscape converted to SpatRaster if needed
+
+**Description:**
+1. Checks the input type
+2. If already a SpatRaster, returns as is
+3. If matrix, converts to SpatRaster with given CRS
+4. If neither, throws an error
 
 ### `fill_na_with_nearest`
 
@@ -87,15 +117,18 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - `height` (integer): Height of the landscape in pixels (default: 100)
 - `treeline_position` (numeric): Relative position of treeline from top (0-1) (default: 0.5)
 - `rotation` (numeric): Angle to rotate landscape in degrees (default: 0)
+- `as_raster` (logical): Whether to return a SpatRaster (default: TRUE)
+- `crs` (character): CRS if returning as raster (default: NULL)
 
 **Output:**
-- SpatRaster: Binary landscape with sharp treeline (1 above treeline, 0 below)
+- If as_raster=TRUE: SpatRaster with sharp treeline (1 above treeline, 0 below)
+- If as_raster=FALSE: Matrix with sharp treeline (1 above treeline, 0 below)
 
 **Description:**
 1. Creates a matrix with values 1 above treeline_position*height and 0 below
-2. Converts matrix to raster
-3. If rotation != 0, rotates landscape using rotate_and_crop_landscape()
-4. Returns the resulting landscape
+2. If rotation != 0, rotates landscape matrix
+3. If as_raster=TRUE, converts to SpatRaster
+4. Returns the landscape in the requested format
 
 ### `create_landscape_diffuse_treeline`
 
@@ -105,17 +138,20 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - `steepness` (numeric): Steepness of the transition (default: 2)
 - `rotation` (numeric): Angle to rotate landscape in degrees (default: 0)
 - `seed` (integer): Random seed for reproducibility (default: NULL)
+- `as_raster` (logical): Whether to return a SpatRaster (default: TRUE)
+- `crs` (character): CRS if returning as raster (default: NULL)
 
 **Output:**
-- SpatRaster: Binary landscape with diffuse treeline (decreasing probability with row)
+- If as_raster=TRUE: SpatRaster with diffuse treeline (decreasing probability with row)
+- If as_raster=FALSE: Matrix with diffuse treeline (decreasing probability with row)
 
 **Description:**
 1. If seed is not NULL, sets random seed
 2. Creates a matrix where probability of tree presence decreases with row index
 3. For each cell, assigns 1 with probability = 1 - (normalized_row)^steepness
-4. Converts matrix to raster
-5. If rotation != 0, rotates landscape
-6. Returns the resulting landscape
+4. If rotation != 0, rotates landscape matrix
+5. If as_raster=TRUE, converts to SpatRaster
+6. Returns the landscape in the requested format
 
 ### `create_landscape_curvy_treeline`
 
@@ -126,16 +162,20 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - `sine_length` (numeric): Wavelength of sinusoidal curve in pixels (default: 20)
 - `sine_height` (numeric): Amplitude of sinusoidal curve in pixels (default: 5)
 - `rotation` (numeric): Angle to rotate landscape in degrees (default: 0)
+- `as_raster` (logical): Whether to return a SpatRaster (default: TRUE)
+- `crs` (character): CRS if returning as raster (default: NULL)
 
 **Output:**
-- SpatRaster: Binary landscape with curvy treeline
+- If as_raster=TRUE: SpatRaster with curvy treeline
+- If as_raster=FALSE: Matrix with curvy treeline
 
 **Description:**
 1. Calculates treeline row position
 2. Creates matrix where cells above curvy treeline = 1, below = 0
 3. Uses sine wave to create undulating boundary using formula i > (treeline_row + sin(2π*j/sine_length) * sine_height)
-4. Converts to raster and rotates if needed
-5. Returns the resulting landscape
+4. If rotation != 0, rotates landscape matrix
+5. If as_raster=TRUE, converts to SpatRaster
+6. Returns the landscape in the requested format
 
 ### `create_landscape_fingers`
 
@@ -147,15 +187,19 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - `finger_width` (integer): Width of each finger in pixels (default: 3)
 - `finger_length_prop` (numeric): Length of fingers as proportion of height (default: 0.3)
 - `rotation` (numeric): Angle to rotate landscape in degrees (default: 0)
+- `as_raster` (logical): Whether to return a SpatRaster (default: TRUE)
+- `crs` (character): CRS if returning as raster (default: NULL)
 
 **Output:**
-- SpatRaster: Binary landscape with finger-like extensions from treeline
+- If as_raster=TRUE: SpatRaster with finger-like extensions from treeline
+- If as_raster=FALSE: Matrix with finger-like extensions from treeline
 
 **Description:**
-1. Creates a sharp treeline base landscape
+1. Creates a sharp treeline base landscape as a matrix (using as_raster=FALSE)
 2. Adds rectangular extensions from treeline evenly distributed across width
-3. Converts to raster and rotates if needed
-4. Returns the resulting landscape
+3. If rotation != 0, rotates landscape matrix
+4. If as_raster=TRUE, converts to SpatRaster
+5. Returns the landscape in the requested format
 
 ### `create_landscape_bent_fingers`
 
@@ -168,15 +212,19 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - `finger_length_prop` (numeric): Length of fingers as proportion of height (default: 0.3)
 - `bend_factor` (numeric): Degree of finger bending (default: 3)
 - `rotation` (numeric): Angle to rotate landscape in degrees (default: 0)
+- `as_raster` (logical): Whether to return a SpatRaster (default: TRUE)
+- `crs` (character): CRS if returning as raster (default: NULL)
 
 **Output:**
-- SpatRaster: Binary landscape with bent finger-like extensions
+- If as_raster=TRUE: SpatRaster with bent finger-like extensions
+- If as_raster=FALSE: Matrix with bent finger-like extensions
 
 **Description:**
-1. Creates a sharp treeline base landscape
+1. Creates a sharp treeline base landscape as a matrix (using as_raster=FALSE)
 2. Adds bent extensions using sine function to create bending effect
-3. Converts to raster and rotates if needed
-4. Returns the resulting landscape
+3. If rotation != 0, rotates landscape matrix
+4. If as_raster=TRUE, converts to SpatRaster
+5. Returns the landscape in the requested format
 
 ### `create_landscape_scattered_trees`
 
@@ -188,16 +236,20 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - `scatter_zone_prop` (numeric): Proportion of height for scatter zone (default: 0.5)
 - `rotation` (numeric): Angle to rotate landscape in degrees (default: 0)
 - `seed` (integer): Random seed for reproducibility (default: NULL)
+- `as_raster` (logical): Whether to return a SpatRaster (default: TRUE)
+- `crs` (character): CRS if returning as raster (default: NULL)
 
 **Output:**
-- SpatRaster: Binary landscape with randomly scattered trees below treeline
+- If as_raster=TRUE: SpatRaster with randomly scattered trees below treeline
+- If as_raster=FALSE: Matrix with randomly scattered trees below treeline
 
 **Description:**
 1. If seed is not NULL, sets random seed
-2. Creates sharp treeline base landscape
+2. Creates sharp treeline base landscape as matrix (using as_raster=FALSE)
 3. In scatter zone below treeline, randomly places trees based on scatter_density
-4. Converts to raster and rotates if needed
-5. Returns the resulting landscape
+4. If rotation != 0, rotates landscape matrix
+5. If as_raster=TRUE, converts to SpatRaster
+6. Returns the landscape in the requested format
 
 ### `create_landscape_sine_bands`
 
@@ -213,17 +265,21 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - `noise_sd` (numeric): Standard deviation for random noise (default: 1)
 - `rotation` (numeric): Angle to rotate landscape in degrees (default: 0)
 - `seed` (integer): Random seed for reproducibility (default: NULL)
+- `as_raster` (logical): Whether to return a SpatRaster (default: TRUE)
+- `crs` (character): CRS if returning as raster (default: NULL)
 
 **Output:**
-- SpatRaster: Binary landscape with parallel sine-wave bands
+- If as_raster=TRUE: SpatRaster with parallel sine-wave bands
+- If as_raster=FALSE: Matrix with parallel sine-wave bands
 
 **Description:**
 1. If seed is not NULL, sets random seed
 2. Generates matrix with wavy bands parallel to treeline
 3. Each band follows a sine wave pattern
 4. Adds noise if noise=TRUE
-5. Converts to raster and rotates if needed
-6. Returns the resulting landscape
+5. If rotation != 0, rotates landscape matrix
+6. If as_raster=TRUE, converts to SpatRaster
+7. Returns the landscape in the requested format
 
 ### `create_landscape_clustered_trees`
 
@@ -238,17 +294,21 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - `elongation_y` (numeric): Vertical elongation factor for clusters (default: 1)
 - `seed` (integer): Random seed for reproducibility (default: NULL)
 - `rotation` (numeric): Angle to rotate landscape in degrees (default: 0)
+- `as_raster` (logical): Whether to return a SpatRaster (default: TRUE)
+- `crs` (character): CRS if returning as raster (default: NULL)
 
 **Output:**
-- SpatRaster: Binary landscape with clustered trees
+- If as_raster=TRUE: SpatRaster with clustered trees
+- If as_raster=FALSE: Matrix with clustered trees
 
 **Description:**
 1. If seed is not NULL, sets random seed
-2. Creates sharp treeline base landscape
+2. Creates sharp treeline base landscape as matrix (using as_raster=FALSE)
 3. Places specified number of cluster centers in scatter zone below treeline
 4. For each cluster, calculates probability of tree presence based on distance from center
-5. Converts to raster and rotates if needed
-6. Returns the resulting landscape
+5. If rotation != 0, rotates landscape matrix
+6. If as_raster=TRUE, converts to SpatRaster
+7. Returns the landscape in the requested format
 
 ### `create_landscape`
 
@@ -259,6 +319,7 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - `height` (integer): Height of the landscape in pixels (default: 100)
 - `rotation` (numeric): Angle to rotate landscape in degrees (default: 0)
 - `seed` (integer): Random seed for reproducibility (default: NULL)
+- `crs` (character): Coordinate reference system (default: NULL)
 
 **Output:**
 - SpatRaster: Generated landscape of specified type
@@ -266,9 +327,9 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 **Description:**
 1. Validates input parameters
 2. If seed is not NULL, passes it to the specific landscape generation function
-3. Calls appropriate landscape generation function based on type
+3. Calls appropriate landscape generation function based on type with as_raster=TRUE
 4. Passes additional parameters to specific function
-5. Returns the generated landscape
+5. Returns the generated landscape as a SpatRaster
 
 ### `generate_training_landscapes`
 
@@ -281,9 +342,10 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - `rotation_angles` (numeric vector): Rotation angles in degrees (default: c(0, 45, 90, 135))
 - `params_list` (list): List of parameter ranges for each landscape type (default: NULL)
 - `seed` (integer): Master random seed (default: NULL)
+- `crs` (character): Coordinate reference system (default: NULL)
 
 **Output:**
-- List: Named list of generated landscapes with attributes for type
+- List: Named list of generated landscapes (as SpatRaster objects) with attributes for type
 
 **Description:**
 1. If seed is not NULL, sets master random seed
@@ -291,7 +353,7 @@ This document outlines all the functions required for the EcotoneClassifyR packa
    a. For each index from 1 to n:
       i. Sets derived seed based on master seed (if provided)
       ii. Randomly selects parameters from params_list or uses defaults
-      iii. Generates landscape using create_landscape() with derived seed
+      iii. Generates landscape using create_landscape() with derived seed (as_raster=TRUE)
       iv. Adds metadata attributes for type
    b. If add_rotation=TRUE, generates rotated versions for each landscape
 3. Returns list of all generated landscapes with names indicating type and index
@@ -311,12 +373,13 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 - ggplot object: Plot of the landscape
 
 **Description:**
-1. Converts input to data frame if it's a raster or matrix
-2. Determines unique classes in the landscape
-3. If color_scale is NULL, automatically selects colors based on number of classes
-4. Creates ggplot with appropriate aesthetics
-5. Applies color scale and formatting
-6. Returns the plot object
+1. Uses ensure_spatraster internally if input is a matrix
+2. Converts raster to data frame for plotting
+3. Determines unique classes in the landscape
+4. If color_scale is NULL, automatically selects colors based on number of classes
+5. Creates ggplot with appropriate aesthetics
+6. Applies color scale and formatting
+7. Returns the plot object
 
 ### `plot_landscape_list`
 
@@ -333,14 +396,15 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 
 **Description:**
 1. Validates that input is a list of landscapes
-2. Determines unique classes across all landscapes
-3. If color_scale is NULL, automatically selects colors based on number of classes
-4. For each landscape in the list:
+2. Uses ensure_spatraster internally if any input is a matrix
+3. Determines unique classes across all landscapes
+4. If color_scale is NULL, automatically selects colors based on number of classes
+5. For each landscape in the list:
    a. Creates plot using plot_landscape function
    b. Applies consistent color scale across all plots
-5. Combines individual plots using patchwork package
-6. Arranges plots in grid with ncol columns
-7. Returns the combined plot
+6. Combines individual plots using patchwork package
+7. Arranges plots in grid with ncol columns
+8. Returns the combined plot
 
 ### `plot_metrics`
 
@@ -413,7 +477,7 @@ This document outlines all the functions required for the EcotoneClassifyR packa
   - value: Computed metric value
 
 **Description:**
-1. Validates input landscapes
+1. Validates input landscapes using ensure_spatraster
 2. For each landscape:
    a. Extracts landscape name and type from attributes
    b. Calculates specified metrics using landscapemetrics
@@ -494,7 +558,7 @@ This document outlines all the functions required for the EcotoneClassifyR packa
   - warning: Warning messages if applicable
 
 **Description:**
-1. Validates input landscape and model
+1. Uses ensure_spatraster to validate input landscape
 2. If landscape is a list, processes each element
 3. Calculates metrics for landscape using same metrics as training
 4. Scales features using scaling parameters from model
