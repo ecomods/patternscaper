@@ -75,7 +75,6 @@ create_landscape_fingers <- function(
 
     landscape[treeline_row:end_row, start_col:end_col] <- 1
   }
-  print(class(landscape))
 
   # Apply rotation if specified
   if (rotation != 0) {
