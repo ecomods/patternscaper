@@ -13,6 +13,8 @@
 #' @param noise_sd Numeric. Standard deviation for random noise (default: 1).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
+#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param crs Character. Coordinate reference system (default: NULL).
 #'
 #' @return SpatRaster. Binary landscape with parallel sine-wave bands.
 #' @export
@@ -27,7 +29,9 @@ create_landscape_sine_bands <- function(
   noise = FALSE,
   noise_sd = 1,
   rotation = 0,
-  seed = NULL
+  seed = NULL,
+  as_raster = TRUE,
+  crs = NULL
 ) {
   # Set seed if provided
   if (!is.null(seed)) {
@@ -60,9 +64,11 @@ create_landscape_sine_bands <- function(
 
   for (offset in band_offsets) {
     # Generate new noise just for this band
-    band_noise <- if (noise)
-      stats::rnorm(width_actual, mean = 0, sd = noise_sd) else
+    band_noise <- if (noise) {
+      stats::rnorm(width_actual, mean = 0, sd = noise_sd)
+    } else {
       rep(0, width_actual)
+    }
 
     for (x in 1:width_actual) {
       y_center <- base_treeline[x] + offset + band_noise[x]
@@ -87,6 +93,11 @@ create_landscape_sine_bands <- function(
       width,
       height
     )
+  }
+
+  # Convert to SpatRaster if requested
+  if (as_raster) {
+    return(matrix_to_raster(landscape, crs = crs))
   }
 
   return(landscape)
