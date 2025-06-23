@@ -95,12 +95,14 @@ plot_landscape <- function(
 #'
 #' Creates a grid of multiple landscape plots.
 #'
-#' @param landscape_list List. List of landscapes (SpatRaster or matrix) to plot.
+#' @param landscape_list List. List of landscapes (SpatRaster, matrix) or list of landscape data with metadata
+#'        (as returned by generate_training_landscapes).
 #' @param titles Character vector. Vector of titles for each landscape (default: NULL).
 #' @param color_scale Character vector. Colors for mapping values across all plots (default: NULL).
 #' @param ncol Integer. Number of columns in the plot arrangement (default: NULL).
 #' @param legend_title Character. Title for the legend (default: "Value").
 #' @param show_legend Logical. Whether to show legend (default: TRUE).
+#' @param show_type Logical. Whether to include landscape type in title when custom titles are provided (default: FALSE).
 #'
 #' @return patchwork object. Combined plot of all landscapes.
 #' @export
@@ -110,26 +112,51 @@ plot_landscape_list <- function(
   color_scale = NULL,
   ncol = NULL,
   legend_title = "Value",
-  show_legend = TRUE
+  show_legend = TRUE,
+  show_type = FALSE
 ) {
   # Validate input is a list
   if (!is.list(landscape_list)) {
     stop("landscape_list must be a list of landscapes (SpatRaster or matrix)")
   }
 
-  # Generate default titles if not provided
+  # Check if the list contains metadata structures (from generate_training_landscapes)
+  has_metadata <- !is.null(landscape_list[[1]]$landscape) &&
+    !is.null(landscape_list[[1]]$type)
+
+  # If we have metadata structure, extract landscape types and the landscapes
+  if (has_metadata) {
+    # Extract landscape types for titles
+    types <- sapply(landscape_list, function(x) x$type)
+
+    # Extract just the landscapes
+    landscape_list <- lapply(landscape_list, function(x) x$landscape)
+  }
+
+  # Generate titles
   if (is.null(titles)) {
-    # Check if list has names
-    if (!is.null(names(landscape_list))) {
+    if (has_metadata) {
+      # Use types as titles when available and no custom titles provided
+      titles <- types
+    } else if (!is.null(names(landscape_list))) {
+      # Use list names if available
       titles <- names(landscape_list)
     } else {
+      # Simple default titles as last resort
       titles <- paste("Landscape", 1:length(landscape_list))
     }
   } else if (length(titles) != length(landscape_list)) {
     warning(
       "Number of titles doesn't match number of landscapes. Using default titles."
     )
-    titles <- paste("Landscape", 1:length(landscape_list))
+    if (has_metadata) {
+      titles <- types
+    } else {
+      titles <- paste("Landscape", 1:length(landscape_list))
+    }
+  } else if (has_metadata && show_type) {
+    # Append type information to user-provided titles if requested
+    titles <- paste0(titles, " (", types, ")")
   }
 
   # Create a list of plots
@@ -141,7 +168,6 @@ plot_landscape_list <- function(
       title = titles[i],
       color_scale = color_scale,
       legend_title = legend_title,
-      # Show legend based on user preference
       show_legend = show_legend
     )
   }
