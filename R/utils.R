@@ -32,7 +32,7 @@ validate_raster <- function(
 #' @param crs Character. Coordinate reference system (default: NULL).
 #'
 #' @return SpatRaster. Raster representation of input matrix.
-#' @internal
+#' @noRd
 matrix_to_raster <- function(
   matrix,
   crs = NULL
@@ -59,7 +59,7 @@ matrix_to_raster <- function(
 #' @param landscape Matrix or SpatRaster. The landscape to validate.
 #' @return SpatRaster. Converted or validated SpatRaster object.
 #'
-#' @internal
+#' @noRd
 ensure_spatraster <- function(landscape) {
   if (is.matrix(landscape)) {
     message("Converting matrix to SpatRaster...")
