@@ -122,7 +122,7 @@ The landscapes that can be generated include:
   - **Algorithm**: Places specified number of cluster centers in scatter zone with decreasing tree probability based on distance from centers using formula: 1-(dist/radius)²
   - **Key parameters**: width, height, treeline_position, num_clusters (default: 5), cluster_radius (default: 5), scatter_zone_prop, elongation_x/y (for elliptical clusters, default: 1), seed (for reproducibility)
 
-All landscapes can be created in different sizes and with different parameters, such as the density of trees, the curvature of treelines, or the size of the fingers. The user can also specify the resolution of the landscape, which will determine the size of the pixels in the raster image. In addition, each landscape can also be created in a rotated version, because also rotated landscapes should be classified correctly by the neural network.
+All landscapes can be created in different sizes and with different parameters, such as the density of trees, the curvature of treelines, or the size of the fingers. In addition, each landscape can also be created in a rotated version, because also rotated landscapes should be classified correctly by the neural network.
 
 To make it easy for the user to generate training landscapes, the package will also provide a function to generate a set of synthetic landscapes with different ecotone characteristics (function `generate_training_landscapes`). The user can specify the number of landscapes they want to generate and the type of landscapes they want to include in the set. Then, this function will call the landscape generation function multiple times and return a list of generated landscapes.
 
