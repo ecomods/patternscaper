@@ -17,11 +17,61 @@ create_landscape_scattered_trees <- function(
   height = 100,
   treeline_position = 0.5,
   scatter_density = 0.1,
-  scatter_zone_prop = 0.5,
+  scatter_zone_prop = 0.2,
   rotation = 0,
-  seed = NULL
+  seed = NULL,
+  as_raster = TRUE,
+  crs = NULL
 ) {
-  # Function implementation will go here
+  # If seed is not provided, set it to current time
+  if (is.null(seed)) {
+    seed <- as.integer(Sys.time())
+  }
+
+  # Calculate dimensions based on rotation
+  height_actual <- ifelse(rotation == 0, height, height * 1.5)
+  width_actual <- ifelse(rotation == 0, width, width * 1.5)
+
+  # Get base landscape with sharp treeline
+  landscape <- create_landscape_sharp_treeline(
+    width_actual,
+    height_actual,
+    treeline_position,
+    as_raster = FALSE
+  )
+
+  # Define scatter zone
+  treeline_row <- round(height_actual * treeline_position)
+  scatter_zone_end <- min(
+    height_actual,
+    treeline_row + round(height_actual * scatter_zone_prop)
+  )
+
+  # Randomly place trees in scatter zone
+  for (i in (treeline_row + 1):scatter_zone_end) {
+    for (j in 1:width_actual) {
+      if (stats::runif(1) < scatter_density) {
+        landscape[i, j] <- 1
+      }
+    }
+  }
+
+  # Apply rotation if specified
+  if (rotation != 0) {
+    landscape <- rotate_and_crop_landscape(
+      landscape,
+      rotation,
+      width,
+      height
+    )
+  }
+
+  # Convert to SpatRaster if requested
+  if (as_raster) {
+    return(matrix_to_raster(landscape, crs = crs))
+  }
+
+  return(landscape)
 }
 
 #' Create a Landscape with Clustered Trees
