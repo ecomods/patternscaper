@@ -112,7 +112,50 @@ plot_landscape_list <- function(
   legend_title = "Value",
   show_legend = TRUE
 ) {
-  # Function implementation will go here
+  # Validate input is a list
+  if (!is.list(landscape_list)) {
+    stop("landscape_list must be a list of landscapes (SpatRaster or matrix)")
+  }
+
+  # Generate default titles if not provided
+  if (is.null(titles)) {
+    # Check if list has names
+    if (!is.null(names(landscape_list))) {
+      titles <- names(landscape_list)
+    } else {
+      titles <- paste("Landscape", 1:length(landscape_list))
+    }
+  } else if (length(titles) != length(landscape_list)) {
+    warning(
+      "Number of titles doesn't match number of landscapes. Using default titles."
+    )
+    titles <- paste("Landscape", 1:length(landscape_list))
+  }
+
+  # Create a list of plots
+  plot_list <- list()
+  for (i in 1:length(landscape_list)) {
+    # Pass all plotting decisions to plot_landscape
+    plot_list[[i]] <- plot_landscape(
+      landscape = landscape_list[[i]],
+      title = titles[i],
+      color_scale = color_scale,
+      legend_title = legend_title,
+      # Show legend based on user preference
+      show_legend = show_legend
+    )
+  }
+
+  # Combine all plots using patchwork
+  combined_plot <- patchwork::wrap_plots(plot_list, ncol = ncol)
+
+  # Use patchwork to handle legend collection if needed
+  if (show_legend && length(landscape_list) > 1) {
+    combined_plot <- combined_plot +
+      patchwork::plot_layout(guides = "collect")
+  }
+
+  return(combined_plot)
 }
 
 #' Plot Landscape Metrics
