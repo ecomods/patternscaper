@@ -68,9 +68,13 @@ rotate_and_crop_landscape <- function(
 #'   is performed first row by row and then column by column to ensure all NA values are filled.
 fill_na_with_nearest <- function(matrix_with_na, binarize = TRUE) {
   # Check if the input is a matrix
-  if (!is.matrix(landscape)) {
-    stop("landscape must be a matrix, but is of class: ", class(landscape))
+  if (!is.matrix(matrix_with_na)) {
+    stop(
+      "matrix_with_na must be a matrix, but is of class: ",
+      class(matrix_with_na)
+    )
   }
+
   # Apply na.approx row by row
   for (i in 1:nrow(matrix_with_na)) {
     matrix_with_na[i, ] <- zoo::na.approx(
