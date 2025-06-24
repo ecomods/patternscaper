@@ -4,7 +4,7 @@
 #'
 #' @param calculated_metrics tibble. Metrics from calculate_landscape_metrics().
 #' @param metrics_number Integer. Number of top metrics to return (default: 10).
-#' @param method Character. Selection method (options: "coeffvar_all", "linmod", "lin_mod_r2", "mean_groups") (default: "coeffvar_all").
+#' @param method Character. Selection method (options: "coeffvar_all", "lin_mod_r2", "mean_groups") (default: "coeffvar_all").
 #' @param plot Logical. Whether to generate visualization (default: FALSE).
 #' @param exclude_metrics Character vector. Metrics to exclude (default: NULL).
 #'
@@ -31,7 +31,6 @@ evaluate_landscape_metrics <- function(
   # Validate method parameter early
   valid_methods <- c(
     "coeffvar_all",
-    "linmod",
     "lin_mod_p",
     "lin_mod_r2",
     "mean_groups"
@@ -41,11 +40,6 @@ evaluate_landscape_metrics <- function(
       "Invalid method. Choose from:",
       paste(valid_methods, collapse = ", ")
     ))
-  }
-
-  # Normalize method name (allow "linmod" as an alias for "lin_mod_p")
-  if (method == "linmod") {
-    method <- "lin_mod_p"
   }
 
   # Exclude metrics if specified
