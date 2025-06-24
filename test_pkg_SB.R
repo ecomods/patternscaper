@@ -10,12 +10,20 @@ list_available_metrics(level = c("class", "landscape"))
 # Calculate landscape metrics for all patterns
 # ---- Basic Test: Single landscape, all metrics ----
 # Create a simple landscape
-landscapes <- generate_training_landscapes(add_rotation = FALSE)
+landscapes <- generate_training_landscapes(add_rotation = TRUE)
+plot_landscape_list(landscapes)
 
 test_metrics <- calculate_landscape_metrics(
   landscapes,
   level = "landscape"
 )
+
+best_5 <- evaluate_landscape_metrics(test_metrics, metrics_number = 5)
+
+# metric visualizations
+plot_raw_metrics(test_metrics, plot_type = "boxplot")
+plot_raw_metrics(test_metrics, plot_type = "heatmap")
+
 
 landscapes <- test_cluster
 calculate_landscape_metrics(test_cluster, level = "landscape")
@@ -47,11 +55,13 @@ test_cluster <- create_landscape(
   treeline_position = 0.5,
   num_clusters = 10,
   cluster_radius = 5,
-  rotation = 0,
+  rotation = 45,
   seed = 42,
-  add_metadata = F
+  add_metadata = TRUE
 )
 plot_landscape(test_cluster)
+
+create_landscape_clusters(rotation = 45)
 
 # Test with diffuse treeline
 create_landscape(
@@ -120,8 +130,17 @@ create_landscape(
 
 # Test individual landscape creation functions
 
+# Test all individual landscape function with rotation 45
+create_landscape_bent_fingers(rotation = 45)
+create_landscape_clustered_trees(rotation = 45)
+create_landscape_curvy_treeline(rotation = 45)
+create_landscape_diffuse_treeline(rotation = 45)
+create_landscape_fingers(rotation = 45)
+create_landscape_scattered_trees(rotation = 45, as_raster = FALSE)
+
+
 # clustered trees
-test_cluster <- create_landscape_clustered_trees()
+test_cluster <- create_landscape_clustered_trees(rotation = 45)
 plot_landscape(test_cluster)
 
 # diffuse treeline
@@ -141,7 +160,7 @@ test_bent_fingers <- create_landscape_bent_fingers()
 plot_landscape(test_bent_fingers)
 
 # scattered trees
-test_scattered <- create_landscape_scattered_trees()
+test_scattered <- create_landscape_scattered_trees(rotation = 45)
 plot_landscape(test_scattered)
 
 # sine bands
