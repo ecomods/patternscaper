@@ -17,90 +17,181 @@ evaluate_landscape_metrics <- function(
   plot = FALSE,
   exclude_metrics = NULL
 ) {
-  #metrics list not used yet
-  top_metrics <- NA
+  # Validate input data
+  if (
+    !is.data.frame(calculated_metrics) && !tibble::is_tibble(calculated_metrics)
+  ) {
+    stop("calculated_metrics must be a data frame or tibble")
+  }
 
-  #number of metrics
+  if (!all(c("metric", "type", "value") %in% colnames(calculated_metrics))) {
+    stop("calculated_metrics must contain columns: metric, type, and value")
+  }
+
+  # Validate method parameter early
+  valid_methods <- c(
+    "coeffvar_all",
+    "linmod",
+    "lin_mod_p",
+    "lin_mod_r2",
+    "mean_groups"
+  )
+  if (!(method %in% valid_methods)) {
+    stop(paste(
+      "Invalid method. Choose from:",
+      paste(valid_methods, collapse = ", ")
+    ))
+  }
+
+  # Normalize method name (allow "linmod" as an alias for "lin_mod_p")
+  if (method == "linmod") {
+    method <- "lin_mod_p"
+  }
+
+  # Exclude metrics if specified
+  if (!is.null(exclude_metrics)) {
+    calculated_metrics <- calculated_metrics[
+      !calculated_metrics$metric %in% exclude_metrics,
+    ]
+    if (nrow(calculated_metrics) == 0) {
+      stop("No metrics left after exclusion")
+    }
+  }
+
+  # Initialize top_metrics
+  top_metrics <- NULL
+
+  # Get unique metrics and types
   metrics_names <- unique(calculated_metrics$metric)
   num_metrics <- length(metrics_names)
-  #number of landscape types
-  num_types <- length(unique(calculated_metrics$type))
 
-  #calculate coefficient of variation for each metric
-  #once for each landscape separate, and once jointly
-  means_types <- data.frame(tapply(
+  # Check if we have enough metrics
+  if (num_metrics < metrics_number) {
+    warning(paste(
+      "Requested",
+      metrics_number,
+      "metrics but only",
+      num_metrics,
+      "are available. Returning all available metrics."
+    ))
+    metrics_number <- num_metrics
+  }
+
+  # Number of landscape types
+  landscape_types <- unique(calculated_metrics$type)
+  num_types <- length(landscape_types)
+
+  if (num_types < 2) {
+    stop(
+      "At least two different landscape types are required for metric evaluation"
+    )
+  }
+
+  # Calculate coefficient of variation for each metric
+  # Once for each landscape type separately, and once jointly
+  means_types <- as.data.frame(tapply(
     calculated_metrics$value,
     list(
       as.factor(calculated_metrics$metric),
       as.factor(calculated_metrics$type)
     ),
     mean,
-    na.rm = T
+    na.rm = TRUE
   ))
+
   means_types$all <- tapply(
     calculated_metrics$value,
     as.factor(calculated_metrics$metric),
     mean,
-    na.rm = T
+    na.rm = TRUE
   )
-  sd_types <- data.frame(tapply(
+
+  sd_types <- as.data.frame(tapply(
     calculated_metrics$value,
     list(
       as.factor(calculated_metrics$metric),
       as.factor(calculated_metrics$type)
     ),
     sd,
-    na.rm = T
+    na.rm = TRUE
   ))
+
   sd_types$all <- tapply(
     calculated_metrics$value,
     as.factor(calculated_metrics$metric),
     sd,
-    na.rm = T
+    na.rm = TRUE
   )
 
-  #--------------------------------------------------------------------------------------------
-  #coefficient of variation for all data
-  #however, we do not now, if this comes from a high variation across landscape types or
-  #across landscapes in general (e.g. within fingers)
-  #--------------------------------------------------------------------------------------------
+  # Choose method for metric evaluation
   if (method == "coeffvar_all") {
-    ranking <- rank(sd_types$all / means_types$all, na.last = FALSE)
-    top_metrics <- metrics_names[ranking > (num_metrics - metrics_number)] #take only top x
-  }
+    # Coefficient of variation for all data
+    cv_values <- sd_types$all / means_types$all
 
-  #--------------------------------------------------------------------------------------------
-  #for which metrics do the landscape types significantly differ from each other
-  #(with linear model using the smallest p-value)
-  #--------------------------------------------------------------------------------------------
-  if (method == "lin_mod_p") {
+    # Handle zero means or NAs
+    cv_values[!is.finite(cv_values)] <- NA
+
+    # Rank metrics by coefficient of variation
+    ranking <- rank(cv_values, na.last = FALSE)
+    top_metrics <- metrics_names[ranking > (num_metrics - metrics_number)]
+  } else if (method == "lin_mod_p") {
     means_types$p <- NA
-    for (i in 1:num_metrics) {
-      dat <- calculated_metrics[calculated_metrics$metric == metrics_names[i], ]
-      if (!is.na(dat$value[i])) {
-        model <- lm(data = dat, value ~ type)
-        means_types$p[i] <- anova(model)$`Pr(>F)`[1]
-      }
-    }
-    #ranking of the smallest p-values
-    ranking <- rank(means_types$p, na.last = TRUE)
-    top_metrics <- metrics_names[ranking <= metrics_number] #take only top x
-  }
 
-  #--------------------------------------------------------------------------------------------
-  #for which metrics do the landscape types significantly differ from each other
-  #(with linear model using the smallest p-value)
-  #--------------------------------------------------------------------------------------------
-  if (method == "lin_mod_r2") {
-    means_types$r2 <- NA
     for (i in 1:num_metrics) {
       dat <- calculated_metrics[calculated_metrics$metric == metrics_names[i], ]
-      if (!is.na(dat$value[i])) {
-        model <- lm(data = dat, value ~ type)
-        means_types$r2[i] <- summary(model)$r.squared
+
+      # Ensure we have valid data for linear model
+      if (nrow(dat) > 0 && !all(is.na(dat$value))) {
+        tryCatch(
+          {
+            model <- lm(data = dat, value ~ type)
+            # Get p-value from ANOVA
+            means_types$p[i] <- anova(model)$`Pr(>F)`[1]
+          },
+          error = function(e) {
+            warning(paste(
+              "Error fitting model for metric",
+              metrics_names[i],
+              ":",
+              e$message
+            ))
+            means_types$p[i] <- NA
+          }
+        )
       }
     }
-    #ranking of the smallest p-values
+
+    # Ranking of the smallest p-values
+    ranking <- rank(means_types$p, na.last = TRUE)
+    top_metrics <- metrics_names[ranking <= metrics_number]
+  } else if (method == "lin_mod_r2") {
+    # Linear model using R-squared
+    means_types$r2 <- NA
+
+    for (i in 1:num_metrics) {
+      dat <- calculated_metrics[calculated_metrics$metric == metrics_names[i], ]
+
+      # Ensure we have valid data for linear model
+      if (nrow(dat) > 0 && !all(is.na(dat$value))) {
+        tryCatch(
+          {
+            model <- lm(data = dat, value ~ type)
+            means_types$r2[i] <- summary(model)$r.squared
+          },
+          error = function(e) {
+            warning(paste(
+              "Error fitting model for metric",
+              metrics_names[i],
+              ":",
+              e$message
+            ))
+            means_types$r2[i] <- NA
+          }
+        )
+      }
+    }
+
+    # Ranking of the highest R-squared values
     ranking <- rank(means_types$r2, na.last = FALSE)
     top_metrics <- metrics_names[ranking > (num_metrics - metrics_number)] #take only top x
   }
