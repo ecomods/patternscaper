@@ -582,24 +582,26 @@ This is an internal utility function used by `calculate_landscape_metrics` to ha
 **Input:**
 - `calculated_metrics` (tibble): Metrics from calculate_landscape_metrics()
 - `metrics_number` (integer): Number of top metrics to return (default: 10)
-- `method` (character): Selection method (options: "coeffvar_all", "linmod", "lin_mod_r2", "mean_groups") (default: "coeffvar_all")
+- `method` (character): Selection method (options: "coeffvar_all", "linmod", "lin_mod_p", "lin_mod_r2", "mean_groups") (default: "coeffvar_all")
 - `plot` (logical): Whether to generate visualization (default: FALSE)
 - `exclude_metrics` (character vector): Metrics to exclude (default: NULL)
 
 **Output:**
 - character vector: Names of most sensitive metrics
-- (If plot=TRUE) Also prints a visualization using plot_metrics function
+- (If plot=TRUE) Also prints a visualization of the selected metrics
 
 **Description:**
-1. Validates that metrics contain type information
-2. Based on the selected method:
-   a. "coeffvar_all": Calculates coefficient of variation for each metric
-   b. "linmod": Fits linear models and ranks by p-values
-   c. "lin_mod_r2": Fits linear models and ranks by R²
-   d. "mean_groups": Calculates relative deviation from overall mean
-3. Selects top metrics_number metrics
-4. If plot=TRUE, generates visualization of selected metrics
-5. Returns vector of selected metric names
+1. Validates that metrics contain required columns (metric, type, value)
+2. Excludes metrics specified in exclude_metrics parameter
+3. Checks if there are at least two landscape types for comparison
+4. Based on the selected method:
+   a. "coeffvar_all": Calculates coefficient of variation for each metric and selects those with highest variation
+   b. "linmod"/"lin_mod_p": Fits linear models and ranks metrics by p-values (smaller is better)
+   c. "lin_mod_r2": Fits linear models and ranks metrics by R² values (larger is better)
+   d. "mean_groups": Calculates relative deviation from overall mean across all types and selects metrics with highest total deviation
+5. Handles missing values and edge cases robustly
+6. If plot=TRUE, generates visualization of selected metrics using ggplot2
+7. Returns vector of selected metric names
 
 ## Neural Network Functions
 

@@ -198,27 +198,32 @@ evaluate_landscape_metrics <- function(
 
   #--------------------------------------------------------------------------------------------
   #how strongly do the means vary from the overall mean
-  #take four metrics for each landscape types (problem number does not match metrics_number)
   #--------------------------------------------------------------------------------------------
   if (method == "mean_groups") {
+    # Calculate relative difference from mean for each type
     rel_mean_diff <- (means_types[, 1:num_types] - means_types$all) /
       means_types$all
 
-    #for each type, take the two lowest and highest differences from mean
-    #problem: sometimes, indices have the same ranking, here I randomly take a sample of two
-    mymetrics <- array(data = NA, dim = 4 * num_types)
-    for (t in 1:num_types) {
-      ranking <- as.integer(rank(rel_mean_diff[, t], na.last = TRUE))
-      mymetrics[(t * 4 - 3):(t * 4 - 2)] <- sample(
-        metrics_names[ranking <= 2],
-        2
-      )
-      ranking <- as.integer(rank(rel_mean_diff[, t], na.last = FALSE))
-      mymetrics[(t * 4 - 1):(t * 4)] <- sample(metrics_names[
-        ranking > (num_metrics - 2)
-      ])
+    # Handle NaN, Inf values from division by zero or very small numbers
+    rel_mean_diff[!is.finite(rel_mean_diff)] <- NA
+
+    # Calculate absolute difference for better comparison
+    abs_diff <- abs(rel_mean_diff)
+
+    # Calculate overall importance score for each metric (sum across types)
+    importance_scores <- rowSums(abs_diff, na.rm = TRUE)
+
+    # Rank by importance (higher total deviation = better discriminating power)
+    ranking <- rank(-importance_scores, na.last = TRUE)
+
+    # Select top metrics based on user-specified count
+    top_metrics <- metrics_names[ranking <= metrics_number]
+
+    # If no metrics selected (e.g., all NA), provide a warning
+    if (length(top_metrics) == 0) {
+      warning("No metrics selected by mean_groups method. Check your data.")
+      top_metrics <- metrics_names[1:min(metrics_number, num_metrics)]
     }
-    top_metrics <- sort(unique(mymetrics))
   }
 
   # Plot classification results if requested
