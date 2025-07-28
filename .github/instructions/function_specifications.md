@@ -609,7 +609,7 @@ This is an internal utility function used by `calculate_landscape_metrics` to ha
 
 **Input:**
 - `metrics` (tibble): Metrics from calculate_landscape_metrics()
-- `metric_list` (character vector): Names of metrics to use as features
+- `metrics_selected` (character vector): Names of metrics to use as features
 - `test` (logical): Whether to perform cross-validation (default: TRUE)
 - `cv_folds` (integer): Number of cross-validation folds (default: 5)
 - `hidden_neurons` (integer): Number of neurons in hidden layer (default: 5)

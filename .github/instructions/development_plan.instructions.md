@@ -414,3 +414,7 @@ The package will follow a process-based organization with logical grouping of fu
 2. **Milestone 2** (End of Phase 2): Complete tested metrics calculation with sensitive metrics detection
 3. **Milestone 3** (End of Phase 3): Thoroughly tested neural network classification system
 4. **Milestone 4** (End of Phase 4): Fully documented package ready for publication with comprehensive test
+
+# Known issues
+
+- Function evaluate_landscape_metrics gives back metrics that have NA values
