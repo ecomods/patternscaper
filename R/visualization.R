@@ -37,15 +37,16 @@ plot_landscape <- function(
 
   # If the values are discrete, convert to factor
   if (is_discrete) {
-    df$value <- factor(df$value, levels = unique_values)
+    # Always use sorted numeric values as factor levels for consistency
+    df$value <- factor(df$value, levels = sort(unique_values))
   }
 
   # Set up default color scale if not provided
   if (is.null(color_scale)) {
     # Define a standard palette of 10 distinct colors
     standard_palette <- c(
-      "#005C29", # dark green (forest)
       "#E5E59F", # light yellow/beige (saltmarsh)
+      "#005C29", # dark green (forest)
       "#8DA0CB", # periwinkle blue
       "#E78AC3", # pink
       "#A6D854", # lime green
@@ -60,6 +61,11 @@ plot_landscape <- function(
       # For all categorical data, select the needed number of colors from the palette
       n_colors <- length(unique_values)
       color_scale <- standard_palette[1:min(n_colors, 10)]
+
+      # If more than 10 colors are needed, use a color palette function
+      if (n_colors > 10) {
+        color_scale <- viridisLite::viridis(n_colors)
+      }
     } else {
       # For continuous data, use a viridis gradient
       color_scale <- viridisLite::viridis(100)
@@ -82,15 +88,13 @@ plot_landscape <- function(
     p <- p +
       ggplot2::scale_fill_manual(
         values = color_scale,
-        name = legend_title,
-        na.value = "grey80"
+        name = legend_title
       )
   } else {
     p <- p +
       ggplot2::scale_fill_gradientn(
-        colours = color_scale,
-        name = legend_title,
-        na.value = "grey80"
+        colors = color_scale,
+        name = legend_title
       )
   }
 
