@@ -59,7 +59,7 @@ train_nn <- function(
 
   # Reformat the table to wide format
   metrics_wide <- metrics |>
-    tidyr:::pivot_wider(
+    tidyr::pivot_wider(
       names_from = metric,
       values_from = value
     ) |>
@@ -74,8 +74,73 @@ train_nn <- function(
     type = factor(metrics_wide$type)
   )
 
-  # Train the neural network model with softmax = TRUE for multinomial classification
-  model <- nnet::nnet(
+  # Store the class names
+  class_names <- levels(metrics_scaled$type)
+
+  # Initialize performance metrics storage
+  performance <- NULL
+
+  if (test == TRUE) {
+    # Perform k-fold cross-validation
+    # Create fold indices
+    set.seed(seed)
+    fold_indices <- sample(rep(1:cv_folds, length.out = nrow(metrics_scaled)))
+
+    # Initialize confusion matrix and other metrics
+    all_predictions <- character(0)
+    all_actual <- character(0)
+
+    # Perform k-fold cross-validation
+    for (fold in 1:cv_folds) {
+      # Split data into training and validation
+      train_indices <- fold_indices != fold
+      validation_indices <- fold_indices == fold
+
+      train_data <- metrics_scaled[train_indices, ]
+      validation_data <- metrics_scaled[validation_indices, ]
+
+      # Train model on training data
+      fold_model <- nnet::nnet(
+        type ~ .,
+        data = train_data,
+        size = hidden_neurons,
+        decay = decay,
+        maxit = maxit,
+        trace = FALSE
+      )
+
+      # Predict on validation data
+      probs <- predict(
+        fold_model,
+        newdata = validation_data[, -which(names(validation_data) == "type")],
+        type = "raw"
+      )
+
+      # Get predicted class labels
+      predictions <- colnames(probs)[max.col(probs, ties.method = "first")]
+
+      # Store actual and predicted values
+      all_predictions <- c(all_predictions, predictions)
+      all_actual <- c(all_actual, as.character(validation_data$type))
+    }
+
+    # Create and print confusion matrix
+    conf_matrix <- table(Predicted = all_predictions, Actual = all_actual)
+    print("Cross-validation results:")
+    print(conf_matrix)
+
+    # Calculate performance metrics
+    accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+    performance <- list(
+      confusion_matrix = conf_matrix,
+      accuracy = accuracy
+    )
+
+    cat(sprintf("Cross-validation accuracy: %.2f%%\n", accuracy * 100))
+  }
+
+  # Train final model on all data
+  final_model <- nnet::nnet(
     type ~ .,
     data = metrics_scaled,
     size = hidden_neurons,
@@ -84,23 +149,25 @@ train_nn <- function(
     trace = FALSE
   )
 
-  # split into training and test data before we train
-  if (test == TRUE) {
-    # Predict class probabilities on the training data
-    probs <- predict(
-      model,
-      newdata = metrics_scaled[,
-        -which(names(metrics_scaled) == "type")
-      ],
-      type = "raw"
-    )
-    # Convert probabilities to predicted class labels
-    predictions <- colnames(probs)[max.col(probs, ties.method = "first")]
-    # Create a confusion matrix comparing predicted and actual classes
-    print(table(Predicted = predictions, Actual = metrics_wide$type))
+  # Prepare return object
+  result <- list(
+    model = final_model,
+    features = colnames(predictors),
+    scaling = scaling_params,
+    classes = class_names
+  )
+
+  # Add performance metrics if cross-validation was performed
+  if (!is.null(performance)) {
+    result$performance <- performance
   }
 
-  return(model)
+  # Save model if requested
+  if (save_model && !is.null(model_path)) {
+    readr::write_rds(result, model_path)
+  }
+
+  return(result)
 }
 
 #' Apply Neural Network for Landscape Classification
