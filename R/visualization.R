@@ -242,7 +242,9 @@ plot_classification_results <- function(
 #' understand their metrics before selecting an evaluation method.
 #'
 #' @param metrics Data frame. Metrics dataframe from calculate_landscape_metrics.
-#' @param plot_type Character. Type of plot to create: "boxplot", "heatmap", "variability", or "parallel" (default: "boxplot").
+#' @param subset Character vector. Subset of metrics to visualize (default: NULL, uses all metrics).
+#'   If provided, only these metrics will be plotted.
+#' @param plot_type Character. Type of plot to create: "boxplot", "heatmap", "variability", or "ridgeline" (default: "boxplot").
 #' @param title Character. Plot title (default: "Raw Landscape Metrics").
 #' @param scale_values Logical. Whether to scale metric values for better comparison (default: FALSE).
 #' @param top_n Integer. Number of metrics to highlight in variability plot (default: 10).
@@ -252,6 +254,7 @@ plot_classification_results <- function(
 #' @export
 plot_raw_metrics <- function(
   metrics,
+  subset = NULL,
   plot_type = "boxplot",
   title = "Raw Landscape Metrics",
   scale_values = FALSE,
@@ -265,15 +268,23 @@ plot_raw_metrics <- function(
     )
   }
 
+  # Filter metrics if subset is provided
+  if (!is.null(subset)) {
+    metrics <- metrics[metrics$metric %in% subset, ]
+    if (nrow(metrics) == 0) {
+      stop("No metrics found matching the provided subset.")
+    }
+  }
+
   # Scale values if requested
   if (scale_values) {
-    metrics <- metrics %>%
-      dplyr::group_by(metric) %>%
-      dplyr::mutate(value = scale(value)[, 1]) %>%
+    metrics <- metrics |>
+      dplyr::group_by(metric) |>
+      dplyr::mutate(value = scale(value)[, 1]) |>
       dplyr::ungroup()
   }
 
-  # Create boxplot
+  # Create boxplot -------------------------------------------------------------
   p_boxplot <- ggplot2::ggplot(
     metrics,
     ggplot2::aes(x = type, y = value, fill = type)
@@ -282,42 +293,32 @@ plot_raw_metrics <- function(
     ggplot2::facet_wrap(~metric, scales = "free_y") +
     ggplot2::theme_bw() +
     ggplot2::theme(
-      legend.position = "bottom",
+      legend.position = "none",
       axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-      panel.grid.minor = ggplot2::element_blank(),
-      strip.text = ggplot2::element_text(face = "bold")
+      axis.title.x = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank()
     ) +
     ggplot2::labs(
       title = paste0(title, " - Distribution"),
-      x = "Landscape Type",
       y = "Metric Value"
     )
 
-  # Create heatmap
+  # Create heatmap of mean values per metric and type --------------------------
   # Calculate mean values for each metric by type
-  means <- metrics %>%
-    dplyr::group_by(metric, type) %>%
-    dplyr::summarize(mean_value = mean(value, na.rm = TRUE), .groups = "drop")
-
-  # Standardize values for the heatmap using base R scale function
-  means_wide <- tidyr::pivot_wider(
-    means,
-    names_from = type,
-    values_from = mean_value
-  )
-
-  # Apply scale() to each row (metric) and convert back to long format
-  metric_names <- means_wide$metric
-  scaled_values <- t(scale(t(as.matrix(means_wide[, -1]))))
-
-  means_scaled <- data.frame(
-    metric = rep(metric_names, ncol(scaled_values)),
-    type = rep(colnames(scaled_values), each = nrow(scaled_values)),
-    mean_value_scaled = as.vector(scaled_values)
-  )
+  means <- metrics |>
+    dplyr::group_by(metric, type) |>
+    dplyr::summarize(
+      mean_value = mean(value, na.rm = TRUE),
+      .groups = "drop"
+    ) |>
+    # scale the values by metric so that they fit into one color scale
+    dplyr::mutate(
+      mean_value_scaled = scale(mean_value)[, 1],
+      .by = metric
+    )
 
   p_heatmap <- ggplot2::ggplot(
-    means_scaled,
+    means,
     ggplot2::aes(x = type, y = metric, fill = mean_value_scaled)
   ) +
     ggplot2::geom_tile() +
@@ -331,34 +332,27 @@ plot_raw_metrics <- function(
     ggplot2::theme_minimal() +
     ggplot2::theme(
       axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+      axis.title.x = ggplot2::element_blank(),
+      axis.title.y = ggplot2::element_blank(),
       panel.grid = ggplot2::element_blank()
     ) +
-    ggplot2::labs(title = paste0(title, " - Heatmap"))
+    ggplot2::labs(title = paste0(title, " - Mean Values"))
 
   # Create metric variability plot
   # Calculate coefficient of variation for each metric
-  cv_data <- metrics %>%
-    dplyr::group_by(metric) %>%
+  cv_data <- metrics |>
     dplyr::summarize(
       mean = mean(value, na.rm = TRUE),
       sd = sd(value, na.rm = TRUE),
       cv = sd / abs(mean),
-      .groups = "drop"
-    ) %>%
-    dplyr::arrange(desc(cv))
-
-  # Highlight top metrics by CV
-  cv_data$highlight <- cv_data$metric %in%
-    cv_data$metric[1:min(top_n, nrow(cv_data))]
+      .by = metric
+    )
 
   p_variability <- ggplot2::ggplot(
     cv_data,
-    ggplot2::aes(x = reorder(metric, cv), y = cv, fill = highlight)
+    ggplot2::aes(x = reorder(metric, cv), y = cv)
   ) +
-    ggplot2::geom_col() +
-    ggplot2::scale_fill_manual(
-      values = c("FALSE" = "gray80", "TRUE" = "steelblue")
-    ) +
+    ggplot2::geom_col(fill = "steelblue") +
     ggplot2::coord_flip() +
     ggplot2::theme_bw() +
     ggplot2::theme(legend.position = "none") +
@@ -368,32 +362,34 @@ plot_raw_metrics <- function(
       y = "Coefficient of Variation"
     )
 
-  # Create parallel coordinate plot
-  # Create a scaled version of the data for parallel plot
-  parallel_data <- metrics %>%
-    dplyr::group_by(metric) %>%
-    dplyr::mutate(scaled_value = scale(value)[, 1]) %>%
-    dplyr::ungroup()
+  # Create ridgeline plot (replacing parallel coordinate plot)
+  # Scale the values by metric for better visualization
+  ridge_data <- metrics |>
+    dplyr::mutate(scaled_value = scale(value)[, 1], .by = metric)
 
-  p_parallel <- ggplot2::ggplot(
-    parallel_data,
+  p_ridgeline <- ggplot2::ggplot(
+    ridge_data,
     ggplot2::aes(
-      x = metric,
-      y = scaled_value,
-      group = interaction(id, type),
+      x = scaled_value,
+      y = metric,
+      fill = type,
       color = type
     )
   ) +
-    ggplot2::geom_line(alpha = 0.5) +
+    ggridges::geom_density_ridges(
+      alpha = 0.65,
+      scale = 0.9,
+      rel_min_height = 0.01
+    ) +
     ggplot2::theme_bw() +
     ggplot2::theme(
-      axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5),
-      panel.grid.minor = ggplot2::element_blank()
+      panel.grid.minor = ggplot2::element_blank(),
+      legend.position = "right"
     ) +
     ggplot2::labs(
-      title = paste0(title, " - Parallel Coordinates"),
-      x = "Metric",
-      y = "Scaled Value"
+      title = paste0(title, " - Distribution by Type"),
+      x = "Scaled Metric Value",
+      y = "Metric"
     )
 
   # Return either a single plot or all plots based on parameters
@@ -402,7 +398,7 @@ plot_raw_metrics <- function(
       boxplot = p_boxplot,
       heatmap = p_heatmap,
       variability = p_variability,
-      parallel = p_parallel
+      ridgeline = p_ridgeline
     ))
   } else {
     # Return the requested plot type
@@ -411,9 +407,9 @@ plot_raw_metrics <- function(
       "boxplot" = return(p_boxplot),
       "heatmap" = return(p_heatmap),
       "variability" = return(p_variability),
-      "parallel" = return(p_parallel),
+      "ridgeline" = return(p_ridgeline),
       stop(
-        "Invalid plot_type. Choose from: 'boxplot', 'heatmap', 'variability', or 'parallel'"
+        "Invalid plot_type. Choose from: 'boxplot', 'heatmap', 'variability', or 'ridgeline'"
       )
     )
   }
