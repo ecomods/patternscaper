@@ -21,9 +21,57 @@ test_metrics <- calculate_landscape_metrics(
 best_5 <- evaluate_landscape_metrics(test_metrics, metrics_number = 5)
 
 # metric visualizations
-plot_raw_metrics(test_metrics, plot_type = "boxplot")
+plot_raw_metrics(test_metrics, subset = best_5, plot_type = "boxplot")
 plot_raw_metrics(test_metrics, plot_type = "heatmap")
+all_metric_plots <- plot_raw_metrics(
+  test_metrics,
+  subset = best_5,
+  return_all = TRUE
+)
+patchwork::wrap_plots(all_metric_plots)
 
+# Train a neural network with the metrics ------------------------------------
+
+# generate more training landscapes
+training_landscapes <- generate_training_landscapes(
+  seed = 42,
+  n = 20,
+  add_rotation = TRUE
+)
+# calculate metrics for the training landscapes
+training_metrics <- calculate_landscape_metrics(
+  training_landscapes,
+  level = "landscape"
+)
+
+# select the best 10 metrics for training
+best_10 <- evaluate_landscape_metrics(
+  calculated_metrics = training_metrics,
+  metrics_number = 10
+)
+
+# train the neural network model
+model <- train_nn(
+  metrics = training_metrics,
+  metrics_selected = best_10,
+  cv_folds = 3,
+  test = TRUE
+)
+
+# Plot training results ------------------------------------------------------
+
+# Validate the model ---------------------------------------------------------
+# generate validation landscapes
+validation_landscapes <- generate_training_landscapes(
+  seed = 43,
+  n = 20,
+  add_rotation = TRUE
+)
+
+
+# Test model with new landscapes ---------------------------------------------
+
+# Other tests ----------------------------------------------------------------
 
 landscapes <- test_cluster
 calculate_landscape_metrics(test_cluster, level = "landscape")
@@ -55,13 +103,24 @@ test_cluster <- create_landscape(
   treeline_position = 0.5,
   num_clusters = 10,
   cluster_radius = 5,
-  rotation = 45,
   seed = 42,
+  rotation = 0,
   add_metadata = TRUE
 )
-plot_landscape(test_cluster)
+test_cluster_rot <- create_landscape(
+  pattern = "clustered",
+  width = 100,
+  height = 100,
+  treeline_position = 0.5,
+  num_clusters = 10,
+  cluster_radius = 5,
+  seed = 42,
+  rotation = 45,
+  add_metadata = TRUE
+)
 
-create_landscape_clusters(rotation = 45)
+plot_landscape(test_cluster_rot)
+
 
 # Test with diffuse treeline
 create_landscape(
