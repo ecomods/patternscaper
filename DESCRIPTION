@@ -20,3 +20,7 @@ Imports:
     patchwork,
     purrr,
     zoo
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
