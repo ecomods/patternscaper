@@ -148,6 +148,11 @@ train_nn <- function(
     all_predictions <- character(0)
     all_actual <- character(0)
 
+    # Initialize storage for CV results
+    cv_predictions <- list()
+    cv_probabilities <- list()
+    cv_actual <- list()
+
     if (cv_method == "loo") {
       # Perform leave-one-out cross-validation
       for (i in 1:nrow(metrics_scaled)) {
@@ -181,6 +186,22 @@ train_nn <- function(
         # Store actual and predicted values
         all_predictions <- c(all_predictions, prediction)
         all_actual <- c(all_actual, as.character(validation_data$type))
+
+        # Store predictions for this fold
+        fold_probabilities <- predict(
+          fold_model,
+          newdata = validation_data[,
+            -which(names(validation_data) == "type"),
+            drop = FALSE
+          ],
+          type = "raw"
+        )
+        fold_predictions <- class_names[apply(fold_probabilities, 1, which.max)]
+
+        # Store results for this fold
+        cv_predictions[[i]] <- fold_predictions
+        cv_probabilities[[i]] <- fold_probabilities
+        cv_actual[[i]] <- validation_data$type
       }
 
       # Set cv_folds for reporting
@@ -233,6 +254,19 @@ train_nn <- function(
         # Store actual and predicted values
         all_predictions <- c(all_predictions, predictions)
         all_actual <- c(all_actual, as.character(validation_data$type))
+
+        # Store predictions for this fold
+        fold_probabilities <- predict(
+          fold_model,
+          newdata = validation_data[, -which(names(validation_data) == "type")],
+          type = "raw"
+        )
+        fold_predictions <- class_names[apply(fold_probabilities, 1, which.max)]
+
+        # Store results for this fold
+        cv_predictions[[fold]] <- fold_predictions
+        cv_probabilities[[fold]] <- fold_probabilities
+        cv_actual[[fold]] <- validation_data$type
       }
     }
 
@@ -326,19 +360,82 @@ train_nn <- function(
     trace = FALSE
   )
 
+  # Get probabilities for training data
+  training_probabilities <- predict(
+    final_model,
+    newdata = metrics_scaled[,
+      -which(names(metrics_scaled) == "type"),
+      drop = FALSE
+    ],
+    type = "raw"
+  )
+
+  # Create dataframe with training predictions and actual classes
+  training_results <- data.frame(
+    actual_class = metrics_scaled$type
+  )
+
+  # Add probability for each class
+  for (class_name in class_names) {
+    training_results[[class_name]] <- training_probabilities[, class_name]
+  }
+
+  # Add predicted class and confidence
+  training_results$predicted_class <- class_names[max.col(
+    training_probabilities,
+    ties.method = "first"
+  )]
+  training_results$confidence <- apply(training_probabilities, 1, max)
+
   # Prepare return object
   result <- list(
     model = final_model,
     features = colnames(predictors),
     scaling = scaling_params,
     classes = class_names,
-    performance = performance
+    performance = performance,
+    training_results = training_results
   )
 
   # Save model if requested
   if (save_model && !is.null(model_path)) {
     readr::write_rds(result, model_path)
   }
+
+  # After CV loop, combine all fold results
+  validation_actual_class <- unlist(cv_actual)
+  validation_predicted_class <- unlist(cv_predictions)
+
+  # Create matrix of all probabilities
+  validation_probabilities <- matrix(
+    0,
+    nrow = length(validation_actual_class),
+    ncol = length(class_names)
+  )
+  colnames(validation_probabilities) <- class_names
+  row_index <- 1
+  for (fold in 1:length(cv_probabilities)) {
+    n_rows <- nrow(cv_probabilities[[fold]])
+    for (i in 1:n_rows) {
+      validation_probabilities[row_index, ] <- cv_probabilities[[fold]][i, ]
+      row_index <- row_index + 1
+    }
+  }
+
+  # Create validation results dataframe similar to training_results
+  validation_results <- data.frame(
+    actual_class = validation_actual_class,
+    predicted_class = validation_predicted_class,
+    confidence = apply(validation_probabilities, 1, max)
+  )
+
+  # Add probability for each class
+  for (class_name in class_names) {
+    validation_results[[class_name]] <- validation_probabilities[, class_name]
+  }
+
+  # Add to result object
+  result$validation_results <- validation_results
 
   return(result)
 }
