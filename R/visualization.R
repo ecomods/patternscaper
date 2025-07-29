@@ -218,199 +218,299 @@ plot_metrics <- function(
   # Function implementation will go here
 }
 
-#' Plot Classification Results
+#' Plot Neural Network Classification Results
 #'
-#' Creates a visualization of neural network classification results.
+#' Creates visualizations of neural network model results from cross-validation.
 #'
-#' @param classification Data frame. Classification results from apply_nn.
-#' @param show_probabilities Logical. Whether to include probability bars (default: TRUE).
+#' @param nn_model List. Neural network model from train_nn().
+#' @param plot_type Character. Type of plot to create: "confusion", "probabilities",
+#'   "confidence", or "misclassifications" (default: "confusion").
 #' @param confidence_threshold Numeric. Threshold for highlighting low confidence (default: 0.6).
-#'
-#' @return ggplot object. Visualization of classification results.
-#' @export
-plot_classification_results <- function(
-  classification,
-  show_probabilities = TRUE,
-  confidence_threshold = 0.6
-) {
-  # Function implementation will go here
-}
-
-#' Plot Raw Landscape Metrics
-#'
-#' Creates visualizations of raw landscape metrics data to help users
-#' understand their metrics before selecting an evaluation method.
-#'
-#' @param metrics Data frame. Metrics dataframe from calculate_landscape_metrics.
-#' @param subset Character vector. Subset of metrics to visualize (default: NULL, uses all metrics).
-#'   If provided, only these metrics will be plotted.
-#' @param plot_type Character. Type of plot to create: "boxplot", "heatmap", "variability", or "ridgeline" (default: "boxplot").
-#' @param title Character. Plot title (default: "Raw Landscape Metrics").
-#' @param scale_values Logical. Whether to scale metric values for better comparison (default: FALSE).
-#' @param top_n Integer. Number of metrics to highlight in variability plot (default: 10).
 #' @param return_all Logical. Whether to return all plot types as a list (default: FALSE).
 #'
-#' @return ggplot object or list of ggplot objects. Visualization(s) of raw metrics.
+#' @return ggplot object or list of ggplot objects. Visualization(s) of classification results.
 #' @export
-plot_raw_metrics <- function(
-  metrics,
-  subset = NULL,
-  plot_type = "boxplot",
-  title = "Raw Landscape Metrics",
-  scale_values = FALSE,
-  top_n = 10,
+plot_classification_results <- function(
+  nn_model,
+  plot_type = "confusion",
+  confidence_threshold = 0.6,
   return_all = FALSE
 ) {
-  # Check input dataframe structure
-  if (!all(c("metric", "value", "type") %in% names(metrics))) {
+  # Check if nn_model has the required elements
+  if (!is.list(nn_model) || is.null(nn_model$performance)) {
     stop(
-      "Metrics dataframe must contain columns: 'metric', 'value', and 'type'"
+      "Invalid neural network model. Must be a list with performance element."
     )
   }
 
-  # Filter metrics if subset is provided
-  if (!is.null(subset)) {
-    metrics <- metrics[metrics$metric %in% subset, ]
-    if (nrow(metrics) == 0) {
-      stop("No metrics found matching the provided subset.")
+  # Extract key data from model
+  class_names <- nn_model$classes
+
+  # Set up plot list for potential return_all
+  plot_list <- list()
+
+  # 1. Confusion Matrix Plot --------------------------------------------------
+  if (plot_type == "confusion" || return_all) {
+    if (is.null(nn_model$performance$confusion_matrix)) {
+      message("No confusion matrix available. Skipping confusion plot.")
+    } else {
+      # Convert confusion matrix to data frame for plotting
+      conf_matrix <- nn_model$performance$confusion_matrix
+      conf_df <- as.data.frame(as.table(conf_matrix))
+      names(conf_df) <- c("Predicted", "Actual", "Count")
+
+      # Calculate cell percentages (by actual class column)
+      conf_df <- conf_df |>
+        dplyr::mutate(Percent = Count / sum(Count) * 100, .by = Actual)
+
+      # Create plot
+      p_confusion <- ggplot2::ggplot(
+        conf_df,
+        ggplot2::aes(x = Actual, y = Predicted, fill = Percent)
+      ) +
+        ggplot2::geom_tile() +
+        ggplot2::geom_text(
+          ggplot2::aes(label = sprintf("%.1f%%", Percent)),
+          color = "black"
+        ) +
+        ggplot2::scale_fill_gradient2(
+          low = "white",
+          mid = "#6baed6",
+          high = "#084594",
+          midpoint = 50,
+          limits = c(0, 100),
+          name = "% of Actual Class"
+        ) +
+        ggplot2::coord_fixed() +
+        ggplot2::theme_minimal() +
+        ggplot2::theme(
+          panel.grid = ggplot2::element_blank(),
+          axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+        ) +
+        ggplot2::labs(
+          title = "Cross-Validation Confusion Matrix",
+          subtitle = sprintf(
+            "Accuracy: %.1f%% (%s with %d folds)",
+            nn_model$performance$accuracy * 100,
+            nn_model$performance$cv_method,
+            nn_model$performance$cv_folds
+          ),
+          fill = "% of Actual Class"
+        )
+
+      plot_list[["confusion"]] <- p_confusion
+      if (plot_type == "confusion" && !return_all) return(p_confusion)
     }
   }
 
-  # Scale values if requested
-  if (scale_values) {
-    metrics <- metrics |>
-      dplyr::group_by(metric) |>
-      dplyr::mutate(value = scale(value)[, 1]) |>
-      dplyr::ungroup()
-  }
-
-  # Create boxplot -------------------------------------------------------------
-  p_boxplot <- ggplot2::ggplot(
-    metrics,
-    ggplot2::aes(x = type, y = value, fill = type)
-  ) +
-    ggplot2::geom_boxplot() +
-    ggplot2::facet_wrap(~metric, scales = "free_y") +
-    ggplot2::theme_bw() +
-    ggplot2::theme(
-      legend.position = "none",
-      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-      axis.title.x = ggplot2::element_blank(),
-      panel.grid.minor = ggplot2::element_blank()
-    ) +
-    ggplot2::labs(
-      title = paste0(title, " - Distribution"),
-      y = "Metric Value"
-    )
-
-  # Create heatmap of mean values per metric and type --------------------------
-  # Calculate mean values for each metric by type
-  means <- metrics |>
-    dplyr::group_by(metric, type) |>
-    dplyr::summarize(
-      mean_value = mean(value, na.rm = TRUE),
-      .groups = "drop"
-    ) |>
-    # scale the values by metric so that they fit into one color scale
-    dplyr::mutate(
-      mean_value_scaled = scale(mean_value)[, 1],
-      .by = metric
-    )
-
-  p_heatmap <- ggplot2::ggplot(
-    means,
-    ggplot2::aes(x = type, y = metric, fill = mean_value_scaled)
-  ) +
-    ggplot2::geom_tile() +
-    ggplot2::scale_fill_gradient2(
-      low = "blue",
-      mid = "white",
-      high = "red",
-      midpoint = 0,
-      name = "Standardized\nValue"
-    ) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(
-      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-      axis.title.x = ggplot2::element_blank(),
-      axis.title.y = ggplot2::element_blank(),
-      panel.grid = ggplot2::element_blank()
-    ) +
-    ggplot2::labs(title = paste0(title, " - Mean Values"))
-
-  # Create metric variability plot
-  # Calculate coefficient of variation for each metric
-  cv_data <- metrics |>
-    dplyr::summarize(
-      mean = mean(value, na.rm = TRUE),
-      sd = sd(value, na.rm = TRUE),
-      cv = sd / abs(mean),
-      .by = metric
-    )
-
-  p_variability <- ggplot2::ggplot(
-    cv_data,
-    ggplot2::aes(x = reorder(metric, cv), y = cv)
-  ) +
-    ggplot2::geom_col(fill = "steelblue") +
-    ggplot2::coord_flip() +
-    ggplot2::theme_bw() +
-    ggplot2::theme(legend.position = "none") +
-    ggplot2::labs(
-      title = paste0(title, " - Variability"),
-      x = "Metric",
-      y = "Coefficient of Variation"
-    )
-
-  # Create ridgeline plot (replacing parallel coordinate plot)
-  # Scale the values by metric for better visualization
-  ridge_data <- metrics |>
-    dplyr::mutate(scaled_value = scale(value)[, 1], .by = metric)
-
-  p_ridgeline <- ggplot2::ggplot(
-    ridge_data,
-    ggplot2::aes(
-      x = scaled_value,
-      y = metric,
-      fill = type,
-      color = type
-    )
-  ) +
-    ggridges::geom_density_ridges(
-      alpha = 0.65,
-      scale = 0.9,
-      rel_min_height = 0.01
-    ) +
-    ggplot2::theme_bw() +
-    ggplot2::theme(
-      panel.grid.minor = ggplot2::element_blank(),
-      legend.position = "right"
-    ) +
-    ggplot2::labs(
-      title = paste0(title, " - Distribution by Type"),
-      x = "Scaled Metric Value",
-      y = "Metric"
-    )
-
-  # Return either a single plot or all plots based on parameters
-  if (return_all) {
-    return(list(
-      boxplot = p_boxplot,
-      heatmap = p_heatmap,
-      variability = p_variability,
-      ridgeline = p_ridgeline
-    ))
-  } else {
-    # Return the requested plot type
-    switch(
-      plot_type,
-      "boxplot" = return(p_boxplot),
-      "heatmap" = return(p_heatmap),
-      "variability" = return(p_variability),
-      "ridgeline" = return(p_ridgeline),
-      stop(
-        "Invalid plot_type. Choose from: 'boxplot', 'heatmap', 'variability', or 'ridgeline'"
+  # 2. Validation Probabilities Plot ------------------------------------------
+  if (plot_type == "probabilities" || return_all) {
+    if (is.null(nn_model$validation_results)) {
+      message(
+        "No validation results available. Add code to store cross-validation probabilities in train_nn()."
       )
-    )
+    } else {
+      # Extract class probabilities from validation results
+      prob_data <- nn_model$validation_results
+
+      # Calculate mean probability for each actual-predicted class combination
+      prob_matrix_data <- data.frame()
+      for (actual in class_names) {
+        for (pred in class_names) {
+          # Subset data for this actual class
+          actual_class_data <- prob_data[prob_data$actual_class == actual, ]
+          # Get mean probability for this prediction class
+          mean_prob <- mean(actual_class_data[[pred]], na.rm = TRUE)
+
+          # Add to data frame
+          prob_matrix_data <- rbind(
+            prob_matrix_data,
+            data.frame(
+              Actual = actual,
+              Predicted = pred,
+              MeanProbability = mean_prob
+            )
+          )
+        }
+      }
+
+      # Create the probability confusion matrix plot
+      p_probabilities <- ggplot2::ggplot(
+        prob_matrix_data,
+        ggplot2::aes(x = Actual, y = Predicted, fill = MeanProbability)
+      ) +
+        ggplot2::geom_tile() +
+        ggplot2::geom_text(
+          ggplot2::aes(label = sprintf("%.2f", MeanProbability)),
+          color = ifelse(
+            prob_matrix_data$MeanProbability > 0.7,
+            "white",
+            "black"
+          )
+        ) +
+        ggplot2::scale_fill_gradient2(
+          low = "white",
+          mid = "#6baed6",
+          high = "#084594",
+          midpoint = 0.5,
+          limits = c(0, 1),
+          name = "Mean Probability"
+        ) +
+        ggplot2::coord_fixed() +
+        ggplot2::theme_minimal() +
+        ggplot2::theme(
+          panel.grid = ggplot2::element_blank(),
+          axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+        ) +
+        ggplot2::labs(
+          title = "Cross-Validation Mean Probabilities",
+          subtitle = "Average probability that landscapes of class X are classified as class Y",
+          x = "Actual Class",
+          y = "Predicted Class",
+          fill = "Mean Probability"
+        )
+
+      plot_list[["probabilities"]] <- p_probabilities
+      if (plot_type == "probabilities" && !return_all) return(p_probabilities)
+    }
   }
+
+  # 3. Confidence by Class ----------------------------------------------------
+  if (plot_type == "confidence" || return_all) {
+    if (is.null(nn_model$validation_results)) {
+      message(
+        "No validation results available. Add code to store cross-validation results in train_nn()."
+      )
+    } else {
+      # Create data for confidence plot
+      confidence_data <- nn_model$validation_results
+
+      # Create plot
+      p_confidence <- ggplot2::ggplot(
+        confidence_data,
+        ggplot2::aes(
+          x = factor(actual_class),
+          y = confidence,
+          color = factor(predicted_class == actual_class)
+        )
+      ) +
+        ggplot2::geom_boxplot(outlier.shape = NA) +
+        ggplot2::geom_point(
+          position = ggplot2::position_jitterdodge(
+            jitter.width = 0.1,
+            dodge.width = 0.75
+          ),
+          alpha = 0.5
+        ) +
+        ggplot2::geom_hline(
+          yintercept = confidence_threshold,
+          linetype = "dashed",
+          color = "red"
+        ) +
+        ggplot2::scale_color_manual(
+          values = c("tomato", "forestgreen"),
+          name = "Prediction",
+          labels = c("Incorrect", "Correct")
+        ) +
+        ggplot2::theme_bw() +
+        ggplot2::theme(
+          panel.grid.minor = ggplot2::element_blank(),
+          axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+        ) +
+        ggplot2::labs(
+          title = "Cross-Validation Confidence by Class",
+          subtitle = sprintf(
+            "Dashed line shows confidence threshold (%.1f)",
+            confidence_threshold
+          ),
+          x = "Actual Class",
+          y = "Confidence Score"
+        )
+
+      plot_list[["confidence"]] <- p_confidence
+      if (plot_type == "confidence" && !return_all) return(p_confidence)
+    }
+  }
+
+  # 4. Misclassification Analysis ----------------------------------------------
+  if (plot_type == "misclassifications" || return_all) {
+    if (is.null(nn_model$validation_results)) {
+      message(
+        "No validation results available. Add code to store cross-validation results in train_nn()."
+      )
+    } else {
+      # Create data for misclassification analysis
+      misclass_data <- nn_model$validation_results |>
+        dplyr::mutate(
+          correct = predicted_class == actual_class,
+          low_confidence = confidence < confidence_threshold
+        )
+
+      # Count occurrences of each type of misclassification
+      misclass_counts <- misclass_data |>
+        dplyr::filter(!correct) |>
+        dplyr::group_by(actual_class, predicted_class) |>
+        dplyr::summarize(
+          count = n(),
+          avg_confidence = mean(confidence),
+          .groups = "drop"
+        ) |>
+        dplyr::arrange(desc(count))
+
+      # Create plot
+      if (nrow(misclass_counts) > 0) {
+        p_misclass <- ggplot2::ggplot(
+          misclass_counts,
+          ggplot2::aes(
+            x = reorder(paste(actual_class, "-", predicted_class), count),
+            y = count,
+            fill = avg_confidence
+          )
+        ) +
+          ggplot2::geom_col(color = "grey") +
+          ggplot2::scale_fill_gradient2(
+            low = "white",
+            mid = "#6baed6",
+            high = "#084594",
+            midpoint = 0.5,
+            limits = c(0, 1),
+            name = "Avg. Confidence"
+          ) +
+          ggplot2::coord_flip() +
+          ggplot2::theme_bw() +
+          ggplot2::theme(
+            panel.grid.minor = ggplot2::element_blank()
+          ) +
+          ggplot2::labs(
+            title = "Common Cross-Validation Misclassifications",
+            subtitle = "Frequency of specific misclassification patterns",
+            y = "Count",
+            x = "Misclassification (Actual - Predicted)"
+          )
+      } else {
+        p_misclass <- ggplot2::ggplot() +
+          ggplot2::annotate(
+            "text",
+            x = 0.5,
+            y = 0.5,
+            label = "No misclassifications found"
+          ) +
+          ggplot2::theme_minimal() +
+          ggplot2::labs(title = "Cross-Validation Misclassification Analysis")
+      }
+
+      plot_list[["misclassifications"]] <- p_misclass
+      if (plot_type == "misclassifications" && !return_all) return(p_misclass)
+    }
+  }
+
+  # Return all plots if requested
+  if (return_all) {
+    return(plot_list)
+  }
+
+  # Default return if plot_type wasn't valid
+  stop(
+    "Invalid plot_type. Choose from: 'confusion', 'probabilities', 'confidence', or 'misclassifications'"
+  )
 }
