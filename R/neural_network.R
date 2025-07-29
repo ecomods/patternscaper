@@ -347,20 +347,277 @@ train_nn <- function(
 #'
 #' Applies a trained neural network model to classify new landscapes.
 #'
-#' @param landscape SpatRaster or list. Landscape(s) to classify.
+#' @param landscape SpatRaster, matrix, or list. Landscape(s) to classify.
+#'   Can be a single landscape or list of landscapes, with or without metadata.
 #' @param nn_model List. Neural network model from train_nn().
 #' @param test_data tibble. Metrics used for training (default: NULL).
 #' @param metric_list Character vector. Metrics to use (default: NULL, uses nn_model$features).
 #' @param confidence_threshold Numeric. Threshold for warning flag (default: 0.6).
+#' @param show_progress Logical. Whether to display progress bar for multiple landscapes (default: TRUE).
 #'
-#' @return tibble. Classification results.
+#' @return tibble. Classification results with columns for landscape name,
+#'   predicted class, confidence score, warning flag, and probability for each class.
 #' @export
 apply_nn <- function(
   landscape,
   nn_model,
   test_data = NULL,
   metric_list = NULL,
-  confidence_threshold = 0.6
+  confidence_threshold = 0.6,
+  show_progress = TRUE
 ) {
-  # Function implementation will go here
+  # Validate inputs
+  if (is.null(nn_model)) {
+    stop("Neural network model is required")
+  }
+
+  # Validate confidence threshold
+  if (
+    !is.numeric(confidence_threshold) ||
+      confidence_threshold < 0 ||
+      confidence_threshold > 1
+  ) {
+    stop("confidence_threshold must be a numeric value between 0 and 1")
+  }
+
+  # Extract required elements from the model
+  model <- nn_model$model
+  scaling_params <- nn_model$scaling
+  class_names <- nn_model$classes
+
+  # Use model features if metric_list not specified
+  if (is.null(metric_list)) {
+    metric_list <- nn_model$features
+  }
+
+  # Initialize results list
+  results_list <- list()
+
+  # Helper function to extract landscape data from metadata structure
+  extract_landscape_data <- function(landscape_obj) {
+    if (has_landscape_metadata(landscape_obj)) {
+      return(get_landscape(landscape_obj))
+    } else {
+      return(landscape_obj)
+    }
+  }
+
+  # Helper function to extract landscape name from metadata structure
+  extract_landscape_name <- function(landscape_obj, default_name) {
+    if (has_landscape_metadata(landscape_obj)) {
+      # Try to get type as name
+      type_name <- get_landscape_type(landscape_obj)
+      if (!is.null(type_name) && !is.na(type_name)) {
+        return(type_name)
+      }
+
+      # Try to get landscape name
+      landscape_data <- get_landscape(landscape_obj)
+      if (!is.null(attr(landscape_data, "name"))) {
+        return(attr(landscape_data, "name"))
+      }
+    }
+    return(default_name)
+  }
+
+  # Process a single landscape function
+  process_one_landscape <- function(one_landscape, landscape_name) {
+    # If test_data is NULL, calculate metrics for this landscape
+    if (is.null(test_data)) {
+      # Extract landscape data if it has metadata
+      raster_landscape <- extract_landscape_data(one_landscape)
+
+      # Ensure we have a SpatRaster
+      raster_landscape <- ensure_spatraster(raster_landscape)
+
+      # Calculate metrics for the landscape
+      current_metrics <- calculate_landscape_metrics(
+        raster_landscape,
+        metrics = metric_list
+      )
+    } else {
+      # Filter metrics from test_data for this landscape
+      if (!"landscape" %in% colnames(test_data)) {
+        stop("test_data must contain a 'landscape' column")
+      }
+
+      # Use landscape_name as the identifier in test_data
+      landscape_id <- landscape_name
+
+      current_metrics <- test_data[test_data$landscape == landscape_id, ]
+
+      # Verify that we found metrics for this landscape
+      if (nrow(current_metrics) == 0) {
+        stop(sprintf(
+          "No metrics found for landscape '%s' in test_data",
+          landscape_id
+        ))
+      }
+
+      # Filter for selected metrics
+      if (!is.null(metric_list)) {
+        current_metrics <- subset(current_metrics, metric %in% metric_list)
+      }
+    }
+
+    # Process metrics into the right format (following train_nn logic)
+    processed_metrics <- current_metrics |>
+      dplyr::mutate(
+        metric = stringr::str_remove(
+          paste0(metric, "_", class, "_", id),
+          "_NA_NA"
+        )
+      ) |>
+      dplyr::select(metric, value)
+
+    # Convert to wide format
+    metrics_wide <- processed_metrics |>
+      tidyr::pivot_wider(
+        names_from = metric,
+        values_from = value
+      )
+
+    # Collect potential issues for a single consolidated warning
+    issues <- character(0)
+
+    # Check if we have all required metrics
+    missing_metrics <- setdiff(nn_model$features, colnames(metrics_wide))
+    if (length(missing_metrics) > 0) {
+      issues <- c(
+        issues,
+        sprintf(
+          "Missing required metrics: %s",
+          paste(missing_metrics, collapse = ", ")
+        )
+      )
+
+      # Add missing columns with NA values
+      for (missing_metric in missing_metrics) {
+        metrics_wide[[missing_metric]] <- NA
+      }
+    }
+
+    # Ensure metrics are in the same order as the training data
+    metrics_ordered <- metrics_wide[, nn_model$features, drop = FALSE]
+
+    # Handle any NA values by imputing with column means from training data
+    has_na <- any(is.na(metrics_ordered))
+    if (has_na) {
+      issues <- c(issues, "NA values detected and imputed with means")
+
+      # Replace NA with column means from training data
+      for (col in colnames(metrics_ordered)) {
+        if (any(is.na(metrics_ordered[[col]]))) {
+          metrics_ordered[[col]][is.na(metrics_ordered[[col]])] <-
+            scaling_params$center[col]
+        }
+      }
+    }
+
+    # Issue a consolidated warning if needed
+    if (length(issues) > 0) {
+      warning(sprintf(
+        "Issues for landscape '%s': %s. Classification may be unreliable.",
+        landscape_name,
+        paste(issues, collapse = "; ")
+      ))
+    }
+
+    # Scale the metrics using the same parameters as during training
+    metrics_scaled <- scale(
+      metrics_ordered,
+      center = scaling_params$center,
+      scale = scaling_params$scale
+    )
+
+    # Make predictions using the neural network
+    predictions <- predict(
+      model,
+      newdata = metrics_scaled,
+      type = "raw"
+    )
+
+    # Get the class with the highest probability
+    predicted_class <- class_names[which.max(predictions)]
+
+    # Get the confidence (probability) for the predicted class
+    confidence <- max(predictions)
+
+    # Create warning flag if confidence is below threshold
+    warning_message <- NA
+    if (confidence < confidence_threshold) {
+      warning_message <- "Low classification confidence"
+    }
+
+    # Create row with results
+    result_row <- data.frame(
+      landscape_name = landscape_name,
+      predicted_class = predicted_class,
+      confidence = confidence,
+      warning = warning_message
+    )
+
+    # Add probability for each class
+    for (class_name in class_names) {
+      result_row[[class_name]] <- predictions[, class_name]
+    }
+
+    return(result_row)
+  }
+
+  # Check if input is a list that's not a SpatRaster
+  if (is.list(landscape) && !inherits(landscape, "SpatRaster")) {
+    # Check if this is a single landscape with metadata
+    if (has_landscape_metadata(landscape)) {
+      # Process as a single landscape with metadata
+      landscape_name <- extract_landscape_name(landscape, "landscape_1")
+      results_list[[1]] <- process_one_landscape(landscape, landscape_name)
+    } else {
+      # Process multiple landscapes
+      if (show_progress && length(landscape) > 1) {
+        pb <- utils::txtProgressBar(min = 0, max = length(landscape), style = 3)
+      }
+
+      for (i in seq_along(landscape)) {
+        current_landscape <- landscape[[i]]
+
+        # Determine landscape name
+        default_name <- names(landscape)[i]
+        if (is.null(default_name) || default_name == "") {
+          default_name <- paste0("landscape_", i)
+        }
+
+        landscape_name <- extract_landscape_name(
+          current_landscape,
+          default_name
+        )
+
+        # Process this landscape
+        results_list[[i]] <- process_one_landscape(
+          current_landscape,
+          landscape_name
+        )
+
+        if (show_progress && length(landscape) > 1) {
+          utils::setTxtProgressBar(pb, i)
+        }
+      }
+
+      if (show_progress && length(landscape) > 1) {
+        close(pb)
+      }
+    }
+  } else {
+    # Process a single landscape
+    landscape_name <- extract_landscape_name(landscape, "landscape_1")
+    results_list[[1]] <- process_one_landscape(landscape, landscape_name)
+  }
+
+  # Combine all results into a single tibble
+  final_results <- do.call(rbind, results_list)
+
+  # Convert to tibble for cleaner output
+  final_results <- tibble::as_tibble(final_results)
+
+  return(final_results)
 }
