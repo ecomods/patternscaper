@@ -29,7 +29,7 @@ You can install the development version of `ecotoneClassifyR` directly from GitH
 if (!require("devtools")) install.packages("devtools")
 
 # Install ecotoneClassifyR from GitHub
-devtools::install_github("selinabaldauf/ecotoneClassifyR")
+devtools::install_github("ecomods/ecotoneClassifyR"))
 ```
 
 ### Basic usage
