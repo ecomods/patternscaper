@@ -360,41 +360,13 @@ train_nn <- function(
     trace = FALSE
   )
 
-  # Get probabilities for training data
-  training_probabilities <- predict(
-    final_model,
-    newdata = metrics_scaled[,
-      -which(names(metrics_scaled) == "type"),
-      drop = FALSE
-    ],
-    type = "raw"
-  )
-
-  # Create dataframe with training predictions and actual classes
-  training_results <- data.frame(
-    actual_class = metrics_scaled$type
-  )
-
-  # Add probability for each class
-  for (class_name in class_names) {
-    training_results[[class_name]] <- training_probabilities[, class_name]
-  }
-
-  # Add predicted class and confidence
-  training_results$predicted_class <- class_names[max.col(
-    training_probabilities,
-    ties.method = "first"
-  )]
-  training_results$confidence <- apply(training_probabilities, 1, max)
-
   # Prepare return object
   result <- list(
     model = final_model,
     features = colnames(predictors),
     scaling = scaling_params,
     classes = class_names,
-    performance = performance,
-    training_results = training_results
+    performance = performance
   )
 
   # Save model if requested
@@ -422,7 +394,7 @@ train_nn <- function(
     }
   }
 
-  # Create validation results dataframe similar to training_results
+  # Create validation results dataframe
   validation_results <- data.frame(
     actual_class = validation_actual_class,
     predicted_class = validation_predicted_class,
@@ -572,7 +544,7 @@ apply_nn <- function(
       # Replace NA with column means from training data
       for (col in colnames(metrics_ordered)) {
         if (any(is.na(metrics_ordered[[col]]))) {
-          metrics_ordered[[col]][is.na(metrics_ordered[[col]])] <-
+          metrics_ordered[[col]][is.na(metrics_ordered[[col]]))] <-
             scaling_params$center[col]
         }
       }
