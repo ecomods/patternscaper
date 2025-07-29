@@ -351,7 +351,6 @@ train_nn <- function(
 #'   Can be a single landscape or list of landscapes, with or without metadata.
 #' @param nn_model List. Neural network model from train_nn().
 #' @param test_data tibble. Metrics used for training (default: NULL).
-#' @param metric_list Character vector. Metrics to use (default: NULL, uses nn_model$features).
 #' @param confidence_threshold Numeric. Threshold for warning flag (default: 0.6).
 #' @param show_progress Logical. Whether to display progress bar for multiple landscapes (default: TRUE).
 #'
@@ -362,7 +361,6 @@ apply_nn <- function(
   landscape,
   nn_model,
   test_data = NULL,
-  metric_list = NULL,
   confidence_threshold = 0.6,
   show_progress = TRUE
 ) {
@@ -384,11 +382,6 @@ apply_nn <- function(
   model <- nn_model$model
   scaling_params <- nn_model$scaling
   class_names <- nn_model$classes
-
-  # Use model features if metric_list not specified
-  if (is.null(metric_list)) {
-    metric_list <- nn_model$features
-  }
 
   # Initialize results list
   results_list <- list()
@@ -433,7 +426,7 @@ apply_nn <- function(
       # Calculate metrics for the landscape
       current_metrics <- calculate_landscape_metrics(
         raster_landscape,
-        metrics = metric_list
+        metrics = nn_model$features
       )
     } else {
       # Filter metrics from test_data for this landscape
@@ -452,11 +445,6 @@ apply_nn <- function(
           "No metrics found for landscape '%s' in test_data",
           landscape_id
         ))
-      }
-
-      # Filter for selected metrics
-      if (!is.null(metric_list)) {
-        current_metrics <- subset(current_metrics, metric %in% metric_list)
       }
     }
 
