@@ -35,7 +35,7 @@ patchwork::wrap_plots(all_metric_plots)
 # generate more training landscapes
 training_landscapes <- generate_training_landscapes(
   seed = 42,
-  n = 20,
+  n = 100,
   add_rotation = TRUE
 )
 # calculate metrics for the training landscapes
@@ -50,23 +50,76 @@ best_10 <- evaluate_landscape_metrics(
   metrics_number = 10
 )
 
+# best_10 <- best_10[-which(best_10 == "enn_sd")]
+
+# remove metrics that have NA values in them from the training set
+na_metrics <- training_metrics |>
+  filter(is.na(value) | is.nan(value)) |>
+  pull(metric) |>
+  unique()
+
+training_metrics2 <- training_metrics |>
+  filter(!(metric %in% na_metrics))
+
+# remove metrics that are completely constant
+constant_metrics <- training_metrics2 |>
+  group_by(metric) |>
+  summarise(sd = sd(value, na.rm = TRUE)) |>
+  filter(sd == 0) |>
+  pull(metric)
+
+training_metrics2 <- training_metrics2 |>
+  filter(!metric %in% constant_metrics)
+
 # train the neural network model
 model <- train_nn(
-  metrics = training_metrics,
-  metrics_selected = best_10,
+  metrics = training_metrics2,
   cv_folds = 3,
-  test = TRUE
+  cv_method = "k-fold"
 )
 
-# Plot training results ------------------------------------------------------
+# Visualize classification results
+# Create individual plots
+devtools::load_all()
+plot_classification_results(model, plot_type = "confusion")
+plot_classification_results(model, plot_type = "probabilities")
+plot_classification_results(model, plot_type = "confidence")
+plot_classification_results(model, plot_type = "misclassifications")
 
-# Validate the model ---------------------------------------------------------
-# generate validation landscapes
-validation_landscapes <- generate_training_landscapes(
+# Or get all plots in a list
+all_plots <- plot_classification_results(model, return_all = TRUE)
+patchwork::wrap_plots(all_plots)
+
+# Apply --------------------------------------------------------------
+# generate test landscapes
+test_landscapes <- generate_training_landscapes(
   seed = 43,
   n = 20,
   add_rotation = TRUE
 )
+test_cluster <- create_landscape(
+  pattern = "clustered",
+  width = 100,
+  height = 100,
+  treeline_position = 0.5,
+  num_clusters = 10,
+  cluster_radius = 5,
+  seed = 42,
+  rotation = 0,
+  add_metadata = TRUE
+)
+
+apply_nn(
+  landscape = test_cluster,
+  nn_model = model
+)
+
+apply_nn(
+  landscape = test_landscapes,
+  nn_model = model
+)
+
+plot_landscape_list(test_landscapes)
 
 
 # Test model with new landscapes ---------------------------------------------
