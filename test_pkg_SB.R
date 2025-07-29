@@ -7,50 +7,49 @@ devtools::load_all()
 list_available_metrics()
 list_available_metrics(level = c("class", "landscape"))
 
-# Calculate landscape metrics for all patterns
-# ---- Basic Test: Single landscape, all metrics ----
-# Create a simple landscape
+# Generate some landscapes --------------------------------------
+# Create some landscapes (by default 10)
 landscapes <- generate_training_landscapes(add_rotation = TRUE)
+# Plot all landscapes
 plot_landscape_list(landscapes)
-
+# Calculate landscape metrics on the landscape level
 test_metrics <- calculate_landscape_metrics(
   landscapes,
   level = "landscape"
 )
-
+# find the 5 best metrics based on coefficient of variation
 best_5 <- evaluate_landscape_metrics(test_metrics, metrics_number = 5)
 
-# metric visualizations
-plot_raw_metrics(test_metrics, subset = best_5, plot_type = "boxplot")
-plot_raw_metrics(test_metrics, plot_type = "heatmap")
-all_metric_plots <- plot_raw_metrics(
-  test_metrics,
-  subset = best_5,
-  return_all = TRUE
-)
-patchwork::wrap_plots(all_metric_plots)
+# Visualize the calculated metrics (still needs to be implemented)
+# plot_raw_metrics(test_metrics, subset = best_5, plot_type = "boxplot")
+# plot_raw_metrics(test_metrics, plot_type = "heatmap")
+# all_metric_plots <- plot_raw_metrics(
+#   test_metrics,
+#   subset = best_5,
+#   return_all = TRUE
+# )
+# patchwork::wrap_plots(all_metric_plots)
 
-# Train a neural network with the metrics ------------------------------------
-
-# generate more training landscapes
+# Train a network -----------------------------------------------
+# Generate 100 training landscapes
 training_landscapes <- generate_training_landscapes(
   seed = 42,
   n = 100,
   add_rotation = TRUE
 )
-# calculate metrics for the training landscapes
+
+# calculate metrics for the training landscapes (takes some time)
 training_metrics <- calculate_landscape_metrics(
   training_landscapes,
   level = "landscape"
 )
 
 # select the best 10 metrics for training
+# Not recommended right now because NAs not excluded etc.
 best_10 <- evaluate_landscape_metrics(
   calculated_metrics = training_metrics,
   metrics_number = 10
 )
-
-# best_10 <- best_10[-which(best_10 == "enn_sd")]
 
 # remove metrics that have NA values in them from the training set
 na_metrics <- training_metrics |>
@@ -58,45 +57,53 @@ na_metrics <- training_metrics |>
   pull(metric) |>
   unique()
 
-training_metrics2 <- training_metrics |>
+training_metrics <- training_metrics |>
   filter(!(metric %in% na_metrics))
 
 # remove metrics that are completely constant
-constant_metrics <- training_metrics2 |>
+constant_metrics <- training_metrics |>
   group_by(metric) |>
   summarise(sd = sd(value, na.rm = TRUE)) |>
   filter(sd == 0) |>
   pull(metric)
 
-training_metrics2 <- training_metrics2 |>
+training_metrics <- training_metrics |>
   filter(!metric %in% constant_metrics)
 
 # train the neural network model
+# use k-fold cross-validation with 3 folds
+# warning will tell you that folds need to be reduced to 2
 model <- train_nn(
-  metrics = training_metrics2,
+  metrics = training_metrics,
   cv_folds = 3,
   cv_method = "k-fold"
 )
 
+# Look at the model object
+model
+
 # Visualize classification results
-# Create individual plots
-devtools::load_all()
+# Get all plots in a list
+all_plots <- plot_classification_results(model, return_all = TRUE)
+patchwork::wrap_plots(all_plots)
+# Or create individual plots
 plot_classification_results(model, plot_type = "confusion")
 plot_classification_results(model, plot_type = "probabilities")
 plot_classification_results(model, plot_type = "confidence")
 plot_classification_results(model, plot_type = "misclassifications")
 
-# Or get all plots in a list
-all_plots <- plot_classification_results(model, return_all = TRUE)
-patchwork::wrap_plots(all_plots)
-
-# Apply --------------------------------------------------------------
+# Apply the model ----------------------------------------------------
 # generate test landscapes
 test_landscapes <- generate_training_landscapes(
   seed = 43,
   n = 20,
   add_rotation = TRUE
 )
+
+# plot all landscapes
+plot_landscape_list(test_landscapes)
+
+# or generate just a single landscape
 test_cluster <- create_landscape(
   pattern = "clustered",
   width = 100,
@@ -119,12 +126,7 @@ apply_nn(
   nn_model = model
 )
 
-plot_landscape_list(test_landscapes)
-
-
-# Test model with new landscapes ---------------------------------------------
-
-# Other tests ----------------------------------------------------------------
+# Other tests (IGNORE THIS CODE) ----------------------------------------
 
 landscapes <- test_cluster
 calculate_landscape_metrics(test_cluster, level = "landscape")
