@@ -197,13 +197,48 @@ evaluation function and compare it to the visualization of the metrics for each 
 
 The function to train the neural network will:
 
-- Scale the input features (landscape metrics) to a range of 0-1 using the `scale()` function
+- Scale the input features (landscape metrics) to standardized values using the `scale()` function
 - Create a neural network model using the nnet package (single-hidden-layer neural network)
 - Process metrics data for neural network training
 - Handle normalization of input features
-- Implement cross-validation for model evaluation
+- Implement cross-validation for model evaluation with three options:
+  - **"none"**: No cross-validation, train on all data
+  - **"k-fold"**: Stratified k-fold cross-validation (default)
+  - **"loo"**: Leave-one-out cross-validation
+- Automatically adjust cross-validation method based on dataset size:
+  - Switch to leave-one-out CV when dataset is small (<30 samples) or has classes with few samples
+  - Reduce fold count to maintain sufficient samples per class per fold
+- Calculate comprehensive performance metrics:
+  - **Accuracy**: Overall proportion of correct predictions
+  - **Precision**: How many of the predicted positives are true positives (for each class)
+  - **Recall**: How many of the actual positives are correctly predicted (for each class)
+  - **F1 Score**: Harmonic mean of precision and recall, balancing both concerns
+- Provide informative warnings for:
+  - Classes with very few samples (<3)
+  - Classes that were never correctly predicted during cross-validation
 - Save trained models using readr::write_rds
 - Default configuration: 5 neurons in hidden layer, 0.01 decay, 500 iterations
+
+#### Performance Metrics Explained
+
+- **Confusion Matrix**: Shows how many instances of each actual class were predicted as each possible class
+- **Accuracy**: Proportion of all predictions that were correct (sum of diagonal / total)
+- **Precision**: For each class, how many predictions were correct out of all predictions of that class
+  - Formula: True Positives / (True Positives + False Positives)
+  - Answers: "When the model predicts class X, how often is it right?"
+- **Recall**: For each class, how many instances were correctly identified out of all actual instances
+  - Formula: True Positives / (True Positives + False Negatives)
+  - Answers: "Of all actual instances of class X, how many did the model find?"
+- **F1 Score**: Harmonic mean of precision and recall, providing a balanced metric
+  - Formula: 2 * (Precision * Recall) / (Precision + Recall)
+  - Particularly valuable for datasets with class imbalance
+  - Ranges from 0 (worst) to 1 (best)
+
+The model evaluation process intelligently handles small datasets and rare classes by:
+1. Detecting when k-fold CV isn't appropriate and switching to leave-one-out
+2. Setting appropriate warnings about reliability for classes with few samples
+3. Ensuring all classes appear in confusion matrix even if never predicted
+4. Handling edge cases like division by zero in metric calculations
 
 ### Classify landscapes
 
@@ -415,6 +450,6 @@ The package will follow a process-based organization with logical grouping of fu
 3. **Milestone 3** (End of Phase 3): Thoroughly tested neural network classification system
 4. **Milestone 4** (End of Phase 4): Fully documented package ready for publication with comprehensive test
 
-# Known issues
+# Known issues and todos
 
-- Function evaluate_landscape_metrics gives back metrics that have NA values
+- Calculate landscape metrics in parallel to improve performance for large rasters or many landscapes

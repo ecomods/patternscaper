@@ -608,15 +608,16 @@ This is an internal utility function used by `calculate_landscape_metrics` to ha
 ### `train_nn`
 
 **Input:**
-- `metrics` (tibble): Metrics from calculate_landscape_metrics()
-- `metrics_selected` (character vector): Names of metrics to use as features
-- `test` (logical): Whether to perform cross-validation (default: TRUE)
-- `cv_folds` (integer): Number of cross-validation folds (default: 5)
-- `hidden_neurons` (integer): Number of neurons in hidden layer (default: 5)
-- `decay` (numeric): Weight decay parameter for nnet (default: 0.01)
-- `maxit` (integer): Maximum iterations for training (default: 500)
-- `save_model` (logical): Whether to save the model (default: FALSE)
-- `model_path` (character): Path to save model (default: NULL)
+- `metrics` (tibble): Metrics from calculate_landscape_metrics().
+- `metrics_selected` (character vector): Names of metrics to use as features (default: NULL, uses all metrics).
+- `cv_method` (character): Cross-validation method: "none", "k-fold", or "loo" (leave-one-out) (default: "k-fold").
+- `cv_folds` (integer): Number of cross-validation folds when cv_method="k-fold" (default: 5).
+- `hidden_neurons` (integer): Number of neurons in hidden layer (default: 5).
+- `decay` (numeric): Weight decay parameter for nnet (default: 0.01).
+- `maxit` (integer): Maximum iterations for training (default: 500).
+- `save_model` (logical): Whether to save the model (default: FALSE).
+- `model_path` (character): Path to save model (default: NULL).
+- `seed` (integer): Random seed for reproducibility (default: 123).
 
 **Output:**
 - list: Trained neural network model with components:
@@ -624,15 +625,25 @@ This is an internal utility function used by `calculate_landscape_metrics` to ha
   - features: Names of features used for training
   - scaling: Parameters for feature scaling
   - classes: Vector of class names
-  - performance: Cross-validation performance metrics (if test=TRUE)
+  - performance: Cross-validation performance metrics (if cv_method != "none")
 
 **Description:**
 1. Processes metrics data for neural network training
-2. Scales input features to 0-1 range
-3. If test=TRUE, performs cross-validation
-4. Trains neural network model on full dataset
-5. If save_model=TRUE, saves model to specified path using readr::write_rds
-6. Returns model object with metadata
+2. Validates and potentially adjusts cross-validation method based on dataset characteristics:
+   a. Automatically switches to "loo" if dataset is too small for k-fold
+   b. Reduces number of folds if needed to ensure enough samples per class per fold
+3. Scales input features using the `scale()` function
+4. If cv_method is not "none", performs cross-validation:
+   a. For "loo": Performs leave-one-out cross-validation (each sample is used once as validation data)
+   b. For "k-fold": Performs stratified k-fold cross-validation (ensures each class is represented in each fold)
+5. Calculates and reports performance metrics:
+   a. Confusion matrix (showing predicted vs. actual classes)
+   b. Overall accuracy
+   c. Per-class precision, recall, and F1 score
+   d. Warnings for classes with few samples or poor prediction performance
+6. Trains final model on full dataset
+7. If save_model=TRUE, saves model to specified path using readr::write_rds
+8. Returns model object with metadata
 
 ### `apply_nn`
 
