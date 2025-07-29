@@ -126,7 +126,7 @@ evaluate_landscape_metrics <- function(
     cv_values[!is.finite(cv_values)] <- NA
 
     # Rank metrics by coefficient of variation
-    ranking <- rank(cv_values, na.last = FALSE)
+    ranking <- rank(cv_values, na.last = TRUE)
     top_metrics <- metrics_names[ranking > (num_metrics - metrics_number)]
   } else if (method == "lin_mod_p") {
     means_types$p <- NA
@@ -186,7 +186,7 @@ evaluate_landscape_metrics <- function(
     }
 
     # Ranking of the highest R-squared values
-    ranking <- rank(means_types$r2, na.last = FALSE)
+    ranking <- rank(means_types$r2, na.last = TRUE)
     top_metrics <- metrics_names[ranking > (num_metrics - metrics_number)] #take only top x
   }
 
