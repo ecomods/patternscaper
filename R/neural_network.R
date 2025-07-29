@@ -345,12 +345,12 @@ train_nn <- function(
 
 #' Apply Neural Network for Landscape Classification
 #'
-#' Applies a trained neural network model to classify new landscapes.
+#' Applies a trained neural network model to classify new landscapes. The function
+#' automatically calculates the required landscape metrics needed by the model.
 #'
 #' @param landscape SpatRaster, matrix, or list. Landscape(s) to classify.
 #'   Can be a single landscape or list of landscapes, with or without metadata.
 #' @param nn_model List. Neural network model from train_nn().
-#' @param test_data tibble. Metrics used for training (default: NULL).
 #' @param confidence_threshold Numeric. Threshold for warning flag (default: 0.6).
 #' @param show_progress Logical. Whether to display progress bar for multiple landscapes (default: TRUE).
 #'
@@ -360,7 +360,6 @@ train_nn <- function(
 apply_nn <- function(
   landscape,
   nn_model,
-  test_data = NULL,
   confidence_threshold = 0.6,
   show_progress = TRUE
 ) {
@@ -415,38 +414,18 @@ apply_nn <- function(
 
   # Process a single landscape function
   process_one_landscape <- function(one_landscape, landscape_name) {
-    # If test_data is NULL, calculate metrics for this landscape
-    if (is.null(test_data)) {
-      # Extract landscape data if it has metadata
-      raster_landscape <- extract_landscape_data(one_landscape)
+    # Extract landscape data if it has metadata
+    raster_landscape <- extract_landscape_data(one_landscape)
 
-      # Ensure we have a SpatRaster
-      raster_landscape <- ensure_spatraster(raster_landscape)
+    # Ensure we have a SpatRaster
+    raster_landscape <- ensure_spatraster(raster_landscape)
 
-      # Calculate metrics for the landscape
-      current_metrics <- calculate_landscape_metrics(
-        raster_landscape,
-        metrics = nn_model$features
-      )
-    } else {
-      # Filter metrics from test_data for this landscape
-      if (!"landscape" %in% colnames(test_data)) {
-        stop("test_data must contain a 'landscape' column")
-      }
-
-      # Use landscape_name as the identifier in test_data
-      landscape_id <- landscape_name
-
-      current_metrics <- test_data[test_data$landscape == landscape_id, ]
-
-      # Verify that we found metrics for this landscape
-      if (nrow(current_metrics) == 0) {
-        stop(sprintf(
-          "No metrics found for landscape '%s' in test_data",
-          landscape_id
-        ))
-      }
-    }
+    # Calculate metrics for the landscape
+    # Only calculate the metrics needed by the model
+    current_metrics <- calculate_landscape_metrics(
+      raster_landscape,
+      metrics = nn_model$features
+    )
 
     # Process metrics into the right format (following train_nn logic)
     processed_metrics <- current_metrics |>
