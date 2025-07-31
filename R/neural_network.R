@@ -544,7 +544,7 @@ apply_nn <- function(
       # Replace NA with column means from training data
       for (col in colnames(metrics_ordered)) {
         if (any(is.na(metrics_ordered[[col]]))) {
-          metrics_ordered[[col]][is.na(metrics_ordered[[col]]))] <-
+          metrics_ordered[[col]][is.na(metrics_ordered[[col]])] <-
             scaling_params$center[col]
         }
       }
