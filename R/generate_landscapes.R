@@ -5,7 +5,7 @@
 #' parameter.
 #'
 #' @param pattern Character. Type of landscape to generate: "sharp", "diffuse",
-#'        "curvy", "fingers", "bent_fingers", "scattered", "sine_bands", "clusters"
+#'        "curvy", "fingers", "scattered", "sine_bands", "clusters"
 #' @param ... Parameters passed to specific landscape functions. See the documentation
 #'        of the individual functions for details on required and optional parameters.
 #' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
@@ -20,8 +20,6 @@
 #' \code{\link{create_landscape_curvy_treeline}} for "curvy" pattern parameters
 #'
 #' \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
-#'
-#' \code{\link{create_landscape_bent_fingers}} for "bent_fingers" pattern parameters
 #'
 #' \code{\link{create_landscape_scattered_trees}} for "scattered" pattern parameters
 #'
@@ -57,7 +55,6 @@ create_landscape <- function(
     "diffuse",
     "curvy",
     "fingers",
-    "bent_fingers",
     "scattered",
     "clustered",
     "sine_bands"
@@ -115,7 +112,6 @@ create_landscape <- function(
     diffuse = do.call(create_landscape_diffuse_treeline, dots),
     curvy = do.call(create_landscape_curvy_treeline, dots),
     fingers = do.call(create_landscape_fingers, dots),
-    bent_fingers = do.call(create_landscape_bent_fingers, dots),
     scattered = do.call(create_landscape_scattered_trees, dots),
     clustered = do.call(create_landscape_clustered_trees, dots),
     sine_bands = do.call(create_landscape_sine_bands, dots)
@@ -168,7 +164,6 @@ generate_training_landscapes <- function(
     "diffuse",
     "curvy",
     "fingers",
-    "bent_fingers",
     "scattered",
     "clustered",
     "sine_bands"
@@ -193,7 +188,6 @@ generate_training_landscapes <- function(
     "diffuse",
     "curvy",
     "fingers",
-    "bent_fingers",
     "scattered",
     "clustered",
     "sine_bands"
@@ -231,14 +225,8 @@ generate_training_landscapes <- function(
         treeline_position = c(0.3, 0.7),
         num_fingers = c(3, 8),
         finger_width = c(2, 6),
-        finger_length_prop = c(0.1, 0.4)
-      ),
-      bent_fingers = list(
-        treeline_position = c(0.3, 0.7),
-        num_fingers = c(3, 8),
-        finger_width = c(2, 6),
         finger_length_prop = c(0.1, 0.4),
-        bend_factor = c(1, 5)
+        bend = c(TRUE, FALSE)
       ),
       scattered = list(
         treeline_position = c(0.3, 0.7),

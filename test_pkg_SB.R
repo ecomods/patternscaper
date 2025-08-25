@@ -9,7 +9,10 @@ list_available_metrics(level = c("class", "landscape"))
 
 # Generate some landscapes --------------------------------------
 # Create some landscapes (by default 10)
-landscapes <- generate_training_landscapes(add_rotation = TRUE)
+landscapes <- generate_training_landscapes(
+  add_rotation = TRUE,
+  seed = 123
+)
 # Plot all landscapes
 plot_landscape_list(landscapes)
 # Calculate landscape metrics on the landscape level
@@ -198,7 +201,17 @@ create_landscape(
   plot_landscape()
 
 # fingers
-create_landscape(
+fingers <- create_landscape(
+  pattern = "fingers",
+  width = 100,
+  height = 100,
+  num_fingers = 5,
+  finger_width = 3,
+  rotation = 0
+) |>
+  plot_landscape()
+
+fingers_rotate <- create_landscape(
   pattern = "fingers",
   width = 100,
   height = 100,
@@ -209,8 +222,20 @@ create_landscape(
   plot_landscape()
 
 # bent fingers
-create_landscape(
+bent_fingers <- create_landscape(
+  pattern = "fingers",
+  bend = TRUE,
+  width = 100,
+  height = 100,
+  num_fingers = 5,
+  finger_width = 3,
+  rotation = 0
+) |>
+  plot_landscape()
+
+bent_fingers_rotate <- create_landscape(
   pattern = "bent_fingers",
+  bend = TRUE,
   width = 100,
   height = 100,
   num_fingers = 5,
@@ -218,6 +243,13 @@ create_landscape(
   rotation = 45
 ) |>
   plot_landscape()
+
+patchwork::wrap_plots(
+  fingers,
+  fingers_rotate,
+  bent_fingers,
+  bent_fingers_rotate
+)
 
 # scattered trees
 create_landscape(
