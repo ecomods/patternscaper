@@ -11,11 +11,12 @@
 #' @return ggplot object. Plot of the landscape.
 #' @export
 plot_landscape <- function(
-    landscape,
-    title = "Landscape",
-    color_scale = NULL,
-    legend_title = "Value",
-    show_legend = TRUE) {
+  landscape,
+  title = "Landscape",
+  color_scale = NULL,
+  legend_title = "Value",
+  show_legend = TRUE
+) {
   # Check if landscape has metadata structure
   has_metadata <- has_landscape_metadata(landscape)
   # extract the landscape data if it has metadata
@@ -80,7 +81,9 @@ plot_landscape <- function(
     ggplot2::theme(
       axis.title = ggplot2::element_blank(),
       legend.position = if (show_legend) "right" else "none",
-      plot.title = ggtext::element_markdown()
+      plot.title = ggtext::element_markdown(size = 10),
+      legend.title = ggplot2::element_text(size = 8),
+      axis.text = ggplot2::element_blank()
     )
 
   # Apply appropriate color scale based on data type
@@ -117,20 +120,22 @@ plot_landscape <- function(
 #' @return patchwork object. Combined plot of all landscapes.
 #' @export
 plot_landscape_list <- function(
-    landscape_list,
-    titles = NULL,
-    color_scale = NULL,
-    ncol = NULL,
-    legend_title = "Value",
-    show_legend = TRUE,
-    show_type = TRUE) {
+  landscape_list,
+  titles = NULL,
+  color_scale = NULL,
+  ncol = NULL,
+  legend_title = "Value",
+  show_legend = TRUE,
+  show_type = TRUE
+) {
   # Validate input is a list
   if (!is.list(landscape_list)) {
     stop("landscape_list must be a list of landscapes (SpatRaster or matrix)")
   }
 
   # Check if the list contains metadata structures (from generate_training_landscapes)
-  has_metadata <- has_landscape_metadata(landscape_list)
+  has_metadata <- lapply(landscape_list, has_landscape_metadata)
+  has_metadata <- all(unlist(has_metadata))
 
   # If we have metadata structure, extract landscape types and the landscapes
   if (has_metadata) {
@@ -207,12 +212,13 @@ plot_landscape_list <- function(
 #' @return ggplot object. Visualization of selected metrics across landscape types.
 #' @export
 plot_metrics <- function(
-    metrics,
-    selected_metrics,
-    title = "Landscape Metrics",
-    facet = TRUE,
-    arrange_by_importance = FALSE,
-    method = "") {
+  metrics,
+  selected_metrics,
+  title = "Landscape Metrics",
+  facet = TRUE,
+  arrange_by_importance = FALSE,
+  method = ""
+) {
   # Function implementation will go here
 }
 
@@ -229,10 +235,11 @@ plot_metrics <- function(
 #' @return ggplot object or list of ggplot objects. Visualization(s) of classification results.
 #' @export
 plot_classification_results <- function(
-    nn_model,
-    plot_type = "confusion",
-    confidence_threshold = 0.6,
-    return_all = FALSE) {
+  nn_model,
+  plot_type = "confusion",
+  confidence_threshold = 0.6,
+  return_all = FALSE
+) {
   # Check if nn_model has the required elements
   if (!is.list(nn_model) || is.null(nn_model$performance)) {
     stop(
