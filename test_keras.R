@@ -6,6 +6,7 @@ py_discover_config()
 library(keras)
 
 # Install TensorFlow backend (only needed once)
+# Also creates a venv r-tensorflow
 # install_keras()
 
 # Activate venv with tensorflow installed
@@ -122,6 +123,7 @@ predictions <- model %>% predict(img)
 
 # Test for our images ----------------------------------------------------------
 devtools::load_all()
+
 training_landscapes <- generate_training_landscapes(
   seed = 42,
   n = 120,
@@ -205,4 +207,15 @@ predicted_classes
 true_classes <- labels_val
 table(Predicted = predicted_classes, Actual = true_classes)
 
-plot_validation <- training_plots[101:120] |> plot_landscape_list(titles = true_classes)
+# create plot title with predicted classes and make them red if false and green if true
+# using markdown syntax from ggtext
+predicted_titles <- ifelse(predicted_classes == true_classes,
+  paste0("<span style='color:forestgreen'>", predicted_classes, "</span>"),
+  paste0("<span style='color:red'>", predicted_classes, "</span>")
+)
+
+# combine the actual and predicted lables to a single title in the form
+#<actual>b<br><predicted>#
+titles <- paste0(true_classes, "<br>", predicted_titles)
+
+plot_validation <- training_plots[101:120] |> plot_landscape_list(titles = titles)

@@ -129,6 +129,46 @@ apply_nn(
   nn_model = model
 )
 
+# Test Keras NN ---------------------------------------------------------
+# Increase number of landscapes for better training
+training_landscapes <- generate_training_landscapes(
+  seed = 42,
+  n = 500, # Larger dataset for better generalization
+  types = c("sharp", "diffuse", "curvy", "fingers", "scattered", "clustered", "sine_bands"),
+  width = 100,
+  height = 100,
+  add_rotation = TRUE,
+  rotation_angles = c(0, 45, 90, 135, 180)
+)
+
+# Train a model
+model <- train_nn_keras(
+  landscapes = training_landscapes,
+  cv_method = "k-fold",
+  cv_folds = 5,
+  epochs = 30,
+  save_model = TRUE,
+  model_path = "models/landscape_classifier.h5"
+)
+
+# Apply to new landscapes
+
+new_landscapes <- generate_training_landscapes(
+  seed = 123,
+  n = 10,
+  types = c("sharp", "diffuse", "curvy", "fingers", "scattered", "clustered", "sine_bands"),
+  width = 100,
+  height = 100,
+  add_rotation = TRUE,
+  rotation_angles = c(0, 45, 90, 135, 180)
+)
+
+results <- apply_nn_keras(
+  landscape = new_landscapes,
+  nn_model = model,
+  confidence_threshold = 0.7
+)
+
 # Other tests (IGNORE THIS CODE) ----------------------------------------
 
 landscapes <- test_cluster
