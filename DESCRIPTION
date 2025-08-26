@@ -19,7 +19,9 @@ Imports:
     omnibus,
     patchwork,
     purrr,
-    zoo
+    zoo,
+    ggtext,
+    keras
 Suggests: 
     knitr,
     rmarkdown
