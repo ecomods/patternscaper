@@ -11,12 +11,11 @@
 #' @return ggplot object. Plot of the landscape.
 #' @export
 plot_landscape <- function(
-  landscape,
-  title = "Landscape",
-  color_scale = NULL,
-  legend_title = "Value",
-  show_legend = TRUE
-) {
+    landscape,
+    title = "Landscape",
+    color_scale = NULL,
+    legend_title = "Value",
+    show_legend = TRUE) {
   # Check if landscape has metadata structure
   has_metadata <- has_landscape_metadata(landscape)
   # extract the landscape data if it has metadata
@@ -80,7 +79,8 @@ plot_landscape <- function(
     ggplot2::theme_minimal() +
     ggplot2::theme(
       axis.title = ggplot2::element_blank(),
-      legend.position = if (show_legend) "right" else "none"
+      legend.position = if (show_legend) "right" else "none",
+      plot.title = ggtext::element_markdown()
     )
 
   # Apply appropriate color scale based on data type
@@ -117,14 +117,13 @@ plot_landscape <- function(
 #' @return patchwork object. Combined plot of all landscapes.
 #' @export
 plot_landscape_list <- function(
-  landscape_list,
-  titles = NULL,
-  color_scale = NULL,
-  ncol = NULL,
-  legend_title = "Value",
-  show_legend = TRUE,
-  show_type = TRUE
-) {
+    landscape_list,
+    titles = NULL,
+    color_scale = NULL,
+    ncol = NULL,
+    legend_title = "Value",
+    show_legend = TRUE,
+    show_type = TRUE) {
   # Validate input is a list
   if (!is.list(landscape_list)) {
     stop("landscape_list must be a list of landscapes (SpatRaster or matrix)")
@@ -208,13 +207,12 @@ plot_landscape_list <- function(
 #' @return ggplot object. Visualization of selected metrics across landscape types.
 #' @export
 plot_metrics <- function(
-  metrics,
-  selected_metrics,
-  title = "Landscape Metrics",
-  facet = TRUE,
-  arrange_by_importance = FALSE,
-  method = ""
-) {
+    metrics,
+    selected_metrics,
+    title = "Landscape Metrics",
+    facet = TRUE,
+    arrange_by_importance = FALSE,
+    method = "") {
   # Function implementation will go here
 }
 
@@ -231,11 +229,10 @@ plot_metrics <- function(
 #' @return ggplot object or list of ggplot objects. Visualization(s) of classification results.
 #' @export
 plot_classification_results <- function(
-  nn_model,
-  plot_type = "confusion",
-  confidence_threshold = 0.6,
-  return_all = FALSE
-) {
+    nn_model,
+    plot_type = "confusion",
+    confidence_threshold = 0.6,
+    return_all = FALSE) {
   # Check if nn_model has the required elements
   if (!is.list(nn_model) || is.null(nn_model$performance)) {
     stop(
@@ -299,7 +296,9 @@ plot_classification_results <- function(
         )
 
       plot_list[["confusion"]] <- p_confusion
-      if (plot_type == "confusion" && !return_all) return(p_confusion)
+      if (plot_type == "confusion" && !return_all) {
+        return(p_confusion)
+      }
     }
   }
 
@@ -371,7 +370,9 @@ plot_classification_results <- function(
         )
 
       plot_list[["probabilities"]] <- p_probabilities
-      if (plot_type == "probabilities" && !return_all) return(p_probabilities)
+      if (plot_type == "probabilities" && !return_all) {
+        return(p_probabilities)
+      }
     }
   }
 
@@ -428,7 +429,9 @@ plot_classification_results <- function(
         )
 
       plot_list[["confidence"]] <- p_confidence
-      if (plot_type == "confidence" && !return_all) return(p_confidence)
+      if (plot_type == "confidence" && !return_all) {
+        return(p_confidence)
+      }
     }
   }
 
@@ -500,7 +503,9 @@ plot_classification_results <- function(
       }
 
       plot_list[["misclassifications"]] <- p_misclass
-      if (plot_type == "misclassifications" && !return_all) return(p_misclass)
+      if (plot_type == "misclassifications" && !return_all) {
+        return(p_misclass)
+      }
     }
   }
 
