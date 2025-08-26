@@ -385,11 +385,43 @@ train_nn <- function(
     ncol = length(class_names)
   )
   colnames(validation_probabilities) <- class_names
+
   row_index <- 1
   for (fold in 1:length(cv_probabilities)) {
-    n_rows <- nrow(cv_probabilities[[fold]])
+    fold_probs <- cv_probabilities[[fold]]
+
+    # Get the class names available in this fold's predictions
+    fold_class_names <- colnames(fold_probs)
+
+    # Handle case where fold_probs is missing some classes
+    if (!identical(sort(fold_class_names), sort(class_names))) {
+      # Create a new matrix with all classes
+      fixed_probs <- matrix(
+        0,
+        nrow = nrow(fold_probs),
+        ncol = length(class_names)
+      )
+      colnames(fixed_probs) <- class_names
+
+      # Copy available probabilities to the right columns
+      for (cls in fold_class_names) {
+        if (cls %in% class_names) {
+          fixed_probs[, cls] <- fold_probs[, cls]
+        }
+      }
+
+      # Replace with the fixed version
+      fold_probs <- fixed_probs
+    }
+
+    # Now process normally
+    n_rows <- ifelse(is.null(dim(fold_probs)), 1, nrow(fold_probs))
     for (i in 1:n_rows) {
-      validation_probabilities[row_index, ] <- cv_probabilities[[fold]][i, ]
+      if (is.null(dim(fold_probs))) {
+        validation_probabilities[row_index, ] <- fold_probs
+      } else {
+        validation_probabilities[row_index, ] <- fold_probs[i, ]
+      }
       row_index <- row_index + 1
     }
   }
