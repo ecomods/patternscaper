@@ -368,7 +368,6 @@ create_landscape_spots <- function(
     noise <- rnorm(1, mean = 0, sd = noise_radius_sd)
     # Add noise to the radius, but if radius drops below 0, set it to 1
     adjusted_radius <- max(1, spot_radius + noise)
-    print(adjusted_radius)
 
     row_min <- max(1, center_row - adjusted_radius)
     row_max <- min(height, center_row + adjusted_radius)
