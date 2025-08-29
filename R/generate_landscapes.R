@@ -174,7 +174,9 @@ generate_training_landscapes <- function(
     "fingers",
     "scattered",
     "clustered",
-    "sine_bands"
+    "sine_bands",
+    "spots",
+    "banded"
   ),
   width = 100,
   height = 100,
@@ -198,7 +200,9 @@ generate_training_landscapes <- function(
     "fingers",
     "scattered",
     "clustered",
-    "sine_bands"
+    "sine_bands",
+    "spots",
+    "banded"
   )
   types <- intersect(types, valid_types)
 
@@ -254,6 +258,14 @@ generate_training_landscapes <- function(
         frequency = c(0.01, 0.1),
         amplitude = c(2, 10),
         noise = c(TRUE, FALSE)
+      ),
+      spots = list(
+        n_spots = c(5, 10, 20),
+        spot_radius = c(3, 5, 15),
+        noise_radius_sd = c(0, 1, 2)
+      ),
+      banded = list(
+        nbands = c(3, 5, 10)
       )
     )
   }
