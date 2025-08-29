@@ -27,6 +27,10 @@
 #'
 #' \code{\link{create_landscape_sine_bands}} for "sine_bands" pattern parameters
 #'
+#' \code{\link{create_spots}} for "spots" pattern parameters
+#'
+#' \code{\link{create_banded_vegetation}} for "banded" pattern parameters
+#'
 #' @examples
 #' # Create a sharp treeline landscape
 #' sharp_landscape <- create_landscape("sharp", width = 200, height = 200)
@@ -57,7 +61,9 @@ create_landscape <- function(
     "fingers",
     "scattered",
     "clustered",
-    "sine_bands"
+    "sine_bands",
+    "spots",
+    "banded"
   ),
   ...,
   add_metadata = FALSE
@@ -114,7 +120,9 @@ create_landscape <- function(
     fingers = do.call(create_landscape_fingers, dots),
     scattered = do.call(create_landscape_scattered_trees, dots),
     clustered = do.call(create_landscape_clustered_trees, dots),
-    sine_bands = do.call(create_landscape_sine_bands, dots)
+    sine_bands = do.call(create_landscape_sine_bands, dots),
+    spots = do.call(create_spot_vegetation, dots),
+    banded = do.call(create_banded_vegetation, dots)
   )
 
   # Check if landscape was created successfully
