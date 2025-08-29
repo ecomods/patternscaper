@@ -321,6 +321,10 @@ create_landscape_clustered_trees <- function(
 #' @param n_spots Integer. Number of non-vegetated spots
 #' @param spot_radius Integer. Radius of each spot
 #' @param noise_radius_sd Numeric. If random effects, which standard deviation (Default is 0 - no random effects)
+#' @param seed Integer. Random seed for reproducibility (default: NULL).
+#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param crs Character. Coordinate reference system (default: NULL).
+#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
 #' @return A matrix representing the ringed/spotted landscape, where 1 indicates vegetation and 0 indicates bare soil.
 #' @export
@@ -420,6 +424,4 @@ create_landscape_spots <- function(
   } else {
     return(result)
   }
-
-  return(landscape)
 }
