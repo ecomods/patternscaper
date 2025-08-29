@@ -122,7 +122,7 @@ create_landscape <- function(
     clustered = do.call(create_landscape_clustered_trees, dots),
     sine_bands = do.call(create_landscape_sine_bands, dots),
     spots = do.call(create_landscape_spots, dots),
-    banded = do.call(create_banded_vegetation, dots)
+    banded = do.call(create_landscape_banded, dots)
   )
 
   # Check if landscape was created successfully
