@@ -82,7 +82,6 @@ plot_landscape <- function(
       axis.title = ggplot2::element_blank(),
       legend.position = if (show_legend) "right" else "none",
       plot.title = ggtext::element_markdown(size = 10),
-      legend.title = ggplot2::element_text(size = 8),
       axis.text = ggplot2::element_blank()
     )
 
@@ -133,9 +132,11 @@ plot_landscape_list <- function(
     stop("landscape_list must be a list of landscapes (SpatRaster or matrix)")
   }
 
-  # Check if the list contains metadata structures (from generate_training_landscapes)
-  has_metadata <- lapply(landscape_list, has_landscape_metadata)
-  has_metadata <- all(unlist(has_metadata))
+  # Check if the list contains only landscapes with metadata structures
+  # (from generate_training_landscapes)
+  has_metadata <- lapply(landscape_list, has_landscape_metadata) |>
+    unlist() |>
+    all()
 
   # If we have metadata structure, extract landscape types and the landscapes
   if (has_metadata) {
@@ -152,6 +153,7 @@ plot_landscape_list <- function(
     if (has_metadata) {
       # Use types as titles when available and no custom titles provided
       titles <- types
+      print(titles)
     } else if (!is.null(names(landscape_list))) {
       # Use list names if available
       titles <- names(landscape_list)
