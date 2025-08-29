@@ -335,28 +335,33 @@ create_landscape_spots <- function(
   n_spots = 15,
   spot_radius = 5,
   noise_radius_sd = 0,
+  rotation = 0,
   seed = NULL,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = FALSE
 ) {
+  #Calculate dimensions based on rotation
+  height_actual <- ifelse(rotation == 0, height, height * 1.5)
+  width_actual <- ifelse(rotation == 0, width, width * 1.5)
+
   # Generate random cluster centers
   cluster_centers <- data.frame(
     row = sample(
-      1:height,
+      1:height_actual,
       n_spots,
       replace = TRUE
     ),
     col = sample(
-      1:width,
+      1:width_actual,
       n_spots,
       replace = TRUE
     )
   )
 
-  landscape <- matrix(0, nrow = height, ncol = width)
+  landscape <- matrix(0, nrow = height_actual, ncol = width_actual)
   if (!spot) {
-    landscape <- matrix(1, nrow = height, ncol = width)
+    landscape <- matrix(1, nrow = height_actual, ncol = width_actual)
   }
 
   # Create clusters around centers
@@ -370,9 +375,9 @@ create_landscape_spots <- function(
     adjusted_radius <- max(1, spot_radius + noise)
 
     row_min <- max(1, center_row - adjusted_radius)
-    row_max <- min(height, center_row + adjusted_radius)
+    row_max <- min(height_actual, center_row + adjusted_radius)
     col_min <- max(1, center_col - adjusted_radius)
-    col_max <- min(width, center_col + adjusted_radius)
+    col_max <- min(width_actual, center_col + adjusted_radius)
 
     # Fill in cluster with decreasing probability based on distance from center
     for (r in floor(row_min):ceiling(row_max)) {
@@ -395,6 +400,16 @@ create_landscape_spots <- function(
         }
       }
     }
+  }
+
+  # Apply rotation if specified
+  if (rotation != 0) {
+    landscape <- rotate_and_crop_landscape(
+      landscape,
+      rotation,
+      width,
+      height
+    )
   }
 
   # Get the result either as matrix or SpatRaster
