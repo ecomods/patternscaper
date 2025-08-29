@@ -33,27 +33,27 @@ create_landscape_scattered_trees <- function(
   }
 
   # Calculate dimensions based on rotation
-  height_actual <- ifelse(rotation == 0, height, height * 1.5)
-  width_actual <- ifelse(rotation == 0, width, width * 1.5)
+  height <- ifelse(rotation == 0, height, height * 1.5)
+  width <- ifelse(rotation == 0, width, width * 1.5)
 
   # Get base landscape with sharp treeline
   landscape <- create_landscape_sharp_treeline(
-    width_actual,
-    height_actual,
+    width,
+    height,
     treeline_position,
     as_raster = FALSE
   )
 
   # Define scatter zone
-  treeline_row <- round(height_actual * treeline_position)
+  treeline_row <- round(height * treeline_position)
   scatter_zone_end <- min(
-    height_actual,
-    treeline_row + round(height_actual * scatter_zone_prop)
+    height,
+    treeline_row + round(height * scatter_zone_prop)
   )
 
   # Randomly place trees in scatter zone
   for (i in (treeline_row + 1):scatter_zone_end) {
-    for (j in 1:width_actual) {
+    for (j in 1:width) {
       if (stats::runif(1) < scatter_density) {
         landscape[i, j] <- 1
       }
@@ -181,23 +181,23 @@ create_landscape_clustered_trees <- function(
     {
       set.seed(seed)
       # Calculate dimensions based on rotation
-      height_actual <- ifelse(rotation == 0, height, height * 1.5)
-      width_actual <- ifelse(rotation == 0, width, width * 1.5)
+      height <- ifelse(rotation == 0, height, height * 1.5)
+      width <- ifelse(rotation == 0, width, width * 1.5)
 
       # Get base landscape with sharp treeline
       landscape <- create_landscape_sharp_treeline(
-        width_actual,
-        height_actual,
+        width,
+        height,
         treeline_position,
         as_raster = FALSE
       )
 
       # Define scatter zone
       if (rotation == 0) {
-        treeline_row <- round(height_actual * treeline_position)
+        treeline_row <- round(height * treeline_position)
         scatter_zone_end <- min(
-          height_actual,
-          treeline_row + round(height_actual * scatter_zone_prop)
+          height,
+          treeline_row + round(height * scatter_zone_prop)
         )
         # Generate random cluster centers
         cluster_centers <- data.frame(
@@ -206,13 +206,13 @@ create_landscape_clustered_trees <- function(
             num_clusters,
             replace = TRUE
           ),
-          col = sample(1:width_actual, num_clusters, replace = TRUE)
+          col = sample(1:width, num_clusters, replace = TRUE)
         )
       } else {
-        treeline_row <- round(height_actual * treeline_position)
+        treeline_row <- round(height * treeline_position)
         scatter_zone_end <- min(
-          round(5 / 6 * height_actual),
-          treeline_row + round((5 / 6 * height_actual) * scatter_zone_prop)
+          round(5 / 6 * height),
+          treeline_row + round((5 / 6 * height) * scatter_zone_prop)
         )
         # Generate random cluster centers
         cluster_centers <- data.frame(
@@ -222,7 +222,7 @@ create_landscape_clustered_trees <- function(
             replace = TRUE
           ),
           col = sample(
-            (round(1 / 6 * width_actual) + 1):round(5 / 6 * width_actual),
+            (round(1 / 6 * width) + 1):round(5 / 6 * width),
             num_clusters,
             replace = TRUE
           )
@@ -236,11 +236,11 @@ create_landscape_clustered_trees <- function(
         # Define cluster boundaries (accounting for elongation)
         row_min <- max(1, center_row - cluster_radius * elongation_y)
         row_max <- min(
-          height_actual,
+          height,
           center_row + cluster_radius * elongation_y
         )
         col_min <- max(1, center_col - cluster_radius * elongation_x)
-        col_max <- min(width_actual, center_col + cluster_radius * elongation_x)
+        col_max <- min(width, center_col + cluster_radius * elongation_x)
 
         # Fill in cluster with decreasing probability based on distance from center
         for (r in floor(row_min):ceiling(row_max)) {
@@ -321,7 +321,6 @@ create_landscape_clustered_trees <- function(
 #' @param n_spots Integer. Number of non-vegetated spots
 #' @param spot_radius Integer. Radius of each spot
 #' @param noise_radius_sd Numeric. If random effects, which standard deviation (Default is 0 - no random effects)
-#' @param rotation Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).
 #'
 #' @return A matrix representing the ringed/spotted landscape, where 1 indicates vegetation and 0 indicates bare soil.
 #' @export
@@ -332,33 +331,28 @@ create_landscape_spots <- function(
   n_spots = 15,
   spot_radius = 5,
   noise_radius_sd = 0,
-  rotation = 0,
   seed = NULL,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = FALSE
 ) {
-  #Calculate dimensions based on rotation
-  height_actual <- ifelse(rotation == 0, height, height * 1.5)
-  width_actual <- ifelse(rotation == 0, width, width * 1.5)
-
   # Generate random cluster centers
   cluster_centers <- data.frame(
     row = sample(
-      1:height_actual,
+      1:height,
       n_spots,
       replace = TRUE
     ),
     col = sample(
-      1:width_actual,
+      1:width,
       n_spots,
       replace = TRUE
     )
   )
 
-  landscape <- matrix(0, nrow = height_actual, ncol = width_actual)
+  landscape <- matrix(0, nrow = height, ncol = width)
   if (!spot) {
-    landscape <- matrix(1, nrow = height_actual, ncol = width_actual)
+    landscape <- matrix(1, nrow = height, ncol = width)
   }
 
   # Create clusters around centers
@@ -373,9 +367,9 @@ create_landscape_spots <- function(
     print(adjusted_radius)
 
     row_min <- max(1, center_row - adjusted_radius)
-    row_max <- min(height_actual, center_row + adjusted_radius)
+    row_max <- min(height, center_row + adjusted_radius)
     col_min <- max(1, center_col - adjusted_radius)
-    col_max <- min(width_actual, center_col + adjusted_radius)
+    col_max <- min(width, center_col + adjusted_radius)
 
     # Fill in cluster with decreasing probability based on distance from center
     for (r in floor(row_min):ceiling(row_max)) {
@@ -400,16 +394,6 @@ create_landscape_spots <- function(
     }
   }
 
-  # Apply rotation if specified
-  if (rotation != 0) {
-    landscape <- rotate_and_crop_landscape(
-      landscape,
-      rotation,
-      width,
-      height
-    )
-  }
-
   # Get the result either as matrix or SpatRaster
   result <- if (as_raster) {
     matrix_to_raster(landscape, crs = crs)
@@ -429,7 +413,6 @@ create_landscape_spots <- function(
         n_spots = n_spots,
         spot_radius = spot_radius,
         noise_radius_sd = noise_radius_sd,
-        rotation = rotation,
         seed = seed,
         crs = crs
       )
