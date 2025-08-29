@@ -8,10 +8,7 @@
 #' @param spot Boolean. Spots or rings: if true: vegetated spots, if false unvegetated rings
 #' @param n_spots Integer. Number of non-vegetated spots
 #' @param spot_radius Integer. Radius of each spot
-#' @param noise_radius Boolean. Are random effects included for spot size (noise)
-#' @param noise_radius_sd Numeric. If random effects, which standard deviation
-#' @param noise Boolean. Are random effects included (noise)
-#' @param noise_sd Numeric. If random effects, which standard deviation
+#' @param noise_radius_sd Numeric. If random effects, which standard deviation (Default is 0 - no random effects)
 #' @param rotation Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).
 #'
 #' @return A matrix representing the ringed/spotted landscape, where 1 indicates vegetation and 0 indicates bare soil.
@@ -22,8 +19,7 @@ create_spot_vegetation <- function(
   spot = TRUE,
   n_spots = 15,
   spot_radius = 5,
-  noise_radius = FALSE,
-  noise_radius_sd = 1,
+  noise_radius_sd = 0,
   rotation = 0,
   seed = NULL,
   as_raster = TRUE,
@@ -58,12 +54,12 @@ create_spot_vegetation <- function(
     center_row <- cluster_centers$row[i]
     center_col <- cluster_centers$col[i]
 
-    # Define cluster boundaries (accounting for elongation)
-    adjusted_radius <- ifelse(
-      noise_radius,
-      spot_radius * rnorm(1, mean = 0, sd = noise_radius_sd),
-      spot_radius
-    )
+    # Create noise if requested
+    noise <- rnorm(1, mean = 0, sd = noise_radius_sd)
+    # Add noise to the radius, but if radius drops below 0, set it to 1
+    adjusted_radius <- max(1, spot_radius + noise)
+    print(adjusted_radius)
+
     row_min <- max(1, center_row - adjusted_radius)
     row_max <- min(height_actual, center_row + adjusted_radius)
     col_min <- max(1, center_col - adjusted_radius)
@@ -78,8 +74,8 @@ create_spot_vegetation <- function(
         dist <- sqrt(dx^2 + dy^2)
 
         # Probability decreases with distance
-        if (dist <= spot_radius) {
-          prob <- 1 - (dist / spot_radius)^2
+        if (dist <= adjusted_radius) {
+          prob <- 1 - (dist / adjusted_radius)^2
           if (runif(1) < prob) {
             if (spot) {
               landscape[r, c] <- 1
@@ -120,7 +116,6 @@ create_spot_vegetation <- function(
         spot = spot,
         n_spots = n_spots,
         spot_radius = spot_radius,
-        noise_radius = noise_radius,
         noise_radius_sd = noise_radius_sd,
         rotation = rotation,
         seed = seed,
