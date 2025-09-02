@@ -2,6 +2,53 @@
 
 Here I document changes made to the function packages.
 
+## 2025-08-29
+
+### Summary of Changes
+
+### Remaining questions/problems
+
+#### Banded landscapes
+
+- Only 3 hills possible with fixed positions -> What if the landscape gets bigger?
+- Too many parameters to set that overlap with each other: hilltop, slopes, x/y_ext_hill, nbands -> The values should also be constrained because some combinations don't make sense. E.g. y/x_ext_hill cannot be 0.
+
+#### Spot landscapes
+
+No ecotones, because they have no treeline. Does this make sense? In theory, spots can also be created with a slightly adjusted scattered trees algorithm:
+
+```r
+create_landscape_clustered_trees(
+    treeline_position = 0,
+    num_clusters = 5,
+    cluster_radius = 5,
+    scatter_zone_prop = 1
+) |> plot_landscape()
+```
+
+### Technical Details
+
+#### Add new landscapes to `generate_landscape` and `generate_training_landscapes`
+
+#### Add and modify function to create spotted landscape
+
+- Added function according to Britta's code to `scatter_landscapes.R`
+- Adjusted function to fit with package specs
+  - Optionally add metadata, return as SpatRaster
+- Change logic for noise addition: 
+  - Add noise to the radius to create spots of different sizes (if `noise_radius_sd` > 0).
+  - Before: noise had no effect because in the end only cells in the radius without noise were considered for vegetation spots
+- Add option for setting seed
+
+#### Add and modify function to create banded vegetation patterns
+
+- Added function according to Britta's code to `banded_landscapes.R`
+- Remove flag for noise addition `noise`: Does not make sense to have a flag if we always add noise with a certain standard deviation. Instead, we can set `noise_sd=0` to have no noise.
+- Adjusted function to fit with package specs
+  - Optionally add metadata, return as SpatRaster
+- Add option for setting seed
+
+
 ## 2025-06-24: Improved `mean_groups` method in `evaluate_landscape_metrics`
 
 ### Summary of Changes

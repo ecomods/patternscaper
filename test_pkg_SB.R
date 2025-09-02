@@ -169,6 +169,12 @@ results <- apply_nn_keras(
   confidence_threshold = 0.7
 )
 
+# Plot results
+# Make title
+
+
+plot_landscape_list(new_landscapes)
+
 # Other tests (IGNORE THIS CODE) ----------------------------------------
 
 landscapes <- test_cluster
