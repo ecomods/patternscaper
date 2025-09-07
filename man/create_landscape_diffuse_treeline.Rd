@@ -7,9 +7,10 @@
 create_landscape_diffuse_treeline(
   width = 100,
   height = 100,
+  treeline_position = 0.5,
   steepness = 2,
   rotation = 0,
-  seed = NULL,
+  seed = 42,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE
@@ -20,11 +21,15 @@ create_landscape_diffuse_treeline(
 
 \item{height}{Integer. Height of the landscape in pixels (default: 100).}
 
+\item{treeline_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
+
 \item{steepness}{Numeric. Steepness of the transition (default: 2).}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 
-\item{seed}{Integer. Random seed for reproducibility (default: NULL).}
+\item{seed}{Integer or NULL. Random seed for reproducibility (default: 42).
+If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 
 \item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
 

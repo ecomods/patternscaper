@@ -27,9 +27,9 @@ create_landscape_fingers(
 
 \item{num_fingers}{Integer. Number of fingers to create (default: 5).}
 
-\item{finger_width}{Integer. Width of each finger in columns (default: 3).}
+\item{finger_width}{Integer. Width of each finger in pixels (default: 3).}
 
-\item{finger_length_prop}{Numeric. Proportion of height for finger length (default: 0.3).}
+\item{finger_length_prop}{Numeric. Proportion of height of the total landscape for finger length (default: 0.3).}
 
 \item{bend}{Logical. Should the fingers be bent in a sinus pattern or not? (default: FALSE).}
 

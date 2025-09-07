@@ -11,7 +11,7 @@ create_landscape_scattered_trees(
   scatter_density = 0.1,
   scatter_zone_prop = 0.2,
   rotation = 0,
-  seed = NULL,
+  seed = 42,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE
@@ -24,13 +24,17 @@ create_landscape_scattered_trees(
 
 \item{treeline_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
 
-\item{scatter_density}{Numeric. Probability of tree presence (0-1) (default: 0.1).}
+\item{scatter_density}{Numeric. Probability of tree presence in the scatter zone (0-1) (default: 0.1).
+Higher values result in a denser tree cover in the scatter zone.}
 
-\item{scatter_zone_prop}{Numeric. Proportion of height for scatter zone (default: 0.5).}
+\item{scatter_zone_prop}{Numeric. Proportion of height for scatter zone (default: 0.5).
+Defines how far below the treeline scattered trees can appear.}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 
-\item{seed}{Integer. Random seed for reproducibility (default: NULL).}
+\item{seed}{Integer or NULL. Random seed for reproducibility (default: 42).
+If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 
 \item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
 

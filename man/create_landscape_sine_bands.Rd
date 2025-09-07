@@ -8,14 +8,14 @@ create_landscape_sine_bands(
   width = 100,
   height = 100,
   treeline_position = 0.5,
+  band_zone_prop = 0.2,
   band_thickness = 3,
   band_spacing = 10,
   frequency = 2 * pi/100,
   amplitude = 5,
-  noise = FALSE,
-  noise_sd = 1,
+  noise_sd = 0,
   rotation = 0,
-  seed = NULL,
+  seed = 42,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE
@@ -28,6 +28,10 @@ create_landscape_sine_bands(
 
 \item{treeline_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
 
+\item{band_zone_prop}{Numeric. Proportion of height of the total landscape to
+allocate for bands below the treeline (default: 0.2). If the band zone is too small
+for the given band spacing, no bands will be drawn and a warning will be issued.}
+
 \item{band_thickness}{Integer. Thickness of each band in pixels (default: 3).}
 
 \item{band_spacing}{Integer. Spacing between bands in pixels (default: 10).}
@@ -36,13 +40,13 @@ create_landscape_sine_bands(
 
 \item{amplitude}{Numeric. Amplitude of sine wave in pixels (default: 5).}
 
-\item{noise}{Logical. Whether to add random noise to bands (default: FALSE).}
-
-\item{noise_sd}{Numeric. Standard deviation for random noise (default: 1).}
+\item{noise_sd}{Numeric. Standard deviation for random noise (default: 0).}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 
-\item{seed}{Integer. Random seed for reproducibility (default: NULL).}
+\item{seed}{Integer or NULL. Random seed for reproducibility (default: 42).
+If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 
 \item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
 

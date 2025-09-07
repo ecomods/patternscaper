@@ -14,7 +14,7 @@ create_landscape_banded(
   y_ext_hill = c(1.2, 1, 1.6),
   noise_sd = 0.1,
   rotation = 0,
-  seed = NULL,
+  seed = 42,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE
@@ -39,7 +39,9 @@ create_landscape_banded(
 
 \item{rotation}{Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).}
 
-\item{seed}{Integer. Random seed for reproducibility (default: NULL).}
+\item{seed}{Integer or NULL. Random seed for reproducibility (default: 42).
+If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 
 \item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
 

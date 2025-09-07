@@ -13,9 +13,9 @@ generate_training_landscapes(
   add_rotation = TRUE,
   rotation_angles = c(0, 45, 90, 135),
   params_list = NULL,
-  seed = NULL,
+  seed = 42,
   crs = NULL,
-  type_weights = NULL
+  type_probs = NULL
 )
 }
 \arguments{
@@ -33,11 +33,15 @@ generate_training_landscapes(
 
 \item{params_list}{List. List of parameter ranges for each landscape type (default: NULL).}
 
-\item{seed}{Integer. Random seed for reproducibility (default: 123).}
+\item{seed}{Integer or NULL. Random seed for reproducibility (default: 42).
+If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 
 \item{crs}{Character. Coordinate reference system (default: NULL).}
 
-\item{type_weights}{Numeric vector. Relative weights for sampling landscape types (default: NULL).}
+\item{type_probs}{Numeric vector. Probability that a specific landscape type is chosen.
+By default, all types have equal probability (1) of being chosen.
+Must be the same length as 'types'.}
 }
 \value{
 List. Named list of n generated landscapes with attributes for type and parameters.

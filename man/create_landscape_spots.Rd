@@ -7,12 +7,12 @@
 create_landscape_spots(
   width = 100,
   height = 100,
-  spot = TRUE,
   n_spots = 15,
   spot_radius = 5,
   noise_radius_sd = 0,
+  invert_landscape = FALSE,
+  seed = 42,
   rotation = 0,
-  seed = NULL,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE
@@ -23,15 +23,22 @@ create_landscape_spots(
 
 \item{height}{Integer. Number of rows in the landscape.}
 
-\item{spot}{Boolean. Spots or rings: if true: vegetated spots, if false unvegetated rings}
-
 \item{n_spots}{Integer. Number of non-vegetated spots}
 
 \item{spot_radius}{Integer. Radius of each spot}
 
 \item{noise_radius_sd}{Numeric. If random effects, which standard deviation (Default is 0 - no random effects)}
 
-\item{seed}{Integer. Random seed for reproducibility (default: NULL).}
+\item{invert_landscape}{Boolean. Invert vegetated and unvegetated areas.
+Switches the landscape from vegetated with bare spots to bare with vegetated spots (default: FALSE).}
+
+\item{seed}{Integer or NULL. Random seed for reproducibility (default: 42).
+If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
+
+\item{rotation}{Unused parameter for compatibility with other landscape functions (default: 0).
+Is only needed because in the function \link{generate_training_landscapes}
+all landscape functions need to have a rotation parameter.}
 
 \item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
 
