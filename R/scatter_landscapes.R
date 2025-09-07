@@ -111,9 +111,9 @@ create_landscape_scattered_trees <- function(
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
-#' @param num_clusters Integer. Number of cluster centers (default: 5).
+#' @param num_clusters Integer. Number of cluster centers (default: 10).
 #' @param cluster_radius Numeric. Radius of clusters in pixels (default: 5).
-#' @param scatter_zone_prop Numeric. Proportion of height for scatter zone (default: 0.5).
+#' @param scatter_zone_prop Numeric. Proportion of height for scatter zone (default: 0.3).
 #' @param elongation_x Numeric. Horizontal elongation factor for clusters (default: 1).
 #' @param elongation_y Numeric. Vertical elongation factor for clusters (default: 1).
 #' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
@@ -130,9 +130,9 @@ create_landscape_clustered_trees <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
-  num_clusters = 5,
+  num_clusters = 10,
   cluster_radius = 5,
-  scatter_zone_prop = 0.5,
+  scatter_zone_prop = 0.3,
   elongation_x = 1,
   elongation_y = 1,
   seed = 42,
