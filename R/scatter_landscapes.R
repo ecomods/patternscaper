@@ -9,7 +9,7 @@
 #' @param scatter_zone_prop Numeric. Proportion of height for scatter zone (default: 0.5).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
-#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
@@ -112,7 +112,7 @@ create_landscape_scattered_trees <- function(
 #' @param elongation_y Numeric. Vertical elongation factor for clusters (default: 1).
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
-#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
@@ -322,7 +322,7 @@ create_landscape_clustered_trees <- function(
 #' @param spot_radius Integer. Radius of each spot
 #' @param noise_radius_sd Numeric. If random effects, which standard deviation (Default is 0 - no random effects)
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
-#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'

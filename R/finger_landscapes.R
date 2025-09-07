@@ -12,7 +12,7 @@
 #' @param finger_length_prop Numeric. Proportion of height for finger length (default: 0.3).
 #' @param bend Logical. Should the fingers be bent in a sinus pattern or not? (default: FALSE).
 #' @param rotation Numeric. Degrees to rotate the landscape (default: 0).
-#' @param as_raster Logical. Whether to return the landscape as a raster (default: TRUE).
+#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system for the raster (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'

@@ -13,7 +13,7 @@
 #' @param noise_sd Numeric. Standard deviation for random noise (default: 1).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
-#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
@@ -145,7 +145,7 @@ create_landscape_sine_bands <- function(
 #' @param noise_sd Numeric. If random effects, which standard deviation
 #' @param rotation Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
-#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'

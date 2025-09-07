@@ -6,7 +6,7 @@
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
-#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
@@ -79,7 +79,7 @@ create_landscape_sharp_treeline <- function(
 #' @param steepness Numeric. Steepness of the transition (default: 2).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
-#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
@@ -167,7 +167,7 @@ create_landscape_diffuse_treeline <- function(
 #' @param sine_length Numeric. Wavelength of sinusoidal curve in pixels (default: 20).
 #' @param sine_height Numeric. Amplitude of sinusoidal curve in pixels (default: 5).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
-#' @param as_raster Logical. Whether to return as SpatRaster (default: TRUE).
+#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
 #'
