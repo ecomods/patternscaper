@@ -57,3 +57,28 @@ Generates a landscape with banded vegetation of plants and bare soil.
 the strips are perpendicular to the slope of the hill.
 The landscape can optionally be rotated.
 }
+\examples{
+# Default banded vegetation
+banded_default <- create_landscape_banded()
+
+# Modified banded vegetation with more bands and different hill parameters
+banded_modified <- create_landscape_banded(
+  nbands = 9,
+  hilltop = c(35, 25, 30),
+  slope = c(0.3, 0.15, 0.25),
+  x_ext_hill = c(1.5, 2.2, 1.8),
+  y_ext_hill = c(1.3, 1.1, 1.9),
+  noise_sd = 0.5
+)
+
+# With rotation
+banded_rotated <- create_landscape_banded(
+  nbands = 7,
+  hilltop = c(30, 22, 28),
+  slope = c(0.25, 0.12, 0.2),
+  x_ext_hill = c(1.4, 2.0, 1.6),
+  y_ext_hill = c(1.2, 1.0, 1.7),
+  noise_sd = 0.15,
+  rotation = 45
+)
+}

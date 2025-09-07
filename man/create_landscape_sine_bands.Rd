@@ -60,3 +60,28 @@ List with landscape (SpatRaster or Matrix) and metadata or only landscape withou
 \description{
 Generates a binary landscape with parallel sine-wave bands.
 }
+\examples{
+# Default sine bands
+sine_bands_default <- create_landscape_sine_bands()
+
+# Modified sine bands with thicker bands, wider spacing and noise
+sine_bands_modified <- create_landscape_sine_bands(
+  treeline_position = 0.3,
+  band_zone_prop = 0.5,
+  band_thickness = 5,
+  band_spacing = 15,
+  frequency = 1,
+  amplitude = 8,
+  noise_sd = 1.5
+)
+
+# With rotation
+sine_bands_rotated <- create_landscape_sine_bands(
+  band_thickness = 4,
+  band_spacing = 12,
+  amplitude = 6,
+  noise_sd = 2,
+  rotation = 45
+)
+
+}

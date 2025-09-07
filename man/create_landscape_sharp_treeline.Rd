@@ -35,3 +35,19 @@ List with landscape (SpatRaster or Matrix) and metadata or only landscape withou
 \description{
 Generates a binary landscape with a sharp treeline.
 }
+\examples{
+# Default sharp treeline
+sharp_default <- create_landscape_sharp_treeline()
+
+# Modified sharp treeline with higher treeline position
+sharp_modified <- create_landscape_sharp_treeline(
+  treeline_position = 0.7
+)
+
+# Landscape with rotation
+sharp_rotated <- create_landscape_sharp_treeline(
+  treeline_position = 0.3,
+  rotation = 45
+)
+
+}

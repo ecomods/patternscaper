@@ -55,3 +55,29 @@ List with landscape (SpatRaster or Matrix) and metadata or only landscape withou
 \description{
 Generates a binary landscape with clustered trees below a treeline.
 }
+\examples{
+# Default clustered trees
+clustered_default <- create_landscape_clustered_trees()
+
+# Modified clustered trees with more elongated clusters
+clustered_modified <- create_landscape_clustered_trees(
+  treeline_position = 0.2,
+  num_clusters = 8,
+  cluster_radius = 7,
+  scatter_zone_prop = 0.6,
+  elongation_x = 2.5,
+  elongation_y = 0.5
+)
+
+# With rotation and random seed
+clustered_rotated <- create_landscape_clustered_trees(
+  num_clusters = 20,
+  cluster_radius = 2,
+  scatter_zone_prop = 0.5,
+  elongation_x = 1.8,
+  elongation_y = 1.4,
+  rotation = 45,
+  seed = NULL
+)
+
+}

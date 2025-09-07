@@ -41,3 +41,23 @@ List with landscape (SpatRaster or Matrix) and metadata or only landscape withou
 \description{
 Generates a binary landscape with a curvy treeline following a sine wave pattern.
 }
+\examples{
+# Default curvy treeline
+curvy_default <- create_landscape_curvy_treeline()
+
+# Modified curvy treeline with increased sine parameters
+curvy_modified <- create_landscape_curvy_treeline(
+  treeline_position = 0.3,
+  sine_length = 40,
+  sine_height = 10
+)
+
+# With rotation
+curvy_rotated <- create_landscape_curvy_treeline(
+  treeline_position = 0.6,
+  sine_length = 10,
+  sine_height = 6,
+  rotation = 45
+)
+
+}

@@ -49,3 +49,26 @@ Generates a binary matrix representing a landscape with a sharp treeline and
 finger-like extensions. Allows control over landscape size, number and width
 of fingers, finger length, cropping, and rotation.
 }
+\examples{
+# Default fingers pattern
+fingers_default <- create_landscape_fingers()
+
+# Modified fingers with more, thinner fingers and bending
+fingers_modified <- create_landscape_fingers(
+  treeline_position = 0.2,
+  num_fingers = 7,
+  finger_width = 5,
+  finger_length_prop = 0.5,
+  bend = TRUE
+)
+
+# With rotation
+fingers_rotated <- create_landscape_fingers(
+  num_fingers = 10,
+  finger_width = 4,
+  finger_length_prop = 1,
+  bend = TRUE,
+  rotation = 45
+)
+
+}

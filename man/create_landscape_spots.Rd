@@ -2,7 +2,7 @@
 % Please edit documentation in R/scatter_landscapes.R
 \name{create_landscape_spots}
 \alias{create_landscape_spots}
-\title{Create a Landscape with rings that have no vegetation or spots that have no vegetation}
+\title{Create a Landscape with Spots Pattern}
 \usage{
 create_landscape_spots(
   width = 100,
@@ -50,6 +50,24 @@ all landscape functions need to have a rotation parameter.}
 A matrix representing the ringed/spotted landscape, where 1 indicates vegetation and 0 indicates bare soil.
 }
 \description{
-Generates a vegetated landscape with spots with bare soil in between.
-The landscape can optionally be rotated.
+Generates a binary landscape with circular spots.
+}
+\examples{
+# Default spots
+spots_default <- create_landscape_spots()
+
+# Modified spots with more spots and random radius variation
+spots_modified <- create_landscape_spots(
+  n_spots = 15,
+  spot_radius = 8,
+  noise_radius_sd = 2
+)
+
+# Inverted spots (vegetation outside spots instead of inside)
+spots_inverted <- create_landscape_spots(
+  n_spots = 15,
+  spot_radius = 8,
+  invert_landscape = TRUE,
+  noise_radius_sd = 2
+)
 }

@@ -43,3 +43,21 @@ List with landscape (SpatRaster or Matrix) and metadata or only landscape withou
 \description{
 Generates a binary landscape with a diffuse treeline where tree probability decreases with distance.
 }
+\examples{
+# Default diffuse treeline
+diffuse_default <- create_landscape_diffuse_treeline()
+
+# Modified diffuse treeline with greater steepness
+diffuse_modified <- create_landscape_diffuse_treeline(
+  treeline_position = 0.2,
+  steepness = 0.1
+)
+
+# With rotation
+diffuse_rotated <- create_landscape_diffuse_treeline(
+  treeline_position = 0.3,
+  steepness = 2,
+  rotation = 45
+)
+
+}
