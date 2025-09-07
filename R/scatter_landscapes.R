@@ -41,7 +41,8 @@ create_landscape_scattered_trees <- function(
     width,
     height,
     treeline_position,
-    as_raster = FALSE
+    as_raster = FALSE,
+    add_metadata = FALSE
   )
 
   # Define scatter zone
@@ -189,7 +190,8 @@ create_landscape_clustered_trees <- function(
         width,
         height,
         treeline_position,
-        as_raster = FALSE
+        as_raster = FALSE,
+        add_metadata = FALSE
       )
 
       # Define scatter zone

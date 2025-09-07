@@ -64,16 +64,16 @@ curvy_default <- create_landscape("curvy")
 # Modified curvy treeline with increased sine parameters
 curvy_modified <- create_landscape(
   "curvy",
-  treeline_position = 0.4,
-  sine_length = 35,
-  sine_height = 8
+  treeline_position = 0.3,
+  sine_length = 40,
+  sine_height = 10
 )
 
 # One landscape with rotation
 curvy_rotated <- create_landscape(
   "curvy",
   treeline_position = 0.6,
-  sine_length = 25,
+  sine_length = 10,
   sine_height = 6,
   rotation = 45
 )

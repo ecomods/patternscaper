@@ -39,7 +39,8 @@ create_landscape_fingers <- function(
     width_actual,
     height_actual,
     treeline_position,
-    as_raster = FALSE
+    as_raster = FALSE,
+    add_metadata = FALSE
   )
 
   # Calculate finger parameters
