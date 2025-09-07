@@ -15,7 +15,7 @@ create_landscape_fingers(
   rotation = 0,
   as_raster = TRUE,
   crs = NULL,
-  add_metadata = FALSE
+  add_metadata = TRUE
 )
 }
 \arguments{
@@ -35,11 +35,11 @@ create_landscape_fingers(
 
 \item{rotation}{Numeric. Degrees to rotate the landscape (default: 0).}
 
-\item{as_raster}{Logical. Whether to return the landscape as a raster (default: TRUE).}
+\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
 
 \item{crs}{Character. Coordinate reference system for the raster (default: NULL).}
 
-\item{add_metadata}{Logical. Whether to include metadata in output (default: FALSE).}
+\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
 A matrix, SpatRaster, or List with landscape and metadata

@@ -27,9 +27,9 @@
 #'
 #' \code{\link{create_landscape_sine_bands}} for "sine_bands" pattern parameters
 #'
-#' \code{\link{create_spots}} for "spots" pattern parameters
+#' \code{\link{create_landscape_spots}} for "spots" pattern parameters
 #'
-#' \code{\link{create_banded_vegetation}} for "banded" pattern parameters
+#' \code{\link{create_landscape_banded}} for "banded" pattern parameters
 #'
 #' @examples
 #' # Create a sharp treeline landscape
@@ -54,20 +54,19 @@
 #'
 #' @export
 create_landscape <- function(
-  pattern = c(
-    "sharp",
-    "diffuse",
-    "curvy",
-    "fingers",
-    "scattered",
-    "clustered",
-    "sine_bands",
-    "spots",
-    "banded"
-  ),
-  ...,
-  add_metadata = TRUE
-) {
+    pattern = c(
+      "sharp",
+      "diffuse",
+      "curvy",
+      "fingers",
+      "scattered",
+      "clustered",
+      "sine_bands",
+      "spots",
+      "banded"
+    ),
+    ...,
+    add_metadata = TRUE) {
   # Define valid patterns
   valid_patterns <- eval(formals()$pattern)
 
@@ -112,8 +111,7 @@ create_landscape <- function(
   }
 
   # Call the appropriate function based on the pattern with metadata parameter
-  landscape <- switch(
-    matched,
+  landscape <- switch(matched,
     sharp = do.call(create_landscape_sharp_treeline, dots),
     diffuse = do.call(create_landscape_diffuse_treeline, dots),
     curvy = do.call(create_landscape_curvy_treeline, dots),
@@ -166,27 +164,26 @@ create_landscape <- function(
 #' @return List. Named list of n generated landscapes with attributes for type and parameters.
 #' @export
 generate_training_landscapes <- function(
-  n = 10,
-  types = c(
-    "sharp",
-    "diffuse",
-    "curvy",
-    "fingers",
-    "scattered",
-    "clustered",
-    "sine_bands",
-    "spots",
-    "banded"
-  ),
-  width = 100,
-  height = 100,
-  add_rotation = TRUE,
-  rotation_angles = c(0, 45, 90, 135),
-  params_list = NULL,
-  seed = NULL,
-  crs = NULL,
-  type_weights = NULL
-) {
+    n = 10,
+    types = c(
+      "sharp",
+      "diffuse",
+      "curvy",
+      "fingers",
+      "scattered",
+      "clustered",
+      "sine_bands",
+      "spots",
+      "banded"
+    ),
+    width = 100,
+    height = 100,
+    add_rotation = TRUE,
+    rotation_angles = c(0, 45, 90, 135),
+    params_list = NULL,
+    seed = NULL,
+    crs = NULL,
+    type_weights = NULL) {
   # Validate inputs
   if (!is.numeric(n) || n < 1) {
     stop("'n' must be a positive integer")

@@ -8,7 +8,7 @@ create_landscape(
   pattern = c("sharp", "diffuse", "curvy", "fingers", "scattered", "clustered",
     "sine_bands", "spots", "banded"),
   ...,
-  add_metadata = FALSE
+  add_metadata = TRUE
 )
 }
 \arguments{
@@ -18,10 +18,10 @@ create_landscape(
 \item{...}{Parameters passed to specific landscape functions. See the documentation
 of the individual functions for details on required and optional parameters.}
 
-\item{add_metadata}{Logical. Whether to include metadata in output (default: FALSE).}
+\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
-SpatRaster or List with landscape and metadata
+List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
 }
 \description{
 A generic function that creates various types of landscape matrices using
@@ -65,7 +65,7 @@ landscape_with_metadata <- create_landscape(
 
 \code{\link{create_landscape_sine_bands}} for "sine_bands" pattern parameters
 
-\code{\link{create_spots}} for "spots" pattern parameters
+\code{\link{create_landscape_spots}} for "spots" pattern parameters
 
-\code{\link{create_banded_vegetation}} for "banded" pattern parameters
+\code{\link{create_landscape_banded}} for "banded" pattern parameters
 }

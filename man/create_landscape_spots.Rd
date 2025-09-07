@@ -15,7 +15,7 @@ create_landscape_spots(
   seed = NULL,
   as_raster = TRUE,
   crs = NULL,
-  add_metadata = FALSE
+  add_metadata = TRUE
 )
 }
 \arguments{
@@ -33,11 +33,11 @@ create_landscape_spots(
 
 \item{seed}{Integer. Random seed for reproducibility (default: NULL).}
 
-\item{as_raster}{Logical. Whether to return as SpatRaster (default: TRUE).}
+\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
 
 \item{crs}{Character. Coordinate reference system (default: NULL).}
 
-\item{add_metadata}{Logical. Whether to include metadata in output (default: FALSE).}
+\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
 A matrix representing the ringed/spotted landscape, where 1 indicates vegetation and 0 indicates bare soil.

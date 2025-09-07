@@ -16,7 +16,7 @@ ensure_spatraster(landscape)
 \item{crs}{Character. CRS to use if converting from matrix (default: NULL).}
 }
 \value{
-SpatRaster or list with landscape and metadata.
+List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata).
 }
 \description{
 This function enhances the ensure_spatraster function to properly handle landscape
