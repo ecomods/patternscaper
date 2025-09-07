@@ -8,7 +8,7 @@
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
+#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return SpatRaster or List with landscape and metadata
 #' @export
@@ -19,7 +19,7 @@ create_landscape_sharp_treeline <- function(
   rotation = 0,
   as_raster = TRUE,
   crs = NULL,
-  add_metadata = FALSE
+  add_metadata = TRUE
 ) {
   # calculate width and height of the actual landscape to produce
   # in case of rotation, the landscape needs to be larger
@@ -81,7 +81,7 @@ create_landscape_sharp_treeline <- function(
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
+#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return SpatRaster or List with landscape and metadata
 #' @export
@@ -93,7 +93,7 @@ create_landscape_diffuse_treeline <- function(
   seed = NULL,
   as_raster = TRUE,
   crs = NULL,
-  add_metadata = FALSE
+  add_metadata = TRUE
 ) {
   # Set seed to current time if not  provided
   if (!is.null(seed)) {
@@ -169,7 +169,7 @@ create_landscape_diffuse_treeline <- function(
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
+#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return SpatRaster or List with landscape and metadata
 #' @export
@@ -182,7 +182,7 @@ create_landscape_curvy_treeline <- function(
   rotation = 0,
   as_raster = TRUE,
   crs = NULL,
-  add_metadata = FALSE
+  add_metadata = TRUE
 ) {
   # calculate width and height of the actual landscape to produce
   # in case of rotation, the landscape needs to be larger

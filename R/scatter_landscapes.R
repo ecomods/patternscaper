@@ -11,7 +11,7 @@
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
+#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return SpatRaster or List with landscape and metadata
 #' @export
@@ -25,7 +25,7 @@ create_landscape_scattered_trees <- function(
   seed = NULL,
   as_raster = TRUE,
   crs = NULL,
-  add_metadata = FALSE
+  add_metadata = TRUE
 ) {
   # If seed is not provided, set it to current time
   if (is.null(seed)) {
@@ -114,7 +114,7 @@ create_landscape_scattered_trees <- function(
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
+#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return SpatRaster or List with landscape and metadata
 #' @export
@@ -131,7 +131,7 @@ create_landscape_clustered_trees <- function(
   rotation = 0,
   as_raster = TRUE,
   crs = NULL,
-  add_metadata = FALSE
+  add_metadata = TRUE
 ) {
   # If seed is not provided, set it to current time
   if (is.null(seed)) {
@@ -324,7 +324,7 @@ create_landscape_clustered_trees <- function(
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
+#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return A matrix representing the ringed/spotted landscape, where 1 indicates vegetation and 0 indicates bare soil.
 #' @export
@@ -339,7 +339,7 @@ create_landscape_spots <- function(
   seed = NULL,
   as_raster = TRUE,
   crs = NULL,
-  add_metadata = FALSE
+  add_metadata = TRUE
 ) {
   #Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)

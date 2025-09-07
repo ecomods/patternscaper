@@ -8,7 +8,7 @@
 #'        "curvy", "fingers", "scattered", "sine_bands", "clusters"
 #' @param ... Parameters passed to specific landscape functions. See the documentation
 #'        of the individual functions for details on required and optional parameters.
-#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
+#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return SpatRaster or List with landscape and metadata
 #'

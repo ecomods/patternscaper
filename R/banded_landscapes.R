@@ -15,7 +15,7 @@
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
+#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return SpatRaster or List with landscape and metadata
 #' @export
@@ -33,7 +33,7 @@ create_landscape_sine_bands <- function(
   seed = NULL,
   as_raster = TRUE,
   crs = NULL,
-  add_metadata = FALSE
+  add_metadata = TRUE
 ) {
   # Set seed if provided
   if (!is.null(seed)) {
@@ -147,7 +147,7 @@ create_landscape_sine_bands <- function(
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
+#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return A matrix representing the landscape with banded vegetation, where 1 indicates vegetation and 0 indicates bare soil.
 #' @export
@@ -164,7 +164,7 @@ create_landscape_banded <- function(
   seed = NULL,
   as_raster = TRUE,
   crs = NULL,
-  add_metadata = FALSE
+  add_metadata = TRUE
 ) {
   # Set seed if provided
   if (!is.null(seed)) {

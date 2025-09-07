@@ -14,7 +14,7 @@
 #' @param rotation Numeric. Degrees to rotate the landscape (default: 0).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system for the raster (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: FALSE).
+#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return A matrix, SpatRaster, or List with landscape and metadata
 create_landscape_fingers <- function(
@@ -28,7 +28,7 @@ create_landscape_fingers <- function(
   rotation = 0,
   as_raster = TRUE,
   crs = NULL,
-  add_metadata = FALSE
+  add_metadata = TRUE
 ) {
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
