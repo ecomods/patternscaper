@@ -265,7 +265,6 @@ create_landscape_banded <- function(
         nbands = nbands,
         x_ext_hill = x_ext_hill,
         y_ext_hill = y_ext_hill,
-        noise = noise,
         noise_sd = noise_sd,
         rotation = rotation,
         seed = seed,
