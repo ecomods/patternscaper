@@ -66,7 +66,7 @@ create_landscape <- function(
     "banded"
   ),
   ...,
-  add_metadata = FALSE
+  add_metadata = TRUE
 ) {
   # Define valid patterns
   valid_patterns <- eval(formals()$pattern)
