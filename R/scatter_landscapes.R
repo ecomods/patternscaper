@@ -190,24 +190,24 @@ create_landscape_clustered_trees <- function(
     {
       set.seed(seed)
       # Calculate dimensions based on rotation
-      height <- ifelse(rotation == 0, height, height * 1.5)
-      width <- ifelse(rotation == 0, width, width * 1.5)
+      height_actual <- ifelse(rotation == 0, height, height * 1.5)
+      width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
       # Get base landscape with sharp treeline
       landscape <- create_landscape_sharp_treeline(
-        width,
-        height,
-        treeline_position,
+        width = width_actual,
+        height = height_actual,
+        treeline_position = treeline_position,
         as_raster = FALSE,
         add_metadata = FALSE
       )
 
       # Define scatter zone
       if (rotation == 0) {
-        treeline_row <- round(height * treeline_position)
+        treeline_row <- round(height_actual * treeline_position)
         scatter_zone_end <- min(
-          height,
-          treeline_row + round(height * scatter_zone_prop)
+          height_actual,
+          treeline_row + round(height_actual * scatter_zone_prop)
         )
         # Generate random cluster centers
         cluster_centers <- data.frame(
@@ -216,13 +216,13 @@ create_landscape_clustered_trees <- function(
             num_clusters,
             replace = TRUE
           ),
-          col = sample(1:width, num_clusters, replace = TRUE)
+          col = sample(1:width_actual, num_clusters, replace = TRUE)
         )
       } else {
-        treeline_row <- round(height * treeline_position)
+        treeline_row <- round(height_actual * treeline_position)
         scatter_zone_end <- min(
-          round(5 / 6 * height),
-          treeline_row + round((5 / 6 * height) * scatter_zone_prop)
+          round(5 / 6 * height_actual),
+          treeline_row + round((5 / 6 * height_actual) * scatter_zone_prop)
         )
         # Generate random cluster centers
         cluster_centers <- data.frame(
@@ -232,7 +232,7 @@ create_landscape_clustered_trees <- function(
             replace = TRUE
           ),
           col = sample(
-            (round(1 / 6 * width) + 1):round(5 / 6 * width),
+            (round(1 / 6 * width_actual) + 1):round(5 / 6 * width_actual),
             num_clusters,
             replace = TRUE
           )
