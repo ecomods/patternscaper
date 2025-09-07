@@ -333,8 +333,11 @@ create_landscape_clustered_trees <- function(
 #' @param invert_landscape Boolean. Invert vegetated and unvegetated areas.
 #'     Switches the landscape from vegetated with bare spots to bare with vegetated spots (default: FALSE).
 #' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
-#'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
-#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
+#'     If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+#'     If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
+#' @param rotation Unused parameter for compatibility with other landscape functions (default: 0).
+#'     Is only needed because in the function \link{generate_training_landscapes}
+#'     all landscape functions need to have a rotation parameter.
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
@@ -349,6 +352,7 @@ create_landscape_spots <- function(
   noise_radius_sd = 0,
   invert_landscape = FALSE,
   seed = 42,
+  rotation = 0,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE

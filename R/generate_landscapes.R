@@ -159,9 +159,13 @@ create_landscape <- function(
 #' @param add_rotation Logical. Whether to include rotated versions (default: TRUE).
 #' @param rotation_angles Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).
 #' @param params_list List. List of parameter ranges for each landscape type (default: NULL).
-#' @param seed Integer. Random seed for reproducibility (default: 123).
+#' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
+#'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #' @param crs Character. Coordinate reference system (default: NULL).
-#' @param type_weights Numeric vector. Relative weights for sampling landscape types (default: NULL).
+#' @param type_probs Numeric vector. Probability that a specific landscape type is chosen.
+#'     By default, all types have equal probability (1) of being chosen.
+#'     Must be the same length as 'types'.
 #'
 #' @return List. Named list of n generated landscapes with attributes for type and parameters.
 #' @export
@@ -185,7 +189,7 @@ generate_training_landscapes <- function(
   params_list = NULL,
   seed = 42,
   crs = NULL,
-  type_weights = NULL
+  type_probs = NULL
 ) {
   # Validate inputs
   if (!is.numeric(n) || n < 1) {
@@ -214,8 +218,6 @@ generate_training_landscapes <- function(
   # If seed is NULL, use the current time
   if (is.null(seed)) {
     seed <- as.integer(Sys.time())
-  } else if (!is.numeric(seed) || length(seed) != 1 || seed < 0) {
-    stop("'seed' must be a non-negative integer")
   }
   set.seed(seed)
 
@@ -223,50 +225,60 @@ generate_training_landscapes <- function(
   if (is.null(params_list)) {
     params_list <- list(
       sharp = list(
-        treeline_position = c(0.3, 0.7)
+        treeline_position = c(0.2, 0.8)
       ),
       diffuse = list(
-        steepness = c(0.5, 1, 2),
-        treeline_position = c(0.4, 0.5, 0.6)
+        steepness = c(0.5, 2),
+        treeline_position = c(0.4, 0.6),
+        seed = seed
       ),
       curvy = list(
-        treeline_position = c(0.3, 0.7),
-        sine_length = c(10, 40),
-        sine_height = c(3, 10)
+        treeline_position = c(0.4, 0.5, 0.6),
+        sine_length = c(10, 50),
+        sine_height = c(3, 20)
       ),
       fingers = list(
-        treeline_position = c(0.3, 0.7),
-        num_fingers = c(3, 8),
-        finger_width = c(2, 6),
-        finger_length_prop = c(0.1, 0.4),
+        treeline_position = c(0.4, 0.6),
+        num_fingers = c(3, 10),
+        finger_width = c(3, 8),
+        finger_length_prop = c(0.1, 1),
         bend = c(TRUE, FALSE)
       ),
       scattered = list(
-        treeline_position = c(0.3, 0.7),
-        scatter_density = c(0.05, 0.3),
-        scatter_zone_prop = c(0.3, 0.7)
+        treeline_position = c(0.4, 0.6),
+        scatter_density = c(0.1, 0.8),
+        scatter_zone_prop = c(0.1, 0.4),
+        seed = seed
       ),
       clustered = list(
-        treeline_position = c(0.3, 0.7),
-        num_clusters = c(3, 10),
-        cluster_radius = c(3, 10),
-        scatter_zone_prop = c(0.3, 0.7)
+        treeline_position = c(0.4, 0.6),
+        num_clusters = c(5, 20),
+        cluster_radius = c(5, 10),
+        scatter_zone_prop = c(0.2, 0.4),
+        elongation_x = c(0.5, 2),
+        elongation_y = c(0.5, 2),
+        seed = seed
       ),
       sine_bands = list(
-        treeline_position = c(0.3, 0.7),
-        band_thickness = c(1, 5),
+        treeline_position = c(0.4, 0.6),
+        band_thickness = c(1, 7),
         band_spacing = c(5, 15),
-        frequency = c(0.01, 0.1),
+        frequency = c(0.1, 1),
         amplitude = c(2, 10),
-        noise = c(TRUE, FALSE)
+        noise_sd = c(0, 2),
+        seed = seed
       ),
       spots = list(
-        n_spots = c(5, 10, 20),
-        spot_radius = c(3, 5, 15),
-        noise_radius_sd = c(0, 1, 2)
+        n_spots = c(5, 20),
+        spot_radius = c(2, 10),
+        noise_radius_sd = c(0, 2),
+        invert_landscape = c(TRUE, FALSE),
+        seed = seed
       ),
       banded = list(
-        nbands = c(3, 5, 10)
+        nbands = c(3, 10),
+        noise_sd = c(0, 0.5),
+        seed = seed
       )
     )
   }
@@ -285,13 +297,13 @@ generate_training_landscapes <- function(
   }
 
   # Setup type weights for sampling
-  if (is.null(type_weights)) {
-    type_weights <- rep(1, length(types))
-  } else if (length(type_weights) != length(types)) {
+  if (is.null(type_probs)) {
+    type_probs <- rep(1, length(types))
+  } else if (length(type_probs) != length(types)) {
     warning(
-      "Length of type_weights doesn't match length of types. Using equal weights."
+      "Length of type_probs doesn't match length of types. Using equal weights."
     )
-    type_weights <- rep(1, length(types))
+    type_probs <- rep(1, length(types))
   }
 
   # Initialize results list
@@ -311,7 +323,7 @@ generate_training_landscapes <- function(
     types,
     size = n,
     replace = TRUE,
-    prob = type_weights
+    prob = type_probs
   )
 
   # Generate each landscape
@@ -347,6 +359,7 @@ generate_training_landscapes <- function(
     sampled_params$height <- height
     sampled_params$rotation <- rotation
     sampled_params$crs <- crs
+    sampled_params$add_metadata <- FALSE
 
     # Generate the landscape
     tryCatch(
