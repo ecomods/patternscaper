@@ -217,8 +217,8 @@ create_landscape_curvy_treeline <- function(
     for (j in 1:width_actual) {
       landscape[i, j] <- ifelse(
         i > (treeline_row + sin(2 * pi * j / sine_length) * sine_height),
-        1,
-        0
+        0,
+        1
       )
     }
   }
