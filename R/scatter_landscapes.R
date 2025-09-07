@@ -327,10 +327,11 @@ create_landscape_clustered_trees <- function(
 #'
 #' @param width Integer. Number of columns in the landscape.
 #' @param height Integer. Number of rows in the landscape.
-#' @param spot Boolean. Spots or rings: if true: vegetated spots, if false unvegetated rings
 #' @param n_spots Integer. Number of non-vegetated spots
 #' @param spot_radius Integer. Radius of each spot
 #' @param noise_radius_sd Numeric. If random effects, which standard deviation (Default is 0 - no random effects)
+#' @param invert_landscape Boolean. Invert vegetated and unvegetated areas.
+#'     Switches the landscape from vegetated with bare spots to bare with vegetated spots (default: FALSE).
 #' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
 #'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
@@ -343,11 +344,10 @@ create_landscape_clustered_trees <- function(
 create_landscape_spots <- function(
   width = 100,
   height = 100,
-  spot = TRUE,
   n_spots = 15,
   spot_radius = 5,
   noise_radius_sd = 0,
-  rotation = 0,
+  invert_landscape = FALSE,
   seed = 42,
   as_raster = TRUE,
   crs = NULL,
@@ -358,28 +358,22 @@ create_landscape_spots <- function(
     seed <- as.integer(Sys.time())
   }
   set.seed(seed)
-  #Calculate dimensions based on rotation
-  height_actual <- ifelse(rotation == 0, height, height * 1.5)
-  width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
   # Generate random cluster centers
   cluster_centers <- data.frame(
     row = sample(
-      1:height_actual,
+      1:height,
       n_spots,
       replace = TRUE
     ),
     col = sample(
-      1:width_actual,
+      1:width,
       n_spots,
       replace = TRUE
     )
   )
 
-  landscape <- matrix(0, nrow = height_actual, ncol = width_actual)
-  if (!spot) {
-    landscape <- matrix(1, nrow = height_actual, ncol = width_actual)
-  }
+  landscape <- matrix(0, nrow = height, ncol = width)
 
   # Create clusters around centers
   for (i in 1:nrow(cluster_centers)) {
@@ -392,9 +386,9 @@ create_landscape_spots <- function(
     adjusted_radius <- max(1, spot_radius + noise)
 
     row_min <- max(1, center_row - adjusted_radius)
-    row_max <- min(height_actual, center_row + adjusted_radius)
+    row_max <- min(height, center_row + adjusted_radius)
     col_min <- max(1, center_col - adjusted_radius)
-    col_max <- min(width_actual, center_col + adjusted_radius)
+    col_max <- min(width, center_col + adjusted_radius)
 
     # Fill in cluster with decreasing probability based on distance from center
     for (r in floor(row_min):ceiling(row_max)) {
@@ -408,25 +402,16 @@ create_landscape_spots <- function(
         if (dist <= adjusted_radius) {
           prob <- 1 - (dist / adjusted_radius)^2
           if (runif(1) < prob) {
-            if (spot) {
-              landscape[r, c] <- 1
-            } else {
-              landscape[r, c] <- 0
-            }
+            landscape[r, c] <- 1
           }
         }
       }
     }
   }
 
-  # Apply rotation if specified
-  if (rotation != 0) {
-    landscape <- rotate_and_crop_landscape(
-      landscape,
-      rotation,
-      width,
-      height
-    )
+  # Invert landscape if specified (zeroes become ones and vice versa)
+  if (invert_landscape) {
+    landscape <- 1 - landscape
   }
 
   # Get the result either as matrix or SpatRaster
@@ -444,7 +429,7 @@ create_landscape_spots <- function(
       params = list(
         width = width,
         height = height,
-        spot = spot,
+        invert_landscape = invert_landscape,
         n_spots = n_spots,
         spot_radius = spot_radius,
         noise_radius_sd = noise_radius_sd,
