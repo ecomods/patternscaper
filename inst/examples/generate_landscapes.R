@@ -36,15 +36,17 @@ diffuse_default <- create_landscape("diffuse")
 # Modified diffuse treeline with greater steepness
 diffuse_modified <- create_landscape(
   "diffuse",
-  treeline_position = 0.6,
-  steepness = 5
+  treeline_position = 0.2,
+  steepness = 0.1
 )
+
+plot_landscape(diffuse_modified)
 
 # One landscape with rotation
 diffuse_rotated <- create_landscape(
   "diffuse",
-  treeline_position = 0.4,
-  steepness = 3,
+  treeline_position = 0.3,
+  steepness = 2,
   rotation = 45
 )
 

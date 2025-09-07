@@ -54,19 +54,20 @@
 #'
 #' @export
 create_landscape <- function(
-    pattern = c(
-      "sharp",
-      "diffuse",
-      "curvy",
-      "fingers",
-      "scattered",
-      "clustered",
-      "sine_bands",
-      "spots",
-      "banded"
-    ),
-    ...,
-    add_metadata = TRUE) {
+  pattern = c(
+    "sharp",
+    "diffuse",
+    "curvy",
+    "fingers",
+    "scattered",
+    "clustered",
+    "sine_bands",
+    "spots",
+    "banded"
+  ),
+  ...,
+  add_metadata = TRUE
+) {
   # Define valid patterns
   valid_patterns <- eval(formals()$pattern)
 
@@ -111,7 +112,8 @@ create_landscape <- function(
   }
 
   # Call the appropriate function based on the pattern with metadata parameter
-  landscape <- switch(matched,
+  landscape <- switch(
+    matched,
     sharp = do.call(create_landscape_sharp_treeline, dots),
     diffuse = do.call(create_landscape_diffuse_treeline, dots),
     curvy = do.call(create_landscape_curvy_treeline, dots),
@@ -164,26 +166,27 @@ create_landscape <- function(
 #' @return List. Named list of n generated landscapes with attributes for type and parameters.
 #' @export
 generate_training_landscapes <- function(
-    n = 10,
-    types = c(
-      "sharp",
-      "diffuse",
-      "curvy",
-      "fingers",
-      "scattered",
-      "clustered",
-      "sine_bands",
-      "spots",
-      "banded"
-    ),
-    width = 100,
-    height = 100,
-    add_rotation = TRUE,
-    rotation_angles = c(0, 45, 90, 135),
-    params_list = NULL,
-    seed = NULL,
-    crs = NULL,
-    type_weights = NULL) {
+  n = 10,
+  types = c(
+    "sharp",
+    "diffuse",
+    "curvy",
+    "fingers",
+    "scattered",
+    "clustered",
+    "sine_bands",
+    "spots",
+    "banded"
+  ),
+  width = 100,
+  height = 100,
+  add_rotation = TRUE,
+  rotation_angles = c(0, 45, 90, 135),
+  params_list = NULL,
+  seed = NULL,
+  crs = NULL,
+  type_weights = NULL
+) {
   # Validate inputs
   if (!is.numeric(n) || n < 1) {
     stop("'n' must be a positive integer")
@@ -223,7 +226,8 @@ generate_training_landscapes <- function(
         treeline_position = c(0.3, 0.7)
       ),
       diffuse = list(
-        steepness = c(1, 4)
+        steepness = c(0.5, 1, 2),
+        treeline_position = c(0.4, 0.5, 0.6)
       ),
       curvy = list(
         treeline_position = c(0.3, 0.7),

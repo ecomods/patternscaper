@@ -76,6 +76,7 @@ create_landscape_sharp_treeline <- function(
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
+#' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
 #' @param steepness Numeric. Steepness of the transition (default: 2).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
@@ -88,6 +89,7 @@ create_landscape_sharp_treeline <- function(
 create_landscape_diffuse_treeline <- function(
   width = 100,
   height = 100,
+  treeline_position = 0.5,
   steepness = 2,
   rotation = 0,
   seed = NULL,
@@ -108,12 +110,25 @@ create_landscape_diffuse_treeline <- function(
   # Create empty landscape
   landscape <- matrix(0, nrow = height_actual, ncol = width_actual)
 
-  # Fill with tree cover probability that decreases from 1 to 0 with increasing row index
+  # Determine the center of the transition zone
+  transition_center <- round(height_actual * treeline_position)
+
+  # Fill with tree cover probability that changes based on distance from transition center
   for (i in 1:height_actual) {
-    # Normalize row index [0,1] starting at 0
-    normalized_row <- (i - 1) / (height_actual - 1)
-    # Calculate probability for tree cover (starts 1 and decreases to 0)
-    prob <- 1 - normalized_row^steepness
+    # Calculate normalized position relative to transition center
+    # Ranges from -1 (top of image) to +1 (bottom of image)
+    relative_pos <- (i - transition_center) / (height_actual * 0.5)
+
+    # Calculate probability for tree cover:
+    # prob = 1 for rows above transition (relative_pos <= 0)
+    # prob decreases from 1 to 0 below transition following power curve
+    if (relative_pos <= 0) {
+      prob <- 1
+    } else {
+      prob <- max(0, 1 - (relative_pos)^steepness)
+    }
+
+    # Apply probability to each cell in this row
     for (j in 1:width_actual) {
       if (stats::runif(1) < prob) {
         landscape[i, j] <- 1
@@ -146,6 +161,7 @@ create_landscape_diffuse_treeline <- function(
       params = list(
         width = width,
         height = height,
+        treeline_position = treeline_position,
         steepness = steepness,
         rotation = rotation,
         seed = seed,
