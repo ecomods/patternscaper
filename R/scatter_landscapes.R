@@ -5,8 +5,10 @@
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
-#' @param scatter_density Numeric. Probability of tree presence (0-1) (default: 0.1).
+#' @param scatter_density Numeric. Probability of tree presence in the scatter zone (0-1) (default: 0.1).
+#'    Higher values result in a denser tree cover in the scatter zone.
 #' @param scatter_zone_prop Numeric. Proportion of height for scatter zone (default: 0.5).
+#'   Defines how far below the treeline scattered trees can appear.
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param seed Integer. Random seed for reproducibility (default: NULL).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
@@ -33,28 +35,28 @@ create_landscape_scattered_trees <- function(
   }
 
   # Calculate dimensions based on rotation
-  height <- ifelse(rotation == 0, height, height * 1.5)
-  width <- ifelse(rotation == 0, width, width * 1.5)
+  height_actual <- ifelse(rotation == 0, height, height * 1.5)
+  width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
   # Get base landscape with sharp treeline
   landscape <- create_landscape_sharp_treeline(
-    width,
-    height,
+    width_actual,
+    height_actual,
     treeline_position,
     as_raster = FALSE,
     add_metadata = FALSE
   )
 
   # Define scatter zone
-  treeline_row <- round(height * treeline_position)
+  treeline_row <- round(height_actual * treeline_position)
   scatter_zone_end <- min(
-    height,
-    treeline_row + round(height * scatter_zone_prop)
+    height_actual,
+    treeline_row + round(height_actual * scatter_zone_prop)
   )
 
   # Randomly place trees in scatter zone
   for (i in (treeline_row + 1):scatter_zone_end) {
-    for (j in 1:width) {
+    for (j in 1:width_actual) {
       if (stats::runif(1) < scatter_density) {
         landscape[i, j] <- 1
       }
