@@ -12,7 +12,9 @@
 #' @param noise Logical. Whether to add random noise to bands (default: FALSE).
 #' @param noise_sd Numeric. Standard deviation for random noise (default: 1).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
-#' @param seed Integer. Random seed for reproducibility (default: NULL).
+#' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
+#'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
@@ -30,15 +32,16 @@ create_landscape_sine_bands <- function(
   noise = FALSE,
   noise_sd = 1,
   rotation = 0,
-  seed = NULL,
+  seed = 42,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE
 ) {
-  # Set seed if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
+  # If seed is NULL, use random seed; otherwise use the provided seed
+  if (is.null(seed)) {
+    seed <- as.integer(Sys.time())
   }
+  set.seed(seed)
 
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
@@ -144,7 +147,9 @@ create_landscape_sine_bands <- function(
 #' @param y_ext_hill  List of Numerics. Extention/distortion of a hill into y-direction
 #' @param noise_sd Numeric. If random effects, which standard deviation
 #' @param rotation Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).
-#' @param seed Integer. Random seed for reproducibility (default: NULL).
+#' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
+#'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
@@ -161,15 +166,16 @@ create_landscape_banded <- function(
   y_ext_hill = c(1.2, 1, 1.6),
   noise_sd = 0.1,
   rotation = 0,
-  seed = NULL,
+  seed = 42,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE
 ) {
-  # Set seed if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
+  # If seed is NULL, use random seed; otherwise use the provided seed
+  if (is.null(seed)) {
+    seed <- as.integer(Sys.time())
   }
+  set.seed(seed)
   #Calculate position of the hills
   xpos_hill <- c(floor(width * 0.2), floor(width * 0.9), floor(width * 0.1))
   ypos_hill <- c(floor(height * 0.7), floor(height * 0.3), floor(height * 0.2))

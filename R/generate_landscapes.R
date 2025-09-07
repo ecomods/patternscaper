@@ -183,7 +183,7 @@ generate_training_landscapes <- function(
   add_rotation = TRUE,
   rotation_angles = c(0, 45, 90, 135),
   params_list = NULL,
-  seed = NULL,
+  seed = 42,
   crs = NULL,
   type_weights = NULL
 ) {

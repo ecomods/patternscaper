@@ -10,7 +10,9 @@
 #' @param scatter_zone_prop Numeric. Proportion of height for scatter zone (default: 0.5).
 #'   Defines how far below the treeline scattered trees can appear.
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
-#' @param seed Integer. Random seed for reproducibility (default: NULL).
+#' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
+#'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
@@ -24,15 +26,16 @@ create_landscape_scattered_trees <- function(
   scatter_density = 0.1,
   scatter_zone_prop = 0.2,
   rotation = 0,
-  seed = NULL,
+  seed = 42,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE
 ) {
-  # If seed is not provided, set it to current time
+  # If seed is NULL, use random seed; otherwise use the provided seed
   if (is.null(seed)) {
     seed <- as.integer(Sys.time())
   }
+  set.seed(seed)
 
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
@@ -113,7 +116,9 @@ create_landscape_scattered_trees <- function(
 #' @param scatter_zone_prop Numeric. Proportion of height for scatter zone (default: 0.5).
 #' @param elongation_x Numeric. Horizontal elongation factor for clusters (default: 1).
 #' @param elongation_y Numeric. Vertical elongation factor for clusters (default: 1).
-#' @param seed Integer. Random seed for reproducibility (default: NULL).
+#' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
+#'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
@@ -130,16 +135,17 @@ create_landscape_clustered_trees <- function(
   scatter_zone_prop = 0.5,
   elongation_x = 1,
   elongation_y = 1,
-  seed = NULL,
+  seed = 42,
   rotation = 0,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE
 ) {
-  # If seed is not provided, set it to current time
+  # If seed is NULL, use random seed; otherwise use the provided seed
   if (is.null(seed)) {
     seed <- as.integer(Sys.time())
   }
+  set.seed(seed)
   # Input validation
   if (!is.numeric(width) || width <= 0) {
     stop("'width' must be a positive number")
@@ -325,7 +331,9 @@ create_landscape_clustered_trees <- function(
 #' @param n_spots Integer. Number of non-vegetated spots
 #' @param spot_radius Integer. Radius of each spot
 #' @param noise_radius_sd Numeric. If random effects, which standard deviation (Default is 0 - no random effects)
-#' @param seed Integer. Random seed for reproducibility (default: NULL).
+#' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
+#'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
@@ -340,11 +348,16 @@ create_landscape_spots <- function(
   spot_radius = 5,
   noise_radius_sd = 0,
   rotation = 0,
-  seed = NULL,
+  seed = 42,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE
 ) {
+  # If seed is NULL, use random seed; otherwise use the provided seed
+  if (is.null(seed)) {
+    seed <- as.integer(Sys.time())
+  }
+  set.seed(seed)
   #Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
