@@ -2,6 +2,30 @@
 
 Here I document changes made to the function packages.
 
+## 2025-09-07
+
+### Summary of Changes
+### Remaining questions/problems
+
+- rotated landscape sometimes don't use space on the sides
+  - E.g. in the rotated finger landscape, the fingers are not generated on the sides of the landscape
+- setting seed in meta functions to generate training landscapes
+- scattered landscapes: If rotation > 0 then the scatter zone is too small and some clusters disappear from the final plot
+- Unify terminology:
+  - of parameters: thickness, width, frequency, amplitude, sine_length, etc.
+  - of file and function names: generate_landscape vs. create_landscape
+
+### Technical Details
+
+- Update documentation
+- diffuse treeline function now has argument treeline_position
+- fingers function fix argument `finger_length_prop` to work the same in bend and straight fingers
+- setting seed: Default is now 42 to ensure reproducibility. If set to NULL, the current time is used to create different landscapes each time.
+- spot pattern: remove rotation
+- sine wave pattern: Add option for `scatter_zone_prop` and adjust the number of bands accordingly
+- fix problem with rotation in scatter landscapes (the border cells were not rotated correctly)
+- Update ranges for parameters in `generate_training_landscapes`
+
 ## 2025-08-29
 
 ### Summary of Changes
