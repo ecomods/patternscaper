@@ -5,12 +5,14 @@
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
+#' @param band_zone_prop Numeric. Proportion of height of the total landscape to
+#'     allocate for bands below the treeline (default: 0.2). If the band zone is too small
+#'     for the given band spacing, no bands will be drawn and a warning will be issued.
 #' @param band_thickness Integer. Thickness of each band in pixels (default: 3).
 #' @param band_spacing Integer. Spacing between bands in pixels (default: 10).
 #' @param frequency Numeric. Frequency of sine wave (default: 2*pi/100).
 #' @param amplitude Numeric. Amplitude of sine wave in pixels (default: 5).
-#' @param noise Logical. Whether to add random noise to bands (default: FALSE).
-#' @param noise_sd Numeric. Standard deviation for random noise (default: 1).
+#' @param noise_sd Numeric. Standard deviation for random noise (default: 0).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
 #'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
@@ -25,12 +27,12 @@ create_landscape_sine_bands <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
+  band_zone_prop = 0.2,
   band_thickness = 3,
   band_spacing = 10,
   frequency = 2 * pi / 100,
   amplitude = 5,
-  noise = FALSE,
-  noise_sd = 1,
+  noise_sd = 0,
   rotation = 0,
   seed = 42,
   as_raster = TRUE,
@@ -63,17 +65,24 @@ create_landscape_sine_bands <- function(
     landscape[1:y, x] <- 1
   }
 
-  # Create tree bands below treeline
-  num_bands <- floor((height_actual - max(base_treeline)) / band_spacing)
+  # Create tree bands below treeline in the band zone
+  band_zone <- round(height_actual * band_zone_prop)
+  # check if the band zone is large enough for the given band spacing,
+  # otherwise warn the user and set band_zone to 0
+  if (band_zone > height_actual - max(base_treeline)) {
+    print(paste("band zone:", band_zone))
+    print(paste("Available space:", height_actual - max(base_treeline)))
+    print(paste("Max base treeline:", max(base_treeline)))
+    warning("Band zone too small for the given band spacing. No bands drawn.")
+    band_zone <- 0
+  }
+
+  num_bands <- floor(band_zone / band_spacing)
   band_offsets <- seq(band_spacing, by = band_spacing, length.out = num_bands)
 
   for (offset in band_offsets) {
     # Generate new noise just for this band
-    band_noise <- if (noise) {
-      stats::rnorm(width_actual, mean = 0, sd = noise_sd)
-    } else {
-      rep(0, width_actual)
-    }
+    band_noise <- stats::rnorm(width_actual, mean = 0, sd = noise_sd)
 
     for (x in 1:width_actual) {
       y_center <- base_treeline[x] + offset + band_noise[x]
@@ -120,7 +129,6 @@ create_landscape_sine_bands <- function(
         band_spacing = band_spacing,
         frequency = frequency,
         amplitude = amplitude,
-        noise = noise,
         noise_sd = noise_sd,
         rotation = rotation,
         seed = seed,
