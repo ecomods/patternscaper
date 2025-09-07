@@ -22,6 +22,31 @@
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+#'
+#' @examples
+#' # Default sine bands
+#' sine_bands_default <- create_landscape_sine_bands()
+#'
+#' # Modified sine bands with thicker bands, wider spacing and noise
+#' sine_bands_modified <- create_landscape_sine_bands(
+#'   treeline_position = 0.3,
+#'   band_zone_prop = 0.5,
+#'   band_thickness = 5,
+#'   band_spacing = 15,
+#'   frequency = 1,
+#'   amplitude = 8,
+#'   noise_sd = 1.5
+#' )
+#'
+#' # With rotation
+#' sine_bands_rotated <- create_landscape_sine_bands(
+#'   band_thickness = 4,
+#'   band_spacing = 12,
+#'   amplitude = 6,
+#'   noise_sd = 2,
+#'   rotation = 45
+#' )
+#'
 #' @export
 create_landscape_sine_bands <- function(
   width = 100,
@@ -163,6 +188,31 @@ create_landscape_sine_bands <- function(
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return A matrix representing the landscape with banded vegetation, where 1 indicates vegetation and 0 indicates bare soil.
+#'
+#' @examples
+#' # Default banded vegetation
+#' banded_default <- create_landscape_banded()
+#'
+#' # Modified banded vegetation with more bands and different hill parameters
+#' banded_modified <- create_landscape_banded(
+#'   nbands = 9,
+#'   hilltop = c(35, 25, 30),
+#'   slope = c(0.3, 0.15, 0.25),
+#'   x_ext_hill = c(1.5, 2.2, 1.8),
+#'   y_ext_hill = c(1.3, 1.1, 1.9),
+#'   noise_sd = 0.5
+#' )
+#'
+#' # With rotation
+#' banded_rotated <- create_landscape_banded(
+#'   nbands = 7,
+#'   hilltop = c(30, 22, 28),
+#'   slope = c(0.25, 0.12, 0.2),
+#'   x_ext_hill = c(1.4, 2.0, 1.6),
+#'   y_ext_hill = c(1.2, 1.0, 1.7),
+#'   noise_sd = 0.15,
+#'   rotation = 45
+#' )
 #' @export
 create_landscape_banded <- function(
   width = 100,

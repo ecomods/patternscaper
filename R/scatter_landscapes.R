@@ -18,19 +18,38 @@
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+#'
+#' @examples
+#' # Default scattered trees
+#' scattered_default <- create_landscape_scattered_trees()
+#'
+#' # Modified scattered trees with higher density in a larger scatter zone
+#' scattered_modified <- create_landscape_scattered_trees(
+#'   treeline_position = 0.3,
+#'   scatter_density = 0.7,
+#'   scatter_zone_prop = 0.2
+#' )
+#'
+#' # With rotation
+#' scattered_rotated <- create_landscape_scattered_trees(
+#'   treeline_position = 0.3,
+#'   scatter_density = 0.2,
+#'   scatter_zone_prop = 0.1,
+#'   rotation = 45
+#' )
+#'
 #' @export
 create_landscape_scattered_trees <- function(
-  width = 100,
-  height = 100,
-  treeline_position = 0.5,
-  scatter_density = 0.1,
-  scatter_zone_prop = 0.2,
-  rotation = 0,
-  seed = 42,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
-) {
+    width = 100,
+    height = 100,
+    treeline_position = 0.5,
+    scatter_density = 0.1,
+    scatter_zone_prop = 0.2,
+    rotation = 0,
+    seed = 42,
+    as_raster = TRUE,
+    crs = NULL,
+    add_metadata = TRUE) {
   # If seed is NULL, use random seed; otherwise use the provided seed
   if (is.null(seed)) {
     seed <- as.integer(Sys.time())
@@ -125,22 +144,47 @@ create_landscape_scattered_trees <- function(
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+#'
+#' @examples
+#' # Default clustered trees
+#' clustered_default <- create_landscape_clustered_trees()
+#'
+#' # Modified clustered trees with more elongated clusters
+#' clustered_modified <- create_landscape_clustered_trees(
+#'   treeline_position = 0.2,
+#'   num_clusters = 8,
+#'   cluster_radius = 7,
+#'   scatter_zone_prop = 0.6,
+#'   elongation_x = 2.5,
+#'   elongation_y = 0.5
+#' )
+#'
+#' # With rotation and random seed
+#' clustered_rotated <- create_landscape_clustered_trees(
+#'   num_clusters = 20,
+#'   cluster_radius = 2,
+#'   scatter_zone_prop = 0.5,
+#'   elongation_x = 1.8,
+#'   elongation_y = 1.4,
+#'   rotation = 45,
+#'   seed = NULL
+#' )
+#'
 #' @export
 create_landscape_clustered_trees <- function(
-  width = 100,
-  height = 100,
-  treeline_position = 0.5,
-  num_clusters = 10,
-  cluster_radius = 5,
-  scatter_zone_prop = 0.3,
-  elongation_x = 1,
-  elongation_y = 1,
-  seed = 42,
-  rotation = 0,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
-) {
+    width = 100,
+    height = 100,
+    treeline_position = 0.5,
+    num_clusters = 10,
+    cluster_radius = 5,
+    scatter_zone_prop = 0.3,
+    elongation_x = 1,
+    elongation_y = 1,
+    seed = 42,
+    rotation = 0,
+    as_raster = TRUE,
+    crs = NULL,
+    add_metadata = TRUE) {
   # If seed is NULL, use random seed; otherwise use the provided seed
   if (is.null(seed)) {
     seed <- as.integer(Sys.time())
@@ -320,10 +364,9 @@ create_landscape_clustered_trees <- function(
   }
 }
 
-#' Create a Landscape with rings that have no vegetation or spots that have no vegetation
+#' Create a Landscape with Spots Pattern
 #'
-#' Generates a vegetated landscape with spots with bare soil in between.
-#' The landscape can optionally be rotated.
+#' Generates a binary landscape with circular spots.
 #'
 #' @param width Integer. Number of columns in the landscape.
 #' @param height Integer. Number of rows in the landscape.
@@ -343,20 +386,37 @@ create_landscape_clustered_trees <- function(
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return A matrix representing the ringed/spotted landscape, where 1 indicates vegetation and 0 indicates bare soil.
+#' @examples
+#' # Default spots
+#' spots_default <- create_landscape_spots()
+#'
+#' # Modified spots with more spots and random radius variation
+#' spots_modified <- create_landscape_spots(
+#'   n_spots = 15,
+#'   spot_radius = 8,
+#'   noise_radius_sd = 2
+#' )
+#'
+#' # Inverted spots (vegetation outside spots instead of inside)
+#' spots_inverted <- create_landscape_spots(
+#'   n_spots = 15,
+#'   spot_radius = 8,
+#'   invert_landscape = TRUE,
+#'   noise_radius_sd = 2
+#' )
 #' @export
 create_landscape_spots <- function(
-  width = 100,
-  height = 100,
-  n_spots = 15,
-  spot_radius = 5,
-  noise_radius_sd = 0,
-  invert_landscape = FALSE,
-  seed = 42,
-  rotation = 0,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
-) {
+    width = 100,
+    height = 100,
+    n_spots = 15,
+    spot_radius = 5,
+    noise_radius_sd = 0,
+    invert_landscape = FALSE,
+    seed = 42,
+    rotation = 0,
+    as_raster = TRUE,
+    crs = NULL,
+    add_metadata = TRUE) {
   # If seed is NULL, use random seed; otherwise use the provided seed
   if (is.null(seed)) {
     seed <- as.integer(Sys.time())

@@ -11,6 +11,22 @@
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+#'
+#' @examples
+#' # Default sharp treeline
+#' sharp_default <- create_landscape_sharp_treeline()
+#'
+#' # Modified sharp treeline with higher treeline position
+#' sharp_modified <- create_landscape_sharp_treeline(
+#'   treeline_position = 0.7
+#' )
+#'
+#' # Landscape with rotation
+#' sharp_rotated <- create_landscape_sharp_treeline(
+#'   treeline_position = 0.3,
+#'   rotation = 45
+#' )
+#'
 #' @export
 create_landscape_sharp_treeline <- function(
   width = 100,
@@ -87,6 +103,24 @@ create_landscape_sharp_treeline <- function(
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+#'
+#' @examples
+#' # Default diffuse treeline
+#' diffuse_default <- create_landscape_diffuse_treeline()
+#'
+#' # Modified diffuse treeline with greater steepness
+#' diffuse_modified <- create_landscape_diffuse_treeline(
+#'   treeline_position = 0.2,
+#'   steepness = 0.1
+#' )
+#'
+#' # With rotation
+#' diffuse_rotated <- create_landscape_diffuse_treeline(
+#'   treeline_position = 0.3,
+#'   steepness = 2,
+#'   rotation = 45
+#' )
+#'
 #' @export
 create_landscape_diffuse_treeline <- function(
   width = 100,
@@ -191,6 +225,26 @@ create_landscape_diffuse_treeline <- function(
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
 #' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+#'
+#' @examples
+#' # Default curvy treeline
+#' curvy_default <- create_landscape_curvy_treeline()
+#'
+#' # Modified curvy treeline with increased sine parameters
+#' curvy_modified <- create_landscape_curvy_treeline(
+#'   treeline_position = 0.3,
+#'   sine_length = 40,
+#'   sine_height = 10
+#' )
+#'
+#' # With rotation
+#' curvy_rotated <- create_landscape_curvy_treeline(
+#'   treeline_position = 0.6,
+#'   sine_length = 10,
+#'   sine_height = 6,
+#'   rotation = 45
+#' )
+#'
 #' @export
 create_landscape_curvy_treeline <- function(
   width = 100,

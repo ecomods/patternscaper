@@ -32,24 +32,27 @@
 #' \code{\link{create_landscape_banded}} for "banded" pattern parameters
 #'
 #' @examples
-#' # Create a sharp treeline landscape
-#' sharp_landscape <- create_landscape("sharp", width = 200, height = 200)
+#' # Create a default landscape of various types
+#' sharp_default <- create_landscape("sharp")
+#' diffuse_default <- create_landscape("diffuse")
+#' clustered_default <- create_landscape("clustered")
 #'
-#' # Create a landscape with fingers
-#' fingers_landscape <- create_landscape(
-#'   "fingers",
-#'   width = 150,
-#'   height = 150,
-#'   num_fingers = 7,
-#'   finger_width = 5
+#' # Create a modified landscape with custom parameters
+#' scattered_modified <- create_landscape(
+#'   "scattered",
+#'   treeline_position = 0.3,
+#'   scatter_density = 0.7,
+#'   scatter_zone_prop = 0.2
 #' )
 #'
-#' # Create a landscape with metadata
-#' landscape_with_metadata <- create_landscape(
-#'   "scattered",
-#'   width = 100,
-#'   height = 100,
-#'   add_metadata = TRUE
+#' # Create a rotated landscape
+#' sine_bands_rotated <- create_landscape(
+#'   "sine_bands",
+#'   band_thickness = 4,
+#'   band_spacing = 12,
+#'   amplitude = 6,
+#'   noise_sd = 2,
+#'   rotation = 45
 #' )
 #'
 #' @export
