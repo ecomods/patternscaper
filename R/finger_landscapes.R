@@ -8,8 +8,8 @@
 #' @param height Integer. Height of the landscape (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline (0-1, default: 0.5).
 #' @param num_fingers Integer. Number of fingers to create (default: 5).
-#' @param finger_width Integer. Width of each finger in columns (default: 3).
-#' @param finger_length_prop Numeric. Proportion of height for finger length (default: 0.3).
+#' @param finger_width Integer. Width of each finger in pixels (default: 3).
+#' @param finger_length_prop Numeric. Proportion of height of the total landscape for finger length (default: 0.3).
 #' @param bend Logical. Should the fingers be bent in a sinus pattern or not? (default: FALSE).
 #' @param rotation Numeric. Degrees to rotate the landscape (default: 0).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
@@ -66,14 +66,16 @@ create_landscape_fingers <- function(
 
   # Create fingers extending from treeline
   if (bend) {
-    end_row <- min(round(5 / 6 * height_actual), treeline_row + finger_length)
+    # Use the same calculation as the non-bend case
+    end_row <- min(height_actual, treeline_row + finger_length)
 
     # Create fingers extending from treeline
     for (pos in finger_positions) {
       for (fin in treeline_row:end_row) {
         w <- pos + round(sin(2 * pi * fin / 10) * 3)
         for (fw in ((-floor(finger_width / 2)):(ceiling(finger_width / 2)))) {
-          if ((w + fw) > 0 && (w + fw) < width_actual) {
+          if ((w + fw) > 0 && (w + fw) <= width_actual) {
+            # Changed < to <= to include edge
             landscape[fin, w + fw] <- 1
           }
         }
