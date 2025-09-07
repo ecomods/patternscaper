@@ -10,7 +10,7 @@
 #'        of the individual functions for details on required and optional parameters.
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
-#' @return SpatRaster or List with landscape and metadata
+#' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
 #'
 #' @seealso
 #' \code{\link{create_landscape_sharp_treeline}} for "sharp" pattern parameters

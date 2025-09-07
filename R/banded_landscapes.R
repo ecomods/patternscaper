@@ -17,7 +17,7 @@
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
-#' @return SpatRaster or List with landscape and metadata
+#' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
 #' @export
 create_landscape_sine_bands <- function(
   width = 100,

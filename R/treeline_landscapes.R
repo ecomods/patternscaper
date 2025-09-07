@@ -10,7 +10,7 @@
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
-#' @return SpatRaster or List with landscape and metadata
+#' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
 #' @export
 create_landscape_sharp_treeline <- function(
   width = 100,
@@ -83,7 +83,7 @@ create_landscape_sharp_treeline <- function(
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
-#' @return SpatRaster or List with landscape and metadata
+#' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
 #' @export
 create_landscape_diffuse_treeline <- function(
   width = 100,
@@ -171,7 +171,7 @@ create_landscape_diffuse_treeline <- function(
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
-#' @return SpatRaster or List with landscape and metadata
+#' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
 #' @export
 create_landscape_curvy_treeline <- function(
   width = 100,

@@ -129,7 +129,7 @@ get_landscape_params <- function(x) {
 #' @param silent Logical. Whether to suppress conversion message (default: TRUE).
 #' @param crs Character. CRS to use if converting from matrix (default: NULL).
 #'
-#' @return SpatRaster or list with landscape and metadata.
+#' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata).
 ensure_spatraster <- function(
   landscape,
   extract_from_metadata = TRUE,
