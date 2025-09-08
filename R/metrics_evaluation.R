@@ -10,16 +10,19 @@
 #'     This is recommended if data is later used for model training as this does not
 #'     accept missing values.
 #' @param exclude_metrics Character vector. Metrics to exclude (default: NULL).
+#' @param correlation_threshold Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
 #'
 #' @return Character vector. Names of most sensitive metrics.
 #' @export
 evaluate_landscape_metrics <- function(
-    calculated_metrics,
-    metrics_number = 10,
-    method = "coeffvar_all",
-    plot = FALSE,
-    exclude_NA_metrics = TRUE,
-    exclude_metrics = NULL) {
+  calculated_metrics,
+  metrics_number = 10,
+  method = "coeffvar_all",
+  plot = FALSE,
+  exclude_NA_metrics = TRUE,
+  exclude_metrics = NULL,
+  correlation_threshold = 0.7
+) {
   # Validate input data
   if (
     !is.data.frame(calculated_metrics) && !tibble::is_tibble(calculated_metrics)
@@ -28,7 +31,9 @@ evaluate_landscape_metrics <- function(
   }
 
   if (!all(c("metric", "type", "value") %in% colnames(calculated_metrics))) {
-    stop("calculated_metrics must contain columns: landscape, metric, type, and value")
+    stop(
+      "calculated_metrics must contain columns: landscape, metric, type, and value"
+    )
   }
 
   # Validate method parameter early
@@ -82,15 +87,6 @@ evaluate_landscape_metrics <- function(
       ))
     }
   }
-  # Calculate correlation between metrics to later exclude correlated ones
-  metrics_correlation <- calculated_metrics |>
-    dplyr::select(landscape, metric, value) |>
-    tidyr::pivot_wider(
-      names_from = metric,
-      values_from = value
-    ) |>
-    select(-landscape) |>
-    cor()
 
   # Get unique metrics and types
   metrics_names <- unique(calculated_metrics$metric)
@@ -118,55 +114,27 @@ evaluate_landscape_metrics <- function(
     )
   }
 
-
-
   # Choose method for metric evaluation
   if (method == "coeffvar_all") {
-    # Calculate coefficient of variation for each metric
-    # Once for each landscape type separately, and once jointly
-    means_types <- as.data.frame(tapply(
-      calculated_metrics$value,
-      list(
-        as.factor(calculated_metrics$metric),
-        as.factor(calculated_metrics$type)
-      ),
-      mean,
-      na.rm = TRUE
-    ))
+    # Calculate coefficient of variation directly using group_by and summarize
+    cv_result <- calculated_metrics |>
+      dplyr::group_by(metric) |>
+      dplyr::summarize(
+        mean_val = mean(value, na.rm = TRUE),
+        sd_val = sd(value, na.rm = TRUE),
+        cv = sd_val / mean_val,
+        .groups = "drop"
+      ) |>
+      dplyr::arrange(desc(cv)) |>
+      dplyr::filter(is.finite(cv)) # Remove NaN/Inf values
 
-    means_types$all <- tapply(
-      calculated_metrics$value,
-      as.factor(calculated_metrics$metric),
-      mean,
-      na.rm = TRUE
+    # Select the best uncorrelated metrics
+    top_metrics <- select_metrics_correlation(
+      metric_ranking = cv_result$metric,
+      calculated_metrics = calculated_metrics,
+      metrics_number = metrics_number,
+      correlation_threshold = correlation_threshold
     )
-
-    sd_types <- as.data.frame(tapply(
-      calculated_metrics$value,
-      list(
-        as.factor(calculated_metrics$metric),
-        as.factor(calculated_metrics$type)
-      ),
-      sd,
-      na.rm = TRUE
-    ))
-
-    sd_types$all <- tapply(
-      calculated_metrics$value,
-      as.factor(calculated_metrics$metric),
-      sd,
-      na.rm = TRUE
-    )
-
-    # Coefficient of variation for all data
-    cv_values <- sd_types$all / means_types$all
-
-    # Handle zero means or NAs
-    cv_values[!is.finite(cv_values)] <- NA
-
-    # Rank metrics by coefficient of variation
-    ranking <- rank(cv_values, na.last = TRUE)
-    top_metrics <- metrics_names[ranking > (num_metrics - metrics_number)]
   } else if (method == "lin_mod_p") {
     means_types$p <- NA
 
@@ -264,7 +232,160 @@ evaluate_landscape_metrics <- function(
     plot_classification_results()
   }
 
+  return(top_metrics)
+}
 
+
+#' Select Uncorrelated Metrics
+#'
+#' Selects metrics with low correlation from a set of ranked metrics.
+#' This helps ensure the selected metrics provide diverse information.
+#'
+#' @param metric_ranking Character vector. Names of metrics in order of their ranking
+#'   (most important first).
+#' @param calculated_metrics Data frame. The calculated metrics data used to compute correlations.
+#'   Must contain columns 'landscape', 'metric', and 'value'.
+#' @param metrics_number Integer. Number of metrics to select.
+#' @param correlation_threshold Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
+#' @param verbose Logical. Whether to print progress messages (default: FALSE).
+#'
+#' @return Character vector. Names of selected uncorrelated metrics.
+select_metrics_correlation <- function(
+  metric_ranking,
+  calculated_metrics,
+  metrics_number,
+  correlation_threshold = 0.7,
+  verbose = FALSE
+) {
+  # Input validation
+  if (!is.character(metric_ranking) || length(metric_ranking) == 0) {
+    stop("metric_ranking must be a non-empty character vector of metric names")
+  }
+
+  if (
+    !is.data.frame(calculated_metrics) ||
+      !all(c("landscape", "metric", "value") %in% colnames(calculated_metrics))
+  ) {
+    stop(
+      "calculated_metrics must be a data frame with 'landscape', 'metric', and 'value' columns"
+    )
+  }
+
+  if (!is.numeric(metrics_number) || metrics_number < 1) {
+    stop("metrics_number must be a positive integer")
+  }
+
+  # Calculate correlation between metrics
+  metrics_correlation <- calculated_metrics |>
+    dplyr::select(landscape, metric, value) |>
+    tidyr::pivot_wider(
+      names_from = metric,
+      values_from = value
+    ) |>
+    dplyr::select(-landscape) |>
+    stats::cor(use = "pairwise.complete.obs")
+
+  # Use the ranked metrics vector directly
+  metric_options <- metric_ranking
+
+  # Check if all metrics in ranking exist in correlation matrix
+  missing_metrics <- setdiff(metric_options, rownames(metrics_correlation))
+  if (length(missing_metrics) > 0) {
+    warning(paste(
+      "The following metrics are missing from the correlation matrix:",
+      paste(missing_metrics, collapse = ", ")
+    ))
+    metric_options <- intersect(metric_options, rownames(metrics_correlation))
+  }
+
+  # Initialize results
+  top_metrics <- character(0)
+
+  # Select metrics with low correlation
+  i <- 0
+  while (TRUE) {
+    i <- i + 1
+    if (length(top_metrics) >= metrics_number || i > length(metric_options)) {
+      break
+    }
+
+    current_metric <- metric_options[i]
+
+    # Skip if already selected
+    if (current_metric %in% top_metrics) {
+      next
+    }
+
+    # Skip if not in correlation matrix
+    if (!current_metric %in% rownames(metrics_correlation)) {
+      warning(paste(
+        "Metric",
+        current_metric,
+        "not found in correlation matrix. Skipping."
+      ))
+      next
+    }
+
+    # Check correlation with all previously selected metrics
+    if (length(top_metrics) > 0) {
+      cor_values <- abs(metrics_correlation[current_metric, top_metrics])
+
+      if (verbose) {
+        message(paste(
+          "Correlation values:",
+          paste(cor_values, collapse = ", ")
+        ))
+      }
+
+      # Check if any correlation exceeds threshold
+      if (any(cor_values > correlation_threshold, na.rm = TRUE)) {
+        # Determine which correlations are too high
+        high_correlations <- which(cor_values > correlation_threshold)
+
+        message(paste(
+          "Skipping metric",
+          current_metric,
+          "due to high correlation with:",
+          paste(top_metrics[high_correlations], collapse = ", ")
+        ))
+        next
+      }
+    }
+
+    # Add metric to selected list
+    top_metrics <- c(top_metrics, current_metric)
+
+    if (verbose) {
+      message(paste(
+        "Selected metrics so far:",
+        paste(top_metrics, collapse = ", ")
+      ))
+    }
+  }
+
+  # Fill up with remaining metrics if needed
+  if (length(top_metrics) < metrics_number) {
+    warning(paste(
+      "Only",
+      length(top_metrics),
+      "uncorrelated metrics found.",
+      "Filling up to",
+      metrics_number,
+      "with next best correlated metrics."
+    ))
+
+    # Get remaining metrics in order of importance
+    additional_metrics <- setdiff(metric_options, top_metrics)
+    needed_count <- min(
+      length(additional_metrics),
+      metrics_number - length(top_metrics)
+    )
+
+    top_metrics <- c(
+      top_metrics,
+      additional_metrics[1:needed_count]
+    )
+  }
 
   return(top_metrics)
 }
