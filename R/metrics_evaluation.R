@@ -11,6 +11,7 @@
 #'     accept missing values.
 #' @param exclude_metrics Character vector. Metrics to exclude (default: NULL).
 #' @param correlation_threshold Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
+#'     If you don't want to filter based on correlation, set to 1.
 #'
 #' @return Character vector. Names of most sensitive metrics.
 #' @export
@@ -128,73 +129,71 @@ evaluate_landscape_metrics <- function(
       dplyr::arrange(desc(cv)) |>
       dplyr::filter(is.finite(cv)) # Remove NaN/Inf values
 
-    # Select the best uncorrelated metrics
-    top_metrics <- select_metrics_correlation(
-      metric_ranking = cv_result$metric,
-      calculated_metrics = calculated_metrics,
-      metrics_number = metrics_number,
-      correlation_threshold = correlation_threshold
-    )
-  } else if (method == "lin_mod_p") {
-    means_types$p <- NA
-
-    for (i in 1:num_metrics) {
-      dat <- calculated_metrics[calculated_metrics$metric == metrics_names[i], ]
-
-      # Ensure we have valid data for linear model
-      if (nrow(dat) > 0 && !all(is.na(dat$value))) {
-        tryCatch(
-          {
-            model <- lm(data = dat, value ~ type)
-            # Get p-value from ANOVA
-            means_types$p[i] <- anova(model)$`Pr(>F)`[1]
-          },
-          error = function(e) {
-            warning(paste(
-              "Error fitting model for metric",
-              metrics_names[i],
-              ":",
-              e$message
-            ))
-            means_types$p[i] <- NA
+    if (correlation_threshold < 1) {
+      # Select the best uncorrelated metrics
+      top_metrics <- select_metrics_correlation(
+        metric_ranking = cv_result$metric,
+        calculated_metrics = calculated_metrics,
+        metrics_number = metrics_number,
+        correlation_threshold = correlation_threshold
+      )
+    } else {
+      top_metrics <- cv_result$metric[1:metrics_number]
+    }
+  } else if (method == "lin_mod_p" || method == "lin_mod_r2") {
+    # Create a nested dataframe with data for each metric
+    metric_models <- calculated_metrics |>
+      dplyr::group_by(metric) |>
+      tidyr::nest() |>
+      dplyr::mutate(
+        # Fit linear model for each metric
+        model = purrr::map(data, function(df) {
+          tryCatch(
+            lm(value ~ type, data = df),
+            error = function(e) NULL
+          )
+        }),
+        # Extract p-value from ANOVA for each model
+        p_value = purrr::map_dbl(model, function(m) {
+          if (is.null(m)) {
+            return(NA_real_)
           }
-        )
-      }
+          tryCatch(
+            anova(m)$`Pr(>F)`[1],
+            error = function(e) NA_real_
+          )
+        }),
+        r2 = purrr::map_dbl(model, function(m) {
+          if (is.null(m)) {
+            return(NA_real_)
+          }
+          tryCatch(
+            summary(m)$r.squared,
+            error = function(e) NA_real_
+          )
+        })
+      )
+
+    if (method == "lin_mod_p") {
+      metric_models <- metric_models |>
+        dplyr::arrange(p_value) # Sort by p-value (smallest first)
+    } else if (method == "lin_mod_r2") {
+      metric_models <- metric_models |>
+        dplyr::arrange(desc(r2)) # Sort by R-squared (largest first)
     }
 
-    # Ranking of the smallest p-values
-    ranking <- rank(means_types$p, na.last = TRUE)
-    top_metrics <- metrics_names[ranking <= metrics_number]
-  } else if (method == "lin_mod_r2") {
-    # Linear model using R-squared
-    means_types$r2 <- NA
-
-    for (i in 1:num_metrics) {
-      dat <- calculated_metrics[calculated_metrics$metric == metrics_names[i], ]
-
-      # Ensure we have valid data for linear model
-      if (nrow(dat) > 0 && !all(is.na(dat$value))) {
-        tryCatch(
-          {
-            model <- lm(data = dat, value ~ type)
-            means_types$r2[i] <- summary(model)$r.squared
-          },
-          error = function(e) {
-            warning(paste(
-              "Error fitting model for metric",
-              metrics_names[i],
-              ":",
-              e$message
-            ))
-            means_types$r2[i] <- NA
-          }
-        )
-      }
+    # Use correlation selection if requested
+    if (correlation_threshold < 1) {
+      top_metrics <- select_metrics_correlation(
+        metric_ranking = metric_models$metric,
+        calculated_metrics = calculated_metrics,
+        metrics_number = metrics_number,
+        correlation_threshold = correlation_threshold,
+        verbose = FALSE
+      )
+    } else {
+      top_metrics <- metric_models$metric[1:metrics_number]
     }
-
-    # Ranking of the highest R-squared values
-    ranking <- rank(means_types$r2, na.last = TRUE)
-    top_metrics <- metrics_names[ranking > (num_metrics - metrics_number)] # take only top x
   }
 
   #--------------------------------------------------------------------------------------------
