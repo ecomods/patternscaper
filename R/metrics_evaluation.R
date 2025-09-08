@@ -14,13 +14,12 @@
 #' @return Character vector. Names of most sensitive metrics.
 #' @export
 evaluate_landscape_metrics <- function(
-  calculated_metrics,
-  metrics_number = 10,
-  method = "coeffvar_all",
-  plot = FALSE,
-  exclude_NA_metrics = TRUE,
-  exclude_metrics = NULL
-) {
+    calculated_metrics,
+    metrics_number = 10,
+    method = "coeffvar_all",
+    plot = FALSE,
+    exclude_NA_metrics = TRUE,
+    exclude_metrics = NULL) {
   # Validate input data
   if (
     !is.data.frame(calculated_metrics) && !tibble::is_tibble(calculated_metrics)
@@ -29,7 +28,7 @@ evaluate_landscape_metrics <- function(
   }
 
   if (!all(c("metric", "type", "value") %in% colnames(calculated_metrics))) {
-    stop("calculated_metrics must contain columns: metric, type, and value")
+    stop("calculated_metrics must contain columns: landscape, metric, type, and value")
   }
 
   # Validate method parameter early
@@ -83,9 +82,15 @@ evaluate_landscape_metrics <- function(
       ))
     }
   }
-
-  # Initialize top_metrics
-  top_metrics <- NULL
+  # Calculate correlation between metrics to later exclude correlated ones
+  metrics_correlation <- calculated_metrics |>
+    dplyr::select(landscape, metric, value) |>
+    tidyr::pivot_wider(
+      names_from = metric,
+      values_from = value
+    ) |>
+    select(-landscape) |>
+    cor()
 
   # Get unique metrics and types
   metrics_names <- unique(calculated_metrics$metric)
@@ -113,44 +118,46 @@ evaluate_landscape_metrics <- function(
     )
   }
 
-  # Calculate coefficient of variation for each metric
-  # Once for each landscape type separately, and once jointly
-  means_types <- as.data.frame(tapply(
-    calculated_metrics$value,
-    list(
-      as.factor(calculated_metrics$metric),
-      as.factor(calculated_metrics$type)
-    ),
-    mean,
-    na.rm = TRUE
-  ))
 
-  means_types$all <- tapply(
-    calculated_metrics$value,
-    as.factor(calculated_metrics$metric),
-    mean,
-    na.rm = TRUE
-  )
-
-  sd_types <- as.data.frame(tapply(
-    calculated_metrics$value,
-    list(
-      as.factor(calculated_metrics$metric),
-      as.factor(calculated_metrics$type)
-    ),
-    sd,
-    na.rm = TRUE
-  ))
-
-  sd_types$all <- tapply(
-    calculated_metrics$value,
-    as.factor(calculated_metrics$metric),
-    sd,
-    na.rm = TRUE
-  )
 
   # Choose method for metric evaluation
   if (method == "coeffvar_all") {
+    # Calculate coefficient of variation for each metric
+    # Once for each landscape type separately, and once jointly
+    means_types <- as.data.frame(tapply(
+      calculated_metrics$value,
+      list(
+        as.factor(calculated_metrics$metric),
+        as.factor(calculated_metrics$type)
+      ),
+      mean,
+      na.rm = TRUE
+    ))
+
+    means_types$all <- tapply(
+      calculated_metrics$value,
+      as.factor(calculated_metrics$metric),
+      mean,
+      na.rm = TRUE
+    )
+
+    sd_types <- as.data.frame(tapply(
+      calculated_metrics$value,
+      list(
+        as.factor(calculated_metrics$metric),
+        as.factor(calculated_metrics$type)
+      ),
+      sd,
+      na.rm = TRUE
+    ))
+
+    sd_types$all <- tapply(
+      calculated_metrics$value,
+      as.factor(calculated_metrics$metric),
+      sd,
+      na.rm = TRUE
+    )
+
     # Coefficient of variation for all data
     cv_values <- sd_types$all / means_types$all
 
@@ -219,11 +226,11 @@ evaluate_landscape_metrics <- function(
 
     # Ranking of the highest R-squared values
     ranking <- rank(means_types$r2, na.last = TRUE)
-    top_metrics <- metrics_names[ranking > (num_metrics - metrics_number)] #take only top x
+    top_metrics <- metrics_names[ranking > (num_metrics - metrics_number)] # take only top x
   }
 
   #--------------------------------------------------------------------------------------------
-  #how strongly do the means vary from the overall mean
+  # how strongly do the means vary from the overall mean
   #--------------------------------------------------------------------------------------------
   if (method == "mean_groups") {
     # Calculate relative difference from mean for each type
@@ -256,6 +263,8 @@ evaluate_landscape_metrics <- function(
   if (plot) {
     plot_classification_results()
   }
+
+
 
   return(top_metrics)
 }
