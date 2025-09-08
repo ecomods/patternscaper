@@ -244,12 +244,6 @@ evaluate_landscape_metrics <- function(
       top_metrics <- ranking$metric[1:metrics_number]
     }
   }
-
-  # Plot classification results if requested
-  if (plot) {
-    plot_classification_results()
-  }
-
   return(top_metrics)
 }
 
