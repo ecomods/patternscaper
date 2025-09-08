@@ -6,6 +6,9 @@
 #' @param metrics_number Integer. Number of top metrics to return (default: 10).
 #' @param method Character. Selection method (options: "coeffvar_all", "lin_mod_r2", "mean_groups") (default: "coeffvar_all").
 #' @param plot Logical. Whether to generate visualization (default: FALSE).
+#' @param exclude_NA_metrics Logical. Whether to exclude metrics with NA values (default: TRUE).
+#'     This is recommended if data is later used for model training as this does not
+#'     accept missing values.
 #' @param exclude_metrics Character vector. Metrics to exclude (default: NULL).
 #'
 #' @return Character vector. Names of most sensitive metrics.
@@ -15,6 +18,7 @@ evaluate_landscape_metrics <- function(
   metrics_number = 10,
   method = "coeffvar_all",
   plot = FALSE,
+  exclude_NA_metrics = TRUE,
   exclude_metrics = NULL
 ) {
   # Validate input data
@@ -49,6 +53,34 @@ evaluate_landscape_metrics <- function(
     ]
     if (nrow(calculated_metrics) == 0) {
       stop("No metrics left after exclusion")
+    }
+  }
+
+  # Exclude metrics with NA values is requested
+  if (exclude_NA_metrics) {
+    na_metrics <- calculated_metrics |>
+      dplyr::filter(is.na(value)) |>
+      dplyr::pull(metric) |>
+      unique()
+    nrow_before <- nrow(calculated_metrics)
+    calculated_metrics <- calculated_metrics[
+      !calculated_metrics$metric %in% na_metrics,
+    ]
+    nrow_after <- nrow(calculated_metrics)
+    if (nrow_after == 0) {
+      stop("No metrics left after excluding those with NA values")
+    }
+    if (length(na_metrics) > 0) {
+      message(paste(
+        "Excluded",
+        nrow_before - nrow_after,
+        "rows due to",
+        length(na_metrics),
+        "metrics with NA values:",
+        paste(na_metrics, collapse = ", "),
+        "\n",
+        "Use exclude_NA_metrics = FALSE to retain these metrics (not recommended for model training)."
+      ))
     }
   }
 
