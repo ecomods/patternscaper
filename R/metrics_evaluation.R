@@ -195,34 +195,53 @@ evaluate_landscape_metrics <- function(
       top_metrics <- metric_models$metric[1:metrics_number]
     }
   }
-
-  #--------------------------------------------------------------------------------------------
-  # how strongly do the means vary from the overall mean
-  #--------------------------------------------------------------------------------------------
   if (method == "mean_groups") {
+    # Calculate coefficient of variation directly using group_by and summarize
+    means_all <- calculated_metrics |>
+      dplyr::summarize(
+        mean_all = mean(value, na.rm = TRUE),
+        .by = metric
+      )
+    means_types <- calculated_metrics |>
+      dplyr::summarize(
+        mean_type = mean(value, na.rm = TRUE),
+        .by = c(metric, type)
+      )
+
+    means_groups <- means_types |>
+      dplyr::left_join(means_all, by = "metric")
+
     # Calculate relative difference from mean for each type
-    rel_mean_diff <- (means_types[, 1:num_types] - means_types$all) /
-      means_types$all
-
-    # Handle NaN, Inf values from division by zero or very small numbers
-    rel_mean_diff[!is.finite(rel_mean_diff)] <- NA
-
-    # Calculate absolute difference for better comparison
-    abs_diff <- abs(rel_mean_diff)
+    means_groups <- means_groups |>
+      dplyr::mutate(rel_mean_diff = abs((mean_type - mean_all) / mean_all)) |>
+      # Handle cases where mean_all is zero to avoid Inf values
+      dplyr::mutate(
+        rel_mean_diff = ifelse(
+          is.finite(rel_mean_diff),
+          rel_mean_diff,
+          NA_real_
+        )
+      )
 
     # Calculate overall importance score for each metric (sum across types)
-    importance_scores <- rowSums(abs_diff, na.rm = TRUE)
+    ranking <- dplyr::summarize(
+      means_groups,
+      importance_scores = sum(rel_mean_diff, na.rm = TRUE),
+      .by = metric
+    ) |>
+      # Rank by importance (higher total deviation = better discriminating power)
+      dplyr::arrange(desc(importance_scores))
 
-    # Rank by importance (higher total deviation = better discriminating power)
-    ranking <- rank(-importance_scores, na.last = TRUE)
-
-    # Select top metrics based on user-specified count
-    top_metrics <- metrics_names[ranking <= metrics_number]
-
-    # If no metrics selected (e.g., all NA), provide a warning
-    if (length(top_metrics) == 0) {
-      warning("No metrics selected by mean_groups method. Check your data.")
-      top_metrics <- metrics_names[1:min(metrics_number, num_metrics)]
+    if (correlation_threshold < 1) {
+      # Select the best uncorrelated metrics
+      top_metrics <- select_metrics_correlation(
+        metric_ranking = ranking$metric,
+        calculated_metrics = calculated_metrics,
+        metrics_number = metrics_number,
+        correlation_threshold = correlation_threshold
+      )
+    } else {
+      top_metrics <- ranking$metric[1:metrics_number]
     }
   }
 
