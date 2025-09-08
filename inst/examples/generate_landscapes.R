@@ -1,4 +1,11 @@
+# Load all functions in the package (Keyboard shortcut in RStudio: Ctrl+Shift+L)
+# If you change functions, run it again
+# You can call ?function to open up the help
 devtools::load_all()
+
+# ----------------------------------------------------------------------------#
+# Generate multiple training landscapes --------------------------------------
+# ----------------------------------------------------------------------------#
 
 # Reproducible with same landscapes every time (is also default if seed is not set)
 landscapes <- generate_training_landscapes(n = 20, seed = 42)
@@ -29,7 +36,9 @@ landscapes <- generate_training_landscapes(
 # plot all training landscapes
 plot_landscape_list(landscapes)
 
-# Test individual landscape functions -----------------------------------------
+# ----------------------------------------------------------------------------#
+# Generate individual landscapes ---------------------------------------
+# ----------------------------------------------------------------------------#
 
 # Sharp treeline --------------------------------------------------------------
 # Default sharp treeline
