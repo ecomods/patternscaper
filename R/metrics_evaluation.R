@@ -89,11 +89,8 @@ evaluate_landscape_metrics <- function(
     }
   }
 
-  # Get unique metrics and types
-  metrics_names <- unique(calculated_metrics$metric)
-  num_metrics <- length(metrics_names)
-
-  # Check if we have enough metrics
+  # Check if we have enough metrics to supply the requested number
+  num_metrics <- length(unique(calculated_metrics$metric))
   if (num_metrics < metrics_number) {
     warning(paste(
       "Requested",
@@ -105,148 +102,192 @@ evaluate_landscape_metrics <- function(
     metrics_number <- num_metrics
   }
 
-  # Number of landscape types
-  landscape_types <- unique(calculated_metrics$type)
-  num_types <- length(landscape_types)
-
-  if (num_types < 2) {
+  # Check if we have at least two landscape types
+  if (length(unique(calculated_metrics$type)) < 2) {
     stop(
       "At least two different landscape types are required for metric evaluation"
     )
   }
 
-  # Choose method for metric evaluation
-  if (method == "coeffvar_all") {
-    # Calculate coefficient of variation directly using group_by and summarize
-    cv_result <- calculated_metrics |>
-      dplyr::group_by(metric) |>
-      dplyr::summarize(
-        mean_val = mean(value, na.rm = TRUE),
-        sd_val = sd(value, na.rm = TRUE),
-        cv = sd_val / mean_val,
-        .groups = "drop"
-      ) |>
-      dplyr::arrange(desc(cv)) |>
-      dplyr::filter(is.finite(cv)) # Remove NaN/Inf values
+  # Get ranked metrics using the selected method
+  ranked_metrics <- rank_metrics_by_method(
+    calculated_metrics = calculated_metrics,
+    method = method
+  )
 
-    if (correlation_threshold < 1) {
-      # Select the best uncorrelated metrics
-      top_metrics <- select_metrics_correlation(
-        metric_ranking = cv_result$metric,
-        calculated_metrics = calculated_metrics,
-        metrics_number = metrics_number,
-        correlation_threshold = correlation_threshold
-      )
-    } else {
-      top_metrics <- cv_result$metric[1:metrics_number]
-    }
-  } else if (method == "lin_mod_p" || method == "lin_mod_r2") {
-    # Create a nested dataframe with data for each metric
-    metric_models <- calculated_metrics |>
-      dplyr::group_by(metric) |>
-      tidyr::nest() |>
-      dplyr::mutate(
-        # Fit linear model for each metric
-        model = purrr::map(data, function(df) {
-          tryCatch(
-            lm(value ~ type, data = df),
-            error = function(e) NULL
-          )
-        }),
-        # Extract p-value from ANOVA for each model
-        p_value = purrr::map_dbl(model, function(m) {
-          if (is.null(m)) {
-            return(NA_real_)
-          }
-          tryCatch(
-            anova(m)$`Pr(>F)`[1],
-            error = function(e) NA_real_
-          )
-        }),
-        r2 = purrr::map_dbl(model, function(m) {
-          if (is.null(m)) {
-            return(NA_real_)
-          }
-          tryCatch(
-            summary(m)$r.squared,
-            error = function(e) NA_real_
-          )
-        })
-      )
-
-    if (method == "lin_mod_p") {
-      metric_models <- metric_models |>
-        dplyr::arrange(p_value) # Sort by p-value (smallest first)
-    } else if (method == "lin_mod_r2") {
-      metric_models <- metric_models |>
-        dplyr::arrange(desc(r2)) # Sort by R-squared (largest first)
-    }
-
-    # Use correlation selection if requested
-    if (correlation_threshold < 1) {
-      top_metrics <- select_metrics_correlation(
-        metric_ranking = metric_models$metric,
-        calculated_metrics = calculated_metrics,
-        metrics_number = metrics_number,
-        correlation_threshold = correlation_threshold,
-        verbose = FALSE
-      )
-    } else {
-      top_metrics <- metric_models$metric[1:metrics_number]
-    }
+  # Select metrics with low correlation if requested
+  if (correlation_threshold < 1) {
+    top_metrics <- select_metrics_correlation(
+      metric_ranking = ranked_metrics,
+      calculated_metrics = calculated_metrics,
+      metrics_number = metrics_number,
+      correlation_threshold = correlation_threshold
+    )
+  } else {
+    top_metrics <- ranked_metrics[1:metrics_number]
   }
-  if (method == "mean_groups") {
-    # Calculate coefficient of variation directly using group_by and summarize
-    means_all <- calculated_metrics |>
-      dplyr::summarize(
-        mean_all = mean(value, na.rm = TRUE),
-        .by = metric
-      )
-    means_types <- calculated_metrics |>
-      dplyr::summarize(
-        mean_type = mean(value, na.rm = TRUE),
-        .by = c(metric, type)
-      )
 
-    means_groups <- means_types |>
-      dplyr::left_join(means_all, by = "metric")
-
-    # Calculate relative difference from mean for each type
-    means_groups <- means_groups |>
-      dplyr::mutate(rel_mean_diff = abs((mean_type - mean_all) / mean_all)) |>
-      # Handle cases where mean_all is zero to avoid Inf values
-      dplyr::mutate(
-        rel_mean_diff = ifelse(
-          is.finite(rel_mean_diff),
-          rel_mean_diff,
-          NA_real_
-        )
-      )
-
-    # Calculate overall importance score for each metric (sum across types)
-    ranking <- dplyr::summarize(
-      means_groups,
-      importance_scores = sum(rel_mean_diff, na.rm = TRUE),
-      .by = metric
-    ) |>
-      # Rank by importance (higher total deviation = better discriminating power)
-      dplyr::arrange(desc(importance_scores))
-
-    if (correlation_threshold < 1) {
-      # Select the best uncorrelated metrics
-      top_metrics <- select_metrics_correlation(
-        metric_ranking = ranking$metric,
-        calculated_metrics = calculated_metrics,
-        metrics_number = metrics_number,
-        correlation_threshold = correlation_threshold
-      )
-    } else {
-      top_metrics <- ranking$metric[1:metrics_number]
-    }
-  }
   return(top_metrics)
 }
 
+#' Rank Metrics by Method
+#'
+#' Internal function that ranks metrics according to different methods.
+#'
+#' @param calculated_metrics tibble. Metrics data.
+#' @param method Character. Selection method to use.
+#'
+#' @return Character vector. Metrics ranked from best to worst according to method.
+#' @noRd
+rank_metrics_by_method <- function(calculated_metrics, method) {
+  if (method == "coeffvar_all") {
+    return(rank_by_coefficient_variation(calculated_metrics))
+  } else if (method == "lin_mod_p") {
+    return(rank_by_linear_model(
+      calculated_metrics,
+      stat = "p_value"
+    ))
+  } else if (method == "lin_mod_r2") {
+    return(rank_by_linear_model(
+      calculated_metrics,
+      stat = "r2"
+    ))
+  } else if (method == "mean_groups") {
+    return(rank_by_mean_differences(calculated_metrics))
+  } else {
+    stop(paste("Unknown method:", method))
+  }
+}
+
+#' Rank by Coefficient of Variation
+#'
+#' Ranks metrics by their coefficient of variation (CV)
+#'
+#' @param calculated_metrics tibble. Metrics data.
+#'
+#' @return Character vector. Metrics ranked by CV (highest first).
+#' @noRd
+rank_by_coefficient_variation <- function(calculated_metrics) {
+  cv_result <- calculated_metrics |>
+    dplyr::group_by(metric) |>
+    dplyr::summarize(
+      mean_val = mean(value, na.rm = TRUE),
+      sd_val = sd(value, na.rm = TRUE),
+      cv = sd_val / mean_val,
+      .groups = "drop"
+    ) |>
+    dplyr::arrange(desc(cv)) |>
+    dplyr::filter(is.finite(cv)) # Remove NaN/Inf values
+
+  return(cv_result$metric)
+}
+
+#' Rank by Linear Model Statistics
+#'
+#' Ranks metrics by either p-value or R-squared from linear models
+#'
+#' @param calculated_metrics tibble. Metrics data.
+#' @param stat Character. Statistic to rank by: "p_value" or "r2".
+#'
+#' @return Character vector. Metrics ranked by the specified statistic.
+#' @noRd
+rank_by_linear_model <- function(
+  calculated_metrics,
+  stat = "p_value"
+) {
+  # Create a nested dataframe with data for each metric
+  metric_models <- calculated_metrics |>
+    dplyr::group_by(metric) |>
+    tidyr::nest() |>
+    dplyr::mutate(
+      # Fit linear model for each metric
+      model = purrr::map(data, function(df) {
+        tryCatch(
+          lm(value ~ type, data = df),
+          error = function(e) NULL
+        )
+      }),
+      # Extract p-value from ANOVA for each model
+      p_value = purrr::map_dbl(model, function(m) {
+        if (is.null(m)) {
+          return(NA_real_)
+        }
+        tryCatch(
+          anova(m)$`Pr(>F)`[1],
+          error = function(e) NA_real_
+        )
+      }),
+      r2 = purrr::map_dbl(model, function(m) {
+        if (is.null(m)) {
+          return(NA_real_)
+        }
+        tryCatch(
+          summary(m)$r.squared,
+          error = function(e) NA_real_
+        )
+      })
+    )
+
+  # Sort by the specified statistic
+  if (stat == "p_value") {
+    metric_models <- metric_models |>
+      dplyr::arrange(p_value) # Smallest p-values first
+  } else if (stat == "r2") {
+    metric_models <- metric_models |>
+      dplyr::arrange(dplyr::desc(r2)) # Largest R² first
+  }
+
+  return(metric_models$metric)
+}
+
+#' Rank by Mean Differences
+#'
+#' Ranks metrics by their ability to differentiate between landscape types
+#' based on the differences in means across types.
+#'
+#' @param calculated_metrics tibble. Metrics data.
+#'
+#' @return Character vector. Metrics ranked by mean differences (highest first).
+#' @noRd
+rank_by_mean_differences <- function(calculated_metrics) {
+  # Calculate means across all data and by type
+  means_all <- calculated_metrics |>
+    dplyr::summarize(
+      mean_all = mean(value, na.rm = TRUE),
+      .by = metric
+    )
+  means_types <- calculated_metrics |>
+    dplyr::summarize(
+      mean_type = mean(value, na.rm = TRUE),
+      .by = c(metric, type)
+    )
+
+  means_groups <- means_types |>
+    dplyr::left_join(means_all, by = "metric")
+
+  # Calculate relative difference from mean for each type
+  means_groups <- means_groups |>
+    dplyr::mutate(rel_mean_diff = abs((mean_type - mean_all) / mean_all)) |>
+    # Handle cases where mean_all is zero to avoid Inf values
+    dplyr::mutate(
+      rel_mean_diff = ifelse(
+        is.finite(rel_mean_diff),
+        rel_mean_diff,
+        NA_real_
+      )
+    )
+
+  # Calculate overall importance score for each metric (sum across types)
+  ranking <- dplyr::summarize(
+    means_groups,
+    importance_scores = sum(rel_mean_diff, na.rm = TRUE),
+    .by = metric
+  ) |>
+    # Rank by importance (higher total deviation = better discriminating power)
+    dplyr::arrange(desc(importance_scores))
+
+  return(ranking$metric)
+}
 
 #' Select Uncorrelated Metrics
 #'
@@ -262,6 +303,7 @@ evaluate_landscape_metrics <- function(
 #' @param verbose Logical. Whether to print progress messages (default: FALSE).
 #'
 #' @return Character vector. Names of selected uncorrelated metrics.
+#' @noRd
 select_metrics_correlation <- function(
   metric_ranking,
   calculated_metrics,
