@@ -12,6 +12,9 @@ landscapes <- generate_training_landscapes(n = 20, seed = 42)
 # different landscapes every time
 landscapes <- generate_training_landscapes(n = 20, seed = NULL)
 
+# Randomly sampled landscape types (by default the function balances the types)
+landscapes <- generate_training_landscapes(n = 20, seed = 42, balance_types = FALSE)
+
 # generate only specific landscape types
 landscapes <- generate_training_landscapes(
   n = 20,
@@ -24,6 +27,7 @@ landscapes <- generate_training_landscapes(
   n = 20,
   seed = 42,
   types = c("banded", "spots", "clustered"),
+  balance_types = FALSE,
   type_probs = c(0.1, 1, 0.2)
 )
 

@@ -168,7 +168,9 @@ create_landscape <- function(
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param type_probs Numeric vector. Probability that a specific landscape type is chosen.
 #'     By default, all types have equal probability (1) of being chosen.
-#'     Must be the same length as 'types'.
+#'     Must be the same length as 'types' (default NULL which means equal probability).
+#' @param balance_types Logical. If TRUE, ensures all landscape types appear approximately equally.
+#'     This overrides type_probs unless it's explicitly set. (default: TRUE)
 #'
 #' @return List. Named list of n generated landscapes with attributes for type and parameters.
 #' @export
@@ -192,7 +194,8 @@ generate_training_landscapes <- function(
   params_list = NULL,
   seed = 42,
   crs = NULL,
-  type_probs = NULL
+  type_probs = NULL,
+  balance_types = TRUE
 ) {
   # Validate inputs
   if (!is.numeric(n) || n < 1) {
@@ -299,16 +302,6 @@ generate_training_landscapes <- function(
     }
   }
 
-  # Setup type weights for sampling
-  if (is.null(type_probs)) {
-    type_probs <- rep(1, length(types))
-  } else if (length(type_probs) != length(types)) {
-    warning(
-      "Length of type_probs doesn't match length of types. Using equal weights."
-    )
-    type_probs <- rep(1, length(types))
-  }
-
   # Initialize results list
   all_landscapes <- list()
 
@@ -321,13 +314,42 @@ generate_training_landscapes <- function(
     sampled_rotations <- rep(0, n)
   }
 
-  # Sample the landscape types
-  sampled_types <- sample(
-    types,
-    size = n,
-    replace = TRUE,
-    prob = type_probs
-  )
+  # Determine how to distribute landscape types
+  if (balance_types) {
+    # Calculate how many of each type to generate
+    num_types <- length(types)
+    landscapes_per_type <- floor(n / num_types)
+    extras <- n - (landscapes_per_type * num_types)
+
+    # Create balanced distribution
+    sampled_types <- rep(types, each = landscapes_per_type)
+
+    # Distribute any remaining landscapes randomly
+    if (extras > 0) {
+      extra_types <- sample(types, extras, replace = TRUE)
+      sampled_types <- c(sampled_types, extra_types)
+    }
+
+    # Shuffle the types to avoid patterns
+    sampled_types <- sample(sampled_types)
+  } else {
+    # Setup type weights for sampling
+    if (is.null(type_probs)) {
+      type_probs <- rep(1, length(types))
+    } else if (length(type_probs) != length(types)) {
+      warning(
+        "Length of type_probs doesn't match length of types. Using equal weights."
+      )
+      type_probs <- rep(1, length(types))
+    }
+    # Use weighted sampling as before
+    sampled_types <- sample(
+      types,
+      size = n,
+      replace = TRUE,
+      prob = type_probs
+    )
+  }
 
   # Generate each landscape
   for (i in 1:n) {
