@@ -207,9 +207,6 @@ train_nn <- function(
       # Set cv_folds for reporting
       cv_folds <- nrow(metrics_scaled)
     } else if (cv_method == "k-fold") {
-      # Perform stratified k-fold cross-validation
-      set.seed(seed)
-
       # Create stratified fold assignments
       # Ensure each class is represented in each fold
       fold_indices <- integer(nrow(metrics_scaled))
@@ -270,6 +267,7 @@ train_nn <- function(
       }
     }
 
+    # Evaluate cv performance ---------------------------------------------
     # Create and print confusion matrix
     # Ensure all classes appear in the confusion matrix, even if not predicted
     conf_matrix <- table(
@@ -320,12 +318,19 @@ train_nn <- function(
       (class_precision + class_recall)
     class_f1[is.na(class_f1)] <- 0
 
+    # Combine them in a table
+    per_class_metrics <- data.frame(
+      Class = class_names,
+      Count = as.vector(class_counts),
+      Recall = round(class_recall, 2),
+      Precision = round(class_precision, 2),
+      F1_Score = round(class_f1, 2)
+    )
+
     performance <- list(
       confusion_matrix = conf_matrix,
       accuracy = accuracy,
-      class_precision = class_precision,
-      class_recall = class_recall,
-      class_f1 = class_f1,
+      metrics = per_class_metrics,
       cv_method = cv_method,
       cv_folds = cv_folds,
       class_counts = as.vector(class_counts)
@@ -340,14 +345,25 @@ train_nn <- function(
 
     # Print per-class performance summary
     cat("\nPer-class performance:\n")
-    per_class_metrics <- data.frame(
-      Class = class_names,
-      Count = as.vector(class_counts),
-      Recall = round(class_recall, 2),
-      Precision = round(class_precision, 2),
-      F1_Score = round(class_f1, 2)
-    )
     print(per_class_metrics)
+
+    # Assemble cv validation results ------------------------------------------
+    # Store results for this fold
+    validation_results <- cv_probabilities |>
+      purrr::map(\(x) tibble::as_tibble(x, rownames = "landscape_id")) |>
+      dplyr::bind_rows() |>
+      dplyr::mutate(
+        landscape_id = as.integer(landscape_id),
+        actual_class = unlist(cv_actual),
+        predicted_class = unlist(cv_predictions),
+        confidence = apply(across(all_of(class_names)), 1, max)
+      ) |>
+      dplyr::relocate(c(
+        landscape_id,
+        actual_class,
+        predicted_class,
+        confidence
+      ))
   }
 
   # Train final model on all data
@@ -366,80 +382,14 @@ train_nn <- function(
     features = colnames(predictors),
     scaling = scaling_params,
     classes = class_names,
-    performance = performance
+    performance = performance,
+    validation_results = validation_results
   )
 
   # Save model if requested
   if (save_model && !is.null(model_path)) {
     readr::write_rds(result, model_path)
   }
-
-  # After CV loop, combine all fold results
-  validation_actual_class <- unlist(cv_actual)
-  validation_predicted_class <- unlist(cv_predictions)
-
-  # Create matrix of all probabilities
-  validation_probabilities <- matrix(
-    0,
-    nrow = length(validation_actual_class),
-    ncol = length(class_names)
-  )
-  colnames(validation_probabilities) <- class_names
-
-  row_index <- 1
-  for (fold in 1:length(cv_probabilities)) {
-    fold_probs <- cv_probabilities[[fold]]
-
-    # Get the class names available in this fold's predictions
-    fold_class_names <- colnames(fold_probs)
-
-    # Handle case where fold_probs is missing some classes
-    if (!identical(sort(fold_class_names), sort(class_names))) {
-      # Create a new matrix with all classes
-      fixed_probs <- matrix(
-        0,
-        nrow = nrow(fold_probs),
-        ncol = length(class_names)
-      )
-      colnames(fixed_probs) <- class_names
-
-      # Copy available probabilities to the right columns
-      for (cls in fold_class_names) {
-        if (cls %in% class_names) {
-          fixed_probs[, cls] <- fold_probs[, cls]
-        }
-      }
-
-      # Replace with the fixed version
-      fold_probs <- fixed_probs
-    }
-
-    # Now process normally
-    n_rows <- ifelse(is.null(dim(fold_probs)), 1, nrow(fold_probs))
-    for (i in 1:n_rows) {
-      if (is.null(dim(fold_probs))) {
-        validation_probabilities[row_index, ] <- fold_probs
-      } else {
-        validation_probabilities[row_index, ] <- fold_probs[i, ]
-      }
-      row_index <- row_index + 1
-    }
-  }
-
-  # Create validation results dataframe
-  validation_results <- data.frame(
-    actual_class = validation_actual_class,
-    predicted_class = validation_predicted_class,
-    confidence = apply(validation_probabilities, 1, max)
-  )
-
-  # Add probability for each class
-  for (class_name in class_names) {
-    validation_results[[class_name]] <- validation_probabilities[, class_name]
-  }
-
-  # Add to result object
-  result$validation_results <- validation_results
 
   return(result)
 }
