@@ -294,283 +294,63 @@ plot_classification_results <- function(
   confidence_threshold = 0.6,
   return_all = FALSE
 ) {
-  # Check if nn_model has the required elements
-  if (!is.list(nn_model) || is.null(nn_model$performance)) {
-    stop(
-      "Invalid neural network model. Must be a list with performance element."
-    )
+  # Check that nn_model is valid
+  if (!is.list(nn_model)) {
+    stop("Invalid neural network model. Must be a list.")
   }
-
-  # Extract key data from model
-  class_names <- nn_model$classes
 
   # Set up plot list for potential return_all
   plot_list <- list()
 
-  # 1. Confusion Matrix Plot --------------------------------------------------
+  # Try to generate each plot type as needed
   if (plot_type == "confusion" || return_all) {
-    if (is.null(nn_model$performance$confusion_matrix)) {
-      message("No confusion matrix available. Skipping confusion plot.")
-    } else {
-      # Convert confusion matrix to data frame for plotting
-      conf_matrix <- nn_model$performance$confusion_matrix
-      conf_df <- as.data.frame(as.table(conf_matrix))
-      names(conf_df) <- c("Predicted", "Actual", "Count")
-
-      # Calculate cell percentages (by actual class column)
-      conf_df <- conf_df |>
-        dplyr::mutate(Percent = Count / sum(Count) * 100, .by = Actual) |>
-        dplyr::mutate(percent_color = ifelse(Percent > 50, "white", "black"))
-
-      # Create plot
-      p_confusion <- ggplot2::ggplot(
-        conf_df,
-        ggplot2::aes(x = Actual, y = Predicted, fill = Percent)
-      ) +
-        ggplot2::geom_tile(color = "lightgrey") +
-        ggplot2::geom_text(
-          ggplot2::aes(label = round(Percent, 1), color = percent_color)
-        ) +
-        ggplot2::scale_color_manual(
-          values = c("black", "white"),
-          guide = "none"
-        ) +
-        ggplot2::scale_fill_gradient2(
-          low = "white",
-          mid = "#828282",
-          high = "#111111",
-          midpoint = 50,
-          limits = c(0, 100),
-          name = "% of Actual Class"
-        ) +
-        ggplot2::coord_fixed(expand = FALSE) +
-        ggplot2::theme(
-          panel.grid = ggplot2::element_blank(),
-          axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
-        ) +
-        ggplot2::labs(
-          title = "Cross-Validation Confusion Matrix",
-          subtitle = sprintf(
-            "Accuracy: %.1f%% (%s with %d folds)",
-            nn_model$performance$accuracy * 100,
-            nn_model$performance$cv_method,
-            nn_model$performance$cv_folds
-          ),
-          fill = "% of Actual Class"
-        )
-
-      plot_list[["confusion"]] <- p_confusion
-      if (plot_type == "confusion" && !return_all) {
-        return(p_confusion)
+    tryCatch(
+      {
+        plot_list[["confusion"]] <- plot_nn_confusion_matrix(nn_model)
+      },
+      error = function(e) {
+        message("Could not create confusion matrix plot: ", e$message)
       }
-    }
+    )
   }
 
-  # 2. Validation Probabilities Plot ------------------------------------------
   if (plot_type == "probabilities" || return_all) {
-    if (is.null(nn_model$validation_results)) {
-      message(
-        "No validation results available. Add code to store cross-validation probabilities in train_nn()."
-      )
-    } else {
-      # Extract class probabilities from validation results
-      prob_data <- nn_model$validation_results
-
-      # Calculate mean probability for each actual-predicted class combination
-      prob_matrix_data <- data.frame()
-      for (actual in class_names) {
-        for (pred in class_names) {
-          # Subset data for this actual class
-          actual_class_data <- prob_data[prob_data$actual_class == actual, ]
-          # Get mean probability for this prediction class
-          mean_prob <- mean(actual_class_data[[pred]], na.rm = TRUE)
-
-          # Add to data frame
-          prob_matrix_data <- rbind(
-            prob_matrix_data,
-            data.frame(
-              Actual = actual,
-              Predicted = pred,
-              MeanProbability = mean_prob
-            )
-          )
-        }
+    tryCatch(
+      {
+        plot_list[["probabilities"]] <- plot_nn_probabilities(nn_model)
+      },
+      error = function(e) {
+        message("Could not create probabilities plot: ", e$message)
       }
-
-      # Create the probability confusion matrix plot
-      p_probabilities <- ggplot2::ggplot(
-        prob_matrix_data,
-        ggplot2::aes(x = Actual, y = Predicted, fill = MeanProbability)
-      ) +
-        ggplot2::geom_tile(color = "lightgrey") +
-        ggplot2::geom_text(
-          ggplot2::aes(label = sprintf("%.2f", MeanProbability)),
-          color = ifelse(
-            prob_matrix_data$MeanProbability > 0.5,
-            "white",
-            "black"
-          )
-        ) +
-        ggplot2::scale_fill_gradient2(
-          low = "white",
-          mid = "#828282",
-          high = "#111111",
-          midpoint = 0.5,
-          limits = c(0, 1),
-          name = "Mean Probability"
-        ) +
-        ggplot2::coord_fixed(expand = FALSE) +
-        ggplot2::theme(
-          panel.grid = ggplot2::element_blank(),
-          axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
-        ) +
-        ggplot2::labs(
-          title = "Cross-Validation Mean Probabilities",
-          subtitle = "Average probability that landscapes of class X are classified as class Y",
-          x = "Actual Class",
-          y = "Predicted Class",
-          fill = "Mean Probability"
-        )
-
-      plot_list[["probabilities"]] <- p_probabilities
-      if (plot_type == "probabilities" && !return_all) {
-        return(p_probabilities)
-      }
-    }
+    )
   }
 
-  # 3. Confidence by Class ----------------------------------------------------
   if (plot_type == "confidence" || return_all) {
-    if (is.null(nn_model$validation_results)) {
-      message(
-        "No validation results available. Add code to store cross-validation results in train_nn()."
-      )
-    } else {
-      # Create data for confidence plot
-      confidence_data <- nn_model$validation_results
-
-      # Create plot
-      p_confidence <- ggplot2::ggplot(
-        confidence_data,
-        ggplot2::aes(
-          x = factor(actual_class),
-          y = confidence,
-          color = factor(predicted_class == actual_class)
+    tryCatch(
+      {
+        plot_list[["confidence"]] <- plot_nn_confidence(
+          nn_model,
+          confidence_threshold
         )
-      ) +
-        ggplot2::geom_boxplot(outlier.shape = NA) +
-        ggplot2::geom_point(
-          position = ggplot2::position_jitterdodge(
-            jitter.width = 0.1,
-            dodge.width = 0.75
-          ),
-          alpha = 0.5
-        ) +
-        ggplot2::coord_flip() +
-        ggplot2::geom_hline(
-          yintercept = confidence_threshold,
-          linetype = "dashed",
-          color = "red"
-        ) +
-        ggplot2::scale_color_manual(
-          values = c("tomato", "forestgreen"),
-          name = "Prediction",
-          labels = c("Incorrect", "Correct")
-        ) +
-        ggplot2::theme_bw() +
-        ggplot2::theme(
-          panel.grid.minor = ggplot2::element_blank(),
-          axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
-        ) +
-        ggplot2::labs(
-          title = "Cross-Validation Confidence by Class",
-          subtitle = sprintf(
-            "Dashed line shows confidence threshold (%.1f)",
-            confidence_threshold
-          ),
-          x = "Actual Class",
-          y = "Confidence Score"
-        )
-
-      plot_list[["confidence"]] <- p_confidence
-      if (plot_type == "confidence" && !return_all) {
-        return(p_confidence)
+      },
+      error = function(e) {
+        message("Could not create confidence plot: ", e$message)
       }
-    }
+    )
   }
 
-  # 4. Misclassification Analysis ----------------------------------------------
   if (plot_type == "misclassifications" || return_all) {
-    if (is.null(nn_model$validation_results)) {
-      message(
-        "No validation results available. Add code to store cross-validation results in train_nn()."
-      )
-    } else {
-      # Create data for misclassification analysis
-      misclass_data <- nn_model$validation_results |>
-        dplyr::mutate(
-          correct = predicted_class == actual_class,
-          low_confidence = confidence < confidence_threshold
+    tryCatch(
+      {
+        plot_list[["misclassifications"]] <- plot_nn_misclassifications(
+          nn_model,
+          confidence_threshold
         )
-
-      # Count occurrences of each type of misclassification
-      misclass_counts <- misclass_data |>
-        dplyr::filter(!correct) |>
-        dplyr::group_by(actual_class, predicted_class) |>
-        dplyr::summarize(
-          count = dplyr::n(),
-          avg_confidence = mean(confidence),
-          .groups = "drop"
-        ) |>
-        dplyr::arrange(desc(count))
-
-      # Create plot
-      if (nrow(misclass_counts) > 0) {
-        p_misclass <- ggplot2::ggplot(
-          misclass_counts,
-          ggplot2::aes(
-            x = reorder(paste(actual_class, "-", predicted_class), count),
-            y = count,
-            fill = avg_confidence
-          )
-        ) +
-          ggplot2::geom_col(color = "grey") +
-          ggplot2::scale_fill_gradient2(
-            low = "white",
-            mid = "#6baed6",
-            high = "#084594",
-            midpoint = 0.5,
-            limits = c(0, 1),
-            name = "Avg. Confidence"
-          ) +
-          ggplot2::coord_flip() +
-          ggplot2::theme_bw() +
-          ggplot2::theme(
-            panel.grid.minor = ggplot2::element_blank()
-          ) +
-          ggplot2::labs(
-            title = "Common Cross-Validation Misclassifications",
-            subtitle = "Frequency of specific misclassification patterns",
-            y = "Count",
-            x = "Misclassification (Actual - Predicted)"
-          )
-      } else {
-        p_misclass <- ggplot2::ggplot() +
-          ggplot2::annotate(
-            "text",
-            x = 0.5,
-            y = 0.5,
-            label = "No misclassifications found"
-          ) +
-          ggplot2::theme_minimal() +
-          ggplot2::labs(title = "Cross-Validation Misclassification Analysis")
+      },
+      error = function(e) {
+        message("Could not create misclassifications plot: ", e$message)
       }
-
-      plot_list[["misclassifications"]] <- p_misclass
-      if (plot_type == "misclassifications" && !return_all) {
-        return(p_misclass)
-      }
-    }
+    )
   }
 
   # Return all plots if requested
@@ -578,8 +358,306 @@ plot_classification_results <- function(
     return(plot_list)
   }
 
-  # Default return if plot_type wasn't valid
+  # Return the requested plot type
+  if (plot_type %in% names(plot_list)) {
+    return(plot_list[[plot_type]])
+  }
+
+  # If we got here, the requested plot wasn't created
   stop(
-    "Invalid plot_type. Choose from: 'confusion', 'probabilities', 'confidence', or 'misclassifications'"
+    "Could not create plot of type '",
+    plot_type,
+    "'. Choose from: 'confusion', 'probabilities', 'confidence', or 'misclassifications'"
   )
+}
+
+#' Plot Neural Network Confusion Matrix
+#'
+#' Creates a visualization of the confusion matrix from neural network validation.
+#'
+#' @param nn_model List. Neural network model from train_nn().
+#'
+#' @return ggplot object. Visualization of the confusion matrix.
+#' @export
+plot_nn_confusion_matrix <- function(nn_model) {
+  # Check if nn_model has the required elements
+  if (
+    !is.list(nn_model) ||
+      is.null(nn_model$performance) ||
+      is.null(nn_model$performance$confusion_matrix)
+  ) {
+    stop("Invalid neural network model or missing confusion matrix.")
+  }
+
+  # Convert confusion matrix to data frame for plotting
+  conf_matrix <- nn_model$performance$confusion_matrix
+  conf_df <- as.data.frame(as.table(conf_matrix))
+  names(conf_df) <- c("Predicted", "Actual", "Count")
+
+  # Calculate cell percentages (by actual class column)
+  conf_df <- conf_df |>
+    dplyr::mutate(Percent = Count / sum(Count) * 100, .by = Actual) |>
+    dplyr::mutate(percent_color = ifelse(Percent > 50, "white", "black"))
+
+  # Create plot
+  p_confusion <- ggplot2::ggplot(
+    conf_df,
+    ggplot2::aes(x = Actual, y = Predicted, fill = Percent)
+  ) +
+    ggplot2::geom_tile(color = "lightgrey") +
+    ggplot2::geom_text(
+      ggplot2::aes(label = round(Percent, 1), color = percent_color)
+    ) +
+    ggplot2::scale_color_manual(
+      values = c("black", "white"),
+      guide = "none"
+    ) +
+    ggplot2::scale_fill_gradient2(
+      low = "white",
+      mid = "#828282",
+      high = "#111111",
+      midpoint = 50,
+      limits = c(0, 100),
+      name = "% of Actual Class"
+    ) +
+    ggplot2::coord_fixed(expand = FALSE) +
+    ggplot2::theme(
+      panel.grid = ggplot2::element_blank(),
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+    ) +
+    ggplot2::labs(
+      title = "Cross-Validation Confusion Matrix",
+      subtitle = sprintf(
+        "Accuracy: %.1f%% (%s with %d folds)",
+        nn_model$performance$accuracy * 100,
+        nn_model$performance$cv_method,
+        nn_model$performance$cv_folds
+      ),
+      fill = "% of Actual Class"
+    )
+
+  return(p_confusion)
+}
+
+#' Plot Neural Network Class Probabilities
+#'
+#' Creates a visualization of class probabilities from neural network validation.
+#'
+#' @param nn_model List. Neural network model from train_nn().
+#'
+#' @return ggplot object. Visualization of mean class probabilities.
+#' @export
+plot_nn_probabilities <- function(nn_model) {
+  # Check if nn_model has the required elements
+  if (
+    !is.list(nn_model) ||
+      is.null(nn_model$validation_results) ||
+      is.null(nn_model$classes)
+  ) {
+    stop("Invalid neural network model or missing validation results.")
+  }
+
+  # Extract class names and probabilities
+  class_names <- nn_model$classes
+  prob_data <- nn_model$validation_results
+
+  # Calculate mean probability for each actual-predicted class combination
+  prob_matrix_data <- data.frame()
+  for (actual in class_names) {
+    for (pred in class_names) {
+      # Subset data for this actual class
+      actual_class_data <- prob_data[prob_data$actual_class == actual, ]
+      # Get mean probability for this prediction class
+      mean_prob <- mean(actual_class_data[[pred]], na.rm = TRUE)
+
+      # Add to data frame
+      prob_matrix_data <- rbind(
+        prob_matrix_data,
+        data.frame(
+          Actual = actual,
+          Predicted = pred,
+          MeanProbability = mean_prob
+        )
+      )
+    }
+  }
+
+  # Create the probability confusion matrix plot
+  p_probabilities <- ggplot2::ggplot(
+    prob_matrix_data,
+    ggplot2::aes(x = Actual, y = Predicted, fill = MeanProbability)
+  ) +
+    ggplot2::geom_tile(color = "lightgrey") +
+    ggplot2::geom_text(
+      ggplot2::aes(label = sprintf("%.2f", MeanProbability)),
+      color = ifelse(
+        prob_matrix_data$MeanProbability > 0.5,
+        "white",
+        "black"
+      )
+    ) +
+    ggplot2::scale_fill_gradient2(
+      low = "white",
+      mid = "#828282",
+      high = "#111111",
+      midpoint = 0.5,
+      limits = c(0, 1),
+      name = "Mean Probability"
+    ) +
+    ggplot2::coord_fixed(expand = FALSE) +
+    ggplot2::theme(
+      panel.grid = ggplot2::element_blank(),
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+    ) +
+    ggplot2::labs(
+      title = "Cross-Validation Mean Probabilities",
+      subtitle = "Average probability that landscapes of class X are classified as class Y",
+      x = "Actual Class",
+      y = "Predicted Class",
+      fill = "Mean Probability"
+    )
+
+  return(p_probabilities)
+}
+
+#' Plot Neural Network Prediction Confidence
+#'
+#' Creates a visualization of prediction confidence by class from neural network validation.
+#'
+#' @param nn_model List. Neural network model from train_nn().
+#' @param confidence_threshold Numeric. Threshold for highlighting low confidence (default: 0.6).
+#'
+#' @return ggplot object. Visualization of confidence by class.
+#' @export
+plot_nn_confidence <- function(nn_model, confidence_threshold = 0.6) {
+  # Check if nn_model has the required elements
+  if (!is.list(nn_model) || is.null(nn_model$validation_results)) {
+    stop("Invalid neural network model or missing validation results.")
+  }
+
+  # Create data for confidence plot
+  confidence_data <- nn_model$validation_results
+
+  # Create plot
+  p_confidence <- ggplot2::ggplot(
+    confidence_data,
+    ggplot2::aes(
+      x = factor(actual_class),
+      y = confidence,
+      color = factor(predicted_class == actual_class)
+    )
+  ) +
+    ggplot2::geom_boxplot(outlier.shape = NA) +
+    ggplot2::geom_point(
+      position = ggplot2::position_jitterdodge(
+        jitter.width = 0.1,
+        dodge.width = 0.75
+      ),
+      alpha = 0.5
+    ) +
+    ggplot2::coord_flip() +
+    ggplot2::geom_hline(
+      yintercept = confidence_threshold,
+      linetype = "dashed",
+      color = "red"
+    ) +
+    ggplot2::scale_color_manual(
+      values = c("tomato", "forestgreen"),
+      name = "Prediction",
+      labels = c("Incorrect", "Correct")
+    ) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(
+      panel.grid.minor = ggplot2::element_blank(),
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+    ) +
+    ggplot2::labs(
+      title = "Cross-Validation Confidence by Class",
+      subtitle = sprintf(
+        "Dashed line shows confidence threshold (%.1f)",
+        confidence_threshold
+      ),
+      x = "Actual Class",
+      y = "Confidence Score"
+    )
+
+  return(p_confidence)
+}
+
+#' Plot Neural Network Misclassifications
+#'
+#' Creates a visualization of common misclassification patterns from neural network validation.
+#'
+#' @param nn_model List. Neural network model from train_nn().
+#' @param confidence_threshold Numeric. Threshold for highlighting low confidence (default: 0.6).
+#'
+#' @return ggplot object. Visualization of misclassification patterns.
+#' @export
+plot_nn_misclassifications <- function(nn_model, confidence_threshold = 0.6) {
+  # Check if nn_model has the required elements
+  if (!is.list(nn_model) || is.null(nn_model$validation_results)) {
+    stop("Invalid neural network model or missing validation results.")
+  }
+
+  # Create data for misclassification analysis
+  misclass_data <- nn_model$validation_results |>
+    dplyr::mutate(
+      correct = predicted_class == actual_class,
+      low_confidence = confidence < confidence_threshold
+    )
+
+  # Count occurrences of each type of misclassification
+  misclass_counts <- misclass_data |>
+    dplyr::filter(!correct) |>
+    dplyr::group_by(actual_class, predicted_class) |>
+    dplyr::summarize(
+      count = dplyr::n(),
+      avg_confidence = mean(confidence),
+      .groups = "drop"
+    ) |>
+    dplyr::arrange(desc(count))
+
+  # Create plot
+  if (nrow(misclass_counts) > 0) {
+    p_misclass <- ggplot2::ggplot(
+      misclass_counts,
+      ggplot2::aes(
+        x = reorder(paste(actual_class, "-", predicted_class), count),
+        y = count,
+        fill = avg_confidence
+      )
+    ) +
+      ggplot2::geom_col(color = "grey") +
+      ggplot2::scale_fill_gradient2(
+        low = "white",
+        mid = "#6baed6",
+        high = "#084594",
+        midpoint = 0.5,
+        limits = c(0, 1),
+        name = "Avg. Confidence"
+      ) +
+      ggplot2::coord_flip() +
+      ggplot2::theme_bw() +
+      ggplot2::theme(
+        panel.grid.minor = ggplot2::element_blank()
+      ) +
+      ggplot2::labs(
+        title = "Common Cross-Validation Misclassifications",
+        subtitle = "Frequency of specific misclassification patterns",
+        y = "Count",
+        x = "Misclassification (Actual - Predicted)"
+      )
+  } else {
+    p_misclass <- ggplot2::ggplot() +
+      ggplot2::annotate(
+        "text",
+        x = 0.5,
+        y = 0.5,
+        label = "No misclassifications found"
+      ) +
+      ggplot2::theme_minimal() +
+      ggplot2::labs(title = "Cross-Validation Misclassification Analysis")
+  }
+
+  return(p_misclass)
 }
