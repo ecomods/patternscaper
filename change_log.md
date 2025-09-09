@@ -2,6 +2,72 @@
 
 Here I document changes made to the function packages.
 
+## 2025-09-09
+
+### Summary of Changes
+
+### Remaining questions/problems
+
+- plot for Cross-validation confidence still needs work as it does not look nice
+- apply_nn function should return results in a structured way that is compatible with the plotting function
+
+### Technical details
+
+#### `plot_classification_results`
+
+- Refactor function and add wrapper to create different types of plots
+  - `confusion`: Confusion matrix
+  - `probabilities`: Probabilities of each class
+  - `confidence`: Confidence of the classification
+  - `misclassifications`: Most common misclassifications with average confidence
+- Work on all plots and their aesthetics
+
+#### `train_nn`
+
+- Simplify code and remove unnecessary parts
+  - Cross-validation results are now summarized more straightforwardly
+
+#### `plot_nn_classification_landscapes`
+
+- New function to plot landscapes with their predicted classes and confidence values
+- Can be used to visualize results from `apply_nn` or from the cross-validation in `train_nn`
+
+## 2025-09-08
+
+### Summary of Changes
+
+
+
+### Remaining questions/problems
+
+
+
+### Technical details
+
+#### `evaluate_landscape_metrics`
+
+- Implement method to select only uncorrelated metrics based on correlation threshold
+  - New function `select_metrics_correlation` to select metrics based on ranking while ensuring low correlation among them
+- Refactor to have separate functions for different selection methods
+  - `rank_by_coefficient_variation`
+  - `rank_by_mean_differences`
+  - `rank_by_linear_model`
+  - This way we don't have repeated code and it's easier to add new methods in the future
+- Calculate cv directly using tidyverse. Before, the cv was calculated once for all landscapes and once for
+  each landscape type separately. But then this result was never used -> I removed it
+- Update methods for selection based on linear models 
+  - Simplify the logic to avoid code duplication
+
+#### `select_metrics_correlation`
+
+- New function to select the best metrics based on a ranking while ensuring low correlation among them
+
+#### `generate_training_landscapes`
+
+- Distribute the number of landscapes more evenly among the different types of landscapes
+  - Before, it was assigned randomly which often led to very uneven distributions especially for small total numbers of landscapes
+  - There still is an option to assign randomly if desired but default is evenly
+
 ## 2025-09-07
 
 ### Summary of Changes
@@ -9,8 +75,6 @@ Here I document changes made to the function packages.
 
 - rotated landscape sometimes don't use space on the sides
   - E.g. in the rotated finger landscape, the fingers are not generated on the sides of the landscape
-- setting seed in meta functions to generate training landscapes
-- scattered landscapes: If rotation > 0 then the scatter zone is too small and some clusters disappear from the final plot
 - Unify terminology:
   - of parameters: thickness, width, frequency, amplitude, sine_length, etc.
   - of file and function names: generate_landscape vs. create_landscape

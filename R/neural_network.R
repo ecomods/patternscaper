@@ -402,7 +402,6 @@ train_nn <- function(
 #' @param landscape SpatRaster, matrix, or list. Landscape(s) to classify.
 #'   Can be a single landscape or list of landscapes, with or without metadata.
 #' @param nn_model List. Neural network model from train_nn().
-#' @param confidence_threshold Numeric. Threshold for warning flag (default: 0.6).
 #' @param show_progress Logical. Whether to display progress bar for multiple landscapes (default: TRUE).
 #'
 #' @return tibble. Classification results with columns for landscape name,
@@ -411,23 +410,8 @@ train_nn <- function(
 apply_nn <- function(
   landscape,
   nn_model,
-  confidence_threshold = 0.6,
   show_progress = TRUE
 ) {
-  # Validate inputs
-  if (is.null(nn_model)) {
-    stop("Neural network model is required")
-  }
-
-  # Validate confidence threshold
-  if (
-    !is.numeric(confidence_threshold) ||
-      confidence_threshold < 0 ||
-      confidence_threshold > 1
-  ) {
-    stop("confidence_threshold must be a numeric value between 0 and 1")
-  }
-
   # Extract required elements from the model
   model <- nn_model$model
   scaling_params <- nn_model$scaling
@@ -560,12 +544,6 @@ apply_nn <- function(
 
     # Get the confidence (probability) for the predicted class
     confidence <- max(predictions)
-
-    # Create warning flag if confidence is below threshold
-    warning_message <- NA
-    if (confidence < confidence_threshold) {
-      warning_message <- "Low classification confidence"
-    }
 
     # Create row with results
     result_row <- data.frame(
