@@ -687,6 +687,85 @@ plot_nn_misclassifications <- function(nn_model, confidence_threshold = 0.6) {
       ggplot2::theme_minimal() +
       ggplot2::labs(title = "Cross-Validation Misclassification Analysis")
   }
-
   return(p_misclass)
+}
+
+plot_nn_classification_landscapes <- function(
+  nn_model,
+  landscape_list,
+  only_misclassified = FALSE
+) {
+  # Check if nn_model has the required elements
+  if (
+    !is.list(nn_model) ||
+      is.null(nn_model$validation_results) ||
+      is.null(nn_model$classes)
+  ) {
+    stop("Invalid neural network model or missing validation results.")
+  }
+
+  # Validate input landscape_list
+  if (!is.list(landscape_list)) {
+    stop("landscape_list must be a list of landscapes (SpatRaster or matrix)")
+  }
+
+  # check if the landscape list has the same length as the validation results
+  if (length(landscape_list) < nrow(nn_model$validation_results)) {
+    stop(paste(
+      "landscape_list has fewer entries (",
+      length(landscape_list),
+      ") than validation results (",
+      nrow(nn_model$validation_results),
+      "). Some landscapes may be missing."
+    ))
+  }
+
+  # Extract validation results
+  val_results <- nn_model$validation_results
+
+  # If only_misclassified is TRUE, filter to only misclassified landscapes
+  if (only_misclassified) {
+    val_results <- val_results |>
+      dplyr::filter(predicted_class != actual_class)
+  }
+
+  # Add plot titles as a column to the validation results
+  val_results <- val_results |>
+    dplyr::mutate(
+      title = case_when(
+        predicted_class == actual_class ~
+          paste0(
+            "<span style='color: #228B22;'>",
+            predicted_class,
+            "</span> (",
+            round(confidence, 2),
+            ")<br>",
+            "Actual: ",
+            actual_class
+          ),
+        predicted_class != actual_class ~
+          paste0(
+            "<span style='color: #FF6347;'>",
+            predicted_class,
+            "</span> (",
+            round(confidence, 2),
+            ")<br>",
+            "Actual: ",
+            actual_class
+          ),
+        .default = "no title"
+      )
+    )
+
+  # Subset the landscapes that should be plotted using the index of the landscape
+  # in the validation results
+  landscapes_to_plot <- landscape_list[val_results$landscape_id]
+
+  # Create plots for each landscape
+  plots <- plot_landscape_list(
+    landscape_list = landscapes_to_plot,
+    titles = val_results$title
+  )
+
+  return(plots)
 }
