@@ -11,11 +11,12 @@
 #' @return ggplot object. Plot of the landscape.
 #' @export
 plot_landscape <- function(
-    landscape,
-    title = "Landscape",
-    color_scale = NULL,
-    legend_title = "Value",
-    show_legend = TRUE) {
+  landscape,
+  title = "Landscape",
+  color_scale = NULL,
+  legend_title = "Value",
+  show_legend = TRUE
+) {
   # Check if landscape has metadata structure
   has_metadata <- has_landscape_metadata(landscape)
   # extract the landscape data if it has metadata
@@ -118,13 +119,14 @@ plot_landscape <- function(
 #' @return patchwork object. Combined plot of all landscapes.
 #' @export
 plot_landscape_list <- function(
-    landscape_list,
-    titles = NULL,
-    color_scale = NULL,
-    ncol = NULL,
-    legend_title = "Value",
-    show_legend = TRUE,
-    show_type = TRUE) {
+  landscape_list,
+  titles = NULL,
+  color_scale = NULL,
+  ncol = NULL,
+  legend_title = "Value",
+  show_legend = TRUE,
+  show_type = TRUE
+) {
   # Validate input is a list
   if (!is.list(landscape_list)) {
     stop("landscape_list must be a list of landscapes (SpatRaster or matrix)")
@@ -202,22 +204,76 @@ plot_landscape_list <- function(
 #' Creates a visualization of landscape metric values across landscape types.
 #'
 #' @param metrics Data frame. Metrics dataframe from calculate_landscape_metrics.
+#'    Needs to contain columns: "level", "type", "metric", "value", and optionally "class".
 #' @param selected_metrics Character vector. Metrics to visualize.
-#' @param title Character. Plot title (default: "Landscape Metrics").
-#' @param facet Logical. Whether to create facet plot by metric (default: TRUE).
-#' @param arrange_by_importance Logical. Whether to order metrics by importance (default: FALSE).
-#' @param method Character. Method used for metric importance (default: "").
 #'
 #' @return ggplot object. Visualization of selected metrics across landscape types.
 #' @export
 plot_metrics <- function(
-    metrics,
-    selected_metrics,
-    title = "Landscape Metrics",
-    facet = TRUE,
-    arrange_by_importance = FALSE,
-    method = "") {
-  # Function implementation will go here
+  calculated_metrics,
+  selected_metrics,
+  title = "Landscape Metrics"
+) {
+  # Validate input data
+  if (!is.data.frame(calculated_metrics)) {
+    stop("metrics must be a data frame from calculate_landscape_metrics()")
+  }
+  if (!is.character(selected_metrics)) {
+    stop("selected_metrics must be a character vector of metric names")
+  }
+  # check if metrics data has columns we need
+  required_cols <- c("level", "type", "metric", "value")
+  if (!all(required_cols %in% names(calculated_metrics))) {
+    stop(paste(
+      "metrics data frame must contain the following columns:",
+      paste(required_cols, collapse = ", ")
+    ))
+  }
+  if (length(selected_metrics) == 0) {
+    stop("selected_metrics must contain at least one metric to plot")
+  }
+
+  # extract level at which metrics were calculated
+  level <- unique(calculated_metrics$level)
+
+  # Prepare the data for plotting
+  plot_data <- calculated_metrics |>
+    dplyr::filter(metric %in% selected_metrics) |>
+    # Order metrics by their order in selected_metrics
+    dplyr::mutate(
+      metric = factor(metric, levels = selected_metrics),
+      type = as.factor(type)
+    )
+
+  # Create the base plot (depends on the level at which metrics were calculated)
+  if (level == "landscape") {
+    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = type, y = value))
+  } else if (level == "class") {
+    p <- ggplot2::ggplot(
+      plot_data,
+      ggplot2::aes(x = type, y = value, fill = class)
+    )
+  } else {
+    stop("Plotting for patch-level metrics is not implemented yet.")
+  }
+
+  p <- p +
+    ggplot2::geom_boxplot() +
+    ggplot2::geom_jitter(
+      position = ggplot2::position_jitter(width = 0.1),
+      size = 1,
+      alpha = 0.7
+    ) +
+    ggplot2::facet_wrap(~metric, scales = "free_x") +
+    ggplot2::coord_flip() +
+    ggplot2::theme(
+      panel.grid.minor = ggplot2::element_blank(),
+    ) +
+    ggplot2::labs(
+      x = "Landscape Type",
+      y = "Metric Value"
+    )
+  return(p)
 }
 
 #' Plot Neural Network Classification Results
@@ -233,10 +289,11 @@ plot_metrics <- function(
 #' @return ggplot object or list of ggplot objects. Visualization(s) of classification results.
 #' @export
 plot_classification_results <- function(
-    nn_model,
-    plot_type = "confusion",
-    confidence_threshold = 0.6,
-    return_all = FALSE) {
+  nn_model,
+  plot_type = "confusion",
+  confidence_threshold = 0.6,
+  return_all = FALSE
+) {
   # Check if nn_model has the required elements
   if (!is.list(nn_model) || is.null(nn_model$performance)) {
     stop(
