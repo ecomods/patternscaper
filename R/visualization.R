@@ -423,17 +423,19 @@ plot_nn_confusion_matrix <- function(nn_model) {
     ggplot2::coord_fixed(expand = FALSE) +
     ggplot2::theme(
       panel.grid = ggplot2::element_blank(),
-      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+      legend.position = "none"
     ) +
     ggplot2::labs(
-      title = "Cross-Validation Confusion Matrix",
+      title = "Cross-Validation Confusion Matrix (% of actual class)",
       subtitle = sprintf(
         "Accuracy: %.1f%% (%s with %d folds)",
         nn_model$performance$accuracy * 100,
         nn_model$performance$cv_method,
         nn_model$performance$cv_folds
       ),
-      fill = "% of Actual Class"
+      x = "Actual Class",
+      y = "Predicted Class"
     )
 
   return(p_confusion)
@@ -507,14 +509,14 @@ plot_nn_probabilities <- function(nn_model) {
     ggplot2::coord_fixed(expand = FALSE) +
     ggplot2::theme(
       panel.grid = ggplot2::element_blank(),
-      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+      legend.position = "none"
     ) +
     ggplot2::labs(
       title = "Cross-Validation Mean Probabilities",
       subtitle = "Average probability that landscapes of class X are classified as class Y",
       x = "Actual Class",
-      y = "Predicted Class",
-      fill = "Mean Probability"
+      y = "Predicted Class"
     )
 
   return(p_probabilities)
@@ -526,10 +528,15 @@ plot_nn_probabilities <- function(nn_model) {
 #'
 #' @param nn_model List. Neural network model from train_nn().
 #' @param confidence_threshold Numeric. Threshold for highlighting low confidence (default: 0.6).
+#' @param add_raw_data Logical. Whether to overlay raw data points (default: TRUE).
 #'
 #' @return ggplot object. Visualization of confidence by class.
 #' @export
-plot_nn_confidence <- function(nn_model, confidence_threshold = 0.6) {
+plot_nn_confidence <- function(
+  nn_model,
+  confidence_threshold = 0.6,
+  add_raw_data = TRUE
+) {
   # Check if nn_model has the required elements
   if (!is.list(nn_model) || is.null(nn_model$validation_results)) {
     stop("Invalid neural network model or missing validation results.")
@@ -544,41 +551,51 @@ plot_nn_confidence <- function(nn_model, confidence_threshold = 0.6) {
     ggplot2::aes(
       x = factor(actual_class),
       y = confidence,
-      color = factor(predicted_class == actual_class)
+      fill = factor(predicted_class == actual_class)
     )
   ) +
-    ggplot2::geom_boxplot(outlier.shape = NA) +
-    ggplot2::geom_point(
-      position = ggplot2::position_jitterdodge(
-        jitter.width = 0.1,
-        dodge.width = 0.75
-      ),
-      alpha = 0.5
-    ) +
+    ggdist::stat_slabinterval(
+      slab_linewidth = NA
+    )
+
+  if (add_raw_data) {
+    p_confidence <- p_confidence +
+      ggplot2::geom_jitter(
+        ggplot2::aes(
+          color = factor(predicted_class == actual_class)
+        ),
+        width = 0.1,
+        alpha = 0.3,
+        size = 1
+      )
+  }
+
+  p_confidence <- p_confidence +
     ggplot2::coord_flip() +
     ggplot2::geom_hline(
       yintercept = confidence_threshold,
-      linetype = "dashed",
-      color = "red"
+      linetype = "dashed"
     ) +
-    ggplot2::scale_color_manual(
-      values = c("tomato", "forestgreen"),
+    ggplot2::scale_fill_manual(
+      values = c("#FF6347", "#228B22"),
       name = "Prediction",
       labels = c("Incorrect", "Correct")
     ) +
-    ggplot2::theme_bw() +
-    ggplot2::theme(
-      panel.grid.minor = ggplot2::element_blank(),
-      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+    ggplot2::scale_color_manual(
+      values = c("#ff6347", "#228B22"),
+      name = "Prediction",
+      labels = c("Incorrect", "Correct")
     ) +
     ggplot2::labs(
       title = "Cross-Validation Confidence by Class",
-      subtitle = sprintf(
-        "Dashed line shows confidence threshold (%.1f)",
-        confidence_threshold
-      ),
+      subtitle = "<span style = 'color: #228B22;'>Correct</span> and <span style = 'color: #FF6347;'>incorrect</span> predictions",
       x = "Actual Class",
       y = "Confidence Score"
+    ) +
+    ggplot2::theme(
+      panel.grid.minor = ggplot2::element_blank(),
+      plot.subtitle = ggtext::element_markdown(),
+      legend.position = "none"
     )
 
   return(p_confidence)
@@ -630,22 +647,34 @@ plot_nn_misclassifications <- function(nn_model, confidence_threshold = 0.6) {
       ggplot2::geom_col(color = "grey") +
       ggplot2::scale_fill_gradient2(
         low = "white",
-        mid = "#6baed6",
-        high = "#084594",
+        mid = "#828282",
+        high = "#111111",
         midpoint = 0.5,
         limits = c(0, 1),
         name = "Avg. Confidence"
       ) +
-      ggplot2::coord_flip() +
-      ggplot2::theme_bw() +
+      ggplot2::geom_text(
+        ggplot2::aes(
+          label = round(avg_confidence, 1),
+          y = count - 0.5,
+          color = ifelse(avg_confidence > 0.5, "white", "black")
+        ),
+      ) +
+      ggplot2::scale_color_manual(
+        values = c("black", "white"),
+        guide = "none"
+      ) +
+      ggplot2::coord_flip(expand = FALSE) +
       ggplot2::theme(
-        panel.grid.minor = ggplot2::element_blank()
+        panel.grid.minor = ggplot2::element_blank(),
+        panel.grid.major.y = ggplot2::element_blank(),
+        axis.title.y = ggplot2::element_blank(),
+        legend.position = "none"
       ) +
       ggplot2::labs(
-        title = "Common Cross-Validation Misclassifications",
-        subtitle = "Frequency of specific misclassification patterns",
-        y = "Count",
-        x = "Misclassification (Actual - Predicted)"
+        title = "Cross-Validation Misclassifications (Actual - Predicted)",
+        subtitle = "Color and number indicate average confidence of misclassifications",
+        y = "Count"
       )
   } else {
     p_misclass <- ggplot2::ggplot() +
