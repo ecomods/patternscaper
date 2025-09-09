@@ -319,28 +319,31 @@ plot_classification_results <- function(
 
       # Calculate cell percentages (by actual class column)
       conf_df <- conf_df |>
-        dplyr::mutate(Percent = Count / sum(Count) * 100, .by = Actual)
+        dplyr::mutate(Percent = Count / sum(Count) * 100, .by = Actual) |>
+        dplyr::mutate(percent_color = ifelse(Percent > 50, "white", "black"))
 
       # Create plot
       p_confusion <- ggplot2::ggplot(
         conf_df,
         ggplot2::aes(x = Actual, y = Predicted, fill = Percent)
       ) +
-        ggplot2::geom_tile() +
+        ggplot2::geom_tile(color = "lightgrey") +
         ggplot2::geom_text(
-          ggplot2::aes(label = sprintf("%.1f%%", Percent)),
-          color = "black"
+          ggplot2::aes(label = round(Percent, 1), color = percent_color)
+        ) +
+        ggplot2::scale_color_manual(
+          values = c("black", "white"),
+          guide = "none"
         ) +
         ggplot2::scale_fill_gradient2(
           low = "white",
-          mid = "#6baed6",
-          high = "#084594",
+          mid = "#828282",
+          high = "#111111",
           midpoint = 50,
           limits = c(0, 100),
           name = "% of Actual Class"
         ) +
-        ggplot2::coord_fixed() +
-        ggplot2::theme_minimal() +
+        ggplot2::coord_fixed(expand = FALSE) +
         ggplot2::theme(
           panel.grid = ggplot2::element_blank(),
           axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
@@ -399,25 +402,24 @@ plot_classification_results <- function(
         prob_matrix_data,
         ggplot2::aes(x = Actual, y = Predicted, fill = MeanProbability)
       ) +
-        ggplot2::geom_tile() +
+        ggplot2::geom_tile(color = "lightgrey") +
         ggplot2::geom_text(
           ggplot2::aes(label = sprintf("%.2f", MeanProbability)),
           color = ifelse(
-            prob_matrix_data$MeanProbability > 0.7,
+            prob_matrix_data$MeanProbability > 0.5,
             "white",
             "black"
           )
         ) +
         ggplot2::scale_fill_gradient2(
           low = "white",
-          mid = "#6baed6",
-          high = "#084594",
+          mid = "#828282",
+          high = "#111111",
           midpoint = 0.5,
           limits = c(0, 1),
           name = "Mean Probability"
         ) +
-        ggplot2::coord_fixed() +
-        ggplot2::theme_minimal() +
+        ggplot2::coord_fixed(expand = FALSE) +
         ggplot2::theme(
           panel.grid = ggplot2::element_blank(),
           axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
@@ -464,6 +466,7 @@ plot_classification_results <- function(
           ),
           alpha = 0.5
         ) +
+        ggplot2::coord_flip() +
         ggplot2::geom_hline(
           yintercept = confidence_threshold,
           linetype = "dashed",
@@ -515,7 +518,7 @@ plot_classification_results <- function(
         dplyr::filter(!correct) |>
         dplyr::group_by(actual_class, predicted_class) |>
         dplyr::summarize(
-          count = n(),
+          count = dplyr::n(),
           avg_confidence = mean(confidence),
           .groups = "drop"
         ) |>
