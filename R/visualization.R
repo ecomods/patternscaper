@@ -732,7 +732,7 @@ plot_nn_classification_landscapes <- function(
   # Add plot titles as a column to the validation results
   val_results <- val_results |>
     dplyr::mutate(
-      title = case_when(
+      title = dplyr::case_when(
         predicted_class == actual_class ~
           paste0(
             "<span style='color: #228B22;'>",

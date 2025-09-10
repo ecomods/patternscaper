@@ -356,7 +356,7 @@ train_nn <- function(
         landscape_id = as.integer(landscape_id),
         actual_class = unlist(cv_actual),
         predicted_class = unlist(cv_predictions),
-        confidence = apply(across(all_of(class_names)), 1, max)
+        confidence = apply(dplyr::across(dplyr::all_of(class_names)), 1, max)
       ) |>
       dplyr::relocate(c(
         landscape_id,
