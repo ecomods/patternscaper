@@ -690,18 +690,49 @@ plot_nn_misclassifications <- function(nn_model, confidence_threshold = 0.6) {
   return(p_misclass)
 }
 
+#' Plot Neural Network Classification Landscapes
+#'
+#' Plots landscapes with neural network classification results, highlighting
+#' correct and misclassified cases. Optionally, only misclassified landscapes
+#' can be shown.
+#'
+#' @param classification A data frame with columns: \code{landscape_id},
+#'   \code{actual_class}, \code{predicted_class}, and \code{confidence}.
+#' @param landscape_list A list of landscapes (e.g., SpatRaster or matrix)
+#'   corresponding to the classification results.
+#' @param only_misclassified Logical; if \code{TRUE}, only misclassified
+#'   landscapes are plotted. Default is \code{FALSE}.
+#'
+#' @return A list of ggplot objects, one for each landscape.
+#'
+#' @details The function checks input validity, filters misclassified
+#'   landscapes if requested, and generates annotated plots for each landscape.
+#'
+#' @examples
+#' # Example usage:
+#' # plots <- plot_nn_classification_landscapes(classification, landscape_list)
+#'
+#' @export
 plot_nn_classification_landscapes <- function(
-  nn_model,
+  classification,
   landscape_list,
   only_misclassified = FALSE
 ) {
-  # Check if nn_model has the required elements
+  # Check if classification has the required elements
   if (
-    !is.list(nn_model) ||
-      is.null(nn_model$validation_results) ||
-      is.null(nn_model$classes)
+    !is.data.frame(classification) ||
+      !all(
+        c("landscape_id", "actual_class", "predicted_class", "confidence") %in%
+          names(classification)
+      )
   ) {
-    stop("Invalid neural network model or missing validation results.")
+    stop(
+      paste(
+        "Invalid classification results. Must be a data frame with at least columns: landscape_id, actual_class, predicted_class, confidence.
+       Instead it is",
+        class(classification)
+      )
+    )
   }
 
   # Validate input landscape_list
@@ -710,27 +741,24 @@ plot_nn_classification_landscapes <- function(
   }
 
   # check if the landscape list has the same length as the validation results
-  if (length(landscape_list) < nrow(nn_model$validation_results)) {
+  if (length(landscape_list) < nrow(classification)) {
     stop(paste(
       "landscape_list has fewer entries (",
       length(landscape_list),
       ") than validation results (",
-      nrow(nn_model$validation_results),
+      nrow(classification),
       "). Some landscapes may be missing."
     ))
   }
 
-  # Extract validation results
-  val_results <- nn_model$validation_results
-
   # If only_misclassified is TRUE, filter to only misclassified landscapes
   if (only_misclassified) {
-    val_results <- val_results |>
+    classification <- classification |>
       dplyr::filter(predicted_class != actual_class)
   }
 
   # Add plot titles as a column to the validation results
-  val_results <- val_results |>
+  classification <- classification |>
     dplyr::mutate(
       title = dplyr::case_when(
         predicted_class == actual_class ~
@@ -759,12 +787,12 @@ plot_nn_classification_landscapes <- function(
 
   # Subset the landscapes that should be plotted using the index of the landscape
   # in the validation results
-  landscapes_to_plot <- landscape_list[val_results$landscape_id]
+  landscapes_to_plot <- landscape_list[classification$landscape_id]
 
   # Create plots for each landscape
   plots <- plot_landscape_list(
     landscape_list = landscapes_to_plot,
-    titles = val_results$title
+    titles = classification$title
   )
 
   return(plots)
