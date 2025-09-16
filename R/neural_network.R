@@ -9,9 +9,9 @@
 #' @param hidden_neurons Integer. Number of neurons in hidden layer (default: 5).
 #' @param decay Numeric. Weight decay parameter for nnet (default: 0.01).
 #' @param maxit Integer. Maximum iterations for training (default: 500).
-#' @param save_model Logical. Whether to save the model (default: FALSE).
-#' @param model_path Character. Path to save model (default: NULL).
-#' @param seed Integer. Random seed for reproducibility (default: 123).
+#' @param model_path Character. Path to save model (default: NULL means that
+#'     model is not saved).
+#' @param seed Integer. Random seed for reproducibility (default: 42).
 #'
 #' @return List. Trained neural network model and associated metadata.
 #' @export
@@ -23,9 +23,8 @@ train_nn <- function(
   hidden_neurons = 5,
   decay = 0.01,
   maxit = 500,
-  save_model = FALSE,
   model_path = NULL,
-  seed = 123
+  seed = 42
 ) {
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
@@ -391,7 +390,7 @@ train_nn <- function(
   )
 
   # Save model if requested
-  if (save_model && !is.null(model_path)) {
+  if (!is.null(model_path)) {
     readr::write_rds(result, model_path)
   }
 
