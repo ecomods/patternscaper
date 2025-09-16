@@ -2,6 +2,28 @@
 
 Here I document changes made to the function packages.
 
+## 2025-09-10
+
+### Summary of Changes
+
+### Remaining questions/problems
+
+- I think that the structure of a landscape object should be an S3 class with defined attributes and methods. This would make it easier to handle landscapes and ensure that they have the correct structure. Right now the pipeline feels a bit shaky because we just use lists and data frames without any structure. But this is a bigger change that will require more refactoring.
+
+### Technical details
+
+#### `plot_nn_classification_landscapes`
+
+- Don't take the model as input but the classification results from `train_nn` or `apply_nn`
+
+#### `apply_nn`
+
+- Simplify function quite a bit
+  - Input is now just a list of landscapes and a trained model
+  - The metrics are calculated for the landscape list and then the model is applied to the metrics
+  - Before there were complex subfunction and loops. Now the functionality is much more straightforward operating on the whole list at once
+- Output is compatible with plotting functions
+
 ## 2025-09-09
 
 ### Summary of Changes
@@ -9,7 +31,6 @@ Here I document changes made to the function packages.
 ### Remaining questions/problems
 
 - plot for Cross-validation confidence still needs work as it does not look nice
-- apply_nn function should return results in a structured way that is compatible with the plotting function
 
 ### Technical details
 
@@ -26,6 +47,8 @@ Here I document changes made to the function packages.
 
 - Simplify code and remove unnecessary parts
   - Cross-validation results are now summarized more straightforwardly
+- Add landscape_id to the output to link predictions to landscapes
+  - Reason is that when performing the cross validation, the landscapes are shuffled and split into folds. So they are not in the same order as the input list of landscapes. Adding the landscape_id allows to link the predictions back to the original landscapes. This is important for plotting the landscapes with their predictions.
 
 #### `plot_nn_classification_landscapes`
 
