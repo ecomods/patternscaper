@@ -12,29 +12,23 @@
 #' @param validation_split Numeric. Proportion of data to use for validation when cv_method="none" (default: 0.2).
 #' @param learning_rate Numeric. Learning rate for Adam optimizer (default: 0.001).
 #' @param save_model Logical. Whether to save the model (default: FALSE).
-#' @param model_path Character. Path to save model (default: NULL).
-#' @param seed Integer. Random seed for reproducibility (default: 123).
+#' @param model_path Character. Path to save model (default: NULL means that the
+#'     model is not saved).
+#' @param seed Integer. Random seed for reproducibility (default: 42).
 #'
 #' @return List. Trained CNN model and associated metadata.
 #' @export
 train_nn_keras <- function(
-    landscapes,
-    cv_method = "k-fold",
-    cv_folds = 5,
-    epochs = 20,
-    batch_size = 16,
-    validation_split = 0.2,
-    learning_rate = 0.001,
-    save_model = FALSE,
-    model_path = NULL,
-    seed = 123) {
-  # Load required libraries
-  requireNamespace("keras", quietly = TRUE)
-  requireNamespace("reticulate", quietly = TRUE)
-  requireNamespace("terra", quietly = TRUE)
-  requireNamespace("abind", quietly = TRUE)
-  requireNamespace("caret", quietly = TRUE)
-
+  landscapes,
+  cv_method = "k-fold",
+  cv_folds = 5,
+  epochs = 20,
+  batch_size = 16,
+  validation_split = 0.2,
+  learning_rate = 0.001,
+  model_path = NULL,
+  seed = 42
+) {
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold")) {
@@ -44,9 +38,16 @@ train_nn_keras <- function(
   # Set random seed for reproducibility
   set.seed(seed)
 
-  # Extract labels and landscapes
-  training_labels <- purrr::map_chr(landscapes, ~ .x$type)
-  training_plots <- purrr::map(landscapes, ~ .x$landscape)
+  # Check if the landscapes have metadata and is a valid structure
+  if (all(unlist(lapply(landscapes, has_landscape_metadata)))) {
+    # Extract landscapes if they have metadata
+    training_plots <- lapply(landscapes, get_landscape)
+    training_labels <- sapply(landscapes, get_landscape_type)
+  } else {
+    stop(
+      "All landscapes must have metadata with 'type' and 'landscape' information."
+    )
+  }
 
   # Convert all landscapes to arrays
   training_arrays <- lapply(training_plots, function(r) {
@@ -74,18 +75,32 @@ train_nn_keras <- function(
     model <- keras::keras_model_sequential() %>%
       # Detect fine details with small kernels
       keras::layer_conv_2d(
-        filters = 32, kernel_size = c(3, 3), padding = "same",
+        filters = 32,
+        kernel_size = c(3, 3),
+        padding = "same",
         input_shape = input_shape
       ) %>%
       keras::layer_activation("relu") %>%
       # Detect larger patterns with bigger kernels
-      keras::layer_conv_2d(filters = 32, kernel_size = c(5, 5), padding = "same") %>%
+      keras::layer_conv_2d(
+        filters = 32,
+        kernel_size = c(5, 5),
+        padding = "same"
+      ) %>%
       keras::layer_activation("relu") %>%
       keras::layer_max_pooling_2d(pool_size = c(2, 2)) %>%
       # Additional feature extraction
-      keras::layer_conv_2d(filters = 64, kernel_size = c(3, 3), padding = "same") %>%
+      keras::layer_conv_2d(
+        filters = 64,
+        kernel_size = c(3, 3),
+        padding = "same"
+      ) %>%
       keras::layer_activation("relu") %>%
-      keras::layer_conv_2d(filters = 64, kernel_size = c(5, 5), padding = "same") %>%
+      keras::layer_conv_2d(
+        filters = 64,
+        kernel_size = c(5, 5),
+        padding = "same"
+      ) %>%
       keras::layer_activation("relu") %>%
       keras::layer_max_pooling_2d(pool_size = c(2, 2)) %>%
       # Classifier
@@ -95,11 +110,12 @@ train_nn_keras <- function(
       keras::layer_dense(units = n_classes, activation = "softmax")
 
     # Compile model
-    model %>% keras::compile(
-      loss = "categorical_crossentropy",
-      optimizer = keras::optimizer_adam(learning_rate = learning_rate),
-      metrics = c("accuracy")
-    )
+    model %>%
+      keras::compile(
+        loss = "categorical_crossentropy",
+        optimizer = keras::optimizer_adam(learning_rate = learning_rate),
+        metrics = c("accuracy")
+      )
 
     return(model)
   }
@@ -114,8 +130,29 @@ train_nn_keras <- function(
     all_predictions <- list()
     all_true_labels <- list()
 
-    # Create stratified folds
-    fold_indices <- caret::createFolds(y_int, k = cv_folds, list = TRUE, returnTrain = FALSE)
+    # Create stratified fold assignments
+    # Ensure each landscape type is represented in each fold
+    fold_indices <- list()
+    for (fold in 1:cv_folds) {
+      fold_indices[[fold]] <- integer(0)
+    }
+
+    # Distribute indices for each landscape type across folds
+    for (class_name in class_names) {
+      # Get indices of samples for this landscape type
+      class_indices <- which(training_labels == class_name)
+
+      # Distribute these indices evenly across folds
+      class_folds <- sample(rep(1:cv_folds, length.out = length(class_indices)))
+
+      # Add indices to appropriate fold lists
+      for (fold in 1:cv_folds) {
+        fold_indices[[fold]] <- c(
+          fold_indices[[fold]],
+          class_indices[class_folds == fold]
+        )
+      }
+    }
 
     cat("\n--- Starting", cv_folds, "fold cross-validation ---\n")
 
@@ -135,14 +172,15 @@ train_nn_keras <- function(
       # Create and train the model
       model <- create_model()
 
-      history <- model %>% keras::fit(
-        x = x_train,
-        y = y_train,
-        epochs = epochs,
-        batch_size = batch_size,
-        validation_data = list(x_val, y_val),
-        verbose = 1
-      )
+      history <- model %>%
+        keras::fit(
+          x = x_train,
+          y = y_train,
+          epochs = epochs,
+          batch_size = batch_size,
+          validation_data = list(x_val, y_val),
+          verbose = 1
+        )
 
       # Evaluate the model
       evaluation <- model %>% keras::evaluate(x_val, y_val)
@@ -232,34 +270,38 @@ train_nn_keras <- function(
 
     # Build final model with all data
     final_model <- create_model()
-    history <- final_model %>% keras::fit(
-      x = x_data,
-      y = y_data,
-      epochs = epochs,
-      batch_size = batch_size,
-      validation_split = validation_split,
-      verbose = 1
-    )
+    history <- final_model %>%
+      keras::fit(
+        x = x_data,
+        y = y_data,
+        epochs = epochs,
+        batch_size = batch_size,
+        validation_split = validation_split,
+        verbose = 1
+      )
   } else {
     # Train on all data with validation split (no cross-validation)
     final_model <- create_model()
-    history <- final_model %>% keras::fit(
-      x = x_data,
-      y = y_data,
-      epochs = epochs,
-      batch_size = batch_size,
-      validation_split = validation_split,
-      verbose = 1
-    )
+    history <- final_model %>%
+      keras::fit(
+        x = x_data,
+        y = y_data,
+        epochs = epochs,
+        batch_size = batch_size,
+        validation_split = validation_split,
+        verbose = 1
+      )
 
     # Evaluate on validation set
-    val_indices <- sample(1:nrow(x_data),
+    val_indices <- sample(
+      1:nrow(x_data),
       size = floor(nrow(x_data) * validation_split)
     )
-    val_evaluation <- final_model %>% keras::evaluate(
-      x_data[val_indices, , , , drop = FALSE],
-      y_data[val_indices, , drop = FALSE]
-    )
+    val_evaluation <- final_model %>%
+      keras::evaluate(
+        x_data[val_indices, , , , drop = FALSE],
+        y_data[val_indices, , drop = FALSE]
+      )
 
     cat("\nTraining Results (with validation split):\n")
     cat("Validation accuracy:", val_evaluation[["accuracy"]], "\n")
@@ -285,15 +327,16 @@ train_nn_keras <- function(
   )
 
   # Save model if requested
-  if (save_model && !is.null(model_path)) {
+  if (!is.null(model_path)) {
     # check if the model path ends with .keras. Otherwise replace/add .keras file
     # ending and warn the user
-    keras_file_ending <- stringr::str.detect(model_path, "\\.keras$")
+    keras_file_ending <- stringr::str_detect(model_path, "\\.keras$")
 
     if (!keras_file_ending) {
       warning(
         "model_path should end with .keras, while current name is: ",
-        model_path, ". Automatically adding .keras file ending."
+        model_path,
+        ". Automatically adding .keras file ending."
       )
       model_path <- paste0(model_path, ".keras")
     }
@@ -327,10 +370,11 @@ train_nn_keras <- function(
 #'   predicted class, confidence score, warning flag, and probability for each class.
 #' @export
 apply_nn_keras <- function(
-    landscape,
-    nn_model,
-    confidence_threshold = 0.6,
-    show_progress = TRUE) {
+  landscape,
+  nn_model,
+  confidence_threshold = 0.6,
+  show_progress = TRUE
+) {
   # Validate inputs
   if (is.null(nn_model)) {
     stop("CNN model is required")
