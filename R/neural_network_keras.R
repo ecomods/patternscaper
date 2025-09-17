@@ -425,7 +425,7 @@ train_nn_keras <- function(
 #' Applies a trained CNN model to classify new landscapes based on their
 #' spatial patterns.
 #'
-#' @param landscape SpatRaster, matrix, or list. Landscape(s) to classify.
+#' @param landscapes SpatRaster, matrix, or list. Landscape(s) to classify.
 #'   Can be a single landscape or list of landscapes, with or without metadata.
 #' @param nn_model List. CNN model from train_nn_keras().
 #' @param show_progress Logical. Whether to display progress bar for multiple landscapes (default: TRUE).
@@ -434,15 +434,10 @@ train_nn_keras <- function(
 #'   predicted class, confidence score, warning flag, and probability for each class.
 #' @export
 apply_nn_keras <- function(
-  landscape,
+  landscapes,
   nn_model,
   show_progress = TRUE
 ) {
-  # Validate inputs
-  if (is.null(nn_model)) {
-    stop("CNN model is required")
-  }
-
   # Extract required elements from the model
   model <- nn_model$model
   class_names <- nn_model$classes
@@ -451,159 +446,61 @@ apply_nn_keras <- function(
   # Initialize results list
   results_list <- list()
 
-  # Helper function to extract landscape data from metadata structure
-  extract_landscape_data <- function(landscape_obj) {
-    if (has_landscape_metadata(landscape_obj)) {
-      return(get_landscape(landscape_obj))
-    } else {
-      return(landscape_obj)
-    }
-  }
-
-  # Helper function to extract landscape name from metadata structure
-  extract_landscape_name <- function(landscape_obj, default_name) {
-    if (has_landscape_metadata(landscape_obj)) {
-      # Try to get type as name
-      type_name <- get_landscape_type(landscape_obj)
-      if (!is.null(type_name) && !is.na(type_name)) {
-        return(type_name)
-      }
-
-      # Try to get landscape name
-      landscape_data <- get_landscape(landscape_obj)
-      if (!is.null(attr(landscape_data, "name"))) {
-        return(attr(landscape_data, "name"))
-      }
-    }
-    return(default_name)
-  }
-
-  # Process a single landscape function
-  process_one_landscape <- function(one_landscape, landscape_name) {
-    # Extract landscape data if it has metadata
-    raster_landscape <- extract_landscape_data(one_landscape)
-
-    # Ensure we have a SpatRaster
-    raster_landscape <- ensure_spatraster(raster_landscape)
-
-    # Convert to array for keras prediction
-    landscape_array <- terra::as.array(raster_landscape)
-
-    # Check if dimensions match expected input
-    if (any(dim(landscape_array)[1:2] != input_shape[1:2])) {
-      warning(sprintf(
-        "Landscape '%s' dimensions (%d x %d) don't match model input (%d x %d). Resizing.",
-        landscape_name,
-        dim(landscape_array)[1],
-        dim(landscape_array)[2],
-        input_shape[1],
-        input_shape[2]
-      ))
-
-      # Resize to match expected dimensions
-      # Using terra to resample
-      raster_landscape <- terra::resample(
-        raster_landscape,
-        terra::rast(
-          nrows = input_shape[1],
-          ncols = input_shape[2],
-          extent = terra::ext(raster_landscape)
-        )
-      )
-      landscape_array <- terra::as.array(raster_landscape)
-    }
-
-    # Add batch dimension required for keras predictions
-    landscape_batch <- array(
-      landscape_array,
-      dim = c(1, dim(landscape_array))
-    )
-
-    # Make predictions
-    predictions <- model %>% predict(landscape_batch)
-
-    # Get the class with the highest probability
-    predicted_index <- which.max(predictions[1, ])
-    predicted_class <- class_names[predicted_index]
-
-    # Get the confidence (probability) for the predicted class
-    confidence <- predictions[1, predicted_index]
-
-    # Create warning flag if confidence is below threshold
-    warning_message <- NA
-    if (confidence < confidence_threshold) {
-      warning_message <- "Low classification confidence"
-    }
-
-    # Create row with results
-    result_row <- data.frame(
-      landscape_name = landscape_name,
-      predicted_class = predicted_class,
-      confidence = confidence,
-      warning = warning_message
-    )
-
-    # Add probability for each class
-    for (i in seq_along(class_names)) {
-      result_row[[class_names[i]]] <- predictions[1, i]
-    }
-
-    return(result_row)
-  }
-
-  # Check if input is a list that's not a SpatRaster
-  if (is.list(landscape) && !inherits(landscape, "SpatRaster")) {
-    # Check if this is a single landscape with metadata
-    if (has_landscape_metadata(landscape)) {
-      # Process as a single landscape with metadata
-      landscape_name <- extract_landscape_name(landscape, "landscape_1")
-      results_list[[1]] <- process_one_landscape(landscape, landscape_name)
-    } else {
-      # Process multiple landscapes
-      if (show_progress && length(landscape) > 1) {
-        pb <- utils::txtProgressBar(min = 0, max = length(landscape), style = 3)
-      }
-
-      for (i in seq_along(landscape)) {
-        current_landscape <- landscape[[i]]
-
-        # Determine landscape name
-        default_name <- names(landscape)[i]
-        if (is.null(default_name) || default_name == "") {
-          default_name <- paste0("landscape_", i)
-        }
-
-        landscape_name <- extract_landscape_name(
-          current_landscape,
-          default_name
-        )
-
-        # Process this landscape
-        results_list[[i]] <- process_one_landscape(
-          current_landscape,
-          landscape_name
-        )
-
-        if (show_progress && length(landscape) > 1) {
-          utils::setTxtProgressBar(pb, i)
-        }
-      }
-
-      if (show_progress && length(landscape) > 1) {
-        close(pb)
-      }
-    }
+  # Extract the landscapes if they are in a list with metadata
+  if (all(unlist(lapply(landscapes, has_landscape_metadata)))) {
+    # Extract landscapes if they have metadata
+    landscape_plots <- lapply(landscapes, get_landscape)
+    landscape_type <- sapply(landscapes, get_landscape_type)
   } else {
-    # Process a single landscape
-    landscape_name <- extract_landscape_name(landscape, "landscape_1")
-    results_list[[1]] <- process_one_landscape(landscape, landscape_name)
+    landscape_plots <- landscapes
+    landscape_type <- paste0("landscape_", seq_along(landscape_plots))
   }
 
-  # Combine all results into a single tibble
-  final_results <- do.call(rbind, results_list)
+  # Convert all landscapes to arrays
+  landscape_arrays <- lapply(landscape_plots, function(r) {
+    terra::as.array(r)
+  })
 
-  # Convert to tibble for cleaner output
-  final_results <- tibble::as_tibble(final_results)
+  # Stack all arrays into one 4D array (samples, height, width, channels)
+  landscape_data <- abind::abind(landscape_arrays, along = 0)
 
-  return(final_results)
+  predictions <- predict(model, landscape_data)
+
+  # Add classes as column names
+  colnames(predictions) <- class_names
+
+  # Find the class with the highest probability (this is the predicted class)
+  max_col <- apply(predictions, 1, which.max)
+  predicted_class <- colnames(predictions)[max_col]
+
+  # Find the confidence (the probability for the predicted class)
+  confidence <- apply(predictions, 1, max)
+
+  # turn into a tibble and add columns for actual and predicted class and confidence
+  predictions <- tibble::as_tibble(predictions)
+
+  predictions$predicted_class <- predicted_class
+  predictions$confidence <- confidence
+  predictions$actual_class <- landscape_type
+  predictions$landscape_id <- seq_len(nrow(predictions))
+
+  # Reorder the columns
+  predictions <- predictions |>
+    dplyr::relocate(c(
+      landscape_id,
+      actual_class,
+      predicted_class,
+      confidence
+    ))
+
+  # Create confusion matrix and return it
+  conf_matrix <- table(
+    Predicted = factor(predictions$predicted_class, levels = class_names),
+    Actual = factor(predictions$actual_class, levels = class_names)
+  )
+
+  return(list(
+    predictions = predictions,
+    confusion_matrix = conf_matrix
+  ))
 }
