@@ -146,10 +146,6 @@ train_nn <- function(
       }
     }
 
-    # Initialize confusion matrix and other metrics
-    all_predictions <- character(0)
-    all_actual <- character(0)
-
     # Initialize storage for CV results
     cv_predictions <- list()
     cv_probabilities <- list()
@@ -184,10 +180,6 @@ train_nn <- function(
 
         # Get predicted class label
         prediction <- colnames(probs)[max.col(probs, ties.method = "first")]
-
-        # Store actual and predicted values
-        all_predictions <- c(all_predictions, prediction)
-        all_actual <- c(all_actual, as.character(validation_data$type))
 
         # Store predictions for this fold
         fold_probabilities <- predict(
@@ -250,21 +242,9 @@ train_nn <- function(
         # Get predicted class labels
         predictions <- colnames(probs)[max.col(probs, ties.method = "first")]
 
-        # Store actual and predicted values
-        all_predictions <- c(all_predictions, predictions)
-        all_actual <- c(all_actual, as.character(validation_data$type))
-
-        # Store predictions for this fold
-        fold_probabilities <- predict(
-          fold_model,
-          newdata = validation_data[, -which(names(validation_data) == "type")],
-          type = "raw"
-        )
-        fold_predictions <- class_names[apply(fold_probabilities, 1, which.max)]
-
         # Store results for this fold
-        cv_predictions[[fold]] <- fold_predictions
-        cv_probabilities[[fold]] <- fold_probabilities
+        cv_predictions[[fold]] <- predictions
+        cv_probabilities[[fold]] <- probs
         cv_actual[[fold]] <- validation_data$type
       }
     }
@@ -273,8 +253,8 @@ train_nn <- function(
     # Create and print confusion matrix
     # Ensure all classes appear in the confusion matrix, even if not predicted
     conf_matrix <- table(
-      Predicted = factor(all_predictions, levels = class_names),
-      Actual = factor(all_actual, levels = class_names)
+      Predicted = factor(unlist(cv_predictions), levels = class_names),
+      Actual = factor(unlist(cv_actual), levels = class_names)
     )
 
     # Check for classes that were never correctly predicted
