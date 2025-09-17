@@ -123,12 +123,63 @@ train_nn_keras <- function(
   # Initialize performance metrics storage
   performance <- NULL
 
+  # Check cross-validation method and parameters -------------------------------
+  if (cv_method != "none") {
+    # Adjust CV method based on dataset characteristics
+    if (cv_method == "k-fold") {
+      # Adjust the number of folds if necessary
+      class_counts <- table(training_labels)
+      min_class_count <- min(class_counts)
+      total_samples <- length(training_labels)
+
+      # Minimum recommended samples per class per fold for neural networks
+      min_samples_per_fold <- 3
+      # First, check if the dataset is fundamentally too small for k-fold
+      if (total_samples < 30 || min_class_count < 5) {
+        warning(
+          "Dataset is small (n=",
+          total_samples,
+          ") or has classes with few samples (min=",
+          min_class_count,
+          "). Switching to leave-one-out CV for more reliable estimates."
+        )
+        cv_method <- "loo"
+      } else {
+        # If dataset is large enough, check if we can maintain enough samples per fold
+        # Calculate maximum suitable folds to maintain min_samples_per_fold
+        max_suitable_folds <- floor(min_class_count / min_samples_per_fold)
+
+        # If we can't maintain enough samples even with 2 folds
+        if (max_suitable_folds < 2) {
+          warning(
+            "Cannot maintain ",
+            min_samples_per_fold,
+            " samples per class per fold. Switching to leave-one-out CV."
+          )
+          cv_method <- "loo"
+        } else if (cv_folds > max_suitable_folds) {
+          # If we need to reduce folds but can still do k-fold CV
+          warning(sprintf(
+            "Reducing CV folds from %d to %d to ensure at least %d samples per class per fold.",
+            cv_folds,
+            max_suitable_folds,
+            min_samples_per_fold
+          ))
+          cv_folds <- max_suitable_folds
+        }
+        # Otherwise, keep the user-specified fold count
+      }
+    }
+  }
+
   # If using cross-validation
   if (cv_method == "k-fold") {
     # Results storage
     fold_results <- list()
-    all_predictions <- list()
-    all_true_labels <- list()
+    cv_probabilities <- list()
+    cv_predictions <- list()
+    cv_actual <- list()
+    cv_indices <- list()
 
     # Create stratified fold assignments
     # Ensure each landscape type is represented in each fold
@@ -186,33 +237,26 @@ train_nn_keras <- function(
       evaluation <- model %>% keras::evaluate(x_val, y_val)
 
       # Store predictions
-      predictions <- model %>% predict(x_val)
-      pred_classes <- apply(predictions, 1, which.max) - 1
+      probs <- model %>% predict(x_val)
+      pred_classes <- apply(probs, 1, which.max) - 1
+
+      cv_predictions[[fold]] <- class_names[pred_classes + 1]
+      cv_actual[[fold]] <- class_names[y_val_int + 1]
+      cv_probabilities[[fold]] <- probs
+      cv_indices[[fold]] <- val_indices
 
       # Store results for this fold
       fold_results[[fold]] <- list(
-        evaluation = evaluation,
-        history = history,
-        confusion = table(
-          Predicted = class_names[pred_classes + 1],
-          Actual = class_names[y_val_int + 1]
-        )
+        evaluation = evaluation
       )
-
-      all_predictions[[fold]] <- pred_classes
-      all_true_labels[[fold]] <- y_val_int
 
       cat("Fold", fold, "accuracy:", evaluation[["accuracy"]], "\n")
     }
 
-    # Combine predictions from all folds
-    all_preds <- unlist(all_predictions)
-    all_trues <- unlist(all_true_labels)
-
     # Overall confusion matrix
     overall_confusion <- table(
-      Predicted = class_names[all_preds + 1],
-      Actual = class_names[all_trues + 1]
+      Predicted = unlist(cv_predictions),
+      Actual = unlist(cv_actual)
     )
 
     # Calculate average accuracy and loss across folds
@@ -276,7 +320,6 @@ train_nn_keras <- function(
         y = y_data,
         epochs = epochs,
         batch_size = batch_size,
-        validation_split = validation_split,
         verbose = 1
       )
   } else {
@@ -316,6 +359,27 @@ train_nn_keras <- function(
     )
   }
 
+  # Assemble validation results into a tibble
+  validation_results <- cv_probabilities |>
+    purrr::reduce(rbind) |>
+    tibble::as_tibble()
+
+  colnames(validation_results) <- class_names
+
+  validation_results <- validation_results |>
+    dplyr::mutate(
+      landscape_id = unlist(cv_indices),
+      actual_class = unlist(cv_actual),
+      predicted_class = unlist(cv_predictions),
+      confidence = apply(dplyr::across(dplyr::all_of(class_names)), 1, max)
+    ) |>
+    dplyr::relocate(c(
+      landscape_id,
+      actual_class,
+      predicted_class,
+      confidence
+    ))
+
   # Prepare return object
   result <- list(
     model = final_model,
@@ -323,6 +387,7 @@ train_nn_keras <- function(
     classes = class_names,
     input_shape = input_shape,
     performance = performance,
+    validation_results = validation_results,
     architecture = "multiscale"
   )
 
@@ -363,7 +428,6 @@ train_nn_keras <- function(
 #' @param landscape SpatRaster, matrix, or list. Landscape(s) to classify.
 #'   Can be a single landscape or list of landscapes, with or without metadata.
 #' @param nn_model List. CNN model from train_nn_keras().
-#' @param confidence_threshold Numeric. Threshold for warning flag (default: 0.6).
 #' @param show_progress Logical. Whether to display progress bar for multiple landscapes (default: TRUE).
 #'
 #' @return tibble. Classification results with columns for landscape name,
@@ -372,21 +436,11 @@ train_nn_keras <- function(
 apply_nn_keras <- function(
   landscape,
   nn_model,
-  confidence_threshold = 0.6,
   show_progress = TRUE
 ) {
   # Validate inputs
   if (is.null(nn_model)) {
     stop("CNN model is required")
-  }
-
-  # Validate confidence threshold
-  if (
-    !is.numeric(confidence_threshold) ||
-      confidence_threshold < 0 ||
-      confidence_threshold > 1
-  ) {
-    stop("confidence_threshold must be a numeric value between 0 and 1")
   }
 
   # Extract required elements from the model
