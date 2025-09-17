@@ -69,7 +69,7 @@ plot_metrics(
 # Train a network -----------------------------------------------
 # use k-fold cross-validation with 3 folds
 # warning will tell you that folds need to be reduced to 2
-model2 <- train_nn(
+model <- train_nn(
   metrics = landscape_metrics,
   metrics_selected = best_10_group_diff,
   cv_method = "k-fold",
