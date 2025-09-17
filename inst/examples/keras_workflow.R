@@ -5,7 +5,7 @@ devtools::load_all()
 # Increase number of landscapes for better training
 training_landscapes <- generate_training_landscapes(
   seed = 42,
-  n = 500, # Larger dataset for better generalization
+  n = 100, # Larger dataset for better generalization
   types = c(
     "sharp",
     "diffuse",
@@ -27,8 +27,7 @@ model <- train_nn_keras(
   cv_method = "k-fold",
   cv_folds = 5,
   epochs = 30,
-  save_model = TRUE,
-  model_path = "models/landscape_classifier.h5"
+  model_path = "models/landscape_classifier"
 )
 
 # Apply to new landscapes
