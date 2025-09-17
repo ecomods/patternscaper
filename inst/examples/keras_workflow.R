@@ -86,7 +86,7 @@ validation_results <- apply_nn_keras(
 )
 
 plot_nn_classification_landscapes(
-  classification = validation_results,
+  classification = validation_results$predictions,
   landscape_list = test_landscapes,
   only_misclassified = FALSE
 )
