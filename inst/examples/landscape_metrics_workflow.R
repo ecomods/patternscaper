@@ -3,7 +3,6 @@
 
 # load all functions
 devtools::load_all()
-#kleiner Fix - Britta
 
 # ----------------------------------------------------------------------------#
 # Step 1: Generate some landscapes ---------------------------------------
