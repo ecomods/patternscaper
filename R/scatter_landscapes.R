@@ -256,7 +256,7 @@ create_landscape_clustered_trees <- function(
         # Generate random cluster centers
         cluster_centers <- data.frame(
           row = sample(
-            (treeline_row + 1):scatter_zone_end,
+            round((treeline_row + cluster_radius + 1),0):round((scatter_zone_end-cluster_radius),0),
             num_clusters,
             replace = TRUE
           ),
@@ -271,7 +271,7 @@ create_landscape_clustered_trees <- function(
         # Generate random cluster centers
         cluster_centers <- data.frame(
           row = sample(
-            (treeline_row + 1):scatter_zone_end,
+            round((treeline_row + cluster_radius + 1),0):round((scatter_zone_end-cluster_radius),0),
             num_clusters,
             replace = TRUE
           ),

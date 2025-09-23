@@ -1,0 +1,5 @@
+Britta:
+ - warum wird der Seed in der Erzeugung per Default festgelegt,
+ sollte dies nicht per Default zufällig sein? Beispiel:
+ create_landscape_clustered_trees()
+
