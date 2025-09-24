@@ -268,13 +268,14 @@ create_landscape_clustered_trees <- function(
           round(5 / 6 * height_actual),
           treeline_row + round((5 / 6 * height_actual) * scatter_zone_prop)
         )
-        # Generate random cluster centers
+        #Generate random cluster centers
         cluster_centers <- data.frame(
-          row = sample(
-            round((treeline_row + cluster_radius + 1),0):round((scatter_zone_end-cluster_radius),0),
-            num_clusters,
-            replace = TRUE
-          ),
+         row = sample(
+           round((treeline_row + cluster_radius + 1),0):round((scatter_zone_end-cluster_radius),0),
+           num_clusters,
+           replace = TRUE
+         ),
+
           col = sample(
             (round(1 / 6 * width_actual) + 1):round(5 / 6 * width_actual),
             num_clusters,
@@ -373,6 +374,7 @@ create_landscape_clustered_trees <- function(
 #' @param n_spots Integer. Number of non-vegetated spots
 #' @param spot_radius Integer. Radius of each spot
 #' @param noise_radius_sd Numeric. If random effects, which standard deviation (Default is 0 - no random effects)
+#' @param spot_jitter Integer. Should the regular spots be slightly shifted - how many cells (Default is 0 - no jitter)
 #' @param invert_landscape Boolean. Invert vegetated and unvegetated areas.
 #'     Switches the landscape from vegetated with bare spots to bare with vegetated spots (default: FALSE).
 #' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
@@ -411,32 +413,50 @@ create_landscape_spots <- function(
     n_spots = 15,
     spot_radius = 5,
     noise_radius_sd = 0,
+    spot_jitter = 0,
     invert_landscape = FALSE,
     seed = 42,
     rotation = 0,
     as_raster = TRUE,
     crs = NULL,
     add_metadata = TRUE) {
+
   # If seed is NULL, use random seed; otherwise use the provided seed
   if (is.null(seed)) {
     seed <- as.integer(Sys.time())
   }
   set.seed(seed)
 
-  # Generate random cluster centers
-  cluster_centers <- data.frame(
-    row = sample(
-      1:height,
-      n_spots,
-      replace = TRUE
-    ),
-    col = sample(
-      1:width,
-      n_spots,
-      replace = TRUE
-    )
-  )
+  #hexangon for spots (to make them more regular)
+  spacing <- 2 * spot_radius * 1.1
+  n_cols <- ceiling(width / spacing)
+  n_rows <- ceiling(height / (sqrt(3)/2 * spacing))
 
+  grid_points <- data.frame()
+  for (r in 0:(n_rows-1)) {
+    for (c in 0:(n_cols-1)) {
+      x <- c * spacing + spot_radius
+      y <- r * (sqrt(3)/2 * spacing) + spot_radius
+      if (r %% 2 == 1) {
+        x <- x + spacing / 2
+      }
+      if (x <= width & y <= height) {
+        grid_points <- rbind(grid_points, data.frame(row = y, col = x))
+      }
+    }
+  }
+
+  #chose regularly distributed centers with k-means
+  km <- kmeans(grid_points, centers = n_spots, nstart = 10)
+  cluster_centers <- as.data.frame(km$centers)
+
+  #some jittering if wanted
+  if (spot_jitter > 0) {
+    cluster_centers$row <- pmin(height, pmax(1, cluster_centers$row + runif(n_spots, -spot_jitter, spot_jitter)))
+    cluster_centers$col <- pmin(width, pmax(1, cluster_centers$col + runif(n_spots, -spot_jitter, spot_jitter)))
+  }
+
+  #prepare landscape
   landscape <- matrix(0, nrow = height, ncol = width)
 
   # Create clusters around centers

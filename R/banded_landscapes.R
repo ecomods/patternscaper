@@ -229,6 +229,7 @@ create_landscape_banded <- function(
   crs = NULL,
   add_metadata = TRUE
 ) {
+
   # If seed is NULL, use random seed; otherwise use the provided seed
   if (is.null(seed)) {
     seed <- as.integer(Sys.time())
@@ -268,7 +269,7 @@ create_landscape_banded <- function(
                 ((y - ypos_hill_actual[h]) / y_ext_hill[h])^2
             )
       }
-      elevation[x, y] <- max(hill_distance_elevation[x, y, ])
+      elevation[x, y] <- max(hill_distance_elevation[x, y, ],na.rm=T)
       # add noise
       elevation[x, y] <- elevation[x, y] + rnorm(1, mean = 0, sd = noise_sd)
     }
