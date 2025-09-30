@@ -3,16 +3,21 @@ Britta:
  sollte dies nicht per Default zufällig sein? Beispiel:
  create_landscape_clustered_trees()
 
-- mit treeline_position = 0 hat man dennoch einen Rand der Breite 1 mit Bäumen
---> gelöst mit einer Abfrage, dass nur 1en erzeugt werden, wenn treeline_row > 0 ist
-
 - manchmal gibt es bei den Spots eine Fehlermeldung
 Error: number of cluster centres must lie between 1 and nrow(x)
 Called from: do_one(nmeth)
 
 - banded vegetation: hier wäre es sinnvoll, die Anzahl der Hügel
 und die Ranges für die anderen Werte angeben zu können
+--> Sampling muss dafür verändert werden
 
 - clustered und spots noch zusammenfügen
 
-- labyrinth: library(ambient) an richtiger Stelle einfügen
+- files für verschiedene landscape typen
+ --> treeline/ecotone
+ --> pattern formation
+ --> fragmentation
+
+- generate landscape: hier sollten Landschaften für die drei Landschaftstypen
+unterschieden werden, d.h. eine Liste nur für ecotone, eine für pattern, eine für fragmentation
+

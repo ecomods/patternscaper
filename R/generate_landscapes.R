@@ -257,35 +257,37 @@ generate_training_landscapes <- function(
         seed = seed
       ),
       clustered = list(
-        treeline_position = c(0.4, 0.6),
-        num_clusters = c(5, 20),
-        cluster_radius = c(5, 10),
-        scatter_zone_prop = c(0.2, 0.4),
-        elongation_x = c(0.5, 2),
-        elongation_y = c(0.5, 2),
+        treeline_position = c(0.4, 0.6), # numeric
+        num_clusters = c(5, 15), # integer
+        cluster_radius = c(3, 7), # integer
+        scatter_zone_prop = c(0.2, 1), # numeric
+        elongation_x = c(0.5, 1.5), # numeric
+        elongation_y = c(0.5, 1.5), # numeric
         seed = seed
       ),
       sine_bands = list(
-        treeline_position = c(0.4, 0.6),
-        band_thickness = c(1, 7),
-        band_spacing = c(5, 15),
-        frequency = c(0.1, 1),
-        amplitude = c(2, 10),
-        noise_sd = c(0, 2),
+        treeline_position = c(0.3, 0.5), # numeric
+        band_zone_prop = c(0.2, 0.5), # numeric
+        band_thickness = c(2, 7), #integer
+        band_spacing = c(5, 15), #integer
+        frequency = c(0.1, 0.3), # numeric
+        amplitude = c(0, 6), # integer
+        noise_sd = c(0, 1.5), # numeric
         seed = seed
       ),
       spots = list(
-        n_spots = c(5, 20),
-        spot_radius = c(2, 10),
-        noise_radius_sd = c(0, 2),
+        n_spots = c(10, 30), # integer
+        spot_radius = c(5, 12), # integer
+        noise_radius_sd = c(0, 2), # numeric
         invert_landscape = c(TRUE, FALSE),
         seed = seed
       ),
-      banded = list(
+      banded = list( # parameter ranges are given in test_landscape_values_BT.R - sampling has to be changed
         nbands = c(3, 10),
         noise_sd = c(0, 0.5),
         seed = seed
       )
+      #to do: add at some point labyrinths
     )
   }
 
