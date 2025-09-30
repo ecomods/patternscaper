@@ -380,10 +380,10 @@ create_landscape_labyrinth <- function(
   landscape <- matrix(0, nrow = height, ncol = width)
 
   # calculate Perlin Noise
-  grid$noise <- gen_perlin(
+  grid$noise <- ambient::gen_perlin(
     x = grid$x,
     y = grid$y,
-    frequency = freq,
+    frequency = frequency,
     octaves = octaves,
     seed = seed
   )

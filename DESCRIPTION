@@ -23,7 +23,8 @@ Imports:
     purrr,
     zoo,
     ggtext,
-    keras
+    keras,
+    ambient
 Suggests: 
     knitr,
     rmarkdown
