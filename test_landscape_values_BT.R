@@ -50,6 +50,7 @@ test <- create_landscape_sine_bands(
 plot_landscape(test)
 
 # SPOTS
+#devtools::load_all()
 ns = round(runif(n,10,30),0)
 sr = round(runif(n,5,12),0)
 nrs= runif(n,0,2)
@@ -59,7 +60,8 @@ test <- create_landscape_spots(
       spot_radius = sr[1],
       spot_jitter = 1,
       noise_radius_sd = nrs[1],
-      seed=NULL
+      seed=NULL,
+      regular_spots=FALSE,
     )
 plot_landscape(test)
 

@@ -380,6 +380,8 @@ create_landscape_clustered_trees <- function(
 #' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
 #'     If NULL, a random seed based on system time will be used, producing different landscapes on each call.
 #'     If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
+#' @param regular_spots Boolean. Should the spots be arranged in a regular way (on a hexagon using k-means) or randomly?
+#'     (default: FALSE)
 #' @param rotation Unused parameter for compatibility with other landscape functions (default: 0).
 #'     Is only needed because in the function \link{generate_training_landscapes}
 #'     all landscape functions need to have a rotation parameter.
@@ -416,6 +418,7 @@ create_landscape_spots <- function(
     spot_jitter = 0,
     invert_landscape = FALSE,
     seed = 42,
+    regular_spots = FALSE,
     rotation = 0,
     as_raster = TRUE,
     crs = NULL,
@@ -427,33 +430,43 @@ create_landscape_spots <- function(
   }
   set.seed(seed)
 
-  #hexangon for spots (to make them more regular)
-  spacing <- 2 * spot_radius * 1.1
-  n_cols <- ceiling(width / spacing)
-  n_rows <- ceiling(height / (sqrt(3)/2 * spacing))
+  if (regular_spots){   #hexangon for spots (to make them more regular)
+    spacing <- 2 * spot_radius * 1.1
+    n_cols <- ceiling(width / spacing)
+    n_rows <- ceiling(height / (sqrt(3)/2 * spacing))
 
-  grid_points <- data.frame()
-  for (r in 0:(n_rows-1)) {
-    for (c in 0:(n_cols-1)) {
-      x <- c * spacing + spot_radius
-      y <- r * (sqrt(3)/2 * spacing) + spot_radius
-      if (r %% 2 == 1) {
-        x <- x + spacing / 2
-      }
-      if (x <= width & y <= height) {
-        grid_points <- rbind(grid_points, data.frame(row = y, col = x))
+    grid_points <- data.frame()
+    for (r in 0:(n_rows-1)) {
+      for (c in 0:(n_cols-1)) {
+        x <- c * spacing + spot_radius
+        y <- r * (sqrt(3)/2 * spacing) + spot_radius
+        if (r %% 2 == 1) {
+          x <- x + spacing / 2
+        }
+        if (x <= width & y <= height) {
+          grid_points <- rbind(grid_points, data.frame(row = y, col = x))
+        }
       }
     }
-  }
 
-  #chose regularly distributed centers with k-means
-  km <- kmeans(grid_points, centers = n_spots, nstart = 10)
-  cluster_centers <- as.data.frame(km$centers)
+    #chose regularly distributed centers with k-means
+    km <- kmeans(grid_points, centers = n_spots, nstart = 10)
+    cluster_centers <- as.data.frame(km$centers)
 
-  #some jittering if wanted
-  if (spot_jitter > 0) {
-    cluster_centers$row <- pmin(height, pmax(1, cluster_centers$row + runif(n_spots, -spot_jitter, spot_jitter)))
-    cluster_centers$col <- pmin(width, pmax(1, cluster_centers$col + runif(n_spots, -spot_jitter, spot_jitter)))
+    #some jittering if wanted
+    if (spot_jitter > 0) {
+      cluster_centers$row <- pmin(height, pmax(1, cluster_centers$row + runif(n_spots, -spot_jitter, spot_jitter)))
+      cluster_centers$col <- pmin(width, pmax(1, cluster_centers$col + runif(n_spots, -spot_jitter, spot_jitter)))
+    }
+  } else { # Generate random cluster centers
+    cluster_centers <- data.frame(
+      row = sample(
+        round((spot_radius + 1),0):round((height-spot_radius),0),
+        n_spots,
+        replace = TRUE
+      ),
+      col = sample(1:width, n_spots, replace = TRUE)
+    )
   }
 
   #prepare landscape
