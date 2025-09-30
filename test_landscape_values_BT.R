@@ -86,3 +86,15 @@ test <- create_landscape_banded (
     seed = NULL,
 )
 plot_landscape(test)
+
+#TO DO: PUT ThIS To CORRECT FILE
+library(ambient)
+test <- create_landscape_labyrinth (
+  frequency = runif(n=1,1,4),
+  veg_threshold = runif(n=1,0.4,0.5),
+  band_fuzziness = runif(n=1,0,0.1),
+  octaves = sample(1:3,size=1),
+  seed = NULL
+)
+plot_landscape(test)
+

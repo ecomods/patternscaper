@@ -14,3 +14,5 @@ Called from: do_one(nmeth)
 und die Ranges für die anderen Werte angeben zu können
 
 - clustered und spots noch zusammenfügen
+
+- labyrinth: library(ambient) an richtiger Stelle einfügen
