@@ -21,3 +21,8 @@ und die Ranges für die anderen Werte angeben zu können
 - generate landscape: hier sollten Landschaften für die drei Landschaftstypen
 unterschieden werden, d.h. eine Liste nur für ecotone, eine für pattern, eine für fragmentation
 
+- es gibt zwei Dateien, mit generate_landscapes.R
+in R und in inst-->examples
+eine umbenennen?
+
+- echte Landschaften funktionieren noch nicht

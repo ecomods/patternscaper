@@ -335,6 +335,7 @@ create_landscape_banded <- function(
 #'
 #' @param width Integer. Number of columns in the landscape.
 #' @param height Integer. Number of rows in the landscape.
+#' @param rotation Numreric. Number between 0 and 360 giving the degree of landscape rotation
 #' @param frequency Numeric. Controls the spatial scale of the noise pattern:
 #'    Lower values produce broad, smooth bands, higher values produce finer, maze-like structures.
 #'    (default: 5)
@@ -361,6 +362,7 @@ create_landscape_banded <- function(
 create_landscape_labyrinth <- function(
     width = 100,
     height = 100,
+    rotation = 0,
     frequency = 5,
     veg_threshold = 0.5,
     band_fuzziness = 0.1,
@@ -372,7 +374,7 @@ create_landscape_labyrinth <- function(
 ) {
 
   # make coordinates (required by gen_perlin())
-  grid <- long_grid(
+  grid <- ambient::long_grid(
     x = seq(0, 1, length.out = width),
     y = seq(0, 1, length.out = height)
   )

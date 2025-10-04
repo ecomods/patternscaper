@@ -31,6 +31,8 @@
 #'
 #' \code{\link{create_landscape_banded}} for "banded" pattern parameters
 #'
+#'\code{\link{create_landscape_labyrinth}} for "labyrinth" pattern parameters
+#'
 #' @examples
 #' # Create a default landscape of various types
 #' sharp_default <- create_landscape("sharp")
@@ -66,7 +68,9 @@ create_landscape <- function(
     "clustered",
     "sine_bands",
     "spots",
-    "banded"
+    "gaps",
+    "banded",
+    "labyrinth"
   ),
   ...,
   add_metadata = TRUE
@@ -125,7 +129,9 @@ create_landscape <- function(
     clustered = do.call(create_landscape_clustered_trees, dots),
     sine_bands = do.call(create_landscape_sine_bands, dots),
     spots = do.call(create_landscape_spots, dots),
-    banded = do.call(create_landscape_banded, dots)
+    gaps = do.call(create_landscape_gaps, dots),
+    banded = do.call(create_landscape_banded, dots),
+    labyrinth = do.call(create_landscape_labyrinth, dots)
   )
 
   # Check if landscape was created successfully
@@ -185,7 +191,9 @@ generate_training_landscapes <- function(
     "clustered",
     "sine_bands",
     "spots",
-    "banded"
+    "gaps",
+    "banded",
+    "labyrinth"
   ),
   width = 100,
   height = 100,
@@ -212,7 +220,9 @@ generate_training_landscapes <- function(
     "clustered",
     "sine_bands",
     "spots",
-    "banded"
+    "gaps",
+    "banded",
+    "labyrinth"
   )
   types <- intersect(types, valid_types)
 
@@ -279,15 +289,30 @@ generate_training_landscapes <- function(
         n_spots = c(10, 30), # integer
         spot_radius = c(5, 12), # integer
         noise_radius_sd = c(0, 2), # numeric
-        invert_landscape = c(TRUE, FALSE),
+        regular_spots = c(TRUE,FALSE), #Bool
+        invert_landscape = c(FALSE),
+        seed = seed
+      ),
+      gaps = list(
+        n_spots = c(10, 30), # integer
+        spot_radius = c(5, 12), # integer
+        noise_radius_sd = c(0, 2), # numeric
+        regular_spots = c(TRUE,FALSE), #Bool
+        invert_landscape = c(TRUE),
         seed = seed
       ),
       banded = list( # parameter ranges are given in test_landscape_values_BT.R - sampling has to be changed
         nbands = c(3, 10),
-        noise_sd = c(0, 0.5),
+        noise_sd = c(0, 0.25),
+        seed = seed
+      ),
+      labyrinth = list(
+        frequency = c(2,5), # integer
+        veg_threshold = c(0.4,0.5), # numeric
+        band_fuzziness = c(0,0.1), #numeric
+        octaves = c(1,3), #integer
         seed = seed
       )
-      #to do: add at some point labyrinths
     )
   }
 

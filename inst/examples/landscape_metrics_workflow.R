@@ -11,6 +11,7 @@ devtools::load_all()
 # Create some landscapes (the more the better)
 landscapes <- generate_training_landscapes(
   n = 100,
+  types = c("banded", "spots", "labyrinth"),
   add_rotation = TRUE,
   seed = 123
 )
