@@ -5,6 +5,10 @@
  - warum wird der Seed in der Erzeugung per Default festgelegt,
  sollte dies nicht per Default zufällig sein? Beispiel:
  create_landscape_clustered_trees()
+ - Selina: Ich dachte es macht Sinn, wenn es by default reproduzierbar ist und man
+ die Randomness (seed based on current time) explizit setzen muss (mit seed = NULL).
+ Aber wir könnten die Logik auch umdrehen, also by default random und nur wenn
+ seed gesetzt ist, dann reproduzierbar. 
 
 #---------------------------------------------------------------------
 #Spots
@@ -44,6 +48,8 @@ unterschieden werden, d.h. eine Liste nur für ecotone, eine für pattern, eine 
 - es gibt zwei Dateien, mit generate_landscapes.R
 in R und in inst-->examples
 eine umbenennen?
+  - Selina: Ich habe das file in inst/examples umbenannt in generate_landscapes_workflow.R, weil die
+  anderen Skripte in dem Ordner auch _worflow heißen.
 
 #---------------------------------------------------------------------
 #KERAS
