@@ -86,6 +86,7 @@ model_l
 # ----------------------------------------------------------------------------#
 
 # Train a model
+#BRITTA - LÄUFT DERZEIT BEI MIR NICHT
 model_k <- train_nn_keras(
   landscapes = landscapes,
   cv_method = "k-fold",
@@ -126,6 +127,7 @@ plot_nn_classification_landscapes(
 
 #-------------------------------------------------
 # b) for model using keras
+#BRITTA - LÄUFT DERZEIT BEI MIR NICHT
 #-------------------------------------------------
 
 # Visualize classification results
@@ -181,6 +183,7 @@ plot_nn_classification_landscapes(
 
 #-------------------------------------------------
 # b) for model using keras
+#BRITTA - LÄUFT DERZEIT BEI MIR NICHT
 #-------------------------------------------------
 
 # Apply the model to the test landscape(s)
@@ -222,7 +225,7 @@ image(
 )
 
 result_l <- apply_nn(
-  landscape = test_raster,
+  landscapes = test_raster,
   nn_model = model_l
 )
 

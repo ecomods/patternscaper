@@ -1,28 +1,78 @@
-Britta:
+#---------------------------------------------------------------------
+#Seed
+#---------------------------------------------------------------------
+
  - warum wird der Seed in der Erzeugung per Default festgelegt,
  sollte dies nicht per Default zufällig sein? Beispiel:
  create_landscape_clustered_trees()
 
+#---------------------------------------------------------------------
+#Spots
+#---------------------------------------------------------------------
 - manchmal gibt es bei den Spots eine Fehlermeldung
 Error: number of cluster centres must lie between 1 and nrow(x)
 Called from: do_one(nmeth)
 
+#---------------------------------------------------------------------
+#mehr Flexibilität bei Parameter Ranges (z.B. Anzahl der Hügel bestimmt
+#Anzahl der anderen Parameter)
+#Ggf in Samplingfunktion Berücksichtigung von Int vs Num
+#---------------------------------------------------------------------
 - banded vegetation: hier wäre es sinnvoll, die Anzahl der Hügel
 und die Ranges für die anderen Werte angeben zu können
 --> Sampling muss dafür verändert werden
 
-- clustered und spots noch zusammenfügen
+#---------------------------------------------------------------------
+#Clustered/Spots
+#---------------------------------------------------------------------
+- clustered und spots noch zusammenfügen, aufwändiger, da in Spots bisher
+keine Treeline und Rotation, aber dafür regular vs zufällig
 
+#---------------------------------------------------------------------
+#Organisation der Landscape Files
+#---------------------------------------------------------------------
 - files für verschiedene landscape typen
  --> treeline/ecotone
  --> pattern formation
  --> fragmentation
-
 - generate landscape: hier sollten Landschaften für die drei Landschaftstypen
 unterschieden werden, d.h. eine Liste nur für ecotone, eine für pattern, eine für fragmentation
 
+#---------------------------------------------------------------------
+#Dateibenennung
+#---------------------------------------------------------------------
 - es gibt zwei Dateien, mit generate_landscapes.R
 in R und in inst-->examples
 eine umbenennen?
 
+#---------------------------------------------------------------------
+#KERAS
+#---------------------------------------------------------------------
+- keras --> läuft bei mir nicht mehr
+Error: Valid installation of TensorFlow not found.
+
+#---------------------------------------------------------------------
+#Problem mit Fotos/eingelesenen Dateien
+#---------------------------------------------------------------------
 - echte Landschaften funktionieren noch nicht
+--> hier entseht ein Problem, wenn predictoren (bestimmte Metriken) in den
+Trainingsdaten vorhanden sind, bei den Testdaten aber ein NA haben
+Zeile 443 in neural_network.R
+predictions <- predict(
+    model,
+    newdata = predictors_scaled,
+    type = "raw"
+  ))
+
+#---------------------------------------------------------------------
+#Inverse Landschaften
+#---------------------------------------------------------------------
+- landscape metrics kriegt inverse Landschaften nicht hin
+
+#---------------------------------------------------------------------
+#Parameter landscapes im NN
+#---------------------------------------------------------------------
+- apply_nn: parameter landscapes (im Code) vs. landscape (in Hilfefunktion)
+apply_nn übergibt landscapes (matrix, raster, list) an calculate_landscape_metrics,
+dort ist aber matrix laut Hilfefunktion nicht vorgesehen
+
