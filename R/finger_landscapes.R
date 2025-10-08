@@ -11,7 +11,7 @@
 #' @param finger_width Integer. Width of each finger in pixels (default: 3).
 #' @param finger_length_prop Numeric. Proportion of height of the total landscape for finger length (default: 0.3).
 #' @param finger_length_sd Numeric. Standard deviation for finger length randomness
-#'    in pixels (default: 0, no randomness).
+#'    in proportion of actual finger length (default: 0, no randomness).
 #' @param bend Logical. Should the fingers be bent in a sinus pattern or not? (default: FALSE).
 #' @param rotation Numeric. Degrees to rotate the landscape (default: 0).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
@@ -104,7 +104,7 @@ create_landscape_fingers <- function(
 
   # Add randomness to finger length if specified
   finger_lengths <- rep(finger_length, num_fingers) +
-    round(rnorm(num_fingers, mean = 0, sd = finger_length_sd))
+    round(rnorm(num_fingers, mean = 0, sd = finger_length_sd * finger_length))
 
   # Create fingers extending from treeline
   if (bend) {
