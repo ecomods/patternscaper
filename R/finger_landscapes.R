@@ -44,8 +44,8 @@ create_landscape_fingers <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
-  num_fingers = 5,
-  finger_width = 3,
+  num_fingers = 5L,
+  finger_width = 3L,
   finger_length_prop = 0.3,
   bend = FALSE,
   rotation = 0,
@@ -53,6 +53,14 @@ create_landscape_fingers <- function(
   crs = NULL,
   add_metadata = TRUE
 ) {
+  # Verify inputs
+  if (!is.integer(num_fingers)) {
+    num_fingers <- as.integer(num_fingers)
+  }
+  if (!is.integer(finger_width)) {
+    finger_width <- as.integer(finger_width)
+  }
+
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
