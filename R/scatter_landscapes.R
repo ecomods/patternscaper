@@ -40,16 +40,17 @@
 #'
 #' @export
 create_landscape_scattered_trees <- function(
-    width = 100,
-    height = 100,
-    treeline_position = 0.5,
-    scatter_density = 0.1,
-    scatter_zone_prop = 0.2,
-    rotation = 0,
-    seed = 42,
-    as_raster = TRUE,
-    crs = NULL,
-    add_metadata = TRUE) {
+  width = 100,
+  height = 100,
+  treeline_position = 0.5,
+  scatter_density = 0.1,
+  scatter_zone_prop = 0.2,
+  rotation = 0,
+  seed = 42,
+  as_raster = TRUE,
+  crs = NULL,
+  add_metadata = TRUE
+) {
   # If seed is NULL, use random seed; otherwise use the provided seed
   if (is.null(seed)) {
     seed <- as.integer(Sys.time())
@@ -172,19 +173,20 @@ create_landscape_scattered_trees <- function(
 #'
 #' @export
 create_landscape_clustered_trees <- function(
-    width = 100,
-    height = 100,
-    treeline_position = 0.5,
-    num_clusters = 10,
-    cluster_radius = 5,
-    scatter_zone_prop = 0.3,
-    elongation_x = 1,
-    elongation_y = 1,
-    seed = 42,
-    rotation = 0,
-    as_raster = TRUE,
-    crs = NULL,
-    add_metadata = TRUE) {
+  width = 100,
+  height = 100,
+  treeline_position = 0.5,
+  num_clusters = 10,
+  cluster_radius = 5,
+  scatter_zone_prop = 0.3,
+  elongation_x = 1,
+  elongation_y = 1,
+  seed = 42,
+  rotation = 0,
+  as_raster = TRUE,
+  crs = NULL,
+  add_metadata = TRUE
+) {
   # If seed is NULL, use random seed; otherwise use the provided seed
   if (is.null(seed)) {
     seed <- as.integer(Sys.time())
@@ -256,7 +258,10 @@ create_landscape_clustered_trees <- function(
         # Generate random cluster centers
         cluster_centers <- data.frame(
           row = sample(
-            round((treeline_row + cluster_radius + 1),0):round((scatter_zone_end-cluster_radius),0),
+            round((treeline_row + cluster_radius + 1), 0):round(
+              (scatter_zone_end - cluster_radius),
+              0
+            ),
             num_clusters,
             replace = TRUE
           ),
@@ -270,11 +275,14 @@ create_landscape_clustered_trees <- function(
         )
         #Generate random cluster centers
         cluster_centers <- data.frame(
-         row = sample(
-           round((treeline_row + cluster_radius + 1),0):round((scatter_zone_end-cluster_radius),0),
-           num_clusters,
-           replace = TRUE
-         ),
+          row = sample(
+            round((treeline_row + cluster_radius + 1), 0):round(
+              (scatter_zone_end - cluster_radius),
+              0
+            ),
+            num_clusters,
+            replace = TRUE
+          ),
 
           col = sample(
             (round(1 / 6 * width_actual) + 1):round(5 / 6 * width_actual),
@@ -410,36 +418,37 @@ create_landscape_clustered_trees <- function(
 #' )
 #' @export
 create_landscape_spots <- function(
-    width = 100,
-    height = 100,
-    n_spots = 15,
-    spot_radius = 5,
-    noise_radius_sd = 0,
-    spot_jitter = 0,
-    invert_landscape = FALSE,
-    seed = 42,
-    regular_spots = FALSE,
-    rotation = 0,
-    as_raster = TRUE,
-    crs = NULL,
-    add_metadata = TRUE) {
-
+  width = 100,
+  height = 100,
+  n_spots = 15,
+  spot_radius = 5,
+  noise_radius_sd = 0,
+  spot_jitter = 0,
+  invert_landscape = FALSE,
+  seed = 42,
+  regular_spots = FALSE,
+  rotation = 0,
+  as_raster = TRUE,
+  crs = NULL,
+  add_metadata = TRUE
+) {
   # If seed is NULL, use random seed; otherwise use the provided seed
   if (is.null(seed)) {
     seed <- as.integer(Sys.time())
   }
   set.seed(seed)
 
-  if (regular_spots){   #hexangon for spots (to make them more regular)
+  if (regular_spots) {
+    #hexangon for spots (to make them more regular)
     spacing <- 2 * spot_radius * 1.1
     n_cols <- ceiling(width / spacing)
-    n_rows <- ceiling(height / (sqrt(3)/2 * spacing))
+    n_rows <- ceiling(height / (sqrt(3) / 2 * spacing))
 
     grid_points <- data.frame()
-    for (r in 0:(n_rows-1)) {
-      for (c in 0:(n_cols-1)) {
+    for (r in 0:(n_rows - 1)) {
+      for (c in 0:(n_cols - 1)) {
         x <- c * spacing + spot_radius
-        y <- r * (sqrt(3)/2 * spacing) + spot_radius
+        y <- r * (sqrt(3) / 2 * spacing) + spot_radius
         if (r %% 2 == 1) {
           x <- x + spacing / 2
         }
@@ -455,13 +464,20 @@ create_landscape_spots <- function(
 
     #some jittering if wanted
     if (spot_jitter > 0) {
-      cluster_centers$row <- pmin(height, pmax(1, cluster_centers$row + runif(n_spots, -spot_jitter, spot_jitter)))
-      cluster_centers$col <- pmin(width, pmax(1, cluster_centers$col + runif(n_spots, -spot_jitter, spot_jitter)))
+      cluster_centers$row <- pmin(
+        height,
+        pmax(1, cluster_centers$row + runif(n_spots, -spot_jitter, spot_jitter))
+      )
+      cluster_centers$col <- pmin(
+        width,
+        pmax(1, cluster_centers$col + runif(n_spots, -spot_jitter, spot_jitter))
+      )
     }
-  } else { # Generate random cluster centers
+  } else {
+    # Generate random cluster centers
     cluster_centers <- data.frame(
       row = sample(
-        round((spot_radius + 1),0):round((height-spot_radius),0),
+        round((spot_radius + 1), 0):round((height - spot_radius), 0),
         n_spots,
         replace = TRUE
       ),
@@ -584,34 +600,35 @@ create_landscape_spots <- function(
 #' )
 #' @export
 create_landscape_gaps <- function(
-    width = 100,
-    height = 100,
-    n_spots = 15,
-    spot_radius = 5,
-    noise_radius_sd = 0,
-    spot_jitter = 0,
-    invert_landscape = TRUE,
-    seed = 42,
-    regular_spots = FALSE,
-    rotation = 0,
-    as_raster = TRUE,
-    crs = NULL,
-    add_metadata = TRUE) {
+  width = 100,
+  height = 100,
+  n_spots = 15,
+  spot_radius = 5,
+  noise_radius_sd = 0,
+  spot_jitter = 0,
+  invert_landscape = TRUE,
+  seed = 42,
+  regular_spots = FALSE,
+  rotation = 0,
+  as_raster = TRUE,
+  crs = NULL,
+  add_metadata = TRUE
+) {
+  result <- create_landscape_spots(
+    width = width,
+    height = height,
+    n_spots = n_spots,
+    spot_radius = spot_radius,
+    noise_radius_sd = noise_radius_sd,
+    spot_jitter = spot_jitter,
+    invert_landscape = invert_landscape,
+    seed = seed,
+    regular_spots = regular_spots,
+    rotation = rotation,
+    as_raster = as_raster,
+    crs = crs,
+    add_metadata = add_metadata
+  )
 
-  result <- create_landscape_spots(width=width,
-                         height = height,
-                         n_spots = n_spots,
-                         spot_radius = spot_radius,
-                         noise_radius_sd = noise_radius_sd,
-                         spot_jitter = spot_jitter,
-                         invert_landscape = invert_landscape,
-                         seed = seed,
-                         regular_spots = regular_spots,
-                         rotation = rotation,
-                         as_raster = as_raster,
-                         crs = crs,
-                         add_metadata = add_metadata)
-
-    return(result)
-
+  return(result)
 }
