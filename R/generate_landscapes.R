@@ -244,8 +244,8 @@ generate_training_landscapes <- function(
         treeline_position = c(0.2, 0.8)
       ),
       diffuse = list(
-        steepness = c(0.5, 2),
-        treeline_position = c(0.4, 0.6),
+        steepness = c(0.1, 3),
+        treeline_position = c(0.1, 0.4),
         seed = seed
       ),
       curvy = list(
@@ -289,7 +289,7 @@ generate_training_landscapes <- function(
         n_spots = c(10, 30), # integer
         spot_radius = c(5, 12), # integer
         noise_radius_sd = c(0, 2), # numeric
-        regular_spots = c(TRUE,FALSE), #Bool
+        regular_spots = c(TRUE, FALSE), #Bool
         invert_landscape = c(FALSE),
         seed = seed
       ),
@@ -297,20 +297,21 @@ generate_training_landscapes <- function(
         n_spots = c(10, 30), # integer
         spot_radius = c(5, 12), # integer
         noise_radius_sd = c(0, 2), # numeric
-        regular_spots = c(TRUE,FALSE), #Bool
+        regular_spots = c(TRUE, FALSE), #Bool
         invert_landscape = c(TRUE),
         seed = seed
       ),
-      banded = list( # parameter ranges are given in test_landscape_values_BT.R - sampling has to be changed
+      banded = list(
+        # parameter ranges are given in test_landscape_values_BT.R - sampling has to be changed
         nbands = c(3, 10),
         noise_sd = c(0, 0.25),
         seed = seed
       ),
       labyrinth = list(
-        frequency = c(2,5), # integer
-        veg_threshold = c(0.4,0.5), # numeric
-        band_fuzziness = c(0,0.1), #numeric
-        octaves = c(1,3), #integer
+        frequency = c(2, 5), # integer
+        veg_threshold = c(0.4, 0.5), # numeric
+        band_fuzziness = c(0, 0.1), #numeric
+        octaves = c(1, 3), #integer
         seed = seed
       )
     )
