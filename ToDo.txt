@@ -56,6 +56,7 @@ eine umbenennen?
 #---------------------------------------------------------------------
 - keras --> läuft bei mir nicht mehr
 Error: Valid installation of TensorFlow not found.
+- Selina: Ich habe das in inst/examples/keras_workflow.R ergänzt. Schau mal ob es so läuft.
 
 #---------------------------------------------------------------------
 #Problem mit Fotos/eingelesenen Dateien

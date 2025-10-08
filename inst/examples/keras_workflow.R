@@ -1,6 +1,18 @@
 # Load all functions
 devtools::load_all()
 
+# Set up Keras ----------------------------------------------------------
+# Only needs to be done once
+# First check your python configuration
+# Version should be max. 3.10, otherwise keras will not work
+# If you did not configure python yet, you can do it in R Studio under
+# Tools -> Global Options -> Python
+reticulate::py_discover_config()
+
+# Install TensorFlow backend (only needed once)
+# Also creates a venv r-tensorflow
+# install_keras()
+
 # Test Keras NN ---------------------------------------------------------
 # Increase number of landscapes for better training
 training_landscapes <- generate_training_landscapes(
