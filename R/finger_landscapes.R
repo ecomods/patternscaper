@@ -10,6 +10,8 @@
 #' @param num_fingers Integer. Number of fingers to create (default: 5).
 #' @param finger_width Integer. Width of each finger in pixels (default: 3).
 #' @param finger_length_prop Numeric. Proportion of height of the total landscape for finger length (default: 0.3).
+#' @param finger_length_sd Numeric. Standard deviation for finger length randomness
+#'    in pixels (default: 0, no randomness).
 #' @param bend Logical. Should the fingers be bent in a sinus pattern or not? (default: FALSE).
 #' @param rotation Numeric. Degrees to rotate the landscape (default: 0).
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
@@ -47,6 +49,7 @@ create_landscape_fingers <- function(
   num_fingers = 5L,
   finger_width = 3L,
   finger_length_prop = 0.3,
+  finger_length_sd = 0,
   bend = FALSE,
   rotation = 0,
   as_raster = TRUE,
@@ -99,15 +102,21 @@ create_landscape_fingers <- function(
     )[-c(1, num_fingers + 2)])
   }
 
+  # Add randomness to finger length if specified
+  finger_lengths <- rep(finger_length, num_fingers) +
+    round(rnorm(num_fingers, mean = 0, sd = finger_length_sd))
+
   # Create fingers extending from treeline
   if (bend) {
     # Use the same calculation as the non-bend case
-    end_row <- min(height_actual, treeline_row + finger_length)
+    end_rows <- treeline_row + finger_lengths
+    # Ensure end_row does not exceed landscape height
+    end_rows <- pmin(end_rows, height_actual)
 
     # Create fingers extending from treeline
-    for (pos in finger_positions) {
-      for (fin in treeline_row:end_row) {
-        w <- pos + round(sin(2 * pi * fin / 10) * 3)
+    for (pos in seq_along(finger_positions)) {
+      for (fin in treeline_row:end_rows[pos]) {
+        w <- finger_positions[pos] + round(sin(2 * pi * fin / 10) * 3)
         for (fw in ((-floor(finger_width / 2)):(ceiling(finger_width / 2)))) {
           if ((w + fw) > 0 && (w + fw) <= width_actual) {
             # Changed < to <= to include edge
@@ -117,12 +126,18 @@ create_landscape_fingers <- function(
       }
     }
   } else {
-    for (pos in finger_positions) {
-      start_col <- max(1, pos - floor(finger_width / 2))
-      end_col <- min(width_actual, pos + floor(finger_width / 2))
-      end_row <- min(height_actual, treeline_row + finger_length)
+    # Use the same calculation as the non-bend case
+    end_rows <- treeline_row + finger_lengths
+    # Ensure end_row does not exceed landscape height
+    end_rows <- pmin(end_rows, height_actual)
 
-      landscape[treeline_row:end_row, start_col:end_col] <- 1
+    for (pos in seq_along(finger_positions)) {
+      start_col <- max(1, finger_positions[pos] - floor(finger_width / 2))
+      end_col <- min(
+        width_actual,
+        finger_positions[pos] + floor(finger_width / 2)
+      )
+      landscape[treeline_row:end_rows[pos], start_col:end_col] <- 1
     }
   }
 
