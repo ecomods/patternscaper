@@ -249,9 +249,9 @@ generate_training_landscapes <- function(
         seed = seed
       ),
       curvy = list(
-        treeline_position = c(0.4, 0.5, 0.6),
-        sine_length = c(10, 50),
-        sine_height = c(3, 20)
+        treeline_position = c(0.3, 0.6),
+        sine_length = c(0.2 * width, 0.4 * width),
+        sine_height = c(0.03 * height, 0.2 * height)
       ),
       fingers = list(
         treeline_position = c(0.4, 0.6),
