@@ -3,6 +3,16 @@
 # load all functions
 devtools::load_all()
 
+landscapes <- generate_training_landscapes(
+  n = 20,
+  seed = NULL
+)
+
+plot_landscape_list(landscapes)
+
+# Extract params object from list of lists
+purrr::map_df(landscapes, ~ .x$params)
+
 # List available landscape metrics
 list_available_metrics()
 list_available_metrics(level = c("class", "landscape"))
@@ -134,7 +144,15 @@ apply_nn(
 training_landscapes <- generate_training_landscapes(
   seed = 42,
   n = 500, # Larger dataset for better generalization
-  types = c("sharp", "diffuse", "curvy", "fingers", "scattered", "clustered", "sine_bands"),
+  types = c(
+    "sharp",
+    "diffuse",
+    "curvy",
+    "fingers",
+    "scattered",
+    "clustered",
+    "sine_bands"
+  ),
   width = 100,
   height = 100,
   add_rotation = TRUE,
@@ -156,7 +174,15 @@ model <- train_nn_keras(
 new_landscapes <- generate_training_landscapes(
   seed = 123,
   n = 10,
-  types = c("sharp", "diffuse", "curvy", "fingers", "scattered", "clustered", "sine_bands"),
+  types = c(
+    "sharp",
+    "diffuse",
+    "curvy",
+    "fingers",
+    "scattered",
+    "clustered",
+    "sine_bands"
+  ),
   width = 100,
   height = 100,
   add_rotation = TRUE,
@@ -171,7 +197,6 @@ results <- apply_nn_keras(
 
 # Plot results
 # Make title
-
 
 plot_landscape_list(new_landscapes)
 
