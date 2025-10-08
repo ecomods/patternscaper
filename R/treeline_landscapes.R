@@ -49,10 +49,9 @@ create_landscape_sharp_treeline <- function(
   landscape <- matrix(0, nrow = height_actual, ncol = width_actual)
 
   # Fill in mangrove area (1) based on treeline position
-  if(treeline_row > 0){
+  if (treeline_row > 0) {
     landscape[1:treeline_row, ] <- 1
   }
-
 
   # Rotate the landscape, crop and fill NAs if specified
   if (rotation != 0) {
@@ -270,9 +269,9 @@ create_landscape_curvy_treeline <- function(
 
   # Create the landscape matrix
   landscape <- matrix(0, nrow = height_actual, ncol = width_actual)
-  # Fill in mangrove area (1) based on sine wave around treeline position
-  #sine_height determines how many cells around tree_line are affected
-  #sine_length determines the length of the wave
+  # Fill in tree area (1) based on sine wave around the treeline position
+  # sine_height determines how many cells around tree_line are affected
+  # sine_length determines the wave length
   for (i in 1:height_actual) {
     for (j in 1:width_actual) {
       landscape[i, j] <- ifelse(
