@@ -69,7 +69,9 @@ create_landscape_fingers <- function(
   # Calculate finger parameters
   if (rotation == 0) {
     treeline_row <- round(height_actual * treeline_position)
-    finger_length <- round(height_actual * finger_length_prop)
+    finger_length <- round((height_actual - treeline_row) * finger_length_prop)
+    # Create finger positions evenly spaced across the width
+    # Remove first and last to avoid edge issues
     finger_positions <- round(seq(
       1,
       width_actual,
@@ -79,7 +81,9 @@ create_landscape_fingers <- function(
     ])
   } else {
     treeline_row <- round(height_actual * treeline_position)
-    finger_length <- round((2 / 3 * height_actual) * finger_length_prop)
+    finger_length <- round(
+      (2 / 3 * (height_actual - treeline_row)) * finger_length_prop
+    )
     finger_positions <- round(seq(
       (1 / 6 * width_actual),
       (5 / 6 * width_actual),
