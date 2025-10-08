@@ -237,7 +237,7 @@ generate_training_landscapes <- function(
   }
   set.seed(seed)
 
-  # Create default parameter ranges if not provided
+  # Set default parameter ranges if not provided
   if (is.null(params_list)) {
     params_list <- list(
       sharp = list(
@@ -254,10 +254,11 @@ generate_training_landscapes <- function(
         sine_height = c(0.03 * height, 0.2 * height)
       ),
       fingers = list(
-        treeline_position = c(0.4, 0.6),
-        num_fingers = c(3, 10),
-        finger_width = c(3, 8),
-        finger_length_prop = c(0.1, 1),
+        treeline_position = c(0.3, 0.6),
+        num_fingers = c(3, 8),
+        finger_width = c(0.03 * width, 0.1 * width),
+        finger_length_prop = c(0.3, 1),
+        finger_length_sd = c(0, 0.6),
         bend = c(TRUE, FALSE)
       ),
       scattered = list(
