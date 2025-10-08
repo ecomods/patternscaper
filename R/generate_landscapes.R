@@ -161,7 +161,7 @@ create_landscape <- function(
 #' Generates a series of landscape models with variations for training purposes.
 #' Creates a total of n landscapes distributed across different landscape types.
 #'
-#' @param n Integer. Total number of landscapes to generate (default: 10).
+#' @param n Integer. Total number of landscapes to generate (default: 50).
 #' @param types Character vector. Types of landscapes to sample from (default: all types).
 #' @param width Integer. Width of all landscapes in pixels (default: 100).
 #' @param height Integer. Height of all landscapes in pixels (default: 100).
@@ -181,7 +181,7 @@ create_landscape <- function(
 #' @return List. Named list of n generated landscapes with attributes for type and parameters.
 #' @export
 generate_training_landscapes <- function(
-  n = 10,
+  n = 50,
   types = c(
     "sharp",
     "diffuse",
