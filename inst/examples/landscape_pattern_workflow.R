@@ -213,6 +213,34 @@ pic_names
 #Korrekt: 4,8,9, 11 (Farben falsch herum)
 #Halb Falsch: 5,6,7 (Binary Class Einteilung)
 
+i <- 8
+image <- terra::rast(paste(pic_dir,pic_names[i],sep=""))
+# If it's a multi-band image
+band1 <- image[[1]]
+# Apply threshold
+binary_class <- band1 > 150
+test_matrix <- as.matrix(binary_class, wide = TRUE)
+test_matrix <- t(1 - test_matrix)
+test_raster <- terra::rast(test_matrix)
+
+
+raster::plot(band1,col=terrain.colors(25))
+image(
+  test_matrix,
+  col = c("orange2", "darkgreen"),
+  main = "Spatial Plot of test_matrix"
+)
+
+result_l <- apply_nn(
+  landscapes = test_raster,
+  nn_model = model_l
+)
+
+plot_nn_classification_landscapes(
+  classification = validation_results_l$predictions,
+  landscape_list = test_landscapes,
+  only_misclassified = TRUE
+)
 
 result_pics <- apply_nn(
   landscapes = test_raster,
