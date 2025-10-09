@@ -13,7 +13,11 @@ landscapes <- generate_training_landscapes(n = 20, seed = 42)
 landscapes <- generate_training_landscapes(n = 20, seed = NULL)
 
 # Randomly sampled landscape types (by default the function balances the types)
-landscapes <- generate_training_landscapes(n = 20, seed = 42, balance_types = FALSE)
+landscapes <- generate_training_landscapes(
+  n = 20,
+  seed = 42,
+  balance_types = FALSE
+)
 
 # generate only specific landscape types
 landscapes <- generate_training_landscapes(
@@ -62,11 +66,14 @@ sharp_rotated <- create_landscape(
 )
 
 # Plot all sharp treelines together
-plot_landscape_list(list(
-  sharp_default,
-  sharp_modified,
-  sharp_rotated
-), title = c("Default", "Modified", "Rotated"))
+plot_landscape_list(
+  list(
+    sharp_default,
+    sharp_modified,
+    sharp_rotated
+  ),
+  title = c("Default", "Modified", "Rotated")
+)
 
 # Diffuse treeline -----------------------------------------------------------
 # Default diffuse treeline
@@ -90,11 +97,14 @@ diffuse_rotated <- create_landscape(
 )
 
 # Plot all diffuse treelines together
-plot_landscape_list(list(
-  diffuse_default,
-  diffuse_modified,
-  diffuse_rotated
-), title = c("Default", "Modified", "Rotated"))
+plot_landscape_list(
+  list(
+    diffuse_default,
+    diffuse_modified,
+    diffuse_rotated
+  ),
+  title = c("Default", "Modified", "Rotated")
+)
 
 # Curvy treeline -------------------------------------------------------------
 # Default curvy treeline
@@ -118,11 +128,14 @@ curvy_rotated <- create_landscape(
 )
 
 # Plot all curvy treelines together
-plot_landscape_list(list(
-  curvy_default,
-  curvy_modified,
-  curvy_rotated
-), title = c("Default", "Modified", "Rotated"))
+plot_landscape_list(
+  list(
+    curvy_default,
+    curvy_modified,
+    curvy_rotated
+  ),
+  title = c("Default", "Modified", "Rotated")
+)
 
 # Fingers --------------------------------------------------------------------
 # Default fingers pattern
@@ -149,11 +162,14 @@ fingers_rotated <- create_landscape(
 )
 
 # Plot all fingers together
-plot_landscape_list(list(
-  fingers_default,
-  fingers_modified,
-  fingers_rotated
-), title = c("Default", "Modified", "Rotated"))
+plot_landscape_list(
+  list(
+    fingers_default,
+    fingers_modified,
+    fingers_rotated
+  ),
+  title = c("Default", "Modified", "Rotated")
+)
 
 # Scattered trees ------------------------------------------------------------
 # Default scattered trees
@@ -177,11 +193,14 @@ scattered_rotated <- create_landscape(
 )
 
 # Plot all scattered trees together
-plot_landscape_list(list(
-  scattered_default,
-  scattered_modified,
-  scattered_rotated
-), titles = c("Default", "Modified", "Rotated"))
+plot_landscape_list(
+  list(
+    scattered_default,
+    scattered_modified,
+    scattered_rotated
+  ),
+  titles = c("Default", "Modified", "Rotated")
+)
 
 # Clustered trees ------------------------------------------------------------
 # Default clustered trees
@@ -211,11 +230,14 @@ clustered_rotated <- create_landscape(
 )
 
 # Plot all clustered trees together
-plot_landscape_list(list(
-  clustered_default,
-  clustered_modified,
-  clustered_rotated
-), titles = c("Default", "Modified", "Rotated"))
+plot_landscape_list(
+  list(
+    clustered_default,
+    clustered_modified,
+    clustered_rotated
+  ),
+  titles = c("Default", "Modified", "Rotated")
+)
 
 # Sine bands -----------------------------------------------------------------
 # Default sine bands
@@ -244,11 +266,14 @@ sine_bands_rotated <- create_landscape(
 )
 
 # Plot all sine bands together
-plot_landscape_list(list(
-  sine_bands_default,
-  sine_bands_modified,
-  sine_bands_rotated
-), titles = c("Default", "Modified", "Rotated"))
+plot_landscape_list(
+  list(
+    sine_bands_default,
+    sine_bands_modified,
+    sine_bands_rotated
+  ),
+  titles = c("Default", "Modified", "Rotated")
+)
 
 # Spots ----------------------------------------------------------------------
 # Default spots
@@ -271,13 +296,26 @@ spots_inverted <- create_landscape(
   noise_radius_sd = 2
 )
 
+spots_regular <- create_landscape(
+  "spots",
+  n_spots = 15,
+  spot_radius = 8,
+  noise_radius_sd = 0,
+  regular_spots = TRUE,
+  seed = 42
+)
+
 
 # Plot all spots together
-plot_landscape_list(list(
-  spots_default,
-  spots_modified,
-  spots_inverted
-), titles = c("Default", "Modified", "Inverted"))
+plot_landscape_list(
+  list(
+    spots_default,
+    spots_modified,
+    spots_inverted,
+    spots_regular
+  ),
+  titles = c("Default", "Modified", "Inverted", "Regular")
+)
 
 # Banded vegetation ----------------------------------------------------------
 # Default banded vegetation
