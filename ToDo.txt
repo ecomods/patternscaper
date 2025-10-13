@@ -24,7 +24,7 @@ Called from: do_one(nmeth)
 #---------------------------------------------------------------------
 - banded vegetation: hier wäre es sinnvoll, die Anzahl der Hügel
 und die Ranges für die anderen Werte angeben zu können
---> Sampling muss dafür verändert werden
+--> Sampling muss dafür verändert werden (Britta)
 
 #---------------------------------------------------------------------
 #Clustered/Spots
@@ -97,4 +97,23 @@ predictions <- predict(
 - apply_nn: parameter landscapes (im Code) vs. landscape (in Hilfefunktion)
 apply_nn übergibt landscapes (matrix, raster, list) an calculate_landscape_metrics,
 dort ist aber matrix laut Hilfefunktion nicht vorgesehen
+
+#--------------------------------------------------------------------
+#Funktion evaluate_landscape_metrics
+#--------------------------------------------------------------------
+- Wenn ich die Metriken mit "class" statt "landscape" berechnet habe,
+erhalte ich hier folgende Fehlermeldung:
+
+Excluded 4700 rows due to 25 metrics with NA values: area_cv, area_sd, cai_cv, cai_sd, circle_cv, circle_sd, contig_cv, contig_sd, core_cv, core_sd, dcore_cv, dcore_sd, enn_cv, enn_mn, enn_sd, frac_cv, frac_sd, gyrate_cv, gyrate_sd, iji, pafrac, para_cv, para_sd, shape_cv, shape_sd
+ Use exclude_NA_metrics = FALSE to retain these metrics (not recommended for model training).
+Error in stats::cor(dplyr::select(tidyr::pivot_wider(dplyr::select(calculated_metrics,  :
+  'x' must be numeric
+In addition: Warning message:
+Values from `value` are not uniquely identified; output will contain list-cols.
+• Use `values_fn = list` to suppress this warning.
+• Use `values_fn = {summary_fun}` to summarise duplicates.
+• Use the following dplyr code to identify duplicates.
+  {data} |>
+  dplyr::summarise(n = dplyr::n(), .by = c(landscape, metric)) |>
+  dplyr::filter(n > 1L)
 

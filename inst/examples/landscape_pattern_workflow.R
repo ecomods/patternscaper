@@ -33,7 +33,7 @@ list_available_metrics(level = c("class", "landscape"))
 # Calculate landscape metrics on the landscape level
 landscape_metrics <- calculate_landscape_metrics(
   landscapes,
-  level = "landscape"
+  level = "class" #"landscape"
 )
 
 # find the 10 best metrics based on coefficient of variation
@@ -82,24 +82,6 @@ model_l
 
 
 # ----------------------------------------------------------------------------#
-# Step 2b: Calculate  model according to keras workflow ----------------------
-# ----------------------------------------------------------------------------#
-
-# Train a model
-#BRITTA - LÄUFT DERZEIT BEI MIR NICHT
-model_k <- train_nn_keras(
-  landscapes = landscapes,
-  cv_method = "k-fold",
-  cv_folds = 5,
-  epochs = 30,
-  model_path = "models/landscape_classifier"
-)
-
-# Look at the model object
-model_k
-
-
-# ----------------------------------------------------------------------------#
 # Step 3: Look at classification results  ----------------
 # ----------------------------------------------------------------------------#
 
@@ -125,27 +107,6 @@ plot_nn_classification_landscapes(
   only_misclassified = TRUE
 )
 
-#-------------------------------------------------
-# b) for model using keras
-#BRITTA - LÄUFT DERZEIT BEI MIR NICHT
-#-------------------------------------------------
-
-# Visualize classification results
-# Get all plots in a list
-all_plots <- plot_classification_results(model_l, return_all = TRUE)
-patchwork::wrap_plots(all_plots)
-
-plot_classification_results(model_l, plot_type = "confusion")
-plot_classification_results(model_l, plot_type = "probabilities")
-plot_classification_results(model_l, plot_type = "confidence")
-plot_classification_results(model_l, plot_type = "misclassifications")
-
-# Plot the landscapes that were misclassified
-plot_nn_classification_landscapes(
-  classification = model_l$validation_results,
-  landscape_list = training_landscapes,
-  only_misclassified = TRUE
-)
 
 
 # ----------------------------------------------------------------------------#
@@ -181,23 +142,6 @@ plot_nn_classification_landscapes(
 )
 
 
-#-------------------------------------------------
-# b) for model using keras
-#BRITTA - LÄUFT DERZEIT BEI MIR NICHT
-#-------------------------------------------------
-
-# Apply the model to the test landscape(s)
-
-validation_results_k <- apply_nn_keras(
-  landscape = test_landscapes,
-  nn_model = model_k
-)
-
-plot_nn_classification_landscapes(
-  classification = validation_results_k$predictions,
-  landscape_list = test_landscapes,
-  only_misclassified = FALSE
-)
 
 # ----------------------------------------------------------------------------#
 # Step 5: Apply the models to pictures --------------------------------------
@@ -212,12 +156,12 @@ pic_names
 #correct: 4,8,9, 11 (colours wrong)
 #semi wrong: 5,6,7 (binary class categorization)
 
-i <- 2
+i <- 10
 image <- terra::rast(paste(pic_dir,pic_names[i],sep=""))
 # If it's a multi-band image
 band1 <- image[[1]]
 # Apply threshold
-binary_class <- band1 < 150 #this parameter determines the sensitity towards
+binary_class <- band1 < 120 #this parameter determines the sensitity towards
                             #classification as vegetation - the higher the more vegetation
 test_matrix <- as.matrix(binary_class, wide = TRUE)
 test_raster <- terra::rast(test_matrix)
@@ -241,4 +185,63 @@ pic_names[i]
 result_pics$predictions
 
 
+
+
+# ----------------------------------------------------------------------------#
+# Step 2b: Calculate  model according to keras workflow ----------------------
+# ----------------------------------------------------------------------------#
+
+# Train a model
+#BRITTA - LÄUFT DERZEIT BEI MIR NICHT
+model_k <- train_nn_keras(
+  landscapes = landscapes,
+  cv_method = "k-fold",
+  cv_folds = 5,
+  epochs = 30,
+  model_path = "models/landscape_classifier"
+)
+
+# Look at the model object
+model_k
+
+
+#-------------------------------------------------
+# 3b) for model using keras
+#BRITTA - LÄUFT DERZEIT BEI MIR NICHT
+#-------------------------------------------------
+
+# Visualize classification results
+# Get all plots in a list
+all_plots <- plot_classification_results(model_l, return_all = TRUE)
+patchwork::wrap_plots(all_plots)
+
+plot_classification_results(model_l, plot_type = "confusion")
+plot_classification_results(model_l, plot_type = "probabilities")
+plot_classification_results(model_l, plot_type = "confidence")
+plot_classification_results(model_l, plot_type = "misclassifications")
+
+# Plot the landscapes that were misclassified
+plot_nn_classification_landscapes(
+  classification = model_l$validation_results,
+  landscape_list = training_landscapes,
+  only_misclassified = TRUE
+)
+
+#-------------------------------------------------
+# 4b) for model using keras
+#BRITTA - LÄUFT DERZEIT BEI MIR NICHT
+#-------------------------------------------------
+
+# Apply the model to the test landscape(s)
+
+validation_results_k <- apply_nn_keras(
+  landscape = test_landscapes,
+  nn_model = model_k
+)
+
+plot_nn_classification_landscapes(
+  classification = validation_results_k$predictions,
+  landscape_list = test_landscapes,
+  only_misclassified = FALSE
+)
 
