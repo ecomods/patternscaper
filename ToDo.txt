@@ -82,7 +82,7 @@ predictions <- predict(
     type = "raw"
   ))
 
---> class statt landscape als Level probieren
+--> wie gehen NNs mit NAs um? (Selina)
 
 #---------------------------------------------------------------------
 #Inverse Landschaften

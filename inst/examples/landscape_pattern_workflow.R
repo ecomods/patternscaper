@@ -201,58 +201,44 @@ plot_nn_classification_landscapes(
 
 # ----------------------------------------------------------------------------#
 # Step 5: Apply the models to pictures --------------------------------------
-# does not work, yet!!! --------------------------------------
 # ----------------------------------------------------------------------------#
 # Read in the satellite image
 pic_dir <- "inst/examples/Pics/" #folder name
 pic_names <- list.files(pic_dir) #file names
 pic_names
 
-#Fehler: 1,3
-#Falsch: 2,10 (spots/gaps)
-#Korrekt: 4,8,9, 11 (Farben falsch herum)
-#Halb Falsch: 5,6,7 (Binary Class Einteilung)
+#error: 1,3
+#wrong: 2,10 (spots/gaps)
+#correct: 4,8,9, 11 (colours wrong)
+#semi wrong: 5,6,7 (binary class categorization)
 
-i <- 8
+i <- 2
 image <- terra::rast(paste(pic_dir,pic_names[i],sep=""))
 # If it's a multi-band image
 band1 <- image[[1]]
 # Apply threshold
-binary_class <- band1 > 150
+binary_class <- band1 < 150 #this parameter determines the sensitity towards
+                            #classification as vegetation - the higher the more vegetation
 test_matrix <- as.matrix(binary_class, wide = TRUE)
-test_matrix <- t(1 - test_matrix)
 test_raster <- terra::rast(test_matrix)
 
+#test plotting of binary categorization
+par(mfrow=c(1,2),pty="s")
+  raster::plot(band1,col=terrain.colors(25),
+               main="Initial Landscape")
+  raster::plot(test_raster,col=c(terrain.colors(25)[25],terrain.colors(25)[1]),
+               main="Binary Landscape")
+par(mfrow=c(1,1))
 
-raster::plot(band1,col=terrain.colors(25))
-image(
-  test_matrix,
-  col = c("orange2", "darkgreen"),
-  main = "Spatial Plot of test_matrix"
-)
-
-result_l <- apply_nn(
-  landscapes = test_raster,
-  nn_model = model_l
-)
-
-plot_nn_classification_landscapes(
-  classification = validation_results_l$predictions,
-  landscape_list = test_landscapes,
-  only_misclassified = TRUE
-)
-
+#apply the neural metwork model to the picture
 result_pics <- apply_nn(
   landscapes = test_raster,
   nn_model = model_l
 )
 
+#show predicted type
 pic_names[i]
 result_pics$predictions
 
-plot_nn_classification_landscapes(
-  classification = result_pics$predictions,
-  landscape_list = list(test_raster),
-  only_misclassified = FALSE
-)
+
 
