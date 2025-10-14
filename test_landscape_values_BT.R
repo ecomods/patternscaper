@@ -67,25 +67,18 @@ plot_landscape(test)
 
 
 #BANDED VEGETATION AT HILLSLOPES
-
-nhills <- sample(x=2:6,size=1)
-ht <- sample(x=20:30,size=nhills)
-sl <- runif(n=nhills,min=0.1,max=0.3)
-nb <- sample(x=4:8, size=1)
-xx <- rnorm(n=nhills,mean=1,sd=0.5)
-xy <- rnorm(n=nhills,mean=1,sd=0.5)
-ns <- runif(n=nhills,min=0,max=0.2)
 test <- create_landscape_banded (
-    hilltop = ht,
-    slope = sl,
-    nbands = nb,
-    x_ext_hill = xx,
-    y_ext_hill = xy,
-    noise_sd = ns,
-    rotation = 0,
-    seed = NULL,
+  nhills = sample(1:5,size=1),
+  nbands = sample(3:8,size=1),
+  regular_hilltop = sample(c(TRUE, FALSE), size=1),
+  top_elevation_sd = runif(n=1,min=0,max=3),
+  x_ext_hill_sd = runif(n=1,min=0,max=0.5),
+  y_ext_hill_sd = runif(n=1,min=0,max=0.5),
+  seed = NULL,
+  rotation=43,
 )
 plot_landscape(test)
+
 
 #TO DO: PUT ThIS To CORRECT FILE
 test <- create_landscape_labyrinth (

@@ -303,8 +303,13 @@ generate_training_landscapes <- function(
         seed = seed
       ),
       banded = list(
-        # parameter ranges are given in test_landscape_values_BT.R - sampling has to be changed
-        nbands = c(3, 10),
+        nhills = c(1,5), #integer
+        nbands = c(3, 8), #integer
+        regular_hilltop = c(TRUE, FALSE), #Bool
+        top_elevation_mean = c(25, 35),
+        top_elevation_sd = c(0, 3),
+        x_ext_hill_sd = c(0, 0.5),
+        y_ext_hill_sd = c(0, 0.5),
         noise_sd = c(0, 0.25),
         seed = seed
       ),

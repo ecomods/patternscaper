@@ -171,13 +171,17 @@ create_landscape_sine_bands <- function(
 #' the strips are perpendicular to the slope of the hill.
 #' The landscape can optionally be rotated.
 #'
-#' @param width Integer. Number of columns in the landscape.
-#' @param height Integer. Number of rows in the landscape.
-#' @param hilltop List of Numerics/Integers. Elevation of hilltop.
-#' @param slope List of Numerics. Slopes of each hill.
-#' @param nbands Integer. Number of bands at the hill, one band is vegetated plus bare stripe.
-#' @param x_ext_hill  List of Numerics. Extention/distortion of a hill into x-direction
-#' @param y_ext_hill  List of Numerics. Extention/distortion of a hill into y-direction
+#' @param width Integer. Number of columns in the landscape. Default is 100.
+#' @param height Integer. Number of rows in the landscape. Default is 100.
+#' @param nhills Integer. Number of hills in the landscape. Default is 2.
+#' @param regular_hilltop Boolean. Regular or random position of the hilltops. Default is TRUE.
+#' @param top_elevation_mean. Numeric. Mean elevation of hilltops. Default is 30.
+#' @param top_elevation_sd Numeric. Standard deviation of hilltop elevations. Default is 2.
+#' @param slope_mean Numeric. Mean slope of hills 0.2 (per pixel). Default is 0.2.
+#' @param slope_sd Numeric. Standard deviation of slope. Default is 0.05.
+#' @param nbands Integer. Number of vegetation bands per hill. Default is 7.
+#' @param x_ext_hill_sd Numeric. Standard deviation of extension of slope into x direction. Default is 0.4.
+#' @param y_ext_hill_sd Numeric. Standard deviation of extension of slope into y direction. Default is 0.4.
 #' @param noise_sd Numeric. If random effects, which standard deviation
 #' @param rotation Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).
 #' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
@@ -195,39 +199,39 @@ create_landscape_sine_bands <- function(
 #'
 #' # Modified banded vegetation with more bands and different hill parameters
 #' banded_modified <- create_landscape_banded(
-#'   nbands = 9,
-#'   hilltop = c(35, 25, 30),
-#'   slope = c(0.3, 0.15, 0.25),
-#'   x_ext_hill = c(1.5, 2.2, 1.8),
-#'   y_ext_hill = c(1.3, 1.1, 1.9),
+#'   hilltop = 2,
+#'   nbands = 5,
+#'   slope_mean = 0.5,
+#'   regular_hilltop = FALSE,
 #'   noise_sd = 0.5
 #' )
 #'
 #' # With rotation
 #' banded_rotated <- create_landscape_banded(
+#'   hilltop = 3,
 #'   nbands = 7,
-#'   hilltop = c(30, 22, 28),
-#'   slope = c(0.25, 0.12, 0.2),
-#'   x_ext_hill = c(1.4, 2.0, 1.6),
-#'   y_ext_hill = c(1.2, 1.0, 1.7),
-#'   noise_sd = 0.15,
-#'   rotation = 45
+#'   regular_hilltop = TRUE,
+#'   noise_sd = 0
 #' )
 #' @export
 create_landscape_banded <- function(
-  width = 100,
-  height = 100,
-  hilltop = c(30, 20, 25),
-  slope = c(0.2, 0.1, 0.3),
-  nbands = 7,
-  x_ext_hill = c(1.7, 2, 1.3),
-  y_ext_hill = c(1.2, 1, 1.6),
-  noise_sd = 0.1,
-  rotation = 0,
-  seed = 42,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+    width = 100,
+    height = 100,
+    nhills = 2,
+    regular_hilltop = TRUE,
+    top_elevation_mean = 30,
+    top_elevation_sd = 2,
+    slope_mean = 0.2,
+    slope_sd = 0.05,
+    nbands = 7,
+    x_ext_hill_sd = 0.4,
+    y_ext_hill_sd = 0.4,
+    noise_sd = 0.1,
+    rotation = 0,
+    seed = 42,
+    as_raster = TRUE,
+    crs = NULL,
+    add_metadata = TRUE
 ) {
 
   # If seed is NULL, use random seed; otherwise use the provided seed
@@ -235,34 +239,68 @@ create_landscape_banded <- function(
     seed <- as.integer(Sys.time())
   }
   set.seed(seed)
-  #Calculate position of the hills
-  xpos_hill <- c(floor(width * 0.2), floor(width * 0.9), floor(width * 0.1))
-  ypos_hill <- c(floor(height * 0.7), floor(height * 0.3), floor(height * 0.2))
+
+
+  if (regular_hilltop) {
+    #hexangon for spots (to make them more regular)
+    spacing <- 6 #minimum of 5 between hilltops #2 * spot_radius * 1.1
+    n_cols <- ceiling(width / spacing)
+    n_rows <- ceiling(height / (sqrt(3) / 2 * spacing))
+
+    grid_points <- data.frame()
+    for (r in 0:(n_rows - 1)) {
+      for (c in 0:(n_cols - 1)) {
+        x <- c * 1.5 * spacing
+        y <- r * (sqrt(3) / 2 * spacing) + spacing / 2
+        if (r %% 2 == 1) {
+          x <- x + spacing / 2
+        }
+        if (x <= width & y <= height) {
+          grid_points <- rbind(grid_points, data.frame(row = y, col = x))
+        }
+      }
+    }
+
+    #chose regularly distributed centers with k-means
+    km <- kmeans(grid_points, centers = nhills, nstart = 10)
+    hill_tops <- as.data.frame(round(km$centers,0))
+    hill_tops$col <- pmin(width,pmax(1, hill_tops$col))
+
+  } else {
+    # Generate random cluster centers
+    hill_tops <- data.frame(
+      row = sample(1:height, nhills, replace = TRUE),
+      col = sample(1:width, nhills, replace = TRUE)
+    )
+  }
 
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
-  # Calculate position of hills based on rotation
+  # Calculate position of hills (with/without rotation)
   if (rotation == 0) {
-    xpos_hill_actual <- xpos_hill
-    ypos_hill_actual <- ypos_hill
+    xpos_hill_actual <- hill_tops$row
+    ypos_hill_actual <- hill_tops$col
   } else {
-    xpos_hill_actual <- floor(xpos_hill * 1.5)
-    ypos_hill_actual <- floor(ypos_hill * 1.5)
+    xpos_hill_actual <- floor(hill_tops$row * 1.5)
+    ypos_hill_actual <- floor(hill_tops$col * 1.5)
   }
 
   #Create hills and their elevation
-  nhill <- length(hilltop)
   hill_distance_elevation <- array(
     data = NA,
-    dim = c(width_actual, height_actual, nhill)
+    dim = c(width_actual, height_actual, nhills)
   )
   elevation <- matrix(data = NA, nrow = width_actual, ncol = height_actual)
+  x_ext_hill <- rnorm(n=nhills,mean=1,sd=x_ext_hill_sd)
+  y_ext_hill <- rnorm(n=nhills,mean=1,sd=y_ext_hill_sd)
+  top_elevation <- rnorm(n=nhills,mean=top_elevation_mean,sd=top_elevation_sd)
+  slope <- rnorm(n=nhills,mean=slope_mean,sd=slope_sd)
   for (x in 1:width_actual) {
     for (y in 1:height_actual) {
-      for (h in 1:nhill) {
-        hill_distance_elevation[x, y, h] <- hilltop[h] -
+      for (h in 1:nhills) {
+        hill_distance_elevation[x, y, h] <- top_elevation[h] -
           slope[h] *
             sqrt(
               ((x - xpos_hill_actual[h]) / x_ext_hill[h])^2 +
@@ -270,7 +308,7 @@ create_landscape_banded <- function(
             )
       }
       elevation[x, y] <- max(hill_distance_elevation[x, y, ],na.rm=T)
-      # add noise
+      # add noise (if sd > 0)
       elevation[x, y] <- elevation[x, y] + rnorm(1, mean = 0, sd = noise_sd)
     }
   }
@@ -307,18 +345,25 @@ create_landscape_banded <- function(
   if (add_metadata) {
     return(list(
       landscape = result,
-      type = "spots",
+      type = "bands",
       params = list(
         width = width,
         height = height,
-        hilltop = hilltop,
-        slope = slope,
+        nhills = nhills,
+        regular_hilltop = regular_hilltop,
+        top_elevation_mean = top_elevation_mean,
+        top_elevation_sd = top_elevation_sd,
+        slope_mean = slope_mean,
+        slope_sd = slope_sd,
         nbands = nbands,
-        x_ext_hill = x_ext_hill,
-        y_ext_hill = y_ext_hill,
+        x_ext_hill_mean = x_ext_hill_mean,
+        x_ext_hill_sd = x_ext_hill_sd,
+        y_ext_hill_mean = y_ext_hill_mean,
+        y_ext_hill_sd = y_ext_hill_sd,
         noise_sd = noise_sd,
         rotation = rotation,
         seed = seed,
+        as_raster = as_raster,
         crs = crs
       )
     ))
