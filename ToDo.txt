@@ -117,3 +117,21 @@ Values from `value` are not uniquely identified; output will contain list-cols.
   dplyr::summarise(n = dplyr::n(), .by = c(landscape, metric)) |>
   dplyr::filter(n > 1L)
 
+#--------------------------------------------------------------------
+#Landscape plotting
+#--------------------------------------------------------------------
+es wäre schön, mehr Optionen zu haben:
+beim Titel (titles) wird der angegebene Title ZUSÄTZLICH angegeben
+schön wären auch Optionen für Legende
+Reihenfolge der Plots
+
+#--------------------------------------------------------------------
+#plot_nn_classification_landscapes
+#--------------------------------------------------------------------
+liefert eine Fehlermeldung bei only_misclassified = TRUE
+wenn es keine misclassified gibt
+
+#--------------------------------------------------------------------
+#überall nochmal Parameterbeschreibungen und Examples prüfen
+#--------------------------------------------------------------------
+

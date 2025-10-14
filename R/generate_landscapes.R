@@ -4,7 +4,7 @@
 #' specialized functions. The type of landscape is determined by the 'pattern'
 #' parameter.
 #'
-#' @param pattern Character. Type of landscape to generate: "sharp", "diffuse",
+#' @param pattern Character. Type of landscape to generate: "random", sharp", "diffuse",
 #'        "curvy", "fingers", "scattered", "sine_bands", "clusters"
 #' @param ... Parameters passed to specific landscape functions. See the documentation
 #'        of the individual functions for details on required and optional parameters.
@@ -13,6 +13,8 @@
 #' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
 #'
 #' @seealso
+#' \code{\link{create_landscape_random}} for "random" pattern parameters
+#'
 #' \code{\link{create_landscape_sharp_treeline}} for "sharp" pattern parameters
 #'
 #' \code{\link{create_landscape_diffuse_treeline}} for "diffuse" pattern parameters
@@ -35,9 +37,16 @@
 #'
 #' @examples
 #' # Create a default landscape of various types
+#' random_default <- create_landscape("random")
 #' sharp_default <- create_landscape("sharp")
 #' diffuse_default <- create_landscape("diffuse")
 #' clustered_default <- create_landscape("clustered")
+#'
+#' # Create a modified landscape with custom parameters
+#' random_modified <- create_landscape(
+#'   "random",
+#'   tree_prop = 0.3
+#' )
 #'
 #' # Create a modified landscape with custom parameters
 #' scattered_modified <- create_landscape(
@@ -60,6 +69,7 @@
 #' @export
 create_landscape <- function(
   pattern = c(
+    "random",
     "sharp",
     "diffuse",
     "curvy",
@@ -121,6 +131,7 @@ create_landscape <- function(
   # Call the appropriate function based on the pattern with metadata parameter
   landscape <- switch(
     matched,
+    random = do.call(create_landscape_random, dots),
     sharp = do.call(create_landscape_sharp_treeline, dots),
     diffuse = do.call(create_landscape_diffuse_treeline, dots),
     curvy = do.call(create_landscape_curvy_treeline, dots),
@@ -183,6 +194,7 @@ create_landscape <- function(
 generate_training_landscapes <- function(
   n = 50,
   types = c(
+    "random",
     "sharp",
     "diffuse",
     "curvy",
@@ -212,6 +224,7 @@ generate_training_landscapes <- function(
 
   # Filter out invalid types
   valid_types <- c(
+    "random",
     "sharp",
     "diffuse",
     "curvy",
@@ -240,6 +253,9 @@ generate_training_landscapes <- function(
   # Set default parameter ranges if not provided
   if (is.null(params_list)) {
     params_list <- list(
+      random = list(
+        tree_prop = c(0.1,0.9)
+      ),
       sharp = list(
         treeline_position = c(0.2, 0.8)
       ),
