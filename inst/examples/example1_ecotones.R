@@ -10,6 +10,7 @@ devtools::load_all()
 # only those types that refer to ecotones (or random)
 ecotone_types = c("random","sharp", "diffuse", "curvy", "fingers","scattered","clustered","sine_bands")
 ecotone_types_title = c("random","sharp", "diffuse", "curvy", "fingers","scattered","clustered","sine bands")
+n_ecotones <- length(ecotone_types)
 
 #--------------------------------------------------------------------
 # Generate landscapes for example figure (each type one landscape)
@@ -17,13 +18,13 @@ ecotone_types_title = c("random","sharp", "diffuse", "curvy", "fingers","scatter
 
 # generate landscapes
 landscapes_manuscript <- generate_training_landscapes(
-  n = 8,
+  n = n_ecotones,
   seed = 42,
   types = ecotone_types
 )
 
 # plot all landscapes
-plot_landscape_list(landscapes_manuscript,ncol=8, titles = "", show_legend = FALSE)
+plot_landscape_list(landscapes_manuscript,ncol=n_ecotones, titles = "", show_legend = FALSE)
 
 #--------------------------------------------------------------------
 # Generate training landscapes and take a look
@@ -110,13 +111,13 @@ plot_nn_classification_landscapes(
 # generate test landscapes
 test_landscapes_ecotone <- generate_training_landscapes(
   seed = 43,
-  n = 20,
+  n = 50,
   add_rotation = TRUE,
   types = ecotone_types
 )
 
-# plot all landscapes
-plot_landscape_list(test_landscapes_ecotone)
+# plot first 20 landscapes
+plot_landscape_list(test_landscapes_ecotone[1:20])
 
 # apply the model to the test landscapes
 validation_results_ecotone_lm <- apply_nn(
@@ -124,17 +125,49 @@ validation_results_ecotone_lm <- apply_nn(
   nn_model = model_ecotones_lm
 )
 
+validation_results_ecotone_lm
+
 #show landscapes that are not classified correctly
 plot_nn_classification_landscapes(
   classification = validation_results_ecotone_lm$predictions,
   landscape_list = test_landscapes_ecotone,
-  only_misclassified = FALSE
+  only_misclassified = TRUE
 )
 
 # -------------------------------------------------------------------
-# Apply the model to pictures ???
+# Apply the model to pictures NOT FINISHED YET
 # -------------------------------------------------------------------
 
+# Read in the satellite image
+pic_dir <- "inst/examples/Ecotone/" #folder name
+pic_names <- list.files(pic_dir) #file names
+pic_names
 
+i <- 3
+image <- terra::rast(paste(pic_dir,pic_names[i],sep=""))
+# If it's a multi-band image
+band1 <- image[[1]]
+# Apply threshold
+binary_class <- band1 < 70 #this parameter determines the sensitivity towards
+#classification as vegetation - the higher the more vegetation
+test_matrix <- as.matrix(binary_class, wide = TRUE)
+test_raster <- terra::rast(test_matrix)
 
+#test plotting of binary categorization
+par(mfrow=c(1,2),pty="s")
+  raster::plot(raster::flip(band1),col=terrain.colors(25),
+               main="Initial Landscape")
+  raster::plot(raster::flip(test_raster),col=c(terrain.colors(25)[25],terrain.colors(25)[1]),
+             main="Binary Landscape")
+par(mfrow=c(1,1))
+
+#apply the neural metwork model to the picture
+result_pics <- apply_nn(
+  landscapes = test_raster,
+  nn_model = model_ecotones_lm
+)
+
+#show predicted type
+pic_names[i]
+result_pics$predictions
 
