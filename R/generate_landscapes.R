@@ -179,9 +179,9 @@ create_landscape <- function(
 #' @param add_rotation Logical. Whether to include rotated versions (default: TRUE).
 #' @param rotation_angles Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).
 #' @param params_list List. List of parameter ranges for each landscape type (default: NULL).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
-#'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
+#'   If NULL, no seed is set explicitly.
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param type_probs Numeric vector. Probability that a specific landscape type is chosen.
 #'     By default, all types have equal probability (1) of being chosen.
@@ -212,11 +212,16 @@ generate_training_landscapes <- function(
   add_rotation = TRUE,
   rotation_angles = c(0, 45, 90, 135),
   params_list = NULL,
-  seed = 42,
+  seed = NULL,
   crs = NULL,
   type_probs = NULL,
   balance_types = TRUE
 ) {
+  # Set seed for reproducibility if provided
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
+
   # Validate inputs
   if (!is.numeric(n) || n < 1) {
     stop("'n' must be a positive integer")
@@ -243,26 +248,18 @@ generate_training_landscapes <- function(
     stop("No valid landscape types specified")
   }
 
-  # Set seed for reproducibility
-  # If seed is NULL, use the current time
-  if (is.null(seed)) {
-    seed <- as.integer(Sys.time())
-  }
-  set.seed(seed)
-
   # Set default parameter ranges if not provided
   if (is.null(params_list)) {
     params_list <- list(
       random = list(
-        tree_prop = c(0.1,0.9)
+        tree_prop = c(0.1, 0.9)
       ),
       sharp = list(
         treeline_position = c(0.2, 0.8)
       ),
       diffuse = list(
         steepness = c(0.1, 3),
-        treeline_position = c(0.1, 0.4),
-        seed = seed
+        treeline_position = c(0.1, 0.4)
       ),
       curvy = list(
         treeline_position = c(0.3, 0.6),
@@ -280,8 +277,7 @@ generate_training_landscapes <- function(
       scattered = list(
         treeline_position = c(0.4, 0.6),
         scatter_density = c(0.1, 0.8),
-        scatter_zone_prop = c(0.1, 0.4),
-        seed = seed
+        scatter_zone_prop = c(0.1, 0.4)
       ),
       clustered = list(
         treeline_position = c(0.4, 0.6), # numeric
@@ -289,8 +285,7 @@ generate_training_landscapes <- function(
         cluster_radius = c(3, 7), # integer
         scatter_zone_prop = c(0.2, 1), # numeric
         elongation_x = c(0.5, 1.5), # numeric
-        elongation_y = c(0.5, 1.5), # numeric
-        seed = seed
+        elongation_y = c(0.5, 1.5) # numeric
       ),
       sine_bands = list(
         treeline_position = c(0.3, 0.5), # numeric
@@ -299,42 +294,37 @@ generate_training_landscapes <- function(
         band_spacing = c(5, 15), #integer
         frequency = c(0.1, 0.3), # numeric
         amplitude = c(0, 6), # integer
-        noise_sd = c(0, 1.5), # numeric
-        seed = seed
+        noise_sd = c(0, 1.5) # numeric
       ),
       spots = list(
         n_spots = c(10, 30), # integer
         spot_radius = c(5, 12), # integer
         noise_radius_sd = c(0, 2), # numeric
         regular_spots = c(TRUE, FALSE), #Bool
-        invert_landscape = c(FALSE),
-        seed = seed
+        invert_landscape = c(FALSE)
       ),
       gaps = list(
         n_spots = c(10, 30), # integer
         spot_radius = c(5, 12), # integer
         noise_radius_sd = c(0, 2), # numeric
         regular_spots = c(TRUE, FALSE), #Bool
-        invert_landscape = c(TRUE),
-        seed = seed
+        invert_landscape = c(TRUE)
       ),
       banded = list(
-        nhills = c(1,5), #integer
+        nhills = c(1, 5), #integer
         nbands = c(3, 8), #integer
         regular_hilltop = c(TRUE, FALSE), #Bool
         top_elevation_mean = c(25, 35),
         top_elevation_sd = c(0, 3),
         x_ext_hill_sd = c(0, 0.5),
         y_ext_hill_sd = c(0, 0.5),
-        noise_sd = c(0, 0.25),
-        seed = seed
+        noise_sd = c(0, 0.25)
       ),
       labyrinth = list(
         frequency = c(2, 5), # integer
         veg_threshold = c(0.4, 0.5), # numeric
         band_fuzziness = c(0, 0.1), #numeric
-        octaves = c(1, 3), #integer
-        seed = seed
+        octaves = c(1, 3) #integer
       )
     )
   }

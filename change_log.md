@@ -2,6 +2,12 @@
 
 Here I document changes made to the function packages.
 
+## 2025-10-21
+
+- Change seed argument behaviours: Instead of setting a seed by default, I now 
+set the seed to NULL which sets no seed. If the user sets the seed argument to 
+something else, they can do so explicitly and the seed is set inside the function
+
 ## 2025-09-17
 
 ### Summary of Changes

@@ -14,9 +14,9 @@
 #' @param amplitude Numeric. Amplitude of sine wave in pixels (default: 5).
 #' @param noise_sd Numeric. Standard deviation for random noise (default: 0).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
-#'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
+#'   If NULL, no seed is set explicitly.
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
 #' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
@@ -59,16 +59,15 @@ create_landscape_sine_bands <- function(
   amplitude = 5,
   noise_sd = 0,
   rotation = 0,
-  seed = 42,
+  seed = NULL,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE
 ) {
   # If seed is NULL, use random seed; otherwise use the provided seed
-  if (is.null(seed)) {
-    seed <- as.integer(Sys.time())
+  if (!is.null(seed)) {
+    set.seed(seed)
   }
-  set.seed(seed)
 
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
@@ -184,8 +183,8 @@ create_landscape_sine_bands <- function(
 #' @param y_ext_hill_sd Numeric. Standard deviation of extension of slope into y direction. Default is 0.4.
 #' @param noise_sd Numeric. If random effects, which standard deviation
 #' @param rotation Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
-#'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
+#'   If NULL, no seed is set explicitly.
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
@@ -215,31 +214,28 @@ create_landscape_sine_bands <- function(
 #' )
 #' @export
 create_landscape_banded <- function(
-    width = 100,
-    height = 100,
-    nhills = 2,
-    regular_hilltop = TRUE,
-    top_elevation_mean = 30,
-    top_elevation_sd = 2,
-    slope_mean = 0.2,
-    slope_sd = 0.05,
-    nbands = 7,
-    x_ext_hill_sd = 0.4,
-    y_ext_hill_sd = 0.4,
-    noise_sd = 0.1,
-    rotation = 0,
-    seed = 42,
-    as_raster = TRUE,
-    crs = NULL,
-    add_metadata = TRUE
+  width = 100,
+  height = 100,
+  nhills = 2,
+  regular_hilltop = TRUE,
+  top_elevation_mean = 30,
+  top_elevation_sd = 2,
+  slope_mean = 0.2,
+  slope_sd = 0.05,
+  nbands = 7,
+  x_ext_hill_sd = 0.4,
+  y_ext_hill_sd = 0.4,
+  noise_sd = 0.1,
+  rotation = 0,
+  seed = NULL,
+  as_raster = TRUE,
+  crs = NULL,
+  add_metadata = TRUE
 ) {
-
-  # If seed is NULL, use random seed; otherwise use the provided seed
-  if (is.null(seed)) {
-    seed <- as.integer(Sys.time())
+  # If seed is provided, set it; otherwise, use a random seed
+  if (!is.null(seed)) {
+    set.seed(seed)
   }
-  set.seed(seed)
-
 
   if (regular_hilltop) {
     #hexangon for spots (to make them more regular)
@@ -263,9 +259,8 @@ create_landscape_banded <- function(
 
     #chose regularly distributed centers with k-means
     km <- kmeans(grid_points, centers = nhills, nstart = 10)
-    hill_tops <- as.data.frame(round(km$centers,0))
-    hill_tops$col <- pmin(width,pmax(1, hill_tops$col))
-
+    hill_tops <- as.data.frame(round(km$centers, 0))
+    hill_tops$col <- pmin(width, pmax(1, hill_tops$col))
   } else {
     # Generate random cluster centers
     hill_tops <- data.frame(
@@ -293,10 +288,14 @@ create_landscape_banded <- function(
     dim = c(width_actual, height_actual, nhills)
   )
   elevation <- matrix(data = NA, nrow = width_actual, ncol = height_actual)
-  x_ext_hill <- rnorm(n=nhills,mean=1,sd=x_ext_hill_sd)
-  y_ext_hill <- rnorm(n=nhills,mean=1,sd=y_ext_hill_sd)
-  top_elevation <- rnorm(n=nhills,mean=top_elevation_mean,sd=top_elevation_sd)
-  slope <- rnorm(n=nhills,mean=slope_mean,sd=slope_sd)
+  x_ext_hill <- rnorm(n = nhills, mean = 1, sd = x_ext_hill_sd)
+  y_ext_hill <- rnorm(n = nhills, mean = 1, sd = y_ext_hill_sd)
+  top_elevation <- rnorm(
+    n = nhills,
+    mean = top_elevation_mean,
+    sd = top_elevation_sd
+  )
+  slope <- rnorm(n = nhills, mean = slope_mean, sd = slope_sd)
   for (x in 1:width_actual) {
     for (y in 1:height_actual) {
       for (h in 1:nhills) {
@@ -307,7 +306,7 @@ create_landscape_banded <- function(
                 ((y - ypos_hill_actual[h]) / y_ext_hill[h])^2
             )
       }
-      elevation[x, y] <- max(hill_distance_elevation[x, y, ],na.rm=T)
+      elevation[x, y] <- max(hill_distance_elevation[x, y, ], na.rm = T)
       # add noise (if sd > 0)
       elevation[x, y] <- elevation[x, y] + rnorm(1, mean = 0, sd = noise_sd)
     }
@@ -394,8 +393,8 @@ create_landscape_banded <- function(
 #' @param octaves Integer >= 1 The number of layers of noise combined to
 #'    generate the pattern. A single octave gives smooth, simple structures.
 #'    More octaves add detail and complexity, similar to fractal patterns.(default: 1)
-#' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
-#'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
+#'   If NULL, no seed is set explicitly.
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
@@ -405,19 +404,18 @@ create_landscape_banded <- function(
 #'
 #' @examples
 create_landscape_labyrinth <- function(
-    width = 100,
-    height = 100,
-    rotation = 0,
-    frequency = 5,
-    veg_threshold = 0.5,
-    band_fuzziness = 0.1,
-    octaves = 1,
-    seed = 42,
-    as_raster = TRUE,
-    crs = NULL,
-    add_metadata = TRUE
+  width = 100,
+  height = 100,
+  rotation = 0,
+  frequency = 5,
+  veg_threshold = 0.5,
+  band_fuzziness = 0.1,
+  octaves = 1,
+  seed = NULL,
+  as_raster = TRUE,
+  crs = NULL,
+  add_metadata = TRUE
 ) {
-
   # make coordinates (required by gen_perlin())
   grid <- ambient::long_grid(
     x = seq(0, 1, length.out = width),
@@ -458,6 +456,4 @@ create_landscape_labyrinth <- function(
   }
 
   return(result)
-
 }
-

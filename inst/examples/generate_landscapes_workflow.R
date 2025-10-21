@@ -10,7 +10,7 @@ devtools::load_all()
 # Reproducible with same landscapes every time (is also default if seed is not set)
 landscapes <- generate_training_landscapes(n = 20, seed = 42)
 # different landscapes every time
-landscapes <- generate_training_landscapes(n = 20, seed = NULL)
+landscapes <- generate_training_landscapes(n = 20)
 
 # Randomly sampled landscape types (by default the function balances the types)
 landscapes <- generate_training_landscapes(
@@ -225,8 +225,7 @@ clustered_rotated <- create_landscape(
   scatter_zone_prop = 0.5,
   elongation_x = 1.8,
   elongation_y = 1.4,
-  rotation = 45,
-  seed = NULL
+  rotation = 45
 )
 
 # Plot all clustered trees together
@@ -301,8 +300,7 @@ spots_regular <- create_landscape(
   n_spots = 15,
   spot_radius = 8,
   noise_radius_sd = 0,
-  regular_spots = TRUE,
-  seed = 42
+  regular_spots = TRUE
 )
 
 

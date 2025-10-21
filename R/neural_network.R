@@ -11,7 +11,7 @@
 #' @param maxit Integer. Maximum iterations for training (default: 500).
 #' @param model_path Character. Path to save model (default: NULL means that
 #'     model is not saved).
-#' @param seed Integer. Random seed for reproducibility (default: 42).
+#' @param seed Integer. Random seed for reproducibility. If NULL, a random seed will be used (default: NULL).
 #'
 #' @return List. Trained neural network model and associated metadata.
 #' @export
@@ -24,15 +24,19 @@ train_nn <- function(
   decay = 0.01,
   maxit = 500,
   model_path = NULL,
-  seed = 42
+  seed = NULL
 ) {
+  # Set seed if provided
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
+
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold", "loo")) {
     stop('cv_method must be one of: "none", "k-fold", or "loo"')
   }
 
-  set.seed(seed)
   # subset selected metrics if provided
   if (!is.null(metrics_selected)) {
     # Subset only the selected metrics

@@ -14,7 +14,7 @@
 #' @param save_model Logical. Whether to save the model (default: FALSE).
 #' @param model_path Character. Path to save model (default: NULL means that the
 #'     model is not saved).
-#' @param seed Integer. Random seed for reproducibility (default: 42).
+#' @param seed Integer. Random seed for reproducibility. If NULL, a random seed will be used (default: NULL).
 #'
 #' @return List. Trained CNN model and associated metadata.
 #' @export
@@ -27,16 +27,17 @@ train_nn_keras <- function(
   validation_split = 0.2,
   learning_rate = 0.001,
   model_path = NULL,
-  seed = 42
+  seed = NULL
 ) {
+  # Set seed if provided
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold")) {
     stop('cv_method must be one of: "none" or "k-fold"')
   }
-
-  # Set random seed for reproducibility
-  set.seed(seed)
 
   # Check if the landscapes have metadata and is a valid structure
   if (all(unlist(lapply(landscapes, has_landscape_metadata)))) {

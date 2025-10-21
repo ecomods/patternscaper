@@ -1,16 +1,4 @@
 #---------------------------------------------------------------------
-#Seed
-#---------------------------------------------------------------------
-
- - warum wird der Seed in der Erzeugung per Default festgelegt,
- sollte dies nicht per Default zufällig sein? Beispiel:
- create_landscape_clustered_trees()
- - Selina: Ich dachte es macht Sinn, wenn es by default reproduzierbar ist und man
- die Randomness (seed based on current time) explizit setzen muss (mit seed = NULL).
- Aber wir könnten die Logik auch umdrehen, also by default random und nur wenn
- seed gesetzt ist, dann reproduzierbar.
-
-#---------------------------------------------------------------------
 #Spots
 #---------------------------------------------------------------------
 - manchmal gibt es bei den Spots eine Fehlermeldung

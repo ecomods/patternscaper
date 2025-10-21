@@ -97,8 +97,8 @@ create_landscape_sharp_treeline <- function(
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
 #' @param steepness Numeric. Steepness of the transition (default: 2).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: 42).
-#'   If NULL, a random seed based on system time will be used, producing different landscapes on each call.
+#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
+#'   If NULL, seed will not be set explicitly.
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
 #' @param crs Character. Coordinate reference system (default: NULL).
@@ -130,16 +130,15 @@ create_landscape_diffuse_treeline <- function(
   treeline_position = 0.5,
   steepness = 2,
   rotation = 0,
-  seed = 42,
+  seed = NULL,
   as_raster = TRUE,
   crs = NULL,
   add_metadata = TRUE
 ) {
-  # If seed is NULL, use random seed; otherwise use the provided seed
-  if (is.null(seed)) {
-    seed <- as.integer(Sys.time())
+  # Set seed if provided
+  if (!is.null(seed)) {
+    set.seed(seed)
   }
-  set.seed(seed)
 
   # calculate width and height of the actual landscape to produce
   # in case of rotation, the landscape needs to be larger
