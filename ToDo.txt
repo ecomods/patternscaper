@@ -29,6 +29,12 @@ keine Treeline und Rotation, aber dafür regular vs zufällig
  --> treeline/ecotone
  --> pattern formation
  --> fragmentation
+
+- Selina: Ich habe jetzt jeder Landschaft ihr eigenes File gegeben. Ich fand es 
+langsam unübersichtlich und ich finde, man kann die Lanschaften auch nicht ganz klar in 
+die 3 Kategorien unterteilen. Jetzt heißen alle File landscape_<type>.R.
+
+
 - generate landscape: hier sollten Landschaften für die drei Landschaftstypen
 unterschieden werden, d.h. eine Liste nur für ecotone, eine für pattern, eine für fragmentation
 

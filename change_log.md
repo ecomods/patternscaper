@@ -7,6 +7,12 @@ Here I document changes made to the function packages.
 - Change seed argument behaviours: Instead of setting a seed by default, I now 
 set the seed to NULL which sets no seed. If the user sets the seed argument to 
 something else, they can do so explicitly and the seed is set inside the function
+- Reorganize and rename files:
+  - All landscapes function now get their own file with filename `landscape_<type>.R`. 
+  I renamed other files starting with `landscape_` so only landscape generation files are called like this.
+  Reasoning: It started to be confusing with some landscape generation files long with many functions and some short.
+  Also, you had to know which function is in which file and then you had to scroll through the file to find the right
+  function. This is not ideal for maintenance.
 
 ## 2025-09-17
 
