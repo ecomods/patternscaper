@@ -172,19 +172,6 @@ train_nn <- function(
           trace = FALSE
         )
 
-        # Predict on validation data
-        probs <- predict(
-          fold_model,
-          newdata = validation_data[,
-            -which(names(validation_data) == "type"),
-            drop = FALSE
-          ],
-          type = "raw"
-        )
-
-        # Get predicted class label
-        prediction <- colnames(probs)[max.col(probs, ties.method = "first")]
-
         # Store predictions for this fold
         fold_probabilities <- predict(
           fold_model,
