@@ -10,11 +10,8 @@
 #' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
 #'   If NULL, seed will not be set explicitly.
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
-#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
-#' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
-#' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+#' @return A landscape object with class "diffuse" containing the generated landscape data and parameters.
 #'
 #' @examples
 #' # Default diffuse treeline
@@ -40,10 +37,7 @@ create_landscape_diffuse_treeline <- function(
   treeline_position = 0.5,
   steepness = 2,
   rotation = 0,
-  seed = NULL,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  seed = NULL
 ) {
   # Set seed if provided
   if (!is.null(seed)) {
@@ -56,7 +50,7 @@ create_landscape_diffuse_treeline <- function(
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
   # Create empty landscape
-  landscape <- matrix(0, nrow = height_actual, ncol = width_actual)
+  mat <- matrix(0, nrow = height_actual, ncol = width_actual)
 
   # Determine the center of the transition zone
   transition_center <- round(height_actual * treeline_position)
@@ -79,44 +73,32 @@ create_landscape_diffuse_treeline <- function(
     # Apply probability to each cell in this row
     for (j in 1:width_actual) {
       if (stats::runif(1) < prob) {
-        landscape[i, j] <- 1
+        mat[i, j] <- 1
       }
     }
   }
 
   # Rotate the landscape, crop and fill NAs if specified
   if (rotation != 0) {
-    landscape <- rotate_and_crop_landscape(
-      landscape,
+    mat <- rotate_and_crop_landscape(
+      mat,
       rotation,
       width,
       height
     )
   }
 
-  # Get the result either as matrix or SpatRaster
-  result <- if (as_raster) {
-    matrix_to_raster(landscape, crs = crs)
-  } else {
-    landscape
-  }
-
-  # Return with metadata if requested
-  if (add_metadata) {
-    return(list(
-      landscape = result,
-      type = "diffuse",
-      params = list(
-        width = width,
-        height = height,
-        treeline_position = treeline_position,
-        steepness = steepness,
-        rotation = rotation,
-        seed = seed,
-        crs = crs
-      )
-    ))
-  } else {
-    return(result)
-  }
+  # Create and return landscape object
+  landscape(
+    data = mat,
+    class = "diffuse",
+    params = list(
+      width = width,
+      height = height,
+      treeline_position = treeline_position,
+      steepness = steepness,
+      rotation = rotation,
+      seed = seed
+    )
+  )
 }

@@ -14,11 +14,8 @@
 #'    in proportion of actual finger length (default: 0, no randomness).
 #' @param bend Logical. Should the fingers be bent in a sinus pattern or not? (default: FALSE).
 #' @param rotation Numeric. Degrees to rotate the landscape (default: 0).
-#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
-#' @param crs Character. Coordinate reference system for the raster (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
-#' @return A matrix, SpatRaster, or List with landscape and metadata
+#' @return A landscape object with class "fingers" containing the generated landscape data and parameters.
 #'
 #' @examples
 #' # Default fingers pattern
@@ -41,7 +38,9 @@
 #'   bend = TRUE,
 #'   rotation = 45
 #' )
-#'
+#' @keywords internal
+#' @importFrom stats rnorm#
+#' @importFrom terra as.matrix
 create_landscape_fingers <- function(
   width = 100,
   height = 100,
@@ -51,10 +50,7 @@ create_landscape_fingers <- function(
   finger_length_prop = 0.3,
   finger_length_sd = 0,
   bend = FALSE,
-  rotation = 0,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  rotation = 0
 ) {
   # Verify inputs
   if (!is.integer(num_fingers)) {
@@ -69,13 +65,15 @@ create_landscape_fingers <- function(
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
   # Get base landscape with sharp treeline
-  landscape <- create_landscape_sharp_treeline(
+  base_landscape <- create_landscape_sharp_treeline(
     width_actual,
     height_actual,
     treeline_position,
-    as_raster = FALSE,
-    add_metadata = FALSE
+    rotation = 0
   )
+
+  # Extract matrix from landscape object
+  mat <- terra::as.matrix(base_landscape$data, wide = TRUE)
 
   # Calculate finger parameters
   if (rotation == 0) {
@@ -120,7 +118,7 @@ create_landscape_fingers <- function(
         for (fw in ((-floor(finger_width / 2)):(ceiling(finger_width / 2)))) {
           if ((w + fw) > 0 && (w + fw) <= width_actual) {
             # Changed < to <= to include edge
-            landscape[fin, w + fw] <- 1
+            mat[fin, w + fw] <- 1
           }
         }
       }
@@ -137,44 +135,34 @@ create_landscape_fingers <- function(
         width_actual,
         finger_positions[pos] + floor(finger_width / 2)
       )
-      landscape[treeline_row:end_rows[pos], start_col:end_col] <- 1
+      mat[treeline_row:end_rows[pos], start_col:end_col] <- 1
     }
   }
 
   # Apply rotation if specified
   if (rotation != 0) {
-    landscape <- rotate_and_crop_landscape(
-      landscape,
+    mat <- rotate_and_crop_landscape(
+      mat,
       rotation,
       width,
       height
     )
   }
 
-  # Get the result either as matrix or SpatRaster
-  result <- if (as_raster) {
-    matrix_to_raster(landscape, crs = crs)
-  } else {
-    landscape
-  }
-
-  # Return with metadata if requested
-  if (add_metadata) {
-    return(list(
-      landscape = result,
-      type = "fingers",
-      params = list(
-        width = width,
-        height = height,
-        treeline_position = treeline_position,
-        num_fingers = num_fingers,
-        finger_width = finger_width,
-        finger_length_prop = finger_length_prop,
-        rotation = rotation,
-        crs = crs
-      )
-    ))
-  } else {
-    return(result)
-  }
+  # Create and return landscape object
+  landscape(
+    data = mat,
+    class = "fingers",
+    params = list(
+      width = width,
+      height = height,
+      treeline_position = treeline_position,
+      num_fingers = num_fingers,
+      finger_width = finger_width,
+      finger_length_prop = finger_length_prop,
+      finger_length_sd = finger_length_sd,
+      bend = bend,
+      rotation = rotation
+    )
+  )
 }

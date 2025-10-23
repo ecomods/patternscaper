@@ -18,11 +18,9 @@
 #' @param rotation Unused parameter for compatibility with other landscape functions (default: 0).
 #'     Is only needed because in the function \link{generate_training_landscapes}
 #'     all landscape functions need to have a rotation parameter.
-#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
-#' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
-#' @return A matrix representing the ringed/spotted landscape, where 1 indicates vegetation and 0 indicates bare soil.
+#' @return A landscape object with class "spots" containing the generated landscape data and parameters.
+#'
 #' @examples
 #' # Default spots
 #' spots_default <- create_landscape_spots()
@@ -41,7 +39,7 @@
 #'   invert_landscape = TRUE,
 #'   noise_radius_sd = 2
 #' )
-#' @export
+#' @keywords internal
 create_landscape_spots <- function(
   width = 100,
   height = 100,
@@ -52,10 +50,7 @@ create_landscape_spots <- function(
   invert_landscape = FALSE,
   seed = NULL,
   regular_spots = FALSE,
-  rotation = 0,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  rotation = 0
 ) {
   # Set seed if provided
   if (!is.null(seed)) {
@@ -110,7 +105,7 @@ create_landscape_spots <- function(
   }
 
   #prepare landscape
-  landscape <- matrix(0, nrow = height, ncol = width)
+  mat <- matrix(0, nrow = height, ncol = width)
 
   # Create clusters around centers
   for (i in 1:nrow(cluster_centers)) {
@@ -139,7 +134,7 @@ create_landscape_spots <- function(
         if (dist <= adjusted_radius) {
           prob <- 1 - (dist / adjusted_radius)^2
           if (runif(1) < prob) {
-            landscape[r, c] <- 1
+            mat[r, c] <- 1
           }
         }
       }
@@ -148,33 +143,24 @@ create_landscape_spots <- function(
 
   # Invert landscape if specified (zeroes become ones and vice versa)
   if (invert_landscape) {
-    landscape <- 1 - landscape
+    mat <- 1 - mat
   }
 
-  # Get the result either as matrix or SpatRaster
-  result <- if (as_raster) {
-    matrix_to_raster(landscape, crs = crs)
-  } else {
-    landscape
-  }
-
-  # Return with metadata if requested
-  if (add_metadata) {
-    return(list(
-      landscape = result,
-      type = "spots",
-      params = list(
-        width = width,
-        height = height,
-        invert_landscape = invert_landscape,
-        n_spots = n_spots,
-        spot_radius = spot_radius,
-        noise_radius_sd = noise_radius_sd,
-        seed = seed,
-        crs = crs
-      )
-    ))
-  } else {
-    return(result)
-  }
+  # Create and return landscape object
+  landscape(
+    data = mat,
+    class = "spots",
+    params = list(
+      width = width,
+      height = height,
+      invert_landscape = invert_landscape,
+      n_spots = n_spots,
+      spot_radius = spot_radius,
+      noise_radius_sd = noise_radius_sd,
+      spot_jitter = spot_jitter,
+      regular_spots = regular_spots,
+      seed = seed,
+      rotation = rotation
+    )
+  )
 }

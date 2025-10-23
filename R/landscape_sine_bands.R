@@ -17,11 +17,8 @@
 #' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #'   If NULL, no seed is set explicitly.
-#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
-#' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
-#' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+#' @return A landscape object with class "sine_bands" containing the generated landscape data and parameters.
 #'
 #' @examples
 #' # Default sine bands
@@ -47,7 +44,8 @@
 #'   rotation = 45
 #' )
 #'
-#' @export
+#' @keywords internal
+#' @importFrom stats rnorm
 create_landscape_sine_bands <- function(
   width = 100,
   height = 100,
@@ -59,10 +57,7 @@ create_landscape_sine_bands <- function(
   amplitude = 5,
   noise_sd = 0,
   rotation = 0,
-  seed = NULL,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  seed = NULL
 ) {
   # If seed is NULL, use random seed; otherwise use the provided seed
   if (!is.null(seed)) {
@@ -74,7 +69,7 @@ create_landscape_sine_bands <- function(
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
   # Initialize empty landscape
-  landscape <- matrix(0, nrow = height_actual, ncol = width_actual)
+  mat <- matrix(0, nrow = height_actual, ncol = width_actual)
 
   # Base sine wave, used for both treeline and bands
   base_sine <- amplitude * sin(frequency * (1:width_actual))
@@ -86,7 +81,7 @@ create_landscape_sine_bands <- function(
   # Draw treeline: trees above the treeline
   for (x in 1:width_actual) {
     y <- base_treeline[x]
-    landscape[1:y, x] <- 1
+    mat[1:y, x] <- 1
   }
 
   # Create tree bands below treeline in the band zone
@@ -118,48 +113,37 @@ create_landscape_sine_bands <- function(
       )
 
       if (y_min <= y_max) {
-        landscape[y_min:y_max, x] <- 1
+        mat[y_min:y_max, x] <- 1
       }
     }
   }
 
   # Apply rotation if specified
   if (rotation != 0) {
-    landscape <- rotate_and_crop_landscape(
-      landscape,
+    mat <- rotate_and_crop_landscape(
+      mat,
       rotation,
       width,
       height
     )
   }
 
-  # Get the result either as matrix or SpatRaster
-  result <- if (as_raster) {
-    matrix_to_raster(landscape, crs = crs)
-  } else {
-    landscape
-  }
-
-  # Return with metadata if requested
-  if (add_metadata) {
-    return(list(
-      landscape = result,
-      type = "sine_bands",
-      params = list(
-        width = width,
-        height = height,
-        treeline_position = treeline_position,
-        band_thickness = band_thickness,
-        band_spacing = band_spacing,
-        frequency = frequency,
-        amplitude = amplitude,
-        noise_sd = noise_sd,
-        rotation = rotation,
-        seed = seed,
-        crs = crs
-      )
-    ))
-  } else {
-    return(result)
-  }
+  # Create and return landscape object
+  landscape(
+    data = mat,
+    class = "sine_bands",
+    params = list(
+      width = width,
+      height = height,
+      treeline_position = treeline_position,
+      band_zone_prop = band_zone_prop,
+      band_thickness = band_thickness,
+      band_spacing = band_spacing,
+      frequency = frequency,
+      amplitude = amplitude,
+      noise_sd = noise_sd,
+      rotation = rotation,
+      seed = seed
+    )
+  )
 }

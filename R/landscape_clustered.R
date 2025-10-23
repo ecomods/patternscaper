@@ -14,17 +14,17 @@
 #'   If NULL, no seed is set explicitly.
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
-#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
-#' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
-#' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+#' @return A landscape object with class "clustered" containing the generated landscape data and parameters.
 #'
+#' @importFrom stats runif
+#' @importFrom terra as.matrix
+#' @keywords internal
 #' @examples
 #' # Default clustered trees
 #' clustered_default <- create_landscape_clustered_trees()
 #'
-#' # Modified clustered trees with more elongated clusters and fixed seeed
+#' # Modified clustered trees with more elongated clusters and fixed seed
 #' clustered_modified <- create_landscape_clustered_trees(
 #'   treeline_position = 0.2,
 #'   num_clusters = 8,
@@ -55,15 +55,13 @@ create_landscape_clustered_trees <- function(
   elongation_x = 1,
   elongation_y = 1,
   seed = NULL,
-  rotation = 0,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  rotation = 0
 ) {
   # Set seed if provided
   if (!is.null(seed)) {
     set.seed(seed)
   }
+
   # Input validation
   if (!is.numeric(width) || width <= 0) {
     stop("'width' must be a positive number")
@@ -108,13 +106,15 @@ create_landscape_clustered_trees <- function(
       width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
       # Get base landscape with sharp treeline
-      landscape <- create_landscape_sharp_treeline(
+      base_landscape <- create_landscape_sharp_treeline(
         width = width_actual,
         height = height_actual,
         treeline_position = treeline_position,
-        as_raster = FALSE,
-        add_metadata = FALSE
+        rotation = 0
       )
+
+      # Extract matrix from landscape object
+      mat <- terra::as.matrix(base_landscape$data, wide = TRUE)
 
       # Define scatter zone
       if (rotation == 0) {
@@ -159,6 +159,7 @@ create_landscape_clustered_trees <- function(
           )
         )
       }
+
       # Create clusters around centers
       for (i in seq_len(nrow(cluster_centers))) {
         center_row <- cluster_centers$row[i]
@@ -185,7 +186,7 @@ create_landscape_clustered_trees <- function(
             if (dist <= cluster_radius) {
               prob <- 1 - (dist / cluster_radius)^2
               if (stats::runif(1) < prob) {
-                landscape[r, c] <- 1
+                mat[r, c] <- 1
               }
             }
           }
@@ -194,22 +195,15 @@ create_landscape_clustered_trees <- function(
 
       # Apply rotation if specified
       if (rotation != 0) {
-        landscape <- rotate_and_crop_landscape(
-          landscape,
+        mat <- rotate_and_crop_landscape(
+          mat,
           rotation,
           width,
           height
         )
       }
 
-      # Get the result either as matrix or SpatRaster
-      if (as_raster) {
-        landscape <- matrix_to_raster(
-          landscape,
-          crs = crs
-        )
-      }
-      landscape
+      mat
     },
     error = function(e) {
       # Add context to the error for easier debugging
@@ -217,26 +211,21 @@ create_landscape_clustered_trees <- function(
     }
   )
 
-  # Return with metadata if requested
-  if (add_metadata) {
-    return(list(
-      landscape = result,
-      type = "clustered",
-      params = list(
-        width = width,
-        height = height,
-        treeline_position = treeline_position,
-        num_clusters = num_clusters,
-        cluster_radius = cluster_radius,
-        scatter_zone_prop = scatter_zone_prop,
-        elongation_x = elongation_x,
-        elongation_y = elongation_y,
-        seed = seed,
-        rotation = rotation,
-        crs = crs
-      )
-    ))
-  } else {
-    return(result)
-  }
+  # Create and return landscape object
+  landscape(
+    data = result,
+    class = "clustered",
+    params = list(
+      width = width,
+      height = height,
+      treeline_position = treeline_position,
+      num_clusters = num_clusters,
+      cluster_radius = cluster_radius,
+      scatter_zone_prop = scatter_zone_prop,
+      elongation_x = elongation_x,
+      elongation_y = elongation_y,
+      seed = seed,
+      rotation = rotation
+    )
+  )
 }

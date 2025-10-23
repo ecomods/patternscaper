@@ -13,14 +13,12 @@
 #' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
 #'   If NULL, no seed is set explicitly.
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
-#' @param as_raster Logical. Whether to return as SpatRaster or a matrix (default: TRUE).
-#' @param crs Character. Coordinate reference system (default: NULL).
-#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
-#' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+#' @return A landscape object with class "scattered" containing the generated landscape data and parameters.
 #'
-#' @examples
-#' # Default scattered trees
+#' @keywords internal
+#' @importFrom stats runif
+#' @importFrom terra as.matrix
 #' scattered_default <- create_landscape_scattered_trees()
 #'
 #' # Modified scattered trees with higher density in a larger scatter zone
@@ -46,10 +44,7 @@ create_landscape_scattered_trees <- function(
   scatter_density = 0.1,
   scatter_zone_prop = 0.2,
   rotation = 0,
-  seed = NULL,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  seed = NULL
 ) {
   # Set seed if provided
   if (!is.null(seed)) {
@@ -61,13 +56,16 @@ create_landscape_scattered_trees <- function(
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
   # Get base landscape with sharp treeline
-  landscape <- create_landscape_sharp_treeline(
+  # Note: This returns a landscape object now, so we need to extract the matrix
+  base_landscape <- create_landscape_sharp_treeline(
     width_actual,
     height_actual,
     treeline_position,
-    as_raster = FALSE,
-    add_metadata = FALSE
+    rotation = 0
   )
+
+  # Extract matrix from landscape object
+  mat <- terra::as.matrix(base_landscape$data, wide = TRUE)
 
   # Define scatter zone
   treeline_row <- round(height_actual * treeline_position)
@@ -80,45 +78,33 @@ create_landscape_scattered_trees <- function(
   for (i in (treeline_row + 1):scatter_zone_end) {
     for (j in 1:width_actual) {
       if (stats::runif(1) < scatter_density) {
-        landscape[i, j] <- 1
+        mat[i, j] <- 1
       }
     }
   }
 
   # Apply rotation if specified
   if (rotation != 0) {
-    landscape <- rotate_and_crop_landscape(
-      landscape,
+    mat <- rotate_and_crop_landscape(
+      mat,
       rotation,
       width,
       height
     )
   }
 
-  # Get the result either as matrix or SpatRaster
-  result <- if (as_raster) {
-    matrix_to_raster(landscape, crs = crs)
-  } else {
-    landscape
-  }
-
-  # Return with metadata if requested
-  if (add_metadata) {
-    return(list(
-      landscape = result,
-      type = "scattered",
-      params = list(
-        width = width,
-        height = height,
-        treeline_position = treeline_position,
-        scatter_density = scatter_density,
-        scatter_zone_prop = scatter_zone_prop,
-        rotation = rotation,
-        seed = seed,
-        crs = crs
-      )
-    ))
-  } else {
-    return(result)
-  }
+  # Create and return landscape object
+  landscape(
+    data = mat,
+    class = "scattered",
+    params = list(
+      width = width,
+      height = height,
+      treeline_position = treeline_position,
+      scatter_density = scatter_density,
+      scatter_zone_prop = scatter_zone_prop,
+      rotation = rotation,
+      seed = seed
+    )
+  )
 }
