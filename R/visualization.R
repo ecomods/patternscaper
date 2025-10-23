@@ -1,104 +1,87 @@
 #' Plot a Landscape
 #'
-#' Creates a visualization of a landscape using ggplot2.
+#' A wrapper function for the S3 method \code{plot.landscape} with additional customization options.
 #'
-#' @param landscape SpatRaster or matrix. Landscape to plot.
-#' @param title Character. Plot title (default: "Landscape").
-#' @param color_scale Character vector. Colors for mapping values (default: NULL).
-#' @param legend_title Character. Title for the legend (default: "Value").
+#' @param landscape A landscape object to plot.
+#' @param title Character. Controls the plot title:
+#'        - "name": uses only the landscape name
+#'        - "class": uses only the landscape class
+#'        - "both": uses "name (class)" format
+#'        - Any other string: used as a custom title
+#'        Default: "both"
 #' @param show_legend Logical. Whether to show legend (default: TRUE).
+#' @param legend_title Character. Title for the legend (default: "Value").
 #'
 #' @return ggplot object. Plot of the landscape.
 #' @export
 plot_landscape <- function(
   landscape,
-  title = "Landscape",
-  color_scale = NULL,
-  legend_title = "Value",
-  show_legend = TRUE
+  title = "both",
+  show_legend = TRUE,
+  legend_title = "Value"
 ) {
-  # Check if landscape has metadata structure
-  has_metadata <- has_landscape_metadata(landscape)
-  # extract the landscape data if it has metadata
-  if (has_metadata) {
-    landscape <- get_landscape(landscape)
-  }
-  # Use the ensure_spatraster function to handle matrix inputs
-  landscape <- ensure_spatraster(landscape)
-
-  # Convert raster to data frame for plotting
-  df <- terra::as.data.frame(landscape, xy = TRUE)
-  names(df)[3] <- "value" # Rename the value column
-
-  # Determine if data is categorical/discrete
-  unique_values <- unique(df$value[!is.na(df$value)])
-  is_discrete <- length(unique_values) < 10 &&
-    all(unique_values == round(unique_values))
-
-  # If the values are discrete, convert to factor
-  if (is_discrete) {
-    # Always use sorted numeric values as factor levels for consistency
-    df$value <- factor(df$value, levels = sort(unique_values))
+  # Validate landscape is a landscape object
+  if (!is_landscape(landscape)) {
+    stop("'landscape' must be a landscape object", call. = FALSE)
   }
 
-  # Set up default color scale if not provided
-  if (is.null(color_scale)) {
-    # Define a standard palette of 10 distinct colors
-    standard_palette <- c(
-      "#E5E59F", # light yellow/beige (saltmarsh)
-      "#005C29", # dark green (forest)
-      "#8DA0CB", # periwinkle blue
-      "#E78AC3", # pink
-      "#A6D854", # lime green
-      "#FFD92F", # yellow
-      "#E5C494", # tan
-      "#B3B3B3", # gray
-      "#7570B3", # purple
-      "#D95F02" # orange
-    )
+  # Generate the base plot using plot.landscape
+  p <- plot(landscape)
 
-    if (is_discrete) {
-      # For all categorical data, select the needed number of colors from the palette
-      n_colors <- length(unique_values)
-      color_scale <- standard_palette[1:min(n_colors, 10)]
-
-      # If more than 10 colors are needed, use a color palette function
-      if (n_colors > 10) {
-        color_scale <- viridisLite::viridis(n_colors)
-      }
+  # Build the title based on the options
+  plot_title <- switch(
+    title,
+    name = if (!is.na(landscape$name)) landscape$name else "Unnamed landscape",
+    class = if (!is.na(landscape$class)) {
+      landscape$class
     } else {
-      # For continuous data, use a viridis gradient
-      color_scale <- viridisLite::viridis(100)
-    }
-  }
+      "Unclassified landscape"
+    },
+    both = paste0(
+      if (!is.na(landscape$name)) landscape$name else "Unnamed landscape",
+      " (",
+      if (!is.na(landscape$class)) landscape$class else "unclassified",
+      ")"
+    ),
+    title # Use custom title as provided if not one of the special keywords
+  )
 
-  # Create base plot
-  p <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y, fill = value)) +
-    ggplot2::geom_raster() +
-    ggplot2::coord_equal(expand = FALSE) +
-    ggplot2::labs(title = title) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(
-      axis.title = ggplot2::element_blank(),
-      legend.position = if (show_legend) "right" else "none",
-      plot.title = ggtext::element_markdown(size = 10),
-      axis.text = ggplot2::element_blank()
+  # Check if data is discrete by examining the plot's fill scale
+  is_discrete <- is.factor(p$data$value)
+
+  # Update plot with appropriate scale and customizations
+  if (is_discrete) {
+    # Define standard palette for discrete data
+    standard_palette <- c(
+      "#E5E59F",
+      "#005C29",
+      "#8DA0CB",
+      "#E78AC3",
+      "#A6D854",
+      "#FFD92F",
+      "#E5C494",
+      "#B3B3B3",
+      "#7570B3",
+      "#D95F02"
     )
 
-  # Apply appropriate color scale based on data type
-  if (is_discrete) {
     p <- p +
       ggplot2::scale_fill_manual(
-        values = color_scale,
+        values = standard_palette,
         name = legend_title
       )
   } else {
     p <- p +
-      ggplot2::scale_fill_gradientn(
-        colors = color_scale,
-        name = legend_title
-      )
+      ggplot2::scale_fill_viridis_c(name = legend_title)
   }
+
+  # Add title and legend customization
+  p <- p +
+    ggplot2::labs(title = plot_title, fill = legend_title) +
+    ggplot2::theme(
+      legend.position = if (show_legend) "right" else "none",
+      plot.title = ggtext::element_markdown(size = 10)
+    )
 
   return(p)
 }
