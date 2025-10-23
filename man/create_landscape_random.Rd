@@ -9,10 +9,7 @@ create_landscape_random(
   height = 100,
   tree_prop = 0.5,
   rotation = 0,
-  seed = NULL,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  seed = NULL
 )
 }
 \arguments{
@@ -28,15 +25,9 @@ Higher values result in a denser tree cover.}
 \item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
 If NULL, no seed is set explicitly.
 If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
-
-\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
-
-\item{crs}{Character. Coordinate reference system (default: NULL).}
-
-\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
-List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+A landscape object with class "random" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with randomly distributed trees.

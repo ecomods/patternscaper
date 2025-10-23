@@ -10,10 +10,7 @@ create_landscape_curvy_treeline(
   treeline_position = 0.5,
   sine_length = 20,
   sine_height = 5,
-  rotation = 0,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  rotation = 0
 )
 }
 \arguments{
@@ -28,15 +25,9 @@ create_landscape_curvy_treeline(
 \item{sine_height}{Numeric. Amplitude of sinusoidal curve in pixels (default: 5).}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
-
-\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
-
-\item{crs}{Character. Coordinate reference system (default: NULL).}
-
-\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
-List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+A landscape object with class "curvy" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with a curvy treeline following a sine wave pattern.

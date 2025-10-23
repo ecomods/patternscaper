@@ -11,10 +11,7 @@ create_landscape_scattered_trees(
   scatter_density = 0.1,
   scatter_zone_prop = 0.2,
   rotation = 0,
-  seed = NULL,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  seed = NULL
 )
 }
 \arguments{
@@ -35,36 +32,11 @@ Defines how far below the treeline scattered trees can appear.}
 \item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
 If NULL, no seed is set explicitly.
 If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
-
-\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
-
-\item{crs}{Character. Coordinate reference system (default: NULL).}
-
-\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
-List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+A landscape object with class "scattered" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with randomly scattered trees below a treeline.
 }
-\examples{
-# Default scattered trees
-scattered_default <- create_landscape_scattered_trees()
-
-# Modified scattered trees with higher density in a larger scatter zone
-scattered_modified <- create_landscape_scattered_trees(
-  treeline_position = 0.3,
-  scatter_density = 0.7,
-  scatter_zone_prop = 0.2
-)
-
-# With rotation
-scattered_rotated <- create_landscape_scattered_trees(
-  treeline_position = 0.3,
-  scatter_density = 0.2,
-  scatter_zone_prop = 0.1,
-  rotation = 45
-)
-
-}
+\keyword{internal}

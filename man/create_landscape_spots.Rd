@@ -14,10 +14,7 @@ create_landscape_spots(
   invert_landscape = FALSE,
   seed = NULL,
   regular_spots = FALSE,
-  rotation = 0,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  rotation = 0
 )
 }
 \arguments{
@@ -46,15 +43,9 @@ If a specific integer is provided, the same landscape will be generated on repea
 \item{rotation}{Unused parameter for compatibility with other landscape functions (default: 0).
 Is only needed because in the function \link{generate_training_landscapes}
 all landscape functions need to have a rotation parameter.}
-
-\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
-
-\item{crs}{Character. Coordinate reference system (default: NULL).}
-
-\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
-A matrix representing the ringed/spotted landscape, where 1 indicates vegetation and 0 indicates bare soil.
+A landscape object with class "spots" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with circular spots.
@@ -78,3 +69,4 @@ spots_inverted <- create_landscape_spots(
   noise_radius_sd = 2
 )
 }
+\keyword{internal}

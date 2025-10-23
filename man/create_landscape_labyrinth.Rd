@@ -12,50 +12,58 @@ create_landscape_labyrinth(
   veg_threshold = 0.5,
   band_fuzziness = 0.1,
   octaves = 1,
-  seed = NULL,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  seed = NULL
 )
 }
 \arguments{
-\item{width}{Integer. Number of columns in the landscape.}
+\item{width}{Integer. Number of columns in the landscape (default: 100).}
 
-\item{height}{Integer. Number of rows in the landscape.}
+\item{height}{Integer. Number of rows in the landscape (default: 100).}
 
-\item{rotation}{Numreric. Number between 0 and 360 giving the degree of landscape rotation}
+\item{rotation}{Numeric. Number between 0 and 360 giving the degree of landscape rotation (default: 0).}
 
 \item{frequency}{Numeric. Controls the spatial scale of the noise pattern:
-Lower values produce broad, smooth bands, higher values produce finer, maze-like structures.
-(default: 5)}
+Lower values produce broad, smooth bands, higher values produce finer, maze-like structures (default: 5).}
 
 \item{veg_threshold}{Numeric between 0 and 1. Defines the cutoff value that separates vegetated
 from non-vegetated cells. Values above the threshold become vegetation.
-Adjusting this changes the overall proportion of vegetated area (default: 0.5)}
+Adjusting this changes the overall proportion of vegetated area (default: 0.5).}
 
 \item{band_fuzziness}{Numeric and << 1. Controls how sharp or soft the vegetation boundary
 is around the threshold. At 0, boundaries are sharp, larger values introduce
-randomness at the edges, making the pattern more natural and irregular.
-(default: 0.1)}
+randomness at the edges, making the pattern more natural and irregular (default: 0.1).}
 
-\item{octaves}{Integer >= 1 The number of layers of noise combined to
+\item{octaves}{Integer >= 1. The number of layers of noise combined to
 generate the pattern. A single octave gives smooth, simple structures.
-More octaves add detail and complexity, similar to fractal patterns.(default: 1)}
+More octaves add detail and complexity, similar to fractal patterns (default: 1).}
 
 \item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
 If NULL, no seed is set explicitly.
 If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
-
-\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
-
-\item{crs}{Character. Coordinate reference system (default: NULL).}
-
-\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
-A matrix representing the landscape with banded vegetation, where 1 indicates vegetation and 0 indicates bare soil.
+A landscape object with class "labyrinth" containing the generated landscape data and parameters.
 }
 \description{
 Generates a landscape with banded and spotted vegetation (labyrinth),
-this mimics Touring patterns
+this mimics Turing patterns.
+}
+\examples{
+# Default labyrinth pattern
+labyrinth_default <- create_landscape_labyrinth()
+
+# Modified labyrinth with higher frequency and multiple octaves
+labyrinth_modified <- create_landscape_labyrinth(
+  frequency = 8,
+  octaves = 3,
+  band_fuzziness = 0.05
+)
+
+# With rotation
+labyrinth_rotated <- create_landscape_labyrinth(
+  frequency = 5,
+  veg_threshold = 0.6,
+  rotation = 45
+)
+
 }

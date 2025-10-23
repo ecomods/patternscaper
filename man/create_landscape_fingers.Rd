@@ -13,10 +13,7 @@ create_landscape_fingers(
   finger_length_prop = 0.3,
   finger_length_sd = 0,
   bend = FALSE,
-  rotation = 0,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  rotation = 0
 )
 }
 \arguments{
@@ -38,15 +35,9 @@ in proportion of actual finger length (default: 0, no randomness).}
 \item{bend}{Logical. Should the fingers be bent in a sinus pattern or not? (default: FALSE).}
 
 \item{rotation}{Numeric. Degrees to rotate the landscape (default: 0).}
-
-\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
-
-\item{crs}{Character. Coordinate reference system for the raster (default: NULL).}
-
-\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
-A matrix, SpatRaster, or List with landscape and metadata
+A landscape object with class "fingers" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary matrix representing a landscape with a sharp treeline and
@@ -74,5 +65,5 @@ fingers_rotated <- create_landscape_fingers(
   bend = TRUE,
   rotation = 45
 )
-
 }
+\keyword{internal}

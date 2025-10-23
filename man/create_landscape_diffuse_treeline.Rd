@@ -10,10 +10,7 @@ create_landscape_diffuse_treeline(
   treeline_position = 0.5,
   steepness = 2,
   rotation = 0,
-  seed = NULL,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  seed = NULL
 )
 }
 \arguments{
@@ -30,15 +27,9 @@ create_landscape_diffuse_treeline(
 \item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
 If NULL, seed will not be set explicitly.
 If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
-
-\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
-
-\item{crs}{Character. Coordinate reference system (default: NULL).}
-
-\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
-List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+A landscape object with class "diffuse" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with a diffuse treeline where tree probability decreases with distance.

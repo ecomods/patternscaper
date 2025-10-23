@@ -15,10 +15,7 @@ create_landscape_sine_bands(
   amplitude = 5,
   noise_sd = 0,
   rotation = 0,
-  seed = NULL,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  seed = NULL
 )
 }
 \arguments{
@@ -47,15 +44,9 @@ for the given band spacing, no bands will be drawn and a warning will be issued.
 \item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
 If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 If NULL, no seed is set explicitly.}
-
-\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
-
-\item{crs}{Character. Coordinate reference system (default: NULL).}
-
-\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
-List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+A landscape object with class "sine_bands" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with parallel sine-wave bands.
@@ -85,3 +76,4 @@ sine_bands_rotated <- create_landscape_sine_bands(
 )
 
 }
+\keyword{internal}

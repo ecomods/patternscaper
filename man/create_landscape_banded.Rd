@@ -18,10 +18,7 @@ create_landscape_banded(
   y_ext_hill_sd = 0.4,
   noise_sd = 0.1,
   rotation = 0,
-  seed = NULL,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  seed = NULL
 )
 }
 \arguments{
@@ -32,6 +29,8 @@ create_landscape_banded(
 \item{nhills}{Integer. Number of hills in the landscape. Default is 2.}
 
 \item{regular_hilltop}{Boolean. Regular or random position of the hilltops. Default is TRUE.}
+
+\item{top_elevation_mean}{Numeric. Mean elevation of hilltops. Default is 30.}
 
 \item{top_elevation_sd}{Numeric. Standard deviation of hilltop elevations. Default is 2.}
 
@@ -45,24 +44,16 @@ create_landscape_banded(
 
 \item{y_ext_hill_sd}{Numeric. Standard deviation of extension of slope into y direction. Default is 0.4.}
 
-\item{noise_sd}{Numeric. If random effects, which standard deviation}
+\item{noise_sd}{Numeric. Standard deviation for random elevation effects. Default is 0.1.}
 
 \item{rotation}{Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).}
 
 \item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
 If NULL, no seed is set explicitly.
 If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
-
-\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
-
-\item{crs}{Character. Coordinate reference system (default: NULL).}
-
-\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
-
-\item{top_elevation_mean.}{Numeric. Mean elevation of hilltops. Default is 30.}
 }
 \value{
-A matrix representing the landscape with banded vegetation, where 1 indicates vegetation and 0 indicates bare soil.
+A landscape object with class "bands" containing the generated landscape data and parameters.
 }
 \description{
 Generates a landscape with banded vegetation of plants and bare soil.
@@ -75,7 +66,7 @@ banded_default <- create_landscape_banded()
 
 # Modified banded vegetation with more bands and different hill parameters
 banded_modified <- create_landscape_banded(
-  hilltop = 2,
+  nhills = 2,
   nbands = 5,
   slope_mean = 0.5,
   regular_hilltop = FALSE,
@@ -84,9 +75,11 @@ banded_modified <- create_landscape_banded(
 
 # With rotation
 banded_rotated <- create_landscape_banded(
-  hilltop = 3,
+  nhills = 3,
   nbands = 7,
   regular_hilltop = TRUE,
-  noise_sd = 0
+  noise_sd = 0,
+  rotation = 45
 )
 }
+\keyword{internal}

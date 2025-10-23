@@ -8,10 +8,7 @@ create_landscape_sharp_treeline(
   width = 100,
   height = 100,
   treeline_position = 0.5,
-  rotation = 0,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  rotation = 0
 )
 }
 \arguments{
@@ -22,15 +19,9 @@ create_landscape_sharp_treeline(
 \item{treeline_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
-
-\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
-
-\item{crs}{Character. Coordinate reference system (default: NULL).}
-
-\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
-List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+A landscape object with class "sharp" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with a sharp treeline.

@@ -14,10 +14,7 @@ create_landscape_clustered_trees(
   elongation_x = 1,
   elongation_y = 1,
   seed = NULL,
-  rotation = 0,
-  as_raster = TRUE,
-  crs = NULL,
-  add_metadata = TRUE
+  rotation = 0
 )
 }
 \arguments{
@@ -42,15 +39,9 @@ If NULL, no seed is set explicitly.
 If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
-
-\item{as_raster}{Logical. Whether to return as SpatRaster or a matrix (default: TRUE).}
-
-\item{crs}{Character. Coordinate reference system (default: NULL).}
-
-\item{add_metadata}{Logical. Whether to include metadata in output (default: TRUE).}
 }
 \value{
-List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+A landscape object with class "clustered" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with clustered trees below a treeline.
@@ -59,7 +50,7 @@ Generates a binary landscape with clustered trees below a treeline.
 # Default clustered trees
 clustered_default <- create_landscape_clustered_trees()
 
-# Modified clustered trees with more elongated clusters and fixed seeed
+# Modified clustered trees with more elongated clusters and fixed seed
 clustered_modified <- create_landscape_clustered_trees(
   treeline_position = 0.2,
   num_clusters = 8,
@@ -80,3 +71,4 @@ clustered_rotated <- create_landscape_clustered_trees(
   rotation = 45
 )
 }
+\keyword{internal}
