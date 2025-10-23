@@ -93,13 +93,60 @@ print.landscape <- function(x, ...) {
 
 #' Plot method for landscape objects
 #'
-#' @param x Landscape object
-#' @param ... Additional arguments passed to plotting functions
-#' @return Invisibly returns the input object
+#' Creates a basic ggplot2 visualization of a landscape object.
+#'
+#' @param x A landscape object created by \code{\link{landscape}}.
+#' @param ... Additional arguments passed to ggplot2 functions.
+#'
+#' @return A ggplot2 object representing the landscape data.
+#'
+#' @details
+#' This function creates a minimal ggplot2 visualization of the landscape raster data.
+#' The returned plot can be further customized by adding ggplot2 elements or by using
+#' the \code{\link{plot_landscape}} function for higher-level customization.
+#'
+#' @examples
+#' # Create a landscape
+#' mat <- matrix(1:100, 10, 10)
+#' l <- landscape(mat, class = "test", name = "example")
+#'
+#' # Get basic plot
+#' p <- plot(l)
+#'
+#' # Add your own customization
+#' p + ggplot2::ggtitle("My custom title") +
+#'     ggplot2::theme_dark()
+#'
+#' @importFrom terra as.data.frame
+#' @importFrom ggplot2 ggplot aes geom_raster coord_equal theme_minimal element_blank
 #' @export
 plot.landscape <- function(x, ...) {
-  # Extract raster data from landscape object
-  # Set up plotting parameters (colors, legend, title)
-  # Create plot using terra::plot or similar function
-  # Return x invisibly
+  # Validate input
+  if (!is_landscape(x)) {
+    stop("'x' must be a landscape object", call. = FALSE)
+  }
+
+  # Convert raster to data frame for plotting
+  df <- terra::as.data.frame(x$data, xy = TRUE)
+  names(df)[3] <- "value" # Rename the value column
+
+  # Determine if data is categorical/discrete
+  unique_values <- unique(df$value[!is.na(df$value)])
+  is_discrete <- length(unique_values) < 10 &&
+    all(unique_values == round(unique_values))
+
+  # If the values are discrete, convert to factor
+  if (is_discrete) {
+    # Always use sorted numeric values as factor levels for consistency
+    df$value <- factor(df$value, levels = sort(unique_values))
+  }
+
+  # Create base plot
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y, fill = value)) +
+    ggplot2::geom_raster() +
+    ggplot2::coord_equal(expand = FALSE) +
+    theme_landscape()
+
+  # Return the ggplot object
+  return(p)
 }

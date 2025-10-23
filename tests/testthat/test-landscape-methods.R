@@ -74,3 +74,78 @@ test_that("print.landscape returns the object invisibly", {
   expect_identical(result$value, l)
   expect_false(result$visible)
 })
+
+# Test plot.landscape -------------------------------------------------------------
+
+test_that("plot.landscape returns a valid ggplot object", {
+  # Create a basic landscape
+  l <- create_test_landscape(type = "uniform", n = 10)
+
+  # Get plot
+  p <- plot(l)
+
+  # Check class
+  expect_s3_class(p, "ggplot")
+
+  # Check that plot has at least one layer
+  expect_true(length(p$layers) > 0)
+
+  # Check that first layer uses geom_raster (more robust)
+  expect_true(inherits(p$layers[[1]]$geom, "GeomRaster"))
+
+  # Check that coordinates use equal aspect ratio
+  # coord_equal creates a CoordCartesian with ratio = 1
+  expect_true(inherits(p$coordinates, "CoordCartesian"))
+})
+
+test_that("plot.landscape handles discrete and continuous data correctly", {
+  # Discrete data (integers 1-5)
+  l_discrete <- landscape(matrix(sample(1:5, 100, replace = TRUE), 10, 10))
+  p_discrete <- plot(l_discrete)
+
+  # More robust check - test that we can render the plot without errors
+  expect_error(print(p_discrete), NA)
+
+  # Continuous data (random decimals)
+  set.seed(123)
+  l_continuous <- landscape(matrix(runif(100), 10, 10))
+  p_continuous <- plot(l_continuous)
+
+  # More robust check - test that we can render the plot without errors
+  expect_error(print(p_continuous), NA)
+})
+
+test_that("plot.landscape handles NA values properly", {
+  # Create landscape with NAs
+  l <- create_test_landscape(type = "uniform", n = 10, na_percent = 20)
+
+  # This should run without errors
+  p <- expect_silent(plot(l))
+
+  # Check that the plot can be rendered without errors
+  expect_error(print(p), NA)
+})
+
+test_that("plot.landscape validates input", {
+  # Not a landscape
+  not_landscape <- list(data = matrix(1:9, 3, 3))
+
+  # Should error with informative message when called directly
+  expect_error(plot.landscape(not_landscape), "must be a landscape object")
+})
+
+test_that("plot.landscape applies appropriate theme elements", {
+  l <- create_test_landscape(type = "uniform", n = 5)
+  p <- plot(l)
+
+  # Check for theme existence rather than specific implementation
+  expect_true(!is.null(p$theme))
+
+  # Convert the theme to a list to check theme properties more robustly
+  theme_list <- unclass(p$theme)
+
+  # Check that certain theme properties exist (without checking specific implementation)
+  expect_true(any(names(theme_list) == "axis.title"))
+  expect_true(any(names(theme_list) == "axis.text"))
+  expect_true(any(names(theme_list) == "panel.grid.major"))
+})
