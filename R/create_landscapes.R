@@ -144,12 +144,12 @@ create_landscape <- function(
 }
 
 
-#' Generate Training Landscapes
+#' Create Training Landscapes
 #'
-#' Generates a series of landscape models with variations for training purposes.
+#' Create a series of landscape models with variations for training purposes.
 #' Creates a total of n landscapes distributed across different landscape types.
 #'
-#' @param n Integer. Total number of landscapes to generate (default: 50).
+#' @param n Integer. Total number of landscapes to create (default: 50).
 #' @param types Character vector. Types of landscapes to sample from (default: all types).
 #' @param width Integer. Width of all landscapes in pixels (default: 100).
 #' @param height Integer. Height of all landscapes in pixels (default: 100).
@@ -157,18 +157,31 @@ create_landscape <- function(
 #' @param rotation_angles Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).
 #' @param params_list List. List of parameter ranges for each landscape type (default: NULL).
 #' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
-#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
+#'   If a specific integer is provided, the same landscapes will be created on repeated calls with that seed.
 #'   If NULL, no seed is set explicitly.
-#' @param crs Character. Coordinate reference system (default: NULL).
 #' @param type_probs Numeric vector. Probability that a specific landscape type is chosen.
 #'     By default, all types have equal probability (1) of being chosen.
 #'     Must be the same length as 'types' (default NULL which means equal probability).
 #' @param balance_types Logical. If TRUE, ensures all landscape types appear approximately equally.
 #'     This overrides type_probs unless it's explicitly set. (default: TRUE)
 #'
-#' @return List. Named list of n generated landscapes with attributes for type and parameters.
+#' @return A named list of landscape objects. Names indicate the type and optional rotation.
+#'
+#' @examples
+#' # Generate 20 training landscapes
+#' landscapes <- create_training_landscapes(n = 20)
+#'
+#' # Access a landscape
+#' landscapes[[1]]
+#'
+#' # Check the type
+#' landscapes[[1]]$class
+#'
+#' # Get all landscape types
+#' sapply(landscapes, function(x) x$class)
+#'
 #' @export
-generate_training_landscapes <- function(
+create_training_landscapes <- function(
   n = 50,
   types = c(
     "random",
@@ -190,7 +203,6 @@ generate_training_landscapes <- function(
   rotation_angles = c(0, 45, 90, 135),
   params_list = NULL,
   seed = NULL,
-  crs = NULL,
   type_probs = NULL,
   balance_types = TRUE
 ) {
@@ -400,8 +412,6 @@ generate_training_landscapes <- function(
     sampled_params$width <- width
     sampled_params$height <- height
     sampled_params$rotation <- rotation
-    sampled_params$crs <- crs
-    sampled_params$add_metadata <- FALSE
 
     # Generate the landscape
     tryCatch(
@@ -411,14 +421,10 @@ generate_training_landscapes <- function(
           c(list(pattern = type), sampled_params)
         )
 
-        # Store landscape with metadata as a structured list
-        all_landscapes[[i]] <- list(
-          landscape = landscape,
-          type = type,
-          params = sampled_params
-        )
+        # Store the landscape object directly
+        all_landscapes[[i]] <- landscape
 
-        # Set list name
+        # Set descriptive name
         names(all_landscapes)[i] <- paste0(
           type,
           "_",
@@ -435,7 +441,6 @@ generate_training_landscapes <- function(
           "': ",
           e$message
         )
-        # Return NULL for this landscape (will be filtered out later)
         all_landscapes[[i]] <- NULL
       }
     )
