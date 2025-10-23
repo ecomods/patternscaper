@@ -4,13 +4,14 @@
 #' specialized functions. The type of landscape is determined by the 'pattern'
 #' parameter.
 #'
-#' @param pattern Character. Type of landscape to generate: "random", sharp", "diffuse",
-#'        "curvy", "fingers", "scattered", "sine_bands", "clusters"
+#' @param pattern Character. Type of landscape to generate: "random", "sharp", "diffuse",
+#'        "curvy", "fingers", "scattered", "sine_bands", "clusters", "spots", "gaps",
+#'        "banded", "labyrinth"
 #' @param ... Parameters passed to specific landscape functions. See the documentation
 #'        of the individual functions for details on required and optional parameters.
-#' @param add_metadata Logical. Whether to include metadata in output (default: TRUE).
 #'
-#' @return List with landscape (SpatRaster or Matrix) and metadata or only landscape without metadata)
+#' @return A landscape object with class corresponding to the pattern type, containing
+#'   the generated landscape data and parameters.
 #'
 #' @seealso
 #' \code{\link{create_landscape_random}} for "random" pattern parameters
@@ -31,9 +32,11 @@
 #'
 #' \code{\link{create_landscape_spots}} for "spots" pattern parameters
 #'
+#' \code{\link{create_landscape_gaps}} for "gaps" pattern parameters
+#'
 #' \code{\link{create_landscape_banded}} for "banded" pattern parameters
 #'
-#'\code{\link{create_landscape_labyrinth}} for "labyrinth" pattern parameters
+#' \code{\link{create_landscape_labyrinth}} for "labyrinth" pattern parameters
 #'
 #' @examples
 #' # Create a default landscape of various types
@@ -82,15 +85,14 @@ create_landscape <- function(
     "banded",
     "labyrinth"
   ),
-  ...,
-  add_metadata = TRUE
+  ...
 ) {
   # Define valid patterns
   valid_patterns <- eval(formals()$pattern)
 
   # Check if pattern is a valid string
-  if (!is.character(pattern)) {
-    stop("'pattern' must be a character string")
+  if (!is.character(pattern) || length(pattern) != 1) {
+    stop("'pattern' must be a single character string")
   }
 
   # Try to match the pattern argument with partial matching
@@ -121,47 +123,22 @@ create_landscape <- function(
     )
   }
 
-  # Extract the dots arguments
-  dots <- list(...)
-  # Add the add_metadata parameter if it's not already in dots
-  if (!"add_metadata" %in% names(dots)) {
-    dots$add_metadata <- add_metadata
-  }
-
-  # Call the appropriate function based on the pattern with metadata parameter
+  # Call the appropriate function based on the pattern
   landscape <- switch(
     matched,
-    random = do.call(create_landscape_random, dots),
-    sharp = do.call(create_landscape_sharp_treeline, dots),
-    diffuse = do.call(create_landscape_diffuse_treeline, dots),
-    curvy = do.call(create_landscape_curvy_treeline, dots),
-    fingers = do.call(create_landscape_fingers, dots),
-    scattered = do.call(create_landscape_scattered_trees, dots),
-    clustered = do.call(create_landscape_clustered_trees, dots),
-    sine_bands = do.call(create_landscape_sine_bands, dots),
-    spots = do.call(create_landscape_spots, dots),
-    gaps = do.call(create_landscape_gaps, dots),
-    banded = do.call(create_landscape_banded, dots),
-    labyrinth = do.call(create_landscape_labyrinth, dots)
+    random = create_landscape_random(...),
+    sharp = create_landscape_sharp_treeline(...),
+    diffuse = create_landscape_diffuse_treeline(...),
+    curvy = create_landscape_curvy_treeline(...),
+    fingers = create_landscape_fingers(...),
+    scattered = create_landscape_scattered_trees(...),
+    clustered = create_landscape_clustered_trees(...),
+    sine_bands = create_landscape_sine_bands(...),
+    spots = create_landscape_spots(...),
+    gaps = create_landscape_gaps(...),
+    banded = create_landscape_banded(...),
+    labyrinth = create_landscape_labyrinth(...)
   )
-
-  # Check if landscape was created successfully
-  if (is.null(landscape)) {
-    stop(
-      "Failed to create landscape with pattern '",
-      matched,
-      "'. Check that all required parameters are provided."
-    )
-  }
-
-  # If we didn't get metadata but need it, add it here
-  if (add_metadata && !is.list(landscape)) {
-    landscape <- list(
-      landscape = landscape,
-      type = matched,
-      params = dots[setdiff(names(dots), "add_metadata")] # Exclude add_metadata from params
-    )
-  }
 
   return(landscape)
 }
