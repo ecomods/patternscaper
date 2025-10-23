@@ -143,6 +143,19 @@ test_that("create_landscape_banded creates valid landscape object", {
   expect_equal(terra::nrow(l$data), 50)
 })
 
+test_that("create_landscape_labyrinth creates valid landscape object", {
+  l <- create_landscape_labyrinth(width = 50, height = 50, seed = 123)
+
+  expect_true(is_landscape(l))
+  expect_s3_class(l, "landscape")
+  expect_true(!is.null(l$data))
+  expect_s4_class(l$data, "SpatRaster")
+  expect_equal(l$class, "labyrinth")
+  expect_true(!is.null(l$params))
+  expect_equal(terra::ncol(l$data), 50)
+  expect_equal(terra::nrow(l$data), 50)
+})
+
 # Test that rotation works
 test_that("rotation parameter works", {
   l <- create_landscape_sharp_treeline(width = 50, height = 50, rotation = 45)
