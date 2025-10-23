@@ -4,15 +4,13 @@
 \alias{apply_nn}
 \title{Apply Neural Network for Landscape Classification}
 \usage{
-apply_nn(landscape, nn_model, confidence_threshold = 0.6, show_progress = TRUE)
+apply_nn(landscapes, nn_model, show_progress = TRUE)
 }
 \arguments{
-\item{landscape}{SpatRaster, matrix, or list. Landscape(s) to classify.
+\item{landscapes}{SpatRaster, matrix, or list. Landscape(s) to classify.
 Can be a single landscape or list of landscapes, with or without metadata.}
 
 \item{nn_model}{List. Neural network model from train_nn().}
-
-\item{confidence_threshold}{Numeric. Threshold for warning flag (default: 0.6).}
 
 \item{show_progress}{Logical. Whether to display progress bar for multiple landscapes (default: TRUE).}
 }

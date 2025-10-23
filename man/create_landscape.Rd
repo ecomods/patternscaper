@@ -5,14 +5,14 @@
 \title{Create a Landscape with Specified Pattern}
 \usage{
 create_landscape(
-  pattern = c("sharp", "diffuse", "curvy", "fingers", "scattered", "clustered",
-    "sine_bands", "spots", "banded"),
+  pattern = c("random", "sharp", "diffuse", "curvy", "fingers", "scattered", "clustered",
+    "sine_bands", "spots", "gaps", "banded", "labyrinth"),
   ...,
   add_metadata = TRUE
 )
 }
 \arguments{
-\item{pattern}{Character. Type of landscape to generate: "sharp", "diffuse",
+\item{pattern}{Character. Type of landscape to generate: "random", sharp", "diffuse",
 "curvy", "fingers", "scattered", "sine_bands", "clusters"}
 
 \item{...}{Parameters passed to specific landscape functions. See the documentation
@@ -30,9 +30,16 @@ parameter.
 }
 \examples{
 # Create a default landscape of various types
+random_default <- create_landscape("random")
 sharp_default <- create_landscape("sharp")
 diffuse_default <- create_landscape("diffuse")
 clustered_default <- create_landscape("clustered")
+
+# Create a modified landscape with custom parameters
+random_modified <- create_landscape(
+  "random",
+  tree_prop = 0.3
+)
 
 # Create a modified landscape with custom parameters
 scattered_modified <- create_landscape(
@@ -54,6 +61,8 @@ sine_bands_rotated <- create_landscape(
 
 }
 \seealso{
+\code{\link{create_landscape_random}} for "random" pattern parameters
+
 \code{\link{create_landscape_sharp_treeline}} for "sharp" pattern parameters
 
 \code{\link{create_landscape_diffuse_treeline}} for "diffuse" pattern parameters
@@ -71,4 +80,6 @@ sine_bands_rotated <- create_landscape(
 \code{\link{create_landscape_spots}} for "spots" pattern parameters
 
 \code{\link{create_landscape_banded}} for "banded" pattern parameters
+
+\code{\link{create_landscape_labyrinth}} for "labyrinth" pattern parameters
 }

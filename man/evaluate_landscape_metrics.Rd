@@ -9,7 +9,9 @@ evaluate_landscape_metrics(
   metrics_number = 10,
   method = "coeffvar_all",
   plot = FALSE,
-  exclude_metrics = NULL
+  exclude_NA_metrics = TRUE,
+  exclude_metrics = NULL,
+  correlation_threshold = 0.7
 )
 }
 \arguments{
@@ -21,7 +23,14 @@ evaluate_landscape_metrics(
 
 \item{plot}{Logical. Whether to generate visualization (default: FALSE).}
 
+\item{exclude_NA_metrics}{Logical. Whether to exclude metrics with NA values (default: TRUE).
+This is recommended if data is later used for model training as this does not
+accept missing values.}
+
 \item{exclude_metrics}{Character vector. Metrics to exclude (default: NULL).}
+
+\item{correlation_threshold}{Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
+If you don't want to filter based on correlation, set to 1.}
 }
 \value{
 Character vector. Names of most sensitive metrics.

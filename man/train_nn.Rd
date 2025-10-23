@@ -12,9 +12,8 @@ train_nn(
   hidden_neurons = 5,
   decay = 0.01,
   maxit = 500,
-  save_model = FALSE,
   model_path = NULL,
-  seed = 123
+  seed = NULL
 )
 }
 \arguments{
@@ -32,11 +31,10 @@ train_nn(
 
 \item{maxit}{Integer. Maximum iterations for training (default: 500).}
 
-\item{save_model}{Logical. Whether to save the model (default: FALSE).}
+\item{model_path}{Character. Path to save model (default: NULL means that
+model is not saved).}
 
-\item{model_path}{Character. Path to save model (default: NULL).}
-
-\item{seed}{Integer. Random seed for reproducibility (default: 123).}
+\item{seed}{Integer. Random seed for reproducibility. If NULL, a random seed will be used (default: NULL).}
 }
 \value{
 List. Trained neural network model and associated metadata.

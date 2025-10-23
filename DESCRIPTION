@@ -13,7 +13,7 @@ Description: Classification of landscapes using a neural network.
 Encoding: UTF-8
 LazyData: true
 License: GPL (>= 3)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Imports: 
     ggridges,
     ggdist,

@@ -4,27 +4,13 @@
 \alias{plot_metrics}
 \title{Plot Landscape Metrics}
 \usage{
-plot_metrics(
-  metrics,
-  selected_metrics,
-  title = "Landscape Metrics",
-  facet = TRUE,
-  arrange_by_importance = FALSE,
-  method = ""
-)
+plot_metrics(calculated_metrics, selected_metrics, title = "Landscape Metrics")
 }
 \arguments{
-\item{metrics}{Data frame. Metrics dataframe from calculate_landscape_metrics.}
-
 \item{selected_metrics}{Character vector. Metrics to visualize.}
 
-\item{title}{Character. Plot title (default: "Landscape Metrics").}
-
-\item{facet}{Logical. Whether to create facet plot by metric (default: TRUE).}
-
-\item{arrange_by_importance}{Logical. Whether to order metrics by importance (default: FALSE).}
-
-\item{method}{Character. Method used for metric importance (default: "").}
+\item{metrics}{Data frame. Metrics dataframe from calculate_landscape_metrics.
+Needs to contain columns: "level", "type", "metric", "value", and optionally "class".}
 }
 \value{
 ggplot object. Visualization of selected metrics across landscape types.

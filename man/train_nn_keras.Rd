@@ -12,9 +12,8 @@ train_nn_keras(
   batch_size = 16,
   validation_split = 0.2,
   learning_rate = 0.001,
-  save_model = FALSE,
   model_path = NULL,
-  seed = 123
+  seed = NULL
 )
 }
 \arguments{
@@ -32,11 +31,12 @@ train_nn_keras(
 
 \item{learning_rate}{Numeric. Learning rate for Adam optimizer (default: 0.001).}
 
+\item{model_path}{Character. Path to save model (default: NULL means that the
+model is not saved).}
+
+\item{seed}{Integer. Random seed for reproducibility. If NULL, a random seed will be used (default: NULL).}
+
 \item{save_model}{Logical. Whether to save the model (default: FALSE).}
-
-\item{model_path}{Character. Path to save model (default: NULL).}
-
-\item{seed}{Integer. Random seed for reproducibility (default: 123).}
 }
 \value{
 List. Trained CNN model and associated metadata.

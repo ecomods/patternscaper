@@ -5,21 +5,22 @@
 \title{Generate Training Landscapes}
 \usage{
 generate_training_landscapes(
-  n = 10,
-  types = c("sharp", "diffuse", "curvy", "fingers", "scattered", "clustered",
-    "sine_bands", "spots", "banded"),
+  n = 50,
+  types = c("random", "sharp", "diffuse", "curvy", "fingers", "scattered", "clustered",
+    "sine_bands", "spots", "gaps", "banded", "labyrinth"),
   width = 100,
   height = 100,
   add_rotation = TRUE,
   rotation_angles = c(0, 45, 90, 135),
   params_list = NULL,
-  seed = 42,
+  seed = NULL,
   crs = NULL,
-  type_probs = NULL
+  type_probs = NULL,
+  balance_types = TRUE
 )
 }
 \arguments{
-\item{n}{Integer. Total number of landscapes to generate (default: 10).}
+\item{n}{Integer. Total number of landscapes to generate (default: 50).}
 
 \item{types}{Character vector. Types of landscapes to sample from (default: all types).}
 
@@ -33,15 +34,18 @@ generate_training_landscapes(
 
 \item{params_list}{List. List of parameter ranges for each landscape type (default: NULL).}
 
-\item{seed}{Integer or NULL. Random seed for reproducibility (default: 42).
-If NULL, a random seed based on system time will be used, producing different landscapes on each call.
-If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
+\item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
+If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
+If NULL, no seed is set explicitly.}
 
 \item{crs}{Character. Coordinate reference system (default: NULL).}
 
 \item{type_probs}{Numeric vector. Probability that a specific landscape type is chosen.
 By default, all types have equal probability (1) of being chosen.
-Must be the same length as 'types'.}
+Must be the same length as 'types' (default NULL which means equal probability).}
+
+\item{balance_types}{Logical. If TRUE, ensures all landscape types appear approximately equally.
+This overrides type_probs unless it's explicitly set. (default: TRUE)}
 }
 \value{
 List. Named list of n generated landscapes with attributes for type and parameters.
