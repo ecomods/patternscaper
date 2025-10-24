@@ -7,6 +7,7 @@
 #' @param pattern Character. Type of landscape to generate: "random", "sharp", "diffuse",
 #'        "curvy", "fingers", "scattered", "sine_bands", "clusters", "spots", "gaps",
 #'        "banded", "labyrinth"
+#' @param name Character. Optional name for the landscape (default: NULL).
 #' @param ... Parameters passed to specific landscape functions. See the documentation
 #'        of the individual functions for details on required and optional parameters.
 #'
@@ -85,6 +86,7 @@ create_landscape <- function(
     "banded",
     "labyrinth"
   ),
+  name = NULL,
   ...
 ) {
   # Define valid patterns
@@ -123,6 +125,13 @@ create_landscape <- function(
     )
   }
 
+  # Validate the name parameter
+  if (!is.null(name)) {
+    if (!is.character(name) || length(name) != 1) {
+      stop("'name' must be a single character string or NULL")
+    }
+  }
+
   # Call the appropriate function based on the pattern
   landscape <- switch(
     matched,
@@ -139,6 +148,11 @@ create_landscape <- function(
     banded = create_landscape_banded(...),
     labyrinth = create_landscape_labyrinth(...)
   )
+
+  # Set the name if provided
+  if (!is.null(name)) {
+    landscape <- set_landscape_name(landscape, name)
+  }
 
   return(landscape)
 }

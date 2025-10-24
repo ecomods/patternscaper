@@ -261,6 +261,19 @@ test_that("create_landscape passes parameters correctly", {
   expect_equal(terra::ncol(l$data), 30)
   expect_equal(terra::nrow(l$data), 40)
   expect_equal(l$params$treeline_position, 0.7)
+
+  # Test that name parameter is set correctly
+  l_named <- create_landscape(
+    "sharp",
+    width = 30,
+    height = 40,
+    name = "my_landscape"
+  )
+
+  expect_equal(l_named$name, "my_landscape")
+
+  # Test that name is NULL when not provided
+  expect_true(is.na(l$name) || is.null(l$name))
 })
 
 test_that("create_landscape returns valid landscape objects", {
