@@ -410,7 +410,7 @@ apply_nn <- function(
         "_NA_NA"
       )
     ) |>
-    dplyr::select(metric, value, class, landscape)
+    dplyr::select(metric, value, pattern, landscape_name)
 
   # Reformat the table to wide format
   metrics_wide <- metrics |>
@@ -418,10 +418,10 @@ apply_nn <- function(
       names_from = metric,
       values_from = value
     ) |>
-    dplyr::select(-landscape)
+    dplyr::select(-landscape_name)
 
   # Normalize the predictor variables (all columns except for the class column)
-  predictors <- metrics_wide |> dplyr::select(-class)
+  predictors <- metrics_wide |> dplyr::select(-pattern)
 
   # Scale the metrics using the same parameters as during training
   predictors_scaled <- scale(
@@ -447,7 +447,7 @@ apply_nn <- function(
   # turn into a tibble and add columns for actual and predicted class and confidence
   predictions <- tibble::as_tibble(predictions)
 
-  predictions$actual_class <- metrics_wide$class
+  predictions$actual_class <- metrics_wide$pattern
   predictions$predicted_class <- predicted_class
   predictions$confidence <- confidence
   predictions$landscape_id <- 1:nrow(predictions)

@@ -1,6 +1,6 @@
 #' Evaluate Landscape Metrics
 #'
-#' Identifies the most informative metrics for discriminating between landscape types.
+#' Identifies the most informative metrics for discriminating between landscape_name types.
 #'
 #' @param calculated_metrics tibble. Metrics from calculate_landscape_metrics().
 #' @param metrics_number Integer. Number of top metrics to return (default: 10).
@@ -31,9 +31,14 @@ evaluate_landscape_metrics <- function(
     stop("calculated_metrics must be a data frame or tibble")
   }
 
-  if (!all(c("metric", "pattern", "value") %in% colnames(calculated_metrics))) {
+  if (
+    !all(
+      c("landscape_name", "metric", "pattern", "value") %in%
+        colnames(calculated_metrics)
+    )
+  ) {
     stop(
-      "calculated_metrics must contain columns: landscape, metric, pattern, and value"
+      "calculated_metrics must contain columns: landscape_name, metric, pattern, and value"
     )
   }
 
@@ -102,10 +107,10 @@ evaluate_landscape_metrics <- function(
     metrics_number <- num_metrics
   }
 
-  # Check if we have at least two landscape types
+  # Check if we have at least two landscape_name types
   if (length(unique(calculated_metrics$pattern)) < 2) {
     stop(
-      "At least two different landscape patternes are required for metric evaluation"
+      "At least two different landscape_name patternes are required for metric evaluation"
     )
   }
 
@@ -242,7 +247,7 @@ rank_by_linear_model <- function(
 
 #' Rank by Mean Differences
 #'
-#' Ranks metrics by their ability to differentiate between landscape types
+#' Ranks metrics by their ability to differentiate between landscape_name types
 #' based on the differences in means across types.
 #'
 #' @param calculated_metrics tibble. Metrics data.
@@ -297,7 +302,7 @@ rank_by_mean_differences <- function(calculated_metrics) {
 #' @param metric_ranking Character vector. Names of metrics in order of their ranking
 #'   (most important first).
 #' @param calculated_metrics Data frame. The calculated metrics data used to compute correlations.
-#'   Must contain columns 'landscape', 'metric', and 'value'.
+#'   Must contain columns 'landscape_name', 'metric', and 'value'.
 #' @param metrics_number Integer. Number of metrics to select.
 #' @param correlation_threshold Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
 #' @param verbose Logical. Whether to print progress messages (default: FALSE).
@@ -318,10 +323,12 @@ select_metrics_correlation <- function(
 
   if (
     !is.data.frame(calculated_metrics) ||
-      !all(c("landscape", "metric", "value") %in% colnames(calculated_metrics))
+      !all(
+        c("landscape_name", "metric", "value") %in% colnames(calculated_metrics)
+      )
   ) {
     stop(
-      "calculated_metrics must be a data frame with 'landscape', 'metric', and 'value' columns"
+      "calculated_metrics must be a data frame with 'landscape_name', 'metric', and 'value' columns"
     )
   }
 
@@ -331,12 +338,12 @@ select_metrics_correlation <- function(
 
   # Calculate correlation between metrics
   metrics_correlation <- calculated_metrics |>
-    dplyr::select(landscape, metric, value) |>
+    dplyr::select(landscape_name, metric, value) |>
     tidyr::pivot_wider(
       names_from = metric,
       values_from = value
     ) |>
-    dplyr::select(-landscape) |>
+    dplyr::select(-landscape_name) |>
     stats::cor(use = "pairwise.complete.obs")
 
   # Use the ranked metrics vector directly

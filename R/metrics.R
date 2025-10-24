@@ -78,7 +78,7 @@ calculate_single_metric <- function(landscapes, function_name) {
   result <- tryCatch(
     {
       purrr::map2_dfr(
-        names(landscapes),
+        landscape_names,
         seq_along(landscapes),
         \(name, i) {
           current <- landscapes[[i]]$data
