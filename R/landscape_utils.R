@@ -56,33 +56,33 @@ set_landscape_name <- function(x, name) {
   return(x)
 }
 
-#' Set Landscape Class
+#' Set Landscape pattern
 #'
-#' Sets the class attribute of a landscape object.
+#' Sets the pattern attribute of a landscape object.
 #'
 #' @param x A landscape object
-#' @param class Character string specifying the new class
-#' @return The landscape object with updated class
+#' @param pattern Character string specifying the new pattern
+#' @return The landscape object with updated pattern
 #' @examples
 #' # Single landscape
 #' landscape <- create_landscape("sharp", width = 10, height = 10)
-#' landscape <- set_landscape_class(landscape, "sharp_treeline")
+#' landscape <- set_landscape_pattern(landscape, "sharp_treeline")
 #'
 #' # Multiple landscapes with purrr
 #' landscapes <- list(
 #'   create_landscape("sharp", width = 10, height = 10),
 #'   create_landscape("random", width = 10, height = 10)
 #' )
-#' classes_vec <- c("sharp_treeline", "random_pattern")
-#' landscapes <- purrr::map2(landscapes, classes_vec, set_landscape_class)
+#' patterns_vec <- c("sharp_treeline", "random_pattern")
+#' landscapes <- purrr::map2(landscapes, patterns_vec, set_landscape_pattern)
 #'
 #' # Multiple landscapes with base R
-#' landscapes <- mapply(set_landscape_class, landscapes, classes_vec, SIMPLIFY = FALSE)
+#' landscapes <- mapply(set_landscape_pattern, landscapes, patterns_vec, SIMPLIFY = FALSE)
 #' @export
-set_landscape_class <- function(x, class) {
+set_landscape_pattern <- function(x, pattern) {
   stopifnot(inherits(x, "landscape"))
-  stopifnot(is.character(class) && length(class) == 1)
+  stopifnot(is.character(pattern) && length(pattern) == 1)
 
-  x$class <- class
+  x$pattern <- pattern
   return(x)
 }

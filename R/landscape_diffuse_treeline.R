@@ -11,7 +11,7 @@
 #'   If NULL, seed will not be set explicitly.
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #'
-#' @return A landscape object with class "diffuse" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "diffuse" containing the generated landscape data and parameters.
 #'
 #' @keywords internal
 #'
@@ -92,7 +92,7 @@ create_landscape_diffuse_treeline <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    class = "diffuse",
+    pattern = "diffuse",
     params = list(
       width = width,
       height = height,

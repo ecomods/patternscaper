@@ -102,9 +102,9 @@ calculate_single_metric <- function(landscapes, function_name) {
           # Add landscape name, type, and any warnings to the result
           result |>
             dplyr::mutate(
-              id = i,
-              landscape = name,
-              class = landscapes[[i]]$class,
+              landscape_id = i,
+              landscape_name = name,
+              pattern = landscapes[[i]]$pattern,
               warnings = ifelse(
                 length(warnings_captured) > 0,
                 paste(warnings_captured, collapse = "; "),
@@ -193,10 +193,13 @@ calculate_landscape_metrics <- function(
   # Reorganize columns for better readability
   all_results <- all_results |>
     dplyr::relocate(
-      id,
-      landscape,
-      class,
+      landscape_id,
+      landscape_name,
+      pattern,
+      layer,
       level,
+      class,
+      id,
       metric,
       layer,
       value,

@@ -19,7 +19,7 @@
 #'     Is only needed because in the function \link{generate_training_landscapes}
 #'     all landscape functions need to have a rotation parameter.
 #'
-#' @return A landscape object with class "gaps" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "gaps" containing the generated landscape data and parameters.
 #'
 #' @keywords internal
 #'
@@ -59,8 +59,8 @@ create_landscape_gaps <- function(
     rotation = rotation
   )
 
-  # Update the class to "gaps" instead of "spots"
-  result$class <- "gaps"
+  # Update the pattern to "gaps" instead of "spots"
+  result$pattern <- "gaps"
 
   return(result)
 }

@@ -1,7 +1,7 @@
 #' Print a landscape object
 #'
 #' Provides a concise summary of a landscape object, including its name,
-#' class, dimensions, spatial properties, value range, and parameters.
+#' pattern, dimensions, spatial properties, value range, and parameters.
 #'
 #' @param x A landscape object created by \code{\link{landscape}}.
 #' @param ... Additional arguments (currently unused).
@@ -11,7 +11,7 @@
 #' @details
 #' The print method displays:
 #' \itemize{
-#'   \item Landscape name and class
+#'   \item Landscape name and pattern
 #'   \item Dimensions (rows × columns and total cells)
 #'   \item Resolution and spatial extent
 #'   \item Value range (min/max) and count of NA values
@@ -21,7 +21,7 @@
 #' @examples
 #' # Create a landscape
 #' mat <- matrix(1:100, 10, 10)
-#' l <- landscape(mat, class = "test", name = "example")
+#' l <- landscape(mat, pattern = "test", name = "example")
 #'
 #' # Print it (calls print.landscape automatically)
 #' l
@@ -34,14 +34,14 @@
 print.landscape <- function(x, ...) {
   # Get basic properties of the landscape
   name_str <- if (is.na(x$name)) "unnamed" else paste0('"', x$name, '"')
-  class_str <- if (is.na(x$class)) {
+  pattern_str <- if (is.na(x$pattern)) {
     "unclassified"
   } else {
-    paste0("class: ", x$class)
+    paste0("pattern: ", x$pattern)
   }
 
   # Print header
-  cat("Landscape:", name_str, "[", class_str, "]\n")
+  cat("Landscape:", name_str, "[", pattern_str, "]\n")
   cat("-----------------------------------------\n")
 
   # Extract raster information
@@ -108,7 +108,7 @@ print.landscape <- function(x, ...) {
 #' @examples
 #' # Create a landscape
 #' mat <- matrix(1:100, 10, 10)
-#' l <- landscape(mat, class = "test", name = "example")
+#' l <- landscape(mat, pattern = "test", name = "example")
 #'
 #' # Get basic plot
 #' p <- plot(l)

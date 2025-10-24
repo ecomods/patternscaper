@@ -19,7 +19,7 @@
 #'     Is only needed because in the function \link{generate_training_landscapes}
 #'     all landscape functions need to have a rotation parameter.
 #'
-#' @return A landscape object with class "spots" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "spots" containing the generated landscape data and parameters.
 #'
 #' @examples
 #' # Default spots
@@ -149,7 +149,7 @@ create_landscape_spots <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    class = "spots",
+    pattern = "spots",
     params = list(
       width = width,
       height = height,

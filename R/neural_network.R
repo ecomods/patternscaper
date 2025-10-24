@@ -68,7 +68,7 @@ train_nn <- function(
         "_NA_NA"
       )
     ) |>
-    dplyr::select(metric, value, type, landscape)
+    dplyr::select(metric, value, pattern, landscape_name)
 
   # Reformat the table to wide format
   metrics_wide <- metrics |>
@@ -76,10 +76,10 @@ train_nn <- function(
       names_from = metric,
       values_from = value
     ) |>
-    dplyr::select(-landscape)
+    dplyr::select(-landscape_name)
 
-  # Normalize the predictor variables (all columns except for the type column)
-  predictors <- metrics_wide |> dplyr::select(-type)
+  # Normalize the predictor variables (all columns except for the pattern column)
+  predictors <- metrics_wide |> dplyr::select(-pattern)
   predictors_scaled <- scale(predictors)
 
   # Store scaling parameters for future use
@@ -92,11 +92,11 @@ train_nn <- function(
   # Combine the scaled predictors with the target variable
   metrics_scaled <- data.frame(
     predictors_scaled,
-    type = factor(metrics_wide$type)
+    pattern = factor(metrics_wide$pattern)
   )
 
   # Store the class names
-  class_names <- levels(metrics_scaled$type)
+  class_names <- levels(metrics_scaled$pattern)
 
   # Initialize performance metrics storage
   performance <- NULL
@@ -106,7 +106,7 @@ train_nn <- function(
     # Adjust CV method based on dataset characteristics
     if (cv_method == "k-fold") {
       # Get count of samples per class
-      class_counts <- table(metrics_scaled$type)
+      class_counts <- table(metrics_scaled$pattern)
       min_class_count <- min(class_counts)
       total_samples <- nrow(metrics_scaled)
 
@@ -164,7 +164,7 @@ train_nn <- function(
 
         # Train model on training data
         fold_model <- nnet::nnet(
-          type ~ .,
+          pattern ~ .,
           data = train_data,
           size = hidden_neurons,
           decay = decay,
@@ -176,7 +176,7 @@ train_nn <- function(
         fold_probabilities <- predict(
           fold_model,
           newdata = validation_data[,
-            -which(names(validation_data) == "type"),
+            -which(names(validation_data) == "pattern"),
             drop = FALSE
           ],
           type = "raw"
@@ -186,7 +186,7 @@ train_nn <- function(
         # Store results for this fold
         cv_predictions[[i]] <- fold_predictions
         cv_probabilities[[i]] <- fold_probabilities
-        cv_actual[[i]] <- validation_data$type
+        cv_actual[[i]] <- validation_data$pattern
       }
 
       # Set cv_folds for reporting
@@ -195,8 +195,8 @@ train_nn <- function(
       # Create stratified fold assignments
       # Ensure each class is represented in each fold
       fold_indices <- integer(nrow(metrics_scaled))
-      for (class_name in levels(metrics_scaled$type)) {
-        class_indices <- which(metrics_scaled$type == class_name)
+      for (class_name in levels(metrics_scaled$pattern)) {
+        class_indices <- which(metrics_scaled$pattern == class_name)
         class_folds <- sample(rep(
           1:cv_folds,
           length.out = length(class_indices)
@@ -215,7 +215,7 @@ train_nn <- function(
 
         # Train model on training data
         fold_model <- nnet::nnet(
-          type ~ .,
+          pattern ~ .,
           data = train_data,
           size = hidden_neurons,
           decay = decay,
@@ -226,7 +226,9 @@ train_nn <- function(
         # Predict on validation data
         probs <- predict(
           fold_model,
-          newdata = validation_data[, -which(names(validation_data) == "type")],
+          newdata = validation_data[,
+            -which(names(validation_data) == "pattern")
+          ],
           type = "raw"
         )
 
@@ -236,7 +238,7 @@ train_nn <- function(
         # Store results for this fold
         cv_predictions[[fold]] <- predictions
         cv_probabilities[[fold]] <- probs
-        cv_actual[[fold]] <- validation_data$type
+        cv_actual[[fold]] <- validation_data$pattern
       }
     }
 
@@ -260,7 +262,7 @@ train_nn <- function(
     }
 
     # Check for classes with few samples
-    class_counts <- table(metrics_scaled$type)
+    class_counts <- table(metrics_scaled$pattern)
     small_classes <- names(class_counts[class_counts < 3])
 
     if (length(small_classes) > 0) {
@@ -341,7 +343,7 @@ train_nn <- function(
 
   # Train final model on all data
   final_model <- nnet::nnet(
-    type ~ .,
+    pattern ~ .,
     data = metrics_scaled,
     size = hidden_neurons,
     decay = decay,
@@ -408,7 +410,7 @@ apply_nn <- function(
         "_NA_NA"
       )
     ) |>
-    dplyr::select(metric, value, type, landscape)
+    dplyr::select(metric, value, class, landscape)
 
   # Reformat the table to wide format
   metrics_wide <- metrics |>
@@ -418,8 +420,8 @@ apply_nn <- function(
     ) |>
     dplyr::select(-landscape)
 
-  # Normalize the predictor variables (all columns except for the type column)
-  predictors <- metrics_wide |> dplyr::select(-type)
+  # Normalize the predictor variables (all columns except for the class column)
+  predictors <- metrics_wide |> dplyr::select(-class)
 
   # Scale the metrics using the same parameters as during training
   predictors_scaled <- scale(
@@ -445,7 +447,7 @@ apply_nn <- function(
   # turn into a tibble and add columns for actual and predicted class and confidence
   predictions <- tibble::as_tibble(predictions)
 
-  predictions$actual_class <- metrics_wide$type
+  predictions$actual_class <- metrics_wide$class
   predictions$predicted_class <- predicted_class
   predictions$confidence <- confidence
   predictions$landscape_id <- 1:nrow(predictions)

@@ -21,7 +21,7 @@
 #'   If NULL, no seed is set explicitly.
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #'
-#' @return A landscape object with class "labyrinth" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "labyrinth" containing the generated landscape data and parameters.
 #'
 #' @examples
 #' # Default labyrinth pattern
@@ -111,7 +111,7 @@ create_landscape_labyrinth <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    class = "labyrinth",
+    pattern = "labyrinth",
     params = list(
       width = width,
       height = height,

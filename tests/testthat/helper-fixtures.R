@@ -41,7 +41,7 @@ create_test_landscape <- function(
   type = "uniform",
   n = 10,
   na_percent = 0,
-  class = NA_character_,
+  pattern = NA_character_,
   name = NA_character_,
   params = NULL
 ) {
@@ -52,7 +52,7 @@ create_test_landscape <- function(
     "random" = create_random_matrix(n, na_percent = na_percent),
     create_uniform_matrix(n, na_percent = na_percent)
   )
-  landscape(mat, class = class, name = name, params = params)
+  landscape(mat, pattern = pattern, name = name, params = params)
 }
 
 # function to introduce random NAs into a matrix

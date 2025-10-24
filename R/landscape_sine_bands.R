@@ -18,7 +18,7 @@
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #'   If NULL, no seed is set explicitly.
 #'
-#' @return A landscape object with class "sine_bands" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "sine_bands" containing the generated landscape data and parameters.
 #'
 #' @examples
 #' # Default sine bands
@@ -131,7 +131,7 @@ create_landscape_sine_bands <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    class = "sine_bands",
+    pattern = "sine_bands",
     params = list(
       width = width,
       height = height,

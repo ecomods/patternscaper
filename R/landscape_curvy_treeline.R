@@ -9,7 +9,7 @@
 #' @param sine_height Numeric. Amplitude of sinusoidal curve in pixels (default: 5).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
-#' @return A landscape object with class "curvy" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "curvy" containing the generated landscape data and parameters.
 #'
 #' @keywords internal
 #'
@@ -77,7 +77,7 @@ create_landscape_curvy_treeline <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    class = "curvy",
+    pattern = "curvy",
     params = list(
       width = width,
       height = height,

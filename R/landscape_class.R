@@ -2,14 +2,14 @@
 #'
 #' Internal constructor for landscape objects.
 #' @param data SpatRaster containing landscape data
-#' @param class Character string specifying landscape class
+#' @param pattern Character string specifying landscape pattern
 #' @param name Character string specifying landscape name
 #' @param params List of parameters used to create the landscape
 #' @return A landscape object
 #' @keywords internal
 new_landscape <- function(
   data,
-  class = NA_character_,
+  pattern = NA_character_,
   name = NA_character_,
   params = NULL
 ) {
@@ -18,7 +18,7 @@ new_landscape <- function(
   structure(
     list(
       data = data,
-      class = class,
+      pattern = pattern,
       name = name,
       params = params
     ),
@@ -31,7 +31,7 @@ new_landscape <- function(
 #' Converts a matrix or SpatRaster into a landscape object that can be used
 #' with landscape analysis functions.
 #' @param data Matrix or SpatRaster containing landscape data
-#' @param class Character string specifying the landscape class if known (default NA).
+#' @param pattern Character string specifying the landscape pattern if known (default NA).
 #' @param name Character string specifying the landscape name to distinguish it from other
 #'     landscapes (default NA).
 #' @param params List of parameters used to create the landscape. Can be empty but
@@ -44,13 +44,13 @@ new_landscape <- function(
 #' mat <- matrix(runif(100), nrow = 10, ncol = 10)
 #' l <- landscape(mat)
 #'
-#' # Create with class and name
-#' l <- landscape(mat, class = "random", name = "test_landscape")
+#' # Create with pattern and name
+#' l <- landscape(mat, pattern = "random", name = "test_landscape")
 #'
 #' # Create with parameters
 #' l <- landscape(
 #'   mat,
-#'   class = "sharp",
+#'   pattern = "sharp",
 #'   name = "alpine_treeline",
 #'   params = list(treeline_position = 0.5, rotation = 0)
 #' )
@@ -61,7 +61,7 @@ new_landscape <- function(
 #' @export
 landscape <- function(
   data,
-  class = NA_character_,
+  pattern = NA_character_,
   name = NA_character_,
   params = NULL
 ) {
@@ -70,9 +70,9 @@ landscape <- function(
     stop("'data' must be a matrix or SpatRaster")
   }
 
-  # Validate class
-  if (!is.na(class) && !is.character(class)) {
-    stop("'class' must be a character string or NA")
+  # Validate pattern
+  if (!is.na(pattern) && !is.character(pattern)) {
+    stop("'pattern' must be a character string or NA")
   }
 
   # Validate name
@@ -90,7 +90,7 @@ landscape <- function(
     data <- matrix_to_raster(data)
   }
 
-  new_landscape(data, class, name, params)
+  new_landscape(data, pattern, name, params)
 }
 
 #' Check if an object is a landscape

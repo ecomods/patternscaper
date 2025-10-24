@@ -15,7 +15,7 @@
 #' @param bend Logical. Should the fingers be bent in a sinus pattern or not? (default: FALSE).
 #' @param rotation Numeric. Degrees to rotate the landscape (default: 0).
 #'
-#' @return A landscape object with class "fingers" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "fingers" containing the generated landscape data and parameters.
 #'
 #' @examples
 #' # Default fingers pattern
@@ -152,7 +152,7 @@ create_landscape_fingers <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    class = "fingers",
+    pattern = "fingers",
     params = list(
       width = width,
       height = height,

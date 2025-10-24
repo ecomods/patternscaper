@@ -13,7 +13,7 @@ test_that("plot_landscape creates correct title", {
   p1 <- plot_landscape(l, title = "name")
   expect_equal(p1$labels$title, "Unnamed landscape")
 
-  p2 <- plot_landscape(l, title = "class")
+  p2 <- plot_landscape(l, title = "pattern")
   expect_equal(p2$labels$title, "sharp")
 
   p3 <- plot_landscape(l, title = "both")
@@ -106,7 +106,7 @@ test_that("plot_landscape_list handles titles correctly", {
   )
 
   # Test that we get a valid patchwork with 2 patches
-  p1 <- plot_landscape_list(landscapes, titles = "class")
+  p1 <- plot_landscape_list(landscapes, titles = "pattern")
   expect_true(grepl("2 patches", capture_output(str(p1))))
 
   # Test title length validation

@@ -31,9 +31,9 @@ evaluate_landscape_metrics <- function(
     stop("calculated_metrics must be a data frame or tibble")
   }
 
-  if (!all(c("metric", "class", "value") %in% colnames(calculated_metrics))) {
+  if (!all(c("metric", "pattern", "value") %in% colnames(calculated_metrics))) {
     stop(
-      "calculated_metrics must contain columns: landscape, metric, class, and value"
+      "calculated_metrics must contain columns: landscape, metric, pattern, and value"
     )
   }
 
@@ -103,9 +103,9 @@ evaluate_landscape_metrics <- function(
   }
 
   # Check if we have at least two landscape types
-  if (length(unique(calculated_metrics$class)) < 2) {
+  if (length(unique(calculated_metrics$pattern)) < 2) {
     stop(
-      "At least two different landscape classes are required for metric evaluation"
+      "At least two different landscape patternes are required for metric evaluation"
     )
   }
 
@@ -259,7 +259,7 @@ rank_by_mean_differences <- function(calculated_metrics) {
   means_types <- calculated_metrics |>
     dplyr::summarize(
       mean_type = mean(value, na.rm = TRUE),
-      .by = c(metric, class)
+      .by = c(metric, pattern)
     )
 
   means_groups <- means_types |>

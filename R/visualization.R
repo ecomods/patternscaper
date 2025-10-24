@@ -3,7 +3,7 @@
 #' Creates a visualization of landscape metric values across landscape types.
 #'
 #' @param metrics Data frame. Metrics dataframe from calculate_landscape_metrics.
-#'    Needs to contain columns: "level", "type", "metric", "value", and optionally "class".
+#'    Needs to contain columns: "level", "type", "metric", "value", and optionally "pattern".
 #' @param selected_metrics Character vector. Metrics to visualize.
 #'
 #' @return ggplot object. Visualization of selected metrics across landscape types.
@@ -21,7 +21,7 @@ plot_metrics <- function(
     stop("selected_metrics must be a character vector of metric names")
   }
   # check if metrics data has columns we need
-  required_cols <- c("level", "class", "metric", "value")
+  required_cols <- c("level", "pattern", "metric", "value")
   if (!all(required_cols %in% names(calculated_metrics))) {
     stop(paste(
       "metrics data frame must contain the following columns:",
@@ -41,16 +41,16 @@ plot_metrics <- function(
     # Order metrics by their order in selected_metrics
     dplyr::mutate(
       metric = factor(metric, levels = selected_metrics),
-      class = as.factor(class)
+      pattern = as.factor(pattern)
     )
 
   # Create the base plot (depends on the level at which metrics were calculated)
   if (level == "landscape") {
-    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = class, y = value))
+    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = pattern, y = value))
   } else if (level == "class") {
     p <- ggplot2::ggplot(
       plot_data,
-      ggplot2::aes(x = class, y = value, fill = class)
+      ggplot2::aes(x = pattern, y = value, fill = class)
     )
   } else {
     stop("Plotting for patch-level metrics is not implemented yet.")
@@ -69,7 +69,7 @@ plot_metrics <- function(
       panel.grid.minor = ggplot2::element_blank(),
     ) +
     ggplot2::labs(
-      x = "Landscape Class",
+      x = "Landscape Pattern",
       y = "Metric Value"
     )
   return(p)
@@ -534,9 +534,19 @@ plot_nn_classification_landscapes <- function(
     )
   }
 
-  # Validate input landscape_list
-  if (!is.list(landscape_list)) {
-    stop("landscape_list must be a list of landscapes (SpatRaster or matrix)")
+  # Validate input landscape_list: must be a list of landscape objects
+  # First validate that input is a list
+  if (!is.list(landscapes)) {
+    stop("landscapes must be a list", call. = FALSE)
+  }
+  # Check if it's a list of landscape objects
+  if (any(!sapply(landscapes, is_landscape))) {
+    # find out which element is not a landscape
+    invalid_indices <- which(!sapply(landscapes, is_landscape))
+    stop(
+      "All elements must be landscape objects. Invalid element(s) at index(es): ",
+      paste(invalid_indices, collapse = ", ")
+    )
   }
 
   # check if the landscape list has the same length as the validation results
@@ -590,7 +600,7 @@ plot_nn_classification_landscapes <- function(
 
   # Create plots for each landscape
   plots <- plot_landscape_list(
-    landscape_list = landscapes_to_plot,
+    landscapes = landscapes_to_plot,
     titles = classification$title
   )
 

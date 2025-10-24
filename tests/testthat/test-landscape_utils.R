@@ -44,15 +44,15 @@ test_that("set_landscape_name and set_landscape_class work for single landscape"
   landscape <- create_landscape("sharp", width = 10, height = 10)
 
   result_name <- set_landscape_name(landscape, "test_name")
-  result_class <- set_landscape_class(landscape, "new_class")
+  result_pattern <- set_landscape_pattern(landscape, "new_pattern")
 
   expect_equal(result_name$name, "test_name")
-  expect_equal(result_class$class, "new_class")
+  expect_equal(result_pattern$pattern, "new_pattern")
   expect_s3_class(result_name, "landscape")
-  expect_s3_class(result_class, "landscape")
+  expect_s3_class(result_pattern, "landscape")
 })
 
-test_that("set_landscape_name and set_landscape_class validate input types", {
+test_that("set_landscape_name and set_landscape_pattern validate input types", {
   landscape <- create_landscape("sharp", width = 10, height = 10)
 
   # Non-landscape object
@@ -61,7 +61,7 @@ test_that("set_landscape_name and set_landscape_class validate input types", {
     "inherits\\(x, \"landscape\"\\)"
   )
   expect_error(
-    set_landscape_class(list(data = 1), "class"),
+    set_landscape_pattern(list(data = 1), "pattern"),
     "inherits\\(x, \"landscape\"\\)"
   )
 
@@ -71,8 +71,8 @@ test_that("set_landscape_name and set_landscape_class validate input types", {
     "is\\.character\\(name\\)"
   )
   expect_error(
-    set_landscape_class(landscape, 123),
-    "is\\.character\\(class\\)"
+    set_landscape_pattern(landscape, 123),
+    "is\\.character\\(pattern\\)"
   )
 
   # Multiple values
@@ -81,18 +81,18 @@ test_that("set_landscape_name and set_landscape_class validate input types", {
     "length\\(name\\) == 1"
   )
   expect_error(
-    set_landscape_class(landscape, c("class1", "class2")),
-    "length\\(class\\) == 1"
+    set_landscape_pattern(landscape, c("pattern1", "pattern2")),
+    "length\\(pattern\\) == 1"
   )
 })
 
-test_that("set_landscape_name and set_landscape_class work with multiple landscapes", {
+test_that("set_landscape_name and set_landscape_pattern work with multiple landscapes", {
   landscapes <- list(
     create_landscape("sharp", width = 10, height = 10),
     create_landscape("random", width = 10, height = 10)
   )
   names_vec <- c("alpine", "subalpine")
-  classes_vec <- c("sharp_treeline", "random_pattern")
+  patterns_vec <- c("sharp_treeline", "random_pattern")
 
   # Using mapply
   result_names <- mapply(
@@ -101,15 +101,15 @@ test_that("set_landscape_name and set_landscape_class work with multiple landsca
     names_vec,
     SIMPLIFY = FALSE
   )
-  result_classes <- mapply(
-    set_landscape_class,
+  result_patterns <- mapply(
+    set_landscape_pattern,
     landscapes,
-    classes_vec,
+    patterns_vec,
     SIMPLIFY = FALSE
   )
 
   expect_equal(result_names[[1]]$name, "alpine")
   expect_equal(result_names[[2]]$name, "subalpine")
-  expect_equal(result_classes[[1]]$class, "sharp_treeline")
-  expect_equal(result_classes[[2]]$class, "random_pattern")
+  expect_equal(result_patterns[[1]]$pattern, "sharp_treeline")
+  expect_equal(result_patterns[[2]]$pattern, "random_pattern")
 })

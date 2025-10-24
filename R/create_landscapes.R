@@ -1,17 +1,17 @@
 #' Create a Landscape with Specified Pattern
 #'
-#' A generic function that creates various types of landscape matrices using
-#' specialized functions. The type of landscape is determined by the 'pattern'
+#' A generic function that creates various patterns of landscape matrices using
+#' specialized functions. The pattern of landscape is determined by the 'pattern'
 #' parameter.
 #'
-#' @param pattern Character. Type of landscape to generate: "random", "sharp", "diffuse",
+#' @param pattern Character. pattern of landscape to generate: "random", "sharp", "diffuse",
 #'        "curvy", "fingers", "scattered", "sine_bands", "clusters", "spots", "gaps",
 #'        "banded", "labyrinth"
 #' @param name Character. Optional name for the landscape (default: NULL).
 #' @param ... Parameters passed to specific landscape functions. See the documentation
 #'        of the individual functions for details on required and optional parameters.
 #'
-#' @return A landscape object with class corresponding to the pattern type, containing
+#' @return A landscape object with pattern corresponding to the pattern pattern, containing
 #'   the generated landscape data and parameters.
 #'
 #' @seealso
@@ -40,7 +40,7 @@
 #' \code{\link{create_landscape_labyrinth}} for "labyrinth" pattern parameters
 #'
 #' @examples
-#' # Create a default landscape of various types
+#' # Create a default landscape of various patterns
 #' random_default <- create_landscape("random")
 #' sharp_default <- create_landscape("sharp")
 #' diffuse_default <- create_landscape("diffuse")
@@ -161,25 +161,25 @@ create_landscape <- function(
 #' Create Training Landscapes
 #'
 #' Create a series of landscape models with variations for training purposes.
-#' Creates a total of n landscapes distributed across different landscape types.
+#' Creates a total of n landscapes distributed across different landscape patterns.
 #'
 #' @param n Integer. Total number of landscapes to create (default: 50).
-#' @param types Character vector. Types of landscapes to sample from (default: all types).
+#' @param patterns Character vector. patterns of landscapes to sample from (default: all patterns).
 #' @param width Integer. Width of all landscapes in pixels (default: 100).
 #' @param height Integer. Height of all landscapes in pixels (default: 100).
 #' @param add_rotation Logical. Whether to include rotated versions (default: TRUE).
 #' @param rotation_angles Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).
-#' @param params_list List. List of parameter ranges for each landscape type (default: NULL).
+#' @param params_list List. List of parameter ranges for each landscape pattern (default: NULL).
 #' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
 #'   If a specific integer is provided, the same landscapes will be created on repeated calls with that seed.
 #'   If NULL, no seed is set explicitly.
-#' @param type_probs Numeric vector. Probability that a specific landscape type is chosen.
-#'     By default, all types have equal probability (1) of being chosen.
-#'     Must be the same length as 'types' (default NULL which means equal probability).
-#' @param balance_types Logical. If TRUE, ensures all landscape types appear approximately equally.
-#'     This overrides type_probs unless it's explicitly set. (default: TRUE)
+#' @param pattern_probs Numeric vector. Probability that a specific landscape pattern is chosen.
+#'     By default, all patterns have equal probability (1) of being chosen.
+#'     Must be the same length as 'patterns' (default NULL which means equal probability).
+#' @param balance_patterns Logical. If TRUE, ensures all landscape patterns appear approximately equally.
+#'     This overrides pattern_probs unless it's explicitly set. (default: TRUE)
 #'
-#' @return A named list of landscape objects. Names indicate the type and optional rotation.
+#' @return A named list of landscape objects. Names indicate the pattern and optional rotation.
 #'
 #' @examples
 #' # Generate 20 training landscapes
@@ -188,16 +188,16 @@ create_landscape <- function(
 #' # Access a landscape
 #' landscapes[[1]]
 #'
-#' # Check the type
-#' landscapes[[1]]$class
+#' # Check the pattern
+#' landscapes[[1]]$pattern
 #'
-#' # Get all landscape types
-#' sapply(landscapes, function(x) x$class)
+#' # Get all landscape patterns
+#' sapply(landscapes, function(x) x$pattern)
 #'
 #' @export
 create_training_landscapes <- function(
   n = 50,
-  types = c(
+  patterns = c(
     "random",
     "sharp",
     "diffuse",
@@ -217,8 +217,8 @@ create_training_landscapes <- function(
   rotation_angles = c(0, 45, 90, 135),
   params_list = NULL,
   seed = NULL,
-  type_probs = NULL,
-  balance_types = TRUE
+  pattern_probs = NULL,
+  balance_patterns = TRUE
 ) {
   # Set seed for reproducibility if provided
   if (!is.null(seed)) {
@@ -230,8 +230,8 @@ create_training_landscapes <- function(
     stop("'n' must be a positive integer")
   }
 
-  # Filter out invalid types
-  valid_types <- c(
+  # Filter out invalid patterns
+  valid_patterns <- c(
     "random",
     "sharp",
     "diffuse",
@@ -245,10 +245,10 @@ create_training_landscapes <- function(
     "banded",
     "labyrinth"
   )
-  types <- intersect(types, valid_types)
+  patterns <- intersect(patterns, valid_patterns)
 
-  if (length(types) == 0) {
-    stop("No valid landscape types specified")
+  if (length(patterns) == 0) {
+    stop("No valid landscape patterns specified")
   }
 
   # Set default parameter ranges if not provided
@@ -332,16 +332,16 @@ create_training_landscapes <- function(
     )
   }
 
-  # Ensure all selected types have parameter ranges
-  for (type in types) {
-    if (!(type %in% names(params_list))) {
+  # Ensure all selected patterns have parameter ranges
+  for (pattern in patterns) {
+    if (!(pattern %in% names(params_list))) {
       warning(
-        "Type '",
-        type,
+        "Pattern '",
+        typatternpe,
         "' not found in params_list. Using default parameters."
       )
-      # Add default parameters for missing types
-      params_list[[type]] <- list(treeline_position = c(0.3, 0.7))
+      # Add default parameters for missing pattern
+      params_list[[pattern]] <- list(treeline_position = c(0.3, 0.7))
     }
   }
 
@@ -357,55 +357,55 @@ create_training_landscapes <- function(
     sampled_rotations <- rep(0, n)
   }
 
-  # Determine how to distribute landscape types
-  if (balance_types) {
-    # Calculate how many of each type to generate
-    num_types <- length(types)
-    landscapes_per_type <- floor(n / num_types)
-    extras <- n - (landscapes_per_type * num_types)
+  # Determine how to distribute landscape patterns
+  if (balance_patterns) {
+    # Calculate how many of each pattern to generate
+    num_patterns <- length(patterns)
+    landscapes_per_pattern <- floor(n / num_patterns)
+    extras <- n - (landscapes_per_pattern * num_patterns)
 
     # Create balanced distribution
-    sampled_types <- rep(types, each = landscapes_per_type)
+    sampled_patterns <- rep(patterns, each = landscapes_per_pattern)
 
     # Distribute any remaining landscapes randomly
     if (extras > 0) {
-      extra_types <- sample(types, extras, replace = TRUE)
-      sampled_types <- c(sampled_types, extra_types)
+      extra_patterns <- sample(patterns, extras, replace = TRUE)
+      sampled_patterns <- c(sampled_patterns, extra_patterns)
     }
 
-    # Shuffle the types to avoid patterns
-    sampled_types <- sample(sampled_types)
+    # Shuffle the patterns to avoid patterns
+    sampled_patterns <- sample(sampled_patterns)
   } else {
-    # Setup type weights for sampling
-    if (is.null(type_probs)) {
-      type_probs <- rep(1, length(types))
-    } else if (length(type_probs) != length(types)) {
+    # Setup pattern weights for sampling
+    if (is.null(pattern_probs)) {
+      pattern_probs <- rep(1, length(patterns))
+    } else if (length(pattern_probs) != length(patterns)) {
       warning(
-        "Length of type_probs doesn't match length of types. Using equal weights."
+        "Length of pattern_probs doesn't match length of patterns. Using equal weights."
       )
-      type_probs <- rep(1, length(types))
+      pattern_probs <- rep(1, length(patterns))
     }
     # Use weighted sampling as before
-    sampled_types <- sample(
-      types,
+    sampled_patterns <- sample(
+      patterns,
       size = n,
       replace = TRUE,
-      prob = type_probs
+      prob = pattern_probs
     )
   }
 
   # Generate each landscape
   for (i in 1:n) {
-    type <- sampled_types[i]
+    pattern <- sampled_patterns[i]
     rotation <- sampled_rotations[i]
 
-    # Get parameter ranges for this type
-    type_params <- params_list[[type]]
+    # Get parameter ranges for this pattern
+    pattern_params <- params_list[[pattern]]
 
     # Sample parameter values from ranges
     sampled_params <- list()
-    for (param_name in names(type_params)) {
-      param_range <- type_params[[param_name]]
+    for (param_name in names(pattern_params)) {
+      param_range <- pattern_params[[param_name]]
       if (is.logical(param_range)) {
         # For logical parameters, randomly choose TRUE or FALSE
         sampled_params[[param_name]] <- sample(param_range, 1)
@@ -432,12 +432,12 @@ create_training_landscapes <- function(
       {
         landscape <- do.call(
           create_landscape,
-          c(list(pattern = type), sampled_params)
+          c(list(pattern = pattern), sampled_params)
         )
 
         # Set descriptive name
         landscape_name <- paste0(
-          type,
+          pattern,
           "_",
           i,
           if (rotation != 0) paste0("_rot", rotation) else ""
@@ -452,8 +452,8 @@ create_training_landscapes <- function(
         warning(
           "Error generating landscape ",
           i,
-          " of type '",
-          type,
+          " of pattern '",
+          pattern,
           "': ",
           e$message
         )

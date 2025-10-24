@@ -7,7 +7,7 @@
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
-#' @return A landscape object with class "sharp" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "sharp" containing the generated landscape data and parameters.
 #'
 #' @keywords internal
 #'
@@ -60,7 +60,7 @@ create_landscape_sharp_treeline <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    class = "sharp",
+    pattern = "sharp",
     params = list(
       width = width,
       height = height,

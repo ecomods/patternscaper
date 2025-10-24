@@ -11,7 +11,7 @@
 #'    If NULL, no seed is set explicitly.
 #'    If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #'
-#' @return A landscape object with class "random" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "random" containing the generated landscape data and parameters.
 #'
 #' @keywords internal
 #'
@@ -59,7 +59,7 @@ create_landscape_random <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    class = "random",
+    pattern = "random",
     params = list(
       width = width,
       height = height,

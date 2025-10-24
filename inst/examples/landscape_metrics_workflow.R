@@ -11,13 +11,13 @@ devtools::load_all()
 # Create some landscapes (the more the better)
 landscapes <- create_training_landscapes(
   n = 100,
-  types = c("banded", "spots", "labyrinth"),
+  patterns = c("banded", "spots", "labyrinth"),
   add_rotation = TRUE,
   seed = 123
 )
 
 # Check how many landscapes of each type were generated
-table(purrr::map_chr(landscapes, ~ .x$class))
+table(purrr::map_chr(landscapes, ~ .x$pattern))
 
 # Plot all landscapes (plot only 20)
 plot_landscape_list(landscapes[1:20])

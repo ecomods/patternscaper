@@ -5,7 +5,7 @@ test_that("print.landscape displays basic information correctly", {
   l <- create_test_landscape(
     type = "uniform",
     n = 5,
-    class = "test",
+    pattern = "test",
     name = "example"
   )
 
@@ -14,7 +14,7 @@ test_that("print.landscape displays basic information correctly", {
 
   # Check that essential information is present
   expect_match(output, 'Landscape: "example"')
-  expect_match(output, 'class: test')
+  expect_match(output, 'pattern: test')
   expect_match(output, 'Dimensions: 5x5')
   expect_match(output, '25 cells')
   expect_match(output, 'Resolution:')
@@ -33,7 +33,7 @@ test_that("print.landscape handles NA values in data", {
   expect_match(output, "NA=[0-9]+")
 })
 
-test_that("print.landscape handles missing name and class", {
+test_that("print.landscape handles missing name and pattern", {
   # Create landscape with missing metadata
   l <- create_test_landscape(type = "uniform", n = 5)
 

@@ -15,7 +15,7 @@
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
-#' @return A landscape object with class "clustered" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "clustered" containing the generated landscape data and parameters.
 #'
 #' @importFrom stats runif
 #' @importFrom terra as.matrix
@@ -213,7 +213,7 @@ create_landscape_clustered_trees <- function(
   # Create and return landscape object
   landscape(
     data = result,
-    class = "clustered",
+    pattern = "clustered",
     params = list(
       width = width,
       height = height,

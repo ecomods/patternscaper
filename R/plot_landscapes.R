@@ -5,10 +5,10 @@
 #' @param landscape A landscape object to plot.
 #' @param title Character. Controls the plot title:
 #'        - "name": uses only the landscape name
-#'        - "class": uses only the landscape class
-#'        - "both": uses "name (class)" format
+#'        - "pattern": uses only the landscape pattern
+#'        - "both": uses "name (pattern)" format
 #'        - Any other string: used as a custom title
-#'        Default: "class"
+#'        Default: "pattern"
 #' @param show_legend Logical. Whether to show legend (default: TRUE).
 #' @param legend_title Character. Title for the legend (default: "Value").
 #'
@@ -21,11 +21,11 @@
 #' # Create a basic landscape
 #' l <- create_landscape("sharp", width = 50, height = 50)
 #'
-#' # Default plot (shows both name and class)
+#' # Default plot (shows both name and pattern)
 #' plot_landscape(l)
 #'
-#' # Show only class name
-#' plot_landscape(l, title = "class")
+#' # Show only pattern name
+#' plot_landscape(l, title = "pattern")
 #'
 #' # Custom title and legend
 #' plot_landscape(l,
@@ -35,7 +35,7 @@
 #' @export
 plot_landscape <- function(
   landscape,
-  title = "class",
+  title = "pattern",
   show_legend = TRUE,
   legend_title = "Value"
 ) {
@@ -51,15 +51,15 @@ plot_landscape <- function(
   plot_title <- switch(
     title,
     name = if (!is.na(landscape$name)) landscape$name else "Unnamed landscape",
-    class = if (!is.na(landscape$class)) {
-      landscape$class
+    pattern = if (!is.na(landscape$pattern)) {
+      landscape$pattern
     } else {
       "Unclassified landscape"
     },
     both = paste0(
       if (!is.na(landscape$name)) landscape$name else "Unnamed landscape",
       " (",
-      if (!is.na(landscape$class)) landscape$class else "unclassified",
+      if (!is.na(landscape$pattern)) landscape$pattern else "unclassified",
       ")"
     ),
     title # Use custom title as provided if not one of the special keywords
@@ -113,11 +113,11 @@ plot_landscape <- function(
 #'     \code{\link{create_training_landscapes}}.
 #' @param titles Character. Controls the plot titles:
 #'        - "name": uses only the landscape name
-#'        - "class": uses only the landscape class
-#'        - "both": uses "name (class)" format
+#'        - "pattern": uses only the landscape pattern
+#'        - "both": uses "name (pattern)" format
 #'        - A character vector with custom titles for each landscape. If providing
 #'        `subset_index`, ensure titles match the subset length.
-#'        Default is "class"
+#'        Default is "pattern"
 #' @param show_legend Logical. Whether to show a single combined legend (default: TRUE).
 #' @param legend_title Character. Title for the legend (default: "Value").
 #' @param ncol Integer. Number of columns in the plot grid (default: NULL).
@@ -158,7 +158,7 @@ plot_landscape <- function(
 #' @export
 plot_landscape_list <- function(
   landscapes,
-  titles = "class",
+  titles = "pattern",
   show_legend = TRUE,
   legend_title = "Value",
   ncol = NULL,
@@ -224,7 +224,7 @@ plot_landscape_list <- function(
   # Generate title strings to pass to plot_landscape for each landscape
   if (length(titles) == 1) {
     # check that titles is one of the special keywords
-    if (!titles %in% c("name", "class", "both")) {
+    if (!titles %in% c("name", "pattern", "both")) {
       warning(
         "Using a single custom title for multiple landscapes. All plots will have the same title.",
         call. = FALSE

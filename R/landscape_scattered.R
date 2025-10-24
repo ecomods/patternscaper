@@ -14,7 +14,7 @@
 #'   If NULL, no seed is set explicitly.
 #'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #'
-#' @return A landscape object with class "scattered" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "scattered" containing the generated landscape data and parameters.
 #'
 #' @keywords internal
 #' @importFrom stats runif
@@ -95,7 +95,7 @@ create_landscape_scattered_trees <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    class = "scattered",
+    pattern = "scattered",
     params = list(
       width = width,
       height = height,

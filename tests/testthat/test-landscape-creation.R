@@ -7,7 +7,7 @@ test_that("create_landscape_sharp_treeline creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "sharp")
+  expect_equal(l$pattern, "sharp")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -20,7 +20,7 @@ test_that("create_landscape_diffuse_treeline creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "diffuse")
+  expect_equal(l$pattern, "diffuse")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -33,7 +33,7 @@ test_that("create_landscape_curvy_treeline creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "curvy")
+  expect_equal(l$pattern, "curvy")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -46,7 +46,7 @@ test_that("create_landscape_random creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "random")
+  expect_equal(l$pattern, "random")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -59,7 +59,7 @@ test_that("create_landscape_scattered_trees creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "scattered")
+  expect_equal(l$pattern, "scattered")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -72,7 +72,7 @@ test_that("create_landscape_clustered_trees creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "clustered")
+  expect_equal(l$pattern, "clustered")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -85,7 +85,7 @@ test_that("create_landscape_fingers creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "fingers")
+  expect_equal(l$pattern, "fingers")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -98,7 +98,7 @@ test_that("create_landscape_sine_bands creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "sine_bands")
+  expect_equal(l$pattern, "sine_bands")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -111,7 +111,7 @@ test_that("create_landscape_spots creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "spots")
+  expect_equal(l$pattern, "spots")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -124,7 +124,7 @@ test_that("create_landscape_gaps creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "gaps")
+  expect_equal(l$pattern, "gaps")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -137,7 +137,7 @@ test_that("create_landscape_banded creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "bands")
+  expect_equal(l$pattern, "bands")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -150,7 +150,7 @@ test_that("create_landscape_labyrinth creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "labyrinth")
+  expect_equal(l$pattern, "labyrinth")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -192,7 +192,7 @@ test_that("create_landscape handles partial matching correctly", {
     l <- create_landscape("sha", width = 10, height = 10),
     "Partial pattern 'sha' matched to 'sharp'"
   )
-  expect_equal(l$class, "sharp")
+  expect_equal(l$pattern, "sharp")
 
   # Ambiguous partial match should error
   expect_error(
@@ -202,49 +202,49 @@ test_that("create_landscape handles partial matching correctly", {
 })
 
 test_that("create_landscape creates correct landscape types", {
-  # Test each pattern creates the correct class
+  # Test each pattern creates the correct pattern
   expect_equal(
-    create_landscape("random", width = 10, height = 10, seed = 123)$class,
+    create_landscape("random", width = 10, height = 10, seed = 123)$pattern,
     "random"
   )
   expect_equal(
-    create_landscape("sharp", width = 10, height = 10)$class,
+    create_landscape("sharp", width = 10, height = 10)$pattern,
     "sharp"
   )
   expect_equal(
-    create_landscape("diffuse", width = 10, height = 10, seed = 123)$class,
+    create_landscape("diffuse", width = 10, height = 10, seed = 123)$pattern,
     "diffuse"
   )
   expect_equal(
-    create_landscape("curvy", width = 10, height = 10)$class,
+    create_landscape("curvy", width = 10, height = 10)$pattern,
     "curvy"
   )
   expect_equal(
-    create_landscape("fingers", width = 10, height = 10)$class,
+    create_landscape("fingers", width = 10, height = 10)$pattern,
     "fingers"
   )
   expect_equal(
-    create_landscape("scattered", width = 10, height = 10, seed = 123)$class,
+    create_landscape("scattered", width = 10, height = 10, seed = 123)$pattern,
     "scattered"
   )
   expect_equal(
-    create_landscape("clustered", width = 10, height = 10, seed = 123)$class,
+    create_landscape("clustered", width = 10, height = 10, seed = 123)$pattern,
     "clustered"
   )
   expect_equal(
-    create_landscape("sine_bands", width = 10, height = 10, seed = 123)$class,
+    create_landscape("sine_bands", width = 10, height = 10, seed = 123)$pattern,
     "sine_bands"
   )
   expect_equal(
-    create_landscape("spots", width = 10, height = 10, seed = 123)$class,
+    create_landscape("spots", width = 10, height = 10, seed = 123)$pattern,
     "spots"
   )
   expect_equal(
-    create_landscape("gaps", width = 10, height = 10, seed = 123)$class,
+    create_landscape("gaps", width = 10, height = 10, seed = 123)$pattern,
     "gaps"
   )
   expect_equal(
-    create_landscape("banded", width = 10, height = 10, seed = 123)$class,
+    create_landscape("banded", width = 10, height = 10, seed = 123)$pattern,
     "bands"
   )
 })
@@ -419,12 +419,12 @@ test_that("create_training_landscapes respects type selection", {
     seed = 123
   )
 
-  # Get all classes
-  classes <- sapply(landscapes, function(x) x$class)
-  unique_classes <- unique(classes)
+  # Get all patterns
+  patterns <- sapply(landscapes, function(x) x$pattern)
+  unique_patterns <- unique(patterns)
 
   # Should only contain sharp and diffuse
-  expect_true(all(unique_classes %in% c("sharp", "diffuse")))
+  expect_true(all(unique_patterns %in% c("sharp", "diffuse")))
 })
 
 test_that("create_training_landscapes balances types correctly", {
@@ -437,14 +437,14 @@ test_that("create_training_landscapes balances types correctly", {
     seed = 123
   )
 
-  # Get class distribution
-  classes <- sapply(landscapes, function(x) x$class)
-  class_counts <- table(classes)
+  # Get pattern distribution
+  patterns <- sapply(landscapes, function(x) x$pattern)
+  pattern_counts <- table(patterns)
 
   # Each type should appear approximately equally (4 each for n=12, 3 types)
-  expect_equal(length(class_counts), 3)
-  expect_true(all(class_counts >= 3))
-  expect_true(all(class_counts <= 5))
+  expect_equal(length(pattern_counts), 3)
+  expect_true(all(pattern_counts >= 3))
+  expect_true(all(pattern_counts <= 5))
 })
 
 test_that("create_training_landscapes respects type_probs when balance_types is FALSE", {
@@ -462,9 +462,9 @@ test_that("create_training_landscapes respects type_probs when balance_types is 
 
   expect_equal(length(landscapes), 20)
 
-  # All classes should be from the selected types
-  classes <- sapply(landscapes, function(x) x$class)
-  expect_true(all(classes %in% c("sharp", "diffuse", "random")))
+  # All patternes should be from the selected types
+  patterns <- sapply(landscapes, function(x) x$pattern)
+  expect_true(all(patterns %in% c("sharp", "diffuse", "random")))
 })
 
 test_that("create_training_landscapes handles rotation correctly", {
@@ -544,9 +544,9 @@ test_that("create_training_landscapes is reproducible with seed", {
   )
 
   # Same types in same order
-  classes1 <- sapply(landscapes1, function(x) x$class)
-  classes2 <- sapply(landscapes2, function(x) x$class)
-  expect_equal(classes1, classes2)
+  patterns1 <- sapply(landscapes1, function(x) x$pattern)
+  patterns2 <- sapply(landscapes2, function(x) x$pattern)
+  expect_equal(patterns1, patterns2)
 
   # Same names
   expect_equal(names(landscapes1), names(landscapes2))
@@ -573,11 +573,11 @@ test_that("create_training_landscapes handles custom params_list", {
 
   # Check that parameters are within the specified ranges
   for (l in landscapes) {
-    if (l$class == "sharp") {
+    if (l$pattern == "sharp") {
       expect_true(l$params$treeline_position >= 0.4)
       expect_true(l$params$treeline_position <= 0.6)
     }
-    if (l$class == "random") {
+    if (l$pattern == "random") {
       expect_true(l$params$tree_prop >= 0.5)
       expect_true(l$params$tree_prop <= 0.7)
     }
@@ -631,9 +631,9 @@ test_that("create_training_landscapes works with all default landscape types", {
   expect_true(length(landscapes) > 0)
 
   # Check variety of types
-  classes <- sapply(landscapes, function(x) x$class)
-  unique_classes <- unique(classes)
+  patterns <- sapply(landscapes, function(x) x$pattern)
+  unique_patterns <- unique(patterns)
 
   # Should have multiple types
-  expect_true(length(unique_classes) > 5)
+  expect_true(length(unique_patterns) > 5)
 })

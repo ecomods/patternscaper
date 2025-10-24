@@ -16,46 +16,49 @@ landscapes <- create_training_landscapes(n = 20)
 landscapes <- create_training_landscapes(
   n = 20,
   seed = 42,
-  balance_types = FALSE
+  balance_patterns = FALSE
 )
 
 # generate only specific landscape types
 landscapes <- create_training_landscapes(
   n = 20,
   seed = 42,
-  types = c("banded", "spots", "clustered")
+  patterns = c("banded", "spots", "clustered")
 )
 
 # give different weights for the landscapes (higher weights will be generated more often)
 landscapes <- create_training_landscapes(
   n = 20,
   seed = 42,
-  types = c("banded", "spots", "clustered"),
-  balance_types = FALSE,
-  type_probs = c(0.1, 1, 0.2)
+  patterns = c("banded", "spots", "clustered"),
+  balance_patterns = FALSE,
+  pattern_probs = c(0.1, 1, 0.2)
 )
 
 landscapes <- create_training_landscapes(
   n = 20,
   seed = NULL,
-  types = c("spots", "banded")
+  patterns = c("spots", "banded")
 )
 
 # Look at landscape objects (printed with info in the console)
 landscapes[[1]]
 
-# Change the name and class of a landscape
-landscapes[[1]] <- set_landscape_class(landscapes[[1]], class = "custom_class")
+# Change the name and pattern of a landscape
+landscapes[[1]] <- set_landscape_pattern(
+  landscapes[[1]],
+  pattern = "custom_pattern"
+)
 landscapes[[1]] <- set_landscape_name(
   landscapes[[1]],
   name = "My first landscape"
 )
 
 
-# plot all training landscapes (default titles are both name and class)
+# plot all training landscapes (default titles are both name and pattern)
 plot_landscape_list(landscapes)
-# only plot class names as titles
-plot_landscape_list(landscapes, title = "class")
+# only plot names and patterns as titles
+plot_landscape_list(landscapes, title = "both")
 # Plot custom titles
 my_titles <- paste0("Landscape ", 1:length(landscapes))
 plot_landscape_list(landscapes, title = my_titles)

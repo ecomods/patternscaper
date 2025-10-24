@@ -6,7 +6,7 @@ test_that("new_landscape constructor works with valid input", {
   l <- new_landscape(rast_data)
   expect_s3_class(l, "landscape")
   expect_identical(l$data, rast_data)
-  expect_true(is.na(l$class))
+  expect_true(is.na(l$pattern))
   expect_true(is.na(l$name))
   expect_null(l$params)
 
@@ -14,11 +14,11 @@ test_that("new_landscape constructor works with valid input", {
   params <- list(value1 = 10, value2 = "test")
   l2 <- new_landscape(
     rast_data,
-    class = "spots",
+    pattern = "spots",
     name = "test_landscape",
     params = params
   )
-  expect_equal(l2$class, "spots")
+  expect_equal(l2$pattern, "spots")
   expect_equal(l2$name, "test_landscape")
   expect_equal(l2$params, params)
 })
@@ -31,11 +31,11 @@ test_that("new_landscape constructor validates input", {
 
 test_that("landscape function works with matrix input", {
   mat <- create_gradient_matrix(5)
-  l <- landscape(mat, class = "spots", name = "test")
+  l <- landscape(mat, pattern = "spots", name = "test")
 
   expect_s3_class(l, "landscape")
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$class, "spots")
+  expect_equal(l$pattern, "spots")
   expect_equal(l$name, "test")
 })
 
@@ -49,9 +49,9 @@ test_that("landscape function works with SpatRaster input", {
 
 test_that("landscape function works with different matrix types", {
   # Test uniform matrix
-  l_uniform <- create_test_landscape(type = "uniform", n = 10, class = "test")
+  l_uniform <- create_test_landscape(type = "uniform", n = 10, pattern = "test")
   expect_s3_class(l_uniform, "landscape")
-  expect_equal(l_uniform$class, "test")
+  expect_equal(l_uniform$pattern, "test")
 
   # Test gradient matrix
   l_gradient <- create_test_landscape(type = "gradient", n = 10)
@@ -78,8 +78,8 @@ test_that("landscape function validates parameters", {
   # Test invalid data type
   expect_error(landscape(list()), "'data' must be")
 
-  # Test invalid class
-  expect_error(landscape(mat, class = 123), "'class' must be")
+  # Test invalid pattern
+  expect_error(landscape(mat, pattern = 123), "'pattern' must be")
 
   # Test invalid name
   expect_error(landscape(mat, name = 123), "'name' must be")
