@@ -72,7 +72,7 @@ list_available_metrics <- function(
 #' @param function_name Character. The name of the landscapemetrics function to call.
 #' @return tibble. Results from the metric calculation including any warnings.
 #' @noRd
-calculate_metric_list <- function(landscapes, function_name) {
+calculate_single_metric <- function(landscapes, function_name) {
   # Try to calculate the metric
   result <- tryCatch(
     {
@@ -141,11 +141,7 @@ calculate_metric_list <- function(landscapes, function_name) {
 #'
 #' Calculates selected landscape metrics for one or more landscapes.
 #'
-#' @param landscapes List or SpatRaster. Landscape(s) to analyze. Can be:
-#'   - A single SpatRaster
-#'   - A single landscape with metadata (list with landscape, type, params)
-#'   - A list of SpatRaster objects
-#'   - A list of landscape metadata objects (with landscape, type, params)
+#' @param landscapes A single landscape object or a list of landscape objects.
 #' @param metrics Character vector. Names of metrics to calculate (default: NULL for all).
 #' @param level Character. Level(s) of metrics to calculate ("patch", "class", "landscape" or a vector) (default: "landscape").
 #'
@@ -209,7 +205,7 @@ calculate_landscape_metrics <- function(
   # calculate all selected metrics for all landscapes
   all_results <- purrr::map_dfr(
     available_function_names,
-    ~ calculate_metric_list(landscapes = landscapes, function_name = .x),
+    ~ calculate_single_metric(landscapes = landscapes, function_name = .x),
     .progress = TRUE
   )
 
