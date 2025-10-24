@@ -6,26 +6,45 @@
 \usage{
 plot_landscape(
   landscape,
-  title = "Landscape",
-  color_scale = NULL,
-  legend_title = "Value",
-  show_legend = TRUE
+  title = "both",
+  show_legend = TRUE,
+  legend_title = "Value"
 )
 }
 \arguments{
-\item{landscape}{SpatRaster or matrix. Landscape to plot.}
+\item{landscape}{A landscape object to plot.}
 
-\item{title}{Character. Plot title (default: "Landscape").}
-
-\item{color_scale}{Character vector. Colors for mapping values (default: NULL).}
-
-\item{legend_title}{Character. Title for the legend (default: "Value").}
+\item{title}{Character. Controls the plot title:
+- "name": uses only the landscape name
+- "class": uses only the landscape class
+- "both": uses "name (class)" format
+- Any other string: used as a custom title
+Default: "both"}
 
 \item{show_legend}{Logical. Whether to show legend (default: TRUE).}
+
+\item{legend_title}{Character. Title for the legend (default: "Value").}
 }
 \value{
 ggplot object. Plot of the landscape.
 }
 \description{
-Creates a visualization of a landscape using ggplot2.
+A wrapper function for the S3 method \code{plot.landscape} with additional customization options.
+}
+\examples{
+
+# Create a basic landscape
+l <- create_landscape("sharp", width = 50, height = 50)
+
+# Default plot (shows both name and class)
+plot_landscape(l)
+
+# Show only class name
+plot_landscape(l, title = "class")
+
+# Custom title and legend
+plot_landscape(l,
+              title = "My Sharp Treeline",
+              legend_title = "Vegetation",
+              show_legend = TRUE)
 }

@@ -40,5 +40,5 @@ random_default <- create_landscape_random()
 random_modified <- create_landscape_random(
   tree_prop = 0.7
 )
-
 }
+\keyword{internal}

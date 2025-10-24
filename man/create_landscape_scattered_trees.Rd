@@ -39,4 +39,22 @@ A landscape object with class "scattered" containing the generated landscape dat
 \description{
 Generates a binary landscape with randomly scattered trees below a treeline.
 }
+\examples{
+scattered_default <- create_landscape_scattered_trees()
+
+# Modified scattered trees with higher density in a larger scatter zone
+scattered_modified <- create_landscape_scattered_trees(
+  treeline_position = 0.3,
+  scatter_density = 0.7,
+  scatter_zone_prop = 0.2
+)
+
+# With rotation
+scattered_rotated <- create_landscape_scattered_trees(
+  treeline_position = 0.3,
+  scatter_density = 0.2,
+  scatter_zone_prop = 0.1,
+  rotation = 45
+)
+}
 \keyword{internal}

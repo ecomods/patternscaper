@@ -52,3 +52,4 @@ curvy_rotated <- create_landscape_curvy_treeline(
 )
 
 }
+\keyword{internal}

@@ -5,34 +5,72 @@
 \title{Plot Multiple Landscapes}
 \usage{
 plot_landscape_list(
-  landscape_list,
-  titles = NULL,
-  color_scale = NULL,
-  ncol = NULL,
-  legend_title = "Value",
+  landscapes,
+  titles = "both",
   show_legend = TRUE,
-  show_type = TRUE
+  legend_title = "Value",
+  ncol = NULL,
+  max_landscapes = 36,
+  force = FALSE,
+  subset_index = NULL
 )
 }
 \arguments{
-\item{landscape_list}{List. List of landscapes (SpatRaster, matrix) or list of landscape data with metadata
-(as returned by generate_training_landscapes).}
+\item{landscapes}{List. List of landscape objects to plot. E.g. created by
+\code{\link{create_training_landscapes}}.}
 
-\item{titles}{Character vector. Vector of titles for each landscape (default: NULL).}
+\item{titles}{Character. Controls the plot titles:
+- "name": uses only the landscape name
+- "class": uses only the landscape class
+- "both": uses "name (class)" format
+- A character vector with custom titles for each landscape. If providing
+`subset_index`, ensure titles match the subset length.
+Default is "both"}
 
-\item{color_scale}{Character vector. Colors for mapping values across all plots (default: NULL).}
-
-\item{ncol}{Integer. Number of columns in the plot arrangement (default: NULL).}
+\item{show_legend}{Logical. Whether to show a single combined legend (default: TRUE).}
 
 \item{legend_title}{Character. Title for the legend (default: "Value").}
 
-\item{show_legend}{Logical. Whether to show legend (default: TRUE).}
+\item{ncol}{Integer. Number of columns in the plot grid (default: NULL).}
 
-\item{show_type}{Logical. Whether to include landscape type in title when custom titles are provided (default: FALSE).}
+\item{max_landscapes}{Integer. Maximum number of landscapes to plot (default: 36).
+Plotting more than 36 landscapes (6x6 grid) is not recommended.}
+
+\item{force}{Logical. Override max_landscapes limit (default: FALSE).}
+
+\item{subset_index}{Integer vector. Indices of landscapes to plot.
+Can be used to plot specific landscapes or change plot order (default: NULL).}
 }
 \value{
-patchwork object. Combined plot of all landscapes.
+A ggplot object combining all landscape plots.
 }
 \description{
 Creates a grid of multiple landscape plots.
+}
+\examples{
+# Create a list of different landscapes
+landscapes <- list(
+  create_landscape("sharp", width = 50, height = 50),
+  create_landscape("random", width = 50, height = 50),
+  create_landscape("diffuse", width = 50, height = 50)
+)
+
+# Default plot (3x1 grid)
+plot_landscape_list(landscapes)
+
+# 2-column grid with custom titles
+plot_landscape_list(landscapes,
+                   titles = c("Sharp", "Random", "Diffuse"),
+                   ncol = 2)
+
+# Plot only first two landscapes
+plot_landscape_list(landscapes,
+                   subset_index = 1:2,
+                   legend_title = "Vegetation")
+
+# Create many landscapes and handle overflow
+many_landscapes <- create_training_landscapes(n = 50)
+plot_landscape_list(many_landscapes,
+                   max_landscapes = 9,  # Show first 9 only
+                   ncol = 3)            # In 3x3 grid
 }

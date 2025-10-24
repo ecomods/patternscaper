@@ -40,5 +40,5 @@ sharp_rotated <- create_landscape_sharp_treeline(
   treeline_position = 0.3,
   rotation = 45
 )
-
 }
+\keyword{internal}

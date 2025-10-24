@@ -60,5 +60,5 @@ gaps_modified <- create_landscape_gaps(
   spot_radius = 8,
   noise_radius_sd = 2
 )
-
 }
+\keyword{internal}
