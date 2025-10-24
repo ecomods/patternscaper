@@ -26,3 +26,23 @@ A landscape object
 Converts a matrix or SpatRaster into a landscape object that can be used
 with landscape analysis functions.
 }
+\examples{
+# Create from a matrix
+mat <- matrix(runif(100), nrow = 10, ncol = 10)
+l <- landscape(mat)
+
+# Create with class and name
+l <- landscape(mat, class = "random", name = "test_landscape")
+
+# Create with parameters
+l <- landscape(
+  mat,
+  class = "sharp",
+  name = "alpine_treeline",
+  params = list(treeline_position = 0.5, rotation = 0)
+)
+
+# Create from SpatRaster
+rast <- terra::rast(mat)
+l <- landscape(rast, name = "my_raster")
+}

@@ -7,6 +7,7 @@
 create_landscape(
   pattern = c("random", "sharp", "diffuse", "curvy", "fingers", "scattered", "clustered",
     "sine_bands", "spots", "gaps", "banded", "labyrinth"),
+  name = NULL,
   ...
 )
 }
@@ -14,6 +15,8 @@ create_landscape(
 \item{pattern}{Character. Type of landscape to generate: "random", "sharp", "diffuse",
 "curvy", "fingers", "scattered", "sine_bands", "clusters", "spots", "gaps",
 "banded", "labyrinth"}
+
+\item{name}{Character. Optional name for the landscape (default: NULL).}
 
 \item{...}{Parameters passed to specific landscape functions. See the documentation
 of the individual functions for details on required and optional parameters.}
