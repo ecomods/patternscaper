@@ -13,6 +13,8 @@
 #'
 #' @return A landscape object with class "diffuse" containing the generated landscape data and parameters.
 #'
+#' @keywords internal
+#'
 #' @examples
 #' # Default diffuse treeline
 #' diffuse_default <- create_landscape_diffuse_treeline()
@@ -30,7 +32,6 @@
 #'   rotation = 45
 #' )
 #'
-#' @export
 create_landscape_diffuse_treeline <- function(
   width = 100,
   height = 100,

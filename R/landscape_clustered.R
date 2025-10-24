@@ -44,7 +44,6 @@
 #'   elongation_y = 1.4,
 #'   rotation = 45
 #' )
-#' @export
 create_landscape_clustered_trees <- function(
   width = 100,
   height = 100,

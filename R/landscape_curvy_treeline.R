@@ -11,6 +11,8 @@
 #'
 #' @return A landscape object with class "curvy" containing the generated landscape data and parameters.
 #'
+#' @keywords internal
+#'
 #' @examples
 #' # Default curvy treeline
 #' curvy_default <- create_landscape_curvy_treeline()
@@ -30,7 +32,6 @@
 #'   rotation = 45
 #' )
 #'
-#' @export
 create_landscape_curvy_treeline <- function(
   width = 100,
   height = 100,

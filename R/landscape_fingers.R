@@ -39,7 +39,7 @@
 #'   rotation = 45
 #' )
 #' @keywords internal
-#' @importFrom stats rnorm#
+#' @importFrom stats rnorm
 #' @importFrom terra as.matrix
 create_landscape_fingers <- function(
   width = 100,

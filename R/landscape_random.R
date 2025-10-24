@@ -13,6 +13,8 @@
 #'
 #' @return A landscape object with class "random" containing the generated landscape data and parameters.
 #'
+#' @keywords internal
+#'
 #' @examples
 #' # Default randomly distributed trees
 #' random_default <- create_landscape_random()
@@ -21,8 +23,6 @@
 #' random_modified <- create_landscape_random(
 #'   tree_prop = 0.7
 #' )
-#'
-#' @export
 create_landscape_random <- function(
   width = 100,
   height = 100,

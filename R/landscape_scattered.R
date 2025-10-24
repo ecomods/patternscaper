@@ -19,6 +19,7 @@
 #' @keywords internal
 #' @importFrom stats runif
 #' @importFrom terra as.matrix
+#' @examples
 #' scattered_default <- create_landscape_scattered_trees()
 #'
 #' # Modified scattered trees with higher density in a larger scatter zone
@@ -35,8 +36,6 @@
 #'   scatter_zone_prop = 0.1,
 #'   rotation = 45
 #' )
-#'
-#' @export
 create_landscape_scattered_trees <- function(
   width = 100,
   height = 100,

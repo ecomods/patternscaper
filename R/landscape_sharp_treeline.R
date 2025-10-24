@@ -9,6 +9,8 @@
 #'
 #' @return A landscape object with class "sharp" containing the generated landscape data and parameters.
 #'
+#' @keywords internal
+#'
 #' @examples
 #' # Default sharp treeline
 #' sharp_default <- create_landscape_sharp_treeline()
@@ -23,8 +25,6 @@
 #'   treeline_position = 0.3,
 #'   rotation = 45
 #' )
-#'
-#' @export
 create_landscape_sharp_treeline <- function(
   width = 100,
   height = 100,

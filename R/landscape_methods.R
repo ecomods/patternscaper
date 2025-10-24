@@ -29,7 +29,7 @@
 #' # Or explicitly
 #' print(l)
 #'
-#' @importFrom terra dim res ext values
+#' @importFrom terra res ext values
 #' @export
 print.landscape <- function(x, ...) {
   # Get basic properties of the landscape

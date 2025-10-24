@@ -21,6 +21,8 @@
 #'
 #' @return A landscape object with class "gaps" containing the generated landscape data and parameters.
 #'
+#' @keywords internal
+#'
 #' @examples
 #' # Default gaps
 #' gaps_default <- create_landscape_gaps()
@@ -31,8 +33,6 @@
 #'   spot_radius = 8,
 #'   noise_radius_sd = 2
 #' )
-#'
-#' @export
 create_landscape_gaps <- function(
   width = 100,
   height = 100,
