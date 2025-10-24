@@ -2,6 +2,14 @@
 
 Here I document changes made to the function packages.
 
+## 2025-10-22/23/24
+
+- Implement landscape class as S3 class
+- Re-implement all landscape creation functions to return landscape objects
+- Update all plotting functions to work with landscape objects
+- Write tests for functions related to landscape creation and plotting
+- Update documentation
+
 ## 2025-10-21
 
 - Change seed argument behaviours: Instead of setting a seed by default, I now 
