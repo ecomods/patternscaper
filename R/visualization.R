@@ -13,6 +13,25 @@
 #' @param legend_title Character. Title for the legend (default: "Value").
 #'
 #' @return ggplot object. Plot of the landscape.
+#' @importFrom ggplot2 ggplot aes geom_raster coord_equal labs theme_minimal theme
+#'             element_blank scale_fill_manual scale_fill_viridis_c
+#' @importFrom ggtext element_markdown
+#' @examples
+#'
+#' # Create a basic landscape
+#' l <- create_landscape("sharp", width = 50, height = 50)
+#'
+#' # Default plot (shows both name and class)
+#' plot_landscape(l)
+#'
+#' # Show only class name
+#' plot_landscape(l, title = "class")
+#'
+#' # Custom title and legend
+#' plot_landscape(l,
+#'               title = "My Sharp Treeline",
+#'               legend_title = "Vegetation",
+#'               show_legend = TRUE)
 #' @export
 plot_landscape <- function(
   landscape,
@@ -90,91 +109,147 @@ plot_landscape <- function(
 #'
 #' Creates a grid of multiple landscape plots.
 #'
-#' @param landscape_list List. List of landscapes (SpatRaster, matrix) or list of landscape data with metadata
-#'        (as returned by generate_training_landscapes).
-#' @param titles Character vector. Vector of titles for each landscape (default: NULL).
-#' @param color_scale Character vector. Colors for mapping values across all plots (default: NULL).
-#' @param ncol Integer. Number of columns in the plot arrangement (default: NULL).
+#' @param landscapes List. List of landscape objects to plot. E.g. created by
+#'     \code{\link{create_training_landscapes}}.
+#' @param titles Character. Controls the plot titles:
+#'        - "name": uses only the landscape name
+#'        - "class": uses only the landscape class
+#'        - "both": uses "name (class)" format
+#'        - A character vector with custom titles for each landscape. If providing
+#'        `subset_index`, ensure titles match the subset length.
+#'        Default is "both"
+#' @param show_legend Logical. Whether to show a single combined legend (default: TRUE).
 #' @param legend_title Character. Title for the legend (default: "Value").
-#' @param show_legend Logical. Whether to show legend (default: TRUE).
-#' @param show_type Logical. Whether to include landscape type in title when custom titles are provided (default: FALSE).
+#' @param ncol Integer. Number of columns in the plot grid (default: NULL).
+#' @param max_landscapes Integer. Maximum number of landscapes to plot (default: 36).
+#'     Plotting more than 36 landscapes (6x6 grid) is not recommended.
+#' @param force Logical. Override max_landscapes limit (default: FALSE).
+#' @param subset_index Integer vector. Indices of landscapes to plot.
+#'     Can be used to plot specific landscapes or change plot order (default: NULL).
 #'
-#' @return patchwork object. Combined plot of all landscapes.
+#' @return A ggplot object combining all landscape plots.
+#' @importFrom patchwork wrap_plots plot_layout
+#' @examples
+#' # Create a list of different landscapes
+#' landscapes <- list(
+#'   create_landscape("sharp", width = 50, height = 50),
+#'   create_landscape("random", width = 50, height = 50),
+#'   create_landscape("diffuse", width = 50, height = 50)
+#' )
+#'
+#' # Default plot (3x1 grid)
+#' plot_landscape_list(landscapes)
+#'
+#' # 2-column grid with custom titles
+#' plot_landscape_list(landscapes,
+#'                    titles = c("Sharp", "Random", "Diffuse"),
+#'                    ncol = 2)
+#'
+#' # Plot only first two landscapes
+#' plot_landscape_list(landscapes,
+#'                    subset_index = 1:2,
+#'                    legend_title = "Vegetation")
+#'
+#' # Create many landscapes and handle overflow
+#' many_landscapes <- create_training_landscapes(n = 50)
+#' plot_landscape_list(many_landscapes,
+#'                    max_landscapes = 9,  # Show first 9 only
+#'                    ncol = 3)            # In 3x3 grid
 #' @export
 plot_landscape_list <- function(
-  landscape_list,
-  titles = NULL,
-  color_scale = NULL,
-  ncol = NULL,
-  legend_title = "Value",
+  landscapes,
+  titles = "both",
   show_legend = TRUE,
-  show_type = TRUE
+  legend_title = "Value",
+  ncol = NULL,
+  max_landscapes = 36,
+  force = FALSE,
+  subset_index = NULL
 ) {
-  # Validate input is a list
-  if (!is.list(landscape_list)) {
-    stop("landscape_list must be a list of landscapes (SpatRaster or matrix)")
+  # Validate inputs
+
+  # First validate that input is a list
+  if (!is.list(landscapes)) {
+    stop("landscapes must be a list", call. = FALSE)
   }
 
-  # Check if the list contains only landscapes with metadata structures
-  # (from generate_training_landscapes)
-  has_metadata <- lapply(landscape_list, has_landscape_metadata) |>
-    unlist() |>
-    all()
-
-  # If we have metadata structure, extract landscape types and the landscapes
-  if (has_metadata) {
-    # Extract landscape types for titles
-    types <- sapply(landscape_list, function(x) x$type)
-
-    # Extract just the landscapes
-    landscape_list <- lapply(landscape_list, function(x) x$landscape)
-  }
-
-  # Generate titles
-  if (is.null(titles)) {
-    # if list is named, us the names as titles
-    if (has_metadata) {
-      # Use types as titles when available and no custom titles provided
-      titles <- types
-    } else if (!is.null(names(landscape_list))) {
-      # Use list names if available
-      titles <- names(landscape_list)
-    } else {
-      # Simple default titles as last resort
-      titles <- paste("Landscape", 1:length(landscape_list))
-    }
-  } else if (length(titles) != length(landscape_list)) {
-    warning(
-      "Number of titles doesn't match number of landscapes. Using default titles."
+  # Then check if list is empty
+  if (length(landscapes) == 0) {
+    stop(
+      "landscapes must contain at least one landscape to plot",
+      call. = FALSE
     )
-    if (has_metadata) {
-      titles <- types
-    } else {
-      titles <- paste("Landscape", 1:length(landscape_list))
+  }
+
+  if (any(!sapply(landscapes, is_landscape))) {
+    # find out which element is not a landscape
+    invalid_indices <- which(!sapply(landscapes, is_landscape))
+    stop(
+      "All elements must be landscape objects. Invalid element(s) at index(es): ",
+      paste(invalid_indices, collapse = ", ")
+    )
+  }
+
+  # Subset the landscape list if subset_index is provided
+  if (!is.null(subset_index)) {
+    landscapes <- landscapes[subset_index]
+  }
+
+  # Check if enough titles are provided for the subset
+  if (length(titles) > 1 && length(titles) != length(landscapes)) {
+    stop(
+      sprintf(
+        "If providing multiple titles, length must match number of landscapes (%d). Got %d titles instead.",
+        length(landscapes),
+        length(titles)
+      ),
+      call. = FALSE
+    )
+  }
+
+  # If number of landscapes exceeds max_landscapes, limit it (only if force is FALSE)
+  if (length(landscapes) > max_landscapes && !force) {
+    warning(
+      sprintf(
+        "Number of landscapes (%d) exceeds maximum (%d). Showing first %d. Use force=TRUE to override or subset_index to select a subset of landscapes to plot.",
+        length(landscapes),
+        max_landscapes,
+        max_landscapes
+      ),
+      call. = FALSE
+    )
+    landscapes <- landscapes[1:max_landscapes]
+  }
+
+  # Generate title strings to pass to plot_landscape for each landscape
+  if (length(titles) == 1) {
+    # check that titles is one of the special keywords
+    if (!titles %in% c("name", "class", "both")) {
+      warning(
+        "Using a single custom title for multiple landscapes. All plots will have the same title.",
+        call. = FALSE
+      )
     }
-  } else if (has_metadata && show_type) {
-    # Append type information to user-provided titles if requested
-    titles <- paste0(titles, " (", types, ")")
+    titles <- rep(titles, length(landscapes))
   }
 
   # Create a list of plots
   plot_list <- list()
-  for (i in 1:length(landscape_list)) {
+  for (i in seq_along(landscapes)) {
     # Pass all plotting decisions to plot_landscape
     plot_list[[i]] <- plot_landscape(
-      landscape = landscape_list[[i]],
+      landscape = landscapes[[i]],
       title = titles[i],
-      color_scale = color_scale,
-      legend_title = legend_title,
-      show_legend = show_legend
+      show_legend = show_legend,
+      legend_title = legend_title
     )
   }
 
   # Combine all plots using patchwork
   combined_plot <- patchwork::wrap_plots(plot_list, ncol = ncol)
 
-  # Use patchwork to handle legend collection if needed
-  if (show_legend && length(landscape_list) > 1) {
+  # Use patchwork to collect legend if it's shown
+  if (show_legend && length(landscapes) > 1) {
     combined_plot <- combined_plot +
       patchwork::plot_layout(guides = "collect")
   }

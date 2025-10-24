@@ -74,3 +74,98 @@ test_that("plot_landscape preserves landscape dimensions", {
   expect_equal(length(unique(plot_data$x)), 15) # width
   expect_equal(length(unique(plot_data$y)), 10) # height
 })
+
+# Test plot_landscape_list function --------------------------------------------
+
+test_that("plot_landscape_list validates input", {
+  # Empty list
+  expect_error(
+    plot_landscape_list(list()),
+    "landscapes must contain at least one landscape"
+  )
+
+  # Not a list
+  expect_error(
+    plot_landscape_list(matrix(1:9, 3, 3)),
+    "landscapes must be a list"
+  )
+
+  # List with non-landscape objects
+  bad_list <- list(matrix(1:9, 3, 3), matrix(1:9, 3, 3))
+  expect_error(
+    plot_landscape_list(bad_list),
+    "All elements must be landscape objects"
+  )
+})
+
+test_that("plot_landscape_list handles titles correctly", {
+  # Create test landscapes
+  landscapes <- list(
+    create_landscape("sharp", width = 10, height = 10),
+    create_landscape("random", width = 10, height = 10)
+  )
+
+  # Test that we get a valid patchwork with 2 patches
+  p1 <- plot_landscape_list(landscapes, titles = "class")
+  expect_true(grepl("2 patches", capture_output(str(p1))))
+
+  # Test title length validation
+  expect_error(
+    plot_landscape_list(landscapes, titles = c("One", "Two", "Three")),
+    "length must match number of landscapes"
+  )
+})
+
+test_that("plot_landscape_list respects max_landscapes", {
+  # Create many landscapes
+  landscapes <- replicate(
+    10,
+    create_landscape("sharp", width = 10, height = 10),
+    simplify = FALSE
+  )
+
+  # Test max_landscapes warning and output
+  expect_warning(
+    p <- plot_landscape_list(landscapes, max_landscapes = 5),
+    "Number of landscapes .* exceeds maximum"
+  )
+  expect_true(grepl("5 patches", capture_output(str(p))))
+
+  # Test force override
+  p2 <- plot_landscape_list(landscapes, max_landscapes = 5, force = TRUE)
+  expect_true(grepl("10 patches", capture_output(str(p2))))
+})
+
+test_that("plot_landscape_list handles subset_index", {
+  landscapes <- list(
+    create_landscape("sharp", width = 10, height = 10),
+    create_landscape("random", width = 10, height = 10),
+    create_landscape("diffuse", width = 10, height = 10)
+  )
+
+  # Test subsetting produces correct number of patches
+  p <- plot_landscape_list(landscapes, subset_index = c(1, 3))
+  expect_true(grepl("2 patches", capture_output(str(p))))
+})
+
+test_that("plot_landscape_list returns patchwork object", {
+  landscapes <- list(
+    create_landscape("sharp", width = 10, height = 10),
+    create_landscape("random", width = 10, height = 10)
+  )
+
+  p <- plot_landscape_list(landscapes)
+  expect_s3_class(p, "patchwork")
+})
+
+test_that("plot_landscape_list respects ncol parameter", {
+  landscapes <- list(
+    create_landscape("sharp", width = 10, height = 10),
+    create_landscape("random", width = 10, height = 10),
+    create_landscape("diffuse", width = 10, height = 10),
+    create_landscape("curvy", width = 10, height = 10)
+  )
+
+  p <- plot_landscape_list(landscapes, ncol = 2)
+  expect_equal(p$patches$layout$ncol, 2)
+})
