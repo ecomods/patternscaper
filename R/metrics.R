@@ -66,13 +66,14 @@ list_available_metrics <- function(
 #' Internal function to calculate a specific landscape metric for a single landscape.
 #' This function handles both plain SpatRaster lists and lists with metadata structure.
 #'
-#' @param landscapes List. The landscapes to analyze. Can be either:
-#'   1. A list of SpatRaster objects (no metadata)
-#'   2. A list of metadata structures (each with landscape, type, params)
+#' @param landscapes A list of landscape objects
 #' @param function_name Character. The name of the landscapemetrics function to call.
 #' @return tibble. Results from the metric calculation including any warnings.
 #' @noRd
 calculate_single_metric <- function(landscapes, function_name) {
+  # Extract landscape names
+  landscape_names <- purrr::map_chr(landscapes, function(x) x$name)
+
   # Try to calculate the metric
   result <- tryCatch(
     {
@@ -80,23 +81,7 @@ calculate_single_metric <- function(landscapes, function_name) {
         names(landscapes),
         seq_along(landscapes),
         \(name, i) {
-          current <- landscapes[[i]]
-
-          # Check if this landscape has metadata structure
-          has_metadata <- has_landscape_metadata(current)
-
-          # Extract the type if metadata is available
-          landscape_type <- NA_character_
-          if (has_metadata) {
-            landscape_type <- get_landscape_type(current)
-            # Extract just the SpatRaster for processing
-            current <- get_landscape(current)
-          }
-
-          # Ensure we have a SpatRaster regardless of input format
-          if (!inherits(current, "SpatRaster")) {
-            current <- ensure_spatraster(current)
-          }
+          current <- landscapes[[i]]$data
 
           # Create a wrapper that captures warnings
           warnings_captured <- character(0)
@@ -117,8 +102,9 @@ calculate_single_metric <- function(landscapes, function_name) {
           # Add landscape name, type, and any warnings to the result
           result |>
             dplyr::mutate(
+              id = i,
               landscape = name,
-              type = landscape_type,
+              class = landscapes[[i]]$class,
               warnings = ifelse(
                 length(warnings_captured) > 0,
                 paste(warnings_captured, collapse = "; "),
@@ -153,27 +139,22 @@ calculate_landscape_metrics <- function(
   metrics = NULL,
   level = "landscape"
 ) {
-  # Check if input is a single landscape with metadata (not a list of landscapes)
-  # This handles the case when create_landscape(..., add_metadata = TRUE) is used
-  if (has_landscape_metadata(landscapes)) {
-    # Wrap the single metadata-enriched landscape in a list
-    landscapes <- list(landscape = landscapes)
-  } else if (inherits(landscapes, "SpatRaster")) {
-    # If a single SpatRaster is provided, convert to a list
-    landscapes <- list(landscape = landscapes)
+  # Validate inputs
+
+  # If landscapes is a single landscape, wrap it into a list
+  if (is_landscape(landscapes)) {
+    # Wrap single landscape into a list
+    landscapes <- list(landscapes)
   }
 
-  # Check if input is a list
-  if (!is.list(landscapes)) {
+  # Check if landscapes is a list of landscape objects
+  if (any(!sapply(landscapes, is_landscape))) {
+    # find out which element is not a landscape
+    invalid_indices <- which(!sapply(landscapes, is_landscape))
     stop(
-      "'landscapes' must be a single SpatRaster, a landscape with metadata, or a list of landscapes."
+      "All elements must be landscape objects. Invalid element(s) at index(es): ",
+      paste(invalid_indices, collapse = ", ")
     )
-  }
-
-  # Check if landscape list is named. If not, name landscapes with default names
-  if (is.null(names(landscapes)) || any(names(landscapes) == "")) {
-    warning("Landscape list is not named. Assigning default names.")
-    names(landscapes) <- paste0("landscape_", seq_along(landscapes))
   }
 
   # Get available metrics for the requested level(s)
@@ -208,6 +189,19 @@ calculate_landscape_metrics <- function(
     ~ calculate_single_metric(landscapes = landscapes, function_name = .x),
     .progress = TRUE
   )
+
+  # Reorganize columns for better readability
+  all_results <- all_results |>
+    dplyr::relocate(
+      id,
+      landscape,
+      class,
+      level,
+      metric,
+      layer,
+      value,
+      warnings
+    )
 
   return(all_results)
 }

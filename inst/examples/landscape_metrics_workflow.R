@@ -9,7 +9,7 @@ devtools::load_all()
 # ----------------------------------------------------------------------------#
 
 # Create some landscapes (the more the better)
-landscapes <- generate_training_landscapes(
+landscapes <- create_training_landscapes(
   n = 100,
   types = c("banded", "spots", "labyrinth"),
   add_rotation = TRUE,
@@ -17,7 +17,7 @@ landscapes <- generate_training_landscapes(
 )
 
 # Check how many landscapes of each type were generated
-table(purrr::map_chr(landscapes, "type"))
+table(purrr::map_chr(landscapes, ~ .x$class))
 
 # Plot all landscapes (plot only 20)
 plot_landscape_list(landscapes[1:20])
@@ -27,6 +27,7 @@ plot_landscape_list(landscapes[1:20])
 # ----------------------------------------------------------------------------#
 # List available landscape metrics
 list_available_metrics()
+landscapemetrics::list_lsm() |> dplyr::arrange(metric)
 # List available landscape metrics of specific level(s)
 list_available_metrics(level = c("class", "landscape"))
 
@@ -100,7 +101,7 @@ plot_nn_classification_landscapes(
 
 # Apply the model ----------------------------------------------------
 # generate test landscapes
-test_landscapes <- generate_training_landscapes(
+test_landscapes <- create_training_landscapes(
   seed = 43,
   n = 20,
   add_rotation = TRUE

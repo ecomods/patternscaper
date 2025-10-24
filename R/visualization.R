@@ -21,7 +21,7 @@ plot_metrics <- function(
     stop("selected_metrics must be a character vector of metric names")
   }
   # check if metrics data has columns we need
-  required_cols <- c("level", "type", "metric", "value")
+  required_cols <- c("level", "class", "metric", "value")
   if (!all(required_cols %in% names(calculated_metrics))) {
     stop(paste(
       "metrics data frame must contain the following columns:",
@@ -41,16 +41,16 @@ plot_metrics <- function(
     # Order metrics by their order in selected_metrics
     dplyr::mutate(
       metric = factor(metric, levels = selected_metrics),
-      type = as.factor(type)
+      class = as.factor(class)
     )
 
   # Create the base plot (depends on the level at which metrics were calculated)
   if (level == "landscape") {
-    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = type, y = value))
+    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = class, y = value))
   } else if (level == "class") {
     p <- ggplot2::ggplot(
       plot_data,
-      ggplot2::aes(x = type, y = value, fill = class)
+      ggplot2::aes(x = class, y = value, fill = class)
     )
   } else {
     stop("Plotting for patch-level metrics is not implemented yet.")
@@ -69,7 +69,7 @@ plot_metrics <- function(
       panel.grid.minor = ggplot2::element_blank(),
     ) +
     ggplot2::labs(
-      x = "Landscape Type",
+      x = "Landscape Class",
       y = "Metric Value"
     )
   return(p)
