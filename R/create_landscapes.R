@@ -421,16 +421,18 @@ create_training_landscapes <- function(
           c(list(pattern = type), sampled_params)
         )
 
-        # Store the landscape object directly
-        all_landscapes[[i]] <- landscape
-
         # Set descriptive name
-        names(all_landscapes)[i] <- paste0(
+        landscape_name <- paste0(
           type,
           "_",
           i,
           if (rotation != 0) paste0("_rot", rotation) else ""
         )
+        landscape <- set_landscape_name(landscape, landscape_name)
+
+        # Store the landscape object
+        all_landscapes[[i]] <- landscape
+        names(all_landscapes)[i] <- landscape_name
       },
       error = function(e) {
         warning(

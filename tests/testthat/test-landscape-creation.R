@@ -355,22 +355,43 @@ test_that("create_training_landscapes returns landscape objects", {
   }
 })
 
-test_that("create_training_landscapes assigns names correctly", {
+test_that("create_training_landscapes sets landscape names correctly", {
   landscapes <- create_training_landscapes(
     n = 5,
+    types = c("sharp", "random"),
     width = 20,
     height = 20,
     add_rotation = FALSE,
     seed = 123
   )
 
-  # All should have names
-  expect_true(!is.null(names(landscapes)))
-  expect_equal(length(names(landscapes)), length(landscapes))
+  # Check that each landscape has its name property set
+  for (i in seq_along(landscapes)) {
+    expect_equal(landscapes[[i]]$name, names(landscapes)[i])
+  }
 
-  # Names should contain type and index
-  for (name in names(landscapes)) {
-    expect_true(grepl("_\\d+", name))
+  # With rotation
+  landscapes_rotated <- create_training_landscapes(
+    n = 5,
+    types = c("sharp"),
+    width = 20,
+    height = 20,
+    add_rotation = TRUE,
+    rotation_angles = c(0, 45),
+    seed = 123
+  )
+
+  # Check names include rotation info where applicable
+  for (i in seq_along(landscapes_rotated)) {
+    landscape_name <- landscapes_rotated[[i]]$name
+    list_name <- names(landscapes_rotated)[i]
+
+    expect_equal(landscape_name, list_name)
+
+    # If rotation != 0, name should contain "_rot"
+    if (landscapes_rotated[[i]]$params$rotation != 0) {
+      expect_true(grepl("_rot", landscape_name))
+    }
   }
 })
 
