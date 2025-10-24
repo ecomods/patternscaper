@@ -8,26 +8,26 @@ devtools::load_all()
 # ----------------------------------------------------------------------------#
 
 # Reproducible with same landscapes every time (is also default if seed is not set)
-landscapes <- generate_training_landscapes(n = 20, seed = 42)
+landscapes <- create_training_landscapes(n = 20, seed = 42)
 # different landscapes every time
-landscapes <- generate_training_landscapes(n = 20)
+landscapes <- create_training_landscapes(n = 20)
 
 # Randomly sampled landscape types (by default the function balances the types)
-landscapes <- generate_training_landscapes(
+landscapes <- create_training_landscapes(
   n = 20,
   seed = 42,
   balance_types = FALSE
 )
 
 # generate only specific landscape types
-landscapes <- generate_training_landscapes(
+landscapes <- create_training_landscapes(
   n = 20,
   seed = 42,
   types = c("banded", "spots", "clustered")
 )
 
 # give different weights for the landscapes (higher weights will be generated more often)
-landscapes <- generate_training_landscapes(
+landscapes <- create_training_landscapes(
   n = 20,
   seed = 42,
   types = c("banded", "spots", "clustered"),
@@ -35,32 +35,55 @@ landscapes <- generate_training_landscapes(
   type_probs = c(0.1, 1, 0.2)
 )
 
-landscapes <- generate_training_landscapes(
+landscapes <- create_training_landscapes(
   n = 20,
   seed = NULL,
   types = c("spots", "banded")
 )
 
-# plot all training landscapes
+# Look at landscape objects (printed with info in the console)
+landscapes[[1]]
+
+# Change the name and class of a landscape
+landscapes[[1]] <- set_landscape_class(landscapes[[1]], class = "custom_class")
+landscapes[[1]] <- set_landscape_name(
+  landscapes[[1]],
+  name = "My first landscape"
+)
+
+
+# plot all training landscapes (default titles are both name and class)
 plot_landscape_list(landscapes)
+# only plot class names as titles
+plot_landscape_list(landscapes, title = "class")
+# Plot custom titles
+my_titles <- paste0("Landscape ", 1:length(landscapes))
+plot_landscape_list(landscapes, title = my_titles)
 
 # ----------------------------------------------------------------------------#
-# Generate individual landscapes ---------------------------------------
+# Generate individual landscapes ----------------------------------------------
 # ----------------------------------------------------------------------------#
 
 # Sharp treeline --------------------------------------------------------------
 # Default sharp treeline
 sharp_default <- create_landscape("sharp")
+# by default the landscape does not have a name
+sharp_default
+# But you can create it with a name
+sharp_default <- create_landscape("sharp", name = "Default")
+sharp_default
 
 # Modified sharp treeline with higher treeline position
 sharp_modified <- create_landscape(
   "sharp",
+  name = "Modified",
   treeline_position = 0.7
 )
 
 # One landscape with rotation
 sharp_rotated <- create_landscape(
   "sharp",
+  name = "Rotated",
   treeline_position = 0.3,
   rotation = 45
 )
@@ -71,17 +94,17 @@ plot_landscape_list(
     sharp_default,
     sharp_modified,
     sharp_rotated
-  ),
-  title = c("Default", "Modified", "Rotated")
+  )
 )
 
 # Diffuse treeline -----------------------------------------------------------
 # Default diffuse treeline
-diffuse_default <- create_landscape("diffuse")
+diffuse_default <- create_landscape("diffuse", name = "Default")
 
 # Modified diffuse treeline with greater steepness
 diffuse_modified <- create_landscape(
   "diffuse",
+  name = "Modified",
   treeline_position = 0.2,
   steepness = 0.1
 )
@@ -91,6 +114,7 @@ plot_landscape(diffuse_modified)
 # One landscape with rotation
 diffuse_rotated <- create_landscape(
   "diffuse",
+  name = "Rotated",
   treeline_position = 0.3,
   steepness = 2,
   rotation = 45
@@ -102,17 +126,17 @@ plot_landscape_list(
     diffuse_default,
     diffuse_modified,
     diffuse_rotated
-  ),
-  title = c("Default", "Modified", "Rotated")
+  )
 )
 
 # Curvy treeline -------------------------------------------------------------
 # Default curvy treeline
-curvy_default <- create_landscape("curvy")
+curvy_default <- create_landscape("curvy", name = "Default")
 
 # Modified curvy treeline with increased sine parameters
 curvy_modified <- create_landscape(
   "curvy",
+  name = "Modified",
   treeline_position = 0.3,
   sine_length = 40,
   sine_height = 10
@@ -121,6 +145,7 @@ curvy_modified <- create_landscape(
 # One landscape with rotation
 curvy_rotated <- create_landscape(
   "curvy",
+  name = "Rotated",
   treeline_position = 0.6,
   sine_length = 10,
   sine_height = 6,
@@ -133,17 +158,17 @@ plot_landscape_list(
     curvy_default,
     curvy_modified,
     curvy_rotated
-  ),
-  title = c("Default", "Modified", "Rotated")
+  )
 )
 
 # Fingers --------------------------------------------------------------------
 # Default fingers pattern
-fingers_default <- create_landscape("fingers")
+fingers_default <- create_landscape("fingers", name = "Default")
 
 # Modified fingers with more, thinner fingers and bending
 fingers_modified <- create_landscape(
   "fingers",
+  name = "Modified",
   treeline_position = 0.2,
   num_fingers = 7,
   finger_width = 5,
@@ -154,6 +179,7 @@ fingers_modified <- create_landscape(
 # One landscape with rotation
 fingers_rotated <- create_landscape(
   "fingers",
+  name = "Rotated",
   num_fingers = 10,
   finger_width = 4,
   finger_length_prop = 1,
@@ -167,17 +193,17 @@ plot_landscape_list(
     fingers_default,
     fingers_modified,
     fingers_rotated
-  ),
-  title = c("Default", "Modified", "Rotated")
+  )
 )
 
 # Scattered trees ------------------------------------------------------------
 # Default scattered trees
-scattered_default <- create_landscape("scattered")
+scattered_default <- create_landscape("scattered", name = "Default")
 
 # Modified scattered trees with higher density in a larger scatter zone
 scattered_modified <- create_landscape(
   "scattered",
+  name = "Modified",
   treeline_position = 0.3,
   scatter_density = 0.7,
   scatter_zone_prop = 0.2
@@ -186,6 +212,7 @@ scattered_modified <- create_landscape(
 # One landscape with rotation
 scattered_rotated <- create_landscape(
   "scattered",
+  name = "Rotated",
   treeline_position = 0.3,
   scatter_density = 0.2,
   scatter_zone_prop = 0.1,
@@ -198,17 +225,17 @@ plot_landscape_list(
     scattered_default,
     scattered_modified,
     scattered_rotated
-  ),
-  titles = c("Default", "Modified", "Rotated")
+  )
 )
 
 # Clustered trees ------------------------------------------------------------
 # Default clustered trees
-clustered_default <- create_landscape("clustered")
+clustered_default <- create_landscape("clustered", name = "Default")
 
 # Modified clustered trees with more elongated clusters
 clustered_modified <- create_landscape(
   "clustered",
+  name = "Modified",
   treeline_position = 0.2,
   num_clusters = 8,
   cluster_radius = 7,
@@ -220,6 +247,7 @@ clustered_modified <- create_landscape(
 # One landscape with rotation
 clustered_rotated <- create_landscape(
   "clustered",
+  name = "Rotated",
   num_clusters = 20,
   cluster_radius = 2,
   scatter_zone_prop = 0.5,
@@ -234,17 +262,17 @@ plot_landscape_list(
     clustered_default,
     clustered_modified,
     clustered_rotated
-  ),
-  titles = c("Default", "Modified", "Rotated")
+  )
 )
 
 # Sine bands -----------------------------------------------------------------
 # Default sine bands
-sine_bands_default <- create_landscape("sine_bands")
+sine_bands_default <- create_landscape("sine_bands", name = "Default")
 
 # Modified sine bands with thicker bands, wider spacing and noise
 sine_bands_modified <- create_landscape(
   "sine_bands",
+  name = "Modified",
   treeline_position = 0.3,
   band_zone_prop = 0.5,
   band_thickness = 5,
@@ -257,6 +285,7 @@ sine_bands_modified <- create_landscape(
 # One landscape with rotation
 sine_bands_rotated <- create_landscape(
   "sine_bands",
+  name = "Rotated",
   band_thickness = 4,
   band_spacing = 12,
   amplitude = 6,
@@ -270,17 +299,17 @@ plot_landscape_list(
     sine_bands_default,
     sine_bands_modified,
     sine_bands_rotated
-  ),
-  titles = c("Default", "Modified", "Rotated")
+  )
 )
 
 # Spots ----------------------------------------------------------------------
 # Default spots
-spots_default <- create_landscape("spots")
+spots_default <- create_landscape("spots", name = "Default")
 
 # Modified spots with more spots and random radius variation
 spots_modified <- create_landscape(
   "spots",
+  name = "Modified",
   n_spots = 15,
   spot_radius = 8,
   noise_radius_sd = 2
@@ -289,6 +318,7 @@ spots_modified <- create_landscape(
 # Modified spots with more spots and random radius variation
 spots_inverted <- create_landscape(
   "spots",
+  name = "Inverted",
   n_spots = 15,
   spot_radius = 8,
   invert_landscape = TRUE,
@@ -297,6 +327,7 @@ spots_inverted <- create_landscape(
 
 spots_regular <- create_landscape(
   "spots",
+  name = "Regular",
   n_spots = 15,
   spot_radius = 8,
   noise_radius_sd = 0,
@@ -311,40 +342,37 @@ plot_landscape_list(
     spots_modified,
     spots_inverted,
     spots_regular
-  ),
-  titles = c("Default", "Modified", "Inverted", "Regular")
+  )
 )
 
 # Banded vegetation ----------------------------------------------------------
 # Default banded vegetation
-banded_default <- create_landscape("banded")
+banded_default <- create_landscape("banded", name = "Default")
 
 # Modified banded vegetation with more bands and different hill parameters
 banded_modified <- create_landscape(
   "banded",
+  name = "Modified",
   nbands = 9,
-  hilltop = c(35, 25, 30),
-  slope = c(0.3, 0.15, 0.25),
-  x_ext_hill = c(1.5, 2.2, 1.8),
-  y_ext_hill = c(1.3, 1.1, 1.9),
+  regular_hilltop = FALSE,
+  top_elevation_mean = 25,
   noise_sd = 0.5
 )
 
 # One landscape with rotation
 banded_rotated <- create_landscape(
   "banded",
-  nbands = 7,
-  hilltop = c(30, 22, 28),
-  slope = c(0.25, 0.12, 0.2),
-  x_ext_hill = c(1.4, 2.0, 1.6),
-  y_ext_hill = c(1.2, 1.0, 1.7),
-  noise_sd = 0.15,
+  name = "Rotated",
+  nbands = 9,
+  regular_hilltop = FALSE,
+  top_elevation_mean = 25,
+  noise_sd = 0.5,
   rotation = 45
 )
 
 # Plot all banded vegetation together
 plot_landscape_list(list(
-  default = banded_default,
-  modified = banded_modified,
-  rotated = banded_rotated
+  banded_default,
+  banded_modified,
+  banded_rotated
 ))
