@@ -4,14 +4,13 @@
 #' spatial patterns. The function uses a multiscale CNN architecture optimized for
 #' distinguishing different landscape patterns.
 #'
-#' @param landscapes List. List of landscapes or landscape objects with metadata.
+#' @param landscapes List. List of landscape objects created by `create_landscape()` or `create_training_landscapes()`.
 #' @param cv_method Character. Cross-validation method: "none", "k-fold" (default: "k-fold").
 #' @param cv_folds Integer. Number of cross-validation folds when cv_method="k-fold" (default: 5).
 #' @param epochs Integer. Number of training epochs (default: 20).
 #' @param batch_size Integer. Batch size for training (default: 16).
 #' @param validation_split Numeric. Proportion of data to use for validation when cv_method="none" (default: 0.2).
 #' @param learning_rate Numeric. Learning rate for Adam optimizer (default: 0.001).
-#' @param save_model Logical. Whether to save the model (default: FALSE).
 #' @param model_path Character. Path to save model (default: NULL means that the
 #'     model is not saved).
 #' @param seed Integer. Random seed for reproducibility. If NULL, a random seed will be used (default: NULL).
@@ -39,20 +38,34 @@ train_nn_keras <- function(
     stop('cv_method must be one of: "none" or "k-fold"')
   }
 
-  # Check if the landscapes have metadata and is a valid structure
-  if (all(unlist(lapply(landscapes, has_landscape_metadata)))) {
-    # Extract landscapes if they have metadata
-    training_plots <- lapply(landscapes, get_landscape)
-    training_labels <- sapply(landscapes, get_landscape_type)
-  } else {
+  # Check if landscapes is a list of landscape objects
+  if (any(!sapply(landscapes, is_landscape))) {
+    # find out which element is not a landscape
+    invalid_indices <- which(!sapply(landscapes, is_landscape))
     stop(
-      "All landscapes must have metadata with 'type' and 'landscape' information."
+      "All elements must be landscape objects. Invalid element(s) at index(es): ",
+      paste(invalid_indices, collapse = ", ")
+    )
+  }
+
+  # Get the training labels (pattern field of the landscape object)
+  training_labels <- sapply(landscapes, function(l) l$pattern)
+
+  # Check if all training labels are neither NA nor unclassified
+  if (any(is.na(training_labels) | training_labels == "unclassified")) {
+    bad_patterns <- which(
+      is.na(training_labels) | training_labels == "unclassified"
+    )
+    stop(
+      "All training labels must be classified and not NA. Invalid label(s) at index(es): ",
+      paste(bad_patterns, collapse = ", ")
     )
   }
 
   # Convert all landscapes to arrays
-  training_arrays <- lapply(training_plots, function(r) {
-    terra::as.array(r)
+  training_arrays <- lapply(landscapes, function(l) {
+    landscape_data <- l$data
+    terra::as.array(landscape_data)
   })
 
   # Show distribution of landscape types
@@ -444,22 +457,31 @@ apply_nn_keras <- function(
   class_names <- nn_model$classes
   input_shape <- nn_model$input_shape
 
-  # Initialize results list
-  results_list <- list()
+  # Validate inputs
 
-  # Extract the landscapes if they are in a list with metadata
-  if (all(unlist(lapply(landscapes, has_landscape_metadata)))) {
-    # Extract landscapes if they have metadata
-    landscape_plots <- lapply(landscapes, get_landscape)
-    landscape_type <- sapply(landscapes, get_landscape_type)
-  } else {
-    landscape_plots <- landscapes
-    landscape_type <- paste0("landscape_", seq_along(landscape_plots))
+  # If landscapes is a single landscape, wrap it into a list
+  if (is_landscape(landscapes)) {
+    # Wrap single landscape into a list
+    landscapes <- list(landscapes)
   }
 
+  # Check if landscapes is a list of landscape objects
+  if (any(!sapply(landscapes, is_landscape))) {
+    # find out which element is not a landscape
+    invalid_indices <- which(!sapply(landscapes, is_landscape))
+    stop(
+      "All elements must be landscape objects. Invalid element(s) at index(es): ",
+      paste(invalid_indices, collapse = ", ")
+    )
+  }
+
+  # Get the training labels (pattern field of the landscape object) if available
+  landscape_pattern <- sapply(landscapes, function(l) l$pattern)
+
   # Convert all landscapes to arrays
-  landscape_arrays <- lapply(landscape_plots, function(r) {
-    terra::as.array(r)
+  landscape_arrays <- lapply(landscapes, function(l) {
+    landscape_data <- l$data
+    terra::as.array(landscape_data)
   })
 
   # Stack all arrays into one 4D array (samples, height, width, channels)
@@ -482,7 +504,7 @@ apply_nn_keras <- function(
 
   predictions$predicted_class <- predicted_class
   predictions$confidence <- confidence
-  predictions$actual_class <- landscape_type
+  predictions$actual_class <- landscape_pattern
   predictions$landscape_id <- seq_len(nrow(predictions))
 
   # Reorder the columns

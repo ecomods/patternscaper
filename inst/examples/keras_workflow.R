@@ -15,10 +15,10 @@ reticulate::py_discover_config()
 
 # Test Keras NN ---------------------------------------------------------
 # Increase number of landscapes for better training
-training_landscapes <- generate_training_landscapes(
+training_landscapes <- create_training_landscapes(
   seed = 42,
   n = 100, # Larger dataset for better generalization
-  types = c(
+  patterns = c(
     "sharp",
     "diffuse",
     "curvy",
@@ -63,8 +63,8 @@ plot_nn_classification_landscapes(
 )
 
 # Apply the model ----------------------------------------------------
-# generate test landscapes
-test_landscapes <- generate_training_landscapes(
+# create test landscapes
+test_landscapes <- create_training_landscapes(
   seed = 43,
   n = 20,
   add_rotation = TRUE
@@ -73,7 +73,7 @@ test_landscapes <- generate_training_landscapes(
 # plot all landscapes
 plot_landscape_list(test_landscapes)
 
-# or generate just a single landscape
+# or create just a single landscape
 test_cluster <- create_landscape(
   pattern = "clustered",
   width = 100,
