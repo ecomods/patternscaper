@@ -24,7 +24,7 @@ landscapes_manuscript <- generate_training_landscapes(
 )
 
 # plot all landscapes
-plot_landscape_list(landscapes_manuscript,ncol=n_ecotones, titles = "", show_legend = FALSE)
+plot_landscape_list(landscapes_manuscript,ncol=n_ecotones, titles = ecotone_types_title, show_legend = FALSE)
 
 #--------------------------------------------------------------------
 # Generate training landscapes and take a look
@@ -143,7 +143,7 @@ pic_dir <- "inst/examples/Ecotone/" #folder name
 pic_names <- list.files(pic_dir) #file names
 pic_names
 
-i <- 3
+i <- 1
 image <- terra::rast(paste(pic_dir,pic_names[i],sep=""))
 # If it's a multi-band image
 band1 <- image[[1]]
