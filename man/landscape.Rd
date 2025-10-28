@@ -4,12 +4,12 @@
 \alias{landscape}
 \title{Create a landscape object}
 \usage{
-landscape(data, class = NA_character_, name = NA_character_, params = NULL)
+landscape(data, pattern = NA_character_, name = NA_character_, params = NULL)
 }
 \arguments{
 \item{data}{Matrix or SpatRaster containing landscape data}
 
-\item{class}{Character string specifying the landscape class if known (default NA).}
+\item{pattern}{Character string specifying the landscape pattern if known (default NA).}
 
 \item{name}{Character string specifying the landscape name to distinguish it from other
 landscapes (default NA).}
@@ -31,13 +31,13 @@ with landscape analysis functions.
 mat <- matrix(runif(100), nrow = 10, ncol = 10)
 l <- landscape(mat)
 
-# Create with class and name
-l <- landscape(mat, class = "random", name = "test_landscape")
+# Create with pattern and name
+l <- landscape(mat, pattern = "random", name = "test_landscape")
 
 # Create with parameters
 l <- landscape(
   mat,
-  class = "sharp",
+  pattern = "sharp",
   name = "alpine_treeline",
   params = list(treeline_position = 0.5, rotation = 0)
 )

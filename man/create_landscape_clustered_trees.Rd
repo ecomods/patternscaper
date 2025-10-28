@@ -41,7 +41,7 @@ If a specific integer is provided, the same landscape will be generated on repea
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
 \value{
-A landscape object with class "clustered" containing the generated landscape data and parameters.
+A landscape object with pattern "clustered" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with clustered trees below a treeline.

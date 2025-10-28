@@ -34,7 +34,7 @@ If NULL, no seed is set explicitly.
 If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 }
 \value{
-A landscape object with class "scattered" containing the generated landscape data and parameters.
+A landscape object with pattern "scattered" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with randomly scattered trees below a treeline.

@@ -25,7 +25,7 @@ the \code{\link{plot_landscape}} function for higher-level customization.
 \examples{
 # Create a landscape
 mat <- matrix(1:100, 10, 10)
-l <- landscape(mat, class = "test", name = "example")
+l <- landscape(mat, pattern = "test", name = "example")
 
 # Get basic plot
 p <- plot(l)

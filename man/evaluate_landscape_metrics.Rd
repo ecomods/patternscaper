@@ -36,5 +36,5 @@ If you don't want to filter based on correlation, set to 1.}
 Character vector. Names of most sensitive metrics.
 }
 \description{
-Identifies the most informative metrics for discriminating between landscape types.
+Identifies the most informative metrics for discriminating between landscape_name types.
 }

@@ -29,7 +29,7 @@ If NULL, seed will not be set explicitly.
 If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 }
 \value{
-A landscape object with class "diffuse" containing the generated landscape data and parameters.
+A landscape object with pattern "diffuse" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with a diffuse treeline where tree probability decreases with distance.

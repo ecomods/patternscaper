@@ -10,7 +10,7 @@ plot_metrics(calculated_metrics, selected_metrics, title = "Landscape Metrics")
 \item{selected_metrics}{Character vector. Metrics to visualize.}
 
 \item{metrics}{Data frame. Metrics dataframe from calculate_landscape_metrics.
-Needs to contain columns: "level", "type", "metric", "value", and optionally "class".}
+Needs to contain columns: "level", "type", "metric", "value", and optionally "pattern".}
 }
 \value{
 ggplot object. Visualization of selected metrics across landscape types.

@@ -4,12 +4,17 @@
 \alias{new_landscape}
 \title{Create a new landscape object}
 \usage{
-new_landscape(data, class = NA_character_, name = NA_character_, params = NULL)
+new_landscape(
+  data,
+  pattern = NA_character_,
+  name = NA_character_,
+  params = NULL
+)
 }
 \arguments{
 \item{data}{SpatRaster containing landscape data}
 
-\item{class}{Character string specifying landscape class}
+\item{pattern}{Character string specifying landscape pattern}
 
 \item{name}{Character string specifying landscape name}
 

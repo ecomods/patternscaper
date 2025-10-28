@@ -12,7 +12,7 @@ create_landscape(
 )
 }
 \arguments{
-\item{pattern}{Character. Type of landscape to generate: "random", "sharp", "diffuse",
+\item{pattern}{Character. pattern of landscape to generate: "random", "sharp", "diffuse",
 "curvy", "fingers", "scattered", "sine_bands", "clusters", "spots", "gaps",
 "banded", "labyrinth"}
 
@@ -22,16 +22,16 @@ create_landscape(
 of the individual functions for details on required and optional parameters.}
 }
 \value{
-A landscape object with class corresponding to the pattern type, containing
+A landscape object with pattern corresponding to the pattern pattern, containing
   the generated landscape data and parameters.
 }
 \description{
-A generic function that creates various types of landscape matrices using
-specialized functions. The type of landscape is determined by the 'pattern'
+A generic function that creates various patterns of landscape matrices using
+specialized functions. The pattern of landscape is determined by the 'pattern'
 parameter.
 }
 \examples{
-# Create a default landscape of various types
+# Create a default landscape of various patterns
 random_default <- create_landscape("random")
 sharp_default <- create_landscape("sharp")
 diffuse_default <- create_landscape("diffuse")

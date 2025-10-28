@@ -46,7 +46,7 @@ If a specific integer is provided, the same landscape will be generated on repea
 If NULL, no seed is set explicitly.}
 }
 \value{
-A landscape object with class "sine_bands" containing the generated landscape data and parameters.
+A landscape object with pattern "sine_bands" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with parallel sine-wave bands.

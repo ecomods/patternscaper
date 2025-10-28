@@ -27,7 +27,7 @@ create_landscape_curvy_treeline(
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
 \value{
-A landscape object with class "curvy" containing the generated landscape data and parameters.
+A landscape object with pattern "curvy" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with a curvy treeline following a sine wave pattern.

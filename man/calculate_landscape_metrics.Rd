@@ -7,11 +7,7 @@
 calculate_landscape_metrics(landscapes, metrics = NULL, level = "landscape")
 }
 \arguments{
-\item{landscapes}{List or SpatRaster. Landscape(s) to analyze. Can be:
-- A single SpatRaster
-- A single landscape with metadata (list with landscape, type, params)
-- A list of SpatRaster objects
-- A list of landscape metadata objects (with landscape, type, params)}
+\item{landscapes}{A single landscape object or a list of landscape objects.}
 
 \item{metrics}{Character vector. Names of metrics to calculate (default: NULL for all).}
 

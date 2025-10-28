@@ -45,7 +45,7 @@ Is only needed because in the function \link{generate_training_landscapes}
 all landscape functions need to have a rotation parameter.}
 }
 \value{
-A landscape object with class "spots" containing the generated landscape data and parameters.
+A landscape object with pattern "spots" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary landscape with circular spots.

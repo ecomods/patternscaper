@@ -6,22 +6,22 @@
 \usage{
 create_training_landscapes(
   n = 50,
-  types = c("random", "sharp", "diffuse", "curvy", "fingers", "scattered", "clustered",
-    "sine_bands", "spots", "gaps", "banded", "labyrinth"),
+  patterns = c("random", "sharp", "diffuse", "curvy", "fingers", "scattered",
+    "clustered", "sine_bands", "spots", "gaps", "banded", "labyrinth"),
   width = 100,
   height = 100,
   add_rotation = TRUE,
   rotation_angles = c(0, 45, 90, 135),
   params_list = NULL,
   seed = NULL,
-  type_probs = NULL,
-  balance_types = TRUE
+  pattern_probs = NULL,
+  balance_patterns = TRUE
 )
 }
 \arguments{
 \item{n}{Integer. Total number of landscapes to create (default: 50).}
 
-\item{types}{Character vector. Types of landscapes to sample from (default: all types).}
+\item{patterns}{Character vector. patterns of landscapes to sample from (default: all patterns).}
 
 \item{width}{Integer. Width of all landscapes in pixels (default: 100).}
 
@@ -31,25 +31,25 @@ create_training_landscapes(
 
 \item{rotation_angles}{Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).}
 
-\item{params_list}{List. List of parameter ranges for each landscape type (default: NULL).}
+\item{params_list}{List. List of parameter ranges for each landscape pattern (default: NULL).}
 
 \item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
 If a specific integer is provided, the same landscapes will be created on repeated calls with that seed.
 If NULL, no seed is set explicitly.}
 
-\item{type_probs}{Numeric vector. Probability that a specific landscape type is chosen.
-By default, all types have equal probability (1) of being chosen.
-Must be the same length as 'types' (default NULL which means equal probability).}
+\item{pattern_probs}{Numeric vector. Probability that a specific landscape pattern is chosen.
+By default, all patterns have equal probability (1) of being chosen.
+Must be the same length as 'patterns' (default NULL which means equal probability).}
 
-\item{balance_types}{Logical. If TRUE, ensures all landscape types appear approximately equally.
-This overrides type_probs unless it's explicitly set. (default: TRUE)}
+\item{balance_patterns}{Logical. If TRUE, ensures all landscape patterns appear approximately equally.
+This overrides pattern_probs unless it's explicitly set. (default: TRUE)}
 }
 \value{
-A named list of landscape objects. Names indicate the type and optional rotation.
+A named list of landscape objects. Names indicate the pattern and optional rotation.
 }
 \description{
 Create a series of landscape models with variations for training purposes.
-Creates a total of n landscapes distributed across different landscape types.
+Creates a total of n landscapes distributed across different landscape patterns.
 }
 \examples{
 # Generate 20 training landscapes
@@ -58,10 +58,10 @@ landscapes <- create_training_landscapes(n = 20)
 # Access a landscape
 landscapes[[1]]
 
-# Check the type
-landscapes[[1]]$class
+# Check the pattern
+landscapes[[1]]$pattern
 
-# Get all landscape types
-sapply(landscapes, function(x) x$class)
+# Get all landscape patterns
+sapply(landscapes, function(x) x$pattern)
 
 }

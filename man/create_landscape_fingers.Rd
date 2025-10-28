@@ -37,7 +37,7 @@ in proportion of actual finger length (default: 0, no randomness).}
 \item{rotation}{Numeric. Degrees to rotate the landscape (default: 0).}
 }
 \value{
-A landscape object with class "fingers" containing the generated landscape data and parameters.
+A landscape object with pattern "fingers" containing the generated landscape data and parameters.
 }
 \description{
 Generates a binary matrix representing a landscape with a sharp treeline and

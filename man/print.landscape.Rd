@@ -16,12 +16,12 @@ The input landscape object \code{x}, returned invisibly.
 }
 \description{
 Provides a concise summary of a landscape object, including its name,
-class, dimensions, spatial properties, value range, and parameters.
+pattern, dimensions, spatial properties, value range, and parameters.
 }
 \details{
 The print method displays:
 \itemize{
-  \item Landscape name and class
+  \item Landscape name and pattern
   \item Dimensions (rows × columns and total cells)
   \item Resolution and spatial extent
   \item Value range (min/max) and count of NA values
@@ -31,7 +31,7 @@ The print method displays:
 \examples{
 # Create a landscape
 mat <- matrix(1:100, 10, 10)
-l <- landscape(mat, class = "test", name = "example")
+l <- landscape(mat, pattern = "test", name = "example")
 
 # Print it (calls print.landscape automatically)
 l

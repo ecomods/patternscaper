@@ -53,7 +53,7 @@ If NULL, no seed is set explicitly.
 If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 }
 \value{
-A landscape object with class "bands" containing the generated landscape data and parameters.
+A landscape object with pattern "bands" containing the generated landscape data and parameters.
 }
 \description{
 Generates a landscape with banded vegetation of plants and bare soil.
