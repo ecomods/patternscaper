@@ -8,6 +8,8 @@
 #'        "curvy", "fingers", "scattered", "sine_bands", "clusters", "spots", "gaps",
 #'        "banded", "labyrinth"
 #' @param name Character. Optional name for the landscape (default: NULL).
+#' @param custom_pattern Character. Optional pattern for the landscape (default: NULL uses the default
+#'     pattern of the corresponding function).
 #' @param ... Parameters passed to specific landscape functions. See the documentation
 #'        of the individual functions for details on required and optional parameters.
 #'
@@ -87,6 +89,7 @@ create_landscape <- function(
     "labyrinth"
   ),
   name = NULL,
+  custom_pattern = NULL,
   ...
 ) {
   # Define valid patterns
@@ -152,6 +155,10 @@ create_landscape <- function(
   # Set the name if provided
   if (!is.null(name)) {
     landscape <- set_landscape_name(landscape, name)
+  }
+  # Set a pattern different from the default if requested
+  if (!is.null(custom_pattern)) {
+    landscape <- set_landscape_pattern(landscape, custom_pattern)
   }
 
   return(landscape)
