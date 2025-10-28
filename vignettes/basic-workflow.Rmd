@@ -155,14 +155,14 @@ length(unique(training_metrics_filtered$metric))
 
 Now we'll train a neural network model using our filtered metrics.
 
-The `train_nn()` function trains a neural network model with cross-validation.
+The `train_nn_metrics()` function trains a neural network model with cross-validation.
 We can optionally specify the metrics to use with the `metrics_selected` argument.
 Also, we can specify the cross validation method (kfold or leave-one-out) and the number of folds.
 For a low number of data points, the function will automatically use leave-one-out cross-validation.
 
 ```{r train_model}
 # Train neural network model with cross-validation
-model <- train_nn(
+model <- train_nn_metrics(
   metrics = training_metrics_filtered,
   cv_folds = 5,
   cv_method = "k-fold" # one of "k-fold", "loo", "none"
@@ -221,7 +221,7 @@ test_landscape <- create_landscape(
 plot_landscape(test_landscape)
 
 # Classify the landscape
-classification <- apply_nn(
+classification <- apply_nn_metrics(
   landscape = test_landscape,
   nn_model = model
 )
@@ -244,7 +244,7 @@ test_landscapes <- generate_training_landscapes(
 plot_landscape_list(test_landscapes)
 
 # Classify all landscapes
-classifications <- apply_nn(
+classifications <- apply_nn_metrics(
   landscape = test_landscapes,
   nn_model = model
 )

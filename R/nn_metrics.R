@@ -15,7 +15,7 @@
 #'
 #' @return List. Trained neural network model and associated metadata.
 #' @export
-train_nn <- function(
+train_nn_metrics <- function(
   metrics,
   metrics_selected = NULL,
   cv_method = "k-fold",
@@ -377,13 +377,13 @@ train_nn <- function(
 #'
 #' @param landscapes SpatRaster, matrix, or list. Landscape(s) to classify.
 #'   Can be a single landscape or list of landscapes, with or without metadata.
-#' @param nn_model List. Neural network model from train_nn().
+#' @param nn_model List. Neural network model from apply_nn_landscapes().
 #' @param show_progress Logical. Whether to display progress bar for multiple landscapes (default: TRUE).
 #'
 #' @return tibble. Classification results with columns for landscape name,
 #'   predicted class, confidence score, warning flag, and probability for each class.
 #' @export
-apply_nn <- function(
+apply_nn_metrics <- function(
   landscapes,
   nn_model,
   show_progress = TRUE

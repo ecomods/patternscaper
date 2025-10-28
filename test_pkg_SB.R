@@ -86,7 +86,7 @@ training_metrics <- training_metrics |>
 # train the neural network model
 # use k-fold cross-validation with 3 folds
 # warning will tell you that folds need to be reduced to 2
-model <- train_nn(
+model <- train_nn_metrics(
   metrics = training_metrics,
   cv_folds = 3,
   cv_method = "k-fold"
@@ -129,12 +129,12 @@ test_cluster <- create_landscape(
   add_metadata = TRUE
 )
 
-apply_nn(
+apply_nn_metrics(
   landscape = test_cluster,
   nn_model = model
 )
 
-apply_nn(
+apply_nn_metrics(
   landscape = test_landscapes,
   nn_model = model
 )
@@ -160,7 +160,7 @@ training_landscapes <- generate_training_landscapes(
 )
 
 # Train a model
-model <- train_nn_keras(
+model <- train_nn_landscapes(
   landscapes = training_landscapes,
   cv_method = "k-fold",
   cv_folds = 5,
@@ -189,7 +189,7 @@ new_landscapes <- generate_training_landscapes(
   rotation_angles = c(0, 45, 90, 135, 180)
 )
 
-results <- apply_nn_keras(
+results <- apply_nn_landscapes(
   landscape = new_landscapes,
   nn_model = model,
   confidence_threshold = 0.7

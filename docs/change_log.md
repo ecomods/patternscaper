@@ -30,7 +30,7 @@ something else, they can do so explicitly and the seed is set inside the functio
 
 - The `train_nn` function still has some parts that could be simplified. For example, the cross-validation part could be made more straightforward and moved to a separate function.
 - Selection of cv-folds could be in a separate function that is shared between `train_nn` and `train_nn_keras`
-- The `apply_nn` function could also be simplified further and the data structure between the metrics and the keras version could be clearer
+- The `apply_nn_metrics` function could also be simplified further and the data structure between the metrics and the keras version could be clearer
 - `train_nn_keras` should also have a loo cross-validation option
 - The model architecture could be moved to a separate function. This way, I can easily provide different architectures to select from and compare
 - The prediction accuracy of the keras model is not very good. I need to find out why

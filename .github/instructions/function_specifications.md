@@ -505,7 +505,7 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 ### `plot_classification_results`
 
 **Input:**
-- `classification` (data frame): Classification results from apply_nn
+- `classification` (data frame): Classification results from apply_nn_metrics
 - `show_probabilities` (logical): Whether to include probability bars (default: TRUE)
 - `confidence_threshold` (numeric): Threshold for highlighting low confidence (default: 0.6)
 
@@ -645,7 +645,7 @@ This is an internal utility function used by `calculate_landscape_metrics` to ha
 7. If save_model=TRUE, saves model to specified path using readr::write_rds
 8. Returns model object with metadata
 
-### `apply_nn`
+### `apply_nn_metrics`
 
 **Input:**
 - `landscape` (SpatRaster or list): Landscape(s) to classify

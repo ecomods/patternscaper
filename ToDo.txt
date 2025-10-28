@@ -90,8 +90,8 @@ predictions <- predict(
 #---------------------------------------------------------------------
 #Parameter landscapes im NN
 #---------------------------------------------------------------------
-- apply_nn: parameter landscapes (im Code) vs. landscape (in Hilfefunktion)
-apply_nn übergibt landscapes (matrix, raster, list) an calculate_landscape_metrics,
+- apply_nn_metrics: parameter landscapes (im Code) vs. landscape (in Hilfefunktion)
+apply_nn_metrics übergibt landscapes (matrix, raster, list) an calculate_landscape_metrics,
 dort ist aber matrix laut Hilfefunktion nicht vorgesehen
 
 #--------------------------------------------------------------------

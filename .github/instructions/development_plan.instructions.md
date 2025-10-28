@@ -70,7 +70,7 @@ model <- train_nn(
 image <- terra::rast("data-raw/satellite_images/Picture9.png")
 
 # Classify the landscape
-classification <- apply_nn(
+classification <- apply_nn_metrics(
   image,
   nn_model = model,
   test_data = metrics, 

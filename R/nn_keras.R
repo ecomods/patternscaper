@@ -17,7 +17,7 @@
 #'
 #' @return List. Trained CNN model and associated metadata.
 #' @export
-train_nn_keras <- function(
+train_nn_landscapes <- function(
   landscapes,
   cv_method = "k-fold",
   cv_folds = 5,
@@ -441,7 +441,7 @@ train_nn_keras <- function(
 #'
 #' @param landscapes SpatRaster, matrix, or list. Landscape(s) to classify.
 #'   Can be a single landscape or list of landscapes, with or without metadata.
-#' @param nn_model List. CNN model from train_nn_keras().
+#' @param nn_model List. CNN model from train_nn_landscapes().
 #' @param show_progress Logical. Whether to display progress bar for multiple landscapes (default: TRUE).
 #'
 #' @return tibble. Classification results with columns for landscape name,

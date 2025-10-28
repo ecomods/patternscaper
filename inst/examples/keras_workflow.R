@@ -34,7 +34,7 @@ training_landscapes <- create_training_landscapes(
 )
 
 # Train a model
-model <- train_nn_keras(
+model <- train_nn_landscapes(
   landscapes = training_landscapes,
   cv_method = "k-fold",
   cv_folds = 5,
@@ -87,12 +87,12 @@ test_cluster <- create_landscape(
 plot_landscape(test_cluster)
 
 # Apply the model to the test landscape(s)
-apply_nn_keras(
+apply_nn_landscapes(
   landscape = test_cluster,
   nn_model = model
 )
 
-validation_results <- apply_nn_keras(
+validation_results <- apply_nn_landscapes(
   landscape = test_landscapes,
   nn_model = model
 )

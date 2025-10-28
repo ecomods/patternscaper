@@ -71,7 +71,7 @@ plot_metrics(
 # Train a network -----------------------------------------------
 # use k-fold cross-validation with 3 folds
 # warning will tell you that folds need to be reduced to 2
-model <- train_nn(
+model <- train_nn_metrics(
   metrics = landscape_metrics,
   metrics_selected = best_10_group_diff,
   cv_method = "k-fold",
@@ -124,12 +124,12 @@ test_cluster <- create_landscape(
 plot_landscape(test_cluster)
 
 # Apply the model to the test landscape(s)
-apply_nn(
+apply_nn_metrics(
   landscapes = test_cluster,
   nn_model = model
 )
 
-validation_results <- apply_nn(
+validation_results <- apply_nn_metrics(
   landscapes = test_landscapes,
   nn_model = model
 )
