@@ -8,8 +8,16 @@ devtools::load_all()
 #--------------------------------------------------------------------
 
 # only those types that refer to ecotones (or random)
-ecotone_types = c("random","sharp", "diffuse", "curvy", "fingers","scattered","clustered","sine_bands")
-ecotone_types_title = c("random","sharp", "diffuse", "curvy", "fingers","scattered","clustered","sine bands")
+ecotone_types = c(
+  "random",
+  "sharp",
+  "diffuse",
+  "curvy",
+  "fingers",
+  "scattered",
+  "clustered",
+  "sine_bands"
+)
 n_ecotones <- length(ecotone_types)
 
 #--------------------------------------------------------------------
@@ -17,28 +25,32 @@ n_ecotones <- length(ecotone_types)
 #--------------------------------------------------------------------
 
 # generate landscapes
-landscapes_manuscript <- generate_training_landscapes(
+landscapes_manuscript <- create_training_landscapes(
   n = n_ecotones,
   seed = 42,
-  types = ecotone_types
+  patterns = ecotone_types
 )
 
 # plot all landscapes
-plot_landscape_list(landscapes_manuscript,ncol=n_ecotones, titles = ecotone_types_title, show_legend = FALSE)
+plot_landscape_list(
+  landscapes_manuscript,
+  ncol = n_ecotones,
+  show_legend = FALSE
+)
 
 #--------------------------------------------------------------------
 # Generate training landscapes and take a look
 #--------------------------------------------------------------------
 
 #generate all training landscapes
-ecotone_landscapes <- generate_training_landscapes(
+ecotone_landscapes <- create_training_landscapes(
   n = 200,
   seed = 42,
-  types = ecotone_types
+  patterns = ecotone_types
 )
 
-# check how many landscapes of each type were generated
-table(purrr::map_chr(ecotone_landscapes, "type"))
+# check how many landscapes of each pattern were generated
+table(purrr::map_chr(ecotone_landscapes, ~ .x$pattern))
 
 # plot first 20 landscapes
 plot_landscape_list(ecotone_landscapes[1:20])
@@ -72,7 +84,7 @@ plot_metrics(
 # train a network
 # use k-fold cross-validation with 3 folds
 # warning will tell you that folds need to be reduced to 2
-model_ecotones_lm <- train_nn(
+model_ecotones_lm <- train_nn_metrics(
   metrics = landscape_metrics,
   metrics_selected = best_10,
   cv_method = "k-fold",
@@ -100,7 +112,7 @@ plot_classification_results(model_ecotones_lm, plot_type = "misclassifications")
 # Plot the landscapes that were misclassified
 plot_nn_classification_landscapes(
   classification = model_ecotones_lm$validation_results,
-  landscape_list = ecotone_landscapes,
+  landscapes = ecotone_landscapes,
   only_misclassified = TRUE
 )
 
@@ -109,18 +121,18 @@ plot_nn_classification_landscapes(
 # -------------------------------------------------------------------
 
 # generate test landscapes
-test_landscapes_ecotone <- generate_training_landscapes(
+test_landscapes_ecotone <- create_training_landscapes(
   seed = 43,
   n = 50,
   add_rotation = TRUE,
-  types = ecotone_types
+  patterns = ecotone_types
 )
 
 # plot first 20 landscapes
 plot_landscape_list(test_landscapes_ecotone[1:20])
 
 # apply the model to the test landscapes
-validation_results_ecotone_lm <- apply_nn(
+validation_results_ecotone_lm <- apply_nn_metrics(
   landscapes = test_landscapes_ecotone,
   nn_model = model_ecotones_lm
 )
@@ -130,7 +142,7 @@ validation_results_ecotone_lm
 #show landscapes that are not classified correctly
 plot_nn_classification_landscapes(
   classification = validation_results_ecotone_lm$predictions,
-  landscape_list = test_landscapes_ecotone,
+  landscapes = test_landscapes_ecotone,
   only_misclassified = TRUE
 )
 
@@ -144,7 +156,7 @@ pic_names <- list.files(pic_dir) #file names
 pic_names
 
 i <- 1
-image <- terra::rast(paste(pic_dir,pic_names[i],sep=""))
+image <- terra::rast(paste(pic_dir, pic_names[i], sep = ""))
 # If it's a multi-band image
 band1 <- image[[1]]
 # Apply threshold
@@ -154,20 +166,28 @@ test_matrix <- as.matrix(binary_class, wide = TRUE)
 test_raster <- terra::rast(test_matrix)
 
 #test plotting of binary categorization
-par(mfrow=c(1,2),pty="s")
-  raster::plot(raster::flip(band1),col=terrain.colors(25),
-               main="Initial Landscape")
-  raster::plot(raster::flip(test_raster),col=c(terrain.colors(25)[25],terrain.colors(25)[1]),
-             main="Binary Landscape")
-par(mfrow=c(1,1))
+par(mfrow = c(1, 2), pty = "s")
+raster::plot(
+  raster::flip(band1),
+  col = terrain.colors(25),
+  main = "Initial Landscape"
+)
+raster::plot(
+  raster::flip(test_raster),
+  col = c(terrain.colors(25)[25], terrain.colors(25)[1]),
+  main = "Binary Landscape"
+)
+par(mfrow = c(1, 1))
+
+# Bring the test raster in the right format for package functions
+test_raster_l <- landscape(data = test_raster, name = "test raster")
 
 #apply the neural metwork model to the picture
-result_pics <- apply_nn(
-  landscapes = test_raster,
+result_pics <- apply_nn_metrics(
+  landscapes = test_raster_l,
   nn_model = model_ecotones_lm
 )
 
 #show predicted type
 pic_names[i]
 result_pics$predictions
-
