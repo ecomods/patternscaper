@@ -420,7 +420,7 @@ plot_nn_misclassifications <- function(nn_model, confidence_threshold = 0.6) {
 #'
 #' @param classification A data frame with columns: \code{landscape_id},
 #'   \code{actual_class}, \code{predicted_class}, and \code{confidence}.
-#' @param landscape_list A list of landscapes (e.g., SpatRaster or matrix)
+#' @param landscapes A list of landscape objects
 #'   corresponding to the classification results.
 #' @param only_misclassified Logical; if \code{TRUE}, only misclassified
 #'   landscapes are plotted. Default is \code{FALSE}.
@@ -437,7 +437,7 @@ plot_nn_misclassifications <- function(nn_model, confidence_threshold = 0.6) {
 #' @export
 plot_nn_classification_landscapes <- function(
   classification,
-  landscape_list,
+  landscapes,
   only_misclassified = FALSE
 ) {
   # Check if classification has the required elements
@@ -473,10 +473,10 @@ plot_nn_classification_landscapes <- function(
   }
 
   # check if the landscape list has the same length as the validation results
-  if (length(landscape_list) < nrow(classification)) {
+  if (length(landscapes) < nrow(classification)) {
     stop(paste(
-      "landscape_list has fewer entries (",
-      length(landscape_list),
+      "landscapes has fewer entries (",
+      length(landscapes),
       ") than validation results (",
       nrow(classification),
       "). Some landscapes may be missing."
@@ -519,7 +519,7 @@ plot_nn_classification_landscapes <- function(
 
   # Subset the landscapes that should be plotted using the index of the landscape
   # in the validation results
-  landscapes_to_plot <- landscape_list[classification$landscape_id]
+  landscapes_to_plot <- landscapes[classification$landscape_id]
 
   # Create plots for each landscape
   plots <- plot_landscape_list(
