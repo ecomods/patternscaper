@@ -141,7 +141,7 @@ create_landscape_fingers <- function(
 
   # Apply rotation if specified
   if (rotation != 0) {
-    mat <- rotate_and_crop_landscape(
+    mat <- rotate_and_crop_matrix(
       mat,
       rotation,
       width,

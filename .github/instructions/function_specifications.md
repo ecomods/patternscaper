@@ -31,7 +31,7 @@ This document outlines all the functions required for the EcotoneClassifyR packa
 4. Verifies that raster has valid dimensions
 5. If verbose=TRUE, returns size and unique class information
 
-### `rotate_and_crop_landscape`
+### `rotate_and_crop_matrix`
 
 **Input:**
 - `landscape` (matrix or SpatRaster): Landscape to rotate

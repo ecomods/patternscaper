@@ -49,7 +49,7 @@ create_landscape_sharp_treeline <- function(
 
   # Rotate the landscape, crop and fill NAs if specified
   if (rotation != 0) {
-    mat <- rotate_and_crop_landscape(
+    mat <- rotate_and_crop_matrix(
       mat,
       rotation,
       width,

@@ -4,7 +4,7 @@
 #' matrix to the target width and height, centering the crop. Any missing values
 #' after cropping are filled with the values of their nearest neighbors.
 #'
-#' @param landscape A matrix representing the landscape to be rotated and cropped.
+#' @param mat A matrix representing the landscape to be rotated and cropped.
 #' @param rotation Numeric value specifying the rotation angle (in degrees).
 #' @param target_width Integer specifying the desired width of the cropped matrix.
 #' @param target_height Integer specifying the desired height of the cropped matrix.
@@ -17,22 +17,22 @@
 #'   filled using the \code{fill_na_with_nearest} function.
 #'
 #' @seealso \code{\link[omnibus]{rotateMatrix}}, \code{fill_na_with_nearest}
-rotate_and_crop_landscape <- function(
-  landscape,
+rotate_and_crop_matrix <- function(
+  mat,
   rotation,
   target_width,
   target_height
 ) {
-  # check if the landscape is a matrix
-  if (!is.matrix(landscape)) {
-    stop("landscape must be a matrix, but is of class: ", class(landscape))
+  # check if the mat is a matrix
+  if (!is.matrix(mat)) {
+    stop("mat must be a matrix, but is of class: ", class(mat))
   }
-  # rotate landscape and crop it to the original size
-  landscape <- omnibus::rotateMatrix(landscape, rotation)
-  # # crop the rotated landscape to the original size (take the center)
-  # get dimensions of rotated landscape
-  rotated_nrow <- nrow(landscape)
-  rotated_ncol <- ncol(landscape)
+  # rotate mat and crop it to the original size
+  mat <- omnibus::rotateMatrix(mat, rotation)
+  # # crop the rotated mat to the original size (take the center)
+  # get dimensions of rotated mat
+  rotated_nrow <- nrow(mat)
+  rotated_ncol <- ncol(mat)
 
   # calculate the indices to crop the center
   start_row <- ceiling((rotated_nrow - target_width) / 2)
@@ -41,12 +41,12 @@ rotate_and_crop_landscape <- function(
   start_col <- ceiling((rotated_ncol - target_height) / 2)
   end_col <- start_col + target_height - 1
 
-  # crop the rotated landscape to the target size (take the center)
-  landscape <- landscape[start_row:end_row, start_col:end_col]
+  # crop the rotated mat to the target size (take the center)
+  mat <- mat[start_row:end_row, start_col:end_col]
   # fill the last missing values with the values of their nearest neighbors
   # first turn to raster
-  landscape <- fill_na_with_nearest(landscape, binarize = TRUE)
-  return(landscape)
+  mat <- fill_na_with_nearest(mat, binarize = TRUE)
+  return(mat)
 }
 
 #' Fill NA Values in a Matrix Using Nearest Neighbor Interpolation
