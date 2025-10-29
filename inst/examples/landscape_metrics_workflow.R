@@ -26,7 +26,6 @@ plot_landscape_list(landscapes[1:20])
 # Step 2: Calculate landscape metrics ---------------------------------------
 # ----------------------------------------------------------------------------#
 # List available landscape metrics
-list_available_metrics()
 landscapemetrics::list_lsm() |> dplyr::arrange(metric)
 # List available landscape metrics of specific level(s)
 list_available_metrics(level = c("class", "landscape"))
