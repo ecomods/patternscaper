@@ -93,11 +93,6 @@ calculate_single_metric <- function(landscapes, function_name) {
 #'   level = "landscape"
 #' )
 #'
-#' # Calculate metrics at multiple levels
-#' metrics <- calculate_landscape_metrics(
-#'   landscapes,
-#'   level = c("class", "landscape")
-#' )
 #' }
 calculate_landscape_metrics <- function(
   landscapes,
@@ -113,9 +108,9 @@ calculate_landscape_metrics <- function(
   }
 
   # Check if landscapes is a list of landscape objects
-  if (any(!sapply(landscapes, is_landscape))) {
+  if (any(!vapply(landscapes, is_landscape, logical(1)))) {
     # find out which element is not a landscape
-    invalid_indices <- which(!sapply(landscapes, is_landscape))
+    invalid_indices <- which(!vapply(landscapes, is_landscape, logical(1)))
     stop(
       "All elements must be landscape objects. Invalid element(s) at index(es): ",
       paste(invalid_indices, collapse = ", ")
