@@ -32,6 +32,8 @@ Defines how far below the treeline scattered trees can appear.}
 \item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
 If NULL, no seed is set explicitly.
 If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
+
+\item{random_spots}{List of Numerics. Probability or random spots of vegetation in the other vegetation type (default: c(0,0))}
 }
 \value{
 A landscape object with pattern "scattered" containing the generated landscape data and parameters.
