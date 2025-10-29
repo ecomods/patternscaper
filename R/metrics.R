@@ -6,71 +6,99 @@
 #' @param landscapes A list of landscape objects
 #' @param function_name Character. The name of the landscapemetrics function to call.
 #' @return tibble. Results from the metric calculation including any warnings.
-#' @noRd
+#' @keywords internal
+#' @importFrom purrr map_dfr
+#' @importFrom dplyr mutate
 calculate_single_metric <- function(landscapes, function_name) {
-  # Extract landscape names
-  landscape_names <- purrr::map_chr(landscapes, function(x) x$name)
+  # Get the function from landscapemetrics namespace
+  func <- getFromNamespace(function_name, "landscapemetrics")
+  purrr::map_dfr(
+    seq_along(landscapes),
+    \(i) {
+      current <- landscapes[[i]]$data
+      warnings_captured <- character(0)
 
-  # Try to calculate the metric
-  result <- tryCatch(
-    {
-      purrr::map2_dfr(
-        landscape_names,
-        seq_along(landscapes),
-        \(name, i) {
-          current <- landscapes[[i]]$data
-
-          # Create a wrapper that captures warnings
-          warnings_captured <- character(0)
-
-          # Use withCallingHandlers to capture warnings
-          result <- withCallingHandlers(
-            {
-              # Get the function from landscapemetrics namespace
-              func <- getFromNamespace(function_name, "landscapemetrics")
-              func(current)
-            },
-            warning = function(w) {
-              warnings_captured <<- c(warnings_captured, conditionMessage(w))
-              invokeRestart("muffleWarning")
-            }
-          )
-
-          # Add landscape name, type, and any warnings to the result
-          result |>
-            dplyr::mutate(
-              landscape_id = i,
-              landscape_name = name,
-              pattern = landscapes[[i]]$pattern,
-              warnings = ifelse(
-                length(warnings_captured) > 0,
-                paste(warnings_captured, collapse = "; "),
-                NA_character_
-              )
-            )
+      # Use withCallingHandlers to capture warnings
+      result <- withCallingHandlers(
+        {
+          func(current)
+        },
+        warning = function(w) {
+          warnings_captured <<- c(warnings_captured, conditionMessage(w))
+          invokeRestart("muffleWarning")
         }
       )
-    },
-    error = function(e) {
-      warning(paste("Error calculating", function_name, ":", e$message))
-      return(NULL)
+
+      # Add landscape name, type, and any warnings to the result
+      result |>
+        dplyr::mutate(
+          landscape_id = i,
+          landscape_name = landscapes[[i]]$name,
+          pattern = landscapes[[i]]$pattern,
+          warnings = if (length(warnings_captured) > 0) {
+            paste(warnings_captured, collapse = "; ")
+          } else {
+            NA_character_
+          }
+        )
     }
   )
-
-  return(result)
 }
 
 #' Calculate Landscape Metrics
 #'
-#' Calculates selected landscape metrics for one or more landscapes.
+#' Calculates selected landscape metrics for one or more landscapes using functions
+#' from the landscapemetrics package. Returns a standardized tibble with results
+#' including landscape identifiers, metric values, and any warnings.
 #'
-#' @param landscapes A single landscape object or a list of landscape objects.
-#' @param metrics Character vector. Names of metrics to calculate (default: NULL for all).
-#' @param level Character. Level(s) of metrics to calculate ("patch", "class", "landscape" or a vector) (default: "landscape").
+#' @param landscapes A single landscape object (created with \code{\link{create_landscape}})
+#'   or a list of landscape objects (e.g. created with \code{\link{create_training_landscapes}}).
+#'   Each landscape object should contain a \code{data}
+#'   element with a SpatRaster, plus \code{name} and \code{pattern} metadata.
+#' @param metrics Character vector. Names of metrics to calculate (default: NULL for all
+#'   available metrics at the specified level). Use \code{list_lsm()} from landscapemetrics
+#'   to see available metrics.
+#' @param level Character. Level(s) of metrics to calculate: "patch", "class", "landscape"
+#'   (default: "landscape").
 #'
-#' @return tibble. Standardized metrics table with landscape name, type (if available), metric name,
-#'         class (if applicable), and value.
+#' @return A tibble with the following columns:
+#'   \describe{
+#'     \item{landscape_id}{Numeric identifier for each landscape in the input list}
+#'     \item{landscape_name}{Name of the landscape from the landscape object}
+#'     \item{pattern}{Pattern type from the landscape object (e.g., "banded", "spots")}
+#'     \item{layer}{Layer number (from landscapemetrics output)}
+#'     \item{level}{Metric level: "patch", "class", or "landscape"}
+#'     \item{class}{Class value (for class- and patch-level metrics, NA for landscape-level)}
+#'     \item{id}{Patch ID (for patch-level metrics, NA otherwise)}
+#'     \item{metric}{Name of the calculated metric}
+#'     \item{value}{Calculated metric value}
+#'     \item{warnings}{Any warnings generated during calculation (NA if none)}
+#'   }
+#'
 #' @export
+#' @importFrom dplyr mutate relocate
+#' @importFrom purrr map_dfr
+#'
+#' @examples
+#' \dontrun{
+#' # Calculate all landscape-level metrics for a single landscape
+#' landscape <- create_landscape(pattern = "banded")
+#' metrics <- calculate_landscape_metrics(landscape)
+#'
+#' # Calculate specific metrics for multiple landscapes
+#' landscapes <- create_training_landscapes(n = 10, patterns = "spots")
+#' metrics <- calculate_landscape_metrics(
+#'   landscapes,
+#'   metrics = c("ai", "lsi"),
+#'   level = "landscape"
+#' )
+#'
+#' # Calculate metrics at multiple levels
+#' metrics <- calculate_landscape_metrics(
+#'   landscapes,
+#'   level = c("class", "landscape")
+#' )
+#' }
 calculate_landscape_metrics <- function(
   landscapes,
   metrics = NULL,
@@ -94,8 +122,18 @@ calculate_landscape_metrics <- function(
     )
   }
 
-  # Get available metrics for the requested level(s)
-  available_metrics <- list_available_metrics(level = level)
+  # Check if level parameter is valid
+  valid_levels <- c("patch", "class", "landscape")
+  if (!all(level %in% valid_levels) || length(level) != 1) {
+    stop(paste(
+      "Invalid level:",
+      paste(level, collapse = ", "),
+      "\nValid options are a single value of: 'patch', 'class', or 'landscape'"
+    ))
+  }
+
+  # Check if metrics parameter is valid
+  available_metrics <- landscapemetrics::list_lsm(level = level)
 
   # Filter metrics if specified
   if (!is.null(metrics)) {
@@ -103,7 +141,7 @@ calculate_landscape_metrics <- function(
     invalid_metrics <- metrics[!metrics %in% available_metrics$metric]
     if (length(invalid_metrics) > 0) {
       warning(paste(
-        "The following metrics were not found:",
+        "The following metrics were not found and will be ignored:",
         paste(invalid_metrics, collapse = ", ")
       ))
     }
@@ -133,12 +171,11 @@ calculate_landscape_metrics <- function(
       landscape_id,
       landscape_name,
       pattern,
-      layer,
       level,
+      layer,
       class,
       id,
       metric,
-      layer,
       value,
       warnings
     )
