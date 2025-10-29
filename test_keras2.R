@@ -6,7 +6,7 @@
 
 # Setup and Environment -------------------------------------------------------
 library(reticulate)
-library(keras)
+library(keras3)
 library(terra)
 library(tidyverse)
 library(purrr)
@@ -30,7 +30,15 @@ set.seed(42)
 training_landscapes <- generate_training_landscapes(
   seed = 42,
   n = 500, # Larger dataset for better generalization
-  types = c("sharp", "diffuse", "curvy", "fingers", "scattered", "clustered", "sine_bands"),
+  types = c(
+    "sharp",
+    "diffuse",
+    "curvy",
+    "fingers",
+    "scattered",
+    "clustered",
+    "sine_bands"
+  ),
   width = 100,
   height = 100,
   add_rotation = TRUE,
@@ -75,18 +83,26 @@ cat("Input shape:", paste(input_shape, collapse = "x"), "\n")
 #------------------------------------------------------------------------------#
 
 # Define multiple model architectures to compare
-create_model <- function(architecture = c("basic", "deeper", "multiscale", "residual")) {
+create_model <- function(
+  architecture = c("basic", "deeper", "multiscale", "residual")
+) {
   architecture <- match.arg(architecture)
 
   if (architecture == "basic") {
     # Basic CNN architecture (baseline)
     model <- keras_model_sequential() %>%
       layer_conv_2d(
-        filters = 32, kernel_size = c(3, 3), activation = "relu",
+        filters = 32,
+        kernel_size = c(3, 3),
+        activation = "relu",
         input_shape = input_shape
       ) %>%
       layer_max_pooling_2d(pool_size = c(2, 2)) %>%
-      layer_conv_2d(filters = 64, kernel_size = c(3, 3), activation = "relu") %>%
+      layer_conv_2d(
+        filters = 64,
+        kernel_size = c(3, 3),
+        activation = "relu"
+      ) %>%
       layer_max_pooling_2d(pool_size = c(2, 2)) %>%
       layer_flatten() %>%
       layer_dense(units = 128, activation = "relu") %>%
@@ -96,7 +112,9 @@ create_model <- function(architecture = c("basic", "deeper", "multiscale", "resi
     # Deeper architecture with batch normalization
     model <- keras_model_sequential() %>%
       layer_conv_2d(
-        filters = 64, kernel_size = c(3, 3), padding = "same",
+        filters = 64,
+        kernel_size = c(3, 3),
+        padding = "same",
         input_shape = input_shape
       ) %>%
       layer_batch_normalization() %>%
@@ -120,7 +138,9 @@ create_model <- function(architecture = c("basic", "deeper", "multiscale", "resi
     model <- keras_model_sequential() %>%
       # Detect fine details with small kernels
       layer_conv_2d(
-        filters = 32, kernel_size = c(3, 3), padding = "same",
+        filters = 32,
+        kernel_size = c(3, 3),
+        padding = "same",
         input_shape = input_shape
       ) %>%
       layer_activation("relu") %>%
@@ -187,11 +207,12 @@ create_model <- function(architecture = c("basic", "deeper", "multiscale", "resi
   }
 
   # Compile model
-  model %>% compile(
-    loss = "categorical_crossentropy",
-    optimizer = optimizer_adam(learning_rate = 0.001),
-    metrics = c("accuracy")
-  )
+  model %>%
+    compile(
+      loss = "categorical_crossentropy",
+      optimizer = optimizer_adam(learning_rate = 0.001),
+      metrics = c("accuracy")
+    )
 
   return(model)
 }
@@ -201,17 +222,32 @@ create_model <- function(architecture = c("basic", "deeper", "multiscale", "resi
 #------------------------------------------------------------------------------#
 
 # K-fold cross validation function
-run_cross_validation <- function(architecture = "basic", k_folds = 5,
-                                 epochs = 20, batch_size = 16) {
+run_cross_validation <- function(
+  architecture = "basic",
+  k_folds = 5,
+  epochs = 20,
+  batch_size = 16
+) {
   # Results storage
   fold_results <- list()
   all_predictions <- list()
   all_true_labels <- list()
 
   # Create folds
-  fold_indices <- createFolds(y_int, k = k_folds, list = TRUE, returnTrain = FALSE)
+  fold_indices <- createFolds(
+    y_int,
+    k = k_folds,
+    list = TRUE,
+    returnTrain = FALSE
+  )
 
-  cat("\n--- Starting", k_folds, "fold cross-validation for", architecture, "model ---\n")
+  cat(
+    "\n--- Starting",
+    k_folds,
+    "fold cross-validation for",
+    architecture,
+    "model ---\n"
+  )
 
   for (fold in 1:k_folds) {
     cat("Fold", fold, "of", k_folds, "\n")
@@ -229,14 +265,15 @@ run_cross_validation <- function(architecture = "basic", k_folds = 5,
     # Create and train the model
     model <- create_model(architecture)
 
-    history <- model %>% fit(
-      x = x_train,
-      y = y_train,
-      epochs = epochs,
-      batch_size = batch_size,
-      validation_data = list(x_val, y_val),
-      verbose = 1
-    )
+    history <- model %>%
+      fit(
+        x = x_train,
+        y = y_train,
+        epochs = epochs,
+        batch_size = batch_size,
+        validation_data = list(x_val, y_val),
+        verbose = 1
+      )
 
     # Evaluate the model
     evaluation <- model %>% evaluate(x_val, y_val)
@@ -374,19 +411,26 @@ cat("\nTraining final model with", best_arch, "architecture on all data...\n")
 
 final_model <- create_model(best_arch)
 
-history <- final_model %>% fit(
-  x = x_data,
-  y = y_data,
-  epochs = 30, # More epochs for final model
-  batch_size = 16,
-  validation_split = 0.2
-)
+history <- final_model %>%
+  fit(
+    x = x_data,
+    y = y_data,
+    epochs = 30, # More epochs for final model
+    batch_size = 16,
+    validation_split = 0.2
+  )
 
 # Plot training history
 plot(history)
 
 # Save the model
-model_filename <- paste0("landscape_classifier_", best_arch, "_", format(Sys.time(), "%Y%m%d"), ".h5")
+model_filename <- paste0(
+  "landscape_classifier_",
+  best_arch,
+  "_",
+  format(Sys.time(), "%Y%m%d"),
+  ".h5"
+)
 save_model_hdf5(final_model, model_filename)
 cat("Model saved as:", model_filename, "\n")
 
@@ -428,15 +472,25 @@ cat("\nGenerating visual prediction samples...\n")
 sample_indices <- sample(1:length(test_labels), min(10, length(test_labels)))
 
 # Create titles for plots with predicted and actual labels
-predicted_titles <- ifelse(predicted_classes[sample_indices] == test_labels[sample_indices],
-  paste0("<span style='color:forestgreen'>", predicted_classes[sample_indices], "</span>"),
-  paste0("<span style='color:red'>", predicted_classes[sample_indices], "</span>")
+predicted_titles <- ifelse(
+  predicted_classes[sample_indices] == test_labels[sample_indices],
+  paste0(
+    "<span style='color:forestgreen'>",
+    predicted_classes[sample_indices],
+    "</span>"
+  ),
+  paste0(
+    "<span style='color:red'>",
+    predicted_classes[sample_indices],
+    "</span>"
+  )
 )
 
 titles <- paste0(test_labels[sample_indices], "<br>", predicted_titles)
 
 # Plot the landscapes with their predicted classes
-plot_validation <- test_plots[sample_indices] |> plot_landscape_list(titles = titles)
+plot_validation <- test_plots[sample_indices] |>
+  plot_landscape_list(titles = titles)
 print(plot_validation)
 
 cat("\nLandscape classification complete!\n")

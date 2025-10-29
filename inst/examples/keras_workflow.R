@@ -13,6 +13,38 @@ reticulate::py_discover_config()
 # Also creates a venv r-tensorflow
 # install_keras()
 
+# -----------------------------------------------------------------------------#
+# Setup keras ------------------------------------------------------------------
+# -----------------------------------------------------------------------------#
+# You need to have a python version <=3.11 installed
+# install.packages("keras3")
+# keras3::install_keras()
+
+# ----------------------------------------------------------------------------#
+# Prewarm Keras ---------------------------------------------------------------
+# ----------------------------------------------------------------------------#
+# The first time tensorflow is set up, it takes time. Therefore, we do it outside
+# the training function to make the setup explicit. This is just a placehodler for
+# later
+prewarm_keras <- function() {
+  cat("Initializing keras3/TensorFlow backend...\n")
+
+  start_time <- Sys.time()
+
+  # The simplest operation that triggers TensorFlow initialization
+  # You don't need a full model!
+  keras3::invisible(to_categorical(0))
+
+  end_time <- Sys.time()
+  elapsed <- as.numeric(difftime(end_time, start_time, units = "secs"))
+
+  cat(sprintf("✓ Backend ready (%.1f seconds)\n", elapsed))
+  invisible(TRUE)
+}
+
+# Call the function
+prewarm_keras()
+
 # Test Keras NN ---------------------------------------------------------
 # Increase number of landscapes for better training
 training_landscapes <- create_training_landscapes(
@@ -38,7 +70,7 @@ model <- train_nn_landscapes(
   landscapes = training_landscapes,
   cv_method = "k-fold",
   cv_folds = 5,
-  epochs = 30,
+  epochs = 10,
   model_path = "models/landscape_classifier"
 )
 
