@@ -5,7 +5,7 @@
 #' parameter.
 #'
 #' @param pattern Character. pattern of landscape to generate: "random", "sharp", "diffuse",
-#'        "curvy", "fingers", "scattered", "sine_bands", "clusters", "spots", "gaps",
+#'        "curvy", "fingers", "curvyfingers", "scattered", "sine_bands", "clusters", "spots", "gaps",
 #'        "banded", "labyrinth"
 #' @param name Character. Optional name for the landscape (default: NULL).
 #' @param custom_pattern Character. Optional pattern for the landscape (default: NULL uses the default
@@ -26,6 +26,8 @@
 #' \code{\link{create_landscape_curvy_treeline}} for "curvy" pattern parameters
 #'
 #' \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
+#'
+#' \code{\link{create_landscape_curvyfingers}} for "curvyfingers" pattern parameters
 #'
 #' \code{\link{create_landscape_scattered_trees}} for "scattered" pattern parameters
 #'
@@ -80,6 +82,7 @@ create_landscape <- function(
     "diffuse",
     "curvy",
     "fingers",
+    "curyfingers",
     "scattered",
     "clustered",
     "sine_bands",
@@ -143,6 +146,7 @@ create_landscape <- function(
     diffuse = create_landscape_diffuse_treeline(...),
     curvy = create_landscape_curvy_treeline(...),
     fingers = create_landscape_fingers(...),
+    curvyfingers = create_landscape_curvyfingers(...),
     scattered = create_landscape_scattered_trees(...),
     clustered = create_landscape_clustered_trees(...),
     sine_bands = create_landscape_sine_bands(...),
@@ -210,6 +214,7 @@ create_training_landscapes <- function(
     "diffuse",
     "curvy",
     "fingers",
+    "curvyfingers",
     "scattered",
     "clustered",
     "sine_bands",
@@ -244,6 +249,7 @@ create_training_landscapes <- function(
     "diffuse",
     "curvy",
     "fingers",
+    "curvyfingers",
     "scattered",
     "clustered",
     "sine_bands",
