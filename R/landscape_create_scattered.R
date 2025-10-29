@@ -5,6 +5,7 @@
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
+#' @param random_spots List of Numerics. Probability or random spots of vegetation in the other vegetation type (default: c(0,0))
 #' @param scatter_density Numeric. Probability of tree presence in the scatter zone (0-1) (default: 0.1).
 #'    Higher values result in a denser tree cover in the scatter zone.
 #' @param scatter_zone_prop Numeric. Proportion of height for scatter zone (default: 0.5).
@@ -60,6 +61,7 @@ create_landscape_scattered_trees <- function(
     width_actual,
     height_actual,
     treeline_position,
+    random_spots,
     rotation = 0
   )
 

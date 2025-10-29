@@ -5,6 +5,7 @@
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
+#' @param random_spots List of Numerics. Probability or random spots of vegetation in the other vegetation type (default: c(0,0))
 #' @param num_clusters Integer. Number of cluster centers (default: 10).
 #' @param cluster_radius Numeric. Radius of clusters in pixels (default: 5).
 #' @param scatter_zone_prop Numeric. Proportion of height for scatter zone (default: 0.3).
@@ -48,6 +49,7 @@ create_landscape_clustered_trees <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
+  random_spots = c(0,0),
   num_clusters = 10,
   cluster_radius = 5,
   scatter_zone_prop = 0.3,
@@ -109,6 +111,7 @@ create_landscape_clustered_trees <- function(
         width = width_actual,
         height = height_actual,
         treeline_position = treeline_position,
+        random_spots = random_spots,
         rotation = 0
       )
 

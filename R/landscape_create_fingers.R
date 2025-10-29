@@ -7,6 +7,7 @@
 #' @param width Integer. Width of the landscape (default: 100).
 #' @param height Integer. Height of the landscape (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline (0-1, default: 0.5).
+#' @param random_spots List of Numerics. Probability or random spots of vegetation in the other vegetation type (default: c(0,0))
 #' @param num_fingers Integer. Number of fingers to create (default: 5).
 #' @param finger_width Integer. Width of each finger in pixels (default: 3).
 #' @param finger_length_prop Numeric. Proportion of height of the total landscape for finger length (default: 0.3).
@@ -45,6 +46,7 @@ create_landscape_fingers <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
+  random_spots = c(0,0),
   num_fingers = 5L,
   finger_width = 3L,
   finger_length_prop = 0.3,
@@ -69,6 +71,7 @@ create_landscape_fingers <- function(
     width_actual,
     height_actual,
     treeline_position,
+    random_spots,
     rotation = 0
   )
 
