@@ -77,6 +77,8 @@ sine_bands_rotated <- create_landscape(
 
 \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
 
+\code{\link{create_landscape_curvyfingers}} for "curvy_fingers" pattern parameters
+
 \code{\link{create_landscape_scattered_trees}} for "scattered" pattern parameters
 
 \code{\link{create_landscape_clustered_trees}} for "clusters" pattern parameters
