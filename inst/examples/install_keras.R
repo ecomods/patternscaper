@@ -30,24 +30,26 @@ library(reticulate)
 library(keras3)
 
 # =============================================================================
-# Step 2: Install keras3 (handles Python automatically)
+# Step 2: Install/Verify keras3
 # =============================================================================
 
-cat("\n=== Step 2: Installing keras3 ===\n")
+cat("\n=== Step 2: Installing/Verifying keras3 ===\n")
 
-# Check if already installed
-keras_env_path <- file.path(
-  rappdirs::user_data_dir("r-keras"),
-  "python.exe" # .exe for Windows, remove for Unix
+# Simple check: try to import keras module
+keras_installed <- tryCatch(
+  {
+    reticulate::py_module_available("keras") &&
+      reticulate::py_module_available("tensorflow")
+  },
+  error = function(e) FALSE
 )
 
-if (file.exists(keras_env_path)) {
-  cat("✓ keras3 virtual environment already exists\n")
-  cat("  Location:", keras_env_path, "\n")
+if (keras_installed) {
+  cat("✓ keras3 and TensorFlow already installed\n")
   cat("  Skipping installation\n")
 } else {
-  cat("Installing keras3 with TensorFlow backend...\n")
-  cat("This will install Python 3.10 in a virtual environment if needed\n")
+  cat("keras3 not found. Installing...\n")
+  cat("This will create a Python virtual environment with TensorFlow\n")
   cat("This may take 5-15 minutes...\n\n")
 
   tryCatch(
