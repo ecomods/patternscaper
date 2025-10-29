@@ -45,9 +45,10 @@ evaluate_landscape_metrics <- function(
   # Validate method parameter early
   valid_methods <- c(
     "coeffvar_all",
-    "lin_mod_p",
     "lin_mod_r2",
-    "mean_groups"
+    "mean_groups",
+    "fisher_score",
+    "kruskal_p"
   )
   if (!(method %in% valid_methods)) {
     stop(paste(
@@ -144,21 +145,18 @@ evaluate_landscape_metrics <- function(
 #'
 #' @return Character vector. Metrics ranked from best to worst according to method.
 #' @noRd
+
 rank_metrics_by_method <- function(calculated_metrics, method) {
   if (method == "coeffvar_all") {
     return(rank_by_coefficient_variation(calculated_metrics))
-  } else if (method == "lin_mod_p") {
-    return(rank_by_linear_model(
-      calculated_metrics,
-      stat = "p_value"
-    ))
   } else if (method == "lin_mod_r2") {
-    return(rank_by_linear_model(
-      calculated_metrics,
-      stat = "r2"
-    ))
+    return(rank_by_linear_model(calculated_metrics))
   } else if (method == "mean_groups") {
     return(rank_by_mean_differences(calculated_metrics))
+  } else if (method == "fisher_score") {
+    return(rank_by_fisher_score(calculated_metrics))
+  } else if (method == "kruskal_p") {
+    return(rank_by_kruskal(calculated_metrics))
   } else {
     stop(paste("Unknown method:", method))
   }
@@ -189,16 +187,14 @@ rank_by_coefficient_variation <- function(calculated_metrics) {
 
 #' Rank by Linear Model Statistics
 #'
-#' Ranks metrics by either p-value or R-squared from linear models
+#' Ranks metrics by R-squared from linear models
 #'
 #' @param calculated_metrics tibble. Metrics data.
-#' @param stat Character. Statistic to rank by: "p_value" or "r2".
 #'
 #' @return Character vector. Metrics ranked by the specified statistic.
 #' @noRd
 rank_by_linear_model <- function(
-  calculated_metrics,
-  stat = "p_value"
+  calculated_metrics
 ) {
   # Create a nested dataframe with data for each metric
   metric_models <- calculated_metrics |>
@@ -212,16 +208,6 @@ rank_by_linear_model <- function(
           error = function(e) NULL
         )
       }),
-      # Extract p-value from ANOVA for each model
-      p_value = purrr::map_dbl(model, function(m) {
-        if (is.null(m)) {
-          return(NA_real_)
-        }
-        tryCatch(
-          anova(m)$`Pr(>F)`[1],
-          error = function(e) NA_real_
-        )
-      }),
       r2 = purrr::map_dbl(model, function(m) {
         if (is.null(m)) {
           return(NA_real_)
@@ -233,14 +219,9 @@ rank_by_linear_model <- function(
       })
     )
 
-  # Sort by the specified statistic
-  if (stat == "p_value") {
+  # Sort by R2-value
     metric_models <- metric_models |>
-      dplyr::arrange(p_value) # Smallest p-values first
-  } else if (stat == "r2") {
-    metric_models <- metric_models |>
-      dplyr::arrange(dplyr::desc(r2)) # Largest R² first
-  }
+    dplyr::arrange(dplyr::desc(r2)) # Largest R² first
 
   return(metric_models$metric)
 }
@@ -292,6 +273,71 @@ rank_by_mean_differences <- function(calculated_metrics) {
     dplyr::arrange(desc(importance_scores))
 
   return(ranking$metric)
+}
+
+#' Rank by Fisher Score
+#'
+#' Ranks metrics by their within variance compared to the variance between groups
+#'
+#' @param calculated_metrics tibble. Metrics data.
+#'
+#' @return Character vector. Metrics ranked by mean differences (highest first).
+#' @noRd
+rank_by_fisher_score <- function(calculated_metrics) {
+  fisher_results <- calculated_metrics |>
+    dplyr::group_by(metric) |>
+    tidyr::nest() |>
+    dplyr::mutate(
+      fisher_score = purrr::map_dbl(data, function(df) {
+        df <- df[!is.na(df$value), ]
+        if (length(unique(df$pattern)) < 2) return(NA_real_)
+        overall_mean <- mean(df$value)
+        group_stats <- df |>
+          dplyr::group_by(pattern) |>
+          dplyr::summarize(
+            n = dplyr::n(),
+            mean_val = mean(value),
+            sd_val = sd(value),
+            .groups = "drop"
+          )
+        sb <- sum(group_stats$n * (group_stats$mean_val - overall_mean)^2) /
+          (nrow(group_stats) - 1)
+        sw <- sum((group_stats$n - 1) * (group_stats$sd_val^2)) /
+          (sum(group_stats$n) - nrow(group_stats))
+        return(sb / sw)
+      })
+    ) |>
+    dplyr::arrange(dplyr::desc(fisher_score))
+
+  return(fisher_results$metric)
+}
+
+
+#' Rank by Kruskal-Wallis H
+#'
+#' Similar as Fisher score, but more robust towards non-normality
+#'
+#' @param calculated_metrics tibble. Metrics data.
+#'
+#' @return Character vector. Metrics ranked by mean differences (highest first).
+#' @noRd
+rank_by_kruskal <- function(calculated_metrics) {
+  kruskal_results <- calculated_metrics |>
+    dplyr::group_by(metric) |>
+    tidyr::nest() |>
+    dplyr::mutate(
+      kruskal_p = purrr::map_dbl(data, function(df) {
+        df <- df[!is.na(df$value), ]
+        if (length(unique(df$pattern)) < 2) return(NA_real_)
+        tryCatch(
+          kruskal.test(value ~ pattern, data = df)$p.value,
+          error = function(e) NA_real_
+        )
+      })
+    ) |>
+    dplyr::arrange(kruskal_p)
+
+  return(kruskal_results$metric)
 }
 
 #' Select Uncorrelated Metrics
