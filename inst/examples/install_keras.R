@@ -30,122 +30,42 @@ library(reticulate)
 library(keras3)
 
 # =============================================================================
-# Step 2: Check Python Installation
+# Step 2: Install keras3 (handles Python automatically)
 # =============================================================================
 
-cat("\n=== Step 2: Checking Python ===\n")
+cat("\n=== Step 2: Installing keras3 ===\n")
 
-# Check if Python is available
-python_available <- !inherits(try(py_config(), silent = TRUE), "try-error")
+# Check if already installed
+keras_env_path <- file.path(
+  rappdirs::user_data_dir("r-keras"),
+  "python.exe" # .exe for Windows, remove for Unix
+)
 
-if (python_available) {
-  config <- py_config()
-  cat("✓ Python found:\n")
-  cat("  Version:", config$version, "\n")
-  cat("  Path:", config$python, "\n")
-
-  # Check Python version
-  py_version <- as.numeric(paste0(
-    config$version_major,
-    ".",
-    config$version_minor
-  ))
-
-  if (py_version < 3.9) {
-    cat("⚠ Warning: Python version is too old (need >= 3.9)\n")
-    cat("  Recommendation: Install Python 3.9, 3.10, or 3.11\n")
-    needs_python <- TRUE
-  } else if (py_version > 3.11) {
-    cat(
-      "⚠ Warning: Python version may be too new (keras3 works best with 3.9-3.11)\n"
-    )
-    cat(
-      "  You can try to continue, but may need to install Python 3.10 or 3.11\n"
-    )
-    needs_python <- FALSE
-  } else {
-    cat("✓ Python version is compatible\n")
-    needs_python <- FALSE
-  }
+if (file.exists(keras_env_path)) {
+  cat("✓ keras3 virtual environment already exists\n")
+  cat("  Location:", keras_env_path, "\n")
+  cat("  Skipping installation\n")
 } else {
-  cat("✗ No Python installation detected\n")
-  needs_python <- TRUE
-}
-
-# =============================================================================
-# Step 3: Install Python (if needed)
-# =============================================================================
-
-if (needs_python) {
-  cat("\n=== Step 3: Installing Python ===\n")
-  cat("Installing Python 3.10 (recommended for keras3)...\n")
-  cat("This may take several minutes...\n\n")
-
-  tryCatch(
-    {
-      # Install Python 3.10 using reticulate
-      install_python(version = "3.10:latest")
-      cat("✓ Python 3.10 installed successfully\n")
-    },
-    error = function(e) {
-      cat("✗ Automatic Python installation failed\n")
-      cat("\nManual installation required:\n")
-      cat(
-        "1. Download Python 3.10 or 3.11 from: https://www.python.org/downloads/\n"
-      )
-      cat("2. During installation, check 'Add Python to PATH'\n")
-      cat("3. Restart R/RStudio after installation\n")
-      cat("4. Run this script again\n\n")
-      stop("Please install Python manually and restart R")
-    }
-  )
-} else {
-  cat("\n=== Step 3: Python check ===\n")
-  cat("✓ Python installation is adequate\n")
-}
-
-# =============================================================================
-# Step 4: Install TensorFlow and keras3
-# =============================================================================
-
-cat("\n=== Step 4: Installing TensorFlow backend ===\n")
-cat("This creates a Python virtual environment with TensorFlow...\n")
-cat("This may take 5-15 minutes depending on your internet connection.\n\n")
-
-# Check if keras is already installed
-keras_installed <- py_module_available("keras")
-
-if (!keras_installed) {
   cat("Installing keras3 with TensorFlow backend...\n")
+  cat("This will install Python 3.10 in a virtual environment if needed\n")
+  cat("This may take 5-15 minutes...\n\n")
 
   tryCatch(
     {
-      # Install keras with TensorFlow
-      # This creates a virtual environment at ~/.virtualenvs/r-keras
       install_keras()
-
-      cat("\n✓ keras3 and TensorFlow installed successfully!\n")
+      cat("\n✓ Installation complete!\n")
     },
     error = function(e) {
-      cat("\n✗ Installation failed with error:\n")
-      cat(conditionMessage(e), "\n\n")
-      cat("Troubleshooting steps:\n")
-      cat("1. Ensure you have a stable internet connection\n")
-      cat("2. Try running: keras3::install_keras()\n")
-      cat("3. If that fails, try: keras3::install_keras(method = 'conda')\n")
-      cat("4. Check for firewall/antivirus blocking Python installations\n")
-      stop("keras3 installation failed")
+      stop("Installation failed: ", conditionMessage(e))
     }
   )
-} else {
-  cat("✓ keras/TensorFlow already installed\n")
 }
 
 # =============================================================================
-# Step 5: Verify Installation
+# Step 3: Verify Installation
 # =============================================================================
 
-cat("\n=== Step 5: Verifying installation ===\n")
+cat("\n=== Step 3: Verifying installation ===\n")
 
 # Check backend
 tryCatch(
@@ -191,10 +111,10 @@ tryCatch(
 )
 
 # =============================================================================
-# Step 6: Final Configuration
+# Step 4: Final Configuration
 # =============================================================================
 
-cat("\n=== Step 6: Final setup ===\n")
+cat("\n=== Step 4: Final setup ===\n")
 
 # Show final configuration
 cat("\nYour configuration:\n")
