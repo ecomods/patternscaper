@@ -82,7 +82,7 @@ create_landscape <- function(
     "diffuse",
     "curvy",
     "fingers",
-    "curyfingers",
+    "curvyfingers",
     "scattered",
     "clustered",
     "sine_bands",
@@ -290,6 +290,13 @@ create_training_landscapes <- function(
         finger_length_sd = c(0, 0.6),
         bend = c(TRUE, FALSE)
       ),
+      curvyfingers = list(
+        treeline_position = c(0.3, 0.6),
+        sine_length_mean = c(0.2 * width, 0.4 * width),
+        sine_length_sd = c(0, 0.6 * width),
+        sine_height_mean = c(0.03 * height, 0.2 * height),
+        sine_height_mean = c(0, 0.3 * height)
+      ),
       scattered = list(
         treeline_position = c(0.4, 0.6),
         scatter_density = c(0.1, 0.8),
@@ -350,7 +357,7 @@ create_training_landscapes <- function(
     if (!(pattern %in% names(params_list))) {
       warning(
         "Pattern '",
-        typatternpe,
+        pattern,
         "' not found in params_list. Using default parameters."
       )
       # Add default parameters for missing pattern

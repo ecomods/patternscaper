@@ -127,7 +127,7 @@ create_landscape_curvyfingers <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    pattern = "curvy",
+    pattern = "curvyfingers",
     params = list(
       width = width,
       height = height,
