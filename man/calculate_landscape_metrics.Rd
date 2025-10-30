@@ -7,16 +7,56 @@
 calculate_landscape_metrics(landscapes, metrics = NULL, level = "landscape")
 }
 \arguments{
-\item{landscapes}{A single landscape object or a list of landscape objects.}
+\item{landscapes}{A single landscape object (created with \code{\link{create_landscape}})
+or a list of landscape objects (e.g. created with \code{\link{create_training_landscapes}}).
+Each landscape object should contain a \code{data}
+element with a SpatRaster, plus \code{name} and \code{pattern} metadata.}
 
-\item{metrics}{Character vector. Names of metrics to calculate (default: NULL for all).}
+\item{metrics}{Character vector. Names of metrics to calculate (default: NULL for all
+available metrics at the specified level). Use \code{list_lsm()} from landscapemetrics
+to see available metrics.}
 
-\item{level}{Character. Level(s) of metrics to calculate ("patch", "class", "landscape" or a vector) (default: "landscape").}
+\item{level}{Character. Level(s) of metrics to calculate: "patch", "class", "landscape"
+(default: "landscape").}
 }
 \value{
-tibble. Standardized metrics table with landscape name, type (if available), metric name,
-        class (if applicable), and value.
+A tibble with the following columns:
+  \describe{
+    \item{landscape_id}{Numeric identifier for each landscape in the input list}
+    \item{landscape_name}{Name of the landscape from the landscape object}
+    \item{pattern}{Pattern type from the landscape object (e.g., "banded", "spots")}
+    \item{layer}{Layer number (from landscapemetrics output)}
+    \item{level}{Metric level: "patch", "class", or "landscape"}
+    \item{class}{Class value (for class- and patch-level metrics, NA for landscape-level)}
+    \item{id}{Patch ID (for patch-level metrics, NA otherwise)}
+    \item{metric}{Name of the calculated metric}
+    \item{value}{Calculated metric value}
+    \item{warnings}{Any warnings generated during calculation (NA if none)}
+  }
 }
 \description{
-Calculates selected landscape metrics for one or more landscapes.
+Calculates selected landscape metrics for one or more landscapes using functions
+from the landscapemetrics package. Returns a standardized tibble with results
+including landscape identifiers, metric values, and any warnings.
+}
+\examples{
+\dontrun{
+# Calculate all landscape-level metrics for a single landscape
+landscape <- create_landscape(pattern = "banded")
+metrics <- calculate_landscape_metrics(landscape)
+
+# Calculate specific metrics for multiple landscapes
+landscapes <- create_training_landscapes(n = 10, patterns = "spots")
+metrics <- calculate_landscape_metrics(
+  landscapes,
+  metrics = c("ai", "lsi"),
+  level = "landscape"
+)
+
+# Calculate metrics at multiple levels
+metrics <- calculate_landscape_metrics(
+  landscapes,
+  level = c("class", "landscape")
+)
+}
 }

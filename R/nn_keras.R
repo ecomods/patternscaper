@@ -78,7 +78,7 @@ train_nn_landscapes <- function(
 
   # Convert labels to integers and one-hot encode
   y_int <- as.integer(factor(training_labels, levels = class_names)) - 1
-  y_data <- keras::to_categorical(y_int)
+  y_data <- keras3::to_categorical(y_int)
 
   # Stack all arrays into one 4D array (samples, height, width, channels)
   x_data <- abind::abind(training_arrays, along = 0)
@@ -86,48 +86,48 @@ train_nn_landscapes <- function(
 
   # Function to create the multiscale CNN architecture
   create_model <- function() {
-    model <- keras::keras_model_sequential() %>%
+    model <- keras3::keras_model_sequential() %>%
       # Detect fine details with small kernels
-      keras::layer_conv_2d(
+      keras3::layer_conv_2d(
         filters = 32,
         kernel_size = c(3, 3),
         padding = "same",
         input_shape = input_shape
       ) %>%
-      keras::layer_activation("relu") %>%
+      keras3::layer_activation("relu") %>%
       # Detect larger patterns with bigger kernels
-      keras::layer_conv_2d(
+      keras3::layer_conv_2d(
         filters = 32,
         kernel_size = c(5, 5),
         padding = "same"
       ) %>%
-      keras::layer_activation("relu") %>%
-      keras::layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+      keras3::layer_activation("relu") %>%
+      keras3::layer_max_pooling_2d(pool_size = c(2, 2)) %>%
       # Additional feature extraction
-      keras::layer_conv_2d(
+      keras3::layer_conv_2d(
         filters = 64,
         kernel_size = c(3, 3),
         padding = "same"
       ) %>%
-      keras::layer_activation("relu") %>%
-      keras::layer_conv_2d(
+      keras3::layer_activation("relu") %>%
+      keras3::layer_conv_2d(
         filters = 64,
         kernel_size = c(5, 5),
         padding = "same"
       ) %>%
-      keras::layer_activation("relu") %>%
-      keras::layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+      keras3::layer_activation("relu") %>%
+      keras3::layer_max_pooling_2d(pool_size = c(2, 2)) %>%
       # Classifier
-      keras::layer_flatten() %>%
-      keras::layer_dropout(rate = 0.3) %>%
-      keras::layer_dense(units = 128, activation = "relu") %>%
-      keras::layer_dense(units = n_classes, activation = "softmax")
+      keras3::layer_flatten() %>%
+      keras3::layer_dropout(rate = 0.3) %>%
+      keras3::layer_dense(units = 128, activation = "relu") %>%
+      keras3::layer_dense(units = n_classes, activation = "softmax")
 
     # Compile model
     model %>%
-      keras::compile(
+      keras3::compile(
         loss = "categorical_crossentropy",
-        optimizer = keras::optimizer_adam(learning_rate = learning_rate),
+        optimizer = keras3::optimizer_adam(learning_rate = learning_rate),
         metrics = c("accuracy")
       )
 
@@ -238,7 +238,7 @@ train_nn_landscapes <- function(
       model <- create_model()
 
       history <- model %>%
-        keras::fit(
+        keras3::fit(
           x = x_train,
           y = y_train,
           epochs = epochs,
@@ -248,7 +248,7 @@ train_nn_landscapes <- function(
         )
 
       # Evaluate the model
-      evaluation <- model %>% keras::evaluate(x_val, y_val)
+      evaluation <- model %>% keras3::evaluate(x_val, y_val)
 
       # Store predictions
       probs <- model %>% predict(x_val)
@@ -329,7 +329,7 @@ train_nn_landscapes <- function(
     # Build final model with all data
     final_model <- create_model()
     history <- final_model %>%
-      keras::fit(
+      keras3::fit(
         x = x_data,
         y = y_data,
         epochs = epochs,
@@ -340,7 +340,7 @@ train_nn_landscapes <- function(
     # Train on all data with validation split (no cross-validation)
     final_model <- create_model()
     history <- final_model %>%
-      keras::fit(
+      keras3::fit(
         x = x_data,
         y = y_data,
         epochs = epochs,
@@ -355,7 +355,7 @@ train_nn_landscapes <- function(
       size = floor(nrow(x_data) * validation_split)
     )
     val_evaluation <- final_model %>%
-      keras::evaluate(
+      keras3::evaluate(
         x_data[val_indices, , , , drop = FALSE],
         y_data[val_indices, , drop = FALSE]
       )
@@ -420,7 +420,7 @@ train_nn_landscapes <- function(
       model_path <- paste0(model_path, ".keras")
     }
 
-    keras::save_model_tf(final_model, model_path)
+    keras3::save_model_tf(final_model, model_path)
     # Save metadata separately
     metadata_path <- gsub("\\.keras$", "_metadata.rds", model_path)
     if (model_path == metadata_path) {

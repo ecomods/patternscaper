@@ -8,6 +8,7 @@ create_landscape_clustered_trees(
   width = 100,
   height = 100,
   treeline_position = 0.5,
+  random_spots = c(0, 0),
   num_clusters = 10,
   cluster_radius = 5,
   scatter_zone_prop = 0.3,
@@ -23,6 +24,8 @@ create_landscape_clustered_trees(
 \item{height}{Integer. Height of the landscape in pixels (default: 100).}
 
 \item{treeline_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
+
+\item{random_spots}{List of Numerics. Probability or random spots of vegetation in the other vegetation type (default: c(0,0))}
 
 \item{num_clusters}{Integer. Number of cluster centers (default: 10).}
 

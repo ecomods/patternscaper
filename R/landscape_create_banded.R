@@ -169,7 +169,7 @@ create_landscape_banded <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    pattern = "bands",
+    pattern = "banded",
     params = list(
       width = width,
       height = height,

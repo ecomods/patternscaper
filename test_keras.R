@@ -3,7 +3,7 @@ library(reticulate)
 py_discover_config()
 # Install if not already installed
 # install.packages("keras")
-library(keras)
+library(keras3)
 
 # Install TensorFlow backend (only needed once)
 # Also creates a venv r-tensorflow
@@ -62,8 +62,13 @@ par(mar = c(0, 0, 1.5, 0), xaxs = "i", yaxs = "i")
 for (i in 1:25) {
   img <- train_images[i, , ]
   img <- t(apply(img, 2, rev))
-  image(1:28, 1:28, img,
-    col = gray((0:255) / 255), xaxt = "n", yaxt = "n",
+  image(
+    1:28,
+    1:28,
+    img,
+    col = gray((0:255) / 255),
+    xaxt = "n",
+    yaxt = "n",
     main = paste(class_names[train_labels[i] + 1])
   )
 }
@@ -75,11 +80,12 @@ model %>%
   layer_dense(units = 128, activation = "relu") %>%
   layer_dense(units = 10, activation = "softmax")
 
-model %>% compile(
-  optimizer = "adam",
-  loss = "sparse_categorical_crossentropy",
-  metrics = c("accuracy")
-)
+model %>%
+  compile(
+    optimizer = "adam",
+    loss = "sparse_categorical_crossentropy",
+    metrics = c("accuracy")
+  )
 model %>% fit(train_images, train_labels, epochs = 5, verbose = 2)
 
 # Evaluate the accuracy
@@ -104,11 +110,18 @@ for (i in 1:25) {
   } else {
     color <- "#bb0000"
   }
-  image(1:28, 1:28, img,
-    col = gray((0:255) / 255), xaxt = "n", yaxt = "n",
+  image(
+    1:28,
+    1:28,
+    img,
+    col = gray((0:255) / 255),
+    xaxt = "n",
+    yaxt = "n",
     main = paste0(
-      class_names[predicted_label + 1], " (",
-      class_names[true_label + 1], ")"
+      class_names[predicted_label + 1],
+      " (",
+      class_names[true_label + 1],
+      ")"
     ),
     col.main = color
   )
@@ -166,7 +179,12 @@ y_data <- to_categorical(y_int)
 input_shape <- c(100, 100, 1) # grayscale
 
 model <- keras_model_sequential() %>%
-  layer_conv_2d(filters = 32, kernel_size = c(3, 3), activation = "relu", input_shape = input_shape) %>%
+  layer_conv_2d(
+    filters = 32,
+    kernel_size = c(3, 3),
+    activation = "relu",
+    input_shape = input_shape
+  ) %>%
   layer_max_pooling_2d(pool_size = c(2, 2)) %>%
   layer_conv_2d(filters = 64, kernel_size = c(3, 3), activation = "relu") %>%
   layer_max_pooling_2d(pool_size = c(2, 2)) %>%
@@ -175,20 +193,22 @@ model <- keras_model_sequential() %>%
   layer_dense(units = length(class_names), activation = "softmax") # Multi-class output
 
 # Compile the model
-model %>% compile(
-  loss = "categorical_crossentropy",
-  optimizer = optimizer_adam(),
-  metrics = c("accuracy")
-)
+model %>%
+  compile(
+    loss = "categorical_crossentropy",
+    optimizer = optimizer_adam(),
+    metrics = c("accuracy")
+  )
 
 # Train the model
-model %>% fit(
-  x = x_data,
-  y = y_data,
-  epochs = 20,
-  batch_size = 16,
-  validation_split = 0.2
-)
+model %>%
+  fit(
+    x = x_data,
+    y = y_data,
+    epochs = 20,
+    batch_size = 16,
+    validation_split = 0.2
+  )
 
 # Predict on the test data
 predictions <- model %>% predict(x_data_val)
@@ -209,7 +229,8 @@ table(Predicted = predicted_classes, Actual = true_classes)
 
 # create plot title with predicted classes and make them red if false and green if true
 # using markdown syntax from ggtext
-predicted_titles <- ifelse(predicted_classes == true_classes,
+predicted_titles <- ifelse(
+  predicted_classes == true_classes,
   paste0("<span style='color:forestgreen'>", predicted_classes, "</span>"),
   paste0("<span style='color:red'>", predicted_classes, "</span>")
 )
@@ -218,4 +239,5 @@ predicted_titles <- ifelse(predicted_classes == true_classes,
 #<actual>b<br><predicted>#
 titles <- paste0(true_classes, "<br>", predicted_titles)
 
-plot_validation <- training_plots[101:120] |> plot_landscape_list(titles = titles)
+plot_validation <- training_plots[101:120] |>
+  plot_landscape_list(titles = titles)

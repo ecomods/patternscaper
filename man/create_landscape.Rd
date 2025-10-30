@@ -5,8 +5,8 @@
 \title{Create a Landscape with Specified Pattern}
 \usage{
 create_landscape(
-  pattern = c("random", "sharp", "diffuse", "curvy", "fingers", "scattered", "clustered",
-    "sine_bands", "spots", "gaps", "banded", "labyrinth"),
+  pattern = c("random", "sharp", "diffuse", "curvy", "fingers", "curyfingers",
+    "scattered", "clustered", "sine_bands", "spots", "gaps", "banded", "labyrinth"),
   name = NULL,
   custom_pattern = NULL,
   ...
@@ -14,7 +14,7 @@ create_landscape(
 }
 \arguments{
 \item{pattern}{Character. pattern of landscape to generate: "random", "sharp", "diffuse",
-"curvy", "fingers", "scattered", "sine_bands", "clusters", "spots", "gaps",
+"curvy", "fingers", "curvyfingers", "scattered", "sine_bands", "clusters", "spots", "gaps",
 "banded", "labyrinth"}
 
 \item{name}{Character. Optional name for the landscape (default: NULL).}
@@ -77,7 +77,7 @@ sine_bands_rotated <- create_landscape(
 
 \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
 
-\code{\link{create_landscape_curvyfingers}} for "curvy_fingers" pattern parameters
+\code{\link{create_landscape_curvyfingers}} for "curvyfingers" pattern parameters
 
 \code{\link{create_landscape_scattered_trees}} for "scattered" pattern parameters
 

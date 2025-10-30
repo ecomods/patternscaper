@@ -24,7 +24,8 @@ Imports:
     zoo,
     ggtext,
     keras,
-    ambient
+    ambient,
+    keras3
 Suggests: 
     knitr,
     rmarkdown
