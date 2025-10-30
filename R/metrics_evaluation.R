@@ -173,25 +173,24 @@ rank_metrics_by_method <- function(metrics, method) {
 
 #' Rank by Coefficient of Variation
 #'
-#' Ranks metrics by their coefficient of variation (CV)
+#' Ranks metrics by their coefficient of variation (CV = SD/mean).
+#' Higher CV indicates greater relative variability across landscapes.
 #'
-#' @param calculated_metrics tibble. Metrics data.
+#' @param metrics tibble. Metrics data with columns 'metric' and 'value'.
 #'
 #' @return Character vector. Metrics ranked by CV (highest first).
+#' @importFrom dplyr group_by summarize filter arrange pull
 #' @noRd
-rank_by_coefficient_variation <- function(calculated_metrics) {
-  cv_result <- calculated_metrics |>
+rank_by_coefficient_variation <- function(metrics) {
+  metrics |>
     dplyr::group_by(metric) |>
     dplyr::summarize(
-      mean_val = mean(value, na.rm = TRUE),
-      sd_val = sd(value, na.rm = TRUE),
-      cv = sd_val / mean_val,
+      cv = sd(value, na.rm = TRUE) / mean(value, na.rm = TRUE),
       .groups = "drop"
     ) |>
+    dplyr::filter(is.finite(cv)) |>
     dplyr::arrange(desc(cv)) |>
-    dplyr::filter(is.finite(cv)) # Remove NaN/Inf values
-
-  return(cv_result$metric)
+    dplyr::pull(metric)
 }
 
 #' Rank by Linear Model Statistics
