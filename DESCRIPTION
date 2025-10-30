@@ -25,7 +25,8 @@ Imports:
     ggtext,
     keras,
     ambient,
-    keras3
+    keras3,
+    cli
 Suggests: 
     knitr,
     rmarkdown

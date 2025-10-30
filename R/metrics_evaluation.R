@@ -26,19 +26,21 @@ evaluate_landscape_metrics <- function(
   correlation_threshold = 0.7,
   verbose = FALSE
 ) {
-  # Validate input data
+  # Validate input data - USE cli::cli_abort for all errors
   if (!is.data.frame(metrics) && !tibble::is_tibble(metrics)) {
-    stop("metrics must be a data frame or tibble")
+    cli::cli_abort("metrics must be a data frame or tibble")
   }
 
   if (!all(c("metric", "pattern", "value", "level") %in% colnames(metrics))) {
-    stop(
-      "metrics must contain columns: metric, pattern, value, and level"
+    cli::cli_abort(
+      "metrics must contain columns: {.field metric}, {.field pattern}, {.field value}, and {.field level}"
     )
   }
+
   if (!is.numeric(metrics_number) || metrics_number < 1) {
-    stop("metrics_number must be a positive integer")
+    cli::cli_abort("metrics_number must be a positive integer")
   }
+
   # Validate method parameter
   valid_methods <- c(
     "coeffvar_all",
@@ -48,92 +50,76 @@ evaluate_landscape_metrics <- function(
     "kruskal_p"
   )
   if (!(method %in% valid_methods)) {
-    stop(
-      "Invalid method. Choose from: ",
-      paste(valid_methods, collapse = ", ")
+    cli::cli_abort(
+      "Invalid method. Choose from: {.val {valid_methods}}"
     )
   }
 
-  # Exclude metrics if specified
+  # Exclude metrics if specified - DON'T message, this is expected behavior
   if (!is.null(exclude_metrics)) {
-    metrics <- metrics[
-      !metrics$metric %in% exclude_metrics,
-    ]
+    metrics <- metrics[!metrics$metric %in% exclude_metrics, ]
     if (nrow(metrics) == 0) {
-      stop("No metrics left after exclusion")
+      cli::cli_abort("No metrics left after exclusion")
     }
   }
 
-  # Exclude metrics with NA values if requested
+  # Exclude metrics with NA values - USE cli::cli_alert_warning
+  # This is important for user to know
   if (exclude_NA_metrics) {
     na_metrics <- metrics |>
       dplyr::filter(is.na(value)) |>
       dplyr::pull(metric) |>
       unique()
     nrow_before <- nrow(metrics)
-    metrics <- metrics[
-      !metrics$metric %in% na_metrics,
-    ]
+    metrics <- metrics[!metrics$metric %in% na_metrics, ]
     nrow_after <- nrow(metrics)
+
     if (nrow_after == 0) {
-      stop("No metrics left after excluding those with NA values")
+      cli::cli_abort("No metrics left after excluding those with NA values")
     }
+
     if (length(na_metrics) > 0) {
-      message(
-        "Excluded ",
-        nrow_before - nrow_after,
-        " rows due to ",
-        length(na_metrics),
-        " metrics with NA values: ",
-        paste(na_metrics, collapse = ", "),
-        "\n",
-        "Use exclude_NA_metrics = FALSE to retain these metrics (not recommended for model training)."
+      cli::cli_alert_warning(
+        "Excluded {nrow_before - nrow_after} rows containing {length(na_metrics)} metrics with NA values. Metrics removed: {.val {na_metrics}} \nUse {.code exclude_NA_metrics = FALSE} to retain (not recommended for model training) "
       )
     }
   }
 
-  # Check if we have enough metrics to supply the requested number
+  # Check if we have enough metrics - USE cli::cli_alert_warning
+  # This changes expected behavior
   num_metrics <- length(unique(metrics$metric))
   if (num_metrics < metrics_number) {
-    warning(paste(
-      "Requested",
-      metrics_number,
-      "metrics but only",
-      num_metrics,
-      "are available. Returning all available metrics."
-    ))
+    cli::cli_alert_warning(
+      "Only {num_metrics} metric{?s} available, returning all instead of requested {metrics_number}"
+    )
     metrics_number <- num_metrics
   }
 
-  # Check if we have at least two different landscape patterns
+  # Check patterns - USE cli::cli_abort
   if (length(unique(metrics$pattern)) < 2) {
-    stop(
-      "At least two different landscape_name patterns are required for metric evaluation"
+    cli::cli_abort(
+      "At least two different landscape patterns are required for metric evaluation"
     )
   }
 
-  # Get ranked metrics using the selected method
+  # Get ranked metrics - NO MESSAGE NEEDED (internal operation)
   ranked_metrics <- rank_metrics_by_method(
     metrics = metrics,
     method = method
   )
 
+  # Verbose output - KEEP as message() or use cli::cli_alert_info
   if (verbose) {
-    message(
-      "Ranked metrics (",
-      method,
-      "): ",
-      paste(ranked_metrics, collapse = ", ")
-    )
+    cli::cli_alert_info("Ranked metrics ({method}): {.val {ranked_metrics}}")
   }
 
-  # Return early if no correlation filtering needed
+  # Return early if no correlation filtering needed - NO MESSAGE (expected behavior)
   if (correlation_threshold >= 1) {
     available_count <- min(length(ranked_metrics), metrics_number)
     return(ranked_metrics[seq_len(available_count)])
   }
 
-  # Select metrics with low correlation
+  # Select metrics with low correlation - messages handled inside function
   top_metrics <- select_metrics_correlation(
     metric_ranking = ranked_metrics,
     metrics = metrics,
