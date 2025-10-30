@@ -166,7 +166,7 @@ rank_metrics_by_method <- function(metrics, method) {
     lin_mod_r2 = rank_by_linear_model(metrics),
     mean_groups = rank_by_mean_differences(metrics),
     fisher_score = rank_by_fisher_score(metrics),
-    kruskal_p = rank_by_kruskal(metrics),
+    kruskal_p = rank_by_krusal(metrics),
     cli::cli_abort("Unknown ranking method: {.val {method}}")
   )
 }
@@ -233,51 +233,43 @@ rank_by_linear_model <- function(
 
 #' Rank by Mean Differences
 #'
-#' Ranks metrics by their ability to differentiate between landscape_name types
-#' based on the differences in means across types.
+#' Ranks metrics by their ability to differentiate between landscape types
+#' based on the differences in means across patterns.
 #'
-#' @param calculated_metrics tibble. Metrics data.
+#' @param metrics tibble. Metrics data with columns 'metric', 'pattern', and 'value'.
 #'
-#' @return Character vector. Metrics ranked by mean differences (highest first).
+#' @return Character vector. Metrics ranked by importance score (highest first).
 #' @noRd
-rank_by_mean_differences <- function(calculated_metrics) {
-  # Calculate means across all data and by type
-  means_all <- calculated_metrics |>
+rank_by_mean_differences <- function(metrics) {
+  # Calculate overall mean for each metric
+  means_all <- metrics |>
     dplyr::summarize(
       mean_all = mean(value, na.rm = TRUE),
       .by = metric
     )
-  means_types <- calculated_metrics |>
+
+  # Calculate pattern-specific means and importance scores
+  scores <- metrics |>
     dplyr::summarize(
       mean_type = mean(value, na.rm = TRUE),
       .by = c(metric, pattern)
-    )
-
-  means_groups <- means_types |>
-    dplyr::left_join(means_all, by = "metric")
-
-  # Calculate relative difference from mean for each type
-  means_groups <- means_groups |>
-    dplyr::mutate(rel_mean_diff = abs((mean_type - mean_all) / mean_all)) |>
-    # Handle cases where mean_all is zero to avoid Inf values
+    ) |>
+    dplyr::left_join(means_all, by = "metric") |>
     dplyr::mutate(
-      rel_mean_diff = ifelse(
+      rel_mean_diff = abs((mean_type - mean_all) / mean_all),
+      rel_mean_diff = dplyr::if_else(
         is.finite(rel_mean_diff),
         rel_mean_diff,
         NA_real_
       )
-    )
+    ) |>
+    dplyr::summarize(
+      importance_score = sum(rel_mean_diff, na.rm = TRUE),
+      .by = metric
+    ) |>
+    dplyr::arrange(desc(importance_score))
 
-  # Calculate overall importance score for each metric (sum across types)
-  ranking <- dplyr::summarize(
-    means_groups,
-    importance_scores = sum(rel_mean_diff, na.rm = TRUE),
-    .by = metric
-  ) |>
-    # Rank by importance (higher total deviation = better discriminating power)
-    dplyr::arrange(desc(importance_scores))
-
-  return(ranking$metric)
+  return(scores$metric)
 }
 
 #' Rank by Fisher Score
