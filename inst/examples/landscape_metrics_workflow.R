@@ -38,32 +38,47 @@ landscape_metrics <- calculate_landscape_metrics(
 
 # find the 10 best metrics based on coefficient of variation
 best_10 <- evaluate_landscape_metrics(
-  calculated_metrics = landscape_metrics,
-  metrics_number = 10
+  metrics = landscape_metrics,
+  metrics_number = 10,
+  verbose = TRUE
 )
 # Find best 10 based on linear model p-values
 best_10_linmod_p <- evaluate_landscape_metrics(
-  calculated_metrics = landscape_metrics,
+  metrics = landscape_metrics,
   method = "lin_mod_p",
   metrics_number = 10
 )
 # Find best 10 based on linear model R-squared
 best_10_linmod_r2 <- evaluate_landscape_metrics(
-  calculated_metrics = landscape_metrics,
+  metrics = landscape_metrics,
   method = "lin_mod_r2",
   metrics_number = 10
 )
 
 # Find best 10 based on difference from group mean
 best_10_group_diff <- evaluate_landscape_metrics(
-  calculated_metrics = landscape_metrics,
+  metrics = landscape_metrics,
   method = "mean_groups",
+  metrics_number = 10
+)
+
+# Find best 10 based on Fisher score
+best_10_fisher <- evaluate_landscape_metrics(
+  metrics = landscape_metrics,
+  method = "fisher_score",
+  metrics_number = 10
+)
+
+# Find best 10 based on Fisher score
+best_10_kruskal <- evaluate_landscape_metrics(
+  metrics = landscape_metrics,
+  method = "kruskal_p",
   metrics_number = 10
 )
 
 # Plot the 10 best metrics
 plot_metrics(
-  calculated_metrics = landscape_metrics,
+  metrics = landscape_metrics,
   selected_metrics = best_10_group_diff
 )
 
