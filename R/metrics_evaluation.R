@@ -140,21 +140,16 @@ evaluate_landscape_metrics <- function(
 #'
 #' @return Character vector. Metrics ranked from best to worst according to method.
 #' @noRd
-
 rank_metrics_by_method <- function(metrics, method) {
-  if (method == "coeffvar_all") {
-    return(rank_by_coefficient_variation(metrics))
-  } else if (method == "lin_mod_r2") {
-    return(rank_by_linear_model(metrics))
-  } else if (method == "mean_groups") {
-    return(rank_by_mean_differences(metrics))
-  } else if (method == "fisher_score") {
-    return(rank_by_fisher_score(metrics))
-  } else if (method == "kruskal_p") {
-    return(rank_by_kruskal(metrics))
-  } else {
-    stop(paste("Unknown method:", method))
-  }
+  switch(
+    method,
+    coeffvar_all = rank_by_coefficient_variation(metrics),
+    lin_mod_r2 = rank_by_linear_model(metrics),
+    mean_groups = rank_by_mean_differences(metrics),
+    fisher_score = rank_by_fisher_score(metrics),
+    kruskal_p = rank_by_kruskal(metrics),
+    cli::cli_abort("Unknown ranking method: {.val {method}}")
+  )
 }
 
 #' Rank by Coefficient of Variation
