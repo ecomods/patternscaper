@@ -50,9 +50,14 @@ evaluate_landscape_metrics <- function(
     cli::cli_abort("metrics must be a data frame or tibble")
   }
 
-  if (!all(c("metric", "pattern", "value", "level") %in% colnames(metrics))) {
+  if (
+    !all(
+      c("landscape_name", "metric", "pattern", "value", "level") %in%
+        colnames(metrics)
+    )
+  ) {
     cli::cli_abort(
-      "metrics must contain columns: {.field metric}, {.field pattern}, {.field value}, and {.field level}"
+      "metrics must contain columns: {.field landscape_name}, {.field metric}, {.field pattern}, {.field value}, and {.field level}"
     )
   }
 
@@ -71,6 +76,17 @@ evaluate_landscape_metrics <- function(
   if (!(method %in% valid_methods)) {
     cli::cli_abort(
       "Invalid method. Choose from: {.val {valid_methods}}"
+    )
+  }
+
+  # Validate correlation_threshold
+  if (
+    !is.numeric(correlation_threshold) ||
+      correlation_threshold < 0 ||
+      correlation_threshold > 1
+  ) {
+    cli::cli_abort(
+      "correlation_threshold must be a numeric value between 0 and 1"
     )
   }
 
@@ -377,22 +393,13 @@ select_metrics_correlation <- function(
 ) {
   # Input validation
   if (!is.character(metric_ranking) || length(metric_ranking) == 0) {
-    stop("metric_ranking must be a non-empty character vector of metric names")
-  }
-
-  if (
-    !is.data.frame(metrics) ||
-      !all(
-        c("landscape_name", "metric", "value") %in% colnames(metrics)
-      )
-  ) {
-    stop(
-      "metrics must be a data frame with 'landscape_name', 'metric', and 'value' columns"
+    cli::cli_abort(
+      "metric_ranking must be a non-empty character vector of metric names"
     )
   }
 
   if (!is.numeric(metrics_number) || metrics_number < 1) {
-    stop("metrics_number must be a positive integer")
+    cli::cli_abort("metrics_number must be a positive integer")
   }
 
   # Calculate correlation between metrics
@@ -405,31 +412,14 @@ select_metrics_correlation <- function(
     dplyr::select(-landscape_name) |>
     stats::cor(use = "pairwise.complete.obs")
 
-  # Use the ranked metrics vector directly
-  metric_options <- metric_ranking
-
-  # Check if all metrics in ranking exist in correlation matrix
-  missing_metrics <- setdiff(metric_options, rownames(metrics_correlation))
-  if (length(missing_metrics) > 0) {
-    warning(paste(
-      "The following metrics are missing from the correlation matrix:",
-      paste(missing_metrics, collapse = ", ")
-    ))
-    metric_options <- intersect(metric_options, rownames(metrics_correlation))
-  }
-
   # Initialize results
   top_metrics <- character(0)
 
   # Select metrics with low correlation
-  i <- 0
-  while (TRUE) {
-    i <- i + 1
-    if (length(top_metrics) >= metrics_number || i > length(metric_options)) {
+  for (current_metric in metric_ranking) {
+    if (length(top_metrics) >= metrics_number) {
       break
     }
-
-    current_metric <- metric_options[i]
 
     # Skip if already selected
     if (current_metric %in% top_metrics) {
@@ -438,11 +428,11 @@ select_metrics_correlation <- function(
 
     # Skip if not in correlation matrix
     if (!current_metric %in% rownames(metrics_correlation)) {
-      warning(paste(
-        "Metric",
-        current_metric,
-        "not found in correlation matrix. Skipping."
-      ))
+      if (verbose) {
+        cli::cli_alert_warning(
+          "Metric {.val {current_metric}} not found in correlation matrix. Skipping."
+        )
+      }
       next
     }
 
@@ -451,23 +441,20 @@ select_metrics_correlation <- function(
       cor_values <- abs(metrics_correlation[current_metric, top_metrics])
 
       if (verbose) {
-        message(paste(
-          "Correlation values:",
-          paste(cor_values, collapse = ", ")
-        ))
+        cli::cli_alert_info(
+          "Correlation values for {.val {current_metric}}: {.val {round(cor_values, 3)}}"
+        )
       }
 
       # Check if any correlation exceeds threshold
       if (any(cor_values > correlation_threshold, na.rm = TRUE)) {
-        # Determine which correlations are too high
         high_correlations <- which(cor_values > correlation_threshold)
 
-        message(paste(
-          "Skipping metric",
-          current_metric,
-          "due to high correlation with:",
-          paste(top_metrics[high_correlations], collapse = ", ")
-        ))
+        if (verbose) {
+          cli::cli_alert_warning(
+            "Skipping metric {.val {current_metric}} due to high correlation with: {.val {top_metrics[high_correlations]}}"
+          )
+        }
         next
       }
     }
@@ -476,35 +463,23 @@ select_metrics_correlation <- function(
     top_metrics <- c(top_metrics, current_metric)
 
     if (verbose) {
-      message(paste(
-        "Selected metrics so far:",
-        paste(top_metrics, collapse = ", ")
-      ))
+      cli::cli_alert_info("Selected metrics so far: {.val {top_metrics}}")
     }
   }
 
   # Fill up with remaining metrics if needed
   if (length(top_metrics) < metrics_number) {
-    warning(paste(
-      "Only",
-      length(top_metrics),
-      "uncorrelated metrics found.",
-      "Filling up to",
-      metrics_number,
-      "with next best correlated metrics."
-    ))
+    cli::cli_alert_warning(
+      "Only {length(top_metrics)} uncorrelated metric{?s} found. Filling to {metrics_number} with correlated metrics."
+    )
 
-    # Get remaining metrics in order of importance
-    additional_metrics <- setdiff(metric_options, top_metrics)
+    additional_metrics <- setdiff(metric_ranking, top_metrics)
     needed_count <- min(
       length(additional_metrics),
       metrics_number - length(top_metrics)
     )
 
-    top_metrics <- c(
-      top_metrics,
-      additional_metrics[1:needed_count]
-    )
+    top_metrics <- c(top_metrics, additional_metrics[seq_len(needed_count)])
   }
 
   return(top_metrics)
