@@ -114,7 +114,7 @@ evaluate_landscape_metrics <- function(
     }
 
     if (length(na_metrics) > 0) {
-      cli::cli_alert_warning(
+      cli::cli_warn(
         "Excluded {nrow_before - nrow_after} rows containing {length(na_metrics)} metrics with NA values. Metrics removed: {.val {na_metrics}} \nUse {.code exclude_NA_metrics = FALSE} to retain (not recommended for model training) "
       )
     }
@@ -124,7 +124,7 @@ evaluate_landscape_metrics <- function(
   # This changes expected behavior
   num_metrics <- length(unique(metrics$metric))
   if (num_metrics < metrics_number) {
-    cli::cli_alert_warning(
+    cli::cli_warn(
       "Only {num_metrics} metric{?s} available, returning all instead of requested {metrics_number}"
     )
     metrics_number <- num_metrics
