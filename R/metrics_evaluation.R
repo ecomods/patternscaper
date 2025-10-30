@@ -193,36 +193,33 @@ rank_by_coefficient_variation <- function(metrics) {
     dplyr::pull(metric)
 }
 
-#' Rank by Linear Model Statistics
+#' Rank by Linear Model R-squared
 #'
-#' Ranks metrics by R-squared from linear models
+#' Ranks metrics by R² from linear models fitting value ~ pattern.
+#' Higher R² indicates the metric better explains variance across landscape patterns.
 #'
-#' @param calculated_metrics tibble. Metrics data.
+#' @param metrics tibble. Metrics data with columns 'metric', 'pattern', and 'value'.
 #'
-#' @return Character vector. Metrics ranked by the specified statistic.
+#' @return Character vector. Metrics ranked by R² (highest first).
+#' @importFrom dplyr group_by arrange desc mutate
+#' @importFrom tidyr nest
+#' @importFrom purrr map_dbl
 #' @noRd
 rank_by_linear_model <- function(
-  calculated_metrics
+  metrics
 ) {
   # Create a nested dataframe with data for each metric
-  metric_models <- calculated_metrics |>
+  metric_models <- metrics |>
     dplyr::group_by(metric) |>
     tidyr::nest() |>
     dplyr::mutate(
-      # Fit linear model for each metric
-      model = purrr::map(data, function(df) {
+      r2 = purrr::map_dbl(data, \(df) {
         tryCatch(
-          lm(value ~ type, data = df),
-          error = function(e) NULL
-        )
-      }),
-      r2 = purrr::map_dbl(model, function(m) {
-        if (is.null(m)) {
-          return(NA_real_)
-        }
-        tryCatch(
-          summary(m)$r.squared,
-          error = function(e) NA_real_
+          {
+            model <- lm(value ~ pattern, data = df)
+            summary(model)$r.squared
+          },
+          error = \(e) NA_real_
         )
       })
     )
