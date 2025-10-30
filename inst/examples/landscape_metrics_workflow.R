@@ -62,6 +62,13 @@ best_10_group_diff <- evaluate_landscape_metrics(
   metrics_number = 10
 )
 
+# Find best 10 based on Fisher score
+best_10_group_diff <- evaluate_landscape_metrics(
+  metrics = landscape_metrics,
+  method = "fisher_score",
+  metrics_number = 10
+)
+
 # Plot the 10 best metrics
 plot_metrics(
   metrics = landscape_metrics,

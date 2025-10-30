@@ -274,23 +274,27 @@ rank_by_mean_differences <- function(metrics) {
 
 #' Rank by Fisher Score
 #'
-#' Ranks metrics by their within variance compared to the variance between groups
+#' Ranks metrics by Fisher score (ratio of between-group to within-group variance).
+#' Higher scores indicate better separation between pattern types.
 #'
-#' @param calculated_metrics tibble. Metrics data.
+#' @param metrics tibble. Metrics data with columns 'metric', 'pattern', and 'value'.
 #'
-#' @return Character vector. Metrics ranked by mean differences (highest first).
+#' @return Character vector. Metrics ranked by Fisher score (highest first).
 #' @noRd
-rank_by_fisher_score <- function(calculated_metrics) {
-  fisher_results <- calculated_metrics |>
+rank_by_fisher_score <- function(metrics) {
+  fisher_results <- metrics |>
     dplyr::group_by(metric) |>
     tidyr::nest() |>
     dplyr::mutate(
-      fisher_score = purrr::map_dbl(data, function(df) {
+      fisher_score = purrr::map_dbl(data, \(df) {
         df <- df[!is.na(df$value), ]
+        # Check if at least two patterns exist for this metric
         if (length(unique(df$pattern)) < 2) {
           return(NA_real_)
         }
+
         overall_mean <- mean(df$value)
+
         group_stats <- df |>
           dplyr::group_by(pattern) |>
           dplyr::summarize(
@@ -299,11 +303,18 @@ rank_by_fisher_score <- function(calculated_metrics) {
             sd_val = sd(value),
             .groups = "drop"
           )
-        sb <- sum(group_stats$n * (group_stats$mean_val - overall_mean)^2) /
+
+        # Between-group variance
+        between_var <- sum(
+          group_stats$n * (group_stats$mean_val - overall_mean)^2
+        ) /
           (nrow(group_stats) - 1)
-        sw <- sum((group_stats$n - 1) * (group_stats$sd_val^2)) /
+
+        # Within-group variance
+        within_var <- sum((group_stats$n - 1) * (group_stats$sd_val^2)) /
           (sum(group_stats$n) - nrow(group_stats))
-        return(sb / sw)
+
+        return(between_var / within_var)
       })
     ) |>
     dplyr::arrange(dplyr::desc(fisher_score))
