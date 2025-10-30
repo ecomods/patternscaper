@@ -166,7 +166,7 @@ rank_metrics_by_method <- function(metrics, method) {
     lin_mod_r2 = rank_by_linear_model(metrics),
     mean_groups = rank_by_mean_differences(metrics),
     fisher_score = rank_by_fisher_score(metrics),
-    kruskal_p = rank_by_krusal(metrics),
+    kruskal_p = rank_by_kruskal(metrics),
     cli::cli_abort("Unknown ranking method: {.val {method}}")
   )
 }
