@@ -13,7 +13,7 @@ landscapes <- generate_training_landscapes(
   n = 100,
   add_rotation = FALSE,
   seed = NULL,
-  types = c("spots","gaps","banded","labyrinth")
+  types = c("spots", "gaps", "banded", "labyrinth")
 )
 
 # Check how many landscapes of each type were generated
@@ -26,9 +26,7 @@ plot_landscape_list(landscapes[1:20])
 # Step 2a: Calculate landscape metrics ---------------------------------------
 # ----------------------------------------------------------------------------#
 # List available landscape metrics
-list_available_metrics()
-# List available landscape metrics of specific level(s)
-list_available_metrics(level = c("class", "landscape"))
+landscapemetrics::list_lsm()
 
 # Calculate landscape metrics on the landscape level
 landscape_metrics <- calculate_landscape_metrics(
@@ -108,7 +106,6 @@ plot_nn_classification_landscapes(
 )
 
 
-
 # ----------------------------------------------------------------------------#
 # Step 4: Apply the models to new landscapes --------------------------------
 # ----------------------------------------------------------------------------#
@@ -118,7 +115,7 @@ test_landscapes <- generate_training_landscapes(
   seed = 43,
   n = 20,
   add_rotation = FALSE,
-  types = c("spots","inverted_spots","banded","labyrinth")
+  types = c("spots", "inverted_spots", "banded", "labyrinth")
 )
 
 # plot all landscapes
@@ -142,7 +139,6 @@ plot_nn_classification_landscapes(
 )
 
 
-
 # ----------------------------------------------------------------------------#
 # Step 5: Apply the models to pictures --------------------------------------
 # ----------------------------------------------------------------------------#
@@ -157,22 +153,24 @@ pic_names
 #semi wrong: 5,6,7 (binary class categorization)
 
 i <- 10
-image <- terra::rast(paste(pic_dir,pic_names[i],sep=""))
+image <- terra::rast(paste(pic_dir, pic_names[i], sep = ""))
 # If it's a multi-band image
 band1 <- image[[1]]
 # Apply threshold
 binary_class <- band1 < 120 #this parameter determines the sensitity towards
-                            #classification as vegetation - the higher the more vegetation
+#classification as vegetation - the higher the more vegetation
 test_matrix <- as.matrix(binary_class, wide = TRUE)
 test_raster <- terra::rast(test_matrix)
 
 #test plotting of binary categorization
-par(mfrow=c(1,2),pty="s")
-  raster::plot(band1,col=terrain.colors(25),
-               main="Initial Landscape")
-  raster::plot(test_raster,col=c(terrain.colors(25)[25],terrain.colors(25)[1]),
-               main="Binary Landscape")
-par(mfrow=c(1,1))
+par(mfrow = c(1, 2), pty = "s")
+raster::plot(band1, col = terrain.colors(25), main = "Initial Landscape")
+raster::plot(
+  test_raster,
+  col = c(terrain.colors(25)[25], terrain.colors(25)[1]),
+  main = "Binary Landscape"
+)
+par(mfrow = c(1, 1))
 
 #apply the neural metwork model to the picture
 result_pics <- apply_nn(
@@ -183,8 +181,6 @@ result_pics <- apply_nn(
 #show predicted type
 pic_names[i]
 result_pics$predictions
-
-
 
 
 # ----------------------------------------------------------------------------#
@@ -244,4 +240,3 @@ plot_nn_classification_landscapes(
   landscape_list = test_landscapes,
   only_misclassified = FALSE
 )
-

@@ -77,11 +77,11 @@ plot_landscape_list(landscapes)
 
 Next, we'll calculate landscape metrics for each of our training landscapes. These metrics will be used as features for the classification model.
 
-You have the option to list all available metrics using the `list_available_metrics()` function:
+You have the option to list all available metrics using the `list_lsm()` function from the `landscapemetrics` package:
 
 ```{r list_metrics}
 # List all available landscape metrics
-list_available_metrics()
+landscapemetrics::list_lsm()
 ```
 
 Landscape metrics can be calculated at different levels: "landscape", "patch", or "class".
