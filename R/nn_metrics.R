@@ -31,6 +31,28 @@ train_nn_metrics <- function(
     set.seed(seed)
   }
 
+  # Validate columns of metrics
+  needed_columns <- c(
+    "landscape_id",
+    "landscape_name",
+    "pattern",
+    "level",
+    "class",
+    "id",
+    "metric",
+    "value"
+  )
+  if (!all(needed_columns %in% colnames(metrics))) {
+    cli::cli_abort(
+      "Metrics data is missing required columns. Missing columns are: ",
+      paste(
+        needed_columns[!needed_columns %in% colnames(metrics)],
+        collapse = ", "
+      ),
+      ". Make sure that metrics is calculated by `calculate_landscape_metrics()`"
+    )
+  }
+
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold", "loo")) {
@@ -58,25 +80,8 @@ train_nn_metrics <- function(
   # extract the level of metrics so it can be accessed later
   metric_levels <- unique(metrics$level)
 
-  # if needed, add info on class and patch id to the metric name
-  # this is needed when the metric is calculated not on the landscape level,
-  # but on the class or patch level
-  metrics <- metrics |>
-    dplyr::mutate(
-      metric = stringr::str_remove(
-        paste0(metric, "_", class, "_", id),
-        "_NA_NA"
-      )
-    ) |>
-    dplyr::select(metric, value, pattern, landscape_name)
-
-  # Reformat the table to wide format
-  metrics_wide <- metrics |>
-    tidyr::pivot_wider(
-      names_from = metric,
-      values_from = value
-    ) |>
-    dplyr::select(-landscape_name)
+  # Convert metrics to wide format with 1 row per landscape
+  metrics_wide <- metrics_to_wide(metrics)
 
   # Normalize the predictor variables (all columns except for the pattern column)
   predictors <- metrics_wide |> dplyr::select(-pattern)
