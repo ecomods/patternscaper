@@ -212,3 +212,136 @@ find_balanced_cv_folds <- function(patterns, cv_folds) {
 
   return(fold_indices)
 }
+
+#' Evaluate cross-validation performance
+#'
+#' Calculates performance metrics from cross-validation results including
+#' confusion matrix, accuracy, and per-class metrics (recall, precision, F1).
+#'
+#' @param cv_predictions List. Predicted class labels for each fold.
+#' @param cv_probabilities List. Prediction probabilities for each fold.
+#'   Each element should be a matrix or named vector with class probabilities.
+#' @param cv_actual List. Actual class labels for each fold.
+#' @param cv_landscape_ids List. Landscape IDs for each fold. Needed to later
+#'   identify which landscapes were used in each fold.
+#' @param class_names Character vector. Names of all classes in the dataset.
+#' @param cv_method Character. Cross-validation method used ("k-fold" or "loo").
+#' @param cv_folds Integer. Number of folds used.
+#'
+#' @return List with performance metrics:
+#'   \item{confusion_matrix}{Confusion matrix table}
+#'   \item{accuracy}{Overall accuracy}
+#'   \item{metrics}{Data frame with per-class recall, precision, and F1 scores}
+#'   \item{cv_method}{CV method used}
+#'   \item{cv_folds}{Number of folds used}
+#'   \item{class_counts}{Sample counts per class}
+#'   \item{validation_results}{Tibble with detailed predictions for each sample}
+#'
+#' @keywords internal
+#' @importFrom cli cli_warn
+evaluate_cv_performance <- function(
+  cv_predictions,
+  cv_probabilities,
+  cv_actual,
+  cv_landscape_ids,
+  class_names,
+  cv_method,
+  cv_folds
+) {
+  # Validate inputs
+  if (length(cv_predictions) != length(cv_actual)) {
+    stop("Length of cv_predictions and cv_actual must be the same")
+  }
+  if (length(cv_probabilities) != length(cv_actual)) {
+    stop("Length of cv_probabilities and cv_actual must be the same")
+  }
+
+  # Create confusion matrix
+  conf_matrix <- table(
+    Predicted = factor(unlist(cv_predictions), levels = class_names),
+    Actual = factor(unlist(cv_actual), levels = class_names)
+  )
+
+  # Check for classes that were never correctly predicted
+  correctly_predicted <- diag(conf_matrix)
+  never_predicted_classes <- class_names[correctly_predicted == 0]
+
+  if (length(never_predicted_classes) > 0) {
+    cli::cli_warn(
+      "Some classes were never correctly predicted during cross-validation: {.val {never_predicted_classes}}. Results for these classes are unreliable."
+    )
+  }
+
+  # Print confusion matrix
+  cat("Cross-validation results:\n")
+  print(conf_matrix)
+
+  # Calculate overall accuracy
+  accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+
+  # Calculate per-class metrics
+  class_recall <- diag(conf_matrix) / colSums(conf_matrix)
+  class_precision <- diag(conf_matrix) / rowSums(conf_matrix)
+
+  # Handle divisions by zero
+  class_precision[is.na(class_precision)] <- 0
+  class_recall[is.na(class_recall)] <- 0
+
+  # Calculate F1 scores
+  class_f1 <- 2 *
+    class_precision *
+    class_recall /
+    (class_precision + class_recall)
+  class_f1[is.na(class_f1)] <- 0
+
+  # Get class counts
+  class_counts <- table(unlist(cv_actual))
+
+  # Combine into per-class metrics table
+  per_class_metrics <- tibble::tibble(
+    Class = class_names,
+    Count = as.vector(class_counts[class_names]),
+    Recall = round(class_recall, 2),
+    Precision = round(class_precision, 2),
+    F1_Score = round(class_f1, 2)
+  )
+
+  # Print summary statistics
+  cat(sprintf(
+    "Cross-validation accuracy: %.2f%% (using %s with %d folds)\n",
+    accuracy * 100,
+    ifelse(cv_method == "loo", "leave-one-out", cv_method),
+    cv_folds
+  ))
+
+  cat("\nPer-class performance:\n")
+  print(per_class_metrics)
+
+  # Assemble validation results tibble
+  validation_results <- cv_probabilities |>
+    purrr::map(\(x) tibble::as_tibble(x)) |>
+    dplyr::bind_rows() |>
+    dplyr::mutate(
+      landscape_id = unlist(cv_landscape_ids),
+      actual_class = unlist(cv_actual),
+      predicted_class = unlist(cv_predictions),
+      confidence = apply(dplyr::across(dplyr::all_of(class_names)), 1, max)
+    ) |>
+    dplyr::relocate(c(
+      landscape_id,
+      actual_class,
+      predicted_class,
+      confidence
+    ))
+  return(
+    list(
+      confusion_matrix = conf_matrix,
+      accuracy = accuracy,
+      per_class_metrics = per_class_metrics,
+      cv_method = cv_method,
+      cv_folds = cv_folds,
+      class_counts = as.vector(class_counts[class_names]),
+      validation_results = validation_results
+    )
+  )
+}

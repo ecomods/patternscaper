@@ -106,7 +106,7 @@ plot_classification_results(model, plot_type = "misclassifications")
 
 # Plot the landscapes that were misclassified
 plot_nn_classification_landscapes(
-  classification = model$validation_results,
+  classification = model$performance$validation_results,
   landscapes = landscapes,
   only_misclassified = TRUE
 )

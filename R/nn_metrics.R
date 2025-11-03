@@ -103,9 +103,6 @@ train_nn_metrics <- function(
   # Store the class names
   class_names <- levels(metrics_scaled$pattern)
 
-  # Initialize performance metrics storage
-  performance <- NULL
-
   # Validate and adjust CV parameters
   cv_params <- validate_cv_params(
     patterns = metrics_scaled$pattern,
@@ -133,6 +130,7 @@ train_nn_metrics <- function(
     cv_predictions <- list()
     cv_probabilities <- list()
     cv_actual <- list()
+    cv_landscape_ids <- list()
 
     # Perform k-fold cross-validation or loo by looping over each fold
     for (fold in 1:cv_folds) {
@@ -169,117 +167,22 @@ train_nn_metrics <- function(
       cv_predictions[[fold]] <- predictions
       cv_probabilities[[fold]] <- probs
       cv_actual[[fold]] <- validation_data$pattern
+      cv_landscape_ids[[fold]] <- which(validation_indices)
     }
 
     # Evaluate cv performance -------------------------------------------------
-    # Create and print confusion matrix
-    # Ensure all classes appear in the confusion matrix, even if not predicted
-    conf_matrix <- table(
-      Predicted = factor(unlist(cv_predictions), levels = class_names),
-      Actual = factor(unlist(cv_actual), levels = class_names)
-    )
-
-    # Check for classes that were never correctly predicted
-    correctly_predicted <- diag(conf_matrix)
-    never_predicted_classes <- class_names[correctly_predicted == 0]
-
-    if (length(never_predicted_classes) > 0) {
-      warning(sprintf(
-        "Some classes were never correctly predicted during cross-validation: %s. Results for these classes are unreliable.",
-        paste(never_predicted_classes, collapse = ", ")
-      ))
-    }
-
-    # Check for classes with few samples
-    class_counts <- table(metrics_scaled$pattern)
-    small_classes <- names(class_counts[class_counts < 3])
-
-    if (length(small_classes) > 0) {
-      warning(sprintf(
-        "Some classes have very few samples (< 3): %s. Cross-validation results for these classes may be unreliable.",
-        paste(small_classes, collapse = ", ")
-      ))
-    }
-
-    print("Cross-validation results:")
-    print(conf_matrix)
-
-    # Calculate performance metrics
-    accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
-
-    # Calculate per-class metrics
-    class_recall <- diag(conf_matrix) / colSums(conf_matrix)
-    class_precision <- diag(conf_matrix) / rowSums(conf_matrix)
-
-    # Handle divisions by zero
-    class_precision[is.na(class_precision)] <- 0
-    class_recall[is.na(class_recall)] <- 0
-
-    # F1 score
-    class_f1 <- 2 *
-      class_precision *
-      class_recall /
-      (class_precision + class_recall)
-    class_f1[is.na(class_f1)] <- 0
-
-    # Combine them in a table
-    per_class_metrics <- data.frame(
-      Class = class_names,
-      Count = as.vector(class_counts),
-      Recall = round(class_recall, 2),
-      Precision = round(class_precision, 2),
-      F1_Score = round(class_f1, 2)
-    )
-
-    performance <- list(
-      confusion_matrix = conf_matrix,
-      accuracy = accuracy,
-      metrics = per_class_metrics,
+    performance <- evaluate_cv_performance(
+      cv_predictions = cv_predictions,
+      cv_probabilities = cv_probabilities,
+      cv_actual = cv_actual,
+      cv_landscape_ids = cv_landscape_ids,
+      class_names = class_names,
       cv_method = cv_method,
-      cv_folds = cv_folds,
-      class_counts = as.vector(class_counts)
+      cv_folds = cv_folds
     )
 
-    cat(sprintf(
-      "Cross-validation accuracy: %.2f%% (using %s with %d folds)\n",
-      accuracy * 100,
-      ifelse(cv_method == "loo", "leave-one-out", cv_method),
-      cv_folds
-    ))
-
-    # Print per-class performance summary
-    cat("\nPer-class performance:\n")
-    print(per_class_metrics)
-
-    # Check for severe class imbalance
-    if (cv_method != "none") {
-      class_counts <- table(metrics_scaled$pattern)
-      imbalance_ratio <- max(class_counts) / min(class_counts)
-
-      if (imbalance_ratio > 5) {
-        cli::cli_alert_warning(
-          "Severe class imbalance detected (ratio: {round(imbalance_ratio, 1)}:1). CV results may be unreliable for minority classes."
-        )
-      }
-    }
-
-    # Assemble cv validation results ------------------------------------------
-    # Store results for this fold
-    validation_results <- cv_probabilities |>
-      purrr::map(\(x) tibble::as_tibble(x, rownames = "landscape_id")) |>
-      dplyr::bind_rows() |>
-      dplyr::mutate(
-        landscape_id = as.integer(landscape_id),
-        actual_class = unlist(cv_actual),
-        predicted_class = unlist(cv_predictions),
-        confidence = apply(dplyr::across(dplyr::all_of(class_names)), 1, max)
-      ) |>
-      dplyr::relocate(c(
-        landscape_id,
-        actual_class,
-        predicted_class,
-        confidence
-      ))
+    # Extract validation results from performance object
+    validation_results <- performance$validation_results
   }
 
   # Train final model on all data
@@ -299,8 +202,7 @@ train_nn_metrics <- function(
     features_level = metric_levels,
     scaling = scaling_params,
     classes = class_names,
-    performance = performance,
-    validation_results = validation_results
+    performance = if (cv_method != "none") performance else NULL
   )
 
   # Save model if requested
