@@ -106,148 +106,72 @@ train_nn_metrics <- function(
   # Initialize performance metrics storage
   performance <- NULL
 
-  # Check cross-validation method and parameters -------------------------------
+  # Validate and adjust CV parameters
+  cv_params <- validate_cv_params(
+    patterns = metrics_scaled$pattern,
+    cv_method = cv_method,
+    cv_folds = cv_folds,
+    n_predictors = ncol(metrics_scaled) - 1
+  )
+
+  # Update cv_method and cv_folds based on validation
+  cv_method <- cv_params$cv_method
+  cv_folds <- cv_params$cv_folds
+  class_counts <- cv_params$class_counts
+
+  # Run model with cross validation --------------------------------------------
   if (cv_method != "none") {
-    # Adjust CV method based on dataset characteristics
-    if (cv_method == "k-fold") {
-      # Get count of samples per class
-      class_counts <- table(metrics_scaled$pattern)
-      min_class_count <- min(class_counts)
-      total_samples <- nrow(metrics_scaled)
-
-      # Minimum recommended samples per class per fold for neural networks
-      min_samples_per_fold <- 3
-
-      # First, check if the dataset is fundamentally too small for k-fold
-      if (total_samples < 30 || min_class_count < 5) {
-        warning(
-          "Dataset is small (n=",
-          total_samples,
-          ") or has classes with few samples (min=",
-          min_class_count,
-          "). Switching to leave-one-out CV for more reliable estimates."
-        )
-        cv_method <- "loo"
-      } else {
-        # If dataset is large enough, check if we can maintain enough samples per fold
-        # Calculate maximum suitable folds to maintain min_samples_per_fold
-        max_suitable_folds <- floor(min_class_count / min_samples_per_fold)
-
-        # If we can't maintain enough samples even with 2 folds
-        if (max_suitable_folds < 2) {
-          warning(
-            "Cannot maintain ",
-            min_samples_per_fold,
-            " samples per class per fold. Switching to leave-one-out CV."
-          )
-          cv_method <- "loo"
-        } else if (cv_folds > max_suitable_folds) {
-          # If we need to reduce folds but can still do k-fold CV
-          warning(sprintf(
-            "Reducing CV folds from %d to %d to ensure at least %d samples per class per fold.",
-            cv_folds,
-            max_suitable_folds,
-            min_samples_per_fold
-          ))
-          cv_folds <- max_suitable_folds
-        }
-        # Otherwise, keep the user-specified fold count
-      }
+    # Create stratified fold assignments ---------------------------------------
+    if (cv_method == "loo") {
+      # If method is "loo", each sample is it's own fold
+      fold_indices <- seq_len(nrow(metrics_scaled))
+    } else {
+      fold_indices <- find_balanced_cv_folds(metrics_scaled$pattern, cv_folds)
     }
 
-    # Initialize storage for CV results
+    # Initialize storage for CV results of each fold
     cv_predictions <- list()
     cv_probabilities <- list()
     cv_actual <- list()
 
-    if (cv_method == "loo") {
-      # Perform leave-one-out cross-validation
-      for (i in 1:nrow(metrics_scaled)) {
-        # Split data into training and validation
-        train_data <- metrics_scaled[-i, ]
-        validation_data <- metrics_scaled[i, , drop = FALSE]
+    # Perform k-fold cross-validation or loo by looping over each fold
+    for (fold in 1:cv_folds) {
+      # Split data into training and validation
+      train_indices <- fold_indices != fold
+      validation_indices <- fold_indices == fold
 
-        # Train model on training data
-        fold_model <- nnet::nnet(
-          pattern ~ .,
-          data = train_data,
-          size = hidden_neurons,
-          decay = decay,
-          maxit = maxit,
-          trace = FALSE
-        )
+      train_data <- metrics_scaled[train_indices, ]
+      validation_data <- metrics_scaled[validation_indices, ]
 
-        # Store predictions for this fold
-        fold_probabilities <- predict(
-          fold_model,
-          newdata = validation_data[,
-            -which(names(validation_data) == "pattern"),
-            drop = FALSE
-          ],
-          type = "raw"
-        )
-        fold_predictions <- class_names[apply(fold_probabilities, 1, which.max)]
+      # Train model on training data
+      fold_model <- nnet::nnet(
+        pattern ~ .,
+        data = train_data,
+        size = hidden_neurons,
+        decay = decay,
+        maxit = maxit,
+        trace = FALSE
+      )
 
-        # Store results for this fold
-        cv_predictions[[i]] <- fold_predictions
-        cv_probabilities[[i]] <- fold_probabilities
-        cv_actual[[i]] <- validation_data$pattern
-      }
+      # Predict on validation data
+      probs <- predict(
+        fold_model,
+        newdata = validation_data[,
+          -which(names(validation_data) == "pattern")
+        ],
+        type = "raw"
+      )
 
-      # Set cv_folds for reporting
-      cv_folds <- nrow(metrics_scaled)
-    } else if (cv_method == "k-fold") {
-      # Create stratified fold assignments
-      # Ensure each class is represented in each fold
-      fold_indices <- integer(nrow(metrics_scaled))
-      for (class_name in levels(metrics_scaled$pattern)) {
-        class_indices <- which(metrics_scaled$pattern == class_name)
-        class_folds <- sample(rep(
-          1:cv_folds,
-          length.out = length(class_indices)
-        ))
-        fold_indices[class_indices] <- class_folds
-      }
+      # Get predicted class labels
+      predictions <- colnames(probs)[max.col(probs, ties.method = "first")]
 
-      # Perform k-fold cross-validation
-      for (fold in 1:cv_folds) {
-        # Split data into training and validation
-        train_indices <- fold_indices != fold
-        validation_indices <- fold_indices == fold
-
-        train_data <- metrics_scaled[train_indices, ]
-        validation_data <- metrics_scaled[validation_indices, ]
-
-        # Train model on training data
-        fold_model <- nnet::nnet(
-          pattern ~ .,
-          data = train_data,
-          size = hidden_neurons,
-          decay = decay,
-          maxit = maxit,
-          trace = FALSE
-        )
-
-        # Predict on validation data
-        probs <- predict(
-          fold_model,
-          newdata = validation_data[,
-            -which(names(validation_data) == "pattern")
-          ],
-          type = "raw"
-        )
-
-        # Get predicted class labels
-        predictions <- colnames(probs)[max.col(probs, ties.method = "first")]
-
-        # Store results for this fold
-        cv_predictions[[fold]] <- predictions
-        cv_probabilities[[fold]] <- probs
-        cv_actual[[fold]] <- validation_data$pattern
-      }
+      # Store results for this fold
+      cv_predictions[[fold]] <- predictions
+      cv_probabilities[[fold]] <- probs
+      cv_actual[[fold]] <- validation_data$pattern
     }
 
-    # Evaluate cv performance ---------------------------------------------
+    # Evaluate cv performance -------------------------------------------------
     # Create and print confusion matrix
     # Ensure all classes appear in the confusion matrix, even if not predicted
     conf_matrix <- table(
@@ -326,6 +250,18 @@ train_nn_metrics <- function(
     # Print per-class performance summary
     cat("\nPer-class performance:\n")
     print(per_class_metrics)
+
+    # Check for severe class imbalance
+    if (cv_method != "none") {
+      class_counts <- table(metrics_scaled$pattern)
+      imbalance_ratio <- max(class_counts) / min(class_counts)
+
+      if (imbalance_ratio > 5) {
+        cli::cli_alert_warning(
+          "Severe class imbalance detected (ratio: {round(imbalance_ratio, 1)}:1). CV results may be unreliable for minority classes."
+        )
+      }
+    }
 
     # Assemble cv validation results ------------------------------------------
     # Store results for this fold
