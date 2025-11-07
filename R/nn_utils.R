@@ -6,7 +6,8 @@
 #' @param metrics A data frame containing landscape metrics in long format.
 #'   Expected columns include: `metric`, `class`, `id`, `value`, `pattern`.
 #'   Must include either `landscape_id` or `landscape_name` for identification.
-#' @param keep_id Logical. Whether to keep the identification column in output (default: FALSE).
+#' @param return_only_metrics Logical. Whether to return only the metrics or
+#'   also the the identification columns in output (default: FALSE).
 #'
 #' @return A data frame in wide format where each metric becomes a column and each
 #'   row is a landscape. Metric names are modified to include class and patch IDs
@@ -16,13 +17,9 @@
 #' @importFrom rlang sym
 #' @importFrom stringr str_remove
 #' @importFrom tidyr pivot_wider
-metrics_to_wide <- function(metrics, keep_id = FALSE) {
+metrics_to_wide <- function(metrics, return_only_metrics = FALSE) {
   # Determine which ID column to use (prefer landscape_id over landscape_name)
-  id_col <- if ("landscape_id" %in% colnames(metrics)) {
-    "landscape_id"
-  } else if ("landscape_name" %in% colnames(metrics)) {
-    "landscape_name"
-  } else {
+  if (!any(c("landscape_id", "landscape_name") %in% colnames(metrics))) {
     cli::cli_abort(
       "Metrics must contain either 'landscape_id' or 'landscape_name' column"
     )
@@ -36,7 +33,13 @@ metrics_to_wide <- function(metrics, keep_id = FALSE) {
         "_NA_NA"
       )
     ) |>
-    dplyr::select(!!rlang::sym(id_col), metric, value, pattern)
+    dplyr::select(dplyr::any_of(c(
+      "landscape_id",
+      "landscape_name",
+      "metric",
+      "value",
+      "pattern"
+    )))
 
   # Pivot to wide format
   metrics_wide <- metrics |>
@@ -46,11 +49,10 @@ metrics_to_wide <- function(metrics, keep_id = FALSE) {
     )
 
   # Drop ID column unless requested
-  if (!keep_id) {
+  if (return_only_metrics) {
     metrics_wide <- metrics_wide |>
-      dplyr::select(-!!rlang::sym(id_col))
+      dplyr::select(-any_of(c("landscape_id", "landscape_name", "pattern")))
   }
-
   metrics_wide
 }
 
@@ -187,10 +189,10 @@ validate_cv_params <- function(
 #' proportionally in each fold.
 #'
 #' @param patterns Factor or character vector. Class labels for training data.
-#' @param cv_folds Integer. Number of folds for k-fold CV
+#' @param cv_folds Integer. Number of folds for k-fold CV.
 #'
 #' @return Integer vector of fold assignments (length = length(patterns)).
-#'   Each element indicates which fold that sample belongs to.
+#'   Each element indicates which fold that sample belongs to (1 to cv_folds).
 #'
 #' @keywords internal
 find_balanced_cv_folds <- function(patterns, cv_folds) {
@@ -220,26 +222,31 @@ find_balanced_cv_folds <- function(patterns, cv_folds) {
 #'
 #' @param cv_predictions List. Predicted class labels for each fold.
 #' @param cv_probabilities List. Prediction probabilities for each fold.
-#'   Each element should be a matrix or named vector with class probabilities.
+#'   Each element should be a matrix or data frame with class probabilities.
 #' @param cv_actual List. Actual class labels for each fold.
-#' @param cv_landscape_ids List. Landscape IDs for each fold. Needed to later
-#'   identify which landscapes were used in each fold.
+#' @param cv_landscape_ids List. Landscape IDs for each fold. Needed to
+#'   map predictions back to original landscapes.
 #' @param class_names Character vector. Names of all classes in the dataset.
-#' @param cv_method Character. Cross-validation method used ("k-fold" or "loo").
+#' @param cv_method Character. Cross-validation method used ("none", "k-fold", or "loo").
 #' @param cv_folds Integer. Number of folds used.
 #' @param verbose Logical. Whether to print detailed results (default: TRUE).
+#' @param return_predictions Logical. Whether to include validation_results
+#'   tibble with detailed per-landscape predictions (default: TRUE).
 #'
 #' @return List with performance metrics:
-#'   \item{confusion_matrix}{Confusion matrix table}
-#'   \item{accuracy}{Overall accuracy}
-#'   \item{metrics}{Data frame with per-class recall, precision, and F1 scores}
-#'   \item{cv_method}{CV method used}
-#'   \item{cv_folds}{Number of folds used}
-#'   \item{class_counts}{Sample counts per class}
-#'   \item{validation_results}{Tibble with detailed predictions for each sample}
+#'   \describe{
+#'     \item{confusion_matrix}{Confusion matrix table}
+#'     \item{accuracy}{Overall accuracy (numeric)}
+#'     \item{per_class_metrics}{Tibble with per-class recall, precision, and F1 scores}
+#'     \item{cv_method}{CV method used (character)}
+#'     \item{cv_folds}{Number of folds used (integer)}
+#'     \item{class_counts}{Sample counts per class (integer vector)}
+#'     \item{validation_results}{Tibble with detailed predictions per landscape
+#'       (only included if return_predictions = TRUE)}
+#'   }
 #'
 #' @keywords internal
-#' @importFrom cli cli_warn
+#' @importFrom cli cli_warn cli_abort
 evaluate_cv_performance <- function(
   cv_predictions,
   cv_probabilities,
@@ -248,7 +255,8 @@ evaluate_cv_performance <- function(
   class_names,
   cv_method,
   cv_folds,
-  verbose = TRUE # Add parameter
+  verbose = TRUE,
+  return_predictions = TRUE
 ) {
   # Validate inputs
   if (length(cv_predictions) != length(cv_actual)) {
@@ -367,15 +375,17 @@ evaluate_cv_performance <- function(
     print(per_class_metrics)
   }
 
-  return(
-    list(
-      confusion_matrix = conf_matrix,
-      accuracy = accuracy,
-      per_class_metrics = per_class_metrics,
-      cv_method = cv_method,
-      cv_folds = cv_folds,
-      class_counts = as.vector(class_counts[class_names]),
-      validation_results = validation_results
-    )
+  result <- list(
+    confusion_matrix = conf_matrix,
+    accuracy = accuracy,
+    per_class_metrics = per_class_metrics,
+    cv_method = cv_method,
+    cv_folds = cv_folds,
+    class_counts = as.vector(class_counts[class_names])
   )
+  if (return_predictions) {
+    result$validation_results <- validation_results
+  }
+
+  return(result)
 }
