@@ -315,11 +315,11 @@ evaluate_cv_performance <- function(
 
   # Combine into per-class metrics table
   per_class_metrics <- tibble::tibble(
-    Class = class_names,
-    Count = as.vector(class_counts[class_names]),
-    Recall = round(class_recall, 2),
-    Precision = round(class_precision, 2),
-    F1_Score = round(class_f1, 2)
+    class = class_names,
+    count = as.vector(class_counts[class_names]),
+    recall = round(class_recall, 2),
+    precision = round(class_precision, 2),
+    f1_score = round(class_f1, 2)
   )
 
   # Assemble validation results tibble
