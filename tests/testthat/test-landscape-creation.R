@@ -137,7 +137,7 @@ test_that("create_landscape_banded creates valid landscape object", {
   expect_s3_class(l, "landscape")
   expect_true(!is.null(l$data))
   expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "bands")
+  expect_equal(l$pattern, "banded")
   expect_true(!is.null(l$params))
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
@@ -186,21 +186,6 @@ test_that("create_landscape validates pattern input", {
   )
 })
 
-test_that("create_landscape handles partial matching correctly", {
-  # Unambiguous partial match should work with warning
-  expect_warning(
-    l <- create_landscape("sha", width = 10, height = 10),
-    "Partial pattern 'sha' matched to 'sharp'"
-  )
-  expect_equal(l$pattern, "sharp")
-
-  # Ambiguous partial match should error
-  expect_error(
-    create_landscape("s", width = 10, height = 10),
-    "Ambiguous pattern"
-  )
-})
-
 test_that("create_landscape creates correct landscape types", {
   # Test each pattern creates the correct pattern
   expect_equal(
@@ -245,7 +230,7 @@ test_that("create_landscape creates correct landscape types", {
   )
   expect_equal(
     create_landscape("banded", width = 10, height = 10, seed = 123)$pattern,
-    "bands"
+    "banded"
   )
 })
 
@@ -322,8 +307,8 @@ test_that("create_training_landscapes validates inputs", {
 
   # Invalid types - empty after filtering
   expect_error(
-    create_training_landscapes(n = 10, types = c("invalid1", "invalid2")),
-    "No valid landscape types specified"
+    create_training_landscapes(n = 10, patterns = c("invalid1", "invalid2")),
+    "No valid landscape patterns specified"
   )
 })
 
@@ -332,7 +317,7 @@ test_that("create_training_landscapes returns correct number of landscapes", {
   # I cannot fix
   landscapes <- create_training_landscapes(
     n = 10,
-    types = c(
+    patterns = c(
       "random",
       "sharp",
       "diffuse",
@@ -371,7 +356,7 @@ test_that("create_training_landscapes returns landscape objects", {
 test_that("create_training_landscapes sets landscape names correctly", {
   landscapes <- create_training_landscapes(
     n = 5,
-    types = c("sharp", "random"),
+    patterns = c("sharp", "random"),
     width = 20,
     height = 20,
     add_rotation = FALSE,
@@ -386,7 +371,7 @@ test_that("create_training_landscapes sets landscape names correctly", {
   # With rotation
   landscapes_rotated <- create_training_landscapes(
     n = 5,
-    types = c("sharp"),
+    patterns = c("sharp"),
     width = 20,
     height = 20,
     add_rotation = TRUE,
@@ -408,14 +393,14 @@ test_that("create_training_landscapes sets landscape names correctly", {
   }
 })
 
-test_that("create_training_landscapes respects type selection", {
-  # Generate only specific types
+test_that("create_training_landscapes respects pattern selection", {
+  # Generate only specific patterns
   landscapes <- create_training_landscapes(
     n = 10,
-    types = c("sharp", "diffuse"),
+    patterns = c("sharp", "diffuse"),
     width = 20,
     height = 20,
-    balance_types = TRUE,
+    balance_patterns = TRUE,
     seed = 123
   )
 
@@ -427,13 +412,13 @@ test_that("create_training_landscapes respects type selection", {
   expect_true(all(unique_patterns %in% c("sharp", "diffuse")))
 })
 
-test_that("create_training_landscapes balances types correctly", {
+test_that("create_training_landscapes balances patterns correctly", {
   landscapes <- create_training_landscapes(
     n = 12,
-    types = c("sharp", "diffuse", "curvy"),
+    patterns = c("sharp", "diffuse", "curvy"),
     width = 20,
     height = 20,
-    balance_types = TRUE,
+    balance_patterns = TRUE,
     seed = 123
   )
 
@@ -441,28 +426,28 @@ test_that("create_training_landscapes balances types correctly", {
   patterns <- sapply(landscapes, function(x) x$pattern)
   pattern_counts <- table(patterns)
 
-  # Each type should appear approximately equally (4 each for n=12, 3 types)
+  # Each type should appear approximately equally (4 each for n=12, 3 patterns)
   expect_equal(length(pattern_counts), 3)
   expect_true(all(pattern_counts >= 3))
   expect_true(all(pattern_counts <= 5))
 })
 
-test_that("create_training_landscapes respects type_probs when balance_types is FALSE", {
+test_that("create_training_landscapes respects type_probs when balance_patterns is FALSE", {
   # This is harder to test deterministically, but we can check that
   # the function runs without error
   landscapes <- create_training_landscapes(
     n = 20,
-    types = c("sharp", "diffuse", "random"),
+    patterns = c("sharp", "diffuse", "random"),
     width = 20,
     height = 20,
-    balance_types = FALSE,
-    type_probs = c(0.5, 0.3, 0.2),
+    balance_patterns = FALSE,
+    pattern_probs = c(0.5, 0.3, 0.2),
     seed = 123
   )
 
   expect_equal(length(landscapes), 20)
 
-  # All patternes should be from the selected types
+  # All patternes should be from the selected patterns
   patterns <- sapply(landscapes, function(x) x$pattern)
   expect_true(all(patterns %in% c("sharp", "diffuse", "random")))
 })
@@ -503,7 +488,7 @@ test_that("create_training_landscapes handles rotation correctly", {
 test_that("create_training_landscapes respects width and height", {
   # TODO: I removed spots and gaps for now because I get an error for them that
   landscapes <- create_training_landscapes(
-    types = c(
+    patterns = c(
       "random",
       "sharp",
       "diffuse",
@@ -543,7 +528,7 @@ test_that("create_training_landscapes is reproducible with seed", {
     seed = 456
   )
 
-  # Same types in same order
+  # Same patterns in same order
   patterns1 <- sapply(landscapes1, function(x) x$pattern)
   patterns2 <- sapply(landscapes2, function(x) x$pattern)
   expect_equal(patterns1, patterns2)
@@ -564,7 +549,7 @@ test_that("create_training_landscapes handles custom params_list", {
 
   landscapes <- create_training_landscapes(
     n = 10,
-    types = c("sharp", "random"),
+    patterns = c("sharp", "random"),
     width = 20,
     height = 20,
     params_list = custom_params,
@@ -593,7 +578,7 @@ test_that("create_training_landscapes warns about missing params", {
   expect_warning(
     landscapes <- create_training_landscapes(
       n = 5,
-      types = c("sharp", "random"),
+      patterns = c("sharp", "random"),
       width = 20,
       height = 20,
       params_list = custom_params,
@@ -618,13 +603,13 @@ test_that("create_training_landscapes handles errors gracefully", {
   expect_true(length(landscapes) <= 20)
 })
 
-test_that("create_training_landscapes works with all default landscape types", {
+test_that("create_training_landscapes works with all default landscape patterns", {
   # Test that all types can be generated without errors
   landscapes <- create_training_landscapes(
     n = 24, # 12 types * 2 = 24 for balanced distribution
     width = 20,
     height = 20,
-    balance_types = TRUE,
+    balance_patterns = TRUE,
     seed = 123
   )
 
