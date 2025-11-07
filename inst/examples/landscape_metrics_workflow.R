@@ -110,6 +110,7 @@ plot_nn_classification_landscapes(
 # generate test landscapes
 test_landscapes <- create_training_landscapes(
   seed = 43,
+  patterns = c("banded", "spots", "labyrinth"),
   n = 20,
   add_rotation = TRUE
 )
@@ -143,6 +144,6 @@ validation_results <- apply_nn_metrics(
 
 plot_nn_classification_landscapes(
   classification = validation_results$predictions,
-  landscape_list = test_landscapes,
+  landscapes = test_landscapes,
   only_misclassified = FALSE
 )
