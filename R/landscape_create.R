@@ -100,41 +100,23 @@ create_landscape <- function(
 
   # Check if pattern is a valid string
   if (!is.character(pattern) || length(pattern) != 1) {
-    stop("'pattern' must be a single character string")
+    cli::cli_abort("'pattern' must be a single character string")
   }
 
-  # Try to match the pattern argument with partial matching
-  matched <- NULL
-  matches <- grep(paste0("^", pattern), valid_patterns, value = TRUE)
-
-  if (length(matches) == 1) {
-    # One match - use it with a warning if it's partial
-    if (matches != pattern) {
-      warning("Partial pattern '", pattern, "' matched to '", matches, "'")
-    }
-    matched <- matches
-  } else if (length(matches) > 1) {
-    # Multiple matches - provide informative error
-    stop(
-      "Ambiguous pattern '",
-      pattern,
-      "'. Matches multiple options: ",
-      paste(matches, collapse = ", ")
-    )
+  # Check for exact match first
+  if (pattern %in% valid_patterns) {
+    matched <- pattern
   } else {
-    # No matches
-    stop(
-      "Invalid pattern '",
-      pattern,
-      "'. Valid options are: ",
-      paste(valid_patterns, collapse = ", ")
-    )
+    cli::cli_abort(c(
+      "Invalid pattern '{pattern}'",
+      "i" = "Valid options are: {paste(valid_patterns, collapse = ', ')}"
+    ))
   }
 
   # Validate the name parameter
   if (!is.null(name)) {
     if (!is.character(name) || length(name) != 1) {
-      stop("'name' must be a single character string or NULL")
+      cli::cli_abort("'name' must be a single character string or NULL")
     }
   }
 
