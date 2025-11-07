@@ -40,12 +40,7 @@ best_10 <- evaluate_landscape_metrics(
   metrics_number = 10,
   verbose = TRUE
 )
-# Find best 10 based on linear model p-values
-best_10_linmod_p <- evaluate_landscape_metrics(
-  metrics = landscape_metrics,
-  method = "lin_mod_p",
-  metrics_number = 10
-)
+
 # Find best 10 based on linear model R-squared
 best_10_linmod_r2 <- evaluate_landscape_metrics(
   metrics = landscape_metrics,
