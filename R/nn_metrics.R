@@ -183,9 +183,6 @@ train_nn_metrics <- function(
       cv_folds = cv_folds,
       verbose = verbose
     )
-
-    # Extract validation results from performance object
-    validation_results <- performance$validation_results
   }
 
   # Train final model on all data
