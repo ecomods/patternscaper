@@ -12,6 +12,7 @@
 #' @param model_path Character. Path to save model (default: NULL means that
 #'     model is not saved).
 #' @param seed Integer. Random seed for reproducibility. If NULL, a random seed will be used (default: NULL).
+#' @param verbose Logical. Whether to print cross-validation results (default: TRUE).
 #'
 #' @return List. Trained neural network model and associated metadata.
 #' @export
@@ -24,7 +25,8 @@ train_nn_metrics <- function(
   decay = 0.01,
   maxit = 500,
   model_path = NULL,
-  seed = NULL
+  seed = NULL,
+  verbose = TRUE
 ) {
   # Set seed if provided
   if (!is.null(seed)) {
@@ -178,7 +180,8 @@ train_nn_metrics <- function(
       cv_landscape_ids = cv_landscape_ids,
       class_names = class_names,
       cv_method = cv_method,
-      cv_folds = cv_folds
+      cv_folds = cv_folds,
+      verbose = verbose
     )
 
     # Extract validation results from performance object

@@ -227,6 +227,7 @@ find_balanced_cv_folds <- function(patterns, cv_folds) {
 #' @param class_names Character vector. Names of all classes in the dataset.
 #' @param cv_method Character. Cross-validation method used ("k-fold" or "loo").
 #' @param cv_folds Integer. Number of folds used.
+#' @param verbose Logical. Whether to print detailed results (default: TRUE).
 #'
 #' @return List with performance metrics:
 #'   \item{confusion_matrix}{Confusion matrix table}
@@ -246,7 +247,8 @@ evaluate_cv_performance <- function(
   cv_landscape_ids,
   class_names,
   cv_method,
-  cv_folds
+  cv_folds,
+  verbose = TRUE # Add parameter
 ) {
   # Validate inputs
   if (length(cv_predictions) != length(cv_actual)) {
@@ -254,6 +256,24 @@ evaluate_cv_performance <- function(
   }
   if (length(cv_probabilities) != length(cv_actual)) {
     stop("Length of cv_probabilities and cv_actual must be the same")
+  }
+
+  # Add validation at the start of the function
+  if (
+    !all(
+      sapply(cv_probabilities, is.matrix) |
+        sapply(cv_probabilities, is.data.frame)
+    )
+  ) {
+    cli::cli_abort("cv_probabilities must contain matrices or data frames")
+  }
+
+  # Check probability columns match class_names
+  prob_colnames <- colnames(cv_probabilities[[1]])
+  if (!identical(sort(prob_colnames), sort(class_names))) {
+    cli::cli_abort(
+      "Probability column names don't match class_names. Expected: {.val {class_names}}"
+    )
   }
 
   # Create confusion matrix
@@ -271,10 +291,6 @@ evaluate_cv_performance <- function(
       "Some classes were never correctly predicted during cross-validation: {.val {never_predicted_classes}}. Results for these classes are unreliable."
     )
   }
-
-  # Print confusion matrix
-  cat("Cross-validation results:\n")
-  print(conf_matrix)
 
   # Calculate overall accuracy
   accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
@@ -306,21 +322,15 @@ evaluate_cv_performance <- function(
     F1_Score = round(class_f1, 2)
   )
 
-  # Print summary statistics
-  cat(sprintf(
-    "Cross-validation accuracy: %.2f%% (using %s with %d folds)\n",
-    accuracy * 100,
-    ifelse(cv_method == "loo", "leave-one-out", cv_method),
-    cv_folds
-  ))
-
-  cat("\nPer-class performance:\n")
-  print(per_class_metrics)
-
   # Assemble validation results tibble
-  validation_results <- cv_probabilities |>
-    purrr::map(\(x) tibble::as_tibble(x)) |>
-    dplyr::bind_rows() |>
+  validation_results <- purrr::map2_dfr(
+    cv_probabilities,
+    seq_along(cv_probabilities),
+    \(probs, fold_num) {
+      tibble::as_tibble(probs) |>
+        dplyr::mutate(fold = fold_num)
+    }
+  ) |>
     dplyr::mutate(
       landscape_id = unlist(cv_landscape_ids),
       actual_class = unlist(cv_actual),
@@ -329,10 +339,34 @@ evaluate_cv_performance <- function(
     ) |>
     dplyr::relocate(c(
       landscape_id,
+      fold,
       actual_class,
       predicted_class,
       confidence
     ))
+
+  if (verbose) {
+    # Header
+    cli::cli_h2("Cross-validation results")
+
+    # CV method info
+    cv_label <- ifelse(
+      cv_method == "loo",
+      "leave-one-out",
+      paste0(cv_folds, "-fold")
+    )
+    cli::cli_alert_info("Method: {cv_label} cross-validation")
+    cli::cli_alert_info("Overall accuracy: {round(accuracy * 100, 2)}%")
+
+    # Confusion matrix
+    cli::cli_h3("Confusion matrix")
+    print(conf_matrix)
+
+    # Per-class metrics
+    cli::cli_h3("Per-class performance")
+    print(per_class_metrics)
+  }
+
   return(
     list(
       confusion_matrix = conf_matrix,
