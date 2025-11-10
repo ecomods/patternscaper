@@ -13,7 +13,8 @@ train_nn_metrics(
   decay = 0.01,
   maxit = 500,
   model_path = NULL,
-  seed = NULL
+  seed = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -35,9 +36,19 @@ train_nn_metrics(
 model is not saved).}
 
 \item{seed}{Integer. Random seed for reproducibility. If NULL, a random seed will be used (default: NULL).}
+
+\item{verbose}{Logical. Whether to print cross-validation results (default: TRUE).}
 }
 \value{
-List. Trained neural network model and associated metadata.
+List containing:
+  \describe{
+    \item{model}{Trained nnet object}
+    \item{features}{Character vector of feature names used}
+    \item{features_level}{Metric aggregation level (e.g., "landscape")}
+    \item{scaling}{List with center and scale parameters for normalization}
+    \item{classes}{Character vector of class names}
+    \item{performance}{Performance metrics from cross-validation (NULL if cv_method = "none")}
+  }
 }
 \description{
 Trains a neural network model to classify landscapes based on metrics.

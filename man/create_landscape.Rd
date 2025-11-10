@@ -5,7 +5,7 @@
 \title{Create a Landscape with Specified Pattern}
 \usage{
 create_landscape(
-  pattern = c("random", "sharp", "diffuse", "curvy", "fingers", "curyfingers",
+  pattern = c("random", "sharp", "diffuse", "curvy", "fingers", "curvyfingers",
     "scattered", "clustered", "sine_bands", "spots", "gaps", "banded", "labyrinth"),
   name = NULL,
   custom_pattern = NULL,

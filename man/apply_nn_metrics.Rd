@@ -4,19 +4,28 @@
 \alias{apply_nn_metrics}
 \title{Apply Neural Network for Landscape Classification}
 \usage{
-apply_nn_metrics(landscapes, nn_model, show_progress = TRUE)
+apply_nn_metrics(landscapes, nn_model, return_performance = FALSE)
 }
 \arguments{
-\item{landscapes}{SpatRaster, matrix, or list. Landscape(s) to classify.
-Can be a single landscape or list of landscapes, with or without metadata.}
+\item{landscapes}{landscape object, or list of landscape objects. Landscape(s) to classify.}
 
-\item{nn_model}{List. Neural network model from apply_nn_landscapes().}
-
-\item{show_progress}{Logical. Whether to display progress bar for multiple landscapes (default: TRUE).}
+\item{nn_model}{List. Neural network model from train_nn_metrics().}
 }
 \value{
-tibble. Classification results with columns for landscape name,
-  predicted class, confidence score, warning flag, and probability for each class.
+When actual classes unavailable: tibble with columns:
+  \describe{
+    \item{landscape_id}{Numeric landscape identifier}
+    \item{landscape_name}{Character landscape name (if available)}
+    \item{predicted_class}{Predicted landscape pattern}
+    \item{confidence}{Prediction confidence (max probability)}
+    \item{<class_name>}{Probability for each trained class}
+  }
+
+  When actual classes available: List containing:
+  \describe{
+    \item{predictions}{Tibble as above, plus actual_class column}
+    \item{performance}{Performance metrics from evaluate_cv_performance()}
+  }
 }
 \description{
 Applies a trained neural network model to classify new landscapes. The function

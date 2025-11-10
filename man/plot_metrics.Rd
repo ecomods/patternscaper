@@ -4,17 +4,47 @@
 \alias{plot_metrics}
 \title{Plot Landscape Metrics}
 \usage{
-plot_metrics(calculated_metrics, selected_metrics, title = "Landscape Metrics")
+plot_metrics(metrics, selected_metrics = NULL, force = FALSE)
 }
 \arguments{
-\item{selected_metrics}{Character vector. Metrics to visualize.}
+\item{metrics}{Data frame from \code{\link{calculate_landscape_metrics}}.
+Must contain columns: "level", "pattern", "metric", and "value".
+For class-level metrics, must also contain "class".}
 
-\item{metrics}{Data frame. Metrics dataframe from calculate_landscape_metrics.
-Needs to contain columns: "level", "type", "metric", "value", and optionally "pattern".}
+\item{selected_metrics}{Character vector of metric names to visualize.
+Must be present in the metrics data. If NULL (default), all available metrics
+are plotted in alphabetical order, subject to automatic limits based on the
+number of patterns.}
+
+\item{force}{Logical. Override automatic metric limits (default: FALSE).
+When TRUE, all selected metrics will be plotted regardless of readability.}
 }
 \value{
-ggplot object. Visualization of selected metrics across landscape types.
+A ggplot2 object showing boxplots of metric values by pattern type.
 }
 \description{
-Creates a visualization of landscape metric values across landscape types.
+Creates a visualization of landscape metric values across landscape types using
+boxplots with overlaid jittered points. Metrics are displayed in separate facets.
+}
+\details{
+The function automatically limits the number of metrics based on the number of
+patterns to maintain readability:
+- 1-3 patterns: up to 12 metrics (3 rows × 4 columns)
+- 4-5 patterns: up to 8 metrics (2 rows × 4 columns)
+- 6+ patterns: up to 6 metrics (2 rows × 3 columns)
+}
+\examples{
+\dontrun{
+landscapes <- create_training_landscapes(n = 20, patterns = c("banded", "spots"))
+metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
+plot_metrics(metrics, selected_metrics = c("ai", "lsi"))
+
+# With many patterns and metrics, automatic limiting applies
+many_metrics <- c("ai", "lsi", "ed", "np", "pd", "cohesion", "division",
+                  "split", "mesh", "enn_mn", "area_mn", "core_mn")
+plot_metrics(metrics, selected_metrics = many_metrics)
+
+# Override limits if needed
+plot_metrics(metrics, selected_metrics = many_metrics, force = TRUE)
+}
 }

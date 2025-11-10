@@ -5,23 +5,22 @@
 \title{Evaluate Landscape Metrics}
 \usage{
 evaluate_landscape_metrics(
-  calculated_metrics,
+  metrics,
   metrics_number = 10,
   method = "coeffvar_all",
-  plot = FALSE,
   exclude_NA_metrics = TRUE,
   exclude_metrics = NULL,
-  correlation_threshold = 0.7
+  correlation_threshold = 0.7,
+  verbose = FALSE
 )
 }
 \arguments{
-\item{calculated_metrics}{tibble. Metrics from calculate_landscape_metrics().}
+\item{metrics}{tibble. Metrics from calculate_landscape_metrics().}
 
 \item{metrics_number}{Integer. Number of top metrics to return (default: 10).}
 
-\item{method}{Character. Selection method (options: "coeffvar_all", "lin_mod_r2", "mean_groups") (default: "coeffvar_all").}
-
-\item{plot}{Logical. Whether to generate visualization (default: FALSE).}
+\item{method}{Character. Selection method to use (default: "coeffvar_all").
+See 'Ranking Methods' section below for details.}
 
 \item{exclude_NA_metrics}{Logical. Whether to exclude metrics with NA values (default: TRUE).
 This is recommended if data is later used for model training as this does not
@@ -31,6 +30,9 @@ accept missing values.}
 
 \item{correlation_threshold}{Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
 If you don't want to filter based on correlation, set to 1.}
+
+\item{verbose}{Logical. Whether to print detailed messages on excluded metrics
+or just a summary (default: FALSE).}
 }
 \value{
 Character vector. Names of most sensitive metrics.
@@ -38,3 +40,24 @@ Character vector. Names of most sensitive metrics.
 \description{
 Identifies the most informative metrics for discriminating between landscape_name types.
 }
+\section{Ranking Methods}{
+
+\describe{
+  \item{\code{coeffvar_all}}{Coefficient of Variation (CV = SD/mean). Ranks metrics by
+    their relative variability across landscapes. Higher CV indicates greater spread.
+    Best for identifying metrics with high variability regardless of pattern type.}
+  \item{\code{lin_mod_r2}}{Linear Model R-squared. Fits \code{value ~ pattern} for each
+    metric and ranks by R². Higher values indicate better ability to predict pattern
+    types. Assumes linear relationships and normally distributed residuals.}
+  \item{\code{mean_groups}}{Mean Differences. Calculates relative differences between
+    pattern-specific means and overall mean, then sums across patterns. Higher scores
+    indicate better discrimination between pattern types.}
+  \item{\code{fisher_score}}{Fisher Score (ratio of between-group to within-group variance).
+    Higher scores indicate better separation between pattern types. Assumes normally
+    distributed data within groups.}
+  \item{\code{kruskal_p}}{Kruskal-Wallis H test p-values. Non-parametric test for differences
+    between groups. Lower p-values (more significant) ranked first. More robust to
+    non-normality and outliers than Fisher score.}
+}
+}
+

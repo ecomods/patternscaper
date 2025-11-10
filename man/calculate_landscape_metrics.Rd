@@ -53,10 +53,5 @@ metrics <- calculate_landscape_metrics(
   level = "landscape"
 )
 
-# Calculate metrics at multiple levels
-metrics <- calculate_landscape_metrics(
-  landscapes,
-  level = c("class", "landscape")
-)
 }
 }

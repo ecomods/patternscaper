@@ -10,6 +10,7 @@ create_landscape_scattered_trees(
   treeline_position = 0.5,
   scatter_density = 0.1,
   scatter_zone_prop = 0.2,
+  random_spots = c(0, 0),
   rotation = 0,
   seed = NULL
 )
@@ -27,13 +28,13 @@ Higher values result in a denser tree cover in the scatter zone.}
 \item{scatter_zone_prop}{Numeric. Proportion of height for scatter zone (default: 0.5).
 Defines how far below the treeline scattered trees can appear.}
 
+\item{random_spots}{List of Numerics. Probability or random spots of vegetation in the other vegetation type (default: c(0,0))}
+
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 
 \item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
 If NULL, no seed is set explicitly.
 If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
-
-\item{random_spots}{List of Numerics. Probability or random spots of vegetation in the other vegetation type (default: c(0,0))}
 }
 \value{
 A landscape object with pattern "scattered" containing the generated landscape data and parameters.
