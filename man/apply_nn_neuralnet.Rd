@@ -2,22 +2,32 @@
 % Please edit documentation in R/nn_neuralnet.R
 \name{apply_nn_neuralnet}
 \alias{apply_nn_neuralnet}
-\title{Apply a multi-layer Neural Network for Landscape Classification}
+\title{Apply Neural Network (from neuralnet package) for Landscape Classification}
 \usage{
-apply_nn_neuralnet(
-  test_metrics = NULL,
-  metrics_selected = NULL,
-  nn_model = NULL
-)
+apply_nn_neuralnet(landscapes, nn_model, return_performance = FALSE)
 }
 \arguments{
-\item{metrics_selected}{Character vector. Names of metrics to use as features.}
+\item{landscapes}{landscape object, or list of landscape objects. Landscape(s) to classify.}
 
-\item{nn_model}{neural network model. Result from train_nn_neuralnet()}
+\item{nn_model}{List. Neural network model from train_nn_metrics().}
+}
+\value{
+When actual classes unavailable: tibble with columns:
+  \describe{
+    \item{landscape_id}{Numeric landscape identifier}
+    \item{landscape_name}{Character landscape name (if available)}
+    \item{predicted_class}{Predicted landscape pattern}
+    \item{confidence}{Prediction confidence (max probability)}
+    \item{<class_name>}{Probability for each trained class}
+  }
 
-\item{metrics}{tibble. Metrics from calculate_landscape_metrics().}
+  When actual classes available: List containing:
+  \describe{
+    \item{predictions}{Tibble as above, plus actual_class column}
+    \item{performance}{Performance metrics from evaluate_cv_performance()}
+  }
 }
 \description{
-Applies a multi-layer neural network model to classify landscapes
-based on metrics. Uses neuralnet package.
+Applies a trained neural network model to classify new landscapes. The function
+automatically calculates the required landscape metrics needed by the model.
 }

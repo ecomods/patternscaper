@@ -7,8 +7,12 @@
 train_nn_neuralnet(
   metrics,
   metrics_selected = NULL,
+  cv_method = "k-fold",
+  cv_folds = 5,
   hidden_layers = c(3, 3),
-  seed = NULL
+  model_path = NULL,
+  seed = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
