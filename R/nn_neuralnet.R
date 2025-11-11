@@ -11,15 +11,46 @@
 #' @return List. Trained neural network model and associated metadata.
 #' @export
 train_nn_neuralnet <- function(
-    metrics,
-    metrics_selected = NULL,
-    hidden_layers = c(3,3),
-    seed = NULL
+  metrics,
+  metrics_selected = NULL,
+  cv_method = "k-fold",
+  cv_folds = 5,
+  hidden_layers = c(3, 3),
+  model_path = NULL,
+  seed = NULL,
+  verbose = TRUE
 ) {
-
   # Set seed if provided
   if (!is.null(seed)) {
     set.seed(seed)
+  }
+
+  # Validate columns of metrics
+  needed_columns <- c(
+    "landscape_id",
+    "landscape_name",
+    "pattern",
+    "level",
+    "class",
+    "id",
+    "metric",
+    "value"
+  )
+  if (!all(needed_columns %in% colnames(metrics))) {
+    cli::cli_abort(
+      "Metrics data is missing required columns. Missing columns are: ",
+      paste(
+        needed_columns[!needed_columns %in% colnames(metrics)],
+        collapse = ", "
+      ),
+      ". Make sure that metrics is calculated by `calculate_landscape_metrics()`"
+    )
+  }
+
+  # Validate cv_method parameter
+  cv_method <- tolower(cv_method)
+  if (!cv_method %in% c("none", "k-fold", "loo")) {
+    stop('cv_method must be one of: "none", "k-fold", or "loo"')
   }
 
   # subset selected metrics if provided
@@ -28,43 +59,48 @@ train_nn_neuralnet <- function(
     metrics <- subset(metrics, metric %in% metrics_selected)
   }
 
-  # Filter out NA values and warn the user about how many were removed
-  metrics_na <- subset(metrics, is.na(value))
-  if (nrow(metrics_na) > 0) {
-    warning(paste(
-      "Removed",
-      nrow(metrics_na),
-      "metrics with NA values (Check the \"value\" column in your metrics data for details)"
-    ))
+  # Convert metrics to wide format with 1 row per landscape
+  metrics_wide <- metrics_to_wide(metrics)
+
+  # Deal with NA values -------------------------------------------------------
+  # Check if we have any NA values in the predictor columns
+  # If yes, warn the user and remove the landscape
+  predictor_cols <- setdiff(
+    colnames(metrics_wide),
+    c("landscape_id", "landscape_name", "pattern")
+  )
+
+  na_rows <- apply(metrics_wide[, predictor_cols], 1, function(row) {
+    any(is.na(row))
+  })
+
+  if (any(na_rows)) {
+    n_removed <- sum(na_rows)
+    removed_names <- metrics_wide$landscape_name[na_rows]
+
+    cli::cli_alert_warning(
+      "Removed {n_removed} landscape{?s} with incomplete metrics: {paste(removed_names, collapse = ', ')}"
+    )
+
+    metrics_wide <- metrics_wide[!na_rows, ]
+    # Check if we have any landscapes left
+    if (nrow(metrics_wide) == 0) {
+      cli::cli_abort(c(
+        "No landscapes remaining after removing those with incomplete metrics",
+        "i" = "All {n_removed} landscape{?s} had NA values in required features"
+      ))
+    }
   }
-  # Remove the missing values
-  metrics <- subset(metrics, !is.na(value))
 
-  # extract the level of metrics so it can be accessed later
-  metric_levels <- unique(metrics$level)
-
-  # if needed, add info on class and patch id to the metric name
-  # this is needed when the metric is calculated not on the landscape level,
-  # but on the class or patch level
-  metrics <- metrics |>
-    dplyr::mutate(
-      metric = stringr::str_remove(
-        paste0(metric, "_", class, "_", id),
-        "_NA_NA"
-      )
-    ) |>
-    dplyr::select(metric, value, pattern, landscape_name)
-
-  # Reformat the table to wide format
-  metrics_wide <- metrics |>
-    tidyr::pivot_wider(
-      names_from = metric,
-      values_from = value
-    ) |>
-    dplyr::select(-landscape_name)
-
-  # Normalize the predictor variables (all columns except for the pattern column)
-  predictors <- metrics_wide |> dplyr::select(-pattern)
+  # Normalize the predictor variables (remove landscape columns)
+  predictors <- metrics_wide |>
+    dplyr::select(
+      -dplyr::any_of(c(
+        "landscape_id",
+        "landscape_name",
+        "pattern"
+      ))
+    )
   predictors_scaled <- scale(predictors)
 
   # Store scaling parameters for future use
@@ -75,206 +111,313 @@ train_nn_neuralnet <- function(
   )
 
   # Combine the scaled predictors with the target variable
+  # Explicitly set factor levels in alphabetical order for consistency
+  class_names <- sort(unique(metrics_wide$pattern))
+
   metrics_scaled <- data.frame(
     predictors_scaled,
-    pattern = factor(metrics_wide$pattern)
+    pattern = factor(metrics_wide$pattern, levels = class_names)
   )
 
-  # Store the class names
-  class_names <- levels(metrics_scaled$pattern)
+  # Cross-validation ----------------------------------------------------------
+  # Validate and adjust CV parameters
+  cv_params <- validate_cv_params(
+    patterns = metrics_scaled$pattern,
+    cv_method = cv_method,
+    cv_folds = cv_folds,
+    n_predictors = ncol(metrics_scaled) - 1
+  )
 
-  # train a network
-  nn_model <- neuralnet::neuralnet(
+  # Update cv_method and cv_folds based on validation
+  cv_method <- cv_params$cv_method
+  cv_folds <- cv_params$cv_folds
+  class_counts <- cv_params$class_counts
+
+  # Run model with cross validation --------------------------------------------
+  if (cv_method != "none") {
+    # Create stratified fold assignments ---------------------------------------
+    if (cv_method == "loo") {
+      # If method is "loo", each sample is it's own fold
+      fold_indices <- seq_len(nrow(metrics_scaled))
+    } else {
+      fold_indices <- find_balanced_cv_folds(metrics_scaled$pattern, cv_folds)
+    }
+
+    # Initialize storage for CV results of each fold
+    cv_predictions <- list()
+    cv_probabilities <- list()
+    cv_actual <- list()
+    cv_landscape_ids <- list()
+
+    # Perform k-fold cross-validation or loo by looping over each fold
+    for (fold in 1:cv_folds) {
+      # Split data into training and validation
+      train_indices <- fold_indices != fold
+      validation_indices <- fold_indices == fold
+
+      train_data <- metrics_scaled[train_indices, ]
+      validation_data <- metrics_scaled[validation_indices, ]
+
+      # Train model on training data
+      # Train final model on all data
+      fold_model <- neuralnet::neuralnet(
+        formula = pattern ~ .,
+        data = train_data,
+        hidden = hidden_layers
+      )
+
+      # Predict on validation data
+      probs <- predict(
+        fold_model,
+        newdata = validation_data[,
+          -which(names(validation_data) == "pattern")
+        ]
+      )
+
+      # Add class names as column names
+      colnames(probs) <- class_names
+
+      # Get predicted class labels
+      predictions <- colnames(probs)[max.col(probs, ties.method = "first")]
+
+      # Store results for this fold
+      cv_predictions[[fold]] <- predictions
+      cv_probabilities[[fold]] <- probs
+      cv_actual[[fold]] <- validation_data$pattern
+      cv_landscape_ids[[fold]] <- which(validation_indices)
+    }
+
+    # Evaluate cv performance -------------------------------------------------
+    performance <- evaluate_cv_performance(
+      cv_predictions = cv_predictions,
+      cv_probabilities = cv_probabilities,
+      cv_actual = cv_actual,
+      cv_landscape_ids = cv_landscape_ids,
+      class_names = class_names,
+      cv_method = cv_method,
+      cv_folds = cv_folds,
+      verbose = verbose
+    )
+  }
+
+  # Train final model on all data
+  final_model <- neuralnet::neuralnet(
     formula = pattern ~ .,
     data = metrics_scaled,
     hidden = hidden_layers
   )
 
-  # return model object
-  nn_model
+  # Prepare return object
+  result <- list(
+    model = final_model,
+    features = colnames(predictors),
+    features_level = unique(metrics$level),
+    scaling = scaling_params,
+    classes = class_names,
+    performance = if (cv_method != "none") performance else NULL
+  )
 
+  # Save model if requested
+  if (!is.null(model_path)) {
+    readr::write_rds(result, model_path)
+  }
+
+  return(result)
 }
 
 
-#' Tests a multi-layer Neural Network for Landscape Classification
+#' Apply Neural Network (from neuralnet package) for Landscape Classification
 #'
-#' Tests a multi-layer neural network model to classify landscapes
-#' based on metrics. Uses neuralnet package.
+#' Applies a trained neural network model to classify new landscapes. The function
+#' automatically calculates the required landscape metrics needed by the model.
 #'
-#' @param metrics tibble. Metrics from calculate_landscape_metrics().
-#' @param metrics_selected Character vector. Names of metrics to use as features.
-#' @param nn_model neural network model. Result from train_nn_neuralnet()
+#' @param landscapes landscape object, or list of landscape objects. Landscape(s) to classify.
+#' @param nn_model List. Neural network model from train_nn_metrics().
 #'
-#' @export
-test_nn_neuralnet <- function(
-    test_metrics,
-    metrics_selected = NULL,
-    nn_model = NULL
-) {
-
-  # subset selected metrics if provided
-  if (!is.null(metrics_selected)) {
-    # Subset only the selected metrics
-    test_metrics <- subset(test_metrics, metric %in% metrics_selected)
-  }
-
-  # Filter out NA values and warn the user about how many were removed
-  test_metrics_na <- subset(test_metrics, is.na(value))
-  if (nrow(test_metrics_na) > 0) {
-    warning(paste(
-      "Removed",
-      nrow(test_metrics_na),
-      "metrics with NA values (Check the \"value\" column in your metrics data for details)"
-    ))
-  }
-  # Remove the missing values
-  test_metrics <- subset(test_metrics, !is.na(value))
-
-  # extract the level of metrics so it can be accessed later
-  test_metric_levels <- unique(test_metrics$level)
-
-  # if needed, add info on class and patch id to the metric name
-  # this is needed when the metric is calculated not on the landscape level,
-  # but on the class or patch level
-  test_metrics <- test_metrics |>
-    dplyr::mutate(
-      metric = stringr::str_remove(
-        paste0(metric, "_", class, "_", id),
-        "_NA_NA"
-      )
-    ) |>
-    dplyr::select(metric, value, pattern, landscape_name)
-
-  # Reformat the table to wide format
-  test_metrics_wide <-test_metrics |>
-    tidyr::pivot_wider(
-      names_from = metric,
-      values_from = value
-    ) |>
-    dplyr::select(-landscape_name)
-
-  # Normalize the predictor variables (all columns except for the pattern column)
-  test_predictors <- test_metrics_wide |> dplyr::select(-pattern)
-  test_predictors_scaled <- scale(test_predictors)
-
-  # Store scaling parameters for future use
-  # This will be used to scale new data before prediction
-  test_scaling_params <- list(
-    center = attr(test_predictors_scaled, "scaled:center"),
-    scale = attr(test_predictors_scaled, "scaled:scale")
-  )
-
-  # Combine the scaled predictors with the target variable
-  test_metrics_scaled <- data.frame(
-    test_predictors_scaled,
-    pattern = factor(test_metrics_wide$pattern)
-  )
-
-  # Store the class names
-  test_class_names <- levels(test_metrics_scaled$pattern)
-
-  pred <- predict(nn_model, test_metrics_scaled)
-  labels <- ecotone_types
-  prediction_label <- data.frame(max.col(pred)) %>%
-    mutate(pred=labels[max.col.pred.]) %>% select(2) %>% unlist()
-
-  print(table(test_metrics_scaled$pattern, prediction_label))
-
-  check = as.numeric(test_metrics_scaled$pattern) == max.col(pred)
-  accuracy = (sum(check)/nrow(test_metrics_scaled))*100
-  print(accuracy)
-
-
-}
-
-#' Apply a multi-layer Neural Network for Landscape Classification
+#' @return When actual classes unavailable: tibble with columns:
+#'   \describe{
+#'     \item{landscape_id}{Numeric landscape identifier}
+#'     \item{landscape_name}{Character landscape name (if available)}
+#'     \item{predicted_class}{Predicted landscape pattern}
+#'     \item{confidence}{Prediction confidence (max probability)}
+#'     \item{<class_name>}{Probability for each trained class}
+#'   }
 #'
-#' Applies a multi-layer neural network model to classify landscapes
-#' based on metrics. Uses neuralnet package.
-#'
-#' @param metrics tibble. Metrics from calculate_landscape_metrics().
-#' @param metrics_selected Character vector. Names of metrics to use as features.
-#' @param nn_model neural network model. Result from train_nn_neuralnet()
-#'
+#'   When actual classes available: List containing:
+#'   \describe{
+#'     \item{predictions}{Tibble as above, plus actual_class column}
+#'     \item{performance}{Performance metrics from evaluate_cv_performance()}
+#'   }
 #' @export
 apply_nn_neuralnet <- function(
-    test_metrics = NULL,
-    metrics_selected = NULL,
-    nn_model = NULL
+  landscapes,
+  nn_model,
+  return_performance = FALSE
 ) {
-
-
-  # subset selected metrics if provided
-  if (!is.null(metrics_selected)) {
-    # Subset only the selected metrics
-    test_metrics <- subset(test_metrics, metric %in% metrics_selected)
+  # Input validation
+  if (
+    !is.list(nn_model) ||
+      !all(c("model", "scaling", "classes", "features") %in% names(nn_model))
+  ) {
+    cli::cli_abort("'nn_model' must be a trained model from train_nn_metrics()")
   }
 
-  # Filter out NA values and warn the user about how many were removed
-  test_metrics_na <- subset(test_metrics, is.na(value))
-  if (nrow(test_metrics_na) > 0) {
-    warning(paste(
-      "Removed",
-      nrow(metrics_na),
-      "metrics with NA values (Check the \"value\" column in your metrics data for details)"
+  # Validate landscapes structure
+  if (!is.list(landscapes) && !is_landscape(landscapes)) {
+    cli::cli_abort(
+      "'landscapes' must be a landscape object or list of landscapes"
+    )
+  }
+
+  # Extract required elements from the model
+  model <- nn_model$model
+  scaling_params <- nn_model$scaling
+  class_names <- nn_model$classes
+
+  # Calculate the necessary metrics for the input landscape(s)
+  metrics <- calculate_landscape_metrics(
+    landscapes = landscapes,
+    metrics = nn_model$features,
+    level = nn_model$features_level
+  )
+
+  # Convert metrics to wide format with 1 row per landscape
+  metrics_wide <- metrics_to_wide(metrics)
+
+  # Check if we have any NA values in the predictor columns
+  # If yes, warn the user and remove the landscape
+  predictor_cols <- setdiff(
+    colnames(metrics_wide),
+    c("landscape_id", "landscape_name", "pattern")
+  )
+
+  na_rows <- apply(metrics_wide[, predictor_cols], 1, function(row) {
+    any(is.na(row))
+  })
+
+  if (any(na_rows)) {
+    n_removed <- sum(na_rows)
+    removed_names <- metrics_wide$landscape_name[na_rows]
+
+    cli::cli_alert_warning(
+      "Removed {n_removed} landscape{?s} with incomplete metrics: {paste(removed_names, collapse = ', ')}"
+    )
+
+    metrics_wide <- metrics_wide[!na_rows, ]
+
+    # Check if we have any landscapes left
+    if (nrow(metrics_wide) == 0) {
+      cli::cli_abort(c(
+        "No landscapes remaining after removing those with incomplete metrics",
+        "i" = "All {n_removed} landscape{?s} had NA values in required features"
+      ))
+    }
+  }
+
+  # Normalize the predictor variables (remove landscape columns)
+  predictors <- metrics_wide |>
+    dplyr::select(
+      -dplyr::any_of(c(
+        "landscape_id",
+        "landscape_name",
+        "pattern"
+      ))
+    )
+
+  # Scale the metrics using the same parameters as during training
+  predictors_scaled <- scale(
+    predictors,
+    center = scaling_params$center,
+    scale = scaling_params$scale
+  )
+
+  # Make predictions using the neural network
+  pred <- predict(
+    model,
+    newdata = predictors_scaled,
+    type = "raw"
+  )
+
+  # Add class names as column names
+  colnames(pred) <- class_names
+
+  # turn into a tibble and add columns for actual and predicted class and confidence
+  predictions <- tibble::as_tibble(pred)
+  # Find the confidence (the probability for the predicted class)
+  predictions$confidence <- apply(pred, 1, max)
+
+  # Find the class with the highest probability (this is the predicted class)
+  max_col <- apply(pred, 1, which.max)
+  predicted_class <- colnames(pred)[max_col]
+  predictions$predicted_class <- predicted_class
+
+  # Reorder the columns
+  predictions <- predictions |>
+    dplyr::relocate(c(
+      predicted_class,
+      confidence
     ))
+
+  # Add all landscape information available to the output
+  landscape_info <- metrics_wide |>
+    dplyr::select(
+      dplyr::any_of(c("landscape_id", "landscape_name", "pattern"))
+    )
+
+  # rename pattern to actual_class if it exists
+  if ("pattern" %in% colnames(landscape_info)) {
+    landscape_info <- landscape_info |>
+      dplyr::rename(actual_class = pattern)
   }
-  # Remove the missing values
-  test_metrics <- subset(test_metrics, !is.na(value))
 
-  # extract the level of metrics so it can be accessed later
-  test_metric_levels <- unique(test_metrics$level)
+  predictions <- dplyr::bind_cols(landscape_info, predictions)
 
-  # if needed, add info on class and patch id to the metric name
-  # this is needed when the metric is calculated not on the landscape level,
-  # but on the class or patch level
-  test_metrics <- test_metrics |>
-    dplyr::mutate(
-      metric = stringr::str_remove(
-        paste0(metric, "_", class, "_", id),
-        "_NA_NA"
-      )
-    ) |>
-    dplyr::select(metric, value, landscape_name)
+  # Evaluate performance if actual classes are available -----------------------
+  if ("actual_class" %in% colnames(predictions)) {
+    # Check if actual classes match model's trained classes
+    unique_actual <- unique(predictions$actual_class)
+    unknown_classes <- setdiff(unique_actual, class_names)
 
-  # Reformat the table to wide format
-  test_metrics_wide <-test_metrics |>
-    tidyr::pivot_wider(
-      names_from = metric,
-      values_from = value
-    ) |>
-    dplyr::select(-landscape_name)
+    if (length(unknown_classes) > 0) {
+      cli::cli_warn(c(
+        "Input landscapes contain classes not seen during training:",
+        "x" = "{.val {unknown_classes}}",
+        "i" = "Model trained on: {.val {class_names}}",
+        "i" = "Performance evaluation skipped - returning predictions only"
+      ))
 
-  # Normalize the predictor variables (all columns except for the pattern column)
-  test_predictors <- test_metrics_wide
+      return(predictions)
+    }
 
-#BRITTA: HIER ENTSTEHT NOCH EIN PROBLEM
-#DIE WERDEN ALLE AUF 0 GESCALED
-  test_predictors_scaled <- scale(test_predictors)
+    # All classes are valid - proceed with performance evaluation
+    # Create single-fold structure for evaluate_cv_performance
+    cv_predictions <- list(predictions$predicted_class)
+    cv_probabilities <- list(as.matrix(
+      predictions |>
+        dplyr::select(dplyr::all_of(class_names))
+    ))
+    cv_actual <- list(predictions$actual_class)
+    cv_landscape_ids <- list(predictions$landscape_id)
 
-  # Store scaling parameters for future use
-  # This will be used to scale new data before prediction
-  test_scaling_params <- list(
-    center = attr(test_predictors_scaled, "scaled:center"),
-    scale = attr(test_predictors_scaled, "scaled:scale")
-  )
+    # Evaluate performance using same function as training
+    performance <- evaluate_cv_performance(
+      cv_predictions = cv_predictions,
+      cv_probabilities = cv_probabilities,
+      cv_actual = cv_actual,
+      cv_landscape_ids = cv_landscape_ids,
+      class_names = class_names,
+      cv_method = "none", # Not actual CV, just test set evaluation
+      cv_folds = 1,
+      verbose = TRUE,
+      return_predictions = FALSE
+    )
 
-  # Combine the scaled predictors with the target variable
-  test_metrics_scaled <- data.frame(
-    test_predictors_scaled
-  )
-
-#BRITTA: um das scaling Problem zu umgehen, habe ich
-#hier statt test_metrics_scaled die nicht skalierten
-#Daten test_predictors eingegeben
-    pred <- predict(nn_model, test_predictors)
-#  labels <- ecotone_types
-#  prediction_label <- data.frame(max.col(pred)) %>%
-#    mutate(pred=labels[max.col.pred.]) %>% select(2) %>% unlist()
-
-  names(pred) <- ecotone_types
-
-  pred
-
+    return(list(
+      predictions = predictions,
+      performance = performance
+    ))
+  } else {
+    # No actual classes - just return predictions
+    return(predictions)
+  }
 }
-

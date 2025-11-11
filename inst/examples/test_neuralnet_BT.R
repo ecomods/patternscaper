@@ -50,7 +50,7 @@ best_10 <- evaluate_landscape_metrics(
 # Train neural network model
 #----------------------------------------------------------
 
-# train a network
+# train a network (by default running with 5-fold cross-validation)
 model_neuralnet <- train_nn_neuralnet(
   metrics = training_metrics,
   metrics_selected = best_10,
@@ -59,8 +59,16 @@ model_neuralnet <- train_nn_neuralnet(
 )
 
 # look at the model object
-#model_neuralnet
-plot(model_neuralnet, rep = "best")
+model_neuralnet
+
+plot(model_neuralnet$model, rep = "best")
+
+# Plot the wrong landscapes from the cross-validation
+plot_nn_classification_landscapes(
+  classification = model_neuralnet$performance$validation_results,
+  landscapes = training_landscapes,
+  only_misclassified = TRUE
+)
 
 #----------------------------------------------------------
 #test landscapes and their metrics (only 10 best)
@@ -71,25 +79,24 @@ test_landscapes <- create_training_landscapes(
   patterns = ecotone_types
 )
 
-# calculate selected landscape metrics on the landscape level
-test_metrics <- calculate_landscape_metrics(
-  test_landscapes,
-  metrics = best_10,
-  level = "landscape"
-)
-
 #--------------------------------------------------------------------
 # Test neural network model
 #--------------------------------------------------------------------
 
-#BRITTA: Achtung - Reihenfolge der Beschriftungen stimmt nicht
-#mit Reihenfolge der Einträge überein
-test_nn_neuralnet(
-  test_metrics = test_metrics,
-  metrics_selected = best_10,
+validation <- apply_nn_neuralnet(
+  landscapes = test_landscapes,
   nn_model = model_neuralnet
 )
 
+# Check out the info for validation:
+validation
+
+# Plot misclassified results
+plot_nn_classification_landscapes(
+  classification = validation$predictions,
+  landscapes = test_landscapes,
+  only_misclassified = TRUE
+)
 
 #--------------------------------------------------------------------
 # Test picture
@@ -127,17 +134,8 @@ par(mfrow = c(1, 1))
 # Bring the test raster in the right format for package functions
 test_raster_l <- landscape(data = test_raster, name = "test raster")
 
-# calculate selected landscape metrics on the landscape level
-test_metrics_pic <- calculate_landscape_metrics(
-  test_raster_l,
-  metrics = best_10,
-  level = "landscape"
-)
-
-
-#apply the neural network model to the picture
+# apply the neural network model to the picture
 apply_nn_neuralnet(
-  test_metrics = test_metrics_pic,
-  metrics_selected = best_10,
+  landscapes = test_raster_l,
   nn_model = model_neuralnet
 )
