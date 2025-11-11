@@ -3,8 +3,6 @@
 #--------------------------------------------------------------------
 devtools::load_all()
 
-#install.packages("neuralnet")
-library("neuralnet")
 library("tidyverse")
 
 
@@ -56,13 +54,13 @@ best_10 <- evaluate_landscape_metrics(
 model_neuralnet <- train_nn_neuralnet(
   metrics = training_metrics,
   metrics_selected = best_10,
-  hidden_layers = c(5,5),
+  hidden_layers = c(5, 5),
   seed = 42
 )
 
 # look at the model object
 #model_neuralnet
-plot(model_neuralnet,rep = "best")
+plot(model_neuralnet, rep = "best")
 
 #----------------------------------------------------------
 #test landscapes and their metrics (only 10 best)
@@ -83,7 +81,6 @@ test_metrics <- calculate_landscape_metrics(
 #--------------------------------------------------------------------
 # Test neural network model
 #--------------------------------------------------------------------
-
 
 #BRITTA: Achtung - Reihenfolge der Beschriftungen stimmt nicht
 #mit Reihenfolge der Einträge überein
@@ -144,4 +141,3 @@ apply_nn_neuralnet(
   metrics_selected = best_10,
   nn_model = model_neuralnet
 )
-
