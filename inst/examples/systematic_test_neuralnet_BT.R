@@ -15,8 +15,9 @@ layers <- list(c(8))#,c(9),c(9),c(9))
 ntraining <- length(training)
 nlayers <- length(layers)
 nreps <- 1
-bestmetrics <- c("coeffvar_all","lin_mod_r2","mean_groups","fisher_score","kruskal_p")
-nbestmetrics <- length(bestmetrics)
+metrics_choice <- c("coeffvar_all","lin_mod_r2","mean_groups","fisher_score","kruskal_p")
+nmetrics_choice <- length(metrics_choice)
+nmetrics <- 10
 results_list <- list()
 best_metrics_all <- list()
 accuracy <- array(data=NA,dim=c(ntraining,nlayers,nbestmetrics,nreps))
@@ -68,21 +69,20 @@ for(r in 1:nreps){
 
     # find the 10 best metrics based on coefficient of variation
     for(m in 1:nbestmetrics){
-      best_names <- paste0("T", training[t], "_", bestmetrics[m],"_",r,sep="",collapse = "-")
+      best_names <- paste0("T", training[t], "_", metrics_choice[m],"_",r,sep="",collapse = "-")
 
       best_ones <- evaluate_landscape_metrics(
         metrics = training_metrics,
-        method = bestmetrics[m],
-        metrics_number = 10
+        method = metrics_choice[m],
+        metrics_number = nmetrics
       )
 
       best_metrics_all[[best_names]] <- list(
         training_size = training[t],
-        metric_10 = bestmetrics[m],
+        metric = metrics_choice[m],
         replicate = r,
         best_metrics = best_ones
       )
-    }
 
 
   #----------------------------------------------------------
@@ -95,7 +95,7 @@ for(r in 1:nreps){
 
       model_neuralnet <- train_nn_neuralnet(
         metrics = training_metrics,
-        metrics_selected = best_10,
+        metrics_selected = best_metrics_all[[m]]$best_metrics,
         hidden_layers = layers[[l]],
         threshold = 0.01,
         stepmax = 1e+05,
@@ -119,15 +119,22 @@ for(r in 1:nreps){
       #----------------------------------------------------------
       # store results
       #----------------------------------------------------------
-      result_name <- paste0("T", training[t], "_L", paste(layers[[l]], "_total",paste0((t-1)*nlayers+l),sep="",collapse = "-"))
+      index <- (r - 1) * ntraining * nbestmetrics * nlayers +
+        (t - 1) * nbestmetrics * nlayers +
+        (m - 1) * nlayers +
+        l
+      result_name <- paste0("T", training[t], "_L", layers[[l]], "_M",metrics_choice[m],"_R",r,"_total",index,sep="")
 
       results_list[[result_name]] <- list(
         training_size = training[t],
         layers = layers[[l]],
+        metric = metrics_choice[m],
+        replicate = r,
         df1 = df1,
         df2 = df2,
         acc = acc
       )
+    }
 
     }
   }
