@@ -72,9 +72,9 @@ create_landscape_sharp_treeline <- function(
     ))
   }
 
-  if (!is.numeric(rotation)) {
+  if (!is.numeric(rotation) || rotation < 0 || rotation > 360) {
     cli::cli_abort(c(
-      "{.arg rotation} must be numeric.",
+      "{.arg rotation} must be numeric and between 0 and 360.",
       "x" = "You supplied {.type {rotation}}"
     ))
   }
