@@ -99,7 +99,7 @@ plot_classification_results(model_l, plot_type = "confidence")
 plot_classification_results(model_l, plot_type = "misclassifications")
 
 # Plot the landscapes that were misclassified
-plot_nn_classification_landscapes(
+plot_classified_landscapes(
   classification = model_l$validation_results,
   landscape_list = landscapes,
   only_misclassified = TRUE
@@ -132,7 +132,7 @@ validation_results_l <- apply_nn(
   nn_model = model_l
 )
 
-plot_nn_classification_landscapes(
+plot_classified_landscapes(
   classification = validation_results_l$predictions,
   landscape_list = test_landscapes,
   only_misclassified = TRUE
@@ -217,7 +217,7 @@ plot_classification_results(model_l, plot_type = "confidence")
 plot_classification_results(model_l, plot_type = "misclassifications")
 
 # Plot the landscapes that were misclassified
-plot_nn_classification_landscapes(
+plot_classified_landscapes(
   classification = model_l$validation_results,
   landscape_list = training_landscapes,
   only_misclassified = TRUE
@@ -235,7 +235,7 @@ validation_results_k <- apply_nn_keras(
   nn_model = model_k
 )
 
-plot_nn_classification_landscapes(
+plot_classified_landscapes(
   classification = validation_results_k$predictions,
   landscape_list = test_landscapes,
   only_misclassified = FALSE

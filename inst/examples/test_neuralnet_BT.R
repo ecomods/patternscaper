@@ -64,7 +64,7 @@ model_neuralnet
 plot(model_neuralnet$model, rep = "best")
 
 # Plot the wrong landscapes from the cross-validation
-plot_nn_classification_landscapes(
+plot_classified_landscapes(
   classification = model_neuralnet$performance$validation_results,
   landscapes = training_landscapes,
   only_misclassified = TRUE
@@ -92,7 +92,7 @@ validation <- apply_nn_neuralnet(
 validation
 
 # Plot misclassified results
-plot_nn_classification_landscapes(
+plot_classified_landscapes(
   classification = validation$predictions,
   landscapes = test_landscapes,
   only_misclassified = TRUE

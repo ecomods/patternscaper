@@ -432,10 +432,10 @@ plot_nn_misclassifications <- function(nn_model, confidence_threshold = 0.6) {
 #'
 #' @examples
 #' # Example usage:
-#' # plots <- plot_nn_classification_landscapes(classification, landscape_list)
+#' # plots <- plot_classified_landscapes(classification, landscape_list)
 #'
 #' @export
-plot_nn_classification_landscapes <- function(
+plot_classified_landscapes <- function(
   classification,
   landscapes,
   only_misclassified = FALSE

@@ -100,7 +100,7 @@ plot_classification_results(model, plot_type = "confidence")
 plot_classification_results(model, plot_type = "misclassifications")
 
 # Plot the landscapes that were misclassified
-plot_nn_classification_landscapes(
+plot_classified_landscapes(
   classification = model$performance$validation_results,
   landscapes = landscapes,
   only_misclassified = TRUE
@@ -142,7 +142,7 @@ validation_results <- apply_nn_metrics(
   nn_model = model
 )
 
-plot_nn_classification_landscapes(
+plot_classified_landscapes(
   classification = validation_results$predictions,
   landscapes = test_landscapes,
   only_misclassified = FALSE

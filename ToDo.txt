@@ -129,7 +129,7 @@ schön wären auch Optionen für Legende
 Reihenfolge der Plots
 
 #--------------------------------------------------------------------
-#plot_nn_classification_landscapes
+#plot_classified_landscapes
 #--------------------------------------------------------------------
 liefert eine Fehlermeldung bei only_misclassified = TRUE
 wenn es keine misclassified gibt

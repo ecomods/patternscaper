@@ -110,7 +110,7 @@ plot_classification_results(model_ecotones_lm, plot_type = "confidence")
 plot_classification_results(model_ecotones_lm, plot_type = "misclassifications")
 
 # Plot the landscapes that were misclassified
-plot_nn_classification_landscapes(
+plot_classified_landscapes(
   classification = model_ecotones_lm$validation_results,
   landscapes = ecotone_landscapes,
   only_misclassified = TRUE
@@ -140,7 +140,7 @@ validation_results_ecotone_lm <- apply_nn_metrics(
 validation_results_ecotone_lm
 
 #show landscapes that are not classified correctly
-plot_nn_classification_landscapes(
+plot_classified_landscapes(
   classification = validation_results_ecotone_lm$predictions,
   landscapes = test_landscapes_ecotone,
   only_misclassified = TRUE
