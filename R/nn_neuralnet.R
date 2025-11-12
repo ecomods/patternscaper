@@ -210,7 +210,9 @@ train_nn_neuralnet <- function(
   final_model <- neuralnet::neuralnet(
     formula = pattern ~ .,
     data = metrics_scaled,
-    hidden = hidden_layers
+    hidden = hidden_layers,
+    threshold = threshold,
+    stepmax = stepmax
   )
 
   # Prepare return object
