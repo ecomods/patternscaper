@@ -457,12 +457,20 @@ plot_classified_landscapes <- function(
     )
   }
 
-  # Validate input landscape_list: must be a list of landscape objects
+  # Validate input landscapes: must be a non-empty list of landscape objects
   # First validate that input is a list
   if (!is.list(landscapes)) {
     stop("landscapes must be a list", call. = FALSE)
   }
-  # Check if it's a list of landscape objects
+
+  # Then check if list is empty
+  if (length(landscapes) == 0) {
+    stop(
+      "landscapes must contain at least one landscape to plot",
+      call. = FALSE
+    )
+  }
+
   if (any(!sapply(landscapes, is_landscape))) {
     # find out which element is not a landscape
     invalid_indices <- which(!sapply(landscapes, is_landscape))
@@ -472,14 +480,27 @@ plot_classified_landscapes <- function(
     )
   }
 
-  # check if the landscape list has the same length as the validation results
-  if (length(landscapes) < nrow(classification)) {
-    stop(paste(
-      "landscapes has fewer entries (",
-      length(landscapes),
-      ") than validation results (",
-      nrow(classification),
-      "). Some landscapes may be missing."
+  # Validate landscape count matches classification results
+  if (length(landscapes) != nrow(classification)) {
+    cli::cli_abort(c(
+      "Length mismatch between landscapes and classification results.",
+      "x" = "landscapes has {length(landscapes)} element{?s}",
+      "x" = "classification has {nrow(classification)} row{?s}",
+      "i" = "These must match exactly for proper landscape_id indexing"
+    ))
+  }
+
+  # Validate all landscape_id values are valid indices
+  invalid_ids <- classification$landscape_id[
+    classification$landscape_id < 1 |
+      classification$landscape_id > length(landscapes)
+  ]
+
+  if (length(invalid_ids) > 0) {
+    cli::cli_abort(c(
+      "Invalid landscape_id values detected.",
+      "x" = "landscape_id must be between 1 and {length(landscapes)}",
+      "i" = "Found invalid ID{?s}: {.val {unique(invalid_ids)}}"
     ))
   }
 
