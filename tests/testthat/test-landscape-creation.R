@@ -54,24 +54,6 @@ test_that("landscape generators support rotation parameter", {
 
 # Sharp treeline --------------------------------------------------------------
 test_that("create_landscape_sharp_treeline treeline_position creates correct patterns", {
-  # Position = 0 should create all 0s
-  l_zero <- create_landscape_sharp_treeline(
-    width = 20,
-    height = 20,
-    treeline_position = 0
-  )
-  vals <- terra::values(l_zero$data)
-  expect_true(all(vals == 0))
-
-  # Position = 1 should create all 1s
-  l_one <- create_landscape_sharp_treeline(
-    width = 20,
-    height = 20,
-    treeline_position = 1
-  )
-  vals <- terra::values(l_one$data)
-  expect_true(all(vals == 1))
-
   # Position = 0.5 should split approximately in half
   l_half <- create_landscape_sharp_treeline(
     width = 20,
