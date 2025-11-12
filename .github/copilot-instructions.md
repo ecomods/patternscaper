@@ -18,8 +18,9 @@ list(
 )
 ```
 
-- Always use `new_landscape()` constructor, not manual list creation
-- Convert matrices to SpatRaster via `matrix_to_raster()` before creating landscape objects
+- **Landscape generators**: Use `landscape()` which accepts matrices or SpatRaster
+- **Low-level utilities**: Use `new_landscape()` when you already have a SpatRaster
+- `landscape()` handles matrix-to-raster conversion internally via `matrix_to_raster()`
 - Check object validity with `is_landscape(x)`
 - **CRS handling**: Artificial landscapes (from `create_landscape()`) may have no CRS - this is acceptable
 
