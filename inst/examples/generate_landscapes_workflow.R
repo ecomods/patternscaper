@@ -137,9 +137,10 @@ curvy_modified <- create_landscape(
   name = "Modified",
   treeline_position = 0.3,
   random_spots = c(0.05, 0.05),
-  sine_length = 40,
-  sine_height = 10
+  sine_length = 100,
+  sine_height = 50
 )
+plot_landscape(curvy_modified)
 
 # One landscape with rotation
 curvy_rotated <- create_landscape(
@@ -147,7 +148,7 @@ curvy_rotated <- create_landscape(
   name = "Rotated",
   treeline_position = 0.6,
   sine_length = 10,
-  sine_height = 6,
+  sine_height = 10,
   rotation = 45
 )
 

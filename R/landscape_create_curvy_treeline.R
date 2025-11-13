@@ -60,7 +60,7 @@ create_landscape_curvy_treeline <- function(
 
   # Warn if sine_height is larger than landscape height
   if (sine_height > height * 0.5) {
-    cli::cli_alert_warning(
+    cli::cli_warn(
       "{.arg sine_height} ({sine_height}) is large relative to {.arg height} ({height}). This may create unexpected patterns."
     )
   }
@@ -121,6 +121,7 @@ create_landscape_curvy_treeline <- function(
       treeline_position = treeline_position,
       sine_length = sine_length,
       sine_height = sine_height,
+      random_spots = random_spots,
       rotation = rotation
     )
   )

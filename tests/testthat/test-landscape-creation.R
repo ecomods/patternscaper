@@ -4,7 +4,8 @@
 test_that("landscape generators create valid landscape objects", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
-    diffuse = create_landscape_diffuse_treeline
+    diffuse = create_landscape_diffuse_treeline,
+    curvy = create_landscape_curvy_treeline
   )
 
   for (name in names(generators)) {
@@ -25,7 +26,8 @@ test_that("landscape generators create valid landscape objects", {
 test_that("landscape generators support rotation parameter", {
   generators_with_rotation <- list(
     sharp = create_landscape_sharp_treeline,
-    diffuse = create_landscape_diffuse_treeline
+    diffuse = create_landscape_diffuse_treeline,
+    curvy = create_landscape_curvy_treeline
   )
 
   for (name in names(generators_with_rotation)) {
@@ -87,7 +89,79 @@ test_that("create_landscape_sharp_treeline stores all params correctly", {
 # Add diffuse-specific functionality tests here when needed
 
 # Curvy treeline --------------------------------------------------------------
-# Add curvy-specific functionality tests here when needed
+test_that("create_landscape_curvy_treeline creates sinusoidal pattern", {
+  # Zero amplitude should create straight line (like sharp)
+  l_straight <- create_landscape_curvy_treeline(
+    width = 20,
+    height = 20,
+    treeline_position = 0.5,
+    sine_height = 0
+  )
+  expect_true(is_landscape(l_straight))
+
+  # With amplitude, pattern should vary across columns
+  l_curvy <- create_landscape_curvy_treeline(
+    width = 20,
+    height = 20,
+    treeline_position = 0.5,
+    sine_length = 10,
+    sine_height = 3
+  )
+  expect_true(is_landscape(l_curvy))
+
+  # Check that treeline position varies across columns
+  vals <- terra::values(l_curvy$data)
+  mat <- matrix(vals, nrow = 20, ncol = 20)
+  # Count 1s in each column - should vary if pattern is curvy
+  col_sums <- colSums(mat)
+  expect_true(length(unique(col_sums)) > 1)
+})
+
+test_that("create_landscape_curvy_treeline stores all params correctly", {
+  l <- create_landscape_curvy_treeline(
+    width = 30,
+    height = 40,
+    treeline_position = 0.7,
+    sine_length = 25,
+    sine_height = 8,
+    random_spots = c(0.1, 0.2),
+    rotation = 45
+  )
+
+  expect_equal(l$params$width, 30)
+  expect_equal(l$params$height, 40)
+  expect_equal(l$params$treeline_position, 0.7)
+  expect_equal(l$params$sine_length, 25)
+  expect_equal(l$params$sine_height, 8)
+  expect_equal(l$params$random_spots, c(0.1, 0.2))
+  expect_equal(l$params$rotation, 45)
+})
+
+test_that("create_landscape_curvy_treeline random_spots parameter works", {
+  set.seed(123)
+  # With no random spots
+  l_no_random <- create_landscape_curvy_treeline(
+    width = 20,
+    height = 20,
+    treeline_position = 0.5,
+    sine_height = 3,
+    random_spots = c(0, 0)
+  )
+
+  # With random spots
+  l_random <- create_landscape_curvy_treeline(
+    width = 20,
+    height = 20,
+    treeline_position = 0.5,
+    sine_height = 3,
+    random_spots = c(0.2, 0.2)
+  )
+
+  # Landscapes should differ due to randomness
+  vals_no_random <- terra::values(l_no_random$data)
+  vals_random <- terra::values(l_random$data)
+  expect_false(identical(vals_no_random, vals_random))
+})
 
 # Random ----------------------------------------------------------------------
 # Add random-specific functionality tests here when needed
