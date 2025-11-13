@@ -5,7 +5,7 @@
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
-#' @param random_spots List of Numerics. Probability or random spots of vegetation in the other vegetation type (default: c(0,0))
+#' @param random_spots Numeric vector of length 2. Probabilities for flipping cells: [1→0, 0→1] (default: c(0,0)).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
 #' @return A landscape object with pattern "sharp" containing the generated landscape data and parameters.
@@ -24,20 +24,66 @@
 #' # Landscape with rotation and some spots
 #' sharp_rotated <- create_landscape_sharp_treeline(
 #'   treeline_position = 0.3,
-#'   random_spots = c(0,0.1),
+#'   random_spots = c(0, 0.1),
 #'   rotation = 45
 #' )
 create_landscape_sharp_treeline <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
-  random_spots = c(0,0),
+  random_spots = c(0, 0),
   rotation = 0
 ) {
-  # calculate width and height of the actual landscape to produce
-  # in case of rotation, the landscape needs to be larger
-  height_actual <- ifelse(rotation == 0, height, height * 1.5)
-  width_actual <- ifelse(rotation == 0, width, width * 1.5)
+  # Validate inputs
+  if (!is.numeric(width) || width <= 0 || width != as.integer(width)) {
+    cli::cli_abort(c(
+      "{.arg width} must be a positive integer.",
+      "x" = "You supplied {.val {width}}"
+    ))
+  }
+
+  if (!is.numeric(height) || height <= 0 || height != as.integer(height)) {
+    cli::cli_abort(c(
+      "{.arg height} must be a positive integer.",
+      "x" = "You supplied {.val {height}}"
+    ))
+  }
+
+  if (
+    !is.numeric(treeline_position) ||
+      treeline_position < 0 ||
+      treeline_position > 1
+  ) {
+    cli::cli_abort(c(
+      "{.arg treeline_position} must be between 0 and 1.",
+      "x" = "You supplied {.val {treeline_position}}"
+    ))
+  }
+
+  if (
+    !is.numeric(random_spots) ||
+      length(random_spots) != 2 ||
+      any(random_spots < 0) ||
+      any(random_spots > 1)
+  ) {
+    cli::cli_abort(c(
+      "{.arg random_spots} must be a numeric vector of length 2 with values between 0 and 1.",
+      "x" = "You supplied {.val {random_spots}}"
+    ))
+  }
+
+  if (!is.numeric(rotation) || rotation < 0 || rotation > 360) {
+    cli::cli_abort(c(
+      "{.arg rotation} must be numeric and between 0 and 360.",
+      "x" = "You supplied {.type {rotation}}"
+    ))
+  }
+
+  # Calculate width and height of the actual landscape to produce
+  # In case of rotation, the landscape needs to be larger to avoid cropping pattern
+  rotation_scale_factor <- 1.5
+  height_actual <- ifelse(rotation == 0, height, height * rotation_scale_factor)
+  width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
   # Convert position from proportion to row number
   treeline_row <- round(height_actual * treeline_position)
@@ -45,15 +91,13 @@ create_landscape_sharp_treeline <- function(
   # Create the landscape matrix
   mat <- matrix(0, nrow = height_actual, ncol = width_actual)
 
-
   # Fill in other vegetation area (1) based on treeline position
   if (treeline_row > 0) {
     mat[1:treeline_row, ] <- 1
   }
 
-  # --- Add random spots if requested ---
-  if (!is.null(random_spots) && length(random_spots) == 2 &&
-      any(random_spots > 0)) {
+  # Add random spots if requested
+  if (any(random_spots > 0)) {
     # Indices for each type
     idx_1 <- which(mat == 1)
     idx_0 <- which(mat == 0)
@@ -84,6 +128,7 @@ create_landscape_sharp_treeline <- function(
       width = width,
       height = height,
       treeline_position = treeline_position,
+      random_spots = random_spots,
       rotation = rotation
     )
   )

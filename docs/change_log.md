@@ -37,7 +37,7 @@ something else, they can do so explicitly and the seed is set inside the functio
 
 ### Technical details
 
-- `train_nn_keras` and `apply_nn_keras` now provide output that can be plotted with `plot_nn_classification_landscapes` to show correctly predicted classes and landscapes
+- `train_nn_keras` and `apply_nn_keras` now provide output that can be plotted with `plot_classified_landscapes` to show correctly predicted classes and landscapes
 
 ## 2025-09-10
 
@@ -49,7 +49,7 @@ something else, they can do so explicitly and the seed is set inside the functio
 
 ### Technical details
 
-#### `plot_nn_classification_landscapes`
+#### `plot_classified_landscapes`
 
 - Don't take the model as input but the classification results from `train_nn` or `apply_nn`
 
@@ -87,7 +87,7 @@ something else, they can do so explicitly and the seed is set inside the functio
 - Add landscape_id to the output to link predictions to landscapes
   - Reason is that when performing the cross validation, the landscapes are shuffled and split into folds. So they are not in the same order as the input list of landscapes. Adding the landscape_id allows to link the predictions back to the original landscapes. This is important for plotting the landscapes with their predictions.
 
-#### `plot_nn_classification_landscapes`
+#### `plot_classified_landscapes`
 
 - New function to plot landscapes with their predicted classes and confidence values
 - Can be used to visualize results from `apply_nn` or from the cross-validation in `train_nn`

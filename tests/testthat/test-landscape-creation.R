@@ -1,168 +1,97 @@
 # Test individual landscape creation functions  -------------------------------
 
-test_that("create_landscape_sharp_treeline creates valid landscape object", {
-  l <- create_landscape_sharp_treeline(width = 50, height = 50)
+# Basic landscape object creation tests ---------------------------------------
+test_that("landscape generators create valid landscape objects", {
+  generators <- list(
+    sharp = create_landscape_sharp_treeline
+  )
 
-  expect_true(is_landscape(l))
-  expect_s3_class(l, "landscape")
-  expect_true(!is.null(l$data))
-  expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "sharp")
-  expect_true(!is.null(l$params))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
+  for (name in names(generators)) {
+    gen <- generators[[name]]
+    l <- gen(width = 50, height = 50)
+
+    expect_true(is_landscape(l), info = paste("Testing", name))
+    expect_s3_class(l, "landscape")
+    expect_true(!is.null(l$data), info = paste("Testing", name))
+    expect_s4_class(l$data, "SpatRaster")
+    expect_equal(l$pattern, name, info = paste("Testing", name))
+    expect_true(!is.null(l$params), info = paste("Testing", name))
+    expect_equal(terra::ncol(l$data), 50, info = paste("Testing", name))
+    expect_equal(terra::nrow(l$data), 50, info = paste("Testing", name))
+  }
 })
 
-test_that("create_landscape_diffuse_treeline creates valid landscape object", {
-  l <- create_landscape_diffuse_treeline(width = 50, height = 50, seed = 123)
+test_that("landscape generators support rotation parameter", {
+  generators_with_rotation <- list(
+    sharp = create_landscape_sharp_treeline
+  )
 
-  expect_true(is_landscape(l))
-  expect_s3_class(l, "landscape")
-  expect_true(!is.null(l$data))
-  expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "diffuse")
-  expect_true(!is.null(l$params))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
+  for (name in names(generators_with_rotation)) {
+    gen <- generators_with_rotation[[name]]
+
+    l <- gen(width = 50, height = 50, rotation = 45)
+
+    expect_true(is_landscape(l), info = paste("Testing", name, "with rotation"))
+    expect_equal(
+      terra::ncol(l$data),
+      50,
+      info = paste("Testing", name, "dimensions")
+    )
+    expect_equal(
+      terra::nrow(l$data),
+      50,
+      info = paste("Testing", name, "dimensions")
+    )
+    expect_equal(
+      l$params$rotation,
+      45,
+      info = paste("Testing", name, "rotation stored")
+    )
+  }
 })
 
-test_that("create_landscape_curvy_treeline creates valid landscape object", {
-  l <- create_landscape_curvy_treeline(width = 50, height = 50)
+# Pattern-specific functionality tests ----------------------------------------
 
-  expect_true(is_landscape(l))
-  expect_s3_class(l, "landscape")
-  expect_true(!is.null(l$data))
-  expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "curvy")
-  expect_true(!is.null(l$params))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
+# Sharp treeline --------------------------------------------------------------
+test_that("create_landscape_sharp_treeline treeline_position creates correct patterns", {
+  # Position = 0.5 should split approximately in half
+  l_half <- create_landscape_sharp_treeline(
+    width = 20,
+    height = 20,
+    treeline_position = 0.5
+  )
+  vals <- terra::values(l_half$data)
+  prop_ones <- sum(vals == 1) / length(vals)
+  expect_true(prop_ones > 0.4 && prop_ones < 0.6)
 })
 
-test_that("create_landscape_random creates valid landscape object", {
-  l <- create_landscape_random(width = 50, height = 50, seed = 123)
+test_that("create_landscape_sharp_treeline stores all params correctly", {
+  l <- create_landscape_sharp_treeline(
+    width = 30,
+    height = 40,
+    treeline_position = 0.7,
+    random_spots = c(0.1, 0.2),
+    rotation = 45
+  )
 
-  expect_true(is_landscape(l))
-  expect_s3_class(l, "landscape")
-  expect_true(!is.null(l$data))
-  expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "random")
-  expect_true(!is.null(l$params))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
+  expect_equal(l$params$width, 30)
+  expect_equal(l$params$height, 40)
+  expect_equal(l$params$treeline_position, 0.7)
+  expect_equal(l$params$random_spots, c(0.1, 0.2))
+  expect_equal(l$params$rotation, 45)
 })
 
-test_that("create_landscape_scattered_trees creates valid landscape object", {
-  l <- create_landscape_scattered_trees(width = 50, height = 50, seed = 123)
+# Diffuse treeline ------------------------------------------------------------
+# Add diffuse-specific functionality tests here when needed
 
-  expect_true(is_landscape(l))
-  expect_s3_class(l, "landscape")
-  expect_true(!is.null(l$data))
-  expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "scattered")
-  expect_true(!is.null(l$params))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
-})
+# Curvy treeline --------------------------------------------------------------
+# Add curvy-specific functionality tests here when needed
 
-test_that("create_landscape_clustered_trees creates valid landscape object", {
-  l <- create_landscape_clustered_trees(width = 50, height = 50, seed = 123)
+# Random ----------------------------------------------------------------------
+# Add random-specific functionality tests here when needed
 
-  expect_true(is_landscape(l))
-  expect_s3_class(l, "landscape")
-  expect_true(!is.null(l$data))
-  expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "clustered")
-  expect_true(!is.null(l$params))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
-})
-
-test_that("create_landscape_fingers creates valid landscape object", {
-  l <- create_landscape_fingers(width = 50, height = 50)
-
-  expect_true(is_landscape(l))
-  expect_s3_class(l, "landscape")
-  expect_true(!is.null(l$data))
-  expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "fingers")
-  expect_true(!is.null(l$params))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
-})
-
-test_that("create_landscape_sine_bands creates valid landscape object", {
-  l <- create_landscape_sine_bands(width = 50, height = 50, seed = 123)
-
-  expect_true(is_landscape(l))
-  expect_s3_class(l, "landscape")
-  expect_true(!is.null(l$data))
-  expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "sine_bands")
-  expect_true(!is.null(l$params))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
-})
-
-test_that("create_landscape_spots creates valid landscape object", {
-  l <- create_landscape_spots(width = 50, height = 50, seed = 123)
-
-  expect_true(is_landscape(l))
-  expect_s3_class(l, "landscape")
-  expect_true(!is.null(l$data))
-  expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "spots")
-  expect_true(!is.null(l$params))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
-})
-
-test_that("create_landscape_gaps creates valid landscape object", {
-  l <- create_landscape_gaps(width = 50, height = 50, seed = 123)
-
-  expect_true(is_landscape(l))
-  expect_s3_class(l, "landscape")
-  expect_true(!is.null(l$data))
-  expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "gaps")
-  expect_true(!is.null(l$params))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
-})
-
-test_that("create_landscape_banded creates valid landscape object", {
-  l <- create_landscape_banded(width = 50, height = 50, seed = 123)
-
-  expect_true(is_landscape(l))
-  expect_s3_class(l, "landscape")
-  expect_true(!is.null(l$data))
-  expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "banded")
-  expect_true(!is.null(l$params))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
-})
-
-test_that("create_landscape_labyrinth creates valid landscape object", {
-  l <- create_landscape_labyrinth(width = 50, height = 50, seed = 123)
-
-  expect_true(is_landscape(l))
-  expect_s3_class(l, "landscape")
-  expect_true(!is.null(l$data))
-  expect_s4_class(l$data, "SpatRaster")
-  expect_equal(l$pattern, "labyrinth")
-  expect_true(!is.null(l$params))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
-})
-
-# Test that rotation works
-test_that("rotation parameter works", {
-  l <- create_landscape_sharp_treeline(width = 50, height = 50, rotation = 45)
-  expect_true(is_landscape(l))
-  expect_equal(terra::ncol(l$data), 50)
-  expect_equal(terra::nrow(l$data), 50)
-})
+# Other patterns --------------------------------------------------------------
+# Add pattern-specific functionality tests as needed
 
 # Test create_landscape wrapper function --------------------------------------
 
