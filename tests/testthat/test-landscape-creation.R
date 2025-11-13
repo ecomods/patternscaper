@@ -3,7 +3,8 @@
 # Basic landscape object creation tests ---------------------------------------
 test_that("landscape generators create valid landscape objects", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline
+    sharp = create_landscape_sharp_treeline,
+    diffuse = create_landscape_diffuse_treeline
   )
 
   for (name in names(generators)) {
@@ -23,7 +24,8 @@ test_that("landscape generators create valid landscape objects", {
 
 test_that("landscape generators support rotation parameter", {
   generators_with_rotation <- list(
-    sharp = create_landscape_sharp_treeline
+    sharp = create_landscape_sharp_treeline,
+    diffuse = create_landscape_diffuse_treeline
   )
 
   for (name in names(generators_with_rotation)) {

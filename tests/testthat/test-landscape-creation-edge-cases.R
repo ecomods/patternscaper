@@ -3,7 +3,8 @@
 # Extreme dimensions ----------------------------------------------------------
 test_that("landscape generators handle very small landscapes", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline
+    sharp = create_landscape_sharp_treeline,
+    diffuse = create_landscape_diffuse_treeline
   )
 
   for (name in names(generators)) {
@@ -19,7 +20,8 @@ test_that("landscape generators handle very small landscapes", {
 
 test_that("landscape generators handle very large landscapes", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline
+    sharp = create_landscape_sharp_treeline,
+    diffuse = create_landscape_diffuse_treeline
   )
 
   for (name in names(generators)) {
@@ -35,7 +37,8 @@ test_that("landscape generators handle very large landscapes", {
 
 test_that("landscape generators handle non-square landscapes", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline
+    sharp = create_landscape_sharp_treeline,
+    diffuse = create_landscape_diffuse_treeline
   )
 
   for (name in names(generators)) {
@@ -96,7 +99,8 @@ test_that("landscape generators handle non-square landscapes", {
 # Extreme rotation angles -----------------------------------------------------
 test_that("landscape generators with rotation handle extreme angles", {
   generators_with_rotation <- list(
-    sharp = create_landscape_sharp_treeline
+    sharp = create_landscape_sharp_treeline,
+    diffuse = create_landscape_diffuse_treeline
   )
 
   for (name in names(generators_with_rotation)) {
@@ -188,7 +192,76 @@ test_that("create_landscape_sharp_treeline handles multiple edge cases together"
 })
 
 # Pattern-specific edge cases: Diffuse treeline -------------------------------
-# Add diffuse-specific edge cases here when needed
+
+# Boundary values for treeline_position --------------------------------------
+test_that("create_landscape_diffuse_treeline handles treeline_position boundary values", {
+  # Exactly 0 - transition at top
+  l_zero <- create_landscape_diffuse_treeline(
+    width = 20,
+    height = 20,
+    treeline_position = 0,
+    steepness = 0.5
+  )
+  expect_true(is_landscape(l_zero))
+
+  # Exactly 1 - transition at bottom
+  l_one <- create_landscape_diffuse_treeline(
+    width = 20,
+    height = 20,
+    treeline_position = 1,
+    steepness = 0.5
+  )
+  expect_true(is_landscape(l_one))
+
+  # Very close to boundaries
+  l_near_zero <- create_landscape_diffuse_treeline(treeline_position = 0.001)
+  l_near_one <- create_landscape_diffuse_treeline(treeline_position = 0.999)
+
+  expect_true(is_landscape(l_near_zero))
+  expect_true(is_landscape(l_near_one))
+})
+
+# Boundary values for steepness -----------------------------------------------
+test_that("create_landscape_diffuse_treeline handles steepness boundary values", {
+  # Minimum steepness (sharp transition)
+  l_min_steep <- create_landscape_diffuse_treeline(
+    width = 20,
+    height = 20,
+    steepness = 0
+  )
+  expect_true(is_landscape(l_min_steep))
+
+  # Maximum steepness (very gradual)
+  l_max_steep <- create_landscape_diffuse_treeline(
+    width = 20,
+    height = 20,
+    steepness = 1
+  )
+  expect_true(is_landscape(l_max_steep))
+
+  # Very close to boundaries
+  l_near_zero <- create_landscape_diffuse_treeline(steepness = 0.001)
+  l_near_one <- create_landscape_diffuse_treeline(steepness = 0.999)
+
+  expect_true(is_landscape(l_near_zero))
+  expect_true(is_landscape(l_near_one))
+})
+
+# Combined edge cases ---------------------------------------------------------
+test_that("create_landscape_diffuse_treeline handles multiple edge cases together", {
+  # Small landscape + extreme treeline + extreme steepness + rotation
+  l_extreme <- create_landscape_diffuse_treeline(
+    width = 5,
+    height = 5,
+    treeline_position = 0.999,
+    steepness = 0.001,
+    rotation = 45
+  )
+
+  expect_true(is_landscape(l_extreme))
+  expect_equal(terra::ncol(l_extreme$data), 5)
+  expect_equal(terra::nrow(l_extreme$data), 5)
+})
 
 # Pattern-specific edge cases: Curvy treeline ---------------------------------
 # Add curvy-specific edge cases here when needed

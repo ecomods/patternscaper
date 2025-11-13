@@ -5,29 +5,38 @@
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
-#' @param steepness Numeric. Steepness of the transition can be a value between
-#'    0 and 1. The higher the number the less sharp the treeline becomes (default: 0.5).
+#' @param steepness Numeric. Controls the transition gradient (0-1).
+#'   Lower values (e.g., 0.1) create sharper transitions.
+#'   Higher values (e.g., 0.9) create more gradual, diffuse transitions
+#'   where tree probability persists further below the treeline (default: 0.5).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
 #' @return A landscape object with pattern "diffuse" containing the generated landscape data and parameters.
 #'
 #' @keywords internal
 #' @importFrom cli cli_abort
+#' @importFrom stats runif
 #'
 #' @examples
 #' # Default diffuse treeline
 #' diffuse_default <- create_landscape_diffuse_treeline()
 #'
-#' # Modified diffuse treeline with greater steepness
-#' diffuse_modified <- create_landscape_diffuse_treeline(
+#' # Sharp transition (lower steepness)
+#' diffuse_sharp <- create_landscape_diffuse_treeline(
 #'   treeline_position = 0.2,
 #'   steepness = 0.1
+#' )
+#'
+#' # Gradual transition (higher steepness)
+#' diffuse_gradual <- create_landscape_diffuse_treeline(
+#'   treeline_position = 0.3,
+#'   steepness = 0.9
 #' )
 #'
 #' # With rotation
 #' diffuse_rotated <- create_landscape_diffuse_treeline(
 #'   treeline_position = 0.3,
-#'   steepness = 9,
+#'   steepness = 0.7,
 #'   rotation = 45
 #' )
 #'
@@ -67,21 +76,22 @@ create_landscape_diffuse_treeline <- function(
   if (!is.numeric(rotation) || rotation < 0 || rotation > 360) {
     cli::cli_abort(c(
       "{.arg rotation} must be numeric and between 0 and 360.",
-      "x" = "You supplied {.type {rotation}}"
+      "x" = "You supplied {.val {rotation}}"
     ))
   }
 
   if (!is.numeric(steepness) || steepness < 0 || steepness > 1) {
     cli::cli_abort(c(
       "{.arg steepness} must be numeric and between 0 and 1.",
-      "x" = "You supplied {.type {steepness}}"
+      "x" = "You supplied {.val {steepness}}"
     ))
   }
 
   # calculate width and height of the actual landscape to produce
   # in case of rotation, the landscape needs to be larger
-  height_actual <- ifelse(rotation == 0, height, height * 1.5)
-  width_actual <- ifelse(rotation == 0, width, width * 1.5)
+  rotation_scale_factor <- 1.5
+  height_actual <- ifelse(rotation == 0, height, height * rotation_scale_factor)
+  width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
   # Create empty landscape
   mat <- matrix(0, nrow = height_actual, ncol = width_actual)
@@ -95,9 +105,11 @@ create_landscape_diffuse_treeline <- function(
     # Ranges from -1 (top of image) to +1 (bottom of image)
     relative_pos <- (i - transition_center) / (height_actual * 0.5)
 
-    # Calculate probability for tree cover:
-    # prob = 1 for rows above transition (relative_pos <= 0)
-    # prob decreases from 1 to 0 below transition following power curve
+    # Calculate probability for tree cover following a power curve:
+    # - Above treeline (relative_pos <= 0): prob = 1 (full tree cover)
+    # - Below treeline (relative_pos > 0): prob = 1 - (relative_pos)^steepness
+    #   * Lower steepness (e.g., 0.1): Higher exponent effect = sharper drop-off
+    #   * Higher steepness (e.g., 0.9): Lower exponent effect = gradual transition
     if (relative_pos <= 0) {
       prob <- 1
     } else {

@@ -181,20 +181,20 @@ test_that("landscape generators validate random_spots parameter", {
 test_that("diffuse treeline validates steepness parameter", {
   expect_error(
     create_landscape_diffuse_treeline(steepness = "2"),
-    "must be numeric and between 0 and 100.",
+    "must be numeric and between 0 and 1.",
     info = "Testing diffuse with non-numeric steepness"
   )
 
   expect_error(
     create_landscape_diffuse_treeline(steepness = -1),
-    "must be numeric and between 0 and 100.",
+    "must be numeric and between 0 and 1.",
     info = "Testing diffuse with negative steepness"
   )
 
   expect_error(
-    create_landscape_diffuse_treeline(steepness = 101),
-    "must be numeric and between 0 and 100.",
-    info = "Testing diffuse with steepness > 100"
+    create_landscape_diffuse_treeline(steepness = 2),
+    "must be numeric and between 0 and 1.",
+    info = "Testing diffuse with steepness > 1"
   )
 })
 # Pattern-specific validation: Curvy treeline ---------------------------------
