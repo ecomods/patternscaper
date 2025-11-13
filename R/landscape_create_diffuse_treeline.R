@@ -5,7 +5,8 @@
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
-#' @param steepness Numeric. Steepness of the transition (default: 2).
+#' @param steepness Numeric. Steepness of the transition can be a value between
+#'    0 and 100. The higher the number the sharper the treeline becomes (default: 2).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
 #' @return A landscape object with pattern "diffuse" containing the generated landscape data and parameters.
@@ -36,6 +37,46 @@ create_landscape_diffuse_treeline <- function(
   steepness = 2,
   rotation = 0
 ) {
+  # Validate inputs
+  if (!is.numeric(width) || width <= 0 || width != as.integer(width)) {
+    cli::cli_abort(c(
+      "{.arg width} must be a positive integer.",
+      "x" = "You supplied {.val {width}}"
+    ))
+  }
+
+  if (!is.numeric(height) || height <= 0 || height != as.integer(height)) {
+    cli::cli_abort(c(
+      "{.arg height} must be a positive integer.",
+      "x" = "You supplied {.val {height}}"
+    ))
+  }
+
+  if (
+    !is.numeric(treeline_position) ||
+      treeline_position < 0 ||
+      treeline_position > 1
+  ) {
+    cli::cli_abort(c(
+      "{.arg treeline_position} must be between 0 and 1.",
+      "x" = "You supplied {.val {treeline_position}}"
+    ))
+  }
+
+  if (!is.numeric(rotation) || rotation < 0 || rotation > 360) {
+    cli::cli_abort(c(
+      "{.arg rotation} must be numeric and between 0 and 360.",
+      "x" = "You supplied {.type {rotation}}"
+    ))
+  }
+
+  if (!is.numeric(steepness) || steepness < 0 || steepness > 100) {
+    cli::cli_abort(c(
+      "{.arg steepness} must be numeric and between 0 and 100.",
+      "x" = "You supplied {.type {steepness}}"
+    ))
+  }
+
   # calculate width and height of the actual landscape to produce
   # in case of rotation, the landscape needs to be larger
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
