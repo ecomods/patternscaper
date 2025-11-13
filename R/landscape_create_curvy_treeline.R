@@ -101,6 +101,20 @@ create_landscape_curvy_treeline <- function(
     mat[flip_to_1] <- 1
   }
 
+  # Add random spots if requested
+  if (any(random_spots > 0)) {
+    # Indices for each type
+    idx_1 <- which(mat == 1)
+    idx_0 <- which(mat == 0)
+
+    # Flip some cells based on probabilities
+    flip_to_0 <- idx_1[rbinom(length(idx_1), 1, random_spots[1]) == 1]
+    flip_to_1 <- idx_0[rbinom(length(idx_0), 1, random_spots[2]) == 1]
+
+    mat[flip_to_0] <- 0
+    mat[flip_to_1] <- 1
+  }
+
   # Rotate the landscape, crop and fill NAs if specified
   if (rotation != 0) {
     mat <- rotate_and_crop_matrix(
