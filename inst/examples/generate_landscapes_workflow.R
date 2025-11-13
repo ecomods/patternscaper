@@ -161,6 +161,38 @@ plot_landscape_list(
   )
 )
 
+# Curvy fingers ---------------------------------------------------------------
+# Default curvyfingers pattern
+fingers_default <- create_landscape(
+  "curvyfingers",
+  name = "Default",
+  pattern = "curvy"
+)
+fingers_modified <- create_landscape(
+  "curvyfingers",
+  name = "Modified",
+  sine_length_mean = 15,
+  sine_length_sd = 10,
+  sine_height_mean = 10,
+  sine_height_sd = 15
+)
+fingers_rotated <- create_landscape(
+  pattern = "curvyfingers",
+  name = "Rotated",
+  rotation = 45,
+  sine_length_mean = 20,
+  sine_length_sd = 10,
+  sine_height_mean = 15,
+  sine_height_sd = 20
+)
+
+plot_landscape_list(list(
+  fingers_default,
+  fingers_modified,
+  fingers_rotated
+))
+
+
 # Fingers --------------------------------------------------------------------
 # Default fingers pattern
 fingers_default <- create_landscape("fingers", name = "Default")
