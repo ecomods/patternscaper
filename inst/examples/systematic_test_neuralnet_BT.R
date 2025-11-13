@@ -8,28 +8,22 @@ devtools::load_all()
 #--------------------------------------------------------------------
 
 training <- c(200)
-layers <- list(c(8,8)) #,c(9),c(9),c(9))
-#c(8,8),c(8,8),c(8,8),c(9,9),c(9,9),c(9,9),
-#c(8,8,8),c(8,8,8),c(8,8,8),c(9,9,9),c(9,9,9),c(9,9,9),
-#c(8,8,8,8),c(8,8,8,8),c(8,8,8,8),c(9,9,9,9),c(9,9,9,9),c(9,9,9,9))
+
+layers <- list(c(6),c(8),c(10),
+               c(6,6),c(8,8),
+               c(10,10),
+               c(6,6,6),
+               c(8,8,8),
+               c(10,10,10))
 ntraining <- length(training)
 nlayers <- length(layers)
 nreps <- 3
-metrics_choice <- c("coeffvar_all","lin_mod_r2","mean_groups","fisher_score","kruskal_p")
+metrics_choice <- c("coeffvar_all","mean_groups","fisher_score","kruskal_p")
 nmetrics_choice <- length(metrics_choice)
 nmetrics <- 10
 
-bestmetrics <- c(
-  "coeffvar_all",
-  "lin_mod_r2",
-  "mean_groups",
-  "fisher_score",
-  "kruskal_p"
-)
-nbestmetrics <- length(bestmetrics)
 results_list <- list()
 best_metrics_all <- list()
-#accuracy <- array(data = NA, dim = c(ntraining, nlayers, nbestmetrics, nreps))
 
 # only those types that refer to ecotones (or random)
 ecotone_types = c(
@@ -76,7 +70,7 @@ for (r in 1:nreps) {
     )
 
     # find the 10 best metrics based on coefficient of variation
-    for(m in 1:nbestmetrics){
+    for(m in 1:nmetrics_choice){
 
       cat("Metric: ",metrics_choice[m]," (",m," of ",nmetrics_choice,")",sep = "","\n")
 
@@ -101,10 +95,11 @@ for (r in 1:nreps) {
 
       for (l in 1:nlayers) {
         # train a network
-        cat("Number of neurons: ",layers[[l]]," (",l," of ",nlayers,")",sep = "","\n")
+        layer_name <- paste(layers[[l]], collapse = "-")
+        cat("Number of neurons: ",layer_name," (",l," of ",nlayers,")",sep = "","\n")
 
-        model_neuralnet <- #tryCatch(
-        #  {
+        model_neuralnet <- tryCatch(
+          {
             train_nn_neuralnet(
               metrics = training_metrics,
               metrics_selected = best_ones,
@@ -114,12 +109,12 @@ for (r in 1:nreps) {
               cv_method = "none",
               seed = 42 + (t - 1) * nlayers + (l - 1)
             )
-      #    },
-      #    error = function(e) {
-      #      cat("Model failed with error:", conditionMessage(e), "\n")
-       #     return(NULL)
-       #   }
-       # )
+          },
+          error = function(e) {
+            cat("Model failed with error:", conditionMessage(e), "\n")
+            return(NULL)
+          }
+        )
 
         # Skip validation and storage if training failed
         if (is.null(model_neuralnet)) {
@@ -131,10 +126,26 @@ for (r in 1:nreps) {
         # Test neural network model
         #--------------------------------------------------------------------
 
-        validation <- apply_nn_neuralnet(
+        validation <- tryCatch(
+        {
+          apply_nn_neuralnet(
           landscapes = test_landscapes,
           nn_model = model_neuralnet
         )
+
+        },
+        error = function(e) {
+          cat("Model failed with error:", conditionMessage(e), "\n")
+          return(NULL)
+        }
+        )
+
+        # Skip validation and storage if training failed
+        if (is.null(model_neuralnet)) {
+          cat("Skipping validation validation\n")
+          next
+        }
+
 
         df1 <- data.frame(validation$performance$per_class_metrics)
         df2 <- validation$performance$confusion_matrix
@@ -143,12 +154,13 @@ for (r in 1:nreps) {
         #----------------------------------------------------------
         # store results
         #----------------------------------------------------------
-        index <- (r - 1) * ntraining * nbestmetrics * nlayers +
-          (t - 1) * nbestmetrics * nlayers +
-          (m - 1) * nlayers + l
+        #index <- (r - 1) * ntraining * nbestmetrics * nlayers +
+        #  (t - 1) * nbestmetrics * nlayers +
+        #  (m - 1) * nlayers + l
 
         layer_name <- paste(layers[[l]], collapse = "-")
-        result_name <- paste0("T", training[t], "_L", layer_name, "_M",metrics_choice[m],"_R",r,"_total",index,sep="")
+#        result_name <- paste0("T", training[t], "_L", layer_name, "_M",metrics_choice[m],"_R",r,"_total",index,sep="")
+        result_name <- paste0("T", training[t], "_L", layer_name, "_M",metrics_choice[m],"_R",r,sep="")
 
         results_list[[result_name]] <- list(
           training_size = training[t],
@@ -165,25 +177,11 @@ for (r in 1:nreps) {
   }
 }
 
-save(results_list, file = "NeuralNet_Test_N8_8.RData")
+save(results_list, file = "NeuralNet_Test_All.RData")
 
 results_list
 
-results_list$T200_L8_Mcoeffvar_all_R1_total1$acc
-results_list$T200_L8_Mcoeffvar_all_R2_total6$acc
-results_list$T200_L8_Mcoeffvar_all_R3_total11$acc
 
-results_list$T200_L8_Mmean_groups_R1_total3$acc
-results_list$T200_L8_Mmean_groups_R2_total8$acc
-results_list$T200_L8_Mmean_groups_R3_total13$acc
-
-results_list$T200_L8_Mfisher_score_R1_total4$acc
-results_list$T200_L8_Mfisher_score_R2_total9$acc
-results_list$T200_L8_Mfisher_score_R3_total14$acc
-
-results_list$T200_L8_Mkruskal_p_R1_total5$acc
-results_list$T200_L8_Mkruskal_p_R1_total10$acc
-results_list$T200_L8_Mkruskal_p_R1_total15$acc
 
 # for (t in 1:ntraining) {
 #   for (l in 1:3) {

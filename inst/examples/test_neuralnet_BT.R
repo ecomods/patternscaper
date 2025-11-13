@@ -12,6 +12,11 @@ library("tidyverse")
 # General landscape types and their titles
 #--------------------------------------------------------------------
 
+ntraining <- c(50,100,200,300)
+nlayers <- list(c(8),c(10,8),c(9,8,7))
+
+
+
 # only those types that refer to ecotones (or random)
 ecotone_types = c(
   "random",
@@ -46,20 +51,25 @@ best_10 <- evaluate_landscape_metrics(
   metrics_number = 10
 )
 
+#best_10_plus <- c(best_10,"shape_mn")
+#best_10_plus
+
 #----------------------------------------------------------
 # Train neural network model
 #----------------------------------------------------------
 
 # train a network (by default running with 5-fold cross-validation)
+#rule of thumb: number of neurons in hidden layers between input and output layer
 model_neuralnet <- train_nn_neuralnet(
   metrics = training_metrics,
   metrics_selected = best_10,
-  hidden_layers = c(5, 5),
+  hidden_layers = nlayers[[2]],
+  cv_method = "none",
   seed = 42
 )
 
 # look at the model object
-model_neuralnet
+#model_neuralnet
 
 plot(model_neuralnet$model, rep = "best")
 
@@ -98,6 +108,63 @@ plot_nn_classification_landscapes(
   only_misclassified = TRUE
 )
 
+
+#----------------------------------------------------------
+# Train neural network model with two hidden layers
+#----------------------------------------------------------
+
+# train a network (by default running with 5-fold cross-validation)
+#rule of thumb: number of neurons in hidden layers between input and output layer
+model_neuralnet2 <- train_nn_neuralnet(
+  metrics = training_metrics,
+  metrics_selected = best,
+  hidden_layers = c(10,8),
+  seed = 42
+)
+
+# look at the model object
+#model_neuralnet2
+
+
+plot(model_neuralnet2$model, rep = "best")
+
+# Plot the wrong landscapes from the cross-validation
+plot_nn_classification_landscapes(
+  classification = model_neuralnet2$performance$validation_results,
+  landscapes = training_landscapes,
+  only_misclassified = TRUE
+)
+
+#--------------------------------------------------------------------
+# Test neural network model
+#--------------------------------------------------------------------
+
+validation2 <- apply_nn_neuralnet(
+  landscapes = test_landscapes,
+  nn_model = model_neuralnet2
+)
+
+# Check out the info for validation:
+validation2
+
+# Plot misclassified results
+plot_nn_classification_landscapes(
+  classification = validation2$predictions,
+  landscapes = test_landscapes,
+  only_misclassified = TRUE
+)
+
+
+validation$performance$per_class_metrics
+validation2$performance$per_class_metrics
+
+validation$performance$confusion_matrix
+validation2$performance$confusion_matrix
+
+validation$performance$accuracy
+validation2$performance$accuracy
+
+
 #--------------------------------------------------------------------
 # Test picture
 #--------------------------------------------------------------------
@@ -135,7 +202,8 @@ par(mfrow = c(1, 1))
 test_raster_l <- landscape(data = test_raster, name = "test raster")
 
 # apply the neural network model to the picture
-apply_nn_neuralnet(
+test_classification <- apply_nn_neuralnet(
   landscapes = test_raster_l,
   nn_model = model_neuralnet
 )
+
