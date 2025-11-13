@@ -6,12 +6,13 @@
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
 #' @param steepness Numeric. Steepness of the transition can be a value between
-#'    0 and 100. The higher the number the sharper the treeline becomes (default: 2).
+#'    0 and 1. The higher the number the less sharp the treeline becomes (default: 0.5).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
 #' @return A landscape object with pattern "diffuse" containing the generated landscape data and parameters.
 #'
 #' @keywords internal
+#' @importFrom cli cli_abort
 #'
 #' @examples
 #' # Default diffuse treeline
@@ -26,15 +27,15 @@
 #' # With rotation
 #' diffuse_rotated <- create_landscape_diffuse_treeline(
 #'   treeline_position = 0.3,
-#'   steepness = 2,
+#'   steepness = 9,
 #'   rotation = 45
 #' )
 #'
 create_landscape_diffuse_treeline <- function(
   width = 100,
   height = 100,
-  treeline_position = 0.5,
-  steepness = 2,
+  treeline_position = 0.2,
+  steepness = 0.5,
   rotation = 0
 ) {
   # Validate inputs
@@ -70,9 +71,9 @@ create_landscape_diffuse_treeline <- function(
     ))
   }
 
-  if (!is.numeric(steepness) || steepness < 0 || steepness > 100) {
+  if (!is.numeric(steepness) || steepness < 0 || steepness > 1) {
     cli::cli_abort(c(
-      "{.arg steepness} must be numeric and between 0 and 100.",
+      "{.arg steepness} must be numeric and between 0 and 1.",
       "x" = "You supplied {.type {steepness}}"
     ))
   }

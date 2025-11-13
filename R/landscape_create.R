@@ -247,7 +247,7 @@ create_training_landscapes <- function(
         treeline_position = c(0.2, 0.8)
       ),
       diffuse = list(
-        steepness = c(0.1, 3),
+        steepness = c(0.1, 1),
         treeline_position = c(0.1, 0.4)
       ),
       curvy = list(

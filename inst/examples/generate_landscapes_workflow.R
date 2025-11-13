@@ -113,8 +113,8 @@ plot_landscape(diffuse_modified)
 diffuse_rotated <- create_landscape(
   "diffuse",
   name = "Rotated",
-  treeline_position = 0.3,
-  steepness = 2,
+  treeline_position = 0.2,
+  steepness = 0.9,
   rotation = 45
 )
 
