@@ -141,7 +141,8 @@ test_that("landscape generators validate rotation parameter", {
 # Pattern-specific validation: random_spots parameter ------------------------
 test_that("landscape generators validate random_spots parameter", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline
+    sharp = create_landscape_sharp_treeline,
+    curvy = create_landscape_curvy_treeline
   )
 
   for (name in names(generators)) {

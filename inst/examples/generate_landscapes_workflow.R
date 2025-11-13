@@ -136,6 +136,7 @@ curvy_modified <- create_landscape(
   "curvy",
   name = "Modified",
   treeline_position = 0.3,
+  random_spots = c(0.05, 0.05),
   sine_length = 40,
   sine_height = 10
 )

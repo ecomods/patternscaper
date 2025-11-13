@@ -7,6 +7,7 @@
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
 #' @param sine_length Numeric. Wavelength of sinusoidal curve in pixels (default: 20).
 #' @param sine_height Numeric. Amplitude of sinusoidal curve in pixels (default: 5).
+#' @param random_spots Numeric vector of length 2. Probabilities for flipping cells: [1→0, 0→1] (default: c(0,0)).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
 #' @return A landscape object with pattern "curvy" containing the generated landscape data and parameters.
@@ -38,12 +39,14 @@ create_landscape_curvy_treeline <- function(
   treeline_position = 0.5,
   sine_length = 20,
   sine_height = 5,
+  random_spots = c(0, 0),
   rotation = 0
 ) {
   # Validate inputs
   validate_dimensions(width = width, height = height)
   validate_treeline_position(treeline_position = treeline_position)
   validate_rotation(rotation = rotation)
+  validate_random_spots(random_spots = random_spots)
 
   # Validate sine_length
   if (!is.numeric(sine_length) || sine_length <= 0) {
@@ -77,6 +80,20 @@ create_landscape_curvy_treeline <- function(
         1
       )
     }
+  }
+
+  # Add random spots if requested
+  if (any(random_spots > 0)) {
+    # Indices for each type
+    idx_1 <- which(mat == 1)
+    idx_0 <- which(mat == 0)
+
+    # Flip some cells based on probabilities
+    flip_to_0 <- idx_1[rbinom(length(idx_1), 1, random_spots[1]) == 1]
+    flip_to_1 <- idx_0[rbinom(length(idx_0), 1, random_spots[2]) == 1]
+
+    mat[flip_to_0] <- 0
+    mat[flip_to_1] <- 1
   }
 
   # Rotate the landscape, crop and fill NAs if specified
