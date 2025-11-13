@@ -48,37 +48,9 @@ create_landscape_diffuse_treeline <- function(
   rotation = 0
 ) {
   # Validate inputs
-  if (!is.numeric(width) || width <= 0 || width != as.integer(width)) {
-    cli::cli_abort(c(
-      "{.arg width} must be a positive integer.",
-      "x" = "You supplied {.val {width}}"
-    ))
-  }
-
-  if (!is.numeric(height) || height <= 0 || height != as.integer(height)) {
-    cli::cli_abort(c(
-      "{.arg height} must be a positive integer.",
-      "x" = "You supplied {.val {height}}"
-    ))
-  }
-
-  if (
-    !is.numeric(treeline_position) ||
-      treeline_position < 0 ||
-      treeline_position > 1
-  ) {
-    cli::cli_abort(c(
-      "{.arg treeline_position} must be between 0 and 1.",
-      "x" = "You supplied {.val {treeline_position}}"
-    ))
-  }
-
-  if (!is.numeric(rotation) || rotation < 0 || rotation > 360) {
-    cli::cli_abort(c(
-      "{.arg rotation} must be numeric and between 0 and 360.",
-      "x" = "You supplied {.val {rotation}}"
-    ))
-  }
+  validate_dimensions(width = width, height = height)
+  validate_treeline_position(treeline_position = treeline_position)
+  validate_rotation(rotation = rotation)
 
   if (!is.numeric(steepness) || steepness < 0 || steepness > 1) {
     cli::cli_abort(c(
