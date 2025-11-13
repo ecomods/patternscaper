@@ -198,13 +198,13 @@ test_that("create_landscape_sharp_treeline handles multiple edge cases together"
 
 # Edge cases for create_training_landscapes ----------------------------------
 test_that("create_training_landscapes handles errors gracefully", {
+  set.seed(123)
   # Use parameters that might cause errors in some cases
   # The function should handle errors and continue
   landscapes <- create_training_landscapes(
     n = 20,
     width = 20,
-    height = 20,
-    seed = 123
+    height = 20
   )
 
   # Should still return landscapes (possibly fewer than n if some failed)
@@ -218,8 +218,7 @@ test_that("create_training_landscapes works with all default landscape patterns"
     n = 24, # 12 types * 2 = 24 for balanced distribution
     width = 20,
     height = 20,
-    balance_patterns = TRUE,
-    seed = 123
+    balance_patterns = TRUE
   )
 
   expect_true(length(landscapes) > 0)

@@ -13,7 +13,6 @@ create_training_landscapes(
   add_rotation = TRUE,
   rotation_angles = c(0, 45, 90, 135),
   params_list = NULL,
-  seed = NULL,
   pattern_probs = NULL,
   balance_patterns = TRUE
 )
@@ -32,10 +31,6 @@ create_training_landscapes(
 \item{rotation_angles}{Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).}
 
 \item{params_list}{List. List of parameter ranges for each landscape pattern (default: NULL).}
-
-\item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
-If a specific integer is provided, the same landscapes will be created on repeated calls with that seed.
-If NULL, no seed is set explicitly.}
 
 \item{pattern_probs}{Numeric vector. Probability that a specific landscape pattern is chosen.
 By default, all patterns have equal probability (1) of being chosen.

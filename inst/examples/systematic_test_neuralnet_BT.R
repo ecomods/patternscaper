@@ -41,9 +41,12 @@ n_ecotones <- length(ecotone_types)
 #--------------------------------------------------------------------
 # Test Landscapes (always the same)
 #--------------------------------------------------------------------
+
+# For reproducibility, you have to set the seed
+set.seed(12345)
+
 test_landscapes <- create_training_landscapes(
   n = 100,
-  seed = 12345,
   patterns = ecotone_types
 )
 
@@ -71,7 +74,6 @@ for (r in 1:nreps) {
     #same landscapes for different architectures of the neural net
     training_landscapes <- create_training_landscapes(
       n = training[t],
-      seed = 42 + (r - 1),
       patterns = ecotone_types
     )
 
@@ -134,8 +136,7 @@ for (r in 1:nreps) {
             hidden_layers = layers[[l]],
             threshold = 0.01,
             stepmax = 1e+05,
-            cv_method = "none",
-            seed = 42 + (t - 1) * nlayers + (l - 1)
+            cv_method = "none"
           )
         },
         error = function(e) {

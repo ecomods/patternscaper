@@ -45,11 +45,6 @@ Use `cli` package for all user-facing messages:
 - **Info**: `cli::cli_alert_info()` for verbose output only
 - **Never message**: Expected behavior (e.g., filtering via `exclude_metrics`)
 
-#### Random Seeds
-- Default `seed = NULL` (no seed set)
-- Only set seed when user explicitly provides value
-- Set inside function: `if (!is.null(seed)) set.seed(seed)`
-
 #### Landscape Dimensions
 - **Standard size**: 100x100 cells (default for all generators)
 - Functions should accept `width` and `height` parameters but default to 100

@@ -11,7 +11,6 @@
 #' @param maxit Integer. Maximum iterations for training (default: 500).
 #' @param model_path Character. Path to save model (default: NULL means that
 #'     model is not saved).
-#' @param seed Integer. Random seed for reproducibility. If NULL, a random seed will be used (default: NULL).
 #' @param verbose Logical. Whether to print cross-validation results (default: TRUE).
 #'
 #' @return List containing:
@@ -33,14 +32,8 @@ train_nn_metrics <- function(
   decay = 0.01,
   maxit = 500,
   model_path = NULL,
-  seed = NULL,
   verbose = TRUE
 ) {
-  # Set seed if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
-
   # Validate columns of metrics
   needed_columns <- c(
     "landscape_id",

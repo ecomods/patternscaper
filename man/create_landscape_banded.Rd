@@ -17,8 +17,7 @@ create_landscape_banded(
   x_ext_hill_sd = 0.4,
   y_ext_hill_sd = 0.4,
   noise_sd = 0.1,
-  rotation = 0,
-  seed = NULL
+  rotation = 0
 )
 }
 \arguments{
@@ -47,10 +46,6 @@ create_landscape_banded(
 \item{noise_sd}{Numeric. Standard deviation for random elevation effects. Default is 0.1.}
 
 \item{rotation}{Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).}
-
-\item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
-If NULL, no seed is set explicitly.
-If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 }
 \value{
 A landscape object with pattern "bands" containing the generated landscape data and parameters.

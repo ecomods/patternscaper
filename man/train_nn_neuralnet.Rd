@@ -10,8 +10,9 @@ train_nn_neuralnet(
   cv_method = "k-fold",
   cv_folds = 5,
   hidden_layers = c(3, 3),
+  threshold = 0.01,
+  stepmax = 1e+05,
   model_path = NULL,
-  seed = NULL,
   verbose = TRUE
 )
 }
@@ -22,7 +23,9 @@ train_nn_neuralnet(
 
 \item{hidden_layers}{List of Integers. Number of neurons in each hidden layer (default: c(3,3)).}
 
-\item{seed}{Integer. Random seed for reproducibility. If NULL, a random seed will be used (default: NULL).}
+\item{threshold}{Numeric. Threshold for the partial derivatives of the error function as stopping criteria in neuralnet. Default: 0.01,}
+
+\item{stepmax}{= Ingeger. Maximum steps for the training of the neural network in neuralnet. Reaching this maximum leads to a stop of the neural network's training process.Default: 1e+05,}
 }
 \value{
 List. Trained neural network model and associated metadata.

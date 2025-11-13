@@ -12,9 +12,6 @@
 #'   Defines how far below the treeline scattered trees can appear.
 #' @param random_spots List of Numerics. Probability or random spots of vegetation in the other vegetation type (default: c(0,0))
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
-#'   If NULL, no seed is set explicitly.
-#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #'
 #' @return A landscape object with pattern "scattered" containing the generated landscape data and parameters.
 #'
@@ -45,14 +42,8 @@ create_landscape_scattered_trees <- function(
   scatter_density = 0.1,
   scatter_zone_prop = 0.2,
   random_spots = c(0, 0),
-  rotation = 0,
-  seed = NULL
+  rotation = 0
 ) {
-  # Set seed if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
-
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
@@ -106,8 +97,7 @@ create_landscape_scattered_trees <- function(
       treeline_position = treeline_position,
       scatter_density = scatter_density,
       scatter_zone_prop = scatter_zone_prop,
-      rotation = rotation,
-      seed = seed
+      rotation = rotation
     )
   )
 }

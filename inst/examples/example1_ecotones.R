@@ -3,6 +3,7 @@
 #--------------------------------------------------------------------
 devtools::load_all()
 
+set.seed(123)
 #--------------------------------------------------------------------
 # General landscape types and their titles
 #--------------------------------------------------------------------
@@ -27,7 +28,6 @@ n_ecotones <- length(ecotone_types)
 # generate landscapes
 landscapes_manuscript <- create_training_landscapes(
   n = n_ecotones,
-  seed = 42,
   patterns = ecotone_types
 )
 
@@ -45,7 +45,6 @@ plot_landscape_list(
 #generate all training landscapes
 ecotone_landscapes <- create_training_landscapes(
   n = 200,
-  seed = 42,
   patterns = ecotone_types
 )
 
@@ -87,8 +86,7 @@ plot_metrics(
 model_ecotones_lm <- train_nn_metrics(
   metrics = landscape_metrics,
   metrics_selected = best_10,
-  cv_method = "k-fold",
-  seed = 123
+  cv_method = "k-fold"
 )
 
 # look at the model object
@@ -122,7 +120,6 @@ plot_classified_landscapes(
 
 # generate test landscapes
 test_landscapes_ecotone <- create_training_landscapes(
-  seed = 43,
   n = 50,
   add_rotation = TRUE,
   patterns = ecotone_types

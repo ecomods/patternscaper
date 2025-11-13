@@ -21,8 +21,7 @@ test <- create_landscape_clustered_trees(
   cluster_radius = cr[1],
   scatter_zone_prop = szp[1],
   elongation_x = ex[1],
-  elongation_y = ey[1],
-  seed = NULL
+  elongation_y = ey[1]
 )
 plot_landscape(test)
 
@@ -44,8 +43,7 @@ test <- create_landscape_sine_bands(
   band_spacing = bs[1],
   frequency = f[1],
   amplitude = a[1],
-  noise_sd = ns[1],
-  seed = NULL
+  noise_sd = ns[1]
 )
 plot_landscape(test)
 
@@ -59,8 +57,7 @@ test <- create_landscape_spots(
       n_spots = ns[1],
       spot_radius = sr[1],
       spot_jitter = 1,
-      noise_radius_sd = nrs[1],
-      seed=NULL,
+      noise_radius_sd = nrs[1]
       regular_spots=FALSE,
     )
 plot_landscape(test)
@@ -73,8 +70,7 @@ test <- create_landscape_banded (
   regular_hilltop = sample(c(TRUE, FALSE), size=1),
   top_elevation_sd = runif(n=1,min=0,max=3),
   x_ext_hill_sd = runif(n=1,min=0,max=0.5),
-  y_ext_hill_sd = runif(n=1,min=0,max=0.5),
-  seed = NULL,
+  y_ext_hill_sd = runif(n=1,min=0,max=0.5)
   rotation=43,
 )
 plot_landscape(test)
@@ -85,8 +81,7 @@ test <- create_landscape_labyrinth (
   frequency = runif(n=1,1,4),
   veg_threshold = runif(n=1,0.4,0.5),
   band_fuzziness = runif(n=1,0,0.1),
-  octaves = sample(1:3,size=1),
-  seed = NULL
+  octaves = sample(1:3,size=1)
 )
 plot_landscape(test)
 

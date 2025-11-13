@@ -29,7 +29,6 @@ create_real_test_metrics <- function(
   landscapes <- create_training_landscapes(
     n = n_landscapes,
     patterns = patterns,
-    seed = 123,
     add_rotation = FALSE
   )
 

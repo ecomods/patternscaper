@@ -17,9 +17,6 @@
 #' @param y_ext_hill_sd Numeric. Standard deviation of extension of slope into y direction. Default is 0.4.
 #' @param noise_sd Numeric. Standard deviation for random elevation effects. Default is 0.1.
 #' @param rotation Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
-#'   If NULL, no seed is set explicitly.
-#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #'
 #' @return A landscape object with pattern "bands" containing the generated landscape data and parameters.
 #'
@@ -59,14 +56,8 @@ create_landscape_banded <- function(
   x_ext_hill_sd = 0.4,
   y_ext_hill_sd = 0.4,
   noise_sd = 0.1,
-  rotation = 0,
-  seed = NULL
+  rotation = 0
 ) {
-  # If seed is provided, set it; otherwise, use a random seed
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
-
   if (regular_hilltop) {
     # Hexagon for spots (to make them more regular)
     spacing <- 6 # minimum of 5 between hilltops
@@ -183,8 +174,7 @@ create_landscape_banded <- function(
       x_ext_hill_sd = x_ext_hill_sd,
       y_ext_hill_sd = y_ext_hill_sd,
       noise_sd = noise_sd,
-      rotation = rotation,
-      seed = seed
+      rotation = rotation
     )
   )
 }

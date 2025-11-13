@@ -13,7 +13,6 @@
 #' @param learning_rate Numeric. Learning rate for Adam optimizer (default: 0.001).
 #' @param model_path Character. Path to save model (default: NULL means that the
 #'     model is not saved).
-#' @param seed Integer. Random seed for reproducibility. If NULL, a random seed will be used (default: NULL).
 #'
 #' @return List. Trained CNN model and associated metadata.
 #' @export
@@ -25,13 +24,8 @@ train_nn_landscapes <- function(
   batch_size = 16,
   validation_split = 0.2,
   learning_rate = 0.001,
-  model_path = NULL,
-  seed = NULL
+  model_path = NULL
 ) {
-  # Set seed if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold")) {

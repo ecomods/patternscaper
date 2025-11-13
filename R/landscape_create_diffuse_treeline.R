@@ -7,9 +7,6 @@
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
 #' @param steepness Numeric. Steepness of the transition (default: 2).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
-#'   If NULL, seed will not be set explicitly.
-#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #'
 #' @return A landscape object with pattern "diffuse" containing the generated landscape data and parameters.
 #'
@@ -37,14 +34,8 @@ create_landscape_diffuse_treeline <- function(
   height = 100,
   treeline_position = 0.5,
   steepness = 2,
-  rotation = 0,
-  seed = NULL
+  rotation = 0
 ) {
-  # Set seed if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
-
   # calculate width and height of the actual landscape to produce
   # in case of rotation, the landscape needs to be larger
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
@@ -98,8 +89,7 @@ create_landscape_diffuse_treeline <- function(
       height = height,
       treeline_position = treeline_position,
       steepness = steepness,
-      rotation = rotation,
-      seed = seed
+      rotation = rotation
     )
   )
 }

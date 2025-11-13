@@ -14,7 +14,6 @@ create_landscape_clustered_trees(
   scatter_zone_prop = 0.3,
   elongation_x = 1,
   elongation_y = 1,
-  seed = NULL,
   rotation = 0
 )
 }
@@ -37,10 +36,6 @@ create_landscape_clustered_trees(
 
 \item{elongation_y}{Numeric. Vertical elongation factor for clusters (default: 1).}
 
-\item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
-If NULL, no seed is set explicitly.
-If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
-
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
 \value{
@@ -53,18 +48,17 @@ Generates a binary landscape with clustered trees below a treeline.
 # Default clustered trees
 clustered_default <- create_landscape_clustered_trees()
 
-# Modified clustered trees with more elongated clusters and fixed seed
+# Modified clustered trees with more elongated clusters
 clustered_modified <- create_landscape_clustered_trees(
   treeline_position = 0.2,
   num_clusters = 8,
   cluster_radius = 7,
   scatter_zone_prop = 0.6,
   elongation_x = 2.5,
-  elongation_y = 0.5,
-  seed = 42
+  elongation_y = 0.5
 )
 
-# With rotation and random seed
+# With rotation
 clustered_rotated <- create_landscape_clustered_trees(
   num_clusters = 20,
   cluster_radius = 2,

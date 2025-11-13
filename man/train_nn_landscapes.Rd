@@ -12,8 +12,7 @@ train_nn_landscapes(
   batch_size = 16,
   validation_split = 0.2,
   learning_rate = 0.001,
-  model_path = NULL,
-  seed = NULL
+  model_path = NULL
 )
 }
 \arguments{
@@ -33,8 +32,6 @@ train_nn_landscapes(
 
 \item{model_path}{Character. Path to save model (default: NULL means that the
 model is not saved).}
-
-\item{seed}{Integer. Random seed for reproducibility. If NULL, a random seed will be used (default: NULL).}
 }
 \value{
 List. Trained CNN model and associated metadata.

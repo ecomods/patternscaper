@@ -14,8 +14,7 @@ create_landscape_sine_bands(
   frequency = 2 * pi/100,
   amplitude = 5,
   noise_sd = 0,
-  rotation = 0,
-  seed = NULL
+  rotation = 0
 )
 }
 \arguments{
@@ -40,10 +39,6 @@ for the given band spacing, no bands will be drawn and a warning will be issued.
 \item{noise_sd}{Numeric. Standard deviation for random noise (default: 0).}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
-
-\item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
-If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
-If NULL, no seed is set explicitly.}
 }
 \value{
 A landscape object with pattern "sine_bands" containing the generated landscape data and parameters.

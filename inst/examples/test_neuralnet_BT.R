@@ -5,6 +5,8 @@ devtools::load_all()
 
 library("tidyverse")
 
+# For reproducibility, you have to set the seed
+set.seed(12345)
 
 #https://www.datacamp.com/tutorial/neural-network-models-r
 
@@ -29,7 +31,6 @@ n_ecotones <- length(ecotone_types)
 #generate all training landscapes
 training_landscapes <- create_training_landscapes(
   n = 100,
-  seed = 42,
   patterns = ecotone_types
 )
 
@@ -54,8 +55,7 @@ best_10 <- evaluate_landscape_metrics(
 model_neuralnet <- train_nn_neuralnet(
   metrics = training_metrics,
   metrics_selected = best_10,
-  hidden_layers = c(5, 5),
-  seed = 42
+  hidden_layers = c(5, 5)
 )
 
 # look at the model object
@@ -75,7 +75,6 @@ plot_classified_landscapes(
 #----------------------------------------------------------
 test_landscapes <- create_training_landscapes(
   n = 100,
-  seed = 100,
   patterns = ecotone_types
 )
 

@@ -11,8 +11,7 @@ create_landscape_labyrinth(
   frequency = 5,
   veg_threshold = 0.5,
   band_fuzziness = 0.1,
-  octaves = 1,
-  seed = NULL
+  octaves = 1
 )
 }
 \arguments{
@@ -36,10 +35,6 @@ randomness at the edges, making the pattern more natural and irregular (default:
 \item{octaves}{Integer >= 1. The number of layers of noise combined to
 generate the pattern. A single octave gives smooth, simple structures.
 More octaves add detail and complexity, similar to fractal patterns (default: 1).}
-
-\item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
-If NULL, no seed is set explicitly.
-If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 }
 \value{
 A landscape object with pattern "labyrinth" containing the generated landscape data and parameters.

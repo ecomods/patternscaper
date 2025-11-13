@@ -10,9 +10,6 @@
 #' @param spot_jitter Integer. Should the regular spots be slightly shifted - how many cells (Default is 0 - no jitter)
 #' @param invert_landscape Boolean. Invert vegetated and unvegetated areas.
 #'     Switches the landscape from vegetated with bare spots to bare with vegetated spots (default: FALSE).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
-#'     If NULL, seed will not be set explicitly.
-#'     If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #' @param regular_spots Boolean. Should the spots be arranged in a regular way (on a hexagon using k-means) or randomly?
 #'     (default: FALSE)
 #' @param rotation Unused parameter for compatibility with other landscape functions (default: 0).
@@ -48,15 +45,9 @@ create_landscape_spots <- function(
   noise_radius_sd = 0,
   spot_jitter = 0,
   invert_landscape = FALSE,
-  seed = NULL,
   regular_spots = FALSE,
   rotation = 0
 ) {
-  # Set seed if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
-
   if (regular_spots) {
     #hexangon for spots (to make them more regular)
     spacing <- 2 * spot_radius * 1.1
@@ -159,7 +150,6 @@ create_landscape_spots <- function(
       noise_radius_sd = noise_radius_sd,
       spot_jitter = spot_jitter,
       regular_spots = regular_spots,
-      seed = seed,
       rotation = rotation
     )
   )

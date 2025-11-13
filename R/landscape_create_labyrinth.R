@@ -17,9 +17,6 @@
 #' @param octaves Integer >= 1. The number of layers of noise combined to
 #'    generate the pattern. A single octave gives smooth, simple structures.
 #'    More octaves add detail and complexity, similar to fractal patterns (default: 1).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
-#'   If NULL, no seed is set explicitly.
-#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #'
 #' @return A landscape object with pattern "labyrinth" containing the generated landscape data and parameters.
 #'
@@ -49,14 +46,8 @@ create_landscape_labyrinth <- function(
   frequency = 5,
   veg_threshold = 0.5,
   band_fuzziness = 0.1,
-  octaves = 1,
-  seed = NULL
+  octaves = 1
 ) {
-  # Set seed if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
-
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
@@ -72,8 +63,6 @@ create_landscape_labyrinth <- function(
     x = grid$x,
     y = grid$y,
     frequency = frequency,
-    octaves = octaves,
-    seed = seed
   )
 
   # Normalize to 0-1
@@ -119,8 +108,7 @@ create_landscape_labyrinth <- function(
       frequency = frequency,
       veg_threshold = veg_threshold,
       band_fuzziness = band_fuzziness,
-      octaves = octaves,
-      seed = seed
+      octaves = octaves
     )
   )
 }

@@ -4,6 +4,9 @@
 # load all functions
 devtools::load_all()
 
+# For reproducibility, you have to set the seed
+set.seed(123)
+
 # ----------------------------------------------------------------------------#
 # Step 1: Generate some landscapes ---------------------------------------
 # ----------------------------------------------------------------------------#
@@ -12,8 +15,7 @@ devtools::load_all()
 landscapes <- create_training_landscapes(
   n = 100,
   patterns = c("banded", "spots", "labyrinth"),
-  add_rotation = TRUE,
-  seed = 123
+  add_rotation = TRUE
 )
 
 # Check how many landscapes of each type were generated
@@ -81,8 +83,7 @@ plot_metrics(
 model <- train_nn_metrics(
   metrics = landscape_metrics,
   metrics_selected = best_10_group_diff,
-  cv_method = "k-fold",
-  seed = 123
+  cv_method = "k-fold"
 )
 
 # Look at the model object
@@ -109,7 +110,6 @@ plot_classified_landscapes(
 # Apply the model ----------------------------------------------------
 # generate test landscapes
 test_landscapes <- create_training_landscapes(
-  seed = 43,
   patterns = c("banded", "spots", "labyrinth"),
   n = 20,
   add_rotation = TRUE
@@ -126,7 +126,6 @@ test_cluster <- create_landscape(
   treeline_position = 0.5,
   num_clusters = 10,
   cluster_radius = 5,
-  seed = 42,
   rotation = 0
 )
 plot_landscape(test_cluster)

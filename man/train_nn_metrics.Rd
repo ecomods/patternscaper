@@ -13,7 +13,6 @@ train_nn_metrics(
   decay = 0.01,
   maxit = 500,
   model_path = NULL,
-  seed = NULL,
   verbose = TRUE
 )
 }
@@ -34,8 +33,6 @@ train_nn_metrics(
 
 \item{model_path}{Character. Path to save model (default: NULL means that
 model is not saved).}
-
-\item{seed}{Integer. Random seed for reproducibility. If NULL, a random seed will be used (default: NULL).}
 
 \item{verbose}{Logical. Whether to print cross-validation results (default: TRUE).}
 }

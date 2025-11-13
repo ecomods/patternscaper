@@ -8,8 +8,7 @@ create_landscape_random(
   width = 100,
   height = 100,
   tree_prop = 0.5,
-  rotation = 0,
-  seed = NULL
+  rotation = 0
 )
 }
 \arguments{
@@ -21,10 +20,6 @@ create_landscape_random(
 Higher values result in a denser tree cover.}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
-
-\item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
-If NULL, no seed is set explicitly.
-If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 }
 \value{
 A landscape object with pattern "random" containing the generated landscape data and parameters.

@@ -116,9 +116,10 @@ test_that("create_landscape validates pattern input", {
 })
 
 test_that("create_landscape creates correct landscape types", {
+  set.seed(123)
   # Test each pattern creates the correct pattern
   expect_equal(
-    create_landscape("random", width = 10, height = 10, seed = 123)$pattern,
+    create_landscape("random", width = 10, height = 10)$pattern,
     "random"
   )
   expect_equal(
@@ -126,7 +127,7 @@ test_that("create_landscape creates correct landscape types", {
     "sharp"
   )
   expect_equal(
-    create_landscape("diffuse", width = 10, height = 10, seed = 123)$pattern,
+    create_landscape("diffuse", width = 10, height = 10)$pattern,
     "diffuse"
   )
   expect_equal(
@@ -138,27 +139,27 @@ test_that("create_landscape creates correct landscape types", {
     "fingers"
   )
   expect_equal(
-    create_landscape("scattered", width = 10, height = 10, seed = 123)$pattern,
+    create_landscape("scattered", width = 10, height = 10)$pattern,
     "scattered"
   )
   expect_equal(
-    create_landscape("clustered", width = 10, height = 10, seed = 123)$pattern,
+    create_landscape("clustered", width = 10, height = 10)$pattern,
     "clustered"
   )
   expect_equal(
-    create_landscape("sine_bands", width = 10, height = 10, seed = 123)$pattern,
+    create_landscape("sine_bands", width = 10, height = 10)$pattern,
     "sine_bands"
   )
   expect_equal(
-    create_landscape("spots", width = 10, height = 10, seed = 123)$pattern,
+    create_landscape("spots", width = 10, height = 10)$pattern,
     "spots"
   )
   expect_equal(
-    create_landscape("gaps", width = 10, height = 10, seed = 123)$pattern,
+    create_landscape("gaps", width = 10, height = 10)$pattern,
     "gaps"
   )
   expect_equal(
-    create_landscape("banded", width = 10, height = 10, seed = 123)$pattern,
+    create_landscape("banded", width = 10, height = 10)$pattern,
     "banded"
   )
 })
@@ -242,6 +243,7 @@ test_that("create_training_landscapes validates inputs", {
 })
 
 test_that("create_training_landscapes returns correct number of landscapes", {
+  set.seed(123)
   # TODO: I removed spots and gaps for now because I get an error for them that
   # I cannot fix
   landscapes <- create_training_landscapes(
@@ -259,8 +261,7 @@ test_that("create_training_landscapes returns correct number of landscapes", {
       "labyrinth"
     ),
     width = 20,
-    height = 20,
-    seed = 123
+    height = 20
   )
 
   expect_equal(length(landscapes), 10)
@@ -270,8 +271,7 @@ test_that("create_training_landscapes returns landscape objects", {
   landscapes <- create_training_landscapes(
     n = 5,
     width = 20,
-    height = 20,
-    seed = 123
+    height = 20
   )
 
   # Check each is a landscape object
@@ -283,13 +283,13 @@ test_that("create_training_landscapes returns landscape objects", {
 })
 
 test_that("create_training_landscapes sets landscape names correctly", {
+  set.seed(123)
   landscapes <- create_training_landscapes(
     n = 5,
     patterns = c("sharp", "random"),
     width = 20,
     height = 20,
-    add_rotation = FALSE,
-    seed = 123
+    add_rotation = FALSE
   )
 
   # Check that each landscape has its name property set
@@ -304,8 +304,7 @@ test_that("create_training_landscapes sets landscape names correctly", {
     width = 20,
     height = 20,
     add_rotation = TRUE,
-    rotation_angles = c(0, 45),
-    seed = 123
+    rotation_angles = c(0, 45)
   )
 
   # Check names include rotation info where applicable
@@ -323,14 +322,14 @@ test_that("create_training_landscapes sets landscape names correctly", {
 })
 
 test_that("create_training_landscapes respects pattern selection", {
+  set.seed(123)
   # Generate only specific patterns
   landscapes <- create_training_landscapes(
     n = 10,
     patterns = c("sharp", "diffuse"),
     width = 20,
     height = 20,
-    balance_patterns = TRUE,
-    seed = 123
+    balance_patterns = TRUE
   )
 
   # Get all patterns
@@ -342,13 +341,13 @@ test_that("create_training_landscapes respects pattern selection", {
 })
 
 test_that("create_training_landscapes balances patterns correctly", {
+  set.seed(123)
   landscapes <- create_training_landscapes(
     n = 12,
     patterns = c("sharp", "diffuse", "curvy"),
     width = 20,
     height = 20,
-    balance_patterns = TRUE,
-    seed = 123
+    balance_patterns = TRUE
   )
 
   # Get pattern distribution
@@ -370,8 +369,7 @@ test_that("create_training_landscapes respects type_probs when balance_patterns 
     width = 20,
     height = 20,
     balance_patterns = FALSE,
-    pattern_probs = c(0.5, 0.3, 0.2),
-    seed = 123
+    pattern_probs = c(0.5, 0.3, 0.2)
   )
 
   expect_equal(length(landscapes), 20)
@@ -382,14 +380,14 @@ test_that("create_training_landscapes respects type_probs when balance_patterns 
 })
 
 test_that("create_training_landscapes handles rotation correctly", {
+  set.seed(123)
   # With rotation
   landscapes_rotated <- create_training_landscapes(
     n = 10,
     width = 30,
     height = 30,
     add_rotation = TRUE,
-    rotation_angles = c(0, 45, 90),
-    seed = 123
+    rotation_angles = c(0, 45, 90)
   )
 
   # Check that some have rotation in their names
@@ -401,8 +399,7 @@ test_that("create_training_landscapes handles rotation correctly", {
     n = 10,
     width = 30,
     height = 30,
-    add_rotation = FALSE,
-    seed = 123
+    add_rotation = FALSE
   )
 
   # None should have rotation in their names
@@ -415,6 +412,7 @@ test_that("create_training_landscapes handles rotation correctly", {
 })
 
 test_that("create_training_landscapes respects width and height", {
+  set.seed(123)
   # TODO: I removed spots and gaps for now because I get an error for them that
   landscapes <- create_training_landscapes(
     patterns = c(
@@ -431,8 +429,7 @@ test_that("create_training_landscapes respects width and height", {
     ),
     n = 5,
     width = 25,
-    height = 35,
-    seed = 123
+    height = 35
   )
 
   # Check dimensions
@@ -443,18 +440,17 @@ test_that("create_training_landscapes respects width and height", {
 })
 
 test_that("create_training_landscapes is reproducible with seed", {
+  set.seed(456)
   landscapes1 <- create_training_landscapes(
     n = 10,
     width = 20,
-    height = 20,
-    seed = 456
+    height = 20
   )
-
+  set.seed(456)
   landscapes2 <- create_training_landscapes(
     n = 10,
     width = 20,
-    height = 20,
-    seed = 456
+    height = 20
   )
 
   # Same patterns in same order
@@ -467,6 +463,7 @@ test_that("create_training_landscapes is reproducible with seed", {
 })
 
 test_that("create_training_landscapes handles custom params_list", {
+  set.seed(123)
   custom_params <- list(
     sharp = list(
       treeline_position = c(0.4, 0.6)
@@ -481,8 +478,7 @@ test_that("create_training_landscapes handles custom params_list", {
     patterns = c("sharp", "random"),
     width = 20,
     height = 20,
-    params_list = custom_params,
-    seed = 123
+    params_list = custom_params
   )
 
   # Check that parameters are within the specified ranges
@@ -499,6 +495,7 @@ test_that("create_training_landscapes handles custom params_list", {
 })
 
 test_that("create_training_landscapes warns about missing params", {
+  set.seed(123)
   # Use a type that's not in custom params_list
   custom_params <- list(
     sharp = list(treeline_position = c(0.3, 0.7))
@@ -510,21 +507,20 @@ test_that("create_training_landscapes warns about missing params", {
       patterns = c("sharp", "random"),
       width = 20,
       height = 20,
-      params_list = custom_params,
-      seed = 123
+      params_list = custom_params
     ),
     "not found in params_list"
   )
 })
 
 test_that("create_training_landscapes handles errors gracefully", {
+  set.seed(123)
   # Use parameters that might cause errors in some cases
   # The function should handle errors and continue
   landscapes <- create_training_landscapes(
     n = 20,
     width = 20,
-    height = 20,
-    seed = 123
+    height = 20
   )
 
   # Should still return landscapes (possibly fewer than n if some failed)
@@ -533,13 +529,13 @@ test_that("create_training_landscapes handles errors gracefully", {
 })
 
 test_that("create_training_landscapes works with all default landscape patterns", {
+  set.seed(123)
   # Test that all types can be generated without errors
   landscapes <- create_training_landscapes(
     n = 24, # 12 types * 2 = 24 for balanced distribution
     width = 20,
     height = 20,
-    balance_patterns = TRUE,
-    seed = 123
+    balance_patterns = TRUE
   )
 
   expect_true(length(landscapes) > 0)

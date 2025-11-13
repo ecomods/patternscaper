@@ -9,8 +9,7 @@ create_landscape_diffuse_treeline(
   height = 100,
   treeline_position = 0.5,
   steepness = 2,
-  rotation = 0,
-  seed = NULL
+  rotation = 0
 )
 }
 \arguments{
@@ -23,10 +22,6 @@ create_landscape_diffuse_treeline(
 \item{steepness}{Numeric. Steepness of the transition (default: 2).}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
-
-\item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
-If NULL, seed will not be set explicitly.
-If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 }
 \value{
 A landscape object with pattern "diffuse" containing the generated landscape data and parameters.

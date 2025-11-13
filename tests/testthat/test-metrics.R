@@ -1,8 +1,8 @@
+set.seed(123)
 # Create test fixtures once, outside all tests
 landscapes <- create_training_landscapes(
   n = 3,
-  patterns = c("banded", "clustered", "labyrinth"),
-  seed = 123
+  patterns = c("banded", "clustered", "labyrinth")
 )
 
 # Tests for calculate_single_metric (internal function) ----------------------

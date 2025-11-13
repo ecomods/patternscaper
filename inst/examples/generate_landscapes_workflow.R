@@ -3,33 +3,29 @@
 # You can call ?function to open up the help
 devtools::load_all()
 
+# For reproducibility, you have to set the seed
+set.seed(123)
 # ----------------------------------------------------------------------------#
 # Generate multiple training landscapes --------------------------------------
 # ----------------------------------------------------------------------------#
 
-# Reproducible with same landscapes every time (is also default if seed is not set)
-landscapes <- create_training_landscapes(n = 20, seed = 42)
-# different landscapes every time
 landscapes <- create_training_landscapes(n = 20)
 
 # Randomly sampled landscape types (by default the function balances the types)
 landscapes <- create_training_landscapes(
   n = 20,
-  seed = 42,
   balance_patterns = FALSE
 )
 
 # generate only specific landscape types
 landscapes <- create_training_landscapes(
   n = 20,
-  seed = 42,
   patterns = c("banded", "spots", "clustered")
 )
 
 # give different weights for the landscapes (higher weights will be generated more often)
 landscapes <- create_training_landscapes(
   n = 20,
-  seed = 42,
   patterns = c("banded", "spots", "clustered"),
   balance_patterns = FALSE,
   pattern_probs = c(0.1, 1, 0.2)
@@ -37,7 +33,6 @@ landscapes <- create_training_landscapes(
 
 landscapes <- create_training_landscapes(
   n = 20,
-  seed = NULL,
   patterns = c("spots", "banded")
 )
 

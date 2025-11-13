@@ -12,7 +12,6 @@ create_landscape_spots(
   noise_radius_sd = 0,
   spot_jitter = 0,
   invert_landscape = FALSE,
-  seed = NULL,
   regular_spots = FALSE,
   rotation = 0
 )
@@ -32,10 +31,6 @@ create_landscape_spots(
 
 \item{invert_landscape}{Boolean. Invert vegetated and unvegetated areas.
 Switches the landscape from vegetated with bare spots to bare with vegetated spots (default: FALSE).}
-
-\item{seed}{Integer or NULL. Random seed for reproducibility (default: NULL).
-If NULL, seed will not be set explicitly.
-If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.}
 
 \item{regular_spots}{Boolean. Should the spots be arranged in a regular way (on a hexagon using k-means) or randomly?
 (default: FALSE)}

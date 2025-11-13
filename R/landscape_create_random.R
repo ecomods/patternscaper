@@ -7,9 +7,6 @@
 #' @param tree_prop Numeric. Probability of tree presence (0-1) (default: 0.5).
 #'    Higher values result in a denser tree cover.
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
-#'    If NULL, no seed is set explicitly.
-#'    If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
 #'
 #' @return A landscape object with pattern "random" containing the generated landscape data and parameters.
 #'
@@ -27,14 +24,8 @@ create_landscape_random <- function(
   width = 100,
   height = 100,
   tree_prop = 0.5,
-  rotation = 0,
-  seed = NULL
+  rotation = 0
 ) {
-  # Set seed if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
-
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
@@ -64,8 +55,7 @@ create_landscape_random <- function(
       width = width,
       height = height,
       tree_prop = tree_prop,
-      rotation = rotation,
-      seed = seed
+      rotation = rotation
     )
   )
 }

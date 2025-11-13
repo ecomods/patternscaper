@@ -4,6 +4,9 @@
 # load all functions
 devtools::load_all()
 
+# For reproducibility, you have to set the seed
+set.seed(123)
+
 # ----------------------------------------------------------------------------#
 # Step 1: Generate some landscapes -------------------------------------------
 # ----------------------------------------------------------------------------#
@@ -12,7 +15,6 @@ devtools::load_all()
 landscapes <- generate_training_landscapes(
   n = 100,
   add_rotation = FALSE,
-  seed = NULL,
   types = c("spots", "gaps", "banded", "labyrinth")
 )
 
@@ -71,8 +73,7 @@ plot_metrics(
 model_l <- train_nn(
   metrics = landscape_metrics,
   metrics_selected = best_10_group_diff,
-  cv_method = "k-fold",
-  seed = 123
+  cv_method = "k-fold"
 )
 
 # Look at the model object
@@ -112,7 +113,6 @@ plot_classified_landscapes(
 
 # generate test landscapes
 test_landscapes <- generate_training_landscapes(
-  seed = 43,
   n = 20,
   add_rotation = FALSE,
   types = c("spots", "inverted_spots", "banded", "labyrinth")

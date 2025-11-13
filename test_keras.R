@@ -138,7 +138,6 @@ predictions <- model %>% predict(img)
 devtools::load_all()
 
 training_landscapes <- generate_training_landscapes(
-  seed = 42,
   n = 120,
   add_rotation = TRUE
 )

@@ -11,9 +11,7 @@
 #' @param scatter_zone_prop Numeric. Proportion of height for scatter zone (default: 0.3).
 #' @param elongation_x Numeric. Horizontal elongation factor for clusters (default: 1).
 #' @param elongation_y Numeric. Vertical elongation factor for clusters (default: 1).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
-#'   If NULL, no seed is set explicitly.
-#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
+#'
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
 #' @return A landscape object with pattern "clustered" containing the generated landscape data and parameters.
@@ -25,18 +23,17 @@
 #' # Default clustered trees
 #' clustered_default <- create_landscape_clustered_trees()
 #'
-#' # Modified clustered trees with more elongated clusters and fixed seed
+#' # Modified clustered trees with more elongated clusters
 #' clustered_modified <- create_landscape_clustered_trees(
 #'   treeline_position = 0.2,
 #'   num_clusters = 8,
 #'   cluster_radius = 7,
 #'   scatter_zone_prop = 0.6,
 #'   elongation_x = 2.5,
-#'   elongation_y = 0.5,
-#'   seed = 42
+#'   elongation_y = 0.5
 #' )
 #'
-#' # With rotation and random seed
+#' # With rotation
 #' clustered_rotated <- create_landscape_clustered_trees(
 #'   num_clusters = 20,
 #'   cluster_radius = 2,
@@ -49,20 +46,14 @@ create_landscape_clustered_trees <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
-  random_spots = c(0,0),
+  random_spots = c(0, 0),
   num_clusters = 10,
   cluster_radius = 5,
   scatter_zone_prop = 0.3,
   elongation_x = 1,
   elongation_y = 1,
-  seed = NULL,
   rotation = 0
 ) {
-  # Set seed if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
-
   # Input validation
   if (!is.numeric(width) || width <= 0) {
     stop("'width' must be a positive number")
@@ -226,7 +217,6 @@ create_landscape_clustered_trees <- function(
       scatter_zone_prop = scatter_zone_prop,
       elongation_x = elongation_x,
       elongation_y = elongation_y,
-      seed = seed,
       rotation = rotation
     )
   )

@@ -163,9 +163,6 @@ create_landscape <- function(
 #' @param add_rotation Logical. Whether to include rotated versions (default: TRUE).
 #' @param rotation_angles Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).
 #' @param params_list List. List of parameter ranges for each landscape pattern (default: NULL).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
-#'   If a specific integer is provided, the same landscapes will be created on repeated calls with that seed.
-#'   If NULL, no seed is set explicitly.
 #' @param pattern_probs Numeric vector. Probability that a specific landscape pattern is chosen.
 #'     By default, all patterns have equal probability (1) of being chosen.
 #'     Must be the same length as 'patterns' (default NULL which means equal probability).
@@ -210,15 +207,9 @@ create_training_landscapes <- function(
   add_rotation = TRUE,
   rotation_angles = c(0, 45, 90, 135),
   params_list = NULL,
-  seed = NULL,
   pattern_probs = NULL,
   balance_patterns = TRUE
 ) {
-  # Set seed for reproducibility if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
-
   # Validate inputs
   if (!is.numeric(n) || n < 1) {
     stop("'n' must be a positive integer")

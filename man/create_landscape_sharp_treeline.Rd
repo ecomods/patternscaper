@@ -19,7 +19,7 @@ create_landscape_sharp_treeline(
 
 \item{treeline_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
 
-\item{random_spots}{List of Numerics. Probability or random spots of vegetation in the other vegetation type (default: c(0,0))}
+\item{random_spots}{Numeric vector of length 2. Probabilities for flipping cells: [1→0, 0→1] (default: c(0,0)).}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
@@ -41,7 +41,7 @@ sharp_modified <- create_landscape_sharp_treeline(
 # Landscape with rotation and some spots
 sharp_rotated <- create_landscape_sharp_treeline(
   treeline_position = 0.3,
-  random_spots = c(0,0.1),
+  random_spots = c(0, 0.1),
   rotation = 45
 )
 }

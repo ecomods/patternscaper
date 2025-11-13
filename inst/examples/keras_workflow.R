@@ -48,7 +48,6 @@ prewarm_keras()
 # Test Keras NN ---------------------------------------------------------
 # Increase number of landscapes for better training
 training_landscapes <- create_training_landscapes(
-  seed = 42,
   n = 100, # Larger dataset for better generalization
   patterns = c(
     "sharp",
@@ -97,7 +96,6 @@ plot_classified_landscapes(
 # Apply the model ----------------------------------------------------
 # create test landscapes
 test_landscapes <- create_training_landscapes(
-  seed = 43,
   n = 20,
   add_rotation = TRUE
 )
@@ -113,7 +111,6 @@ test_cluster <- create_landscape(
   treeline_position = 0.5,
   num_clusters = 10,
   cluster_radius = 5,
-  seed = 42,
   rotation = 0
 )
 plot_landscape(test_cluster)

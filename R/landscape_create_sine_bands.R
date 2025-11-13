@@ -14,9 +14,6 @@
 #' @param amplitude Numeric. Amplitude of sine wave in pixels (default: 5).
 #' @param noise_sd Numeric. Standard deviation for random noise (default: 0).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
-#' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
-#'   If a specific integer is provided, the same landscape will be generated on repeated calls with that seed.
-#'   If NULL, no seed is set explicitly.
 #'
 #' @return A landscape object with pattern "sine_bands" containing the generated landscape data and parameters.
 #'
@@ -56,14 +53,8 @@ create_landscape_sine_bands <- function(
   frequency = 2 * pi / 100,
   amplitude = 5,
   noise_sd = 0,
-  rotation = 0,
-  seed = NULL
+  rotation = 0
 ) {
-  # If seed is NULL, use random seed; otherwise use the provided seed
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
-
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
@@ -142,8 +133,7 @@ create_landscape_sine_bands <- function(
       frequency = frequency,
       amplitude = amplitude,
       noise_sd = noise_sd,
-      rotation = rotation,
-      seed = seed
+      rotation = rotation
     )
   )
 }

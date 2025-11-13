@@ -28,7 +28,6 @@ set.seed(42)
 #------------------------------------------------------------------------------#
 # Increase number of landscapes for better training
 training_landscapes <- generate_training_landscapes(
-  seed = 42,
   n = 500, # Larger dataset for better generalization
   types = c(
     "sharp",
@@ -440,7 +439,6 @@ cat("Model saved as:", model_filename, "\n")
 
 # Generate a small set of test landscapes
 test_landscapes <- generate_training_landscapes(
-  seed = 999, # Different seed from training
   n = 50,
   add_rotation = TRUE
 )
