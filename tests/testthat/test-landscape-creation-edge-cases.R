@@ -346,6 +346,81 @@ test_that("create_landscape_curvy_treeline handles multiple edge cases together"
   expect_equal(terra::nrow(l_extreme$data), 5)
 })
 
+# Boundary values for sine_length ---------------------------------------------
+test_that("create_landscape_curvy_treeline handles sine_length boundary values", {
+  # Very small wavelength
+  l_small_length <- create_landscape_curvy_treeline(
+    width = 20,
+    height = 20,
+    sine_length = 1
+  )
+  expect_true(is_landscape(l_small_length))
+
+  # Very large wavelength (larger than landscape)
+  l_large_length <- create_landscape_curvy_treeline(
+    width = 20,
+    height = 20,
+    sine_length = 1000
+  )
+  expect_true(is_landscape(l_large_length))
+
+  # Wavelength equal to width
+  l_equal_length <- create_landscape_curvy_treeline(
+    width = 50,
+    height = 50,
+    sine_length = 50
+  )
+  expect_true(is_landscape(l_equal_length))
+})
+
+# Boundary values for sine_height ---------------------------------------------
+test_that("create_landscape_curvy_treeline handles sine_height boundary values", {
+  # Zero amplitude (should be straight line)
+  l_zero_height <- create_landscape_curvy_treeline(
+    width = 20,
+    height = 20,
+    sine_height = 0
+  )
+  expect_true(is_landscape(l_zero_height))
+
+  # Very large amplitude
+  l_large_height <- create_landscape_curvy_treeline(
+    width = 20,
+    height = 20,
+    sine_height = 50
+  )
+  expect_true(is_landscape(l_large_height))
+
+  # Amplitude larger than height (should trigger warning)
+  expect_warning(
+    l_extreme_height <- create_landscape_curvy_treeline(
+      width = 20,
+      height = 20,
+      sine_height = 15
+    ),
+    "large relative to"
+  )
+  expect_true(is_landscape(l_extreme_height))
+})
+
+# Combined edge cases ---------------------------------------------------------
+test_that("create_landscape_curvy_treeline handles multiple edge cases together", {
+  # Small landscape + extreme treeline + extreme sine params + max random + rotation
+  l_extreme <- create_landscape_curvy_treeline(
+    width = 5,
+    height = 5,
+    treeline_position = 0.999,
+    sine_length = 1,
+    sine_height = 10,
+    random_spots = c(0.5, 0.5),
+    rotation = 45
+  )
+
+  expect_true(is_landscape(l_extreme))
+  expect_equal(terra::ncol(l_extreme$data), 5)
+  expect_equal(terra::nrow(l_extreme$data), 5)
+})
+
 # Pattern-specific edge cases: Curvy fingers treeline -------------------------
 
 # Boundary values for sine_length_mean and sine_length_sd ---------------------
