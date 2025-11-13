@@ -6,7 +6,8 @@
 test_that("landscape generators validate width parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
-    diffuse = create_landscape_diffuse_treeline
+    diffuse = create_landscape_diffuse_treeline,
+    curvy = create_landscape_curvy_treeline
   )
 
   for (name in names(generators)) {
@@ -42,7 +43,8 @@ test_that("landscape generators validate width parameter", {
 test_that("landscape generators validate height parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
-    diffuse = create_landscape_diffuse_treeline
+    diffuse = create_landscape_diffuse_treeline,
+    curvy = create_landscape_curvy_treeline
   )
 
   for (name in names(generators)) {
@@ -78,7 +80,8 @@ test_that("landscape generators validate height parameter", {
 test_that("landscape generators validate treeline_position parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
-    diffuse = create_landscape_diffuse_treeline
+    diffuse = create_landscape_diffuse_treeline,
+    curvy = create_landscape_curvy_treeline
   )
 
   for (name in names(generators)) {
@@ -108,7 +111,8 @@ test_that("landscape generators validate treeline_position parameter", {
 test_that("landscape generators validate rotation parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
-    diffuse = create_landscape_diffuse_treeline
+    diffuse = create_landscape_diffuse_treeline,
+    curvy = create_landscape_curvy_treeline
   )
 
   for (name in names(generators)) {
@@ -176,8 +180,6 @@ test_that("landscape generators validate random_spots parameter", {
 })
 
 # Pattern-specific validation: Diffuse treeline -------------------------------
-# Add diffuse-specific parameter validation here when implemented
-# Pattern-specific validation: Diffuse treeline -------------------------------
 test_that("diffuse treeline validates steepness parameter", {
   expect_error(
     create_landscape_diffuse_treeline(steepness = "2"),
@@ -197,8 +199,41 @@ test_that("diffuse treeline validates steepness parameter", {
     info = "Testing diffuse with steepness > 1"
   )
 })
+
 # Pattern-specific validation: Curvy treeline ---------------------------------
-# Add curvy-specific parameter validation here when implemented
+test_that("curvy treeline validates sine_length parameter", {
+  expect_error(
+    create_landscape_curvy_treeline(sine_length = "20"),
+    "must be a positive numeric value",
+    info = "Testing curvy with non-numeric sine_length"
+  )
+
+  expect_error(
+    create_landscape_curvy_treeline(sine_length = -10),
+    "must be a positive numeric value",
+    info = "Testing curvy with negative sine_length"
+  )
+
+  expect_error(
+    create_landscape_curvy_treeline(sine_length = 0),
+    "must be a positive numeric value",
+    info = "Testing curvy with zero sine_length"
+  )
+})
+
+test_that("curvy treeline validates sine_height parameter", {
+  expect_error(
+    create_landscape_curvy_treeline(sine_height = "5"),
+    "must be a non-negative numeric value",
+    info = "Testing curvy with non-numeric sine_height"
+  )
+
+  expect_error(
+    create_landscape_curvy_treeline(sine_height = -5),
+    "must be a non-negative numeric value",
+    info = "Testing curvy with negative sine_height"
+  )
+})
 
 # Pattern-specific validation: Random -----------------------------------------
 # Add random-specific parameter validation here when implemented

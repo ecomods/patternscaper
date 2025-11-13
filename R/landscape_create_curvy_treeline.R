@@ -40,6 +40,40 @@ create_landscape_curvy_treeline <- function(
   sine_height = 5,
   rotation = 0
 ) {
+  # Validate width
+  if (!is.numeric(width) || width <= 0 || width != as.integer(width)) {
+    cli::cli_abort("{.arg width} must be a positive integer.")
+  }
+
+  # Validate height
+  if (!is.numeric(height) || height <= 0 || height != as.integer(height)) {
+    cli::cli_abort("{.arg height} must be a positive integer.")
+  }
+
+  # Validate treeline_position
+  if (
+    !is.numeric(treeline_position) ||
+      treeline_position < 0 ||
+      treeline_position > 1
+  ) {
+    cli::cli_abort("{.arg treeline_position} must be between 0 and 1.")
+  }
+
+  # Validate sine_length
+  if (!is.numeric(sine_length) || sine_length <= 0) {
+    cli::cli_abort("{.arg sine_length} must be a positive numeric value.")
+  }
+
+  # Validate sine_height
+  if (!is.numeric(sine_height) || sine_height < 0) {
+    cli::cli_abort("{.arg sine_height} must be a non-negative numeric value.")
+  }
+
+  # Validate rotation
+  if (!is.numeric(rotation) || rotation < 0 || rotation > 360) {
+    cli::cli_abort("{.arg rotation} must be numeric and between 0 and 360.")
+  }
+
   # calculate width and height of the actual landscape to produce
   # in case of rotation, the landscape needs to be larger
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
