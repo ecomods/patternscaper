@@ -58,10 +58,18 @@ create_landscape_curvy_treeline <- function(
     cli::cli_abort("{.arg sine_height} must be a non-negative numeric value.")
   }
 
+  # Warn if sine_height is larger than landscape height
+  if (sine_height > height * 0.5) {
+    cli::cli_alert_warning(
+      "{.arg sine_height} ({sine_height}) is large relative to {.arg height} ({height}). This may create unexpected patterns."
+    )
+  }
+
   # calculate width and height of the actual landscape to produce
   # in case of rotation, the landscape needs to be larger
-  height_actual <- ifelse(rotation == 0, height, height * 1.5)
-  width_actual <- ifelse(rotation == 0, width, width * 1.5)
+  rotation_scale_factor <- 1.5
+  height_actual <- ifelse(rotation == 0, height, height * rotation_scale_factor)
+  width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
   # Convert position from proportion to row number
   treeline_row <- round(height_actual * treeline_position)
@@ -70,16 +78,13 @@ create_landscape_curvy_treeline <- function(
   mat <- matrix(0, nrow = height_actual, ncol = width_actual)
 
   # Fill in tree area (1) based on sine wave around the treeline position
-  # sine_height determines how many cells around tree_line are affected
-  # sine_length determines the wave length
-  for (i in 1:height_actual) {
-    for (j in 1:width_actual) {
-      mat[i, j] <- ifelse(
-        i > (treeline_row + sin(2 * pi * j / sine_length) * sine_height),
-        0,
-        1
-      )
-    }
+  # Vectorized calculation of sine wave boundary for each column
+  wave_boundary <- treeline_row +
+    sin(2 * pi * seq_len(width_actual) / sine_length) * sine_height
+
+  # For each row, check if it's above the wave boundary
+  for (i in seq_len(height_actual)) {
+    mat[i, ] <- ifelse(i <= wave_boundary, 1, 0)
   }
 
   # Add random spots if requested
