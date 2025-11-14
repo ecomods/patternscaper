@@ -70,6 +70,9 @@ create_landscape_clustered_trees <- function(
   validate_random_spots(random_spots = random_spots)
   validate_rotation(rotation = rotation)
 
+  # Convert parameters to the right types
+  num_clusters <- as.integer(num_clusters)
+
   if (
     !is.numeric(num_clusters) ||
       num_clusters < 1 ||
