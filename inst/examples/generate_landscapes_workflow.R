@@ -193,40 +193,108 @@ plot_landscape_list(list(
 ))
 
 # Clustered trees ------------------------------------------------------------
-# Default clustered trees
-clustered_default <- create_landscape("clustered", name = "Default")
+all_clustered <- function() {
+  # Default clustered trees
+  clustered_default <- create_landscape("clustered", name = "Default")
 
-# Modified clustered trees with more elongated clusters
-clustered_modified <- create_landscape(
-  "clustered",
-  name = "Modified",
-  treeline_position = 0.2,
-  num_clusters = 8,
-  cluster_radius = 7,
-  scatter_zone_prop = 0.6,
-  elongation_x = 2.5,
-  elongation_y = 0.5
-)
+  # Modified treeline position (higher = more area below treeline)
+  clustered_high_treeline <- create_landscape(
+    "clustered",
+    name = "High Treeline",
+    treeline_position = 0.7,
+    scatter_zone_prop = 0.4
+  )
 
-# One landscape with rotation
-clustered_rotated <- create_landscape(
-  "clustered",
-  name = "Rotated",
-  num_clusters = 20,
-  cluster_radius = 2,
-  scatter_zone_prop = 0.5,
-  elongation_x = 1.8,
-  elongation_y = 1.4,
-  rotation = 45
-)
+  # Large scatter zone with many small clusters
+  clustered_many_small <- create_landscape(
+    "clustered",
+    name = "Many Small",
+    num_clusters = 30,
+    cluster_radius = 2,
+    scatter_zone_prop = 0.6
+  )
 
+  # Few large clusters
+  clustered_few_large <- create_landscape(
+    "clustered",
+    name = "Few Large",
+    num_clusters = 5,
+    cluster_radius = 12,
+    scatter_zone_prop = 0.5
+  )
+
+  # Horizontally elongated clusters
+  clustered_horizontal <- create_landscape(
+    "clustered",
+    name = "Horizontal",
+    num_clusters = 15,
+    cluster_radius = 5,
+    elongation_x = 3,
+    elongation_y = 1,
+    scatter_zone_prop = 0.4
+  )
+
+  # Vertically elongated clusters
+  clustered_vertical <- create_landscape(
+    "clustered",
+    name = "Vertical",
+    num_clusters = 15,
+    cluster_radius = 5,
+    elongation_x = 1,
+    elongation_y = 3,
+    scatter_zone_prop = 0.4
+  )
+
+  # With random spots added
+  clustered_with_noise <- create_landscape(
+    "clustered",
+    name = "With Noise",
+    num_clusters = 12,
+    cluster_radius = 5,
+    scatter_zone_prop = 0.4,
+    random_spots = c(0.05, 0.05)
+  )
+
+  # Rotated with mixed parameters
+  clustered_rotated <- create_landscape(
+    "clustered",
+    name = "Rotated Mixed",
+    num_clusters = 20,
+    cluster_radius = 4,
+    scatter_zone_prop = 0.5,
+    elongation_x = 1.8,
+    elongation_y = 1.4,
+    rotation = 45
+  )
+
+  # Narrow scatter zone with dense clusters
+  clustered_narrow_dense <- create_landscape(
+    "clustered",
+    name = "Narrow Dense",
+    treeline_position = 0.3,
+    num_clusters = 20,
+    cluster_radius = 4,
+    scatter_zone_prop = 0.2,
+    rotation = 45
+  )
+  return(
+    list(
+      clustered_default,
+      clustered_high_treeline,
+      clustered_many_small,
+      clustered_few_large,
+      clustered_horizontal,
+      clustered_vertical,
+      clustered_narrow_dense,
+      clustered_with_noise,
+      clustered_rotated
+    )
+  )
+}
 # Plot all clustered trees together
 plot_landscape_list(
-  list(
-    clustered_default,
-    clustered_modified,
-    clustered_rotated
-  )
+  all_clustered(),
+  title = "name"
 )
 
 # Sine bands -----------------------------------------------------------------

@@ -186,12 +186,12 @@ create_landscape_clustered_trees <- function(
     # Define cluster boundaries (accounting for elongation)
     row_min <- max(1, center_row - cluster_radius * elongation_y)
     row_max <- min(
-      height_actual, # Use the actual matrix dimensions
+      height_actual,
       center_row + cluster_radius * elongation_y
     )
     col_min <- max(1, center_col - cluster_radius * elongation_x)
     col_max <- min(
-      width_actual, # Use the actual matrix dimensions
+      width_actual,
       center_col + cluster_radius * elongation_x
     )
 
