@@ -140,49 +140,43 @@ create_landscape_clustered_trees <- function(
   # Extract matrix from landscape object
   mat <- terra::as.matrix(base_landscape$data, wide = TRUE)
 
-  # Define scatter zone
-  if (rotation == 0) {
-    treeline_row <- round(height_actual * treeline_position)
-    scatter_zone_end <- min(
-      height_actual,
-      treeline_row + round(height_actual * scatter_zone_prop)
-    )
-    # Generate random cluster centers
-    cluster_centers <- data.frame(
-      row = sample(
-        round((treeline_row + cluster_radius + 1), 0):round(
-          (scatter_zone_end - cluster_radius),
-          0
-        ),
-        num_clusters,
-        replace = TRUE
-      ),
-      col = sample(1:width_actual, num_clusters, replace = TRUE)
-    )
-  } else {
-    treeline_row <- round(height_actual * treeline_position)
-    scatter_zone_end <- min(
-      round(5 / 6 * height_actual),
-      treeline_row + round((5 / 6 * height_actual) * scatter_zone_prop)
-    )
-    # Generate random cluster centers
-    cluster_centers <- data.frame(
-      row = sample(
-        round((treeline_row + cluster_radius + 1), 0):round(
-          (scatter_zone_end - cluster_radius),
-          0
-        ),
-        num_clusters,
-        replace = TRUE
-      ),
+  # Define scatter zone boundaries
+  treeline_row <- round(height_actual * treeline_position)
 
-      col = sample(
-        (round(1 / 6 * width_actual) + 1):round(5 / 6 * width_actual),
-        num_clusters,
-        replace = TRUE
-      )
-    )
+  # For rotated landscapes, use inner portion to avoid edge artifacts after crop
+  rotation_safe_margin <- 1 / 6
+
+  if (rotation != 0) {
+    # Restrict to inner 2/3 of dimensions for rotation safety
+    max_row <- round((1 - rotation_safe_margin) * height_actual)
+    max_col <- round((1 - rotation_safe_margin) * width_actual)
+    min_col <- round(rotation_safe_margin * width_actual) + 1
+  } else {
+    max_row <- height_actual
+    max_col <- width_actual
+    min_col <- 1
   }
+
+  scatter_zone_end <- min(
+    max_row,
+    treeline_row + round(max_row * scatter_zone_prop)
+  )
+
+  # Generate random cluster centers within safe boundaries
+  cluster_centers <- data.frame(
+    row = sample(
+      (treeline_row + cluster_radius + 1):floor(
+        scatter_zone_end - cluster_radius
+      ),
+      num_clusters,
+      replace = TRUE
+    ),
+    col = sample(
+      min_col:max_col,
+      num_clusters,
+      replace = TRUE
+    )
+  )
 
   # Create clusters around centers
   for (i in seq_len(nrow(cluster_centers))) {
