@@ -5,7 +5,8 @@ test_that("landscape generators create valid landscape objects", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
-    curvy = create_landscape_curvy_treeline
+    curvy = create_landscape_curvy_treeline,
+    curvyfingers = create_landscape_curvyfingers
   )
 
   for (name in names(generators)) {
@@ -27,7 +28,8 @@ test_that("landscape generators support rotation parameter", {
   generators_with_rotation <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
-    curvy = create_landscape_curvy_treeline
+    curvy = create_landscape_curvy_treeline,
+    curvyfingers = create_landscape_curvyfingers
   )
 
   for (name in names(generators_with_rotation)) {
@@ -161,6 +163,134 @@ test_that("create_landscape_curvy_treeline random_spots parameter works", {
   vals_no_random <- terra::values(l_no_random$data)
   vals_random <- terra::values(l_random$data)
   expect_false(identical(vals_no_random, vals_random))
+})
+
+# Curvy fingers treeline ------------------------------------------------------
+test_that("create_landscape_curvyfingers creates varying sinusoidal patterns", {
+  set.seed(123)
+
+  # Zero amplitude mean should create relatively straight line
+  l_straight <- create_landscape_curvyfingers(
+    width = 20,
+    height = 20,
+    treeline_position = 0.5,
+    sine_height_mean = 0,
+    sine_height_sd = 0
+  )
+  expect_true(is_landscape(l_straight))
+
+  # With amplitude, pattern should vary across columns
+  l_curvy <- create_landscape_curvyfingers(
+    width = 20,
+    height = 20,
+    treeline_position = 0.5,
+    sine_length_mean = 10,
+    sine_length_sd = 3,
+    sine_height_mean = 3,
+    sine_height_sd = 1
+  )
+  expect_true(is_landscape(l_curvy))
+
+  # Check that treeline position varies across columns
+  vals <- terra::values(l_curvy$data)
+  mat <- matrix(vals, nrow = 20, ncol = 20)
+  col_sums <- colSums(mat)
+  expect_true(length(unique(col_sums)) > 1)
+})
+
+test_that("create_landscape_curvyfingers stores all params correctly", {
+  l <- create_landscape_curvyfingers(
+    width = 30,
+    height = 40,
+    treeline_position = 0.7,
+    sine_length_mean = 25,
+    sine_length_sd = 10,
+    sine_height_mean = 8,
+    sine_height_sd = 3,
+    random_spots = c(0.1, 0.2),
+    rotation = 45
+  )
+
+  expect_equal(l$params$width, 30)
+  expect_equal(l$params$height, 40)
+  expect_equal(l$params$treeline_position, 0.7)
+  expect_equal(l$params$sine_length_mean, 25)
+  expect_equal(l$params$sine_length_sd, 10)
+  expect_equal(l$params$sine_height_mean, 8)
+  expect_equal(l$params$sine_height_sd, 3)
+  expect_equal(l$params$random_spots, c(0.1, 0.2))
+  expect_equal(l$params$rotation, 45)
+})
+
+test_that("create_landscape_curvyfingers random_spots parameter works", {
+  set.seed(123)
+  # With no random spots
+  l_no_random <- create_landscape_curvyfingers(
+    width = 20,
+    height = 20,
+    treeline_position = 0.5,
+    sine_height_mean = 3,
+    random_spots = c(0, 0)
+  )
+
+  set.seed(123)
+  # With random spots
+  l_random <- create_landscape_curvyfingers(
+    width = 20,
+    height = 20,
+    treeline_position = 0.5,
+    sine_height_mean = 3,
+    random_spots = c(0.2, 0.2)
+  )
+
+  # Landscapes should differ due to randomness
+  vals_no_random <- terra::values(l_no_random$data)
+  vals_random <- terra::values(l_random$data)
+  expect_false(identical(vals_no_random, vals_random))
+})
+
+test_that("create_landscape_curvyfingers produces variable patterns", {
+  set.seed(123)
+
+  # Generate two landscapes with same parameters
+  l1 <- create_landscape_curvyfingers(
+    width = 30,
+    height = 30,
+    sine_length_mean = 15,
+    sine_length_sd = 5,
+    sine_height_mean = 5,
+    sine_height_sd = 2
+  )
+
+  l2 <- create_landscape_curvyfingers(
+    width = 30,
+    height = 30,
+    sine_length_mean = 15,
+    sine_length_sd = 5,
+    sine_height_mean = 5,
+    sine_height_sd = 2
+  )
+
+  # Different random seeds should produce different patterns
+  vals1 <- terra::values(l1$data)
+  vals2 <- terra::values(l2$data)
+  expect_false(identical(vals1, vals2))
+})
+
+test_that("create_landscape_curvyfingers handles zero standard deviations", {
+  # Zero SDs should create constant wavelength and amplitude
+  l_constant <- create_landscape_curvyfingers(
+    width = 20,
+    height = 20,
+    sine_length_mean = 20,
+    sine_length_sd = 0,
+    sine_height_mean = 5,
+    sine_height_sd = 0
+  )
+
+  expect_true(is_landscape(l_constant))
+  expect_equal(terra::ncol(l_constant$data), 20)
+  expect_equal(terra::nrow(l_constant$data), 20)
 })
 
 # Random ----------------------------------------------------------------------

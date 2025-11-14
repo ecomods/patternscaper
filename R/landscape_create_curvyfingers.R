@@ -79,7 +79,7 @@ create_landscape_curvyfingers <- function(
 
   # Warn if sine_height_mean is large relative to landscape height
   if (sine_height_mean > height * 0.5) {
-    cli::cli_alert_warning(
+    cli::cli_warn(
       "{.arg sine_height_mean} ({sine_height_mean}) is large relative to {.arg height} ({height}). This may create unexpected patterns."
     )
   }
