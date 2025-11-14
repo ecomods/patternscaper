@@ -104,8 +104,9 @@ create_landscape_clustered_trees <- function(
   }
 
   # Calculate dimensions based on rotation
-  height_actual <- ifelse(rotation == 0, height, height * 1.5)
-  width_actual <- ifelse(rotation == 0, width, width * 1.5)
+  rotation_scale_factor <- 1.5
+  height_actual <- ifelse(rotation == 0, height, height * rotation_scale_factor)
+  width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
   # Get base landscape with sharp treeline
   base_landscape <- create_landscape_sharp_treeline(
