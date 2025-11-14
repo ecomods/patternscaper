@@ -1,29 +1,39 @@
 #' Create a Landscape with Clustered Trees
 #'
 #' Generates a binary landscape with clustered trees below a treeline.
+#' Trees are arranged in clusters within a scatter zone that extends below
+#' the treeline. Clusters can be elongated in x or y directions to create
+#' elliptical patterns.
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
-#' @param random_spots List of Numerics. Probability or random spots of vegetation in the other vegetation type (default: c(0,0))
+#' @param random_spots Numeric vector of length 2. Probabilities for flipping
+#'   cells: `[prob(1→0), prob(0→1)]`. Used to add noise to the landscape
+#'   (default: c(0,0)).
 #' @param num_clusters Integer. Number of cluster centers (default: 10).
 #' @param cluster_radius Numeric. Radius of clusters in pixels (default: 5).
-#' @param scatter_zone_prop Numeric. Proportion of height for scatter zone (default: 0.3).
-#' @param elongation_x Numeric. Horizontal elongation factor for clusters (default: 1).
-#' @param elongation_y Numeric. Vertical elongation factor for clusters (default: 1).
-#'
+#' @param scatter_zone_prop Numeric. Proportion of height for scatter zone
+#'   measured downward from treeline (0-1, default: 0.3).
+#' @param elongation_x Numeric. Horizontal elongation factor for clusters.
+#'   Values > 1 create horizontally elongated clusters (default: 1).
+#' @param elongation_y Numeric. Vertical elongation factor for clusters.
+#'   Values > 1 create vertically elongated clusters (default: 1).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
-#' @return A landscape object with pattern "clustered" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "clustered" containing the generated
+#'   landscape data and parameters.
 #'
 #' @importFrom stats runif
 #' @importFrom terra as.matrix
+#' @importFrom cli cli_abort
 #' @keywords internal
+#'
 #' @examples
 #' # Default clustered trees
 #' clustered_default <- create_landscape_clustered_trees()
 #'
-#' # Modified clustered trees with more elongated clusters
+#' # Modified clustered trees with horizontally elongated clusters
 #' clustered_modified <- create_landscape_clustered_trees(
 #'   treeline_position = 0.2,
 #'   num_clusters = 8,
@@ -33,7 +43,7 @@
 #'   elongation_y = 0.5
 #' )
 #'
-#' # With rotation
+#' # Rotated landscape with mixed parameters
 #' clustered_rotated <- create_landscape_clustered_trees(
 #'   num_clusters = 20,
 #'   cluster_radius = 2,
@@ -108,6 +118,16 @@ create_landscape_clustered_trees <- function(
   height_actual <- ifelse(rotation == 0, height, height * rotation_scale_factor)
   width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
+  # Ensure scatter zone is large enough for clusters
+  min_scatter_zone <- 2 * cluster_radius * max(elongation_y, 1)
+  if (scatter_zone_prop * height_actual < min_scatter_zone) {
+    cli::cli_abort(c(
+      "Scatter zone too small for cluster size.",
+      "i" = "Need at least {min_scatter_zone} pixels but got {scatter_zone_prop * height_actual}.",
+      "i" = "Increase {.arg scatter_zone_prop} or decrease {.arg cluster_radius}."
+    ))
+  }
+
   # Get base landscape with sharp treeline
   base_landscape <- create_landscape_sharp_treeline(
     width = width_actual,
@@ -145,7 +165,7 @@ create_landscape_clustered_trees <- function(
       round(5 / 6 * height_actual),
       treeline_row + round((5 / 6 * height_actual) * scatter_zone_prop)
     )
-    #Generate random cluster centers
+    # Generate random cluster centers
     cluster_centers <- data.frame(
       row = sample(
         round((treeline_row + cluster_radius + 1), 0):round(
