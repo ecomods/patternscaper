@@ -90,7 +90,7 @@ evaluate_landscape_metrics <- function(
     )
   }
 
-  # Exclude metrics if specified - DON'T message, this is expected behavior
+  # Exclude metrics if specified
   if (!is.null(exclude_metrics)) {
     metrics <- metrics[!metrics$metric %in% exclude_metrics, ]
     if (nrow(metrics) == 0) {
@@ -98,8 +98,8 @@ evaluate_landscape_metrics <- function(
     }
   }
 
-  # Exclude metrics with NA values - USE cli::cli_alert_warning
-  # This is important for user to know
+  # Exclude metrics with NA values if the user requests it
+  # as they can't be used for model training
   if (exclude_NA_metrics) {
     na_metrics <- metrics |>
       dplyr::filter(is.na(value)) |>
@@ -120,8 +120,7 @@ evaluate_landscape_metrics <- function(
     }
   }
 
-  # Check if we have enough metrics - USE cli::cli_alert_warning
-  # This changes expected behavior
+  # Check if we have enough metrics
   num_metrics <- length(unique(metrics$metric))
   if (num_metrics < metrics_number) {
     cli::cli_warn(
@@ -130,14 +129,28 @@ evaluate_landscape_metrics <- function(
     metrics_number <- num_metrics
   }
 
-  # Check patterns - USE cli::cli_abort
+  # Check patterns
   if (length(unique(metrics$pattern)) < 2) {
     cli::cli_abort(
       "At least two different landscape patterns are required for metric evaluation"
     )
   }
 
-  # Get ranked metrics - NO MESSAGE NEEDED (internal operation)
+  # Remove metrics with zero variance as they cannot be used to distinguish
+  # landscapes
+  zero_var_metrics <- metrics |>
+    dplyr::summarize(var_value = var(value, na.rm = TRUE), .by = metric) |>
+    dplyr::filter(var_value == 0) |>
+    dplyr::pull(metric)
+
+  if (length(zero_var_metrics) > 0) {
+    metrics <- metrics[!metrics$metric %in% zero_var_metrics, ]
+    cli::cli_warn(
+      "Excluded {length(zero_var_metrics)} metrics with zero variance: {.val {zero_var_metrics}}"
+    )
+  }
+
+  # Get ranked metrics
   ranked_metrics <- rank_metrics_by_method(
     metrics = metrics,
     method = method
