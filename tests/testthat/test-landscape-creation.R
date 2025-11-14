@@ -345,10 +345,6 @@ test_that("create_landscape creates correct landscape types", {
     "fingers"
   )
   expect_equal(
-    create_landscape("scattered", width = 10, height = 10)$pattern,
-    "scattered"
-  )
-  expect_equal(
     create_landscape("clustered", width = 10, height = 10)$pattern,
     "clustered"
   )
@@ -460,7 +456,6 @@ test_that("create_training_landscapes returns correct number of landscapes", {
       "diffuse",
       "curvy",
       "fingers",
-      "scattered",
       "clustered",
       "sine_bands",
       "banded",
@@ -627,7 +622,6 @@ test_that("create_training_landscapes respects width and height", {
       "diffuse",
       "curvy",
       "fingers",
-      "scattered",
       "clustered",
       "sine_bands",
       "banded",

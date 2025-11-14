@@ -15,7 +15,6 @@ ecotone_types = c(
   "diffuse",
   "curvy",
   "fingers",
-  "scattered",
   "clustered",
   "sine_bands"
 )

@@ -192,39 +192,6 @@ plot_landscape_list(list(
   fingers_rotated
 ))
 
-
-# Scattered trees ------------------------------------------------------------
-# Default scattered trees
-scattered_default <- create_landscape("scattered", name = "Default")
-
-# Modified scattered trees with higher density in a larger scatter zone
-scattered_modified <- create_landscape(
-  "scattered",
-  name = "Modified",
-  treeline_position = 0.3,
-  scatter_density = 0.7,
-  scatter_zone_prop = 0.2
-)
-
-# One landscape with rotation
-scattered_rotated <- create_landscape(
-  "scattered",
-  name = "Rotated",
-  treeline_position = 0.3,
-  scatter_density = 0.2,
-  scatter_zone_prop = 0.1,
-  rotation = 45
-)
-
-# Plot all scattered trees together
-plot_landscape_list(
-  list(
-    scattered_default,
-    scattered_modified,
-    scattered_rotated
-  )
-)
-
 # Clustered trees ------------------------------------------------------------
 # Default clustered trees
 clustered_default <- create_landscape("clustered", name = "Default")
