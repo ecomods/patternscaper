@@ -55,40 +55,52 @@ create_landscape_clustered_trees <- function(
   rotation = 0
 ) {
   # Input validation
-  if (!is.numeric(width) || width <= 0) {
-    stop("'width' must be a positive number")
-  }
-  if (!is.numeric(height) || height <= 0) {
-    stop("'height' must be a positive number")
-  }
+  validate_dimensions(width = width, height = height)
+  validate_treeline_position(treeline_position = treeline_position)
+  validate_random_spots(random_spots = random_spots)
+  validate_rotation(rotation = rotation)
+
   if (
-    !is.numeric(treeline_position) ||
-      treeline_position < 0 ||
-      treeline_position > 1
+    !is.numeric(num_clusters) ||
+      num_clusters < 1 ||
+      num_clusters != as.integer(num_clusters)
   ) {
-    stop("'treeline_position' must be between 0 and 1")
+    cli::cli_abort(c(
+      "{.arg num_clusters} must be a positive integer.",
+      "x" = "You supplied {.val {num_clusters}}"
+    ))
   }
-  if (!is.numeric(num_clusters) || num_clusters < 1) {
-    stop("'num_clusters' must be a positive integer")
-  }
+
   if (!is.numeric(cluster_radius) || cluster_radius <= 0) {
-    stop("'cluster_radius' must be a positive number")
+    cli::cli_abort(c(
+      "{.arg cluster_radius} must be a positive number.",
+      "x" = "You supplied {.val {cluster_radius}}"
+    ))
   }
+
   if (
     !is.numeric(scatter_zone_prop) ||
       scatter_zone_prop <= 0 ||
       scatter_zone_prop > 1
   ) {
-    stop("'scatter_zone_prop' must be between 0 and 1")
+    cli::cli_abort(c(
+      "{.arg scatter_zone_prop} must be between 0 and 1.",
+      "x" = "You supplied {.val {scatter_zone_prop}}"
+    ))
   }
+
   if (!is.numeric(elongation_x) || elongation_x <= 0) {
-    stop("'elongation_x' must be a positive number")
+    cli::cli_abort(c(
+      "{.arg elongation_x} must be a positive number.",
+      "x" = "You supplied {.val {elongation_x}}"
+    ))
   }
+
   if (!is.numeric(elongation_y) || elongation_y <= 0) {
-    stop("'elongation_y' must be a positive number")
-  }
-  if (!is.numeric(rotation)) {
-    stop("'rotation' must be a number")
+    cli::cli_abort(c(
+      "{.arg elongation_y} must be a positive number.",
+      "x" = "You supplied {.val {elongation_y}}"
+    ))
   }
 
   result <- tryCatch(
@@ -107,7 +119,7 @@ create_landscape_clustered_trees <- function(
       )
 
       # Extract matrix from landscape object
-      mat <- terra::as.matrix(base_landscape$data, wide = TRUE)
+      mat <- terra::as_matrix(base_landscape$data, wide = TRUE)
 
       # Define scatter zone
       if (rotation == 0) {
