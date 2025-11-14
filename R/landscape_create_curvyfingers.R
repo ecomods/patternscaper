@@ -1,4 +1,4 @@
-#' Create a Landscape with Curvy Fingers Treeline
+#' Create a Landscape with Finger-like Treeline
 #'
 #' Generates a binary landscape with a curvy finger treeline following a sine wave pattern
 #' with random length and amplitude for each wave segment.
@@ -13,17 +13,17 @@
 #' @param sine_height_sd Numeric. Standard deviation of amplitude in pixels (default: 4).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
-#' @return A landscape object with pattern "curvyfingers" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "fingers" containing the generated landscape data and parameters.
 #'
 #' @keywords internal
 #' @importFrom cli cli_warn cli_abort
 #'
 #' @examples
 #' # Default curvy fingers treeline
-#' fingers_default <- create_landscape_curvyfingers()
+#' fingers_default <- create_landscape_fingers()
 #'
 #' # Modified parameters for more variation
-#' fingers_modified <- create_landscape_curvyfingers(
+#' fingers_modified <- create_landscape_fingers(
 #'   sine_length_mean = 15,
 #'   sine_length_sd = 10,
 #'   sine_height_mean = 10,
@@ -31,10 +31,10 @@
 #' )
 #'
 #' # With rotation
-#' fingers_rotated <- create_landscape_curvyfingers(
+#' fingers_rotated <- create_landscape_fingers(
 #'   rotation = 45
 #' )
-create_landscape_curvyfingers <- function(
+create_landscape_fingers <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
@@ -160,7 +160,7 @@ create_landscape_curvyfingers <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    pattern = "curvyfingers",
+    pattern = "fingers",
     params = list(
       width = width,
       height = height,

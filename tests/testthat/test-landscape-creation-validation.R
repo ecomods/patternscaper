@@ -8,7 +8,7 @@ test_that("landscape generators validate width parameter", {
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
-    curvyfingers = create_landscape_curvyfingers
+    fingers = create_landscape_fingers
   )
 
   for (name in names(generators)) {
@@ -46,7 +46,7 @@ test_that("landscape generators validate height parameter", {
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
-    curvyfingers = create_landscape_curvyfingers
+    fingers = create_landscape_fingers
   )
 
   for (name in names(generators)) {
@@ -84,7 +84,7 @@ test_that("landscape generators validate treeline_position parameter", {
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
-    curvyfingers = create_landscape_curvyfingers
+    fingers = create_landscape_fingers
   )
 
   for (name in names(generators)) {
@@ -116,7 +116,7 @@ test_that("landscape generators validate rotation parameter", {
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
-    curvyfingers = create_landscape_curvyfingers
+    fingers = create_landscape_fingers
   )
 
   for (name in names(generators)) {
@@ -147,7 +147,7 @@ test_that("landscape generators validate random_spots parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
     curvy = create_landscape_curvy_treeline,
-    curvyfingers = create_landscape_curvyfingers
+    fingers = create_landscape_fingers
   )
 
   for (name in names(generators)) {
@@ -244,75 +244,75 @@ test_that("curvy treeline validates sine_height parameter", {
 # Pattern-specific validation: Curvy fingers treeline ------------------------
 test_that("curvy fingers treeline validates sine_length_mean parameter", {
   expect_error(
-    create_landscape_curvyfingers(sine_length_mean = "20"),
+    create_landscape_fingers(sine_length_mean = "20"),
     "must be a positive numeric value",
-    info = "Testing curvyfingers with non-numeric sine_length_mean"
+    info = "Testing fingers with non-numeric sine_length_mean"
   )
 
   expect_error(
-    create_landscape_curvyfingers(sine_length_mean = -10),
+    create_landscape_fingers(sine_length_mean = -10),
     "must be a positive numeric value",
-    info = "Testing curvyfingers with negative sine_length_mean"
+    info = "Testing fingers with negative sine_length_mean"
   )
 
   expect_error(
-    create_landscape_curvyfingers(sine_length_mean = 0),
+    create_landscape_fingers(sine_length_mean = 0),
     "must be a positive numeric value",
-    info = "Testing curvyfingers with zero sine_length_mean"
+    info = "Testing fingers with zero sine_length_mean"
   )
 })
 
 test_that("curvy fingers treeline validates sine_length_sd parameter", {
   expect_error(
-    create_landscape_curvyfingers(sine_length_sd = "5"),
+    create_landscape_fingers(sine_length_sd = "5"),
     "must be a non-negative numeric value",
-    info = "Testing curvyfingers with non-numeric sine_length_sd"
+    info = "Testing fingers with non-numeric sine_length_sd"
   )
 
   expect_error(
-    create_landscape_curvyfingers(sine_length_sd = -5),
+    create_landscape_fingers(sine_length_sd = -5),
     "must be a non-negative numeric value",
-    info = "Testing curvyfingers with negative sine_length_sd"
+    info = "Testing fingers with negative sine_length_sd"
   )
 })
 
 test_that("curvy fingers treeline validates sine_height_mean parameter", {
   expect_error(
-    create_landscape_curvyfingers(sine_height_mean = "5"),
+    create_landscape_fingers(sine_height_mean = "5"),
     "must be a non-negative numeric value",
-    info = "Testing curvyfingers with non-numeric sine_height_mean"
+    info = "Testing fingers with non-numeric sine_height_mean"
   )
 
   expect_error(
-    create_landscape_curvyfingers(sine_height_mean = -5),
+    create_landscape_fingers(sine_height_mean = -5),
     "must be a non-negative numeric value",
-    info = "Testing curvyfingers with negative sine_height_mean"
+    info = "Testing fingers with negative sine_height_mean"
   )
 })
 
 test_that("curvy fingers treeline validates sine_height_sd parameter", {
   expect_error(
-    create_landscape_curvyfingers(sine_height_sd = "3"),
+    create_landscape_fingers(sine_height_sd = "3"),
     "must be a non-negative numeric value",
-    info = "Testing curvyfingers with non-numeric sine_height_sd"
+    info = "Testing fingers with non-numeric sine_height_sd"
   )
 
   expect_error(
-    create_landscape_curvyfingers(sine_height_sd = -3),
+    create_landscape_fingers(sine_height_sd = -3),
     "must be a non-negative numeric value",
-    info = "Testing curvyfingers with negative sine_height_sd"
+    info = "Testing fingers with negative sine_height_sd"
   )
 })
 
 test_that("curvy fingers treeline warns about large sine_height_mean", {
   expect_warning(
-    create_landscape_curvyfingers(
+    create_landscape_fingers(
       width = 20,
       height = 20,
       sine_height_mean = 15
     ),
     "large relative to",
-    info = "Testing curvyfingers with sine_height_mean > 50% of height"
+    info = "Testing fingers with sine_height_mean > 50% of height"
   )
 })
 

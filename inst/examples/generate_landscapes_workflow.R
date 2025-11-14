@@ -162,14 +162,14 @@ plot_landscape_list(
 )
 
 # Curvy fingers ---------------------------------------------------------------
-# Default curvyfingers pattern
+# Default fingers pattern
 fingers_default <- create_landscape(
-  "curvyfingers",
+  "fingers",
   name = "Default",
   pattern = "curvy"
 )
 fingers_modified <- create_landscape(
-  "curvyfingers",
+  "fingers",
   name = "Modified",
   sine_length_mean = 15,
   sine_length_sd = 10,
@@ -177,7 +177,7 @@ fingers_modified <- create_landscape(
   sine_height_sd = 15
 )
 fingers_rotated <- create_landscape(
-  pattern = "curvyfingers",
+  pattern = "fingers",
   name = "Rotated",
   rotation = 45,
   sine_length_mean = 20,
@@ -192,41 +192,6 @@ plot_landscape_list(list(
   fingers_rotated
 ))
 
-
-# Fingers --------------------------------------------------------------------
-# Default fingers pattern
-fingers_default <- create_landscape("fingers", name = "Default")
-
-# Modified fingers with more, thinner fingers and bending
-fingers_modified <- create_landscape(
-  "fingers",
-  name = "Modified",
-  treeline_position = 0.2,
-  num_fingers = 7,
-  finger_width = 5,
-  finger_length_prop = 0.5,
-  bend = TRUE
-)
-
-# One landscape with rotation
-fingers_rotated <- create_landscape(
-  "fingers",
-  name = "Rotated",
-  num_fingers = 10,
-  finger_width = 4,
-  finger_length_prop = 1,
-  bend = TRUE,
-  rotation = 45
-)
-
-# Plot all fingers together
-plot_landscape_list(
-  list(
-    fingers_default,
-    fingers_modified,
-    fingers_rotated
-  )
-)
 
 # Scattered trees ------------------------------------------------------------
 # Default scattered trees

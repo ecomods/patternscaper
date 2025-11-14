@@ -6,7 +6,7 @@ test_that("landscape generators create valid landscape objects", {
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
-    curvyfingers = create_landscape_curvyfingers
+    fingers = create_landscape_fingers
   )
 
   for (name in names(generators)) {
@@ -29,7 +29,7 @@ test_that("landscape generators support rotation parameter", {
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
-    curvyfingers = create_landscape_curvyfingers
+    fingers = create_landscape_fingers
   )
 
   for (name in names(generators_with_rotation)) {
@@ -166,11 +166,11 @@ test_that("create_landscape_curvy_treeline random_spots parameter works", {
 })
 
 # Curvy fingers treeline ------------------------------------------------------
-test_that("create_landscape_curvyfingers creates varying sinusoidal patterns", {
+test_that("create_landscape_fingers creates varying sinusoidal patterns", {
   set.seed(123)
 
   # Zero amplitude mean should create relatively straight line
-  l_straight <- create_landscape_curvyfingers(
+  l_straight <- create_landscape_fingers(
     width = 20,
     height = 20,
     treeline_position = 0.5,
@@ -180,7 +180,7 @@ test_that("create_landscape_curvyfingers creates varying sinusoidal patterns", {
   expect_true(is_landscape(l_straight))
 
   # With amplitude, pattern should vary across columns
-  l_curvy <- create_landscape_curvyfingers(
+  l_curvy <- create_landscape_fingers(
     width = 20,
     height = 20,
     treeline_position = 0.5,
@@ -198,8 +198,8 @@ test_that("create_landscape_curvyfingers creates varying sinusoidal patterns", {
   expect_true(length(unique(col_sums)) > 1)
 })
 
-test_that("create_landscape_curvyfingers stores all params correctly", {
-  l <- create_landscape_curvyfingers(
+test_that("create_landscape_fingers stores all params correctly", {
+  l <- create_landscape_fingers(
     width = 30,
     height = 40,
     treeline_position = 0.7,
@@ -222,10 +222,10 @@ test_that("create_landscape_curvyfingers stores all params correctly", {
   expect_equal(l$params$rotation, 45)
 })
 
-test_that("create_landscape_curvyfingers random_spots parameter works", {
+test_that("create_landscape_fingers random_spots parameter works", {
   set.seed(123)
   # With no random spots
-  l_no_random <- create_landscape_curvyfingers(
+  l_no_random <- create_landscape_fingers(
     width = 20,
     height = 20,
     treeline_position = 0.5,
@@ -235,7 +235,7 @@ test_that("create_landscape_curvyfingers random_spots parameter works", {
 
   set.seed(123)
   # With random spots
-  l_random <- create_landscape_curvyfingers(
+  l_random <- create_landscape_fingers(
     width = 20,
     height = 20,
     treeline_position = 0.5,
@@ -249,11 +249,11 @@ test_that("create_landscape_curvyfingers random_spots parameter works", {
   expect_false(identical(vals_no_random, vals_random))
 })
 
-test_that("create_landscape_curvyfingers produces variable patterns", {
+test_that("create_landscape_fingers produces variable patterns", {
   set.seed(123)
 
   # Generate two landscapes with same parameters
-  l1 <- create_landscape_curvyfingers(
+  l1 <- create_landscape_fingers(
     width = 30,
     height = 30,
     sine_length_mean = 15,
@@ -262,7 +262,7 @@ test_that("create_landscape_curvyfingers produces variable patterns", {
     sine_height_sd = 2
   )
 
-  l2 <- create_landscape_curvyfingers(
+  l2 <- create_landscape_fingers(
     width = 30,
     height = 30,
     sine_length_mean = 15,
@@ -277,9 +277,9 @@ test_that("create_landscape_curvyfingers produces variable patterns", {
   expect_false(identical(vals1, vals2))
 })
 
-test_that("create_landscape_curvyfingers handles zero standard deviations", {
+test_that("create_landscape_fingers handles zero standard deviations", {
   # Zero SDs should create constant wavelength and amplitude
-  l_constant <- create_landscape_curvyfingers(
+  l_constant <- create_landscape_fingers(
     width = 20,
     height = 20,
     sine_length_mean = 20,
