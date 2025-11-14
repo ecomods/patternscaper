@@ -151,7 +151,8 @@ test_that("landscape generators validate random_spots parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
     curvy = create_landscape_curvy_treeline,
-    fingers = create_landscape_fingers
+    fingers = create_landscape_fingers,
+    clustered = create_landscape_clustered_trees
   )
 
   for (name in names(generators)) {
