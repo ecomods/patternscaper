@@ -103,122 +103,112 @@ create_landscape_clustered_trees <- function(
     ))
   }
 
-  result <- tryCatch(
-    {
-      # Calculate dimensions based on rotation
-      height_actual <- ifelse(rotation == 0, height, height * 1.5)
-      width_actual <- ifelse(rotation == 0, width, width * 1.5)
+  # Calculate dimensions based on rotation
+  height_actual <- ifelse(rotation == 0, height, height * 1.5)
+  width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
-      # Get base landscape with sharp treeline
-      base_landscape <- create_landscape_sharp_treeline(
-        width = width_actual,
-        height = height_actual,
-        treeline_position = treeline_position,
-        random_spots = random_spots,
-        rotation = 0
+  # Get base landscape with sharp treeline
+  base_landscape <- create_landscape_sharp_treeline(
+    width = width_actual,
+    height = height_actual,
+    treeline_position = treeline_position,
+    random_spots = random_spots,
+    rotation = 0
+  )
+
+  # Extract matrix from landscape object
+  mat <- terra::as.matrix(base_landscape$data, wide = TRUE)
+
+  # Define scatter zone
+  if (rotation == 0) {
+    treeline_row <- round(height_actual * treeline_position)
+    scatter_zone_end <- min(
+      height_actual,
+      treeline_row + round(height_actual * scatter_zone_prop)
+    )
+    # Generate random cluster centers
+    cluster_centers <- data.frame(
+      row = sample(
+        round((treeline_row + cluster_radius + 1), 0):round(
+          (scatter_zone_end - cluster_radius),
+          0
+        ),
+        num_clusters,
+        replace = TRUE
+      ),
+      col = sample(1:width_actual, num_clusters, replace = TRUE)
+    )
+  } else {
+    treeline_row <- round(height_actual * treeline_position)
+    scatter_zone_end <- min(
+      round(5 / 6 * height_actual),
+      treeline_row + round((5 / 6 * height_actual) * scatter_zone_prop)
+    )
+    #Generate random cluster centers
+    cluster_centers <- data.frame(
+      row = sample(
+        round((treeline_row + cluster_radius + 1), 0):round(
+          (scatter_zone_end - cluster_radius),
+          0
+        ),
+        num_clusters,
+        replace = TRUE
+      ),
+
+      col = sample(
+        (round(1 / 6 * width_actual) + 1):round(5 / 6 * width_actual),
+        num_clusters,
+        replace = TRUE
       )
+    )
+  }
 
-      # Extract matrix from landscape object
-      mat <- terra::as_matrix(base_landscape$data, wide = TRUE)
+  # Create clusters around centers
+  for (i in seq_len(nrow(cluster_centers))) {
+    center_row <- cluster_centers$row[i]
+    center_col <- cluster_centers$col[i]
 
-      # Define scatter zone
-      if (rotation == 0) {
-        treeline_row <- round(height_actual * treeline_position)
-        scatter_zone_end <- min(
-          height_actual,
-          treeline_row + round(height_actual * scatter_zone_prop)
-        )
-        # Generate random cluster centers
-        cluster_centers <- data.frame(
-          row = sample(
-            round((treeline_row + cluster_radius + 1), 0):round(
-              (scatter_zone_end - cluster_radius),
-              0
-            ),
-            num_clusters,
-            replace = TRUE
-          ),
-          col = sample(1:width_actual, num_clusters, replace = TRUE)
-        )
-      } else {
-        treeline_row <- round(height_actual * treeline_position)
-        scatter_zone_end <- min(
-          round(5 / 6 * height_actual),
-          treeline_row + round((5 / 6 * height_actual) * scatter_zone_prop)
-        )
-        #Generate random cluster centers
-        cluster_centers <- data.frame(
-          row = sample(
-            round((treeline_row + cluster_radius + 1), 0):round(
-              (scatter_zone_end - cluster_radius),
-              0
-            ),
-            num_clusters,
-            replace = TRUE
-          ),
+    # Define cluster boundaries (accounting for elongation)
+    row_min <- max(1, center_row - cluster_radius * elongation_y)
+    row_max <- min(
+      height,
+      center_row + cluster_radius * elongation_y
+    )
+    col_min <- max(1, center_col - cluster_radius * elongation_x)
+    col_max <- min(width, center_col + cluster_radius * elongation_x)
 
-          col = sample(
-            (round(1 / 6 * width_actual) + 1):round(5 / 6 * width_actual),
-            num_clusters,
-            replace = TRUE
-          )
-        )
-      }
+    # Fill in cluster with decreasing probability based on distance from center
+    for (r in floor(row_min):ceiling(row_max)) {
+      for (c in floor(col_min):ceiling(col_max)) {
+        # Calculate adjusted distance for elliptical shape
+        dx <- (c - center_col) / elongation_x
+        dy <- (r - center_row) / elongation_y
+        dist <- sqrt(dx^2 + dy^2)
 
-      # Create clusters around centers
-      for (i in seq_len(nrow(cluster_centers))) {
-        center_row <- cluster_centers$row[i]
-        center_col <- cluster_centers$col[i]
-
-        # Define cluster boundaries (accounting for elongation)
-        row_min <- max(1, center_row - cluster_radius * elongation_y)
-        row_max <- min(
-          height,
-          center_row + cluster_radius * elongation_y
-        )
-        col_min <- max(1, center_col - cluster_radius * elongation_x)
-        col_max <- min(width, center_col + cluster_radius * elongation_x)
-
-        # Fill in cluster with decreasing probability based on distance from center
-        for (r in floor(row_min):ceiling(row_max)) {
-          for (c in floor(col_min):ceiling(col_max)) {
-            # Calculate adjusted distance for elliptical shape
-            dx <- (c - center_col) / elongation_x
-            dy <- (r - center_row) / elongation_y
-            dist <- sqrt(dx^2 + dy^2)
-
-            # Probability decreases with distance
-            if (dist <= cluster_radius) {
-              prob <- 1 - (dist / cluster_radius)^2
-              if (stats::runif(1) < prob) {
-                mat[r, c] <- 1
-              }
-            }
+        # Probability decreases with distance
+        if (dist <= cluster_radius) {
+          prob <- 1 - (dist / cluster_radius)^2
+          if (stats::runif(1) < prob) {
+            mat[r, c] <- 1
           }
         }
       }
-
-      # Apply rotation if specified
-      if (rotation != 0) {
-        mat <- rotate_and_crop_matrix(
-          mat,
-          rotation,
-          width,
-          height
-        )
-      }
-
-      mat
-    },
-    error = function(e) {
-      # Add context to the error for easier debugging
-      stop("Error in create_landscape_clusters: ", e$message, call. = FALSE)
     }
-  )
+  }
+
+  # Apply rotation if specified
+  if (rotation != 0) {
+    mat <- rotate_and_crop_matrix(
+      mat,
+      rotation,
+      width,
+      height
+    )
+  }
 
   # Create and return landscape object
   landscape(
-    data = result,
+    data = mat,
     pattern = "clustered",
     params = list(
       width = width,
@@ -229,7 +219,8 @@ create_landscape_clustered_trees <- function(
       scatter_zone_prop = scatter_zone_prop,
       elongation_x = elongation_x,
       elongation_y = elongation_y,
-      rotation = rotation
+      rotation = rotation,
+      random_spots = random_spots
     )
   )
 }
