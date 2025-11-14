@@ -148,9 +148,9 @@ create_landscape_clustered_trees <- function(
 
   if (rotation != 0) {
     # Restrict to inner 2/3 of dimensions for rotation safety
-    max_row <- round((1 - rotation_safe_margin) * height_actual)
-    max_col <- round((1 - rotation_safe_margin) * width_actual)
-    min_col <- round(rotation_safe_margin * width_actual) + 1
+    max_row <- floor((1 - rotation_safe_margin) * height_actual)
+    max_col <- floor((1 - rotation_safe_margin) * width_actual)
+    min_col <- floor(rotation_safe_margin * width_actual) + 1
   } else {
     max_row <- height_actual
     max_col <- width_actual
@@ -159,7 +159,7 @@ create_landscape_clustered_trees <- function(
 
   scatter_zone_end <- min(
     max_row,
-    treeline_row + round(max_row * scatter_zone_prop)
+    treeline_row + floor(max_row * scatter_zone_prop)
   )
 
   # Generate random cluster centers within safe boundaries
