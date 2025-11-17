@@ -4,7 +4,9 @@
 test_that("landscape generators handle very small landscapes", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
-    diffuse = create_landscape_diffuse_treeline
+    diffuse = create_landscape_diffuse_treeline,
+    curvy = create_landscape_curvy_treeline,
+    fingers = create_landscape_fingers
   )
 
   for (name in names(generators)) {
@@ -38,7 +40,9 @@ test_that("landscape generators handle very large landscapes", {
 test_that("landscape generators handle non-square landscapes", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
-    diffuse = create_landscape_diffuse_treeline
+    diffuse = create_landscape_diffuse_treeline,
+    curvy = create_landscape_curvy_treeline,
+    fingers = create_landscape_fingers
   )
 
   for (name in names(generators)) {
@@ -100,7 +104,9 @@ test_that("landscape generators handle non-square landscapes", {
 test_that("landscape generators with rotation handle extreme angles", {
   generators_with_rotation <- list(
     sharp = create_landscape_sharp_treeline,
-    diffuse = create_landscape_diffuse_treeline
+    diffuse = create_landscape_diffuse_treeline,
+    curvy = create_landscape_curvy_treeline,
+    fingers = create_landscape_fingers
   )
 
   for (name in names(generators_with_rotation)) {
@@ -264,10 +270,273 @@ test_that("create_landscape_diffuse_treeline handles multiple edge cases togethe
 })
 
 # Pattern-specific edge cases: Curvy treeline ---------------------------------
-# Add curvy-specific edge cases here when needed
 
-# Pattern-specific edge cases: Other patterns ---------------------------------
-# Add pattern-specific edge cases as needed
+# Boundary values for sine_length ---------------------------------------------
+test_that("create_landscape_curvy_treeline handles sine_length boundary values", {
+  # Very small wavelength
+  l_small_length <- create_landscape_curvy_treeline(
+    width = 20,
+    height = 20,
+    sine_length = 1
+  )
+  expect_true(is_landscape(l_small_length))
+
+  # Very large wavelength (larger than landscape)
+  l_large_length <- create_landscape_curvy_treeline(
+    width = 20,
+    height = 20,
+    sine_length = 1000
+  )
+  expect_true(is_landscape(l_large_length))
+
+  # Wavelength equal to width
+  l_equal_length <- create_landscape_curvy_treeline(
+    width = 50,
+    height = 50,
+    sine_length = 50
+  )
+  expect_true(is_landscape(l_equal_length))
+})
+
+# Boundary values for sine_height ---------------------------------------------
+test_that("create_landscape_curvy_treeline handles sine_height boundary values", {
+  # Zero amplitude (should be straight line)
+  l_zero_height <- create_landscape_curvy_treeline(
+    width = 20,
+    height = 20,
+    sine_height = 0
+  )
+  expect_true(is_landscape(l_zero_height))
+
+  # Very large amplitude
+  l_large_height <- create_landscape_curvy_treeline(
+    width = 20,
+    height = 20,
+    sine_height = 50
+  )
+  expect_true(is_landscape(l_large_height))
+
+  # Amplitude larger than height (should trigger warning)
+  expect_warning(
+    l_extreme_height <- create_landscape_curvy_treeline(
+      width = 20,
+      height = 20,
+      sine_height = 15
+    ),
+    "large relative to"
+  )
+  expect_true(is_landscape(l_extreme_height))
+})
+
+# Combined edge cases ---------------------------------------------------------
+test_that("create_landscape_curvy_treeline handles multiple edge cases together", {
+  # Small landscape + extreme treeline + extreme sine params + max random + rotation
+  l_extreme <- create_landscape_curvy_treeline(
+    width = 5,
+    height = 5,
+    treeline_position = 0.999,
+    sine_length = 1,
+    sine_height = 10,
+    random_spots = c(0.5, 0.5),
+    rotation = 45
+  )
+
+  expect_true(is_landscape(l_extreme))
+  expect_equal(terra::ncol(l_extreme$data), 5)
+  expect_equal(terra::nrow(l_extreme$data), 5)
+})
+
+# Pattern-specific edge cases: Curvy fingers treeline -------------------------
+
+# Boundary values for sine_length_mean and sine_length_sd ---------------------
+test_that("create_landscape_fingers handles sine_length boundary values", {
+  # Very small mean wavelength
+  l_small_length <- create_landscape_fingers(
+    width = 20,
+    height = 20,
+    sine_length_mean = 1,
+    sine_length_sd = 0
+  )
+  expect_true(is_landscape(l_small_length))
+
+  # Very large mean wavelength (larger than landscape)
+  l_large_length <- create_landscape_fingers(
+    width = 20,
+    height = 20,
+    sine_length_mean = 1000,
+    sine_length_sd = 0
+  )
+  expect_true(is_landscape(l_large_length))
+
+  # Wavelength equal to width
+  l_equal_length <- create_landscape_fingers(
+    width = 50,
+    height = 50,
+    sine_length_mean = 50,
+    sine_length_sd = 0
+  )
+  expect_true(is_landscape(l_equal_length))
+
+  # Zero standard deviation (constant wavelength)
+  l_zero_sd <- create_landscape_fingers(
+    sine_length_mean = 20,
+    sine_length_sd = 0
+  )
+  expect_true(is_landscape(l_zero_sd))
+
+  # Large standard deviation
+  l_large_sd <- create_landscape_fingers(
+    sine_length_mean = 20,
+    sine_length_sd = 50
+  )
+  expect_true(is_landscape(l_large_sd))
+})
+
+# Boundary values for sine_height_mean and sine_height_sd --------------------
+test_that("create_landscape_fingers handles sine_height boundary values", {
+  # Zero mean amplitude (should be straight line)
+  l_zero_height <- create_landscape_fingers(
+    width = 20,
+    height = 20,
+    sine_height_mean = 0,
+    sine_height_sd = 0
+  )
+  expect_true(is_landscape(l_zero_height))
+
+  # Very large mean amplitude
+  l_large_height <- create_landscape_fingers(
+    width = 20,
+    height = 20,
+    sine_height_mean = 50,
+    sine_height_sd = 0
+  )
+  expect_true(is_landscape(l_large_height))
+
+  # Amplitude larger than height (should trigger warning)
+  expect_warning(
+    l_extreme_height <- create_landscape_fingers(
+      width = 20,
+      height = 20,
+      sine_height_mean = 15,
+      sine_height_sd = 0
+    ),
+    "large relative to"
+  )
+  expect_true(is_landscape(l_extreme_height))
+
+  # Zero standard deviation (constant amplitude)
+  l_zero_sd <- create_landscape_fingers(
+    sine_height_mean = 5,
+    sine_height_sd = 0
+  )
+  expect_true(is_landscape(l_zero_sd))
+
+  # Large standard deviation relative to mean
+  l_large_sd <- create_landscape_fingers(
+    sine_height_mean = 5,
+    sine_height_sd = 20
+  )
+  expect_true(is_landscape(l_large_sd))
+})
+
+# Boundary values for treeline_position --------------------------------------
+test_that("create_landscape_fingers handles treeline_position boundary values", {
+  # Exactly 0 - transition at top
+  l_zero <- create_landscape_fingers(
+    width = 20,
+    height = 20,
+    treeline_position = 0,
+    sine_height_mean = 2
+  )
+  expect_true(is_landscape(l_zero))
+
+  # Exactly 1 - transition at bottom
+  l_one <- create_landscape_fingers(
+    width = 20,
+    height = 20,
+    treeline_position = 1,
+    sine_height_mean = 2
+  )
+  expect_true(is_landscape(l_one))
+
+  # Very close to boundaries
+  l_near_zero <- create_landscape_fingers(treeline_position = 0.001)
+  l_near_one <- create_landscape_fingers(treeline_position = 0.999)
+
+  expect_true(is_landscape(l_near_zero))
+  expect_true(is_landscape(l_near_one))
+})
+
+# Boundary values for random_spots -------------------------------------------
+test_that("create_landscape_fingers handles random_spots boundary values", {
+  # All zeros (no randomness)
+  l_no_random <- create_landscape_fingers(random_spots = c(0, 0))
+  expect_true(is_landscape(l_no_random))
+
+  # Maximum randomness
+  l_max_random <- create_landscape_fingers(
+    width = 20,
+    height = 20,
+    random_spots = c(1, 1)
+  )
+  expect_true(is_landscape(l_max_random))
+
+  # One direction only
+  l_flip_1_to_0 <- create_landscape_fingers(random_spots = c(1, 0))
+  l_flip_0_to_1 <- create_landscape_fingers(random_spots = c(0, 1))
+
+  expect_true(is_landscape(l_flip_1_to_0))
+  expect_true(is_landscape(l_flip_0_to_1))
+})
+
+# Combined edge cases ---------------------------------------------------------
+test_that("create_landscape_fingers handles multiple edge cases together", {
+  # Small landscape + extreme treeline + extreme sine params + max random + rotation
+  l_extreme <- create_landscape_fingers(
+    width = 5,
+    height = 5,
+    treeline_position = 0.999,
+    sine_length_mean = 1,
+    sine_length_sd = 2,
+    sine_height_mean = 10,
+    sine_height_sd = 5,
+    random_spots = c(0.5, 0.5),
+    rotation = 45
+  )
+
+  expect_true(is_landscape(l_extreme))
+  expect_equal(terra::ncol(l_extreme$data), 5)
+  expect_equal(terra::nrow(l_extreme$data), 5)
+})
+
+# Test variability in patterns ------------------------------------------------
+test_that("create_landscape_fingers produces varying patterns", {
+  set.seed(123)
+
+  # Generate multiple landscapes with same parameters
+  landscapes <- replicate(
+    5,
+    {
+      create_landscape_fingers(
+        width = 50,
+        height = 50,
+        sine_length_mean = 15,
+        sine_length_sd = 5,
+        sine_height_mean = 8,
+        sine_height_sd = 3
+      )
+    },
+    simplify = FALSE
+  )
+
+  # Extract values from each
+  vals_list <- lapply(landscapes, function(l) terra::values(l$data))
+
+  # Check that landscapes are not identical (due to randomness)
+  expect_false(all(sapply(2:5, function(i) {
+    identical(vals_list[[1]], vals_list[[i]])
+  })))
+})
 
 # Edge cases for create_training_landscapes ----------------------------------
 test_that("create_training_landscapes handles errors gracefully", {

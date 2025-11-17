@@ -23,7 +23,7 @@ ecotone_types = c(
   "random",
   "sharp",
   "diffuse",
-  "curvyfingers",
+  "fingers",
   "clustered",
   "sine_bands"
 )

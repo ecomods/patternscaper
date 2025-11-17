@@ -5,7 +5,7 @@
 #' parameter.
 #'
 #' @param pattern Character. pattern of landscape to generate: "random", "sharp", "diffuse",
-#'        "curvy", "fingers", "curvyfingers", "scattered", "sine_bands", "clusters", "spots", "gaps",
+#'        "curvy", "fingers", "sine_bands", "clusters", "spots", "gaps",
 #'        "banded", "labyrinth"
 #' @param name Character. Optional name for the landscape (default: NULL).
 #' @param custom_pattern Character. Optional pattern for the landscape (default: NULL uses the default
@@ -26,10 +26,6 @@
 #' \code{\link{create_landscape_curvy_treeline}} for "curvy" pattern parameters
 #'
 #' \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
-#'
-#' \code{\link{create_landscape_curvyfingers}} for "curvyfingers" pattern parameters
-#'
-#' \code{\link{create_landscape_scattered_trees}} for "scattered" pattern parameters
 #'
 #' \code{\link{create_landscape_clustered_trees}} for "clusters" pattern parameters
 #'
@@ -57,8 +53,8 @@
 #' )
 #'
 #' # Create a modified landscape with custom parameters
-#' scattered_modified <- create_landscape(
-#'   "scattered",
+#' diffuse_modified <- create_landscape(
+#'   "diffuse",
 #'   treeline_position = 0.3,
 #'   scatter_density = 0.7,
 #'   scatter_zone_prop = 0.2
@@ -82,8 +78,6 @@ create_landscape <- function(
     "diffuse",
     "curvy",
     "fingers",
-    "curvyfingers",
-    "scattered",
     "clustered",
     "sine_bands",
     "spots",
@@ -128,8 +122,6 @@ create_landscape <- function(
     diffuse = create_landscape_diffuse_treeline(...),
     curvy = create_landscape_curvy_treeline(...),
     fingers = create_landscape_fingers(...),
-    curvyfingers = create_landscape_curvyfingers(...),
-    scattered = create_landscape_scattered_trees(...),
     clustered = create_landscape_clustered_trees(...),
     sine_bands = create_landscape_sine_bands(...),
     spots = create_landscape_spots(...),
@@ -193,8 +185,6 @@ create_training_landscapes <- function(
     "diffuse",
     "curvy",
     "fingers",
-    "curvyfingers",
-    "scattered",
     "clustered",
     "sine_bands",
     "spots",
@@ -222,8 +212,6 @@ create_training_landscapes <- function(
     "diffuse",
     "curvy",
     "fingers",
-    "curvyfingers",
-    "scattered",
     "clustered",
     "sine_bands",
     "spots",
@@ -257,23 +245,10 @@ create_training_landscapes <- function(
       ),
       fingers = list(
         treeline_position = c(0.3, 0.6),
-        num_fingers = c(3, 8),
-        finger_width = c(0.03 * width, 0.1 * width),
-        finger_length_prop = c(0.3, 1),
-        finger_length_sd = c(0, 0.6),
-        bend = c(TRUE, FALSE)
-      ),
-      curvyfingers = list(
-        treeline_position = c(0.3, 0.6),
         sine_length_mean = c(0.2 * width, 0.4 * width),
         sine_length_sd = c(0, 0.6 * width),
         sine_height_mean = c(0.03 * height, 0.2 * height),
         sine_height_mean = c(0, 0.3 * height)
-      ),
-      scattered = list(
-        treeline_position = c(0.4, 0.6),
-        scatter_density = c(0.1, 0.8),
-        scatter_zone_prop = c(0.1, 0.4)
       ),
       clustered = list(
         treeline_position = c(0.4, 0.6), # numeric

@@ -54,7 +54,6 @@ training_landscapes <- create_training_landscapes(
     "diffuse",
     "curvy",
     "fingers",
-    "scattered",
     "clustered",
     "sine_bands"
   ),

@@ -9,7 +9,6 @@
   - Sharp treelines
   - Diffuse treelines
   - Curvy treelines
-  - Scattered tree patterns
   - Clustered vegetation
   - Finger-like extensions
   - Sine wave bands

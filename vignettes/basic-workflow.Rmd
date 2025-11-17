@@ -45,7 +45,6 @@ The following patterns are generated:
 
 - sharp, diffuse or curvy boundaries
 - fingers
-- scattered
 - clustered 
 - parallel sine bands
 
