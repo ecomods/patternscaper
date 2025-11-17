@@ -34,7 +34,7 @@ n_ecotones <- length(ecotone_types)
 #----------------------------------------------------------
 #generate all training landscapes
 training_landscapes <- create_training_landscapes(
-  n = 100,
+  n = 200, #ntraining[1],
   patterns = ecotone_types
 )
 
@@ -48,9 +48,12 @@ training_metrics <- calculate_landscape_metrics(
 best_10 <- evaluate_landscape_metrics(
   metrics = training_metrics,
   method = "coeffvar_all",
-  metrics_number = 10
+  metrics_number = 20,
+#  correlation_threshold = 0.95,
+#  verbose=T
 )
 
+best_10
 #best_10_plus <- c(best_10,"shape_mn")
 #best_10_plus
 
@@ -63,7 +66,7 @@ best_10 <- evaluate_landscape_metrics(
 model_neuralnet <- train_nn_neuralnet(
   metrics = training_metrics,
   metrics_selected = best_10,
-  hidden_layers = nlayers[[2]],
+  hidden_layers = c(8,8),#nlayers[[2]],
   cv_method = "none"
 )
 
