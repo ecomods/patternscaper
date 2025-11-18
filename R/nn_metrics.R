@@ -351,6 +351,21 @@ apply_nn_metrics <- function(
       ))
     )
 
+  # Check if we have more predictor columns than features in data
+  # This can happen if the user trained the model on class level metrics, but
+  # only inputs values for one class and not the other
+  predictor_names <- colnames(predictors)
+  missing_predictors <- setdiff(predictor_names, nn_model$features)
+
+  # Remove the additional predictors that are no features in the model
+  if (length(missing_predictors) > 0) {
+    cli::cli_warn(
+      "Input landscapes contain additional metrics not used by the model: {paste(missing_predictors, collapse = ', ')}. These will be ignored."
+    )
+    predictors <- predictors |>
+      dplyr::select(dplyr::all_of(nn_model$features))
+  }
+
   # Scale the metrics using the same parameters as during training
   predictors_scaled <- scale(
     predictors,
