@@ -61,14 +61,6 @@ evaluate_landscape_metrics <- function(
     )
   }
 
-  # If the level is not landscape, throw an error as other levels are not
-  # supported right now
-  if (any(metrics$level != "landscape")) {
-    cli::cli_abort(
-      "Only metrics calculated at the landscape level are supported. Please recalculate metrics with {.code level = 'landscape'}"
-    )
-  }
-
   if (!is.numeric(metrics_number) || metrics_number < 1) {
     cli::cli_abort("metrics_number must be a positive integer")
   }
