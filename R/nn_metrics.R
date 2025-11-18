@@ -283,12 +283,29 @@ apply_nn_metrics <- function(
   model <- nn_model$model
   scaling_params <- nn_model$scaling
   class_names <- nn_model$classes
+  level <- nn_model$features_level
+
+  # features are the metrics. We need to extract the correct metric name
+  # if the level is not landscape
+  if (level == "landscape") {
+    features <- nn_model$features
+  } else if (level == "class") {
+    # remove the last _part after last underscore
+    features <- gsub("_[^_]+$", "", nn_model$features)
+  } else if (level == "patch") {
+    # remove the last two _parts after last two underscores
+    features <- gsub("_[^_]+_[^_]+$", "", nn_model$features)
+  } else {
+    cli::cli_abort(
+      "Unsupported features_level '{level}' in nn_model"
+    )
+  }
 
   # Calculate the necessary metrics for the input landscape(s)
   metrics <- calculate_landscape_metrics(
     landscapes = landscapes,
-    metrics = nn_model$features,
-    level = nn_model$features_level
+    metrics = features,
+    level = level
   )
 
   # Convert metrics to wide format with 1 row per landscape

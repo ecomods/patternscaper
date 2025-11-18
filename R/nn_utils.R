@@ -30,7 +30,7 @@ metrics_to_wide <- function(metrics, return_only_metrics = FALSE) {
     dplyr::mutate(
       metric = stringr::str_remove(
         paste0(metric, "_", class, "_", id),
-        "_NA_NA"
+        "_NA"
       )
     ) |>
     dplyr::select(dplyr::any_of(c(
