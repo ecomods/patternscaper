@@ -17,7 +17,8 @@
 #'   the generated landscape data and parameters.
 #'
 #' @seealso
-#' \code{\link{create_landscape_random}} for "random" pattern parameters
+#' \code{\link{create_landscape_random}} for "random" pattern parameters. "bare" and "dense" are aliases but
+#'     are produced either with low or high tree probabilities
 #'
 #' \code{\link{create_landscape_sharp_treeline}} for "sharp" pattern parameters
 #'
@@ -74,6 +75,8 @@
 create_landscape <- function(
   pattern = c(
     "random",
+    "bare",
+    "dense",
     "sharp",
     "diffuse",
     "curvy",
@@ -118,6 +121,8 @@ create_landscape <- function(
   landscape <- switch(
     matched,
     random = create_landscape_random(...),
+    bare = create_landscape_random(...),
+    dense = create_landscape_random(...),
     sharp = create_landscape_sharp_treeline(...),
     diffuse = create_landscape_diffuse_treeline(...),
     curvy = create_landscape_curvy_treeline(...),
@@ -133,6 +138,12 @@ create_landscape <- function(
   # Set the name if provided
   if (!is.null(name)) {
     landscape <- set_landscape_name(landscape, name)
+  }
+  # If the pattern is bare or dense, set the pattern accordingly
+  # because it uses the random landscape function which sets the pattern to
+  # random
+  if (matched %in% c("bare", "dense")) {
+    landscape <- set_landscape_pattern(landscape, matched)
   }
   # Set a pattern different from the default if requested
   if (!is.null(custom_pattern)) {
@@ -181,6 +192,8 @@ create_training_landscapes <- function(
   n = 50,
   patterns = c(
     "random",
+    "bare",
+    "dense",
     "sharp",
     "diffuse",
     "curvy",
@@ -208,6 +221,8 @@ create_training_landscapes <- function(
   # Filter out invalid patterns
   valid_patterns <- c(
     "random",
+    "bare",
+    "dense",
     "sharp",
     "diffuse",
     "curvy",
@@ -230,6 +245,12 @@ create_training_landscapes <- function(
     params_list <- list(
       random = list(
         tree_prop = c(0.1, 0.9)
+      ),
+      bare = list(
+        tree_prop = c(0, 0.2)
+      ),
+      dense = list(
+        tree_prop = c(0.8, 1)
       ),
       sharp = list(
         treeline_position = c(0.2, 0.8)
