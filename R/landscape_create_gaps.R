@@ -7,6 +7,7 @@
 #' @param n_spots Integer. Number of non-vegetated spots
 #' @param spot_radius Integer. Radius of each spot
 #' @param noise_radius_sd Numeric. If random effects, which standard deviation (Default is 0 - no random effects)
+#' @param radius_noise_fraction Numeric (between 0 and 1). 0 means no noise, the higher the larger the circle with noise
 #' @param spot_jitter Integer. Should the regular spots be slightly shifted - how many cells (Default is 0 - no jitter)
 #' @param invert_landscape Boolean. Invert vegetated and unvegetated areas.
 #'     Switches the landscape from vegetated with bare spots to bare with vegetated spots (default: TRUE).
@@ -36,6 +37,7 @@ create_landscape_gaps <- function(
   n_spots = 15,
   spot_radius = 5,
   noise_radius_sd = 0,
+  radius_noise_fraction = 0,
   spot_jitter = 0,
   invert_landscape = TRUE,
   regular_spots = FALSE,
@@ -48,6 +50,7 @@ create_landscape_gaps <- function(
     n_spots = n_spots,
     spot_radius = spot_radius,
     noise_radius_sd = noise_radius_sd,
+    radius_noise_fraction = radius_noise_fraction,
     spot_jitter = spot_jitter,
     invert_landscape = invert_landscape,
     regular_spots = regular_spots,

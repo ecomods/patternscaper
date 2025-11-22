@@ -2,7 +2,7 @@
 #'
 #' Generates a landscape with banded and spotted vegetation (labyrinth),
 #' this mimics Turing patterns.
-#'
+#'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAASCAYAAABB7B6eAAABDklEQVR4Xp2UMaoCMRRFFcHCxsrO0tba/i/ADfwV/A2ICFYW7kAY/CSZOGYgnVjbW9taugFbG8f3OpO5A3lzIFh4Dg4ON53VelPp3NWOsW7R+SLVq1FVVbchfhtz/JV6EO99vyF+Ket+pB4ky/ywIX5qXUylHmRfFGMUm9w9+DupB/k/HCY4Lu9K+ZHUgyhbzlBM55pl54HUgxhTzlGscneil92TehBljn9xyMfYctfGq0HSMo748BO38QJ4PCS9UcSjk3oBPBqSXijisUm9AB6L5tGAiEcm9QJ4JDwWFMVDS/EC+FdJuqEovipSvAD+v0i6oCi+7FK8AH7T2roCRfF1neLVIGmLIvpctvFiPtxv6UGYMompAAAAAElFTkSuQmCC
 #' @param width Integer. Number of columns in the landscape (default: 100).
 #' @param height Integer. Number of rows in the landscape (default: 100).
 #' @param rotation Numeric. Number between 0 and 360 giving the degree of landscape rotation (default: 0).
@@ -53,23 +53,27 @@ create_landscape_labyrinth <- function(
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
   # Make coordinates (required by gen_perlin())
+  aspect <- width_actual / height_actual
   grid <- ambient::long_grid(
-    x = seq(0, 1, length.out = width_actual),
+    x = seq(0, aspect, length.out = width_actual),
     y = seq(0, 1, length.out = height_actual)
   )
-
   # Calculate Perlin Noise
-  grid$noise <- ambient::gen_perlin(
+  grid$noise <- fbm_perlin(
     x = grid$x,
     y = grid$y,
     frequency = frequency,
+    octaves = 6
   )
 
   # Normalize to 0-1
   n <- (grid$noise - min(grid$noise)) / (max(grid$noise) - min(grid$noise))
 
+  th <- median(n)
+
   # First: strong threshold
-  landscape_vec <- ifelse(n > veg_threshold, 1, 0)
+  landscape_vec <- ifelse(n > th, 1, 0)
+#  landscape_vec <- ifelse(n > veg_threshold, 1, 0)
 
   # Then fuzziness around boundary
   fuzzy_band <- abs(n - veg_threshold) < band_fuzziness
@@ -111,4 +115,23 @@ create_landscape_labyrinth <- function(
       octaves = octaves
     )
   )
+}
+
+#help function
+fbm_perlin <- function(x, y, frequency, octaves = 6, lacunarity = 2, gain = 0.5) {
+  total <- 0
+  amp <- 1
+  freq <- frequency
+
+  for (i in seq_len(octaves)) {
+    total <- total + amp * ambient::gen_perlin(
+      x = x * freq,
+      y = y * freq
+    )
+
+    freq <- freq * lacunarity
+    amp  <- amp  * gain
+  }
+
+  total
 }

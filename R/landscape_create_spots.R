@@ -7,6 +7,7 @@
 #' @param n_spots Integer. Number of non-vegetated spots
 #' @param spot_radius Integer. Radius of each spot
 #' @param noise_radius_sd Numeric. If random effects, which standard deviation (Default is 0 - no random effects)
+#' @param radius_noise_fraction Numeric (between 0 and 1). 0 means no noise, the higher the larger the circle with noise
 #' @param spot_jitter Integer. Should the regular spots be slightly shifted - how many cells (Default is 0 - no jitter)
 #' @param invert_landscape Boolean. Invert vegetated and unvegetated areas.
 #'     Switches the landscape from vegetated with bare spots to bare with vegetated spots (default: FALSE).
@@ -43,6 +44,7 @@ create_landscape_spots <- function(
   n_spots = 15,
   spot_radius = 5,
   noise_radius_sd = 0,
+  radius_noise_fraction = 0,
   spot_jitter = 0,
   invert_landscape = FALSE,
   regular_spots = FALSE,
@@ -103,28 +105,33 @@ create_landscape_spots <- function(
     center_row <- cluster_centers$row[i]
     center_col <- cluster_centers$col[i]
 
-    # Create noise if requested
-    noise <- rnorm(1, mean = 0, sd = noise_radius_sd)
-    # Add noise to the radius, but if radius drops below 0, set it to 1
-    adjusted_radius <- max(1, spot_radius + noise)
+    # --- Radius-Variation ---
+    if (noise_radius_sd > 0) {
+      adjusted_radius <- max(1, spot_radius + rnorm(1, 0, noise_radius_sd))
+    } else {
+      adjusted_radius <- spot_radius
+    }
 
-    row_min <- max(1, center_row - adjusted_radius)
-    row_max <- min(height, center_row + adjusted_radius)
-    col_min <- max(1, center_col - adjusted_radius)
-    col_max <- min(width, center_col + adjusted_radius)
+    # --- Pixelgrenzen bestimmen ---
+    row_min <- max(1, floor(center_row - adjusted_radius))
+    row_max <- min(height, ceiling(center_row + adjusted_radius))
+    col_min <- max(1, floor(center_col - adjusted_radius))
+    col_max <- min(width, ceiling(center_col + adjusted_radius))
 
-    # Fill in cluster with decreasing probability based on distance from center
-    for (r in floor(row_min):ceiling(row_max)) {
-      for (c in floor(col_min):ceiling(col_max)) {
-        # Calculate distance
-        dx <- (c - center_col)
-        dy <- (r - center_row)
-        dist <- sqrt(dx^2 + dy^2)
+    # --- Sauber gefüllter Kreis ---
+    for (r in row_min:row_max) {
+      for (c in col_min:col_max) {
 
-        # Probability decreases with distance
-        if (dist <= adjusted_radius) {
-          prob <- 1 - (dist / adjusted_radius)^2
-          if (runif(1) < prob) {
+        dx <- c - center_col
+        dy <- r - center_row
+        dist <- sqrt(dx*dx + dy*dy)
+
+        noise_start <- adjusted_radius*(1-radius_noise_fraction)
+        if (dist <= noise_start) {
+          mat[r, c] <- 1
+        } else if (dist <= adjusted_radius){
+          prop_veg <- (1 - 0.5 * (dist - noise_start) / (adjusted_radius-noise_start))
+          if (runif(1) < prop_veg){
             mat[r, c] <- 1
           }
         }
