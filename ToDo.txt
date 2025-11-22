@@ -1,4 +1,12 @@
 #---------------------------------------------------------------------
+#Spots 19.11.2025
+#---------------------------------------------------------------------
+Fehlermeldung und keine Landschaft wird erzeugt (wiederholt, aber nicht immer):
+Error generating landscape 46 of pattern 'spots':
+more cluster centers than distinct data points.
+
+
+#---------------------------------------------------------------------
 #Parameter random_spots in allen create_landscape Funktionen für Ecotones
 #---------------------------------------------------------------------
 Der Parameter ist eine Liste z.B. c(0.1,0.05)
