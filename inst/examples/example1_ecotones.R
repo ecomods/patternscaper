@@ -3,6 +3,8 @@
 #--------------------------------------------------------------------
 devtools::load_all()
 
+library(ggplot2)
+
 set.seed(123)
 #--------------------------------------------------------------------
 # General landscape types and their titles
@@ -10,13 +12,12 @@ set.seed(123)
 
 # only those types that refer to ecotones (or random)
 ecotone_types = c(
-  "random",
   "sharp",
   "diffuse",
-  "curvy",
-  "fingers",
   "clustered",
-  "sine_bands"
+  "curvyfingers",
+  "sine_bands",
+  "random"
 )
 n_ecotones <- length(ecotone_types)
 
@@ -43,7 +44,7 @@ plot_landscape_list(
 
 #generate all training landscapes
 ecotone_landscapes <- create_training_landscapes(
-  n = 200,
+  n = 100,
   patterns = ecotone_types
 )
 
@@ -59,21 +60,31 @@ plot_landscape_list(ecotone_landscapes[1:20])
 
 # calculate landscape metrics on the landscape level
 landscape_metrics <- calculate_landscape_metrics(
-  ecotone_landscapes,
+  landscapes = ecotone_landscapes,
   level = "landscape"
 )
 
-# find the 10 best metrics based on coefficient of variation
+# find the 10 best metrics
 best_10 <- evaluate_landscape_metrics(
-  calculated_metrics = landscape_metrics,
-  metrics_number = 10
+  metrics = landscape_metrics,
+  metrics_number = 10,
+  method = "kruskal_p"
 )
 
 # plot the 10 best metrics
-plot_metrics(
-  calculated_metrics = landscape_metrics,
+p_metrics <- plot_metrics(
+  metrics = landscape_metrics,
   selected_metrics = best_10
 )
+
+ggsave(
+  filename = paste0("Supp_plot_metrics.jpg",sep=""),
+  plot = p_metrics,
+  width = 8,
+  height = 6,
+  dpi = 300
+)
+
 
 #--------------------------------------------------------------------
 # Train neural network with landscapes metrics
@@ -89,15 +100,17 @@ model_ecotones_lm <- train_nn_metrics(
 )
 
 # look at the model object
-model_ecotones_lm
+model_ecotones_lm$performance$accuracy
 
 #--------------------------------------------------------------------
 # Look at classification results
 # -------------------------------------------------------------------
 
+#DOES NOT WORK FOR ALL PLOTS
+
 # visualize classification results
 # get all plots in a list
-all_plots <- plot_classification_results(model_ecotones_lm, return_all = TRUE)
+all_plots <- plot_classification_results(model_ecotones_lm, return_all = T)
 patchwork::wrap_plots(all_plots)
 
 # Or create individual plots with the wrapper
@@ -119,13 +132,10 @@ plot_classified_landscapes(
 
 # generate test landscapes
 test_landscapes_ecotone <- create_training_landscapes(
-  n = 50,
+  n = 100,
   add_rotation = TRUE,
   patterns = ecotone_types
 )
-
-# plot first 20 landscapes
-plot_landscape_list(test_landscapes_ecotone[1:20])
 
 # apply the model to the test landscapes
 validation_results_ecotone_lm <- apply_nn_metrics(

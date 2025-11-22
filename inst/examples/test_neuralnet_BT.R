@@ -19,36 +19,39 @@ nlayers <- list(c(8), c(10, 8), c(9, 8, 7))
 
 
 # only those types that refer to ecotones (or random)
-ecotone_types = c(
-  "random",
-  "sharp",
-  "diffuse",
-  "fingers",
-  "clustered",
-  "sine_bands"
+selforganization_types = c(
+  "bare",
+  "spots",
+  "labyrinth",
+  "gaps",
+  "dense"
 )
-n_ecotones <- length(ecotone_types)
+n_so_types <- length(selforganization_types)
 
 #----------------------------------------------------------
 #training landscapes and their metrics
 #----------------------------------------------------------
 #generate all training landscapes
 training_landscapes <- create_training_landscapes(
-  n = 200, #ntraining[1],
-  patterns = ecotone_types
+  n = 100, #ntraining[1],
+  patterns = selforganization_types
 )
+
+#plot_landscape_list(training_landscapes)
 
 # calculate landscape metrics on the landscape level
 training_metrics <- calculate_landscape_metrics(
   training_landscapes,
-  level = "landscape"
+  level = "class"
 )
+
+training_metrics <- training_metrics %>% filter(class == 0)
 
 # find the 10 best metrics based on coefficient of variation
 best_10 <- evaluate_landscape_metrics(
   metrics = training_metrics,
   method = "coeffvar_all",
-  metrics_number = 20,
+  metrics_number = 10,
 #  correlation_threshold = 0.95,
 #  verbose=T
 )
@@ -66,28 +69,28 @@ best_10
 model_neuralnet <- train_nn_neuralnet(
   metrics = training_metrics,
   metrics_selected = best_10,
-  hidden_layers = c(8,8),#nlayers[[2]],
-  cv_method = "none"
+  hidden_layers = c(8,8)#nlayers[[2]],
+#  cv_method = "none"
 )
 
 # look at the model object
 #model_neuralnet
 
-plot(model_neuralnet$model, rep = "best")
+#plot(model_neuralnet$model, rep = "best")
 
 # Plot the wrong landscapes from the cross-validation
-plot_classified_landscapes(
-  classification = model_neuralnet$performance$validation_results,
-  landscapes = training_landscapes,
-  only_misclassified = TRUE
-)
+#plot_classified_landscapes(
+#  classification = model_neuralnet$performance$validation_results,
+#  landscapes = training_landscapes,
+#  only_misclassified = F
+#)
 
 #----------------------------------------------------------
 #test landscapes and their metrics (only 10 best)
 #----------------------------------------------------------
 test_landscapes <- create_training_landscapes(
   n = 100,
-  patterns = ecotone_types
+  patterns = selforganization_types
 )
 
 #--------------------------------------------------------------------
