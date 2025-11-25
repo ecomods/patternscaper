@@ -516,8 +516,9 @@ plot_classified_landscapes <- function(
   }
 
   # Validate landscape count matches classification results
+  # Warn the user i this is not the case
   if (length(landscapes) != nrow(classification)) {
-    cli::cli_abort(c(
+    cli::cli_warn(c(
       "Length mismatch between landscapes and classification results.",
       "x" = "landscapes has {length(landscapes)} element{?s}",
       "x" = "classification has {nrow(classification)} row{?s}",
