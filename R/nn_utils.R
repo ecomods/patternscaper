@@ -28,7 +28,7 @@ metrics_to_wide <- function(metrics, return_only_metrics = FALSE) {
   # Build metric names with class/patch ID when not at landscape level
   metrics <- metrics |>
     dplyr::mutate(
-      metric = stringr::str_remove(
+      metric = stringr::str_remove_all(
         paste0(metric, "_", class, "_", id),
         "_NA"
       )
