@@ -61,6 +61,14 @@ evaluate_landscape_metrics <- function(
     )
   }
 
+  # Check if the level is landscape. If not abort and tell the user that
+  # currently only the landscape level is supported
+  if (!unique(metrics$level) == "landscape") {
+    cli::cli_abort(
+      "Currently only metrics calculated at the landscape level are supported. Please calculate metrics at the landscape level."
+    )
+  }
+
   if (!is.numeric(metrics_number) || metrics_number < 1) {
     cli::cli_abort("metrics_number must be a positive integer")
   }
