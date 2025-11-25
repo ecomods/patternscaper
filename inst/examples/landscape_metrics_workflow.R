@@ -126,3 +126,44 @@ plot_classified_landscapes(
   landscapes = test_landscapes,
   only_misclassified = FALSE
 )
+
+# ----------------------------------------------------------------------------#
+# Example of a workflow on class level metrics -------------------------------
+# ----------------------------------------------------------------------------#
+landscapes <- create_training_landscapes(
+  n = 10,
+  patterns = c("banded", "spots", "labyrinth"),
+  add_rotation = TRUE
+)
+
+# Calculate class-level metrics
+class_metrics <- calculate_landscape_metrics(
+  landscapes,
+  level = "class"
+)
+
+# find the 10 best metrics based on coefficient of variation
+best_10_class <- evaluate_landscape_metrics(
+  metrics = class_metrics,
+  metrics_number = 10,
+  verbose = TRUE
+)
+
+# Train a network -----------------------------------------------
+model_class <- train_nn_metrics(
+  metrics = class_metrics,
+  metrics_selected = best_10,
+  cv_method = "loo"
+)
+
+# Apply the model ----------------------------------------------------
+validation_results <- apply_nn_metrics(
+  landscapes = test_landscapes,
+  nn_model = model_class
+)
+
+plot_classified_landscapes(
+  classification = validation_results$predictions,
+  landscapes = test_landscapes,
+  only_misclassified = FALSE
+)
