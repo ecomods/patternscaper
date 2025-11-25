@@ -2,7 +2,6 @@
 #'
 #' Generates a landscape with banded and spotted vegetation (labyrinth),
 #' this mimics Turing patterns.
-#'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAASCAYAAABB7B6eAAABDklEQVR4Xp2UMaoCMRRFFcHCxsrO0tba/i/ADfwV/A2ICFYW7kAY/CSZOGYgnVjbW9taugFbG8f3OpO5A3lzIFh4Dg4ON53VelPp3NWOsW7R+SLVq1FVVbchfhtz/JV6EO99vyF+Ket+pB4ky/ywIX5qXUylHmRfFGMUm9w9+DupB/k/HCY4Lu9K+ZHUgyhbzlBM55pl54HUgxhTzlGscneil92TehBljn9xyMfYctfGq0HSMo748BO38QJ4PCS9UcSjk3oBPBqSXijisUm9AB6L5tGAiEcm9QJ4JDwWFMVDS/EC+FdJuqEovipSvAD+v0i6oCi+7FK8AH7T2roCRfF1neLVIGmLIvpctvFiPtxv6UGYMompAAAAAElFTkSuQmCC
 #' @param width Integer. Number of columns in the landscape (default: 100).
 #' @param height Integer. Number of rows in the landscape (default: 100).
 #' @param rotation Numeric. Number between 0 and 360 giving the degree of landscape rotation (default: 0).
@@ -117,7 +116,20 @@ create_landscape_labyrinth <- function(
   )
 }
 
-#help function
+#' Calculates fractal Perlin noise value for coordinates x,y
+#'
+#' Generates a fractal Brownian motion (fBm) noise value by combining multiple
+#' layers (octaves) of Perlin noise at increasing frequencies and decreasing
+#' amplitudes. Used internally for generating labyrinth structures.
+#'
+#' @param x Numeric. x-coordinate at which to evaluate the noise.
+#' @param y Numeric. y-coordinate at which to evaluate the noise.
+#' @param frequency Numeric. Base frequency for the first octave of Perlin noise.
+#' @param octaves Integer. Number of noise layers to combine. Default: 6.
+#' @param lacunarity Numeric. Multiplier applied to the frequency at each octave. Default: 2.
+#' @param gain Numeric. Multiplier applied to the amplitude at each octave. Default: 0.5.
+#'
+#' @return A combined noise value for coordinate x,y
 fbm_perlin <- function(x, y, frequency, octaves = 6, lacunarity = 2, gain = 0.5) {
   total <- 0
   amp <- 1
