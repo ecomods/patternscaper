@@ -1,4 +1,13 @@
 #---------------------------------------------------------------------
+evaluate_landscape_metrics 25.11.2025
+#---------------------------------------------------------------------
+Wenn man "class" als level angegeben hat, MUSS man vorab entweder auf
+0 oder 1 filtern.
+Ansonsten Fehlermeldung:
+Error in stats::cor(dplyr::select(tidyr::pivot_wider(dplyr::select(metrics,  :
+  'x' must be numeric
+
+#---------------------------------------------------------------------
 #Spots 19.11.2025
 #---------------------------------------------------------------------
 Fehlermeldung und keine Landschaft wird erzeugt (wiederholt, aber nicht immer):
