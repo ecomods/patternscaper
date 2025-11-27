@@ -47,7 +47,7 @@ best_10 <- evaluate_landscape_metrics(
 # There are different methods to select the best metrics
 best_10 <- evaluate_landscape_metrics(
   metrics = landscape_metrics,
-  method = "mean_groups", # one of: "coeffvar_all", "lin_mod_r2", "mean_groups", "fisher_score", "kruskal_p"
+  method = "kruskal_p", # one of: "coeffvar_all", "lin_mod_r2", "mean_groups", "fisher_score", "kruskal_p"
   metrics_number = 10
 )
 
@@ -99,20 +99,16 @@ test_landscapes <- create_training_landscapes(
 plot_landscape_list(test_landscapes)
 
 # or generate just a single landscape
-test_cluster <- create_landscape(
-  pattern = "clustered",
+test_banded <- create_landscape(
+  pattern = "banded",
   width = 100,
-  height = 100,
-  treeline_position = 0.5,
-  num_clusters = 10,
-  cluster_radius = 5,
-  rotation = 0
+  height = 100
 )
-plot_landscape(test_cluster)
+plot_landscape(test_banded)
 
 # Apply the model to the test landscape(s)
 apply_nn_metrics(
-  landscapes = test_cluster,
+  landscapes = test_banded,
   nn_model = model
 )
 
@@ -122,7 +118,7 @@ validation_results <- apply_nn_metrics(
 )
 
 plot_classified_landscapes(
-  classification = validation_results$predictions,
+  classification = validation_results,
   landscapes = test_landscapes,
   only_misclassified = FALSE
 )
@@ -130,12 +126,6 @@ plot_classified_landscapes(
 # ----------------------------------------------------------------------------#
 # Example of a workflow on class level metrics -------------------------------
 # ----------------------------------------------------------------------------#
-landscapes <- create_training_landscapes(
-  n = 10,
-  patterns = c("banded", "spots", "labyrinth"),
-  add_rotation = TRUE
-)
-
 # Calculate class-level metrics
 class_metrics <- calculate_landscape_metrics(
   landscapes,
@@ -146,13 +136,13 @@ class_metrics <- calculate_landscape_metrics(
 best_10_class <- evaluate_landscape_metrics(
   metrics = class_metrics,
   metrics_number = 10,
-  verbose = TRUE
+  method = "kruskal_p"
 )
 
 # Train a network -----------------------------------------------
 model_class <- train_nn_metrics(
   metrics = class_metrics,
-  metrics_selected = best_10,
+  metrics_selected = best_10_class,
   cv_method = "loo"
 )
 
@@ -163,7 +153,7 @@ validation_results <- apply_nn_metrics(
 )
 
 plot_classified_landscapes(
-  classification = validation_results$predictions,
+  classification = validation_results,
   landscapes = test_landscapes,
   only_misclassified = FALSE
 )
