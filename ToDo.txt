@@ -1,4 +1,22 @@
 #---------------------------------------------------------------------
+# exampel1_ecotones.R am Ende 27.11.2025
+#---------------------------------------------------------------------
+#show landscapes that are not classified correctly
+#SELINA, please check, gives an error message
+plot_classified_landscapes(
+  classification = validation_results_ecotone_lm,
+  landscapes = test_landscapes_ecotone,
+  only_misclassified = TRUE
+)
+
+Error in `plot_classified_landscapes()`:
+! Invalid classification results.
+✖ Must be a data frame with columns: landscape_id, actual_class,
+  predicted_class, confidence
+ℹ Instead got: <list>
+
+
+#---------------------------------------------------------------------
 evaluate_landscape_metrics 25.11.2025
 #---------------------------------------------------------------------
 Wenn man "class" als level angegeben hat, MUSS man vorab entweder auf
