@@ -50,13 +50,31 @@ create_landscape_spots <- function(
   regular_spots = FALSE,
   rotation = 0
 ) {
+  n_spots <- as.integer(n_spots)
+  # Validate and adjust n_spots for regular placement
   if (regular_spots) {
-    #hexangon for spots (to make them more regular)
+    # Calculate maximum possible spots based on hexagonal grid
+    spacing <- 2 * spot_radius * 1.1
+    n_cols <- ceiling(width / spacing)
+    n_rows <- ceiling(height / (sqrt(3) / 2 * spacing))
+    max_spots <- n_cols * n_rows
+
+    if (n_spots > max_spots) {
+      cli::cli_alert_warning(c(
+        "Regular spot placement requested {n_spots} spots but only ~{max_spots} positions fit.",
+        "i" = "Adjusting to maximum feasible spots. Consider decreasing {.arg spot_radius}."
+      ))
+      n_spots <- max_spots
+    }
+  }
+
+  if (regular_spots) {
+    # Generate hexagonal grid for regular spot placement
     spacing <- 2 * spot_radius * 1.1
     n_cols <- ceiling(width / spacing)
     n_rows <- ceiling(height / (sqrt(3) / 2 * spacing))
 
-    grid_points <- data.frame()
+    grid_points <- data.frame(row = numeric(), col = numeric())
     for (r in 0:(n_rows - 1)) {
       for (c in 0:(n_cols - 1)) {
         x <- c * spacing + spot_radius
@@ -70,11 +88,24 @@ create_landscape_spots <- function(
       }
     }
 
-    #chose regularly distributed centers with k-means
-    km <- kmeans(grid_points, centers = n_spots, nstart = 10)
-    cluster_centers <- as.data.frame(km$centers)
+    n_available <- nrow(grid_points)
 
-    #some jittering if wanted
+    # Final adjustment if actual grid points differ from estimate
+    if (n_spots > n_available) {
+      n_spots <- n_available
+    }
+
+    # Use k-means for subset selection
+    if (n_spots < n_available) {
+      km <- suppressWarnings(
+        kmeans(grid_points, centers = n_spots, nstart = 5, iter.max = 50)
+      )
+      cluster_centers <- as.data.frame(km$centers)
+    } else {
+      cluster_centers <- grid_points
+    }
+
+    # Apply jitter if requested
     if (spot_jitter > 0) {
       cluster_centers$row <- pmin(
         height,
@@ -121,17 +152,17 @@ create_landscape_spots <- function(
     # --- Sauber gefüllter Kreis ---
     for (r in row_min:row_max) {
       for (c in col_min:col_max) {
-
         dx <- c - center_col
         dy <- r - center_row
-        dist <- sqrt(dx*dx + dy*dy)
+        dist <- sqrt(dx * dx + dy * dy)
 
-        noise_start <- adjusted_radius*(1-radius_noise_fraction)
+        noise_start <- adjusted_radius * (1 - radius_noise_fraction)
         if (dist <= noise_start) {
           mat[r, c] <- 1
-        } else if (dist <= adjusted_radius){
-          prop_veg <- (1 - 0.5 * (dist - noise_start) / (adjusted_radius-noise_start))
-          if (runif(1) < prop_veg){
+        } else if (dist <= adjusted_radius) {
+          prop_veg <- (1 -
+            0.5 * (dist - noise_start) / (adjusted_radius - noise_start))
+          if (runif(1) < prop_veg) {
             mat[r, c] <- 1
           }
         }
