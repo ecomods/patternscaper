@@ -160,6 +160,18 @@ calculate_landscape_metrics <- function(
     .progress = TRUE
   )
 
+  # If the level is class, add the class id to the metric column
+  # and store the original metric name in a new column
+  all_results <- all_results |>
+    mutate(
+      metric_name = metric,
+      metric = ifelse(
+        level == "class",
+        paste0(metric, "_", class),
+        metric
+      )
+    )
+
   # Reorganize columns for better readability
   all_results <- all_results |>
     dplyr::relocate(
@@ -170,6 +182,7 @@ calculate_landscape_metrics <- function(
       layer,
       class,
       id,
+      metric_name,
       metric,
       value,
       warnings
