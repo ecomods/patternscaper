@@ -63,9 +63,9 @@ evaluate_landscape_metrics <- function(
 
   # Check if the level is landscape. If not abort and tell the user that
   # currently only the landscape level is supported
-  if (!unique(metrics$level) == "landscape") {
+  if (!unique(metrics$level) %in% c("landscape", "class")) {
     cli::cli_abort(
-      "Currently only metrics calculated at the landscape level are supported. Please calculate metrics at the landscape level."
+      "Currently only metrics calculated at the landscape or class level are supported. Please calculate metrics at the landscape level."
     )
   }
 
