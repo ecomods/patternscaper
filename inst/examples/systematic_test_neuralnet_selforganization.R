@@ -8,7 +8,7 @@ devtools::load_all()
 #--------------------------------------------------------------------
 
 #number of training landscapes
-training <- c(50,100,150)
+training <- c(50, 100, 150)
 ntraining <- length(training)
 
 # ecotone types
@@ -20,7 +20,7 @@ selforganization_types = c(
   "dense"
 )
 n_so_types <- length(selforganization_types)
-n_input_metrics <- c(7,10,13)
+n_input_metrics <- c(7, 10, 13)
 n_n_input_metrics <- length(n_input_metrics)
 
 nlayers <- 3
@@ -55,7 +55,17 @@ for (r in 5:6) {
   )
 
   for (t in 1:ntraining) {
-    cat("Start - Training with ", training[t], " landscapes (", t, " of ", ntraining, ")", sep = "", "\n")
+    cat(
+      "Start - Training with ",
+      training[t],
+      " landscapes (",
+      t,
+      " of ",
+      ntraining,
+      ")",
+      sep = "",
+      "\n"
+    )
 
     #same landscapes for different architectures of the neural net
     training_landscapes <- create_training_landscapes(
@@ -68,15 +78,13 @@ for (r in 5:6) {
       training_landscapes,
       level = metric_level
     )
-    if(metric_level=="class") {
+    if (metric_level == "class") {
       training_metrics <- training_metrics %>% filter(class == 0)
     }
 
     # find the 10 best metrics based on coefficient of variation
     for (m in 1:nmetrics_choice) {
       for (nm in 1:n_n_input_metrics) {
-
-
         best_names <- paste0(
           "T",
           training[t],
@@ -109,29 +117,52 @@ for (r in 5:6) {
         #----------------------------------------------------------
 
         for (l in 1:nlayers) {
-
-          adjuster <- n_input_metrics[nm]/5
+          adjuster <- n_input_metrics[nm] / 5
 
           layers <- list(
-            round(adjuster*c(3),0),
-            round(adjuster*c(4),0),
-            round(adjuster*c(5),0)
+            round(adjuster * c(3), 0),
+            round(adjuster * c(4), 0),
+            round(adjuster * c(5), 0)
           )
 
           layer_name <- paste(layers[[l]], collapse = "-")
           cat(
-            "T: ", training[t], " (", t, " of ", ntraining,
-            "), L: ", layer_name, " (", l, " of ", nlayers,
-            "), M: ", metrics_choice[m], " (", m, " of ", nmetrics_choice,
-            "), IM: ",n_input_metrics[nm], " (", nm, " of ",n_n_input_metrics,
-            "), R: ", r, " of ", nreps,
-            sep = "","\n"
+            "T: ",
+            training[t],
+            " (",
+            t,
+            " of ",
+            ntraining,
+            "), L: ",
+            layer_name,
+            " (",
+            l,
+            " of ",
+            nlayers,
+            "), M: ",
+            metrics_choice[m],
+            " (",
+            m,
+            " of ",
+            nmetrics_choice,
+            "), IM: ",
+            n_input_metrics[nm],
+            " (",
+            nm,
+            " of ",
+            n_n_input_metrics,
+            "), R: ",
+            r,
+            " of ",
+            nreps,
+            sep = "",
+            "\n"
           )
 
           # train a network
           model_neuralnet <- tryCatch(
             {
-              train_nn_neuralnet(
+              train_nn_metrics(
                 metrics = training_metrics,
                 metrics_selected = best_ones,
                 hidden_layers = layers[[l]],
@@ -159,7 +190,7 @@ for (r in 5:6) {
 
           validation <- tryCatch(
             {
-              apply_nn_neuralnet(
+              apply_nn_metrics(
                 landscapes = test_landscapes,
                 nn_model = model_neuralnet
               )
@@ -212,8 +243,15 @@ for (r in 5:6) {
       }
     }
     #notice: could think about removing results_list after being saved
-    file_name <- paste0(result_path,"NeuralNet_SelfOrga_Test_Rep",r,"_T",training[t],".RData",sep = "")
+    file_name <- paste0(
+      result_path,
+      "NeuralNet_SelfOrga_Test_Rep",
+      r,
+      "_T",
+      training[t],
+      ".RData",
+      sep = ""
+    )
     save(results_list, file = file_name)
   }
 }
-

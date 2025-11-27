@@ -67,12 +67,12 @@ best_ones_l <- evaluate_landscape_metrics(
 #----------------------------------------------------------
 
 # train a network
-model_neuralnet_c <- train_nn_neuralnet(
-    metrics = training_metrics_c,
-    metrics_selected = best_ones_c,
-    hidden_layers = 1
+model_neuralnet_c <- train_nn_metrics(
+  metrics = training_metrics_c,
+  metrics_selected = best_ones_c,
+  hidden_layers = 1
 )
-model_neuralnet_l <- train_nn_neuralnet(
+model_neuralnet_l <- train_nn_metrics(
   metrics = training_metrics_l,
   metrics_selected = best_ones_l,
   hidden_layers = 1
@@ -83,14 +83,13 @@ model_neuralnet_l <- train_nn_neuralnet(
 # Test neural network model
 #--------------------------------------------------------------------
 
-validation_c <- apply_nn_neuralnet(
+validation_c <- apply_nn_metrics(
   landscapes = test_landscapes,
   nn_model = model_neuralnet_c
 )
-validation_l <- apply_nn_neuralnet(
+validation_l <- apply_nn_metrics(
   landscapes = test_landscapes,
   nn_model = model_neuralnet_l
 )
 model_neuralnet_c$model$model.list$variables
 model_neuralnet_l$model$model.list$variables
-

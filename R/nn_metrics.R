@@ -11,7 +11,7 @@
 #'
 #' @return List. Trained neural network model and associated metadata.
 #' @export
-train_nn_neuralnet <- function(
+train_nn_metrics <- function(
   metrics,
   metrics_selected = NULL,
   cv_method = "k-fold",
@@ -250,7 +250,7 @@ train_nn_neuralnet <- function(
 #'     \item{performance}{Performance metrics from evaluate_cv_performance()}
 #'   }
 #' @export
-apply_nn_neuralnet <- function(
+apply_nn_metrics <- function(
   landscapes,
   nn_model,
   return_performance = FALSE
