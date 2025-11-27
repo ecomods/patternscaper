@@ -522,7 +522,7 @@ plot_classified_landscapes <- function(
       "Length mismatch between landscapes and classification results.",
       "x" = "landscapes has {length(landscapes)} element{?s}",
       "x" = "classification has {nrow(classification)} row{?s}",
-      "i" = "These must match exactly for proper landscape_id indexing"
+      "i" = "Using landscape_id to index the landscapes"
     ))
   }
 
