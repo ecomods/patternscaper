@@ -24,31 +24,40 @@ create_landscape_clustered_trees(
 
 \item{treeline_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
 
-\item{random_spots}{List of Numerics. Probability or random spots of vegetation in the other vegetation type (default: c(0,0))}
+\item{random_spots}{Numeric vector of length 2. Probabilities for flipping
+cells: `[prob(1→0), prob(0→1)]`. Used to add noise to the landscape
+(default: c(0,0)).}
 
 \item{num_clusters}{Integer. Number of cluster centers (default: 10).}
 
 \item{cluster_radius}{Numeric. Radius of clusters in pixels (default: 5).}
 
-\item{scatter_zone_prop}{Numeric. Proportion of height for scatter zone (default: 0.3).}
+\item{scatter_zone_prop}{Numeric. Proportion of height for scatter zone
+measured downward from treeline (0-1, default: 0.3).}
 
-\item{elongation_x}{Numeric. Horizontal elongation factor for clusters (default: 1).}
+\item{elongation_x}{Numeric. Horizontal elongation factor for clusters.
+Values > 1 create horizontally elongated clusters (default: 1).}
 
-\item{elongation_y}{Numeric. Vertical elongation factor for clusters (default: 1).}
+\item{elongation_y}{Numeric. Vertical elongation factor for clusters.
+Values > 1 create vertically elongated clusters (default: 1).}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
 \value{
-A landscape object with pattern "clustered" containing the generated landscape data and parameters.
+A landscape object with pattern "clustered" containing the generated
+  landscape data and parameters.
 }
 \description{
 Generates a binary landscape with clustered trees below a treeline.
+Trees are arranged in clusters within a scatter zone that extends below
+the treeline. Clusters can be elongated in x or y directions to create
+elliptical patterns.
 }
 \examples{
 # Default clustered trees
 clustered_default <- create_landscape_clustered_trees()
 
-# Modified clustered trees with more elongated clusters
+# Modified clustered trees with horizontally elongated clusters
 clustered_modified <- create_landscape_clustered_trees(
   treeline_position = 0.2,
   num_clusters = 8,
@@ -58,7 +67,7 @@ clustered_modified <- create_landscape_clustered_trees(
   elongation_y = 0.5
 )
 
-# With rotation
+# Rotated landscape with mixed parameters
 clustered_rotated <- create_landscape_clustered_trees(
   num_clusters = 20,
   cluster_radius = 2,

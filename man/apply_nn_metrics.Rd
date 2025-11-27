@@ -2,7 +2,7 @@
 % Please edit documentation in R/nn_metrics.R
 \name{apply_nn_metrics}
 \alias{apply_nn_metrics}
-\title{Apply Neural Network for Landscape Classification}
+\title{Apply Neural Network (from neuralnet package) for Landscape Classification}
 \usage{
 apply_nn_metrics(landscapes, nn_model, return_performance = FALSE)
 }

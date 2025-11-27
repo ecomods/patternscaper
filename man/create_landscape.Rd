@@ -5,8 +5,8 @@
 \title{Create a Landscape with Specified Pattern}
 \usage{
 create_landscape(
-  pattern = c("random", "sharp", "diffuse", "curvy", "fingers", "curvyfingers",
-    "scattered", "clustered", "sine_bands", "spots", "gaps", "banded", "labyrinth"),
+  pattern = c("random", "bare", "dense", "sharp", "diffuse", "curvy", "fingers",
+    "clustered", "sine_bands", "spots", "gaps", "banded", "labyrinth"),
   name = NULL,
   custom_pattern = NULL,
   ...
@@ -14,7 +14,7 @@ create_landscape(
 }
 \arguments{
 \item{pattern}{Character. pattern of landscape to generate: "random", "sharp", "diffuse",
-"curvy", "fingers", "curvyfingers", "scattered", "sine_bands", "clusters", "spots", "gaps",
+"curvy", "fingers", "sine_bands", "clusters", "spots", "gaps",
 "banded", "labyrinth"}
 
 \item{name}{Character. Optional name for the landscape (default: NULL).}
@@ -48,8 +48,8 @@ random_modified <- create_landscape(
 )
 
 # Create a modified landscape with custom parameters
-scattered_modified <- create_landscape(
-  "scattered",
+diffuse_modified <- create_landscape(
+  "diffuse",
   treeline_position = 0.3,
   scatter_density = 0.7,
   scatter_zone_prop = 0.2
@@ -67,7 +67,8 @@ sine_bands_rotated <- create_landscape(
 
 }
 \seealso{
-\code{\link{create_landscape_random}} for "random" pattern parameters
+\code{\link{create_landscape_random}} for "random" pattern parameters. "bare" and "dense" are aliases but
+    are produced either with low or high tree probabilities
 
 \code{\link{create_landscape_sharp_treeline}} for "sharp" pattern parameters
 
@@ -76,10 +77,6 @@ sine_bands_rotated <- create_landscape(
 \code{\link{create_landscape_curvy_treeline}} for "curvy" pattern parameters
 
 \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
-
-\code{\link{create_landscape_curvyfingers}} for "curvyfingers" pattern parameters
-
-\code{\link{create_landscape_scattered_trees}} for "scattered" pattern parameters
 
 \code{\link{create_landscape_clustered_trees}} for "clusters" pattern parameters
 

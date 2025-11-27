@@ -6,8 +6,8 @@
 \usage{
 create_training_landscapes(
   n = 50,
-  patterns = c("random", "sharp", "diffuse", "curvy", "fingers", "curvyfingers",
-    "scattered", "clustered", "sine_bands", "spots", "gaps", "banded", "labyrinth"),
+  patterns = c("random", "bare", "dense", "sharp", "diffuse", "curvy", "fingers",
+    "clustered", "sine_bands", "spots", "gaps", "banded", "labyrinth"),
   width = 100,
   height = 100,
   add_rotation = TRUE,

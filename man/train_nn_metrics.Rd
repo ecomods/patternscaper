@@ -2,16 +2,16 @@
 % Please edit documentation in R/nn_metrics.R
 \name{train_nn_metrics}
 \alias{train_nn_metrics}
-\title{Train a Neural Network for Landscape Classification}
+\title{Train a multi-layer Neural Network for Landscape Classification}
 \usage{
 train_nn_metrics(
   metrics,
   metrics_selected = NULL,
   cv_method = "k-fold",
   cv_folds = 5,
-  hidden_neurons = 5,
-  decay = 0.01,
-  maxit = 500,
+  hidden_layers = c(3, 3),
+  threshold = 0.01,
+  stepmax = 1e+05,
   model_path = NULL,
   verbose = TRUE
 )
@@ -21,32 +21,16 @@ train_nn_metrics(
 
 \item{metrics_selected}{Character vector. Names of metrics to use as features.}
 
-\item{cv_method}{Character. Cross-validation method: "none", "k-fold", or "loo" (leave-one-out) (default: "k-fold").}
+\item{hidden_layers}{List of Integers. Number of neurons in each hidden layer (default: c(3,3)).}
 
-\item{cv_folds}{Integer. Number of cross-validation folds when cv_method="k-fold" (default: 5).}
+\item{threshold}{Numeric. Threshold for the partial derivatives of the error function as stopping criteria in neuralnet. Default: 0.01,}
 
-\item{hidden_neurons}{Integer. Number of neurons in hidden layer (default: 5).}
-
-\item{decay}{Numeric. Weight decay parameter for nnet (default: 0.01).}
-
-\item{maxit}{Integer. Maximum iterations for training (default: 500).}
-
-\item{model_path}{Character. Path to save model (default: NULL means that
-model is not saved).}
-
-\item{verbose}{Logical. Whether to print cross-validation results (default: TRUE).}
+\item{stepmax}{= Ingeger. Maximum steps for the training of the neural network in neuralnet. Reaching this maximum leads to a stop of the neural network's training process.Default: 1e+05,}
 }
 \value{
-List containing:
-  \describe{
-    \item{model}{Trained nnet object}
-    \item{features}{Character vector of feature names used}
-    \item{features_level}{Metric aggregation level (e.g., "landscape")}
-    \item{scaling}{List with center and scale parameters for normalization}
-    \item{classes}{Character vector of class names}
-    \item{performance}{Performance metrics from cross-validation (NULL if cv_method = "none")}
-  }
+List. Trained neural network model and associated metadata.
 }
 \description{
-Trains a neural network model to classify landscapes based on metrics.
+Trains a multi-layer neural network model to classify landscapes
+based on metrics. Uses neuralnet package.
 }

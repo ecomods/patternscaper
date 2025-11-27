@@ -10,6 +10,7 @@ create_landscape_gaps(
   n_spots = 15,
   spot_radius = 5,
   noise_radius_sd = 0,
+  radius_noise_fraction = 0,
   spot_jitter = 0,
   invert_landscape = TRUE,
   regular_spots = FALSE,
@@ -26,6 +27,8 @@ create_landscape_gaps(
 \item{spot_radius}{Integer. Radius of each spot}
 
 \item{noise_radius_sd}{Numeric. If random effects, which standard deviation (Default is 0 - no random effects)}
+
+\item{radius_noise_fraction}{Numeric (between 0 and 1). 0 means no noise, the higher the larger the circle with noise}
 
 \item{spot_jitter}{Integer. Should the regular spots be slightly shifted - how many cells (Default is 0 - no jitter)}
 

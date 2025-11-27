@@ -10,6 +10,7 @@ create_landscape_curvy_treeline(
   treeline_position = 0.5,
   sine_length = 20,
   sine_height = 5,
+  random_spots = c(0, 0),
   rotation = 0
 )
 }
@@ -23,6 +24,8 @@ create_landscape_curvy_treeline(
 \item{sine_length}{Numeric. Wavelength of sinusoidal curve in pixels (default: 20).}
 
 \item{sine_height}{Numeric. Amplitude of sinusoidal curve in pixels (default: 5).}
+
+\item{random_spots}{Numeric vector of length 2. Probabilities for flipping cells: [1→0, 0→1] (default: c(0,0)).}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
