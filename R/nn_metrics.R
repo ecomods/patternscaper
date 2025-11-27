@@ -276,16 +276,14 @@ apply_nn_metrics <- function(
   class_names <- nn_model$classes
   level <- nn_model$features_level
 
-  # features are the metrics. We need to extract the correct metric name
+  # features are the metrics with information on the class level (if at class level).
+  # We need to extract the correct metric name
   # if the level is not landscape
   if (level == "landscape") {
-    features <- nn_model$features
+    metrics_to_calculate <- nn_model$features
   } else if (level == "class") {
     # remove the last _part after last underscore
-    features <- gsub("_[^_]+$", "", nn_model$features)
-  } else if (level == "patch") {
-    # remove the last two _parts after last two underscores
-    features <- gsub("_[^_]+_[^_]+$", "", nn_model$features)
+    metrics_to_calculate <- gsub("_[^_]+$", "", nn_model$features)
   } else {
     cli::cli_abort(
       "Unsupported features_level '{level}' in nn_model"
@@ -295,9 +293,15 @@ apply_nn_metrics <- function(
   # Calculate the necessary metrics for the input landscape(s)
   metrics <- calculate_landscape_metrics(
     landscapes = landscapes,
-    metrics = features,
+    metrics = metrics_to_calculate,
     level = level
   )
+
+  # Subset the metrics to get only those needed for prediction (if we have level
+  # class, we calculated metrics for both classes and we need to remove the
+  # metrics for the classes that we do not want to include)
+  metrics <- metrics |>
+    dplyr::filter(metric %in% nn_model$features)
 
   # Convert metrics to wide format with 1 row per landscape
   metrics_wide <- metrics_to_wide(metrics)
