@@ -406,7 +406,7 @@ apply_nn_metrics <- function(
   predictions <- dplyr::bind_cols(landscape_info, predictions)
 
   # Evaluate performance if actual classes are available -----------------------
-  if ("actual_class" %in% colnames(predictions)) {
+  if ("actual_class" %in% colnames(predictions) & return_performance) {
     # Check if actual classes match model's trained classes
     unique_actual <- unique(predictions$actual_class)
     unknown_classes <- setdiff(unique_actual, class_names)
