@@ -15,7 +15,7 @@ ecotone_types = c(
   "sharp",
   "diffuse",
   "clustered",
-  "curvyfingers",
+  "fingers",
   "sine_bands",
   "random"
 )
@@ -74,11 +74,12 @@ best_10 <- evaluate_landscape_metrics(
 # plot the 10 best metrics
 p_metrics <- plot_metrics(
   metrics = landscape_metrics,
-  selected_metrics = best_10
+  selected_metrics = best_10,
+  force = TRUE
 )
 
 ggsave(
-  filename = paste0("Supp_plot_metrics.jpg",sep=""),
+  filename = paste0("Supp_plot_metrics.jpg", sep = ""),
   plot = p_metrics,
   width = 8,
   height = 6,
@@ -96,6 +97,7 @@ ggsave(
 model_ecotones_lm <- train_nn_metrics(
   metrics = landscape_metrics,
   metrics_selected = best_10,
+  hidden_layers = 6,
   cv_method = "k-fold"
 )
 
@@ -106,22 +108,9 @@ model_ecotones_lm$performance$accuracy
 # Look at classification results
 # -------------------------------------------------------------------
 
-#DOES NOT WORK FOR ALL PLOTS
-
-# visualize classification results
-# get all plots in a list
-all_plots <- plot_classification_results(model_ecotones_lm, return_all = T)
-patchwork::wrap_plots(all_plots)
-
-# Or create individual plots with the wrapper
-plot_classification_results(model_ecotones_lm, plot_type = "confusion")
-plot_classification_results(model_ecotones_lm, plot_type = "probabilities")
-plot_classification_results(model_ecotones_lm, plot_type = "confidence")
-plot_classification_results(model_ecotones_lm, plot_type = "misclassifications")
-
 # Plot the landscapes that were misclassified
 plot_classified_landscapes(
-  classification = model_ecotones_lm$validation_results,
+  classification = model_ecotones_lm$performance$validation_results,
   landscapes = ecotone_landscapes,
   only_misclassified = TRUE
 )
@@ -140,14 +129,15 @@ test_landscapes_ecotone <- create_training_landscapes(
 # apply the model to the test landscapes
 validation_results_ecotone_lm <- apply_nn_metrics(
   landscapes = test_landscapes_ecotone,
-  nn_model = model_ecotones_lm
+  nn_model = model_ecotones_lm,
+  return_performance = TRUE
 )
 
 validation_results_ecotone_lm
 
 #show landscapes that are not classified correctly
 plot_classified_landscapes(
-  classification = validation_results_ecotone_lm$predictions,
+  classification = validation_results_ecotone_lm,
   landscapes = test_landscapes_ecotone,
   only_misclassified = TRUE
 )
@@ -196,4 +186,4 @@ result_pics <- apply_nn_metrics(
 
 #show predicted type
 pic_names[i]
-result_pics$predictions
+result_pics
