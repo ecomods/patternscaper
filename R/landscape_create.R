@@ -266,15 +266,15 @@ create_training_landscapes <- function(
       ),
       fingers = list(
         treeline_position = c(0.3, 0.6),
-        sine_length_mean = c(0.2 * width, 0.4 * width),
-        sine_length_sd = c(0, 0.6 * width),
-        sine_height_mean = c(0.03 * height, 0.2 * height),
-        sine_height_mean = c(0, 0.3 * height)
+        sine_length_mean = c(0.2, 0.4) * width,
+        sine_length_sd = c(0.1, 0.6) * width,
+        sine_height_mean = c(0.03, 0.2) * height,
+        sine_height_sd = c(0.1 , 0.3) * height
       ),
       clustered = list(
         treeline_position = c(0.4, 0.6), # numeric
-        num_clusters = c(5, 15), # integer
-        cluster_radius = c(3, 7), # integer
+        num_clusters = c(5, 12), # integer
+        cluster_radius = c(5, 10), # integer
         scatter_zone_prop = c(0.2, 1), # numeric
         elongation_x = c(0.5, 1.5), # numeric
         elongation_y = c(0.5, 1.5) # numeric
@@ -282,22 +282,22 @@ create_training_landscapes <- function(
       sine_bands = list(
         treeline_position = c(0.3, 0.5), # numeric
         band_zone_prop = c(0.2, 0.5), # numeric
-        band_thickness = c(2, 7), #integer
-        band_spacing = c(5, 15), #integer
+        band_thickness = c(2, 5), #integer
+        band_spacing = c(7, 15), #integer
         frequency = c(0.1, 0.3), # numeric
         amplitude = c(0, 6), # integer
-        noise_sd = c(0, 1.5) # numeric
+        noise_sd = c(0, 1) # numeric
       ),
       spots = list(
-        n_spots = c(10, 30), # integer
-        spot_radius = c(5, 12), # integer
+        n_spots = c(5, 20), # integer
+        spot_radius = c(8, 12), # integer
         noise_radius_sd = c(0, 2), # numeric
         regular_spots = c(TRUE, FALSE), #Bool
         invert_landscape = c(FALSE)
       ),
       gaps = list(
-        n_spots = c(10, 30), # integer
-        spot_radius = c(5, 12), # integer
+        n_spots = c(5, 20), # integer
+        spot_radius = c(8, 12), # integer
         noise_radius_sd = c(0, 2), # numeric
         regular_spots = c(TRUE, FALSE), #Bool
         invert_landscape = c(TRUE)
@@ -316,7 +316,7 @@ create_training_landscapes <- function(
         frequency = c(2, 5), # integer
         veg_threshold = c(0.4, 0.5), # numeric
         band_fuzziness = c(0, 0.1), #numeric
-        octaves = c(1, 3) #integer
+        octaves = c(2, 6) #integer
       )
     )
   }
