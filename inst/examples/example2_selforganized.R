@@ -116,7 +116,8 @@ test_landscapes_selforga <- create_training_landscapes(
 # apply the model to the test landscapes
 validation_results_selforga_lm <- apply_nn_metrics(
   landscapes = test_landscapes_selforga,
-  nn_model = model_selforga_lm
+  nn_model = model_selforga_lm,
+  return_performance = TRUE
 )
 
 validation_results_selforga_lm
@@ -127,4 +128,3 @@ plot_classified_landscapes(
   landscapes = test_landscapes_selforga,
   only_misclassified = TRUE
 )
-
