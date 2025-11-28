@@ -36,6 +36,12 @@ landscapes_manuscript <- create_training_landscapes(
 order_index <- match(sapply(landscapes_manuscript, function(x) x$pattern), ecotone_types)
 landscapes_manuscript <- landscapes_manuscript[order(order_index)]
 landscapes_manuscript[[5]]$pattern <- "bands"
+
+fig_sub_letter <- c("a","b","c","d","e","f")
+for(i in 1:6){
+  landscapes_manuscript[[i]]$pattern <- paste("(", fig_sub_letter[i], ") ", landscapes_manuscript[[i]]$pattern,sep="")
+}
+
 # plot all landscapes
 fig_ecotones <- plot_landscape_list(
   landscapes_manuscript,
