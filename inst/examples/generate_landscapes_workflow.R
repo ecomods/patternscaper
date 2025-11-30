@@ -353,7 +353,6 @@ spots_inverted <- create_landscape(
   name = "Inverted",
   n_spots = 15,
   spot_radius = 8,
-  invert_landscape = TRUE,
   noise_radius_sd = 2
 )
 
@@ -361,11 +360,20 @@ spots_regular <- create_landscape(
   "spots",
   name = "Regular",
   n_spots = 15,
-  spot_radius = 8,
+  spot_radius = 20,
   noise_radius_sd = 0,
   regular_spots = TRUE
 )
 
+many_spots <- create_training_landscapes(
+  patterns = "spots",
+  n = 20
+)
+plot_landscape_list(many_spots)
+
+# which spots are regular
+regular <- purrr::map_lgl(many_spots, \(x) x$params$regular_spots)
+plot_landscape_list(many_spots[regular])
 
 # Plot all spots together
 plot_landscape_list(
