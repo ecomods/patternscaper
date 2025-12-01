@@ -55,6 +55,59 @@ create_landscape_sine_bands <- function(
   noise_sd = 0,
   rotation = 0
 ) {
+  # Validate common parameters
+  validate_dimensions(width = width, height = height)
+  validate_rotation(rotation = rotation)
+  validate_treeline_position(treeline_position = treeline_position)
+
+  # Validate band_zone_prop
+  if (!is.numeric(band_zone_prop) || band_zone_prop < 0 || band_zone_prop > 1) {
+    cli::cli_abort(c(
+      "{.arg band_zone_prop} must be between 0 and 1.",
+      "x" = "You supplied {.val {band_zone_prop}}"
+    ))
+  }
+
+  # Validate band_thickness
+  if (!is.numeric(band_thickness) || band_thickness <= 0) {
+    cli::cli_abort(c(
+      "{.arg band_thickness} must be a positive number.",
+      "x" = "You supplied {.val {band_thickness}}"
+    ))
+  }
+
+  # Validate band_spacing
+  if (!is.numeric(band_spacing) || band_spacing <= 0) {
+    cli::cli_abort(c(
+      "{.arg band_spacing} must be a positive number.",
+      "x" = "You supplied {.val {band_spacing}}"
+    ))
+  }
+
+  # Validate frequency
+  if (!is.numeric(frequency) || frequency < 0) {
+    cli::cli_abort(c(
+      "{.arg frequency} must be a non-negative number.",
+      "x" = "You supplied {.val {frequency}}"
+    ))
+  }
+
+  # Validate amplitude
+  if (!is.numeric(amplitude) || amplitude < 0) {
+    cli::cli_abort(c(
+      "{.arg amplitude} must be a non-negative number.",
+      "x" = "You supplied {.val {amplitude}}"
+    ))
+  }
+
+  # Validate noise_sd
+  if (!is.numeric(noise_sd) || noise_sd < 0) {
+    cli::cli_abort(c(
+      "{.arg noise_sd} must be a non-negative number.",
+      "x" = "You supplied {.val {noise_sd}}"
+    ))
+  }
+
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
@@ -77,13 +130,14 @@ create_landscape_sine_bands <- function(
 
   # Create tree bands below treeline in the band zone
   band_zone <- round(height_actual * band_zone_prop)
-  # check if the band zone is large enough for the given band spacing,
-  # otherwise warn the user and set band_zone to 0
-  if (band_zone > height_actual - max(base_treeline)) {
-    print(paste("band zone:", band_zone))
-    print(paste("Available space:", height_actual - max(base_treeline)))
-    print(paste("Max base treeline:", max(base_treeline)))
-    warning("Band zone too small for the given band spacing. No bands drawn.")
+
+  # Check if the band zone is large enough for the given band spacing
+  available_space <- height_actual - max(base_treeline)
+  if (band_zone > available_space) {
+    cli::cli_warn(c(
+      "Band zone ({band_zone} px) exceeds available space ({available_space} px) below treeline.",
+      "i" = "No bands will be drawn. Consider decreasing {.arg band_zone_prop} or {.arg treeline_position}."
+    ))
     band_zone <- 0
   }
 
