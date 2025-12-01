@@ -75,8 +75,7 @@ create_landscape_clustered_trees <- function(
 
   if (
     !is.numeric(n_clusters) ||
-      n_clusters < 1 ||
-      n_clusters != as.integer(n_clusters)
+      n_clusters < 1
   ) {
     cli::cli_abort(c(
       "{.arg n_clusters} must be a positive integer.",

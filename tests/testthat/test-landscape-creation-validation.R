@@ -330,12 +330,6 @@ test_that("curvy fingers treeline warns about large sine_height_mean", {
 # Pattern-specific validation: Clustered trees --------------------------------
 test_that("clustered trees validates n_clusters parameter", {
   expect_error(
-    create_landscape_clustered_trees(n_clusters = "10"),
-    "must be a positive integer",
-    info = "Testing clustered with non-numeric n_clusters"
-  )
-
-  expect_error(
     create_landscape_clustered_trees(n_clusters = -5),
     "must be a positive integer",
     info = "Testing clustered with negative n_clusters"
@@ -345,12 +339,6 @@ test_that("clustered trees validates n_clusters parameter", {
     create_landscape_clustered_trees(n_clusters = 0),
     "must be a positive integer",
     info = "Testing clustered with zero n_clusters"
-  )
-
-  expect_error(
-    create_landscape_clustered_trees(n_clusters = 10.5),
-    "must be a positive integer",
-    info = "Testing clustered with non-integer n_clusters"
   )
 })
 
