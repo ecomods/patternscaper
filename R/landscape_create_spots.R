@@ -79,9 +79,9 @@ create_landscape_spots <- function(
   validate_dimensions(width = width, height = height)
   validate_rotation(rotation = rotation)
 
-  # Validate n_spots
   n_spots <- as.integer(n_spots)
-  if (!is.numeric(n_spots) || n_spots < 1 || n_spots != as.integer(n_spots)) {
+  # Validate n_spots
+  if (!is.numeric(n_spots) || n_spots < 1) {
     cli::cli_abort(c(
       "{.arg n_spots} must be a positive integer.",
       "x" = "You supplied {.val {n_spots}}"
@@ -181,6 +181,8 @@ create_landscape_spots <- function(
 
     # Use k-means for subset selection
     if (n_spots < n_available) {
+      # Suppress convergence warnings from kmeans - these are expected
+      # and don't affect quality
       km <- suppressWarnings(
         stats::kmeans(grid_points, centers = n_spots, nstart = 5, iter.max = 50)
       )
