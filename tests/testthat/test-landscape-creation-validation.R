@@ -328,29 +328,29 @@ test_that("curvy fingers treeline warns about large sine_height_mean", {
 # Add scattered-specific parameter validation here when implemented
 
 # Pattern-specific validation: Clustered trees --------------------------------
-test_that("clustered trees validates num_clusters parameter", {
+test_that("clustered trees validates n_clusters parameter", {
   expect_error(
-    create_landscape_clustered_trees(num_clusters = "10"),
+    create_landscape_clustered_trees(n_clusters = "10"),
     "must be a positive integer",
-    info = "Testing clustered with non-numeric num_clusters"
+    info = "Testing clustered with non-numeric n_clusters"
   )
 
   expect_error(
-    create_landscape_clustered_trees(num_clusters = -5),
+    create_landscape_clustered_trees(n_clusters = -5),
     "must be a positive integer",
-    info = "Testing clustered with negative num_clusters"
+    info = "Testing clustered with negative n_clusters"
   )
 
   expect_error(
-    create_landscape_clustered_trees(num_clusters = 0),
+    create_landscape_clustered_trees(n_clusters = 0),
     "must be a positive integer",
-    info = "Testing clustered with zero num_clusters"
+    info = "Testing clustered with zero n_clusters"
   )
 
   expect_error(
-    create_landscape_clustered_trees(num_clusters = 10.5),
+    create_landscape_clustered_trees(n_clusters = 10.5),
     "must be a positive integer",
-    info = "Testing clustered with non-integer num_clusters"
+    info = "Testing clustered with non-integer n_clusters"
   )
 })
 

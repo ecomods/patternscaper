@@ -168,7 +168,7 @@ No ecotones, because they have no treeline. Does this make sense? In theory, spo
 ```r
 create_landscape_clustered_trees(
     treeline_position = 0,
-    num_clusters = 5,
+    n_clusters = 5,
     cluster_radius = 5,
     scatter_zone_prop = 1
 ) |> plot_landscape()

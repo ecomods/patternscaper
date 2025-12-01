@@ -269,11 +269,11 @@ create_training_landscapes <- function(
         sine_length_mean = c(0.2, 0.4) * width,
         sine_length_sd = c(0.1, 0.6) * width,
         sine_height_mean = c(0.03, 0.2) * height,
-        sine_height_sd = c(0.1 , 0.3) * height
+        sine_height_sd = c(0.1, 0.3) * height
       ),
       clustered = list(
         treeline_position = c(0.4, 0.6), # numeric
-        num_clusters = c(5, 12), # integer
+        n_clusters = c(5, 12), # integer
         cluster_radius = c(5, 10), # integer
         scatter_zone_prop = c(0.2, 1), # numeric
         elongation_x = c(0.5, 1.5), # numeric

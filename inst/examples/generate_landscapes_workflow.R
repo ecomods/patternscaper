@@ -209,7 +209,7 @@ all_clustered <- function() {
   clustered_many_small <- create_landscape(
     "clustered",
     name = "Many Small",
-    num_clusters = 30,
+    n_clusters = 30,
     cluster_radius = 2,
     scatter_zone_prop = 0.6
   )
@@ -218,7 +218,7 @@ all_clustered <- function() {
   clustered_few_large <- create_landscape(
     "clustered",
     name = "Few Large",
-    num_clusters = 5,
+    n_clusters = 5,
     cluster_radius = 12,
     scatter_zone_prop = 0.5
   )
@@ -227,7 +227,7 @@ all_clustered <- function() {
   clustered_horizontal <- create_landscape(
     "clustered",
     name = "Horizontal",
-    num_clusters = 15,
+    n_clusters = 15,
     cluster_radius = 5,
     elongation_x = 3,
     elongation_y = 1,
@@ -238,7 +238,7 @@ all_clustered <- function() {
   clustered_vertical <- create_landscape(
     "clustered",
     name = "Vertical",
-    num_clusters = 15,
+    n_clusters = 15,
     cluster_radius = 5,
     elongation_x = 1,
     elongation_y = 3,
@@ -249,7 +249,7 @@ all_clustered <- function() {
   clustered_with_noise <- create_landscape(
     "clustered",
     name = "With Noise",
-    num_clusters = 12,
+    n_clusters = 12,
     cluster_radius = 5,
     scatter_zone_prop = 0.4,
     random_spots = c(0.05, 0.05)
@@ -259,7 +259,7 @@ all_clustered <- function() {
   clustered_rotated <- create_landscape(
     "clustered",
     name = "Rotated Mixed",
-    num_clusters = 20,
+    n_clusters = 20,
     cluster_radius = 4,
     scatter_zone_prop = 0.5,
     elongation_x = 1.8,
@@ -272,7 +272,7 @@ all_clustered <- function() {
     "clustered",
     name = "Narrow Dense",
     treeline_position = 0.3,
-    num_clusters = 20,
+    n_clusters = 20,
     cluster_radius = 4,
     scatter_zone_prop = 0.2,
     rotation = 45
@@ -353,7 +353,7 @@ spots_inverted <- create_landscape(
   name = "Inverted",
   n_spots = 15,
   spot_radius = 8,
-  noise_radius_sd = 2
+  noise_radius_sd = 10
 )
 
 spots_regular <- create_landscape(
@@ -365,6 +365,17 @@ spots_regular <- create_landscape(
   regular_spots = TRUE
 )
 
+# Plot all spots together
+plot_landscape_list(
+  list(
+    spots_default,
+    spots_modified,
+    spots_inverted,
+    spots_regular
+  )
+)
+
+set.seed(123)
 many_spots <- create_training_landscapes(
   patterns = "spots",
   n = 20
@@ -375,15 +386,6 @@ plot_landscape_list(many_spots)
 regular <- purrr::map_lgl(many_spots, \(x) x$params$regular_spots)
 plot_landscape_list(many_spots[regular])
 
-# Plot all spots together
-plot_landscape_list(
-  list(
-    spots_default,
-    spots_modified,
-    spots_inverted,
-    spots_regular
-  )
-)
 
 # Banded vegetation ----------------------------------------------------------
 # Default banded vegetation

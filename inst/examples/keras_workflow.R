@@ -108,7 +108,7 @@ test_cluster <- create_landscape(
   width = 100,
   height = 100,
   treeline_position = 0.5,
-  num_clusters = 10,
+  n_clusters = 10,
   cluster_radius = 5,
   rotation = 0
 )

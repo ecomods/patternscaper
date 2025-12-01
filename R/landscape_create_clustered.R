@@ -11,7 +11,7 @@
 #' @param random_spots Numeric vector of length 2. Probabilities for flipping
 #'   cells: `[prob(1→0), prob(0→1)]`. Used to add noise to the landscape
 #'   (default: c(0,0)).
-#' @param num_clusters Integer. Number of cluster centers (default: 10).
+#' @param n_clusters Integer. Number of cluster centers (default: 10).
 #' @param cluster_radius Numeric. Radius of clusters in pixels (default: 5).
 #' @param scatter_zone_prop Numeric. Proportion of height for scatter zone
 #'   measured downward from treeline (0-1, default: 0.3).
@@ -36,7 +36,7 @@
 #' # Modified clustered trees with horizontally elongated clusters
 #' clustered_modified <- create_landscape_clustered_trees(
 #'   treeline_position = 0.2,
-#'   num_clusters = 8,
+#'   n_clusters = 8,
 #'   cluster_radius = 7,
 #'   scatter_zone_prop = 0.6,
 #'   elongation_x = 2.5,
@@ -45,7 +45,7 @@
 #'
 #' # Rotated landscape with mixed parameters
 #' clustered_rotated <- create_landscape_clustered_trees(
-#'   num_clusters = 20,
+#'   n_clusters = 20,
 #'   cluster_radius = 2,
 #'   scatter_zone_prop = 0.5,
 #'   elongation_x = 1.8,
@@ -57,7 +57,7 @@ create_landscape_clustered_trees <- function(
   height = 100,
   treeline_position = 0.5,
   random_spots = c(0, 0),
-  num_clusters = 10,
+  n_clusters = 10,
   cluster_radius = 5,
   scatter_zone_prop = 0.3,
   elongation_x = 1,
@@ -71,16 +71,16 @@ create_landscape_clustered_trees <- function(
   validate_rotation(rotation = rotation)
 
   # Convert parameters to the right types
-  num_clusters <- as.integer(num_clusters)
+  n_clusters <- as.integer(n_clusters)
 
   if (
-    !is.numeric(num_clusters) ||
-      num_clusters < 1 ||
-      num_clusters != as.integer(num_clusters)
+    !is.numeric(n_clusters) ||
+      n_clusters < 1 ||
+      n_clusters != as.integer(n_clusters)
   ) {
     cli::cli_abort(c(
-      "{.arg num_clusters} must be a positive integer.",
-      "x" = "You supplied {.val {num_clusters}}"
+      "{.arg n_clusters} must be a positive integer.",
+      "x" = "You supplied {.val {n_clusters}}"
     ))
   }
 
@@ -171,12 +171,12 @@ create_landscape_clustered_trees <- function(
       (treeline_row + cluster_radius + 1):floor(
         scatter_zone_end - cluster_radius
       ),
-      num_clusters,
+      n_clusters,
       replace = TRUE
     ),
     col = sample(
       min_col:max_col,
-      num_clusters,
+      n_clusters,
       replace = TRUE
     )
   )
@@ -235,7 +235,7 @@ create_landscape_clustered_trees <- function(
       width = width,
       height = height,
       treeline_position = treeline_position,
-      num_clusters = num_clusters,
+      n_clusters = n_clusters,
       cluster_radius = cluster_radius,
       scatter_zone_prop = scatter_zone_prop,
       elongation_x = elongation_x,
