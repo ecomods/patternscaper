@@ -151,9 +151,9 @@ create_landscape_spots <- function(
     max_spots <- n_cols * n_rows
 
     if (n_spots > max_spots) {
-      cli::cli_alert_warning(c(
+      cli::cli_warn(c(
         "Regular spot placement requested {n_spots} spots but only ~{max_spots} positions fit.",
-        "i" = "Adjusting to maximum feasible spots. Consider decreasing {.arg spot_radius}."
+        "i" = " Adjusting to maximum feasible spots. Consider decreasing {.arg spot_radius}."
       ))
       n_spots <- max_spots
     }

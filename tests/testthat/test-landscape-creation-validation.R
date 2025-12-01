@@ -9,7 +9,8 @@ test_that("landscape generators validate width parameter", {
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
-    clustered = create_landscape_clustered_trees
+    clustered = create_landscape_clustered_trees,
+    spots = create_landscape_spots
   )
 
   for (name in names(generators)) {
@@ -48,7 +49,8 @@ test_that("landscape generators validate height parameter", {
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
-    clustered = create_landscape_clustered_trees
+    clustered = create_landscape_clustered_trees,
+    spots = create_landscape_spots
   )
 
   for (name in names(generators)) {
@@ -120,7 +122,8 @@ test_that("landscape generators validate rotation parameter", {
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
-    clustered = create_landscape_clustered_trees
+    clustered = create_landscape_clustered_trees,
+    spots = create_landscape_spots
   )
 
   for (name in names(generators)) {
@@ -428,5 +431,119 @@ test_that("clustered trees validates elongation_y parameter", {
   )
 })
 
-# Pattern-specific validation: Other patterns ---------------------------------
-# Add validation tests for remaining patterns as they are implemented
+# Pattern-specific validation: Spots ------------------------------------------
+test_that("spots validates n_spots parameter", {
+  expect_error(
+    create_landscape_spots(n_spots = -5),
+    "must be a positive integer",
+    info = "Testing spots with negative n_spots"
+  )
+
+  expect_error(
+    create_landscape_spots(n_spots = 0),
+    "must be a positive integer",
+    info = "Testing spots with zero n_spots"
+  )
+})
+
+test_that("spots validates spot_radius parameter", {
+  expect_error(
+    create_landscape_spots(spot_radius = "5"),
+    "must be a positive number",
+    info = "Testing spots with non-numeric spot_radius"
+  )
+
+  expect_error(
+    create_landscape_spots(spot_radius = -3),
+    "must be a positive number",
+    info = "Testing spots with negative spot_radius"
+  )
+
+  expect_error(
+    create_landscape_spots(spot_radius = 0),
+    "must be a positive number",
+    info = "Testing spots with zero spot_radius"
+  )
+
+  expect_error(
+    create_landscape_spots(width = 100, height = 100, spot_radius = 60),
+    "too large for the landscape dimensions",
+    info = "Testing spots with spot_radius >= min(width, height) / 2"
+  )
+})
+
+test_that("spots validates spot_radius_sd parameter", {
+  expect_error(
+    create_landscape_spots(spot_radius_sd = "2"),
+    "must be a non-negative number",
+    info = "Testing spots with non-numeric spot_radius_sd"
+  )
+
+  expect_error(
+    create_landscape_spots(spot_radius_sd = -1),
+    "must be a non-negative number",
+    info = "Testing spots with negative spot_radius_sd"
+  )
+})
+
+test_that("spots validates radius_noise_fraction parameter", {
+  expect_error(
+    create_landscape_spots(radius_noise_fraction = "0.5"),
+    "must be between 0 and 1",
+    info = "Testing spots with non-numeric radius_noise_fraction"
+  )
+
+  expect_error(
+    create_landscape_spots(radius_noise_fraction = -0.1),
+    "must be between 0 and 1",
+    info = "Testing spots with negative radius_noise_fraction"
+  )
+
+  expect_error(
+    create_landscape_spots(radius_noise_fraction = 1.5),
+    "must be between 0 and 1",
+    info = "Testing spots with radius_noise_fraction > 1"
+  )
+})
+
+test_that("spots validates invert_landscape parameter", {
+  expect_error(
+    create_landscape_spots(invert_landscape = "TRUE"),
+    "must be a single logical value",
+    info = "Testing spots with non-logical invert_landscape"
+  )
+
+  expect_error(
+    create_landscape_spots(invert_landscape = c(TRUE, FALSE)),
+    "must be a single logical value",
+    info = "Testing spots with vector invert_landscape"
+  )
+})
+
+test_that("spots validates regular_spots parameter", {
+  expect_error(
+    create_landscape_spots(regular_spots = "TRUE"),
+    "must be a single logical value",
+    info = "Testing spots with non-logical regular_spots"
+  )
+
+  expect_error(
+    create_landscape_spots(regular_spots = c(TRUE, FALSE)),
+    "must be a single logical value",
+    info = "Testing spots with vector regular_spots"
+  )
+})
+
+test_that("spots warns when n_spots exceeds grid capacity for regular placement", {
+  expect_warning(
+    create_landscape_spots(
+      width = 50,
+      height = 50,
+      n_spots = 100,
+      spot_radius = 10,
+      regular_spots = TRUE
+    ),
+    "only ~.* positions fit",
+    info = "Testing spots with too many spots for regular placement"
+  )
+})
