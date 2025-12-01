@@ -19,8 +19,15 @@
 #'     For example, 0.2 means the outer 20% of the radius has a gradient transition.
 #'     Works independently of `spot_radius_sd` (which varies the overall size,
 #'     while this parameter affects edge sharpness).
-#' @param invert_landscape Logical. If TRUE, switches landscape from vegetated with
-#'     bare spots (default) to bare with vegetated spots (default: FALSE).
+#' @param invert_landscape Logical. If TRUE, creates vegetation patches in bare ground
+#'     (equivalent to "gaps" pattern). If FALSE (default), creates bare spots in vegetation.
+#'
+#' @details
+#' This function can generate both "spots" and "gaps" patterns depending on \code{invert_landscape}.
+#' For semantic clarity in training data, use \code{\link{create_landscape_gaps}} when you
+#' want vegetation patches in bare ground, which sets \code{invert_landscape = TRUE} by default
+#' and labels the pattern as "gaps".
+#'
 #' @param regular_spots Logical. If TRUE, spots are arranged on a hexagonal grid
 #'     using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).
 #' @param rotation Numeric. Rotation angle in degrees (unused, present for compatibility
