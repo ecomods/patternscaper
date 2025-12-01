@@ -6,7 +6,8 @@ test_that("landscape generators handle very small landscapes", {
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
-    fingers = create_landscape_fingers
+    fingers = create_landscape_fingers,
+    spots = create_landscape_spots
   )
 
   for (name in names(generators)) {
@@ -23,7 +24,8 @@ test_that("landscape generators handle very small landscapes", {
 test_that("landscape generators handle very large landscapes", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
-    diffuse = create_landscape_diffuse_treeline
+    diffuse = create_landscape_diffuse_treeline,
+    spots = create_landscape_spots
   )
 
   for (name in names(generators)) {
@@ -42,7 +44,8 @@ test_that("landscape generators handle non-square landscapes", {
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
-    fingers = create_landscape_fingers
+    fingers = create_landscape_fingers,
+    spots = create_landscape_spots
   )
 
   for (name in names(generators)) {
@@ -106,7 +109,8 @@ test_that("landscape generators with rotation handle extreme angles", {
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
-    fingers = create_landscape_fingers
+    fingers = create_landscape_fingers,
+    spots = create_landscape_spots
   )
 
   for (name in names(generators_with_rotation)) {
@@ -582,6 +586,198 @@ test_that("create_landscape_fingers handles multiple edge cases together", {
   expect_true(is_landscape(l_extreme))
   expect_equal(terra::ncol(l_extreme$data), 5)
   expect_equal(terra::nrow(l_extreme$data), 5)
+})
+
+# Pattern-specific edge cases: Spots ------------------------------------------
+
+# Boundary values for n_spots ------------------------------------------------
+test_that("create_landscape_spots handles n_spots boundary values", {
+  # Minimum spots
+  l_one_spot <- create_landscape_spots(
+    width = 20,
+    height = 20,
+    n_spots = 1,
+    spot_radius = 3
+  )
+  expect_true(is_landscape(l_one_spot))
+
+  # Many spots
+  l_many_spots <- create_landscape_spots(
+    width = 50,
+    height = 50,
+    n_spots = 50,
+    spot_radius = 3
+  )
+  expect_true(is_landscape(l_many_spots))
+})
+
+# Boundary values for spot_radius --------------------------------------------
+test_that("create_landscape_spots handles spot_radius boundary values", {
+  # Very small radius
+  l_tiny_radius <- create_landscape_spots(
+    width = 20,
+    height = 20,
+    n_spots = 5,
+    spot_radius = 1
+  )
+  expect_true(is_landscape(l_tiny_radius))
+
+  # Large radius (close to maximum allowed)
+  l_large_radius <- create_landscape_spots(
+    width = 50,
+    height = 50,
+    n_spots = 3,
+    spot_radius = 24 # Just under min(50, 50) / 2
+  )
+  expect_true(is_landscape(l_large_radius))
+})
+
+# Boundary values for spot_radius_sd -----------------------------------------
+test_that("create_landscape_spots handles spot_radius_sd boundary values", {
+  set.seed(123)
+
+  # Zero variation (default)
+  l_no_variation <- create_landscape_spots(
+    width = 30,
+    height = 30,
+    n_spots = 5,
+    spot_radius = 5,
+    spot_radius_sd = 0
+  )
+  expect_true(is_landscape(l_no_variation))
+
+  # Large variation relative to radius
+  l_large_variation <- create_landscape_spots(
+    width = 30,
+    height = 30,
+    n_spots = 5,
+    spot_radius = 5,
+    spot_radius_sd = 10
+  )
+  expect_true(is_landscape(l_large_variation))
+})
+
+# Boundary values for radius_noise_fraction ----------------------------------
+test_that("create_landscape_spots handles radius_noise_fraction boundary values", {
+  set.seed(123)
+
+  # Zero noise (sharp edges)
+  l_sharp <- create_landscape_spots(
+    width = 30,
+    height = 30,
+    n_spots = 5,
+    spot_radius = 8,
+    radius_noise_fraction = 0
+  )
+  expect_true(is_landscape(l_sharp))
+
+  # Maximum noise (full radius)
+  l_full_noise <- create_landscape_spots(
+    width = 30,
+    height = 30,
+    n_spots = 5,
+    spot_radius = 8,
+    radius_noise_fraction = 1
+  )
+  expect_true(is_landscape(l_full_noise))
+
+  # Landscapes should differ
+  vals_sharp <- terra::values(l_sharp$data)
+  vals_noise <- terra::values(l_full_noise$data)
+  expect_false(identical(vals_sharp, vals_noise))
+})
+
+# Boundary values for invert_landscape ---------------------------------------
+test_that("create_landscape_spots handles invert_landscape boundary values", {
+  set.seed(123)
+
+  # Normal (bare spots in vegetation)
+  l_normal <- create_landscape_spots(
+    width = 20,
+    height = 20,
+    n_spots = 5,
+    spot_radius = 4,
+    invert_landscape = FALSE
+  )
+  expect_true(is_landscape(l_normal))
+
+  set.seed(123)
+  # Inverted (vegetation spots in bare ground)
+  l_inverted <- create_landscape_spots(
+    width = 20,
+    height = 20,
+    n_spots = 5,
+    spot_radius = 4,
+    invert_landscape = TRUE
+  )
+  expect_true(is_landscape(l_inverted))
+
+  # Values should be inverted
+  vals_normal <- terra::values(l_normal$data)
+  vals_inverted <- terra::values(l_inverted$data)
+  expect_equal(sum(vals_normal), sum(1 - vals_inverted))
+})
+
+# Regular spots with extreme parameters ---------------------------------------
+test_that("create_landscape_spots handles regular_spots with extreme parameters", {
+  # Very small landscape with regular spots
+  expect_warning(
+    l_small_regular <- create_landscape_spots(
+      width = 10,
+      height = 10,
+      n_spots = 20,
+      spot_radius = 3,
+      regular_spots = TRUE
+    ),
+    "only ~.* positions fit"
+  )
+  expect_true(is_landscape(l_small_regular))
+
+  # Large landscape with few regular spots
+  l_few_regular <- create_landscape_spots(
+    width = 100,
+    height = 100,
+    n_spots = 3,
+    spot_radius = 5,
+    regular_spots = TRUE
+  )
+  expect_true(is_landscape(l_few_regular))
+})
+
+# Combined edge cases ---------------------------------------------------------
+test_that("create_landscape_spots handles multiple edge cases together", {
+  set.seed(456)
+
+  # Small landscape + many spots + large radius + variation + noise + invert
+  l_extreme <- create_landscape_spots(
+    width = 15,
+    height = 15,
+    n_spots = 10,
+    spot_radius = 3,
+    spot_radius_sd = 1,
+    radius_noise_fraction = 0.5,
+    invert_landscape = TRUE,
+    rotation = 45
+  )
+
+  expect_true(is_landscape(l_extreme))
+  expect_equal(terra::ncol(l_extreme$data), 15)
+  expect_equal(terra::nrow(l_extreme$data), 15)
+
+  # Non-square + regular + rotation
+  l_nonsquare_regular <- create_landscape_spots(
+    width = 50,
+    height = 20,
+    n_spots = 8,
+    spot_radius = 4,
+    regular_spots = TRUE,
+    rotation = 90
+  )
+
+  expect_true(is_landscape(l_nonsquare_regular))
+  # After rotation, dimensions swap
+  expect_equal(terra::ncol(l_nonsquare_regular$data), 20)
+  expect_equal(terra::nrow(l_nonsquare_regular$data), 50)
 })
 
 # Test variability in patterns ------------------------------------------------

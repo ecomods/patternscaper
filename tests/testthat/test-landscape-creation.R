@@ -6,7 +6,8 @@ test_that("landscape generators create valid landscape objects", {
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
-    fingers = create_landscape_fingers
+    fingers = create_landscape_fingers,
+    spots = create_landscape_spots
   )
 
   for (name in names(generators)) {
@@ -29,7 +30,8 @@ test_that("landscape generators support rotation parameter", {
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
-    fingers = create_landscape_fingers
+    fingers = create_landscape_fingers,
+    spots = create_landscape_spots
   )
 
   for (name in names(generators_with_rotation)) {
@@ -291,6 +293,195 @@ test_that("create_landscape_fingers handles zero standard deviations", {
   expect_true(is_landscape(l_constant))
   expect_equal(terra::ncol(l_constant$data), 20)
   expect_equal(terra::nrow(l_constant$data), 20)
+})
+
+# Spots -----------------------------------------------------------------------
+test_that("create_landscape_spots creates circular patterns", {
+  set.seed(123)
+
+  # Single large spot should create visible circular pattern
+  l_spot <- create_landscape_spots(
+    width = 20,
+    height = 20,
+    n_spots = 1,
+    spot_radius = 5
+  )
+
+  expect_true(is_landscape(l_spot))
+
+  # Should have some vegetation (1s)
+  vals <- terra::values(l_spot$data)
+  expect_true(sum(vals == 1) > 0)
+})
+
+test_that("create_landscape_spots regular_spots creates structured pattern", {
+  set.seed(123)
+
+  # Regular spots should create more uniform distribution
+  l_regular <- create_landscape_spots(
+    width = 50,
+    height = 50,
+    n_spots = 10,
+    spot_radius = 5,
+    regular_spots = TRUE
+  )
+
+  expect_true(is_landscape(l_regular))
+  expect_equal(terra::ncol(l_regular$data), 50)
+  expect_equal(terra::nrow(l_regular$data), 50)
+})
+
+test_that("create_landscape_spots spot_radius_sd adds variation", {
+  set.seed(123)
+
+  # With no variation
+  l_no_var <- create_landscape_spots(
+    width = 30,
+    height = 30,
+    n_spots = 5,
+    spot_radius = 5,
+    spot_radius_sd = 0
+  )
+
+  # With variation
+  l_with_var <- create_landscape_spots(
+    width = 30,
+    height = 30,
+    n_spots = 5,
+    spot_radius = 5,
+    spot_radius_sd = 2
+  )
+
+  # Landscapes should differ due to radius variation
+  vals_no_var <- terra::values(l_no_var$data)
+  vals_with_var <- terra::values(l_with_var$data)
+  expect_false(identical(vals_no_var, vals_with_var))
+})
+
+test_that("create_landscape_spots radius_noise_fraction affects edges", {
+  set.seed(123)
+
+  # Sharp edges (no noise)
+  l_sharp <- create_landscape_spots(
+    width = 30,
+    height = 30,
+    n_spots = 3,
+    spot_radius = 8,
+    radius_noise_fraction = 0
+  )
+
+  # Gradual edges (with noise)
+  l_gradual <- create_landscape_spots(
+    width = 30,
+    height = 30,
+    n_spots = 3,
+    spot_radius = 8,
+    radius_noise_fraction = 0.3
+  )
+
+  expect_true(is_landscape(l_sharp))
+  expect_true(is_landscape(l_gradual))
+
+  # Different noise fractions should produce different patterns
+  vals_sharp <- terra::values(l_sharp$data)
+  vals_gradual <- terra::values(l_gradual$data)
+  expect_false(identical(vals_sharp, vals_gradual))
+})
+
+test_that("create_landscape_spots invert_landscape parameter works", {
+  set.seed(123)
+
+  # Normal (bare spots in vegetation)
+  l_normal <- create_landscape_spots(
+    width = 20,
+    height = 20,
+    n_spots = 5,
+    spot_radius = 4,
+    invert_landscape = FALSE
+  )
+  set.seed(123)
+  # Inverted (vegetation spots in bare ground)
+  l_inverted <- create_landscape_spots(
+    width = 20,
+    height = 20,
+    n_spots = 5,
+    spot_radius = 4,
+    invert_landscape = TRUE
+  )
+
+  vals_normal <- terra::values(l_normal$data)
+  vals_inverted <- terra::values(l_inverted$data)
+
+  # Inverted should have opposite values (approximately)
+  # Sum of 1s in normal ≈ sum of 0s in inverted
+  expect_true(abs(sum(vals_normal) - sum(1 - vals_inverted)) == 0)
+})
+
+test_that("create_landscape_spots stores all params correctly", {
+  l <- create_landscape_spots(
+    width = 30,
+    height = 40,
+    n_spots = 5,
+    spot_radius = 6,
+    spot_radius_sd = 1.5,
+    radius_noise_fraction = 0.2,
+    invert_landscape = TRUE,
+    regular_spots = TRUE,
+    rotation = 45
+  )
+
+  expect_equal(l$params$width, 30)
+  expect_equal(l$params$height, 40)
+  expect_equal(l$params$n_spots, 5)
+  expect_equal(l$params$spot_radius, 6)
+  expect_equal(l$params$spot_radius_sd, 1.5)
+  expect_equal(l$params$invert_landscape, TRUE)
+  expect_equal(l$params$regular_spots, TRUE)
+  expect_equal(l$params$rotation, 45)
+})
+
+test_that("create_landscape_spots produces reproducible results with seed", {
+  set.seed(789)
+  l1 <- create_landscape_spots(
+    width = 25,
+    height = 25,
+    n_spots = 8,
+    spot_radius = 5,
+    spot_radius_sd = 1
+  )
+
+  set.seed(789)
+  l2 <- create_landscape_spots(
+    width = 25,
+    height = 25,
+    n_spots = 8,
+    spot_radius = 5,
+    spot_radius_sd = 1
+  )
+
+  vals1 <- terra::values(l1$data)
+  vals2 <- terra::values(l2$data)
+  expect_identical(vals1, vals2)
+})
+
+test_that("create_landscape_spots handles edge cases", {
+  # Minimum spots
+  l_min <- create_landscape_spots(
+    width = 20,
+    height = 20,
+    n_spots = 1,
+    spot_radius = 3
+  )
+  expect_true(is_landscape(l_min))
+
+  # Very small radius
+  l_small <- create_landscape_spots(
+    width = 20,
+    height = 20,
+    n_spots = 5,
+    spot_radius = 1
+  )
+  expect_true(is_landscape(l_small))
 })
 
 # Random ----------------------------------------------------------------------

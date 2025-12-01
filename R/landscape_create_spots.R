@@ -146,18 +146,6 @@ create_landscape_spots <- function(
     n_cols <- ceiling(width / spacing)
     n_rows <- ceiling(height / (sqrt(3) / 2 * spacing))
 
-    # Validate number of spots and decrease if user requested more spots that possible
-    # to place:
-    max_spots <- n_cols * n_rows
-
-    if (n_spots > max_spots) {
-      cli::cli_warn(c(
-        "Regular spot placement requested {n_spots} spots but only ~{max_spots} positions fit.",
-        "i" = " Adjusting to maximum feasible spots. Consider decreasing {.arg spot_radius}."
-      ))
-      n_spots <- max_spots
-    }
-
     grid_points <- data.frame(row = numeric(), col = numeric())
     for (r in 0:(n_rows - 1)) {
       for (c in 0:(n_cols - 1)) {
@@ -176,6 +164,10 @@ create_landscape_spots <- function(
 
     # Final adjustment if actual grid points differ from estimate
     if (n_spots > n_available) {
+      cli::cli_warn(c(
+        "Regular spot placement requested {n_spots} spots but only ~{n_available} positions fit.",
+        "i" = " Adjusting to maximum feasible spots. Consider decreasing {.arg spot_radius}."
+      ))
       n_spots <- n_available
     }
 
