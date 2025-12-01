@@ -27,18 +27,18 @@ selforga_types = c(
 
 #plotting for manuscript
 landscapes_manuscript <- list()
-landscapes_manuscript[[1]]  <- create_landscape_random(
+landscapes_manuscript[[1]] <- create_landscape_random(
   tree_prop = 0.05
 )
 landscapes_manuscript[[1]]$pattern <- "bare"
 landscapes_manuscript[[2]] <- create_landscape_spots(
   n_spots = 5,
   spot_radius = 18,
-  noise_radius_sd = 3,
+  spot_radius_sd = 3,
   radius_noise_fraction = 0.4,
   regular_spots = T
 )
-landscapes_manuscript[[3]]  <- create_landscape_labyrinth(
+landscapes_manuscript[[3]] <- create_landscape_labyrinth(
   frequency = 4,
   veg_threshold = 0.6,
   band_fuzziness = 0.02,
@@ -47,7 +47,7 @@ landscapes_manuscript[[3]]  <- create_landscape_labyrinth(
 landscapes_manuscript[[4]] <- create_landscape_gaps(
   n_spots = 3,
   spot_radius = 15,
-  noise_radius_sd = 5,
+  spot_radius_sd = 5,
   radius_noise_fraction = 0.5,
   regular_spots = T
 )
@@ -56,16 +56,27 @@ landscapes_manuscript[[5]] <- create_landscape_random(
 )
 landscapes_manuscript[[5]]$pattern <- "dense"
 
-fig_sub_letter <- c("a","b","c","d","e")
-for(i in 1:5){
-  landscapes_manuscript[[i]]$pattern <- paste("(", fig_sub_letter[i], ") ", landscapes_manuscript[[i]]$pattern,sep="")
+fig_sub_letter <- c("a", "b", "c", "d", "e")
+for (i in 1:5) {
+  landscapes_manuscript[[i]]$pattern <- paste(
+    "(",
+    fig_sub_letter[i],
+    ") ",
+    landscapes_manuscript[[i]]$pattern,
+    sep = ""
+  )
 }
 
-fig_pattern_selforga <- plot_landscape_list(landscapes_manuscript,ncol=5,show_legend=F)
+fig_pattern_selforga <- plot_landscape_list(
+  landscapes_manuscript,
+  ncol = 5,
+  show_legend = F
+)
 
 ggsave(
   filename = paste(
-    result_figs,"fig_selforga",
+    result_figs,
+    "fig_selforga",
     ".jpg",
     sep = ""
   ),
@@ -89,9 +100,9 @@ for (i in 1:20) {
     height = sample(x = seq(120, 150), size = 1),
     n_spots = sample(x = seq(3, 5), size = 1),
     spot_radius = sample(x = seq(20, 25), size = 1),
-    noise_radius_sd = sample(x = seq(3, 8), size = 1),
+    spot_radius_sd = sample(x = seq(3, 8), size = 1),
     radius_noise_fraction = runif(n = 1, min = 0.05, max = 0.6),
-    regular_spots = sample(x=c(T,F), size = 1)
+    regular_spots = sample(x = c(T, F), size = 1)
   )
   plot_landscape(temp_landscape)
   landscape_name <- paste("landscape_gaps_", i, sep = "")
@@ -103,9 +114,9 @@ for (i in 1:20) {
     height = sample(x = seq(120, 150), size = 1),
     n_spots = sample(x = seq(3, 5), size = 1),
     spot_radius = sample(x = seq(20, 25), size = 1),
-    noise_radius_sd = sample(x = seq(3, 8), size = 1),
+    spot_radius_sd = sample(x = seq(3, 8), size = 1),
     radius_noise_fraction = runif(n = 1, min = 0.05, max = 0.6),
-    regular_spots = sample(x=c(T,F), size = 1)
+    regular_spots = sample(x = c(T, F), size = 1)
   )
   landscape_name <- paste("landscape_spots_", i, sep = "")
   temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
@@ -168,7 +179,6 @@ best_10 <- evaluate_landscape_metrics(
 best_10
 
 
-
 #--------------------------------------------------------------------
 # Train neural network with landscapes metrics
 #--------------------------------------------------------------------
@@ -187,16 +197,15 @@ model_selforga_pics$performance$accuracy
 # Read in pictures and evaluate them
 #--------------------------------------------------------------------
 
-pic_dir <- paste(directory,"Pics/",sep="") #folder name
+pic_dir <- paste(directory, "Pics/", sep = "") #folder name
 pic_names <- list.files(pic_dir) #file names
 pic_names
 
-author_names <- c("mander","meron")
+author_names <- c("mander", "meron")
 
 pic_landscapes <- list()
 
 for (i in 1:length(pic_names)) {
-
   # lower-case version for matching
   lname <- tolower(pic_names[i])
   # find which class is contained in the file name
@@ -216,7 +225,7 @@ for (i in 1:length(pic_names)) {
     }
   }
 
-  if(author == author_names[2]){
+  if (author == author_names[2]) {
     # read in file as image and make binary based on brown vs green
     img <- readPNG(paste(pic_dir, pic_names[i], sep = ""))
     R <- img[,, 1]
@@ -226,12 +235,11 @@ for (i in 1:length(pic_names)) {
 
     binary_img <- ifelse(
       (V < 0.1 | #very dark
-         G > R * 1.02 & G > B * 1.02) | # normal green
+        G > R * 1.02 & G > B * 1.02) | # normal green
         (G > R * 0.75 & G > B * 0.75 & V < 0.2), # dark green
       1,
       0
     )
-
   } else {
     # read in file as image and make binary based on brown vs green
     img <- readPNG(paste(pic_dir, pic_names[i], sep = ""))
@@ -242,11 +250,10 @@ for (i in 1:length(pic_names)) {
 
     binary_img <- ifelse(
       (V < 0.65),
-       1,
-       0
-      )
-
-}
+      1,
+      0
+    )
+  }
 
   # convert image to data frame
   x <- rep(1:ncol(binary_img), each = nrow(binary_img))
@@ -269,12 +276,13 @@ for (i in 1:length(pic_names)) {
     theme(legend.position = "none")
   combined_pic <- pic_veg + pic_bin
 
-#  combined_pic
+  #  combined_pic
 
   # save plots
   ggsave(
     filename = paste(
-      result_figs,"fig_selforga_binary_",
+      result_figs,
+      "fig_selforga_binary_",
       i,
       ".jpg",
       sep = ""
@@ -286,7 +294,8 @@ for (i in 1:length(pic_names)) {
   )
   ggsave(
     filename = paste(
-      result_figs,"fig_selforga_both_",
+      result_figs,
+      "fig_selforga_both_",
       i,
       ".jpg",
       sep = ""
@@ -301,11 +310,10 @@ for (i in 1:length(pic_names)) {
   # convert to landscape object and store
   test_raster <- terra::rast(binary_img)
   test_raster_l <- landscape(data = test_raster, name = "test raster")
-    test_raster_l$pattern <- class_found #class type from above
+  test_raster_l$pattern <- class_found #class type from above
   landscape_name <- paste("landscape_", i, sep = "")
   test_raster_l <- set_landscape_name(test_raster_l, landscape_name)
   pic_landscapes[[i]] <- test_raster_l
-
 }
 
 # apply the neural network model to the landscape object
@@ -339,10 +347,10 @@ pic_landscape_class_metrics_all <- calculate_landscape_metrics(
 )
 #filter only those metrics that match the best 10
 pic_subset1 <- pic_landscape_class_metrics_all %>%
-  filter(metric %in% best_10 & landscape_id %in% seq(1,3)) %>%
+  filter(metric %in% best_10 & landscape_id %in% seq(1, 3)) %>%
   mutate(class = as.factor(class))
 pic_subset2 <- pic_landscape_class_metrics_all %>%
-  filter(metric %in% best_10 & landscape_id %in% seq(4,6)) %>%
+  filter(metric %in% best_10 & landscape_id %in% seq(4, 6)) %>%
   mutate(class = as.factor(class))
 
 #generate figure
@@ -360,11 +368,12 @@ fig_metrics <- ptraining +
     size = 2,
     color = "purple3",
     shape = 15
-  )  +
+  ) +
   theme(legend.position = "none")
 ggsave(
   filename = paste(
-    result_figs,"supp_fig_metrics_selforga",
+    result_figs,
+    "supp_fig_metrics_selforga",
     i,
     ".jpg",
     sep = ""

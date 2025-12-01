@@ -10,14 +10,14 @@
 #'     cannot accommodate the requested number at the given `spot_radius`.
 #' @param spot_radius Numeric. Mean radius of each spot in cells.
 #'     Must be positive and smaller than landscape dimensions.
-#' @param noise_radius_sd Numeric. Standard deviation for random variation in spot radius.
+#' @param spot_radius_sd Numeric. Standard deviation for random variation in spot radius.
 #'     Default is 0 (no variation). Each spot's radius is sampled from
-#'     N(spot_radius, noise_radius_sd).
+#'     N(spot_radius, spot_radius_sd).
 #' @param radius_noise_fraction Numeric (0 to 1). Proportion of the spot radius
 #'     where gradual edge noise is applied. 0 creates sharp circular edges,
 #'     1 applies probabilistic cell inclusion across the entire radius.
 #'     For example, 0.2 means the outer 20% of the radius has a gradient transition.
-#'     Works independently of `noise_radius_sd` (which varies the overall size,
+#'     Works independently of `spot_radius_sd` (which varies the overall size,
 #'     while this parameter affects edge sharpness).
 #' @param spot_jitter Numeric. Maximum random displacement (in cells) for regular spot
 #'     positions. Only applies when `regular_spots = TRUE`. Default is 0 (no jitter).
@@ -40,7 +40,7 @@
 #' spots_modified <- create_landscape_spots(
 #'   n_spots = 15,
 #'   spot_radius = 8,
-#'   noise_radius_sd = 2
+#'   spot_radius_sd = 2
 #' )
 #'
 #' # Regular hexagonal arrangement with slight jitter
@@ -73,7 +73,7 @@ create_landscape_spots <- function(
   height = 100,
   n_spots = 15,
   spot_radius = 5,
-  noise_radius_sd = 0,
+  spot_radius_sd = 0,
   radius_noise_fraction = 0,
   spot_jitter = 0,
   invert_landscape = FALSE,
@@ -109,11 +109,11 @@ create_landscape_spots <- function(
     ))
   }
 
-  # Validate noise_radius_sd
-  if (!is.numeric(noise_radius_sd) || noise_radius_sd < 0) {
+  # Validate spot_radius_sd
+  if (!is.numeric(spot_radius_sd) || spot_radius_sd < 0) {
     cli::cli_abort(c(
-      "{.arg noise_radius_sd} must be a non-negative number.",
-      "x" = "You supplied {.val {noise_radius_sd}}"
+      "{.arg spot_radius_sd} must be a non-negative number.",
+      "x" = "You supplied {.val {spot_radius_sd}}"
     ))
   }
 
@@ -245,10 +245,10 @@ create_landscape_spots <- function(
     center_col <- cluster_centers$col[i]
 
     # Apply radius variation
-    if (noise_radius_sd > 0) {
+    if (spot_radius_sd > 0) {
       adjusted_radius <- max(
         1,
-        spot_radius + stats::rnorm(1, 0, noise_radius_sd)
+        spot_radius + stats::rnorm(1, 0, spot_radius_sd)
       )
     } else {
       adjusted_radius <- spot_radius
@@ -296,7 +296,7 @@ create_landscape_spots <- function(
       invert_landscape = invert_landscape,
       n_spots = n_spots,
       spot_radius = spot_radius,
-      noise_radius_sd = noise_radius_sd,
+      spot_radius_sd = spot_radius_sd,
       spot_jitter = spot_jitter,
       regular_spots = regular_spots,
       rotation = rotation

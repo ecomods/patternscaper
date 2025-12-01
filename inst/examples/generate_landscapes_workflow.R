@@ -344,7 +344,7 @@ spots_modified <- create_landscape(
   name = "Modified",
   n_spots = 15,
   spot_radius = 8,
-  noise_radius_sd = 2
+  spot_radius_sd = 2
 )
 
 # Modified spots with more spots and random radius variation
@@ -353,7 +353,7 @@ spots_inverted <- create_landscape(
   name = "Inverted",
   n_spots = 15,
   spot_radius = 8,
-  noise_radius_sd = 10
+  spot_radius_sd = 10
 )
 
 spots_regular <- create_landscape(
@@ -361,7 +361,7 @@ spots_regular <- create_landscape(
   name = "Regular",
   n_spots = 15,
   spot_radius = 20,
-  noise_radius_sd = 0,
+  spot_radius_sd = 0,
   regular_spots = TRUE
 )
 

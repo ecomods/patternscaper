@@ -291,14 +291,14 @@ create_training_landscapes <- function(
       spots = list(
         n_spots = c(5, 20), # integer
         spot_radius = c(8, 12), # integer
-        noise_radius_sd = c(0, 2), # numeric
+        spot_radius_sd = c(0, 2), # numeric
         regular_spots = c(TRUE, FALSE), #Bool
         invert_landscape = c(FALSE)
       ),
       gaps = list(
         n_spots = c(5, 20), # integer
         spot_radius = c(8, 12), # integer
-        noise_radius_sd = c(0, 2), # numeric
+        spot_radius_sd = c(0, 2), # numeric
         regular_spots = c(TRUE, FALSE), #Bool
         invert_landscape = c(TRUE)
       ),

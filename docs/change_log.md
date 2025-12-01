@@ -184,7 +184,7 @@ create_landscape_clustered_trees(
 - Adjusted function to fit with package specs
   - Optionally add metadata, return as SpatRaster
 - Change logic for noise addition: 
-  - Add noise to the radius to create spots of different sizes (if `noise_radius_sd` > 0).
+  - Add noise to the radius to create spots of different sizes (if `spot_radius_sd` > 0).
   - Before: noise had no effect because in the end only cells in the radius without noise were considered for vegetation spots
 - Add option for setting seed
 
