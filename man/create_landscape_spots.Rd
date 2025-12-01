@@ -9,62 +9,84 @@ create_landscape_spots(
   height = 100,
   n_spots = 15,
   spot_radius = 5,
-  noise_radius_sd = 0,
+  spot_radius_sd = 0,
   radius_noise_fraction = 0,
-  spot_jitter = 0,
   invert_landscape = FALSE,
   regular_spots = FALSE,
   rotation = 0
 )
 }
 \arguments{
-\item{width}{Integer. Number of columns in the landscape.}
+\item{width}{Integer. Number of columns in the landscape (default: 100).}
 
-\item{height}{Integer. Number of rows in the landscape.}
+\item{height}{Integer. Number of rows in the landscape (default: 100).}
 
-\item{n_spots}{Integer. Number of non-vegetated spots}
+\item{n_spots}{Integer. Number of circular spots to generate.
+For regular placement, this may be automatically reduced if the landscape
+cannot accommodate the requested number at the given `spot_radius`.}
 
-\item{spot_radius}{Integer. Radius of each spot}
+\item{spot_radius}{Numeric. Mean radius of each spot in cells.
+Must be positive and smaller than landscape dimensions.}
 
-\item{noise_radius_sd}{Numeric. If random effects, which standard deviation (Default is 0 - no random effects)}
+\item{spot_radius_sd}{Numeric. Standard deviation for random variation in spot radius.
+Default is 0 (no variation). Each spot's radius is sampled from
+N(spot_radius, spot_radius_sd).}
 
-\item{radius_noise_fraction}{Numeric (between 0 and 1). 0 means no noise, the higher the larger the circle with noise}
+\item{radius_noise_fraction}{Numeric (0 to 1). Proportion of the spot radius
+where gradual edge noise is applied. 0 creates sharp circular edges,
+1 applies probabilistic cell inclusion across the entire radius.
+For example, 0.2 means the outer 20% of the radius has a gradient transition.
+Works independently of `spot_radius_sd` (which varies the overall size,
+while this parameter affects edge sharpness).}
 
-\item{spot_jitter}{Integer. Should the regular spots be slightly shifted - how many cells (Default is 0 - no jitter)}
+\item{invert_landscape}{Logical. If TRUE, switches landscape from vegetated with
+bare spots (default) to bare with vegetated spots (default: FALSE).}
 
-\item{invert_landscape}{Boolean. Invert vegetated and unvegetated areas.
-Switches the landscape from vegetated with bare spots to bare with vegetated spots (default: FALSE).}
+\item{regular_spots}{Logical. If TRUE, spots are arranged on a hexagonal grid
+using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).}
 
-\item{regular_spots}{Boolean. Should the spots be arranged in a regular way (on a hexagon using k-means) or randomly?
-(default: FALSE)}
-
-\item{rotation}{Unused parameter for compatibility with other landscape functions (default: 0).
-Is only needed because in the function \link{generate_training_landscapes}
-all landscape functions need to have a rotation parameter.}
+\item{rotation}{Numeric. Rotation angle in degrees (unused, present for compatibility
+with other landscape generators). Required by \code{\link{create_training_landscapes}}.}
 }
 \value{
-A landscape object with pattern "spots" containing the generated landscape data and parameters.
+A landscape object with pattern "spots" containing the generated landscape
+    data and parameters.
 }
 \description{
-Generates a binary landscape with circular spots.
+Generates a binary landscape with circular spots representing either bare patches
+in vegetation or vegetation patches in bare ground (when inverted).
 }
 \examples{
-# Default spots
+# Default spots (random placement)
 spots_default <- create_landscape_spots()
 
-# Modified spots with more spots and random radius variation
+# More spots with random size variation
 spots_modified <- create_landscape_spots(
   n_spots = 15,
   spot_radius = 8,
-  noise_radius_sd = 2
+  spot_radius_sd = 2
 )
 
-# Inverted spots (vegetation outside spots instead of inside)
+# Regular hexagonal arrangement with slight jitter
+spots_regular <- create_landscape_spots(
+  n_spots = 12,
+  spot_radius = 10,
+  regular_spots = TRUE
+)
+
+# Gradual edges using radius noise fraction
+spots_gradual <- create_landscape_spots(
+  n_spots = 10,
+  spot_radius = 12,
+  radius_noise_fraction = 0.3
+)
+
+# Inverted (vegetation patches in bare ground)
 spots_inverted <- create_landscape_spots(
   n_spots = 15,
   spot_radius = 8,
-  invert_landscape = TRUE,
-  noise_radius_sd = 2
+  invert_landscape = TRUE
 )
+
 }
 \keyword{internal}

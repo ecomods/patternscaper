@@ -9,7 +9,7 @@ create_landscape_clustered_trees(
   height = 100,
   treeline_position = 0.5,
   random_spots = c(0, 0),
-  num_clusters = 10,
+  n_clusters = 10,
   cluster_radius = 5,
   scatter_zone_prop = 0.3,
   elongation_x = 1,
@@ -28,7 +28,7 @@ create_landscape_clustered_trees(
 cells: `[prob(1→0), prob(0→1)]`. Used to add noise to the landscape
 (default: c(0,0)).}
 
-\item{num_clusters}{Integer. Number of cluster centers (default: 10).}
+\item{n_clusters}{Integer. Number of cluster centers (default: 10).}
 
 \item{cluster_radius}{Numeric. Radius of clusters in pixels (default: 5).}
 
@@ -60,7 +60,7 @@ clustered_default <- create_landscape_clustered_trees()
 # Modified clustered trees with horizontally elongated clusters
 clustered_modified <- create_landscape_clustered_trees(
   treeline_position = 0.2,
-  num_clusters = 8,
+  n_clusters = 8,
   cluster_radius = 7,
   scatter_zone_prop = 0.6,
   elongation_x = 2.5,
@@ -69,7 +69,7 @@ clustered_modified <- create_landscape_clustered_trees(
 
 # Rotated landscape with mixed parameters
 clustered_rotated <- create_landscape_clustered_trees(
-  num_clusters = 20,
+  n_clusters = 20,
   cluster_radius = 2,
   scatter_zone_prop = 0.5,
   elongation_x = 1.8,

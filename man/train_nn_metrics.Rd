@@ -9,7 +9,7 @@ train_nn_metrics(
   metrics_selected = NULL,
   cv_method = "k-fold",
   cv_folds = 5,
-  hidden_layers = c(3, 3),
+  hidden_layers = 6,
   threshold = 0.01,
   stepmax = 1e+05,
   model_path = NULL,
