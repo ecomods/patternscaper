@@ -140,12 +140,14 @@ create_landscape_spots <- function(
     ))
   }
 
-  # Validate and adjust n_spots for regular placement
   if (regular_spots) {
-    # Calculate maximum possible spots based on hexagonal grid
+    # Generate hexagonal grid for regular spot placement
     spacing <- 2 * spot_radius * 1.1
     n_cols <- ceiling(width / spacing)
     n_rows <- ceiling(height / (sqrt(3) / 2 * spacing))
+
+    # Validate number of spots and decrease if user requested more spots that possible
+    # to place:
     max_spots <- n_cols * n_rows
 
     if (n_spots > max_spots) {
@@ -155,13 +157,6 @@ create_landscape_spots <- function(
       ))
       n_spots <- max_spots
     }
-  }
-
-  if (regular_spots) {
-    # Generate hexagonal grid for regular spot placement
-    spacing <- 2 * spot_radius * 1.1
-    n_cols <- ceiling(width / spacing)
-    n_rows <- ceiling(height / (sqrt(3) / 2 * spacing))
 
     grid_points <- data.frame(row = numeric(), col = numeric())
     for (r in 0:(n_rows - 1)) {
