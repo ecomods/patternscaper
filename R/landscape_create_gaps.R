@@ -8,7 +8,6 @@
 #' @param spot_radius Integer. Radius of each spot
 #' @param spot_radius_sd Numeric. If random effects, which standard deviation (Default is 0 - no random effects)
 #' @param radius_noise_fraction Numeric (between 0 and 1). 0 means no noise, the higher the larger the circle with noise
-#' @param spot_jitter Integer. Should the regular spots be slightly shifted - how many cells (Default is 0 - no jitter)
 #' @param invert_landscape Boolean. Invert vegetated and unvegetated areas.
 #'     Switches the landscape from vegetated with bare spots to bare with vegetated spots (default: TRUE).
 #' @param regular_spots Boolean. Should the spots be arranged in a regular way (on a hexagon using k-means) or randomly?
@@ -38,7 +37,6 @@ create_landscape_gaps <- function(
   spot_radius = 5,
   spot_radius_sd = 0,
   radius_noise_fraction = 0,
-  spot_jitter = 0,
   invert_landscape = TRUE,
   regular_spots = FALSE,
   rotation = 0
@@ -51,7 +49,6 @@ create_landscape_gaps <- function(
     spot_radius = spot_radius,
     spot_radius_sd = spot_radius_sd,
     radius_noise_fraction = radius_noise_fraction,
-    spot_jitter = spot_jitter,
     invert_landscape = invert_landscape,
     regular_spots = regular_spots,
     rotation = rotation

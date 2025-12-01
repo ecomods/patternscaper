@@ -19,9 +19,6 @@
 #'     For example, 0.2 means the outer 20% of the radius has a gradient transition.
 #'     Works independently of `spot_radius_sd` (which varies the overall size,
 #'     while this parameter affects edge sharpness).
-#' @param spot_jitter Numeric. Maximum random displacement (in cells) for regular spot
-#'     positions. Only applies when `regular_spots = TRUE`. Default is 0 (no jitter).
-#'     Value should be smaller than spacing between spots to avoid excessive overlap.
 #' @param invert_landscape Logical. If TRUE, switches landscape from vegetated with
 #'     bare spots (default) to bare with vegetated spots (default: FALSE).
 #' @param regular_spots Logical. If TRUE, spots are arranged on a hexagonal grid
@@ -47,8 +44,7 @@
 #' spots_regular <- create_landscape_spots(
 #'   n_spots = 12,
 #'   spot_radius = 10,
-#'   regular_spots = TRUE,
-#'   spot_jitter = 2
+#'   regular_spots = TRUE
 #' )
 #'
 #' # Gradual edges using radius noise fraction
@@ -75,7 +71,6 @@ create_landscape_spots <- function(
   spot_radius = 5,
   spot_radius_sd = 0,
   radius_noise_fraction = 0,
-  spot_jitter = 0,
   invert_landscape = FALSE,
   regular_spots = FALSE,
   rotation = 0
@@ -126,14 +121,6 @@ create_landscape_spots <- function(
     cli::cli_abort(c(
       "{.arg radius_noise_fraction} must be between 0 and 1.",
       "x" = "You supplied {.val {radius_noise_fraction}}"
-    ))
-  }
-
-  # Validate spot_jitter
-  if (!is.numeric(spot_jitter) || spot_jitter < 0) {
-    cli::cli_abort(c(
-      "{.arg spot_jitter} must be a non-negative number.",
-      "x" = "You supplied {.val {spot_jitter}}"
     ))
   }
 
@@ -205,24 +192,6 @@ create_landscape_spots <- function(
       cluster_centers <- as.data.frame(km$centers)
     } else {
       cluster_centers <- grid_points
-    }
-
-    # Apply jitter if requested
-    if (spot_jitter > 0) {
-      cluster_centers$row <- pmin(
-        height,
-        pmax(
-          1,
-          cluster_centers$row + stats::runif(n_spots, -spot_jitter, spot_jitter)
-        )
-      )
-      cluster_centers$col <- pmin(
-        width,
-        pmax(
-          1,
-          cluster_centers$col + stats::runif(n_spots, -spot_jitter, spot_jitter)
-        )
-      )
     }
   } else {
     # Generate random cluster centers
@@ -297,7 +266,6 @@ create_landscape_spots <- function(
       n_spots = n_spots,
       spot_radius = spot_radius,
       spot_radius_sd = spot_radius_sd,
-      spot_jitter = spot_jitter,
       regular_spots = regular_spots,
       rotation = rotation
     )
