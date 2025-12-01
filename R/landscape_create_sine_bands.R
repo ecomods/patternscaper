@@ -116,16 +116,16 @@ create_landscape_sine_bands <- function(
   mat <- matrix(0, nrow = height_actual, ncol = width_actual)
 
   # Base sine wave, used for both treeline and bands
-  base_sine <- amplitude * sin(frequency * (1:width_actual))
+  base_sine <- amplitude * sin(frequency * seq_len(width_actual))
 
   # Treeline (smooth)
   base_treeline <- round(height_actual * treeline_position + base_sine)
   base_treeline <- pmin(pmax(base_treeline, 1), height_actual)
 
   # Draw treeline: trees above the treeline
-  for (x in 1:width_actual) {
+  for (x in seq_len(width_actual)) {
     y <- base_treeline[x]
-    mat[1:y, x] <- 1
+    mat[seq_len(y), x] <- 1
   }
 
   # Create tree bands below treeline in the band zone
@@ -154,7 +154,7 @@ create_landscape_sine_bands <- function(
     # Generate new noise just for this band
     band_noise <- stats::rnorm(width_actual, mean = 0, sd = noise_sd)
 
-    for (x in 1:width_actual) {
+    for (x in seq_len(width_actual)) {
       y_center <- base_treeline[x] + offset + band_noise[x]
 
       y_min <- max(1, floor(y_center - floor(band_thickness / 2)))
