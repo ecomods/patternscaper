@@ -130,18 +130,24 @@ create_landscape_sine_bands <- function(
 
   # Create tree bands below treeline in the band zone
   band_zone <- round(height_actual * band_zone_prop)
-
-  # Check if the band zone is large enough for the given band spacing
   available_space <- height_actual - max(base_treeline)
-  if (band_zone > available_space) {
+
+  # Constrain band zone to available space
+  band_zone <- min(band_zone, available_space)
+
+  # Calculate number of bands that can fit
+  num_bands <- floor(band_zone / band_spacing)
+
+  # Warn if no bands can be drawn because the spacing is too large
+  if (num_bands == 0) {
     cli::cli_warn(c(
-      "Band zone ({band_zone} px) exceeds available space ({available_space} px) below treeline.",
-      "i" = "No bands will be drawn. Consider decreasing {.arg band_zone_prop} or {.arg treeline_position}."
+      "No bands can fit in available space.",
+      "i" = "Available space below treeline: {available_space} px",
+      "i" = "Band spacing required: {band_spacing} px",
+      "i" = "Consider decreasing {.arg band_spacing}, {.arg treeline_position}, or increasing {.arg band_zone_prop}."
     ))
-    band_zone <- 0
   }
 
-  num_bands <- floor(band_zone / band_spacing)
   band_offsets <- seq(band_spacing, by = band_spacing, length.out = num_bands)
 
   for (offset in band_offsets) {
