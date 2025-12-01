@@ -1,42 +1,72 @@
 #' Create a Landscape with Spots Pattern
 #'
-#' Generates a binary landscape with circular spots.
+#' Generates a binary landscape with circular spots representing either bare patches
+#' in vegetation or vegetation patches in bare ground (when inverted).
 #'
-#' @param width Integer. Number of columns in the landscape.
-#' @param height Integer. Number of rows in the landscape.
-#' @param n_spots Integer. Number of non-vegetated spots
-#' @param spot_radius Integer. Radius of each spot
-#' @param noise_radius_sd Numeric. If random effects, which standard deviation (Default is 0 - no random effects)
-#' @param radius_noise_fraction Numeric (between 0 and 1). 0 means no noise, the higher the larger the circle with noise
-#' @param spot_jitter Integer. Should the regular spots be slightly shifted - how many cells (Default is 0 - no jitter)
-#' @param invert_landscape Boolean. Invert vegetated and unvegetated areas.
-#'     Switches the landscape from vegetated with bare spots to bare with vegetated spots (default: FALSE).
-#' @param regular_spots Boolean. Should the spots be arranged in a regular way (on a hexagon using k-means) or randomly?
-#'     (default: FALSE)
-#' @param rotation Unused parameter for compatibility with other landscape functions (default: 0).
-#'     Is only needed because in the function \link{generate_training_landscapes}
-#'     all landscape functions need to have a rotation parameter.
+#' @param width Integer. Number of columns in the landscape (default: 100).
+#' @param height Integer. Number of rows in the landscape (default: 100).
+#' @param n_spots Integer. Number of circular spots to generate.
+#'     For regular placement, this may be automatically reduced if the landscape
+#'     cannot accommodate the requested number at the given `spot_radius`.
+#' @param spot_radius Numeric. Mean radius of each spot in cells.
+#'     Must be positive and smaller than landscape dimensions.
+#' @param noise_radius_sd Numeric. Standard deviation for random variation in spot radius.
+#'     Default is 0 (no variation). Each spot's radius is sampled from
+#'     N(spot_radius, noise_radius_sd).
+#' @param radius_noise_fraction Numeric (0 to 1). Proportion of the spot radius
+#'     where gradual edge noise is applied. 0 creates sharp circular edges,
+#'     1 applies probabilistic cell inclusion across the entire radius.
+#'     For example, 0.2 means the outer 20% of the radius has a gradient transition.
+#'     Works independently of `noise_radius_sd` (which varies the overall size,
+#'     while this parameter affects edge sharpness).
+#' @param spot_jitter Numeric. Maximum random displacement (in cells) for regular spot
+#'     positions. Only applies when `regular_spots = TRUE`. Default is 0 (no jitter).
+#'     Value should be smaller than spacing between spots to avoid excessive overlap.
+#' @param invert_landscape Logical. If TRUE, switches landscape from vegetated with
+#'     bare spots (default) to bare with vegetated spots (default: FALSE).
+#' @param regular_spots Logical. If TRUE, spots are arranged on a hexagonal grid
+#'     using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).
+#' @param rotation Numeric. Rotation angle in degrees (unused, present for compatibility
+#'     with other landscape generators). Required by \code{\link{create_training_landscapes}}.
 #'
-#' @return A landscape object with pattern "spots" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "spots" containing the generated landscape
+#'     data and parameters.
 #'
 #' @examples
-#' # Default spots
+#' # Default spots (random placement)
 #' spots_default <- create_landscape_spots()
 #'
-#' # Modified spots with more spots and random radius variation
+#' # More spots with random size variation
 #' spots_modified <- create_landscape_spots(
 #'   n_spots = 15,
 #'   spot_radius = 8,
 #'   noise_radius_sd = 2
 #' )
 #'
-#' # Inverted spots (vegetation outside spots instead of inside)
+#' # Regular hexagonal arrangement with slight jitter
+#' spots_regular <- create_landscape_spots(
+#'   n_spots = 12,
+#'   spot_radius = 10,
+#'   regular_spots = TRUE,
+#'   spot_jitter = 2
+#' )
+#'
+#' # Gradual edges using radius noise fraction
+#' spots_gradual <- create_landscape_spots(
+#'   n_spots = 10,
+#'   spot_radius = 12,
+#'   radius_noise_fraction = 0.3
+#' )
+#'
+#' # Inverted (vegetation patches in bare ground)
 #' spots_inverted <- create_landscape_spots(
 #'   n_spots = 15,
 #'   spot_radius = 8,
-#'   invert_landscape = TRUE,
-#'   noise_radius_sd = 2
+#'   invert_landscape = TRUE
 #' )
+#'
+#' @importFrom stats kmeans rnorm runif
+#' @importFrom cli cli_alert_warning
 #' @keywords internal
 create_landscape_spots <- function(
   width = 100,
@@ -50,7 +80,79 @@ create_landscape_spots <- function(
   regular_spots = FALSE,
   rotation = 0
 ) {
+  # Validate common parameters
+  validate_dimensions(width = width, height = height)
+  validate_rotation(rotation = rotation)
+
+  # Validate n_spots
   n_spots <- as.integer(n_spots)
+  if (!is.numeric(n_spots) || n_spots < 1 || n_spots != as.integer(n_spots)) {
+    cli::cli_abort(c(
+      "{.arg n_spots} must be a positive integer.",
+      "x" = "You supplied {.val {n_spots}}"
+    ))
+  }
+
+  # Validate spot_radius
+  if (!is.numeric(spot_radius) || spot_radius <= 0) {
+    cli::cli_abort(c(
+      "{.arg spot_radius} must be a positive number.",
+      "x" = "You supplied {.val {spot_radius}}"
+    ))
+  }
+
+  if (spot_radius >= min(width, height) / 2) {
+    cli::cli_abort(c(
+      "{.arg spot_radius} is too large for the landscape dimensions.",
+      "i" = "Maximum recommended: {min(width, height) / 2}",
+      "x" = "You supplied {.val {spot_radius}}"
+    ))
+  }
+
+  # Validate noise_radius_sd
+  if (!is.numeric(noise_radius_sd) || noise_radius_sd < 0) {
+    cli::cli_abort(c(
+      "{.arg noise_radius_sd} must be a non-negative number.",
+      "x" = "You supplied {.val {noise_radius_sd}}"
+    ))
+  }
+
+  # Validate radius_noise_fraction
+  if (
+    !is.numeric(radius_noise_fraction) ||
+      radius_noise_fraction < 0 ||
+      radius_noise_fraction > 1
+  ) {
+    cli::cli_abort(c(
+      "{.arg radius_noise_fraction} must be between 0 and 1.",
+      "x" = "You supplied {.val {radius_noise_fraction}}"
+    ))
+  }
+
+  # Validate spot_jitter
+  if (!is.numeric(spot_jitter) || spot_jitter < 0) {
+    cli::cli_abort(c(
+      "{.arg spot_jitter} must be a non-negative number.",
+      "x" = "You supplied {.val {spot_jitter}}"
+    ))
+  }
+
+  # Validate invert_landscape
+  if (!is.logical(invert_landscape) || length(invert_landscape) != 1) {
+    cli::cli_abort(c(
+      "{.arg invert_landscape} must be a single logical value (TRUE or FALSE).",
+      "x" = "You supplied {.val {invert_landscape}}"
+    ))
+  }
+
+  # Validate regular_spots
+  if (!is.logical(regular_spots) || length(regular_spots) != 1) {
+    cli::cli_abort(c(
+      "{.arg regular_spots} must be a single logical value (TRUE or FALSE).",
+      "x" = "You supplied {.val {regular_spots}}"
+    ))
+  }
+
   # Validate and adjust n_spots for regular placement
   if (regular_spots) {
     # Calculate maximum possible spots based on hexagonal grid
@@ -98,7 +200,7 @@ create_landscape_spots <- function(
     # Use k-means for subset selection
     if (n_spots < n_available) {
       km <- suppressWarnings(
-        kmeans(grid_points, centers = n_spots, nstart = 5, iter.max = 50)
+        stats::kmeans(grid_points, centers = n_spots, nstart = 5, iter.max = 50)
       )
       cluster_centers <- as.data.frame(km$centers)
     } else {
@@ -109,11 +211,17 @@ create_landscape_spots <- function(
     if (spot_jitter > 0) {
       cluster_centers$row <- pmin(
         height,
-        pmax(1, cluster_centers$row + runif(n_spots, -spot_jitter, spot_jitter))
+        pmax(
+          1,
+          cluster_centers$row + stats::runif(n_spots, -spot_jitter, spot_jitter)
+        )
       )
       cluster_centers$col <- pmin(
         width,
-        pmax(1, cluster_centers$col + runif(n_spots, -spot_jitter, spot_jitter))
+        pmax(
+          1,
+          cluster_centers$col + stats::runif(n_spots, -spot_jitter, spot_jitter)
+        )
       )
     }
   } else {
@@ -128,28 +236,31 @@ create_landscape_spots <- function(
     )
   }
 
-  #prepare landscape
+  # Prepare landscape
   mat <- matrix(0, nrow = height, ncol = width)
 
   # Create clusters around centers
-  for (i in 1:nrow(cluster_centers)) {
+  for (i in seq_len(nrow(cluster_centers))) {
     center_row <- cluster_centers$row[i]
     center_col <- cluster_centers$col[i]
 
-    # --- Radius-Variation ---
+    # Apply radius variation
     if (noise_radius_sd > 0) {
-      adjusted_radius <- max(1, spot_radius + rnorm(1, 0, noise_radius_sd))
+      adjusted_radius <- max(
+        1,
+        spot_radius + stats::rnorm(1, 0, noise_radius_sd)
+      )
     } else {
       adjusted_radius <- spot_radius
     }
 
-    # --- Pixelgrenzen bestimmen ---
+    # Determine pixel boundaries
     row_min <- max(1, floor(center_row - adjusted_radius))
     row_max <- min(height, ceiling(center_row + adjusted_radius))
     col_min <- max(1, floor(center_col - adjusted_radius))
     col_max <- min(width, ceiling(center_col + adjusted_radius))
 
-    # --- Sauber gefüllter Kreis ---
+    # Fill circular spots
     for (r in row_min:row_max) {
       for (c in col_min:col_max) {
         dx <- c - center_col
@@ -162,7 +273,7 @@ create_landscape_spots <- function(
         } else if (dist <= adjusted_radius) {
           prop_veg <- (1 -
             0.5 * (dist - noise_start) / (adjusted_radius - noise_start))
-          if (runif(1) < prop_veg) {
+          if (stats::runif(1) < prop_veg) {
             mat[r, c] <- 1
           }
         }
@@ -170,7 +281,7 @@ create_landscape_spots <- function(
     }
   }
 
-  # Invert landscape if specified (zeroes become ones and vice versa)
+  # Invert landscape if specified
   if (invert_landscape) {
     mat <- 1 - mat
   }
