@@ -414,7 +414,7 @@ train_nn_landscapes <- function(
       model_path <- paste0(model_path, ".keras")
     }
 
-    keras3::save_model_tf(final_model, model_path)
+    keras3::save_model(final_model, model_path)
     # Save metadata separately
     metadata_path <- gsub("\\.keras$", "_metadata.rds", model_path)
     if (model_path == metadata_path) {

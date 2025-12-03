@@ -57,8 +57,8 @@ ggsave(
     sep = ""
   ),
   plot = fig_ecotones,
-  width = 8,
-  height = 2,
+  width = 6,
+  height = 1.5,
   dpi = 300
 )
 
@@ -96,18 +96,23 @@ best_10 <- evaluate_landscape_metrics(
   method = "kruskal_p"
 )
 
+landscape_metrics_plot <- landscape_metrics
+landscape_metrics_plot$pattern[landscape_metrics_plot$pattern=="sine_bands"] <- "bands"
+
 # plot the 10 best metrics
 p_metrics <- plot_metrics(
-  metrics = landscape_metrics,
+  metrics = landscape_metrics_plot,
   selected_metrics = best_10,
   force = TRUE
 )
 
+p_metrics
+
 ggsave(
   filename = paste(directory,"fig_supp_ecotone_metrics.jpg", sep = ""),
   plot = p_metrics,
-  width = 8,
-  height = 6,
+  width = 6,
+  height = 4.5,
   dpi = 300
 )
 
@@ -156,7 +161,34 @@ validation_results_ecotone_lm <- apply_nn_metrics(
   return_performance = TRUE
 )
 
+#look at validation results
 validation_results_ecotone_lm
+validation_results_ecotone_lm$performance$accuracy
+validation_results_ecotone_lm$performance$confusion_matrix
+df <- validation_results_ecotone_lm$predictions
+#determine wrong classifications
+wrong_idx <- which(df$actual_class != df$predicted_class)
+l_misclass <- test_landscapes_ecotone[wrong_idx]
+for (l in 1:length(l_misclass)){
+  if (l_misclass[[l]]$pattern=="sine_bands") l_misclass[[l]]$pattern <- "bands"
+}
+for(i in 1:length(l_misclass)){
+  l_misclass[[i]]$pattern <- paste("(", fig_sub_letter[i], ") ", l_misclass[[i]]$pattern,sep="")
+}
+
+
+p_misclass <- plot_landscape_list(l_misclass,show_legend = F)
+p_misclass
+
+ggsave(
+  filename = paste(directory,"fig_supp_ecotone_misclassified.jpg", sep = ""),
+  plot = p_misclass,
+  width = 3.5,
+  height = 1.5,
+  dpi = 300
+)
+
+
 
 #show landscapes that are not classified correctly
 #SELINA, please check, gives an error message
@@ -166,4 +198,13 @@ plot_classified_landscapes(
   only_misclassified = TRUE
 )
 
+#--------------------------------------------------------------------
+# Train neural network with keras
+#--------------------------------------------------------------------
 
+# train a network
+model_ecotones_keras <- train_nn_landscapes(
+  landscapes = ecotone_landscapes
+)
+
+#--> Error
