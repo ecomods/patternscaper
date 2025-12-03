@@ -10,7 +10,8 @@ test_that("landscape generators validate width parameter", {
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered_trees,
-    spots = create_landscape_spots
+    spots = create_landscape_spots,
+    sine_bands = create_landscape_sine_bands
   )
 
   for (name in names(generators)) {
@@ -50,7 +51,8 @@ test_that("landscape generators validate height parameter", {
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered_trees,
-    spots = create_landscape_spots
+    spots = create_landscape_spots,
+    sine_bands = create_landscape_sine_bands
   )
 
   for (name in names(generators)) {
@@ -82,14 +84,15 @@ test_that("landscape generators validate height parameter", {
   }
 })
 
-# treeline_position parameter validation -------------------------------------------------
+# treeline_position parameter validation --------------------------------------
 test_that("landscape generators validate treeline_position parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
-    clustered = create_landscape_clustered_trees
+    clustered = create_landscape_clustered_trees,
+    sine_bands = create_landscape_sine_bands
   )
 
   for (name in names(generators)) {
@@ -123,7 +126,8 @@ test_that("landscape generators validate rotation parameter", {
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered_trees,
-    spots = create_landscape_spots
+    spots = create_landscape_spots,
+    sine_bands = create_landscape_sine_bands
   )
 
   for (name in names(generators)) {
@@ -545,5 +549,120 @@ test_that("spots warns when n_spots exceeds grid capacity for regular placement"
     ),
     "only ~.* positions fit",
     info = "Testing spots with too many spots for regular placement"
+  )
+})
+
+# Pattern-specific validation: Sine bands -------------------------------------
+test_that("sine_bands validates band_zone_prop parameter", {
+  expect_error(
+    create_landscape_sine_bands(band_zone_prop = "0.2"),
+    "must be between 0 and 1",
+    info = "Testing sine_bands with non-numeric band_zone_prop"
+  )
+
+  expect_error(
+    create_landscape_sine_bands(band_zone_prop = -0.1),
+    "must be between 0 and 1",
+    info = "Testing sine_bands with negative band_zone_prop"
+  )
+
+  expect_error(
+    create_landscape_sine_bands(band_zone_prop = 1.5),
+    "must be between 0 and 1",
+    info = "Testing sine_bands with band_zone_prop > 1"
+  )
+})
+
+test_that("sine_bands validates band_thickness parameter", {
+  expect_error(
+    create_landscape_sine_bands(band_thickness = "3"),
+    "must be a positive number",
+    info = "Testing sine_bands with non-numeric band_thickness"
+  )
+
+  expect_error(
+    create_landscape_sine_bands(band_thickness = -2),
+    "must be a positive number",
+    info = "Testing sine_bands with negative band_thickness"
+  )
+
+  expect_error(
+    create_landscape_sine_bands(band_thickness = 0),
+    "must be a positive number",
+    info = "Testing sine_bands with zero band_thickness"
+  )
+})
+
+test_that("sine_bands validates band_spacing parameter", {
+  expect_error(
+    create_landscape_sine_bands(band_spacing = "10"),
+    "must be a positive number",
+    info = "Testing sine_bands with non-numeric band_spacing"
+  )
+
+  expect_error(
+    create_landscape_sine_bands(band_spacing = -5),
+    "must be a positive number",
+    info = "Testing sine_bands with negative band_spacing"
+  )
+
+  expect_error(
+    create_landscape_sine_bands(band_spacing = 0),
+    "must be a positive number",
+    info = "Testing sine_bands with zero band_spacing"
+  )
+})
+
+test_that("sine_bands validates frequency parameter", {
+  expect_error(
+    create_landscape_sine_bands(frequency = "0.5"),
+    "must be a non-negative number",
+    info = "Testing sine_bands with non-numeric frequency"
+  )
+
+  expect_error(
+    create_landscape_sine_bands(frequency = -1),
+    "must be a non-negative number",
+    info = "Testing sine_bands with negative frequency"
+  )
+})
+
+test_that("sine_bands validates amplitude parameter", {
+  expect_error(
+    create_landscape_sine_bands(amplitude = "5"),
+    "must be a non-negative number",
+    info = "Testing sine_bands with non-numeric amplitude"
+  )
+
+  expect_error(
+    create_landscape_sine_bands(amplitude = -3),
+    "must be a non-negative number",
+    info = "Testing sine_bands with negative amplitude"
+  )
+})
+
+test_that("sine_bands validates noise_sd parameter", {
+  expect_error(
+    create_landscape_sine_bands(noise_sd = "1"),
+    "must be a non-negative number",
+    info = "Testing sine_bands with non-numeric noise_sd"
+  )
+
+  expect_error(
+    create_landscape_sine_bands(noise_sd = -2),
+    "must be a non-negative number",
+    info = "Testing sine_bands with negative noise_sd"
+  )
+})
+
+test_that("sine_bands warns when no bands can fit", {
+  expect_warning(
+    create_landscape_sine_bands(
+      treeline_position = 0.7,
+      band_zone_prop = 0.15,
+      band_spacing = 20
+    ),
+    "No bands can fit in available space",
+    info = "Testing sine_bands with band_spacing too large for available space"
   )
 })

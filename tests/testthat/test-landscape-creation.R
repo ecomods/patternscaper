@@ -7,7 +7,8 @@ test_that("landscape generators create valid landscape objects", {
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
-    spots = create_landscape_spots
+    spots = create_landscape_spots,
+    sine_bands = create_landscape_sine_bands
   )
 
   for (name in names(generators)) {
@@ -31,7 +32,8 @@ test_that("landscape generators support rotation parameter", {
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
-    spots = create_landscape_spots
+    spots = create_landscape_spots,
+    sine_bands = create_landscape_sine_bands
   )
 
   for (name in names(generators_with_rotation)) {
@@ -482,6 +484,182 @@ test_that("create_landscape_spots handles edge cases", {
     spot_radius = 1
   )
   expect_true(is_landscape(l_small))
+})
+
+# Sine bands ------------------------------------------------------------------
+test_that("create_landscape_sine_bands creates treeline with bands below", {
+  set.seed(123)
+
+  l <- create_landscape_sine_bands(
+    width = 30,
+    height = 30,
+    treeline_position = 0.4,
+    band_zone_prop = 0.3,
+    band_spacing = 5,
+    band_thickness = 2
+  )
+
+  expect_true(is_landscape(l))
+
+  # Should have vegetation (1s) both from treeline and bands
+  vals <- terra::values(l$data)
+  expect_true(sum(vals == 1) > 0)
+
+  # Check that bands exist below treeline
+  mat <- matrix(vals, nrow = 30, ncol = 30)
+  # Lower rows (below treeline) should have some 1s (bands)
+  lower_half <- mat[20:30, ]
+  expect_true(sum(lower_half == 1) > 0)
+})
+
+test_that("create_landscape_sine_bands handles zero amplitude (straight treeline)", {
+  l <- create_landscape_sine_bands(
+    width = 20,
+    height = 20,
+    treeline_position = 0.5,
+    amplitude = 0,
+    band_spacing = 5
+  )
+
+  expect_true(is_landscape(l))
+})
+
+test_that("create_landscape_sine_bands noise_sd adds variation to bands", {
+  set.seed(123)
+
+  # Without noise
+  l_no_noise <- create_landscape_sine_bands(
+    width = 25,
+    height = 25,
+    band_spacing = 5,
+    band_thickness = 2,
+    noise_sd = 0
+  )
+
+  set.seed(123)
+  # With noise
+  l_with_noise <- create_landscape_sine_bands(
+    width = 25,
+    height = 25,
+    band_spacing = 5,
+    band_thickness = 2,
+    noise_sd = 2
+  )
+
+  vals_no_noise <- terra::values(l_no_noise$data)
+  vals_with_noise <- terra::values(l_with_noise$data)
+
+  # Patterns should differ due to noise
+  expect_false(identical(vals_no_noise, vals_with_noise))
+})
+
+test_that("create_landscape_sine_bands frequency affects wave pattern", {
+  set.seed(123)
+
+  # Low frequency (long waves)
+  l_low_freq <- create_landscape_sine_bands(
+    width = 30,
+    height = 30,
+    frequency = 0.1,
+    amplitude = 5
+  )
+
+  # High frequency (short waves)
+  l_high_freq <- create_landscape_sine_bands(
+    width = 30,
+    height = 30,
+    frequency = 0.5,
+    amplitude = 5
+  )
+
+  expect_true(is_landscape(l_low_freq))
+  expect_true(is_landscape(l_high_freq))
+
+  # Different frequencies should create different patterns
+  vals_low <- terra::values(l_low_freq$data)
+  vals_high <- terra::values(l_high_freq$data)
+  expect_false(identical(vals_low, vals_high))
+})
+
+test_that("create_landscape_sine_bands warns when bands cannot fit", {
+  expect_warning(
+    l <- create_landscape_sine_bands(
+      width = 20,
+      height = 20,
+      treeline_position = 0.7,
+      band_zone_prop = 0.15,
+      band_spacing = 20
+    ),
+    "No bands can fit in available space"
+  )
+})
+
+test_that("create_landscape_sine_bands stores all params correctly", {
+  l <- create_landscape_sine_bands(
+    width = 30,
+    height = 40,
+    treeline_position = 0.6,
+    band_zone_prop = 0.3,
+    band_thickness = 4,
+    band_spacing = 8,
+    frequency = 0.2,
+    amplitude = 6,
+    noise_sd = 1.5,
+    rotation = 45
+  )
+
+  expect_equal(l$params$width, 30)
+  expect_equal(l$params$height, 40)
+  expect_equal(l$params$treeline_position, 0.6)
+  expect_equal(l$params$band_zone_prop, 0.3)
+  expect_equal(l$params$band_thickness, 4)
+  expect_equal(l$params$band_spacing, 8)
+  expect_equal(l$params$frequency, 0.2)
+  expect_equal(l$params$amplitude, 6)
+  expect_equal(l$params$noise_sd, 1.5)
+  expect_equal(l$params$rotation, 45)
+})
+
+test_that("create_landscape_sine_bands produces reproducible results with seed", {
+  set.seed(789)
+  l1 <- create_landscape_sine_bands(
+    width = 25,
+    height = 25,
+    band_spacing = 6,
+    noise_sd = 1
+  )
+
+  set.seed(789)
+  l2 <- create_landscape_sine_bands(
+    width = 25,
+    height = 25,
+    band_spacing = 6,
+    noise_sd = 1
+  )
+
+  vals1 <- terra::values(l1$data)
+  vals2 <- terra::values(l2$data)
+  expect_identical(vals1, vals2)
+})
+
+test_that("create_landscape_sine_bands handles edge cases", {
+  # Very small band zone
+  l_small_zone <- create_landscape_sine_bands(
+    width = 20,
+    height = 20,
+    band_zone_prop = 0.05,
+    band_spacing = 3
+  )
+  expect_true(is_landscape(l_small_zone))
+
+  # Very thick bands
+  l_thick <- create_landscape_sine_bands(
+    width = 20,
+    height = 20,
+    band_thickness = 8,
+    band_spacing = 10
+  )
+  expect_true(is_landscape(l_thick))
 })
 
 # Random ----------------------------------------------------------------------
