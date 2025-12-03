@@ -1,18 +1,6 @@
 # Load all functions
 devtools::load_all()
 
-# Set up Keras ----------------------------------------------------------
-# Only needs to be done once
-# First check your python configuration
-# Version should be max. 3.10, otherwise keras will not work
-# If you did not configure python yet, you can do it in R Studio under
-# Tools -> Global Options -> Python
-reticulate::py_discover_config()
-
-# Install TensorFlow backend (only needed once)
-# Also creates a venv r-tensorflow
-# install_keras()
-
 # -----------------------------------------------------------------------------#
 # Setup keras ------------------------------------------------------------------
 # -----------------------------------------------------------------------------#
@@ -33,7 +21,7 @@ prewarm_keras <- function() {
 
   # The simplest operation that triggers TensorFlow initialization
   # You don't need a full model!
-  keras3::invisible(to_categorical(0))
+  keras3::to_categorical(0)
 
   end_time <- Sys.time()
   elapsed <- as.numeric(difftime(end_time, start_time, units = "secs"))
