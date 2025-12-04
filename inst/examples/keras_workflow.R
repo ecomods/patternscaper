@@ -36,14 +36,14 @@ prewarm_keras()
 # Test Keras NN ---------------------------------------------------------
 # Increase number of landscapes for better training
 training_landscapes <- create_training_landscapes(
-  n = 100, # Larger dataset for better generalization
+  n = 200, # Larger dataset for better generalization
   patterns = c(
     "sharp",
     "diffuse",
-    "curvy",
-    "fingers",
     "clustered",
-    "bands"
+    "fingers",
+    "bands",
+    "random"
   ),
   width = 100,
   height = 100,
@@ -56,8 +56,7 @@ model <- train_nn_landscapes(
   landscapes = training_landscapes,
   cv_method = "k-fold",
   cv_folds = 5,
-  epochs = 10,
-  model_path = "models/landscape_classifier"
+  epochs = 10
 )
 
 # Look at the model object
@@ -75,7 +74,7 @@ plot_classification_results(model, plot_type = "misclassifications")
 
 # Plot the landscapes that were misclassified
 plot_classified_landscapes(
-  classification = model$validation_results,
+  classification = model$performance$validation_results,
   landscapes = training_landscapes,
   only_misclassified = TRUE
 )
@@ -84,6 +83,14 @@ plot_classified_landscapes(
 # create test landscapes
 test_landscapes <- create_training_landscapes(
   n = 20,
+  patterns = c(
+    "sharp",
+    "diffuse",
+    "clustered",
+    "fingers",
+    "sine_bands",
+    "random"
+  ),
   add_rotation = TRUE
 )
 
@@ -109,8 +116,9 @@ apply_nn_landscapes(
 )
 
 validation_results <- apply_nn_landscapes(
-  landscape = test_landscapes,
-  nn_model = model
+  landscapes = test_landscapes,
+  nn_model = model,
+  return_performance = TRUE
 )
 
 plot_classified_landscapes(

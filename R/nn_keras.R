@@ -316,8 +316,11 @@ train_nn_landscapes <- function(
 
   result <- list(
     model = final_model,
-    performance = performance,
-    history = history
+    history = history,
+    classes = class_names,
+    input_shape = input_shape,
+    architecture = architecture,
+    performance = performance
   )
 
   # Save model if requested
@@ -352,35 +355,59 @@ train_nn_landscapes <- function(
 #' Applies a trained CNN model to classify new landscapes based on their
 #' spatial patterns.
 #'
-#' @param landscapes SpatRaster, matrix, or list. Landscape(s) to classify.
-#'   Can be a single landscape or list of landscapes, with or without metadata.
+#' @param landscapes landscape object, or list of landscape objects. Landscape(s) to classify.
 #' @param nn_model List. CNN model from train_nn_landscapes().
-#' @param show_progress Logical. Whether to display progress bar for multiple landscapes (default: TRUE).
+#' @param return_performance Logical. Whether to return performance metrics when actual classes are available (default: FALSE).
 #'
-#' @return tibble. Classification results with columns for landscape name,
-#'   predicted class, confidence score, warning flag, and probability for each class.
+#' @return When actual classes unavailable or return_performance=FALSE: tibble with columns:
+#'   \describe{
+#'     \item{landscape_id}{Numeric landscape identifier}
+#'     \item{landscape_name}{Character landscape name (if available)}
+#'     \item{predicted_class}{Predicted landscape pattern}
+#'     \item{confidence}{Prediction confidence (max probability)}
+#'     \item{<class_name>}{Probability for each trained class}
+#'   }
+#'
+#'   When actual classes available and return_performance=TRUE: List containing:
+#'   \describe{
+#'     \item{predictions}{Tibble as above, plus actual_class column}
+#'     \item{performance}{Performance metrics from evaluate_cv_performance()}
+#'   }
 #' @export
-apply_nn_keras <- function(
+apply_nn_landscapes <- function(
   landscapes,
   nn_model,
-  show_progress = TRUE
+  return_performance = FALSE
 ) {
+  # Input validation
+  if (
+    !is.list(nn_model) ||
+      !all(c("model", "classes", "input_shape") %in% names(nn_model))
+  ) {
+    cli::cli_abort(
+      "'nn_model' must be a trained model from train_nn_landscapes()"
+    )
+  }
+
   # Extract required elements from the model
   model <- nn_model$model
   class_names <- nn_model$classes
   input_shape <- nn_model$input_shape
 
-  # Validate inputs
+  # Validate landscapes structure
+  if (!is.list(landscapes) && !is_landscape(landscapes)) {
+    cli::cli_abort(
+      "'landscapes' must be a landscape object or list of landscapes"
+    )
+  }
 
   # If landscapes is a single landscape, wrap it into a list
   if (is_landscape(landscapes)) {
-    # Wrap single landscape into a list
     landscapes <- list(landscapes)
   }
 
   # Check if landscapes is a list of landscape objects
   if (any(!sapply(landscapes, is_landscape))) {
-    # find out which element is not a landscape
     invalid_indices <- which(!sapply(landscapes, is_landscape))
     cli::cli_abort(c(
       "All elements must be landscape objects.",
@@ -390,6 +417,9 @@ apply_nn_keras <- function(
 
   # Get the training labels (pattern field of the landscape object) if available
   landscape_pattern <- sapply(landscapes, function(l) l$pattern)
+  landscape_names <- sapply(landscapes, function(l) {
+    if (!is.null(l$name)) l$name else NA_character_
+  })
 
   # Convert all landscapes to arrays
   landscape_arrays <- lapply(landscapes, function(l) {
@@ -400,45 +430,106 @@ apply_nn_keras <- function(
   # Stack all arrays into one 4D array (samples, height, width, channels)
   landscape_data <- abind::abind(landscape_arrays, along = 0)
 
-  predictions <- predict(model, landscape_data)
+  # Get predictions
+  pred <- predict(model, landscape_data, verbose = 0)
 
   # Add classes as column names
-  colnames(predictions) <- class_names
+  colnames(pred) <- class_names
 
-  # Find the class with the highest probability (this is the predicted class)
-  max_col <- apply(predictions, 1, which.max)
-  predicted_class <- colnames(predictions)[max_col]
+  # Turn into a tibble and add columns for predicted class and confidence
+  predictions <- tibble::as_tibble(pred)
 
   # Find the confidence (the probability for the predicted class)
-  confidence <- apply(predictions, 1, max)
+  predictions$confidence <- apply(pred, 1, max)
 
-  # turn into a tibble and add columns for actual and predicted class and confidence
-  predictions <- tibble::as_tibble(predictions)
-
+  # Find the class with the highest probability (this is the predicted class)
+  max_col <- apply(pred, 1, which.max)
+  predicted_class <- colnames(pred)[max_col]
   predictions$predicted_class <- predicted_class
-  predictions$confidence <- confidence
-  predictions$actual_class <- landscape_pattern
-  predictions$landscape_id <- seq_len(nrow(predictions))
 
   # Reorder the columns
   predictions <- predictions |>
     dplyr::relocate(c(
-      landscape_id,
-      actual_class,
       predicted_class,
       confidence
     ))
 
-  # Create confusion matrix and return it
-  conf_matrix <- table(
-    Predicted = factor(predictions$predicted_class, levels = class_names),
-    Actual = factor(predictions$actual_class, levels = class_names)
+  # Add landscape information
+  predictions$landscape_id <- seq_len(nrow(predictions))
+
+  if (any(!is.na(landscape_names))) {
+    predictions$landscape_name <- landscape_names
+  }
+
+  # Check if we have actual classes (not NA or "unclassified")
+  has_actual_classes <- !all(
+    is.na(landscape_pattern) | landscape_pattern == "unclassified"
   )
 
-  return(list(
-    predictions = predictions,
-    confusion_matrix = conf_matrix
-  ))
+  # Add actual classes if available
+  if (has_actual_classes) {
+    predictions$actual_class <- landscape_pattern
+  }
+
+  # Reorder columns: landscape info, then actual (if present), then predicted
+  predictions <- predictions |>
+    dplyr::relocate(c(
+      landscape_id,
+      dplyr::any_of(c("landscape_name", "actual_class")),
+      predicted_class,
+      confidence
+    ))
+
+  # Evaluate performance if actual classes are available and requested----------
+  if (has_actual_classes & return_performance) {
+    # Check if actual classes match model's trained classes
+    unique_actual <- unique(landscape_pattern[
+      !is.na(landscape_pattern) & landscape_pattern != "unclassified"
+    ])
+    unknown_classes <- setdiff(unique_actual, class_names)
+
+    if (length(unknown_classes) > 0) {
+      cli::cli_warn(c(
+        "Input landscapes contain classes not seen during training:",
+        "x" = "{.val {unknown_classes}}",
+        "i" = "Model trained on: {.val {class_names}}",
+        "i" = "Performance evaluation skipped - returning predictions only"
+      ))
+
+      return(predictions)
+    }
+
+    # All classes are valid - proceed with performance evaluation
+    # Create single-fold structure for evaluate_cv_performance
+    cv_predictions <- list(predictions$predicted_class)
+    cv_probabilities <- list(as.matrix(
+      predictions |>
+        dplyr::select(dplyr::all_of(class_names))
+    ))
+    cv_actual <- list(predictions$actual_class)
+    cv_landscape_ids <- list(predictions$landscape_id)
+
+    # Evaluate performance using same function as training
+    performance <- evaluate_cv_performance(
+      cv_predictions = cv_predictions,
+      cv_probabilities = cv_probabilities,
+      cv_actual = cv_actual,
+      cv_landscape_ids = cv_landscape_ids,
+      class_names = class_names,
+      cv_method = "none", # Not actual CV, just test set evaluation
+      cv_folds = 1,
+      verbose = TRUE,
+      return_predictions = FALSE
+    )
+
+    return(list(
+      predictions = predictions,
+      performance = performance
+    ))
+  } else {
+    # No actual classes or performance not requested - just return predictions
+    return(predictions)
+  }
 }
 
 #' Create Keras Model Architecture
