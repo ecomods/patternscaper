@@ -150,10 +150,10 @@ train_nn_metrics <- function(
     for (fold in 1:cv_folds) {
       # Split data into training and validation
       train_indices <- fold_indices != fold
-      validation_indices <- fold_indices == fold
+      val_indices <- fold_indices == fold
 
       train_data <- metrics_scaled[train_indices, ]
-      validation_data <- metrics_scaled[validation_indices, ]
+      val_data <- metrics_scaled[val_indices, ]
 
       # Train model on training data
       # Train final model on all data
@@ -168,8 +168,8 @@ train_nn_metrics <- function(
       # Predict on validation data
       probs <- predict(
         fold_model,
-        newdata = validation_data[,
-          -which(names(validation_data) == "pattern")
+        newdata = val_data[,
+          -which(names(val_data) == "pattern")
         ]
       )
 
@@ -182,8 +182,8 @@ train_nn_metrics <- function(
       # Store results for this fold
       cv_predictions[[fold]] <- predictions
       cv_probabilities[[fold]] <- probs
-      cv_actual[[fold]] <- validation_data$pattern
-      cv_landscape_ids[[fold]] <- which(validation_indices)
+      cv_actual[[fold]] <- val_data$pattern
+      cv_landscape_ids[[fold]] <- which(val_indices)
     }
 
     # Evaluate cv performance -------------------------------------------------
