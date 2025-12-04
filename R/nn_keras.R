@@ -5,17 +5,25 @@
 #' distinguishing different landscape patterns.
 #'
 #' @param landscapes List. List of landscape objects created by `create_landscape()` or `create_training_landscapes()`.
-#' @param cv_method Character. Cross-validation method: "none", "k-fold" (default: "k-fold").
+#' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #' @param cv_folds Integer. Number of cross-validation folds when cv_method="k-fold" (default: 5).
 #' @param epochs Integer. Number of training epochs (default: 20).
 #' @param batch_size Integer. Batch size for training (default: 16).
 #' @param validation_split Numeric. Proportion of data to use for validation when cv_method="none" (default: 0.2).
 #' @param learning_rate Numeric. Learning rate for Adam optimizer (default: 0.001).
-#' @param model_path Character. Path to save model (default: NULL means that the
-#'     model is not saved).
+#' @param model_path Character. Path to save model (default: NULL means model is not saved).
 #' @param architecture Character. CNN architecture: "multiscale" (default).
 #' @param dropout_rate Numeric. Dropout rate for regularization (default: 0.3).
 #' @param dense_units Integer. Units in dense layer (default: 128).
+#' @param loss Character. Loss function for training (default: "categorical_crossentropy").
+#'   Common alternatives: "sparse_categorical_crossentropy", "kullback_leibler_divergence".
+#' @param optimizer Character. Optimizer to use: "adam" (default), "sgd", "rmsprop".
+#'   Note: optimizer-specific parameters like momentum are currently not exposed.
+#' @param metrics Character vector. Metrics to track during training (default: c("accuracy")).
+#'   Common additions: "categorical_accuracy", "top_k_categorical_accuracy".
+#' @param callbacks List. Optional keras callbacks for advanced training control (default: NULL).
+#'   Examples: early stopping, learning rate scheduling, model checkpointing.
+#' @param verbose Integer. Verbosity mode: 0 = silent, 1 = progress bar, 2 = one line per epoch (default: 1).
 #'
 #' @return List. Trained CNN model and associated metadata.
 #' @export
@@ -30,7 +38,12 @@ train_nn_landscapes <- function(
   architecture = "multiscale",
   dropout_rate = 0.3,
   dense_units = 128,
-  model_path = NULL
+  model_path = NULL,
+  loss = "categorical_crossentropy",
+  optimizer = "adam",
+  metrics = c("accuracy"),
+  callbacks = NULL,
+  verbose = 1
 ) {
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
@@ -94,12 +107,13 @@ train_nn_landscapes <- function(
   )
 
   # Compile model
-  model <- model |>
-    keras3::compile(
-      loss = "categorical_crossentropy",
-      optimizer = keras3::optimizer_adam(learning_rate = learning_rate),
-      metrics = c("accuracy")
-    )
+  model <- compile_keras_model(
+    model = model,
+    learning_rate = learning_rate,
+    loss = loss,
+    optimizer = optimizer,
+    metrics = metrics
+  )
 
   # Initialize performance metrics storage
   performance <- NULL
@@ -205,7 +219,17 @@ train_nn_landscapes <- function(
       model <- create_keras_model(
         architecture = architecture,
         input_shape = input_shape,
-        n_classes = n_classes
+        n_classes = n_classes,
+        dropout_rate = dropout_rate,
+        dense_units = dense_units
+      )
+
+      model <- compile_keras_model(
+        model = model,
+        learning_rate = learning_rate,
+        loss = loss,
+        optimizer = optimizer,
+        metrics = metrics
       )
 
       history <- model |>
@@ -215,7 +239,8 @@ train_nn_landscapes <- function(
           epochs = epochs,
           batch_size = batch_size,
           validation_data = list(x_val, y_val),
-          verbose = 1
+          callbacks = callbacks,
+          verbose = verbose
         )
 
       # Evaluate the model
@@ -531,6 +556,50 @@ create_keras_model <- function(
   }
 
   return(model)
+}
+
+#' Compile Keras Model
+#'
+#' Compiles a keras model with specified loss function and optimizer.
+#' Currently configured for multi-class classification problems.
+#'
+#' @param model Keras model. Uncompiled model from create_keras_model().
+#' @param learning_rate Numeric. Learning rate for optimizer (default: 0.001).
+#' @param loss Character. Loss function (default: "categorical_crossentropy").
+#' @param optimizer Character. Optimizer name: "adam", "sgd", "rmsprop" (default: "adam").
+#' @param metrics Character vector. Metrics to track (default: c("accuracy")).
+#'
+#' @return Compiled keras model.
+#' @keywords internal
+compile_keras_model <- function(
+  model,
+  learning_rate = 0.001,
+  loss = "categorical_crossentropy",
+  optimizer = "adam",
+  metrics = c("accuracy")
+) {
+  # Create optimizer based on type
+  opt <- switch(
+    tolower(optimizer),
+    "adam" = keras3::optimizer_adam(learning_rate = learning_rate),
+    "sgd" = keras3::optimizer_sgd(learning_rate = learning_rate),
+    "rmsprop" = keras3::optimizer_rmsprop(learning_rate = learning_rate),
+    {
+      cli::cli_abort(c(
+        "Unsupported optimizer: {optimizer}",
+        "i" = "Available optimizers: 'adam', 'sgd', 'rmsprop'"
+      ))
+    }
+  )
+
+  compiled_model <- model |>
+    keras3::compile(
+      loss = loss,
+      optimizer = opt,
+      metrics = metrics
+    )
+
+  return(compiled_model)
 }
 
 #' Create Multiscale CNN Architecture
