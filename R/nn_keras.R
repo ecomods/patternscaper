@@ -13,6 +13,9 @@
 #' @param learning_rate Numeric. Learning rate for Adam optimizer (default: 0.001).
 #' @param model_path Character. Path to save model (default: NULL means that the
 #'     model is not saved).
+#' @param architecture Character. CNN architecture: "multiscale" (default).
+#' @param dropout_rate Numeric. Dropout rate for regularization (default: 0.3).
+#' @param dense_units Integer. Units in dense layer (default: 128).
 #'
 #' @return List. Trained CNN model and associated metadata.
 #' @export
@@ -24,6 +27,9 @@ train_nn_landscapes <- function(
   batch_size = 16,
   validation_split = 0.2,
   learning_rate = 0.001,
+  architecture = "multiscale",
+  dropout_rate = 0.3,
+  dense_units = 128,
   model_path = NULL
 ) {
   # Validate cv_method parameter
@@ -78,55 +84,22 @@ train_nn_landscapes <- function(
   x_data <- abind::abind(training_arrays, along = 0)
   input_shape <- c(dim(x_data)[2], dim(x_data)[3], dim(x_data)[4])
 
-  # Function to create the multiscale CNN architecture
-  create_model <- function() {
-    model <- keras3::keras_model_sequential() %>%
-      # Detect fine details with small kernels
-      keras3::layer_conv_2d(
-        filters = 32,
-        kernel_size = c(3, 3),
-        padding = "same",
-        input_shape = input_shape
-      ) %>%
-      keras3::layer_activation("relu") %>%
-      # Detect larger patterns with bigger kernels
-      keras3::layer_conv_2d(
-        filters = 32,
-        kernel_size = c(5, 5),
-        padding = "same"
-      ) %>%
-      keras3::layer_activation("relu") %>%
-      keras3::layer_max_pooling_2d(pool_size = c(2, 2)) %>%
-      # Additional feature extraction
-      keras3::layer_conv_2d(
-        filters = 64,
-        kernel_size = c(3, 3),
-        padding = "same"
-      ) %>%
-      keras3::layer_activation("relu") %>%
-      keras3::layer_conv_2d(
-        filters = 64,
-        kernel_size = c(5, 5),
-        padding = "same"
-      ) %>%
-      keras3::layer_activation("relu") %>%
-      keras3::layer_max_pooling_2d(pool_size = c(2, 2)) %>%
-      # Classifier
-      keras3::layer_flatten() %>%
-      keras3::layer_dropout(rate = 0.3) %>%
-      keras3::layer_dense(units = 128, activation = "relu") %>%
-      keras3::layer_dense(units = n_classes, activation = "softmax")
+  # Create the model with selected architecture
+  model <- create_keras_model(
+    architecture = architecture,
+    input_shape = input_shape,
+    n_classes = n_classes,
+    dropout_rate = dropout_rate,
+    dense_units = dense_units
+  )
 
-    # Compile model
-    model %>%
-      keras3::compile(
-        loss = "categorical_crossentropy",
-        optimizer = keras3::optimizer_adam(learning_rate = learning_rate),
-        metrics = c("accuracy")
-      )
-
-    return(model)
-  }
+  # Compile model
+  model <- model |>
+    keras3::compile(
+      loss = "categorical_crossentropy",
+      optimizer = keras3::optimizer_adam(learning_rate = learning_rate),
+      metrics = c("accuracy")
+    )
 
   # Initialize performance metrics storage
   performance <- NULL
@@ -229,9 +202,13 @@ train_nn_landscapes <- function(
       y_val_int <- y_int[val_indices]
 
       # Create and train the model
-      model <- create_model()
+      model <- create_keras_model(
+        architecture = architecture,
+        input_shape = input_shape,
+        n_classes = n_classes
+      )
 
-      history <- model %>%
+      history <- model |>
         keras3::fit(
           x = x_train,
           y = y_train,
@@ -520,4 +497,93 @@ apply_nn_keras <- function(
     predictions = predictions,
     confusion_matrix = conf_matrix
   ))
+}
+
+#' Create Keras Model Architecture
+#'
+#' @param architecture Character. Architecture type.
+#' @param input_shape Integer vector. Input dimensions (height, width, channels).
+#' @param n_classes Integer. Number of output classes.
+#' @param dropout_rate Numeric. Dropout rate for regularization (default: 0.3).
+#' @param dense_units Integer. Units in dense layer (default: 128).
+#'
+#' @return Uncompiled keras model.
+#' @keywords internal
+create_keras_model <- function(
+  architecture = "multiscale",
+  input_shape,
+  n_classes,
+  dropout_rate = 0.3,
+  dense_units = 128
+) {
+  if (architecture == "multiscale") {
+    model <- create_multiscale_model(
+      input_shape = input_shape,
+      n_classes = n_classes,
+      dropout_rate = dropout_rate,
+      dense_units = dense_units
+    )
+  } else {
+    cli::cli_abort(c(
+      "Unsupported architecture: {architecture}",
+      "i" = "Available architectures: 'multiscale'"
+    ))
+  }
+
+  return(model)
+}
+
+#' Create Multiscale CNN Architecture
+#'
+#' @param input_shape Integer vector. Input dimensions.
+#' @param n_classes Integer. Number of output classes.
+#' @param dropout_rate Numeric. Dropout rate for regularization.
+#' @param dense_units Integer. Units in dense layer.
+#'
+#' @return Uncompiled keras model.
+#' @keywords internal
+create_multiscale_model <- function(
+  input_shape,
+  n_classes,
+  dropout_rate = 0.3,
+  dense_units = 128
+) {
+  model <- keras3::keras_model_sequential() |>
+    # Detect fine details with small kernels
+    keras3::layer_conv_2d(
+      filters = 32,
+      kernel_size = c(3, 3),
+      padding = "same",
+      input_shape = input_shape
+    ) |>
+    keras3::layer_activation("relu") |>
+    # Detect larger patterns with bigger kernels
+    keras3::layer_conv_2d(
+      filters = 32,
+      kernel_size = c(5, 5),
+      padding = "same"
+    ) |>
+    keras3::layer_activation("relu") |>
+    keras3::layer_max_pooling_2d(pool_size = c(2, 2)) |>
+    # Additional feature extraction
+    keras3::layer_conv_2d(
+      filters = 64,
+      kernel_size = c(3, 3),
+      padding = "same"
+    ) |>
+    keras3::layer_activation("relu") |>
+    keras3::layer_conv_2d(
+      filters = 64,
+      kernel_size = c(5, 5),
+      padding = "same"
+    ) |>
+    keras3::layer_activation("relu") |>
+    keras3::layer_max_pooling_2d(pool_size = c(2, 2)) |>
+    # Classifier
+    keras3::layer_flatten() |>
+    keras3::layer_dropout(rate = dropout_rate) |>
+    keras3::layer_dense(units = dense_units, activation = "relu") |>
+    keras3::layer_dense(units = n_classes, activation = "softmax")
+
+  return(model)
 }
