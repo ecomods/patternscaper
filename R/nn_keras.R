@@ -115,99 +115,40 @@ train_nn_landscapes <- function(
     metrics = metrics
   )
 
-  # Initialize performance metrics storage
-  performance <- NULL
+  # Cross-validation ----------------------------------------------------------
+  # Validate and adjust CV parameters
+  cv_params <- validate_cv_params(
+    patterns = training_labels,
+    cv_method = cv_method,
+    cv_folds = cv_folds
+  )
+
+  # Update cv_method and cv_folds based on validation
+  cv_method <- cv_params$cv_method
+  cv_folds <- cv_params$cv_folds
+  class_counts <- cv_params$class_counts
 
   # Check cross-validation method and parameters -------------------------------
+  # Run model with cross validation --------------------------------------------
   if (cv_method != "none") {
-    # Adjust CV method based on dataset characteristics
-    if (cv_method == "k-fold") {
-      # Adjust the number of folds if necessary
-      class_counts <- table(training_labels)
-      min_class_count <- min(class_counts)
-      total_samples <- length(training_labels)
-
-      # Minimum recommended samples per class per fold for neural networks
-      min_samples_per_fold <- 3
-      # First, check if the dataset is fundamentally too small for k-fold
-      if (total_samples < 30 || min_class_count < 5) {
-        warning(
-          "Dataset is small (n=",
-          total_samples,
-          ") or has classes with few samples (min=",
-          min_class_count,
-          "). Switching to leave-one-out CV for more reliable estimates."
-        )
-        cv_method <- "loo"
-      } else {
-        # If dataset is large enough, check if we can maintain enough samples per fold
-        # Calculate maximum suitable folds to maintain min_samples_per_fold
-        max_suitable_folds <- floor(min_class_count / min_samples_per_fold)
-
-        # If we can't maintain enough samples even with 2 folds
-        if (max_suitable_folds < 2) {
-          warning(
-            "Cannot maintain ",
-            min_samples_per_fold,
-            " samples per class per fold. Switching to leave-one-out CV."
-          )
-          cv_method <- "loo"
-        } else if (cv_folds > max_suitable_folds) {
-          # If we need to reduce folds but can still do k-fold CV
-          warning(sprintf(
-            "Reducing CV folds from %d to %d to ensure at least %d samples per class per fold.",
-            cv_folds,
-            max_suitable_folds,
-            min_samples_per_fold
-          ))
-          cv_folds <- max_suitable_folds
-        }
-        # Otherwise, keep the user-specified fold count
-      }
+    # Create stratified fold assignments ---------------------------------------
+    if (cv_method == "loo") {
+      # If method is "loo", each sample is it's own fold
+      fold_indices <- seq_len(length(landscapes))
+    } else {
+      fold_indices <- find_balanced_cv_folds(training_labels, cv_folds)
     }
-  }
 
-  # If using cross-validation
-  if (cv_method == "k-fold") {
-    # Results storage
-    fold_results <- list()
-    cv_probabilities <- list()
+    # Initialize storage for CV results for each fold
     cv_predictions <- list()
+    cv_probabilities <- list()
     cv_actual <- list()
-    cv_indices <- list()
-
-    # Create stratified fold assignments
-    # Ensure each landscape type is represented in each fold
-    fold_indices <- list()
-    for (fold in 1:cv_folds) {
-      fold_indices[[fold]] <- integer(0)
-    }
-
-    # Distribute indices for each landscape type across folds
-    for (class_name in class_names) {
-      # Get indices of samples for this landscape type
-      class_indices <- which(training_labels == class_name)
-
-      # Distribute these indices evenly across folds
-      class_folds <- sample(rep(1:cv_folds, length.out = length(class_indices)))
-
-      # Add indices to appropriate fold lists
-      for (fold in 1:cv_folds) {
-        fold_indices[[fold]] <- c(
-          fold_indices[[fold]],
-          class_indices[class_folds == fold]
-        )
-      }
-    }
-
-    cat("\n--- Starting", cv_folds, "fold cross-validation ---\n")
+    cv_landscape_ids <- list()
+    cv_evaluation <- list()
 
     for (fold in 1:cv_folds) {
-      cat("Fold", fold, "of", cv_folds, "\n")
-
-      # Split data into training and validation
-      val_indices <- fold_indices[[fold]]
-      train_indices <- setdiff(1:length(y_int), val_indices)
+      train_indices <- fold_indices != fold
+      val_indices <- fold_indices == fold
 
       x_train <- x_data[train_indices, , , , drop = FALSE]
       y_train <- y_data[train_indices, , drop = FALSE]
@@ -215,24 +156,24 @@ train_nn_landscapes <- function(
       y_val <- y_data[val_indices, , drop = FALSE]
       y_val_int <- y_int[val_indices]
 
-      # Create and train the model
-      model <- create_keras_model(
+      # Train the model on the training data
+      fold_model <- create_keras_model(
         architecture = architecture,
         input_shape = input_shape,
         n_classes = n_classes,
         dropout_rate = dropout_rate,
         dense_units = dense_units
       )
-
-      model <- compile_keras_model(
-        model = model,
+      # Compile the fold model
+      fold_model <- compile_keras_model(
+        model = fold_model,
         learning_rate = learning_rate,
         loss = loss,
         optimizer = optimizer,
         metrics = metrics
       )
-
-      history <- model |>
+      # Train the fold model
+      fold_model |>
         keras3::fit(
           x = x_train,
           y = y_train,
@@ -243,162 +184,140 @@ train_nn_landscapes <- function(
           verbose = verbose
         )
 
-      # Evaluate the model
-      evaluation <- model %>% keras3::evaluate(x_val, y_val)
+      # Evaluate the model on the validation fold
+      evaluation <- fold_model |> keras3::evaluate(x_val, y_val)
 
       # Store predictions
-      probs <- model %>% predict(x_val)
-      pred_classes <- apply(probs, 1, which.max) - 1
+      probs <- fold_model |> predict(x_val)
 
-      cv_predictions[[fold]] <- class_names[pred_classes + 1]
-      cv_actual[[fold]] <- class_names[y_val_int + 1]
-      cv_probabilities[[fold]] <- probs
-      cv_indices[[fold]] <- val_indices
+      # Add class names as column names
+      colnames(probs) <- class_names
+
+      pred_classes <- apply(probs, 1, which.max)
 
       # Store results for this fold
-      fold_results[[fold]] <- list(
+      cv_predictions[[fold]] <- class_names[pred_classes]
+      cv_probabilities[[fold]] <- probs
+      cv_actual[[fold]] <- class_names[y_val_int + 1]
+      cv_landscape_ids[[fold]] <- which(val_indices)
+
+      # Store results for this fold
+      cv_evaluation[[fold]] <- list(
         evaluation = evaluation
       )
 
       cat("Fold", fold, "accuracy:", evaluation[["accuracy"]], "\n")
     }
 
-    # Overall confusion matrix
-    overall_confusion <- table(
-      Predicted = unlist(cv_predictions),
-      Actual = unlist(cv_actual)
+    # Evaluate cv performance -------------------------------------------------
+    performance <- evaluate_cv_performance(
+      cv_predictions = cv_predictions,
+      cv_probabilities = cv_probabilities,
+      cv_actual = cv_actual,
+      cv_landscape_ids = cv_landscape_ids,
+      class_names = class_names,
+      cv_method = cv_method,
+      cv_folds = cv_folds,
+      verbose = TRUE
     )
-
     # Calculate average accuracy and loss across folds
-    accuracies <- sapply(fold_results, function(x) x$evaluation[["accuracy"]])
-    losses <- sapply(fold_results, function(x) x$evaluation[["loss"]])
+    accuracies <- sapply(cv_evaluation, function(x) x$evaluation[["accuracy"]])
+    losses <- sapply(cv_evaluation, function(x) x$evaluation[["loss"]])
 
-    cat("\nCross-Validation Results:\n")
+    # Header
+    cli::cli_h2("Accuracy and loss across folds")
+
     cat("Mean accuracy:", mean(accuracies), "±", sd(accuracies), "\n")
     cat("Mean loss:", mean(losses), "±", sd(losses), "\n\n")
 
-    cat("Overall Confusion Matrix:\n")
-    print(overall_confusion)
-    cat("\n")
-
-    # Calculate per-class metrics
-    class_counts <- table(factor(training_labels, levels = class_names))
-    class_recall <- diag(overall_confusion) / colSums(overall_confusion)
-    class_precision <- diag(overall_confusion) / rowSums(overall_confusion)
-
-    # Handle divisions by zero
-    class_precision[is.na(class_precision)] <- 0
-    class_recall[is.na(class_recall)] <- 0
-
-    # F1 score
-    class_f1 <- 2 *
-      class_precision *
-      class_recall /
-      (class_precision + class_recall)
-    class_f1[is.na(class_f1)] <- 0
-
-    performance <- list(
-      confusion_matrix = overall_confusion,
-      accuracy = mean(accuracies),
-      sd_accuracy = sd(accuracies),
-      mean_loss = mean(losses),
-      sd_loss = sd(losses),
-      class_precision = class_precision,
-      class_recall = class_recall,
-      class_f1 = class_f1,
-      cv_method = cv_method,
-      cv_folds = cv_folds,
-      class_counts = as.vector(class_counts)
-    )
-
-    # Print per-class performance summary
-    cat("\nPer-class performance:\n")
-    per_class_metrics <- data.frame(
-      Class = class_names,
-      Count = as.vector(class_counts),
-      Recall = round(class_recall, 2),
-      Precision = round(class_precision, 2),
-      F1_Score = round(class_f1, 2)
-    )
-    print(per_class_metrics)
-
     # Build final model with all data
-    final_model <- create_model()
-    history <- final_model %>%
+    final_model <- create_keras_model(
+      architecture = architecture,
+      input_shape = input_shape,
+      n_classes = n_classes,
+      dropout_rate = dropout_rate,
+      dense_units = dense_units
+    )
+    # Compile the fold model
+    final_model <- compile_keras_model(
+      model = fold_model,
+      learning_rate = learning_rate,
+      loss = loss,
+      optimizer = optimizer,
+      metrics = metrics
+    )
+    # Train the fold model
+    history <- final_model |>
       keras3::fit(
         x = x_data,
         y = y_data,
         epochs = epochs,
         batch_size = batch_size,
-        verbose = 1
+        callbacks = callbacks,
+        verbose = verbose
       )
   } else {
-    # Train on all data with validation split (no cross-validation)
-    final_model <- create_model()
-    history <- final_model %>%
+    # No cross-validation: simple train/validation split
+    cat("\nTraining with validation split (no cross-validation)...\n")
+
+    final_model <- create_keras_model(
+      architecture = architecture,
+      input_shape = input_shape,
+      n_classes = n_classes,
+      dropout_rate = dropout_rate,
+      dense_units = dense_units
+    )
+
+    final_model <- compile_keras_model(
+      model = final_model,
+      learning_rate = learning_rate,
+      loss = loss,
+      optimizer = optimizer,
+      metrics = metrics
+    )
+
+    history <- final_model |>
       keras3::fit(
         x = x_data,
         y = y_data,
         epochs = epochs,
         batch_size = batch_size,
         validation_split = validation_split,
-        verbose = 1
+        callbacks = callbacks,
+        verbose = verbose
       )
 
-    # Evaluate on validation set
-    val_indices <- sample(
-      1:nrow(x_data),
-      size = floor(nrow(x_data) * validation_split)
-    )
-    val_evaluation <- final_model %>%
-      keras3::evaluate(
-        x_data[val_indices, , , , drop = FALSE],
-        y_data[val_indices, , drop = FALSE]
-      )
+    # Get validation metrics from history
+    val_accuracy <- history$metrics$val_accuracy[length(
+      history$metrics$val_accuracy
+    )]
+    val_loss <- history$metrics$val_loss[length(history$metrics$val_loss)]
 
     cat("\nTraining Results (with validation split):\n")
-    cat("Validation accuracy:", val_evaluation[["accuracy"]], "\n")
-    cat("Validation loss:", val_evaluation[["loss"]], "\n")
+    cat("Final validation accuracy:", round(val_accuracy, 4), "\n")
+    cat("Final validation loss:", round(val_loss, 4), "\n")
 
-    # Create simple performance metrics
+    # Create performance metrics structure
     performance <- list(
-      accuracy = val_evaluation[["accuracy"]],
-      loss = val_evaluation[["loss"]],
+      accuracy = val_accuracy,
+      loss = val_loss,
       cv_method = "none",
       validation_split = validation_split
     )
+
+    # Create empty structures for consistency with CV path
+    cv_probabilities <- list()
+    cv_landscape_ids <- list()
+    cv_actual <- list()
+    cv_predictions <- list()
   }
 
-  # Assemble validation results into a tibble
-  validation_results <- cv_probabilities |>
-    purrr::reduce(rbind) |>
-    tibble::as_tibble()
-
-  colnames(validation_results) <- class_names
-
-  validation_results <- validation_results |>
-    dplyr::mutate(
-      landscape_id = unlist(cv_indices),
-      actual_class = unlist(cv_actual),
-      predicted_class = unlist(cv_predictions),
-      confidence = apply(dplyr::across(dplyr::all_of(class_names)), 1, max)
-    ) |>
-    dplyr::relocate(c(
-      landscape_id,
-      actual_class,
-      predicted_class,
-      confidence
-    ))
-
   # Prepare return object
+
   result <- list(
     model = final_model,
-    history = history,
-    classes = class_names,
-    input_shape = input_shape,
     performance = performance,
-    validation_results = validation_results,
-    architecture = "multiscale"
+    history = history
   )
 
   # Save model if requested
@@ -408,10 +327,8 @@ train_nn_landscapes <- function(
     keras_file_ending <- stringr::str_detect(model_path, "\\.keras$")
 
     if (!keras_file_ending) {
-      warning(
-        "model_path should end with .keras, while current name is: ",
-        model_path,
-        ". Automatically adding .keras file ending."
+      cli::cli_alert_info(
+        "model_path should end with .keras (current: {model_path}). Automatically adding .keras file ending."
       )
       model_path <- paste0(model_path, ".keras")
     }
