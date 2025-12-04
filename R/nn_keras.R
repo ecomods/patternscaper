@@ -28,18 +28,18 @@ train_nn_landscapes <- function(
 ) {
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
-  if (!cv_method %in% c("none", "k-fold")) {
-    stop('cv_method must be one of: "none" or "k-fold"')
+  if (!cv_method %in% c("none", "k-fold", "loo")) {
+    stop('cv_method must be one of: "none", "k-fold", or "loo"')
   }
 
   # Check if landscapes is a list of landscape objects
   if (any(!sapply(landscapes, is_landscape))) {
     # find out which element is not a landscape
     invalid_indices <- which(!sapply(landscapes, is_landscape))
-    stop(
-      "All elements must be landscape objects. Invalid element(s) at index(es): ",
-      paste(invalid_indices, collapse = ", ")
-    )
+    cli::cli_abort(c(
+      "All elements must be landscape objects.",
+      "x" = "Invalid element(s) at index(es): {paste(invalid_indices, collapse = ', ')}"
+    ))
   }
 
   # Get the training labels (pattern field of the landscape object)
@@ -50,10 +50,10 @@ train_nn_landscapes <- function(
     bad_patterns <- which(
       is.na(training_labels) | training_labels == "unclassified"
     )
-    stop(
-      "All training labels must be classified and not NA. Invalid label(s) at index(es): ",
-      paste(bad_patterns, collapse = ", ")
-    )
+    cli::cli_abort(c(
+      "All training labels must be classified.",
+      "x" = "Invalid label(s) at index(es): {paste(bad_patterns, collapse = ', ')}"
+    ))
   }
 
   # Convert all landscapes to arrays
@@ -463,10 +463,10 @@ apply_nn_keras <- function(
   if (any(!sapply(landscapes, is_landscape))) {
     # find out which element is not a landscape
     invalid_indices <- which(!sapply(landscapes, is_landscape))
-    stop(
-      "All elements must be landscape objects. Invalid element(s) at index(es): ",
-      paste(invalid_indices, collapse = ", ")
-    )
+    cli::cli_abort(c(
+      "All elements must be landscape objects.",
+      "x" = "Invalid element(s) at index(es): {paste(invalid_indices, collapse = ', ')}"
+    ))
   }
 
   # Get the training labels (pattern field of the landscape object) if available
