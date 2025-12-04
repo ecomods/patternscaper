@@ -35,7 +35,7 @@ training_landscapes <- generate_training_landscapes(
     "curvy",
     "fingers",
     "clustered",
-    "sine_bands"
+    "bands"
   ),
   width = 100,
   height = 100,

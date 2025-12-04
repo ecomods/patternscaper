@@ -540,8 +540,8 @@ test_that("create_landscape creates correct landscape types", {
     "clustered"
   )
   expect_equal(
-    create_landscape("sine_bands", width = 10, height = 10)$pattern,
-    "sine_bands"
+    create_landscape("bands", width = 10, height = 10)$pattern,
+    "bands"
   )
   expect_equal(
     create_landscape("spots", width = 10, height = 10)$pattern,
@@ -552,8 +552,8 @@ test_that("create_landscape creates correct landscape types", {
     "gaps"
   )
   expect_equal(
-    create_landscape("banded", width = 10, height = 10)$pattern,
-    "banded"
+    create_landscape("stripes", width = 10, height = 10)$pattern,
+    "stripes"
   )
 })
 
@@ -648,8 +648,8 @@ test_that("create_training_landscapes returns correct number of landscapes", {
       "curvy",
       "fingers",
       "clustered",
-      "sine_bands",
-      "banded",
+      "bands",
+      "stripes",
       "labyrinth"
     ),
     width = 20,
@@ -814,8 +814,8 @@ test_that("create_training_landscapes respects width and height", {
       "curvy",
       "fingers",
       "clustered",
-      "sine_bands",
-      "banded",
+      "bands",
+      "stripes",
       "labyrinth"
     ),
     n = 5,

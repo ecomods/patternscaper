@@ -5,8 +5,8 @@
 #' parameter.
 #'
 #' @param pattern Character. pattern of landscape to generate: "random", "sharp", "diffuse",
-#'        "curvy", "fingers", "sine_bands", "clusters", "spots", "gaps",
-#'        "banded", "labyrinth"
+#'        "curvy", "fingers", "bands", "clusters", "spots", "gaps",
+#'        "stripes", "labyrinth"
 #' @param name Character. Optional name for the landscape (default: NULL).
 #' @param custom_pattern Character. Optional pattern for the landscape (default: NULL uses the default
 #'     pattern of the corresponding function).
@@ -30,13 +30,13 @@
 #'
 #' \code{\link{create_landscape_clustered_trees}} for "clusters" pattern parameters
 #'
-#' \code{\link{create_landscape_sine_bands}} for "sine_bands" pattern parameters
+#' \code{\link{create_landscape_bands}} for "bands" pattern parameters
 #'
 #' \code{\link{create_landscape_spots}} for "spots" pattern parameters
 #'
 #' \code{\link{create_landscape_gaps}} for "gaps" pattern parameters
 #'
-#' \code{\link{create_landscape_banded}} for "banded" pattern parameters
+#' \code{\link{create_landscape_stripes}} for "stripes" pattern parameters
 #'
 #' \code{\link{create_landscape_labyrinth}} for "labyrinth" pattern parameters
 #'
@@ -62,8 +62,8 @@
 #' )
 #'
 #' # Create a rotated landscape
-#' sine_bands_rotated <- create_landscape(
-#'   "sine_bands",
+#' bands_rotated <- create_landscape(
+#'   "bands",
 #'   band_thickness = 4,
 #'   band_spacing = 12,
 #'   amplitude = 6,
@@ -82,10 +82,10 @@ create_landscape <- function(
     "curvy",
     "fingers",
     "clustered",
-    "sine_bands",
+    "bands",
     "spots",
     "gaps",
-    "banded",
+    "stripes",
     "labyrinth"
   ),
   name = NULL,
@@ -128,10 +128,10 @@ create_landscape <- function(
     curvy = create_landscape_curvy_treeline(...),
     fingers = create_landscape_fingers(...),
     clustered = create_landscape_clustered_trees(...),
-    sine_bands = create_landscape_sine_bands(...),
+    bands = create_landscape_bands(...),
     spots = create_landscape_spots(...),
     gaps = create_landscape_gaps(...),
-    banded = create_landscape_banded(...),
+    stripes = create_landscape_stripes(...),
     labyrinth = create_landscape_labyrinth(...)
   )
 
@@ -199,10 +199,10 @@ create_training_landscapes <- function(
     "curvy",
     "fingers",
     "clustered",
-    "sine_bands",
+    "bands",
     "spots",
     "gaps",
-    "banded",
+    "stripes",
     "labyrinth"
   ),
   width = 100,
@@ -228,10 +228,10 @@ create_training_landscapes <- function(
     "curvy",
     "fingers",
     "clustered",
-    "sine_bands",
+    "bands",
     "spots",
     "gaps",
-    "banded",
+    "stripes",
     "labyrinth"
   )
   patterns <- intersect(patterns, valid_patterns)
@@ -279,7 +279,7 @@ create_training_landscapes <- function(
         elongation_x = c(0.5, 1.5), # numeric
         elongation_y = c(0.5, 1.5) # numeric
       ),
-      sine_bands = list(
+      bands = list(
         treeline_position = c(0.3, 0.5), # numeric
         band_zone_prop = c(0.2, 0.5), # numeric
         band_thickness = c(2, 5), #integer
@@ -302,7 +302,7 @@ create_training_landscapes <- function(
         regular_spots = c(TRUE, FALSE), #Bool
         invert_landscape = c(TRUE)
       ),
-      banded = list(
+      stripes = list(
         nhills = c(1, 5), #integer
         nbands = c(3, 8), #integer
         regular_hilltop = c(TRUE, FALSE), #Bool

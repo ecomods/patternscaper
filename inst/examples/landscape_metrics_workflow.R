@@ -14,7 +14,7 @@ set.seed(123)
 # Create some landscapes (the more the better)
 landscapes <- create_training_landscapes(
   n = 100,
-  patterns = c("banded", "spots", "labyrinth"),
+  patterns = c("stripes", "spots", "labyrinth"),
   add_rotation = TRUE
 )
 
@@ -90,7 +90,7 @@ plot_classified_landscapes(
 # Apply the model ----------------------------------------------------
 # generate test landscapes
 test_landscapes <- create_training_landscapes(
-  patterns = c("banded", "spots", "labyrinth"),
+  patterns = c("stripes", "spots", "labyrinth"),
   n = 20,
   add_rotation = TRUE
 )
@@ -99,16 +99,16 @@ test_landscapes <- create_training_landscapes(
 plot_landscape_list(test_landscapes)
 
 # or generate just a single landscape
-test_banded <- create_landscape(
-  pattern = "banded",
+test_stripes <- create_landscape(
+  pattern = "stripes",
   width = 100,
   height = 100
 )
-plot_landscape(test_banded)
+plot_landscape(test_stripes)
 
 # Apply the model to the test landscape(s)
 apply_nn_metrics(
-  landscapes = test_banded,
+  landscapes = test_stripes,
   nn_model = model
 )
 

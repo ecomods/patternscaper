@@ -310,7 +310,7 @@ class_colors <- c(
   "sharp"        = "#E69F00",
   "diffuse"      = "#56B4E9",
   "clustered"    = "#009E73",
-  "sine_bands"   = "#F0E442",
+  "bands"   = "#F0E442",
   "random"       = "#CC79A7"
 )
 

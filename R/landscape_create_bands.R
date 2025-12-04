@@ -15,14 +15,14 @@
 #' @param noise_sd Numeric. Standard deviation for random noise (default: 0).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
-#' @return A landscape object with pattern "sine_bands" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "bands" containing the generated landscape data and parameters.
 #'
 #' @examples
 #' # Default sine bands
-#' sine_bands_default <- create_landscape_sine_bands()
+#' bands_default <- create_landscape_bands()
 #'
 #' # Modified sine bands with thicker bands, wider spacing and noise
-#' sine_bands_modified <- create_landscape_sine_bands(
+#' bands_modified <- create_landscape_bands(
 #'   treeline_position = 0.3,
 #'   band_zone_prop = 0.5,
 #'   band_thickness = 5,
@@ -33,7 +33,7 @@
 #' )
 #'
 #' # With rotation
-#' sine_bands_rotated <- create_landscape_sine_bands(
+#' bands_rotated <- create_landscape_bands(
 #'   band_thickness = 4,
 #'   band_spacing = 12,
 #'   amplitude = 6,
@@ -43,7 +43,7 @@
 #'
 #' @keywords internal
 #' @importFrom stats rnorm
-create_landscape_sine_bands <- function(
+create_landscape_bands <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,
@@ -182,7 +182,7 @@ create_landscape_sine_bands <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    pattern = "sine_bands",
+    pattern = "bands",
     params = list(
       width = width,
       height = height,

@@ -1,6 +1,6 @@
-#' Create a Landscape with banded vegetation along a hill line ("tiger striped vegetation")
+#' Create a Landscape with striped vegetation along a hill line ("tiger striped vegetation")
 #'
-#' Generates a landscape with banded vegetation of plants and bare soil.
+#' Generates a landscape with stripes vegetation of plants and bare soil.
 #' the strips are perpendicular to the slope of the hill.
 #' The landscape can optionally be rotated.
 #'
@@ -18,14 +18,14 @@
 #' @param noise_sd Numeric. Standard deviation for random elevation effects. Default is 0.1.
 #' @param rotation Numeric. Degrees of rotation to apply (counterclockwise). Default is 0 (no rotation).
 #'
-#' @return A landscape object with pattern "bands" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "stripes" containing the generated landscape data and parameters.
 #'
 #' @examples
-#' # Default banded vegetation
-#' banded_default <- create_landscape_banded()
+#' # Default striped vegetation
+#' stripes_default <- create_landscape_stripes()
 #'
-#' # Modified banded vegetation with more bands and different hill parameters
-#' banded_modified <- create_landscape_banded(
+#' # Modified striped vegetation with more stripes and different hill parameters
+#' stripes_modified <- create_landscape_stripes(
 #'   nhills = 2,
 #'   nbands = 5,
 #'   slope_mean = 0.5,
@@ -34,7 +34,7 @@
 #' )
 #'
 #' # With rotation
-#' banded_rotated <- create_landscape_banded(
+#' stripes_rotated <- create_landscape_stripes(
 #'   nhills = 3,
 #'   nbands = 7,
 #'   regular_hilltop = TRUE,
@@ -43,7 +43,7 @@
 #' )
 #' @keywords internal
 #' @importFrom stats rnorm kmeans
-create_landscape_banded <- function(
+create_landscape_stripes <- function(
   width = 100,
   height = 100,
   nhills = 2,
@@ -160,7 +160,7 @@ create_landscape_banded <- function(
   # Create and return landscape object
   landscape(
     data = mat,
-    pattern = "banded",
+    pattern = "stripes",
     params = list(
       width = width,
       height = height,

@@ -18,7 +18,7 @@ ecotone_types = c(
   "diffuse",
   "fingers",
   "clustered",
-  "sine_bands"
+  "bands"
 )
 n_ecotones <- length(ecotone_types)
 

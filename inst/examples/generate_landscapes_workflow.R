@@ -20,20 +20,20 @@ landscapes <- create_training_landscapes(
 # generate only specific landscape types
 landscapes <- create_training_landscapes(
   n = 20,
-  patterns = c("banded", "spots", "clustered")
+  patterns = c("stripes", "spots", "clustered")
 )
 
 # give different weights for the landscapes (higher weights will be generated more often)
 landscapes <- create_training_landscapes(
   n = 20,
-  patterns = c("banded", "spots", "clustered"),
+  patterns = c("stripes", "spots", "clustered"),
   balance_patterns = FALSE,
   pattern_probs = c(0.1, 1, 0.2)
 )
 
 landscapes <- create_training_landscapes(
   n = 20,
-  patterns = c("spots", "banded")
+  patterns = c("spots", "stripes")
 )
 
 # Look at landscape objects (printed with info in the console)
@@ -299,11 +299,11 @@ plot_landscape_list(
 
 # Sine bands -----------------------------------------------------------------
 # Default sine bands
-sine_bands_default <- create_landscape("sine_bands", name = "Default")
+bands_default <- create_landscape("bands", name = "Default")
 
 # Modified sine bands with thicker bands, wider spacing and noise
 sine_bands_modified <- create_landscape(
-  "sine_bands",
+  "bands",
   name = "Modified",
   treeline_position = 0.3,
   band_zone_prop = 0.5,
@@ -315,8 +315,8 @@ sine_bands_modified <- create_landscape(
 )
 
 # One landscape with rotation
-sine_bands_rotated <- create_landscape(
-  "sine_bands",
+bands_rotated <- create_landscape(
+  "bands",
   name = "Rotated",
   band_thickness = 4,
   band_spacing = 12,
@@ -328,9 +328,9 @@ sine_bands_rotated <- create_landscape(
 # Plot all sine bands together
 plot_landscape_list(
   list(
-    sine_bands_default,
-    sine_bands_modified,
-    sine_bands_rotated
+    bands_default,
+    bands_modified,
+    bands_rotated
   )
 )
 
@@ -387,13 +387,13 @@ regular <- purrr::map_lgl(many_spots, \(x) x$params$regular_spots)
 plot_landscape_list(many_spots[regular])
 
 
-# Banded vegetation ----------------------------------------------------------
-# Default banded vegetation
-banded_default <- create_landscape("banded", name = "Default")
+# Stripes vegetation ----------------------------------------------------------
+# Default stripes vegetation
+stripes_default <- create_landscape("stripes", name = "Default")
 
-# Modified banded vegetation with more bands and different hill parameters
-banded_modified <- create_landscape(
-  "banded",
+# Modified stripes vegetation with more stripes and different hill parameters
+stripes_modified <- create_landscape(
+  "stripes",
   name = "Modified",
   nbands = 9,
   regular_hilltop = FALSE,
@@ -402,8 +402,8 @@ banded_modified <- create_landscape(
 )
 
 # One landscape with rotation
-banded_rotated <- create_landscape(
-  "banded",
+stripes_rotated <- create_landscape(
+  "stripes",
   name = "Rotated",
   nbands = 9,
   regular_hilltop = FALSE,
@@ -412,9 +412,9 @@ banded_rotated <- create_landscape(
   rotation = 45
 )
 
-# Plot all banded vegetation together
+# Plot all striped vegetation together
 plot_landscape_list(list(
-  banded_default,
-  banded_modified,
-  banded_rotated
+  stripes_default,
+  stripes_modified,
+  stripes_rotated
 ))

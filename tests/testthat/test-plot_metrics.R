@@ -3,7 +3,7 @@
 # Create test landscapes (3 patterns for variety)
 test_landscapes <- create_training_landscapes(
   n = 3,
-  patterns = c("banded", "clustered", "labyrinth")
+  patterns = c("stripes", "clustered", "labyrinth")
 )
 
 # Pre-calculate metrics to speed up tests
@@ -46,7 +46,7 @@ test_that("plot_metrics stops on non-data.frame input", {
 
 test_that("plot_metrics stops on missing required columns", {
   bad_df <- data.frame(
-    pattern = c("banded", "spots"),
+    pattern = c("stripes", "spots"),
     value = c(1, 2)
   )
 

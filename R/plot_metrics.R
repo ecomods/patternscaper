@@ -27,7 +27,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' landscapes <- create_training_landscapes(n = 20, patterns = c("banded", "spots"))
+#' landscapes <- create_training_landscapes(n = 20, patterns = c("stripes", "spots"))
 #' metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
 #' plot_metrics(metrics, selected_metrics = c("ai", "lsi"))
 #'

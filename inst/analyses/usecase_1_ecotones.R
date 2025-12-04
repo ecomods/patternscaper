@@ -19,7 +19,7 @@ ecotone_types = c(
   "diffuse",
   "clustered",
   "fingers",
-  "sine_bands",
+  "bands",
   "random"
 )
 n_ecotones <- length(ecotone_types)
@@ -97,7 +97,7 @@ best_10 <- evaluate_landscape_metrics(
 )
 
 landscape_metrics_plot <- landscape_metrics
-landscape_metrics_plot$pattern[landscape_metrics_plot$pattern=="sine_bands"] <- "bands"
+landscape_metrics_plot$pattern[landscape_metrics_plot$pattern=="bands"] <- "bands"
 
 # plot the 10 best metrics
 p_metrics <- plot_metrics(
@@ -169,9 +169,6 @@ df <- validation_results_ecotone_lm$predictions
 #determine wrong classifications
 wrong_idx <- which(df$actual_class != df$predicted_class)
 l_misclass <- test_landscapes_ecotone[wrong_idx]
-for (l in 1:length(l_misclass)){
-  if (l_misclass[[l]]$pattern=="sine_bands") l_misclass[[l]]$pattern <- "bands"
-}
 for(i in 1:length(l_misclass)){
   l_misclass[[i]]$pattern <- paste("(", fig_sub_letter[i], ") ", l_misclass[[i]]$pattern,sep="")
 }
