@@ -2,7 +2,7 @@
 
 S3method(plot,landscape)
 S3method(print,landscape)
-export(apply_nn_keras)
+export(apply_nn_landscapes)
 export(apply_nn_metrics)
 export(calculate_landscape_metrics)
 export(create_landscape)

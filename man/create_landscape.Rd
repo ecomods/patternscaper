@@ -6,7 +6,7 @@
 \usage{
 create_landscape(
   pattern = c("random", "bare", "dense", "sharp", "diffuse", "curvy", "fingers",
-    "clustered", "sine_bands", "spots", "gaps", "banded", "labyrinth"),
+    "clustered", "bands", "spots", "gaps", "stripes", "labyrinth"),
   name = NULL,
   custom_pattern = NULL,
   ...
@@ -14,8 +14,8 @@ create_landscape(
 }
 \arguments{
 \item{pattern}{Character. pattern of landscape to generate: "random", "sharp", "diffuse",
-"curvy", "fingers", "sine_bands", "clusters", "spots", "gaps",
-"banded", "labyrinth"}
+"curvy", "fingers", "bands", "clusters", "spots", "gaps",
+"stripes", "labyrinth"}
 
 \item{name}{Character. Optional name for the landscape (default: NULL).}
 
@@ -56,8 +56,8 @@ diffuse_modified <- create_landscape(
 )
 
 # Create a rotated landscape
-sine_bands_rotated <- create_landscape(
-  "sine_bands",
+bands_rotated <- create_landscape(
+  "bands",
   band_thickness = 4,
   band_spacing = 12,
   amplitude = 6,
@@ -80,13 +80,13 @@ sine_bands_rotated <- create_landscape(
 
 \code{\link{create_landscape_clustered_trees}} for "clusters" pattern parameters
 
-\code{\link{create_landscape_sine_bands}} for "sine_bands" pattern parameters
+\code{\link{create_landscape_bands}} for "bands" pattern parameters
 
 \code{\link{create_landscape_spots}} for "spots" pattern parameters
 
 \code{\link{create_landscape_gaps}} for "gaps" pattern parameters
 
-\code{\link{create_landscape_banded}} for "banded" pattern parameters
+\code{\link{create_landscape_stripes}} for "stripes" pattern parameters
 
 \code{\link{create_landscape_labyrinth}} for "labyrinth" pattern parameters
 }

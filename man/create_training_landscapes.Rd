@@ -7,7 +7,7 @@
 create_training_landscapes(
   n = 50,
   patterns = c("random", "bare", "dense", "sharp", "diffuse", "curvy", "fingers",
-    "clustered", "sine_bands", "spots", "gaps", "banded", "labyrinth"),
+    "clustered", "bands", "spots", "gaps", "stripes", "labyrinth"),
   width = 100,
   height = 100,
   add_rotation = TRUE,

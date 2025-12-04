@@ -24,7 +24,7 @@ A tibble with the following columns:
   \describe{
     \item{landscape_id}{Numeric identifier for each landscape in the input list}
     \item{landscape_name}{Name of the landscape from the landscape object}
-    \item{pattern}{Pattern type from the landscape object (e.g., "banded", "spots")}
+    \item{pattern}{Pattern type from the landscape object (e.g., "stripes", "spots")}
     \item{layer}{Layer number (from landscapemetrics output)}
     \item{level}{Metric level: "patch", "class", or "landscape"}
     \item{class}{Class value (for class- and patch-level metrics, NA for landscape-level)}
@@ -42,7 +42,7 @@ including landscape identifiers, metric values, and any warnings.
 \examples{
 \dontrun{
 # Calculate all landscape-level metrics for a single landscape
-landscape <- create_landscape(pattern = "banded")
+landscape <- create_landscape(pattern = "stripes")
 metrics <- calculate_landscape_metrics(landscape)
 
 # Calculate specific metrics for multiple landscapes

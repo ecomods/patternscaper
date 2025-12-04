@@ -12,13 +12,21 @@ train_nn_landscapes(
   batch_size = 16,
   validation_split = 0.2,
   learning_rate = 0.001,
-  model_path = NULL
+  architecture = "multiscale",
+  dropout_rate = 0.3,
+  dense_units = 128,
+  model_path = NULL,
+  loss = "categorical_crossentropy",
+  optimizer = "adam",
+  metrics = c("accuracy"),
+  callbacks = NULL,
+  verbose = 1
 )
 }
 \arguments{
 \item{landscapes}{List. List of landscape objects created by `create_landscape()` or `create_training_landscapes()`.}
 
-\item{cv_method}{Character. Cross-validation method: "none", "k-fold" (default: "k-fold").}
+\item{cv_method}{Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").}
 
 \item{cv_folds}{Integer. Number of cross-validation folds when cv_method="k-fold" (default: 5).}
 
@@ -30,8 +38,27 @@ train_nn_landscapes(
 
 \item{learning_rate}{Numeric. Learning rate for Adam optimizer (default: 0.001).}
 
-\item{model_path}{Character. Path to save model (default: NULL means that the
-model is not saved).}
+\item{architecture}{Character. CNN architecture: "multiscale" (default).}
+
+\item{dropout_rate}{Numeric. Dropout rate for regularization (default: 0.3).}
+
+\item{dense_units}{Integer. Units in dense layer (default: 128).}
+
+\item{model_path}{Character. Path to save model (default: NULL means model is not saved).}
+
+\item{loss}{Character. Loss function for training (default: "categorical_crossentropy").
+Common alternatives: "sparse_categorical_crossentropy", "kullback_leibler_divergence".}
+
+\item{optimizer}{Character. Optimizer to use: "adam" (default), "sgd", "rmsprop".
+Note: optimizer-specific parameters like momentum are currently not exposed.}
+
+\item{metrics}{Character vector. Metrics to track during training (default: c("accuracy")).
+Common additions: "categorical_accuracy", "top_k_categorical_accuracy".}
+
+\item{callbacks}{List. Optional keras callbacks for advanced training control (default: NULL).
+Examples: early stopping, learning rate scheduling, model checkpointing.}
+
+\item{verbose}{Integer. Verbosity mode: 0 = silent, 1 = progress bar, 2 = one line per epoch (default: 1).}
 }
 \value{
 List. Trained CNN model and associated metadata.
