@@ -11,27 +11,6 @@ devtools::load_all()
 # ----------------------------------------------------------------------------#
 # Prewarm Keras ---------------------------------------------------------------
 # ----------------------------------------------------------------------------#
-# The first time tensorflow is set up, it takes time. Therefore, we do it outside
-# the training function to make the setup explicit. This is just a placehodler for
-# later
-prewarm_keras <- function() {
-  cat("Initializing keras3/TensorFlow backend...\n")
-
-  start_time <- Sys.time()
-
-  # The simplest operation that triggers TensorFlow initialization
-  # You don't need a full model!
-  keras3::to_categorical(0)
-
-  end_time <- Sys.time()
-  elapsed <- as.numeric(difftime(end_time, start_time, units = "secs"))
-
-  cat(sprintf("✓ Backend ready (%.1f seconds)\n", elapsed))
-  invisible(TRUE)
-}
-
-# Call the function
-prewarm_keras()
 
 # Test Keras NN ---------------------------------------------------------
 # Increase number of landscapes for better training
