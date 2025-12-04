@@ -156,7 +156,6 @@ train_nn_metrics <- function(
       val_data <- metrics_scaled[val_indices, ]
 
       # Train model on training data
-      # Train final model on all data
       fold_model <- neuralnet::neuralnet(
         formula = pattern ~ .,
         data = train_data,
