@@ -15,19 +15,23 @@ LazyData: true
 License: GPL (>= 3)
 RoxygenNote: 7.3.3
 Imports: 
-    ggridges,
+    ambient,
+    cli,
+    dplyr,
     ggdist,
+    ggplot2,
+    ggtext,
+    keras3,
     landscapemetrics,
+    neuralnet,
     omnibus,
     patchwork,
     purrr,
-    zoo,
-    ggtext,
-    keras,
-    ambient,
-    keras3,
-    cli,
-    neuralnet
+    scales,
+    stringr,
+    terra,
+    tidyr,
+    zoo
 Suggests: 
     knitr,
     rmarkdown
