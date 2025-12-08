@@ -2,26 +2,23 @@
 library(dplyr)
 library(purrr)
 library(cli)
-library(furrr)
-library(future)
 
 devtools::load_all()
-source("systematic_test_functions.R")
 
 # Create parameter grid --------------------------------------------------------
 
-param_grid <- expand_grid(
+param_grid <- tidyr::expand_grid(
   n_landscapes = c(50, 100, 200, 400),
   epochs = c(20, 50, 100),
   learning_rate = c(0.0001, 0.001, 0.01),
   replicate = 1:5
 ) |>
-  mutate(
-    batch_size = case_when(
+  dplyr::mutate(
+    batch_size = dplyr::case_when(
       n_landscapes <= 100 ~ 8,
       .default = 16
     ),
-    dropout_rate = case_when(
+    dropout_rate = dplyr::case_when(
       n_landscapes <= 100 ~ 0.4,
       .default = 0.3
     ),
@@ -41,7 +38,14 @@ dir.create(figs_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Generate datasets ------------------------------------------------------------
 
-patterns <- c("sharp", "diffuse", "fingers", "clustered", "bands", "random")
+patterns <- c(
+  "random",
+  "sharp",
+  "diffuse",
+  "fingers",
+  "clustered",
+  "bands"
+)
 
 max_n <- max(param_grid$n_landscapes)
 n_validation <- 100
@@ -65,7 +69,6 @@ validation_set <- create_training_landscapes(
 cli::cli_alert_success("Generated all landscapes")
 
 # Training function ------------------------------------------------------------
-
 run_single_experiment <- function(
   params_row,
   training_pool,
@@ -96,15 +99,19 @@ run_single_experiment <- function(
   # Sample training data (stratified by pattern)
   training_patterns <- sapply(training_pool, function(x) x$pattern)
 
+  # Calculate samples per pattern
+  n_unique_patterns <- length(unique(training_patterns))
+  samples_per_pattern <- ceiling(n_train / n_unique_patterns)
+
   training_indices <- training_patterns |>
-    tibble(pattern = _) |>
-    mutate(idx = row_number()) |>
-    slice_sample(
-      n = ceiling(n_train / length(unique(pattern))),
-      .by = pattern
+    tibble::tibble(pattern = _) |>
+    dplyr::mutate(idx = dplyr::row_number()) |>
+    dplyr::slice_sample(
+      n = samples_per_pattern,
+      by = pattern
     ) |>
-    slice_head(n = n_train) |>
-    pull(idx)
+    dplyr::slice_head(n = n_train) |>
+    dplyr::pull(idx)
 
   training_landscapes <- training_pool[training_indices]
 
@@ -182,54 +189,35 @@ run_single_experiment <- function(
   )
 }
 
-# Setup parallel execution -----------------------------------------------------
+# Run experiments--------------------------------------------------
 
-# Determine number of workers based on environment
-n_workers <- if (Sys.getenv("SLURM_CPUS_PER_TASK") != "") {
-  as.numeric(Sys.getenv("SLURM_CPUS_PER_TASK"))
-} else {
-  parallel::detectCores() - 1 # Leave one core free for local testing
-}
+cli::cli_alert_info("Running {nrow(param_grid)} experiments...")
 
-cli::cli_alert_info("Setting up parallel execution with {n_workers} workers")
-
-# Setup future plan
-plan(multisession, workers = n_workers)
-
-# Run experiments in parallel --------------------------------------------------
-
-cli::cli_alert_info("Running {nrow(param_grid)} experiments in parallel...")
-
-all_results <- future_map(
+all_results <- map(
   1:nrow(param_grid),
   function(i) {
-    devtools::load_all()
+    cli::cli_alert_info("Running experiment {i} of {nrow(param_grid)}")
     run_single_experiment(
       params_row = param_grid[i, ],
       training_pool = training_pool,
       validation_set = validation_set,
       results_dir = results_dir
     )
-  },
-  .options = furrr_options(
-    seed = TRUE, # Ensures reproducible random sampling
-    globals = c("training_pool", "validation_set", "results_dir")
-  ),
-  .progress = TRUE
+  }
 )
 
 # Close parallel backend
-plan(sequential)
+future::plan(sequential)
 
 cli::cli_alert_success("All experiments complete!")
 
 # Aggregate results ------------------------------------------------------------
 
 # Option 1: Use the returned results
-summary_df <- map_dfr(all_results, function(x) {
+summary_df <- purrr::map_dfr(all_results, function(x) {
   # For unsuccessful experiments, fill with NAs
   if (!x$success) {
-    return(tibble(
+    return(tibble::tibble(
       experiment_id = x$experiment_id,
       n_landscapes = x$parameters$n_landscapes,
       epochs = x$parameters$epochs,
@@ -243,7 +231,7 @@ summary_df <- map_dfr(all_results, function(x) {
     ))
   }
 
-  tibble(
+  tibble::tibble(
     experiment_id = x$experiment_id,
     n_landscapes = x$parameters$n_landscapes,
     epochs = x$parameters$epochs,
