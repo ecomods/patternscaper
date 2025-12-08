@@ -63,7 +63,7 @@ results <- purrr::map(
     training_indices <- training_patterns |>
       tibble::tibble(pattern = _) |>
       dplyr::mutate(idx = dplyr::row_number()) |>
-      dplyr::slice_sample(n = samples_per_pattern, .by = pattern) |>
+      dplyr::slice_sample(n = samples_per_pattern, by = pattern) |>
       dplyr::slice_head(n = n_train) |>
       dplyr::pull(idx)
 
