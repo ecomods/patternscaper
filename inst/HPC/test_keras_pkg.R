@@ -46,7 +46,7 @@ run_single_experiment <- function(
   validation_set,
   results_dir
 ) {
-  keras3::clear_session()
+  #keras3::clear_session()
 
   n_train <- params_row$n_landscapes
 
