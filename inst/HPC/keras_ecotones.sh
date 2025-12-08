@@ -6,8 +6,8 @@
 #SBATCH --nodes=1
 #SBATCH -c 1
 #SBATCH --ntasks=1
-#SBATCH --mem=2G
-#SBATCH --time=00:10:00
+#SBATCH --mem=50G
+#SBATCH --time=48:10:00
 #SBATCH --qos=standard
 
 module add GDAL
