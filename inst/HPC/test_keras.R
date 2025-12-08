@@ -2,13 +2,6 @@
 
 cli::cli_alert_info("Testing keras3 initialization...")
 
-# Check environment variables
-cli::cli_alert_info(
-  "RETICULATE_MINICONDA_PATH: {Sys.getenv('RETICULATE_MINICONDA_PATH')}"
-)
-cli::cli_alert_info("UV_CACHE_DIR: {Sys.getenv('UV_CACHE_DIR')}")
-cli::cli_alert_info("KERAS_HOME: {Sys.getenv('KERAS_HOME')}")
-
 # Try to load keras3
 tryCatch(
   {
