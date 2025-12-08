@@ -219,9 +219,6 @@ all_results <- map(
   }
 )
 
-# Close parallel backend
-future::plan(sequential)
-
 cli::cli_alert_success("All experiments complete!")
 
 # Aggregate results ------------------------------------------------------------
