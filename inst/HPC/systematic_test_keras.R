@@ -5,6 +5,34 @@ library(cli)
 
 devtools::load_all()
 
+# Parse command line arguments -------------------------------------------------
+args <- commandArgs(trailingOnly = TRUE)
+
+if (length(args) != 2) {
+  cli::cli_abort(
+    "Usage: Rscript systematic_test_keras.R <pattern_type> <results_dir>
+  pattern_type: 'selforg' or 'ecotones'
+  results_dir: directory for output"
+  )
+}
+
+pattern_type <- args[1]
+results_dir <- args[2]
+
+# Define patterns based on type ------------------------------------------------
+if (pattern_type == "selforg") {
+  patterns <- c("bare", "spots", "labyrinth", "gaps", "dense")
+} else if (pattern_type == "ecotones") {
+  patterns <- c("random", "sharp", "diffuse", "fingers", "clustered", "bands")
+} else {
+  cli::cli_abort(
+    "pattern_type must be 'selforg' or 'ecotones', got: {pattern_type}"
+  )
+}
+
+cli::cli_alert_info("Running experiments for pattern type: {pattern_type}")
+cli::cli_alert_info("Results will be saved to: {results_dir}")
+
 # Create parameter grid --------------------------------------------------------
 
 param_grid <- tidyr::expand_grid(
@@ -28,25 +56,10 @@ param_grid <- tidyr::expand_grid(
   )
 
 # Directories ------------------------------------------------------------------
-results_dir <- "./"
-models_dir <- file.path(results_dir, "models")
-figs_dir <- file.path(results_dir, "figs")
 
 dir.create(results_dir, recursive = TRUE, showWarnings = FALSE)
-dir.create(models_dir, recursive = TRUE, showWarnings = FALSE)
-dir.create(figs_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Generate datasets ------------------------------------------------------------
-
-patterns <- c(
-  "random",
-  "sharp",
-  "diffuse",
-  "fingers",
-  "clustered",
-  "bands"
-)
-
 max_n <- max(param_grid$n_landscapes)
 n_validation <- 100
 
