@@ -37,9 +37,6 @@ tryCatch(
     )
 
     cli::cli_alert_success("Model training completed!")
-    cli::cli_alert_info(
-      "Validation accuracy: {round(model$validation_accuracy, 3)}"
-    )
 
     # Test 3: Apply model
     cli::cli_alert_info("Testing model application...")
@@ -55,7 +52,6 @@ tryCatch(
       nn_model = model
     )
 
-    cli::cli_alert_success("Prediction: {prediction$predicted_class}")
     cli::cli_alert_success("All tests passed!")
   },
   error = function(e) {
