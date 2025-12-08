@@ -10,6 +10,7 @@
 #SBATCH --time=48:00:00
 #SBATCH --qos=standard
 
+module add GDAL
 module add R
 
 # Run the R script with arguments
