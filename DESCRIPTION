@@ -16,6 +16,7 @@ License: GPL (>= 3)
 RoxygenNote: 7.3.3
 Imports: 
     ambient,
+    abind,
     cli,
     dplyr,
     ggdist,
