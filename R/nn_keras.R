@@ -23,6 +23,8 @@
 #'   Common additions: "categorical_accuracy", "top_k_categorical_accuracy".
 #' @param callbacks List. Optional keras callbacks for advanced training control (default: NULL).
 #'   Examples: early stopping, learning rate scheduling, model checkpointing.
+#' @param patience Integer. Number of epochs with no improvement after which training stops (default: 10).
+#'   Only used when callbacks is NULL. Set to NULL to disable early stopping.
 #' @param verbose Integer. Verbosity mode: 0 = silent, 1 = progress bar, 2 = one line per epoch (default: 1).
 #'
 #' @return List. Trained CNN model and associated metadata.
@@ -43,6 +45,7 @@ train_nn_landscapes <- function(
   optimizer = "adam",
   metrics = c("accuracy"),
   callbacks = NULL,
+  patience = 10,
   verbose = 1
 ) {
   # Validate cv_method parameter
@@ -114,6 +117,18 @@ train_nn_landscapes <- function(
     optimizer = optimizer,
     metrics = metrics
   )
+
+  # Setup callbacks ---------------------------------------------------------
+  # If user didn't provide callbacks and patience is specified, add early stopping
+  if (is.null(callbacks) && !is.null(patience)) {
+    callbacks <- list(
+      keras3::callback_early_stopping(
+        monitor = "loss",
+        patience = patience,
+        restore_best_weights = TRUE
+      )
+    )
+  }
 
   # Cross-validation ----------------------------------------------------------
   # Validate and adjust CV parameters
