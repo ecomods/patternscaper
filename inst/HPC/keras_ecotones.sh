@@ -12,5 +12,17 @@
 
 module add R
 
+# Configure environment for Keras
+export SCRATCH_DIR="/scratch/$USER/keras_job_$SLURM_JOB_ID"
+mkdir -p "$SCRATCH_DIR"
+
+# Point all reticulate/keras cache to local scratch (not NFS home directory)
+export RETICULATE_MINICONDA_PATH="$SCRATCH_DIR/miniconda"
+export UV_CACHE_DIR="$SCRATCH_DIR/uv_cache"
+export KERAS_HOME="$SCRATCH_DIR/keras"
+export TMPDIR="$SCRATCH_DIR/tmp"
+
+echo "Using cache directory: $SCRATCH_DIR"
+
 # Run the R script with arguments
 Rscript "systematic_test_keras.R" ecotones results_ecotones 
