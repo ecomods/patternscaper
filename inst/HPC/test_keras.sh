@@ -13,24 +13,39 @@
 #SBATCH --error=keras_test_%j.err
 
 module add R
+module add TensorFlow/2.2.0-fosscuda-2019b-Python-3.7.4
 
-# Test 1: Try with scratch directory
+# Check loaded modules
+echo "Loaded modules:"
+module list
+echo ""
 
+# Check Python from TensorFlow module
+echo "Python path: $(which python3 || which python || echo 'not found')"
+echo "Python version: $(python3 --version 2>&1 || python --version 2>&1)"
+echo ""
+
+# Point reticulate to the TensorFlow module's Python
+export RETICULATE_PYTHON=$(which python3 || which python)
+
+# Set scratch directory for any additional cache
 export SCRATCH_DIR="/scratch/$USER/keras_test_$SLURM_JOB_ID"
 mkdir -p "$SCRATCH_DIR"
 
-export RETICULATE_MINICONDA_PATH="$SCRATCH_DIR/miniconda"
 export UV_CACHE_DIR="$SCRATCH_DIR/uv_cache"
 export KERAS_HOME="$SCRATCH_DIR/keras"
 export TMPDIR="$SCRATCH_DIR/tmp"
 
-echo "SCRATCH_DIR: $SCRATCH_DIR"
-echo "RETICULATE_MINICONDA_PATH: $RETICULATE_MINICONDA_PATH"
+echo "Environment variables:"
+echo "  RETICULATE_PYTHON: $RETICULATE_PYTHON"
+echo "  SCRATCH_DIR: $SCRATCH_DIR"
+echo ""
 
 Rscript test_keras_minimal.R
 
+echo ""
 echo "Contents of scratch dir:"
-ls -la "$SCRATCH_DIR" || echo "Directory is empty or doesn't exist"
+ls -laR "$SCRATCH_DIR" 2>/dev/null || echo "Directory is empty"
 
 # Cleanup
 rm -rf "$SCRATCH_DIR"
