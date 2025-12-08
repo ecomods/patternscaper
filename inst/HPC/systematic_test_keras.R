@@ -35,25 +35,41 @@ cli::cli_alert_info("Results will be saved to: {results_dir}")
 
 # Create parameter grid --------------------------------------------------------
 
+# Minimal test configuration (4 experiments)
 param_grid <- tidyr::expand_grid(
-  n_landscapes = c(50, 100, 200, 400),
-  epochs = c(20, 50, 100),
-  learning_rate = c(0.0001, 0.001, 0.01),
-  replicate = 1:5
+  n_landscapes = c(12, 24),
+  epochs = c(5),
+  learning_rate = c(0.001),
+  replicate = 1:2
 ) |>
   dplyr::mutate(
-    batch_size = dplyr::case_when(
-      n_landscapes <= 100 ~ 8,
-      .default = 16
-    ),
-    dropout_rate = dplyr::case_when(
-      n_landscapes <= 100 ~ 0.4,
-      .default = 0.3
-    ),
-    dense_units = 128,
+    batch_size = 4,
+    dropout_rate = 0.4,
+    dense_units = 64,
     optimizer = "adam",
     cv_method = "none"
   )
+
+# Full systematic test configuration (180 experiments)
+# param_grid <- tidyr::expand_grid(
+#   n_landscapes = c(50, 100, 200, 400),
+#   epochs = c(20, 50, 100),
+#   learning_rate = c(0.0001, 0.001, 0.01),
+#   replicate = 1:5
+# ) |>
+#   dplyr::mutate(
+#     batch_size = dplyr::case_when(
+#       n_landscapes <= 100 ~ 8,
+#       .default = 16
+#     ),
+#     dropout_rate = dplyr::case_when(
+#       n_landscapes <= 100 ~ 0.4,
+#       .default = 0.3
+#     ),
+#     dense_units = 128,
+#     optimizer = "adam",
+#     cv_method = "none"
+#   )
 
 # Directories ------------------------------------------------------------------
 
@@ -61,13 +77,13 @@ dir.create(results_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Generate datasets ------------------------------------------------------------
 max_n <- max(param_grid$n_landscapes)
-n_validation <- 100
+n_validation <- 12 # Reduced for testing (was 100)
 
 cli::cli_alert_info("Generating {max_n + n_validation} landscapes...")
 
 training_pool <- create_training_landscapes(
   patterns = patterns,
-  n = max_n + length(patterns) * 5, # Extra to allow stratified sampling
+  n = max_n + length(patterns) * 2, # Reduced extra for testing (was * 5)
   width = 100,
   height = 100
 )
@@ -144,7 +160,7 @@ run_single_experiment <- function(
         dense_units = dense_units,
         optimizer = optimizer,
         patience = 10,
-        verbose = 0 # Silent mode for parallel execution
+        verbose = 0
       )
 
       training_time <- as.numeric(difftime(
@@ -174,7 +190,7 @@ run_single_experiment <- function(
         success = TRUE
       )
 
-      # Save individual result immediately (safer for parallel)
+      # Save individual result
       readr::write_rds(
         result,
         file.path(results_dir, paste0(exp_id, ".rds"))
@@ -223,7 +239,6 @@ cli::cli_alert_success("All experiments complete!")
 
 # Aggregate results ------------------------------------------------------------
 
-# Option 1: Use the returned results
 summary_df <- purrr::map_dfr(all_results, function(x) {
   # For unsuccessful experiments, fill with NAs
   if (!x$success) {
