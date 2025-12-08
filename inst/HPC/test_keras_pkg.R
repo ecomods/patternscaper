@@ -1,20 +1,13 @@
-# Simplified test using ecotoneClassifyR keras functions
+# Test with function wrapper like systematic_test_keras.R
 
 cli::cli_alert_info("Loading ecotoneClassifyR package...")
 devtools::load_all()
 
-cli::cli_alert_info("Testing keras3 initialization...")
-
-# Define patterns
 patterns <- c("random", "sharp", "diffuse", "fingers", "clustered", "bands")
-
-# Create results directory
 results_dir <- "test_results"
 dir.create(results_dir, recursive = TRUE, showWarnings = FALSE)
 
-cli::cli_alert_info("Results will be saved to: {results_dir}")
-
-# Create parameter grid (just 4 small experiments)
+# Create parameter grid
 param_grid <- tidyr::expand_grid(
   n_landscapes = c(12, 24),
   epochs = c(5),
@@ -30,9 +23,7 @@ param_grid <- tidyr::expand_grid(
 
 cli::cli_alert_info("Will run {nrow(param_grid)} experiments")
 
-# Generate training pool and validation set
-cli::cli_alert_info("Generating landscape pool...")
-
+# Generate landscapes
 max_n <- max(param_grid$n_landscapes)
 training_pool <- create_training_landscapes(
   patterns = patterns,
@@ -48,145 +39,136 @@ validation_set <- create_training_landscapes(
   height = 100
 )
 
-cli::cli_alert_success(
-  "Generated {length(training_pool)} training and {length(validation_set)} validation landscapes"
-)
+# Define experiment function (like systematic script)
+run_single_experiment <- function(
+  params_row,
+  training_pool,
+  validation_set,
+  results_dir
+) {
+  keras3::clear_session()
 
-# Run experiments
-results <- purrr::map(
+  n_train <- params_row$n_landscapes
+
+  exp_id <- sprintf(
+    "n%d_ep%d_lr%.4f_bs%d_dr%.2f_rep%d",
+    n_train,
+    params_row$epochs,
+    params_row$learning_rate,
+    params_row$batch_size,
+    params_row$dropout_rate,
+    params_row$replicate
+  )
+
+  # Sample training landscapes
+  training_patterns <- sapply(training_pool, function(x) x$pattern)
+  n_unique_patterns <- length(unique(training_patterns))
+  samples_per_pattern <- ceiling(n_train / n_unique_patterns)
+
+  training_indices <- training_patterns |>
+    tibble::tibble(pattern = _) |>
+    dplyr::mutate(idx = dplyr::row_number()) |>
+    dplyr::slice_sample(n = samples_per_pattern, .by = pattern) |>
+    dplyr::slice_head(n = n_train) |>
+    dplyr::pull(idx)
+
+  training_landscapes <- training_pool[training_indices]
+
+  start_time <- Sys.time()
+
+  tryCatch(
+    {
+      model_result <- train_nn_landscapes(
+        landscapes = training_landscapes,
+        cv_method = "none",
+        validation_split = 0.2,
+        epochs = params_row$epochs,
+        batch_size = params_row$batch_size,
+        learning_rate = params_row$learning_rate,
+        dropout_rate = params_row$dropout_rate,
+        dense_units = params_row$dense_units,
+        optimizer = params_row$optimizer,
+        patience = 3,
+        verbose = 0
+      )
+
+      training_time <- as.numeric(difftime(
+        Sys.time(),
+        start_time,
+        units = "secs"
+      ))
+
+      validation_results <- apply_nn_landscapes(
+        landscapes = validation_set,
+        nn_model = model_result,
+        return_performance = TRUE
+      )
+
+      result <- list(
+        experiment_id = exp_id,
+        parameters = params_row,
+        training_time_secs = training_time,
+        training_size = length(training_landscapes),
+        validation_accuracy = validation_results$performance$accuracy,
+        validation_per_class = validation_results$performance$per_class_metrics,
+        confusion_matrix_val = validation_results$performance$confusion_matrix,
+        history = model_result$history$metrics,
+        timestamp = Sys.time(),
+        success = TRUE
+      )
+
+      readr::write_rds(result, file.path(results_dir, paste0(exp_id, ".rds")))
+      keras3::clear_session()
+
+      result
+    },
+    error = function(e) {
+      keras3::clear_session()
+
+      error_result <- list(
+        experiment_id = exp_id,
+        parameters = params_row,
+        error = e$message,
+        timestamp = Sys.time(),
+        success = FALSE
+      )
+
+      readr::write_rds(
+        error_result,
+        file.path(results_dir, paste0(exp_id, "_ERROR.rds"))
+      )
+      error_result
+    }
+  )
+}
+
+# Run experiments using function wrapper
+cli::cli_alert_info("Running experiments with function wrapper...")
+
+all_results <- purrr::map(
   1:nrow(param_grid),
   function(i) {
     cli::cli_alert_info("Running experiment {i} of {nrow(param_grid)}")
-
-    # Clear previous keras session
-    keras3::clear_session()
-
-    params <- param_grid[i, ]
-    n_train <- params$n_landscapes
-
-    # Create experiment ID
-    exp_id <- sprintf(
-      "n%d_ep%d_lr%.4f_bs%d_dr%.2f_rep%d",
-      n_train,
-      params$epochs,
-      params$learning_rate,
-      params$batch_size,
-      params$dropout_rate,
-      params$replicate
-    )
-
-    # Sample training landscapes
-    training_patterns <- sapply(training_pool, function(x) x$pattern)
-    n_unique_patterns <- length(unique(training_patterns))
-    samples_per_pattern <- ceiling(n_train / n_unique_patterns)
-
-    training_indices <- training_patterns |>
-      tibble::tibble(pattern = _) |>
-      dplyr::mutate(idx = dplyr::row_number()) |>
-      dplyr::slice_sample(n = samples_per_pattern, by = pattern) |>
-      dplyr::slice_head(n = n_train) |>
-      dplyr::pull(idx)
-
-    training_landscapes <- training_pool[training_indices]
-
-    # Train model
-    start_time <- Sys.time()
-
-    tryCatch(
-      {
-        model <- train_nn_landscapes(
-          landscapes = training_landscapes,
-          cv_method = "none",
-          validation_split = 0.2,
-          epochs = params$epochs,
-          batch_size = params$batch_size,
-          learning_rate = params$learning_rate,
-          dropout_rate = params$dropout_rate,
-          dense_units = params$dense_units,
-          optimizer = params$optimizer,
-          patience = 3,
-          verbose = 0
-        )
-
-        training_time <- as.numeric(difftime(
-          Sys.time(),
-          start_time,
-          units = "secs"
-        ))
-
-        # Validate
-        validation_results <- apply_nn_landscapes(
-          landscapes = validation_set,
-          nn_model = model,
-          return_performance = TRUE
-        )
-
-        cli::cli_alert_success(
-          "Experiment {i}: accuracy = {round(validation_results$performance$accuracy, 3)}"
-        )
-
-        result <- list(
-          experiment_id = exp_id,
-          parameters = params,
-          training_time_secs = training_time,
-          validation_accuracy = validation_results$performance$accuracy,
-          timestamp = Sys.time(),
-          success = TRUE
-        )
-
-        # Save individual result
-        readr::write_rds(
-          result,
-          file.path(results_dir, paste0(exp_id, ".rds"))
-        )
-
-        # Clear session after success
-        keras3::clear_session()
-
-        result
-      },
-      error = function(e) {
-        cli::cli_alert_danger("Experiment {i} failed: {e$message}")
-
-        # Clear session on error
-        keras3::clear_session()
-
-        error_result <- list(
-          experiment_id = exp_id,
-          parameters = params,
-          error = e$message,
-          timestamp = Sys.time(),
-          success = FALSE
-        )
-
-        # Save error result
-        readr::write_rds(
-          error_result,
-          file.path(results_dir, paste0(exp_id, "_ERROR.rds"))
-        )
-
-        error_result
-      }
+    run_single_experiment(
+      params_row = param_grid[i, ],
+      training_pool = training_pool,
+      validation_set = validation_set,
+      results_dir = results_dir
     )
   }
 )
 
-# Summary
-n_success <- sum(sapply(results, function(x) x$success))
+n_success <- sum(sapply(all_results, function(x) x$success))
 cli::cli_alert_success(
   "Completed: {n_success}/{nrow(param_grid)} experiments succeeded"
 )
 
-# Aggregate and save summary
-summary_df <- purrr::map_dfr(results, function(x) {
+summary_df <- purrr::map_dfr(all_results, function(x) {
   if (!x$success) {
     return(tibble::tibble(
       experiment_id = x$experiment_id,
       n_landscapes = x$parameters$n_landscapes,
-      epochs = x$parameters$epochs,
-      learning_rate = x$parameters$learning_rate,
       validation_accuracy = NA_real_,
-      training_time_secs = NA_real_,
       error = x$error
     ))
   }
@@ -194,17 +176,10 @@ summary_df <- purrr::map_dfr(results, function(x) {
   tibble::tibble(
     experiment_id = x$experiment_id,
     n_landscapes = x$parameters$n_landscapes,
-    epochs = x$parameters$epochs,
-    learning_rate = x$parameters$learning_rate,
     validation_accuracy = x$validation_accuracy,
-    training_time_secs = x$training_time_secs,
     error = NA_character_
   )
 })
 
-readr::write_csv(
-  summary_df,
-  file.path(results_dir, "experiment_summary.csv")
-)
-
+readr::write_csv(summary_df, file.path(results_dir, "experiment_summary.csv"))
 cli::cli_alert_success("Results saved to {results_dir}")
