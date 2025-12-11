@@ -173,27 +173,12 @@ validation_results_ecotone_lm <- apply_nn_metrics(
   return_performance = TRUE
 )
 
-#look at validation results
-validation_results_ecotone_lm
-validation_results_ecotone_lm$performance$accuracy
-validation_results_ecotone_lm$performance$confusion_matrix
-df <- validation_results_ecotone_lm$predictions
-#determine wrong classifications
-wrong_idx <- which(df$actual_class != df$predicted_class)
-l_misclass <- test_landscapes_ecotone[wrong_idx]
-for (i in 1:length(l_misclass)) {
-  l_misclass[[i]]$pattern <- paste(
-    "(",
-    fig_sub_letter[i],
-    ") ",
-    l_misclass[[i]]$pattern,
-    sep = ""
-  )
-}
-
-
-p_misclass <- plot_landscape_list(l_misclass, show_legend = F)
-p_misclass
+# show landscapes that are not classified correctly
+p_misclass <- plot_classified_landscapes(
+  classification = validation_results_ecotone_lm$predictions,
+  landscapes = test_landscapes_ecotone,
+  only_misclassified = TRUE
+)
 
 ggsave(
   filename = paste(directory, "fig_supp_ecotone_misclassified.jpg", sep = ""),
@@ -202,23 +187,3 @@ ggsave(
   height = 1.5,
   dpi = 300
 )
-
-
-#show landscapes that are not classified correctly
-#SELINA, please check, gives an error message
-plot_classified_landscapes(
-  classification = validation_results_ecotone_lm,
-  landscapes = test_landscapes_ecotone,
-  only_misclassified = TRUE
-)
-
-#--------------------------------------------------------------------
-# Train neural network with keras
-#--------------------------------------------------------------------
-
-# train a network
-model_ecotones_keras <- train_nn_landscapes(
-  landscapes = ecotone_landscapes
-)
-
-#--> Error
