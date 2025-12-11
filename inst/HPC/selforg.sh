@@ -10,6 +10,7 @@
 #SBATCH --time=24:00:00
 #SBATCH --qos=standard
 
+module add GDAL
 module add R
 
 Rscript "systematic_test_neuralnet_selforg.R" 
