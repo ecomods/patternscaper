@@ -114,14 +114,18 @@ train_and_validate <- function(
   training_metrics <- training_data_lookup[[training_key]]$training_metrics
   best_metrics <- best_metrics_lookup[[best_metrics_key]]$best_metrics
 
-  # Calculate layer configuration
-  adjuster <- n_input_metrics / 5
+  # Calculate layer configuration based on number of layers
+  # Scale neurons proportionally to input metrics
+  base_neurons <- round(n_input_metrics * 0.8, 0) # Fixed: use n_input_metrics directly
+
+  # Create actual multi-layer configurations
   layers_config <- list(
-    round(adjuster * 3, 0),
-    round(adjuster * 4, 0),
-    round(adjuster * 5, 0)
+    c(base_neurons), # 1 layer
+    c(base_neurons, round(base_neurons * 0.6)), # 2 layers
+    c(base_neurons, round(base_neurons * 0.6), round(base_neurons * 0.4)) # 3 layers
   )
-  hidden_layers <- layers_config[[nlayers]]
+
+  hidden_layers <- layers_config[[nlayers]] # Fixed: use layers_config
   layer_name <- paste(hidden_layers, collapse = "-")
 
   # Train model
@@ -138,7 +142,7 @@ train_and_validate <- function(
       )
     },
     error = function(e) {
-      cli_alert_warning("Training failed: {conditionMessage(e)}")
+      cli::cli_alert_warning("Training failed: {conditionMessage(e)}")
       return(NULL)
     }
   )
@@ -157,7 +161,7 @@ train_and_validate <- function(
       )
     },
     error = function(e) {
-      cli_alert_warning("Validation failed: {conditionMessage(e)}")
+      cli::cli_alert_warning("Validation failed: {conditionMessage(e)}")
       return(NULL)
     }
   )
