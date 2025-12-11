@@ -368,7 +368,8 @@ train_nn_landscapes <- function(
 #' Apply a Keras CNN Model for Landscape Classification
 #'
 #' Applies a trained CNN model to classify new landscapes based on their
-#' spatial patterns.
+#' spatial patterns. Automatically resizes input landscapes to match the
+#' model's expected dimensions.
 #'
 #' @param landscapes landscape object, or list of landscape objects. Landscape(s) to classify.
 #' @param nn_model List. CNN model from train_nn_landscapes().
@@ -409,6 +410,10 @@ apply_nn_landscapes <- function(
   class_names <- nn_model$classes
   input_shape <- nn_model$input_shape
 
+  # Expected dimensions from training
+  expected_height <- input_shape[1]
+  expected_width <- input_shape[2]
+
   # Validate landscapes structure
   if (!is.list(landscapes) && !is_landscape(landscapes)) {
     cli::cli_abort(
@@ -436,9 +441,36 @@ apply_nn_landscapes <- function(
     if (!is.null(l$name)) l$name else NA_character_
   })
 
-  # Convert all landscapes to arrays
+  # Convert all landscapes to arrays, resizing if needed
   landscape_arrays <- lapply(landscapes, function(l) {
     landscape_data <- l$data
+
+    # Check current dimensions
+    current_height <- terra::nrow(landscape_data)
+    current_width <- terra::ncol(landscape_data)
+
+    # Resize if dimensions don't match
+    if (current_height != expected_height || current_width != expected_width) {
+      cli::cli_alert_info(
+        "Resizing landscape from {current_height}x{current_width} to {expected_height}x{expected_width}"
+      )
+
+      # Create template raster with target dimensions
+      template <- terra::rast(
+        nrows = expected_height,
+        ncols = expected_width,
+        extent = terra::ext(landscape_data),
+        crs = terra::crs(landscape_data)
+      )
+
+      # Resample using nearest neighbor to preserve binary values
+      landscape_data <- terra::resample(
+        landscape_data,
+        template,
+        method = "near"
+      )
+    }
+
     terra::as.array(landscape_data)
   })
 
