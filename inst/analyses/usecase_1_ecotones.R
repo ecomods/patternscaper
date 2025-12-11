@@ -33,13 +33,22 @@ landscapes_manuscript <- create_training_landscapes(
   n = n_ecotones,
   patterns = ecotone_types
 )
-order_index <- match(sapply(landscapes_manuscript, function(x) x$pattern), ecotone_types)
+order_index <- match(
+  sapply(landscapes_manuscript, function(x) x$pattern),
+  ecotone_types
+)
 landscapes_manuscript <- landscapes_manuscript[order(order_index)]
 landscapes_manuscript[[5]]$pattern <- "bands"
 
-fig_sub_letter <- c("a","b","c","d","e","f")
-for(i in 1:6){
-  landscapes_manuscript[[i]]$pattern <- paste("(", fig_sub_letter[i], ") ", landscapes_manuscript[[i]]$pattern,sep="")
+fig_sub_letter <- c("a", "b", "c", "d", "e", "f")
+for (i in 1:6) {
+  landscapes_manuscript[[i]]$pattern <- paste(
+    "(",
+    fig_sub_letter[i],
+    ") ",
+    landscapes_manuscript[[i]]$pattern,
+    sep = ""
+  )
 }
 
 # plot all landscapes
@@ -52,7 +61,8 @@ fig_ecotones
 # save plot
 ggsave(
   filename = paste(
-    directory,"fig_ecotones",
+    directory,
+    "fig_ecotones",
     ".jpg",
     sep = ""
   ),
@@ -97,7 +107,9 @@ best_10 <- evaluate_landscape_metrics(
 )
 
 landscape_metrics_plot <- landscape_metrics
-landscape_metrics_plot$pattern[landscape_metrics_plot$pattern=="bands"] <- "bands"
+landscape_metrics_plot$pattern[
+  landscape_metrics_plot$pattern == "bands"
+] <- "bands"
 
 # plot the 10 best metrics
 p_metrics <- plot_metrics(
@@ -109,7 +121,7 @@ p_metrics <- plot_metrics(
 p_metrics
 
 ggsave(
-  filename = paste(directory,"fig_supp_ecotone_metrics.jpg", sep = ""),
+  filename = paste(directory, "fig_supp_ecotone_metrics.jpg", sep = ""),
   plot = p_metrics,
   width = 6,
   height = 4.5,
@@ -125,7 +137,7 @@ ggsave(
 model_ecotones_lm <- train_nn_metrics(
   metrics = landscape_metrics,
   metrics_selected = best_10,
-  hidden_layers = c(8,8),
+  hidden_layers = c(8, 8),
   cv_method = "k-fold"
 )
 
@@ -169,22 +181,27 @@ df <- validation_results_ecotone_lm$predictions
 #determine wrong classifications
 wrong_idx <- which(df$actual_class != df$predicted_class)
 l_misclass <- test_landscapes_ecotone[wrong_idx]
-for(i in 1:length(l_misclass)){
-  l_misclass[[i]]$pattern <- paste("(", fig_sub_letter[i], ") ", l_misclass[[i]]$pattern,sep="")
+for (i in 1:length(l_misclass)) {
+  l_misclass[[i]]$pattern <- paste(
+    "(",
+    fig_sub_letter[i],
+    ") ",
+    l_misclass[[i]]$pattern,
+    sep = ""
+  )
 }
 
 
-p_misclass <- plot_landscape_list(l_misclass,show_legend = F)
+p_misclass <- plot_landscape_list(l_misclass, show_legend = F)
 p_misclass
 
 ggsave(
-  filename = paste(directory,"fig_supp_ecotone_misclassified.jpg", sep = ""),
+  filename = paste(directory, "fig_supp_ecotone_misclassified.jpg", sep = ""),
   plot = p_misclass,
   width = 3.5,
   height = 1.5,
   dpi = 300
 )
-
 
 
 #show landscapes that are not classified correctly
