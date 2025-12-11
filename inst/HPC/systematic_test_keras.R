@@ -5,6 +5,8 @@ library(cli)
 
 devtools::load_all()
 
+set.seed(12345)
+
 # Parse command line arguments -------------------------------------------------
 args <- commandArgs(trailingOnly = TRUE)
 
@@ -52,7 +54,7 @@ cli::cli_alert_info("Results will be saved to: {results_dir}")
 
 # Full systematic test configuration (180 experiments)
 param_grid <- tidyr::expand_grid(
-  n_landscapes = c(50, 100, 200, 400),
+  n_landscapes = c(50, 100, 200, 400, 800),
   epochs = c(20, 50, 100),
   learning_rate = c(0.0001, 0.001, 0.01),
   replicate = 1:5
@@ -160,7 +162,7 @@ run_single_experiment <- function(
         dense_units = dense_units,
         optimizer = optimizer,
         patience = 10,
-        verbose = 0
+        verbose = FALSE
       )
 
       training_time <- as.numeric(difftime(
