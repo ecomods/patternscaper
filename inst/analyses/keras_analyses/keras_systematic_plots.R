@@ -268,7 +268,7 @@ keras_all_systematic_plots <- function(result_path, output_dir) {
 
 # Apply the function for ecotones and selfor landscapes
 
-result_path <- "inst/analyses/keras_systematic_tests"
+result_path <- "inst/analyses/keras_analyses/"
 data_path <- "inst/analyses/data/"
 
 data_path_ecotones <- paste0(
