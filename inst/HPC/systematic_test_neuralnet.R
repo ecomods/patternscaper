@@ -62,7 +62,22 @@ config <- tidyr::expand_grid(
   nlayers = 1:3
 )
 
-#----------------------------------------------------------------
+#--------------------------------------------------------------------
+# Main Execution
+#--------------------------------------------------------------------
+
+# Setup parallel backend
+plan(multisession, workers = n_cores)
+
+cli_alert_info("Preparing test landscapes...")
+test_data_lookup <- prepare_test_data(
+  reps = unique(config$rep),
+  requested_patterns = patterns
+)
+
+cli_alert_info("Preparing training landscapes and metrics (parallel)...")
+training_combos <- config |>
+  distinct(rep, training_size)
 
 # PARALLEL: This is the bottleneck so I parallelized it
 training_data_lookup <- training_combos |>
