@@ -280,8 +280,8 @@ data_path_selforg <- paste0(
   "systematic_test_results_keras_selforg.rds"
 )
 
-output_dir_ecotones <- file.path(result_path, "figures_ecotones2")
-output_dir_selforg <- file.path(result_path, "figures_selforg2")
+output_dir_ecotones <- file.path(result_path, "figures_ecotones")
+output_dir_selforg <- file.path(result_path, "figures_selforg")
 
 keras_all_systematic_plots(data_path_ecotones, output_dir_ecotones)
 keras_all_systematic_plots(data_path_selforg, output_dir_selforg)
