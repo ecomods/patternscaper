@@ -1,5 +1,8 @@
 library(tidyverse)
 
+# Set seed for reproducibility
+set.seed(12345)
+
 
 keras_all_systematic_plots <- function(result_path, output_dir) {
   # load functions to extract results in the right format and make the plots
@@ -13,54 +16,20 @@ keras_all_systematic_plots <- function(result_path, output_dir) {
 
   df_raw <- map_dfr(all_results, combine_validation_results)
 
-  # Plot accuracy
-  df_summary <- df_raw |>
-    summarize(
-      mean_accuracy = mean(validation_accuracy),
-      sd_accuracy = sd(validation_accuracy),
-      .by = c(n_landscapes, epochs, learning_rate, batch_size, dropout_rate)
-    ) |>
-    mutate(
-      n_landscapes = factor(n_landscapes),
-      epochs = factor(epochs)
+  # Create summaries with keras-specific grouping
+  summaries <- create_systematic_summaries(
+    df_raw,
+    grouping_vars = c(
+      "n_landscapes",
+      "epochs",
+      "learning_rate",
+      "batch_size",
+      "dropout_rate"
     )
+  )
 
-  # Find the worst classes across all metrics
-  df_worst_summary <- df_raw |>
-    summarize(
-      # Precision-based worst class
-      worst_class_precision = mode_random(worst_class_precision),
-      worst_precision_entropy = entropy(worst_class_precision),
-      mean_worst_precision = mean(worst_precision, na.rm = TRUE),
-
-      # Recall-based worst class
-      worst_class_recall = mode_random(worst_class_recall),
-      worst_recall_entropy = entropy(worst_class_recall),
-      mean_worst_recall = mean(worst_recall, na.rm = TRUE),
-
-      # F1-based worst class
-      worst_class_f1 = mode_random(worst_class_f1),
-      worst_f1_entropy = entropy(worst_class_f1),
-      mean_worst_f1 = mean(worst_f1, na.rm = TRUE),
-
-      .by = c(n_landscapes, epochs, learning_rate, batch_size, dropout_rate)
-    ) |>
-    mutate(
-      n_landscapes = factor(n_landscapes),
-      epochs = factor(epochs),
-
-      # Normalized entropy for alpha mapping (one per metric)
-      precision_entropy_norm = worst_precision_entropy /
-        max(worst_precision_entropy, na.rm = TRUE),
-      recall_entropy_norm = worst_recall_entropy /
-        max(worst_recall_entropy, na.rm = TRUE),
-      f1_entropy_norm = worst_f1_entropy / max(worst_f1_entropy, na.rm = TRUE),
-
-      # Alpha values (high entropy = low alpha = more transparent)
-      alpha_precision = 1 - precision_entropy_norm,
-      alpha_recall = 1 - recall_entropy_norm,
-      alpha_f1 = 1 - f1_entropy_norm
-    )
+  df_summary <- summaries$accuracy
+  df_worst_summary <- summaries$worst_classes
 
   # Plot accuracy ---------------------------------------------------------------
 
@@ -311,8 +280,8 @@ data_path_selforg <- paste0(
   "systematic_test_results_keras_selforg.rds"
 )
 
-output_dir_ecotones <- file.path(result_path, "figures_ecotones")
-output_dir_selforg <- file.path(result_path, "figures_selforg")
+output_dir_ecotones <- file.path(result_path, "figures_ecotones2")
+output_dir_selforg <- file.path(result_path, "figures_selforg2")
 
 keras_all_systematic_plots(data_path_ecotones, output_dir_ecotones)
 keras_all_systematic_plots(data_path_selforg, output_dir_selforg)

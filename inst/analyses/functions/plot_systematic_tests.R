@@ -9,9 +9,24 @@
 #'
 #' @keywords internal
 combine_validation_results <- function(one_result) {
-  parameters <- one_result$parameters
-  accuracy <- one_result$validation_accuracy
-  per_class <- one_result$validation_per_class
+  # if parameters exists, then extract the parameters (from keras tests)
+  # otherwise create parameters by extracting information from the list (neural
+  # net results)
+  if ("parameters" %in% names(one_result)) {
+    parameters <- one_result$parameters
+    accuracy <- one_result$validation_accuracy
+    per_class <- one_result$validation_per_class
+  } else {
+    parameters <- tibble(
+      n_landscapes = one_result$training_size,
+      layers = one_result$layers,
+      metric = one_result$metric,
+      inputmetrics = one_result$inputmetrics,
+      replicate = one_result$replicate
+    )
+    accuracy <- one_result$validation$performance$accuracy
+    per_class <- one_result$validation$performance$per_class_metrics
+  }
 
   # Helper to extract best/worst with random tie-breaking
   get_extreme_class <- function(metric_col, fn) {
@@ -137,4 +152,89 @@ entropy <- function(x) {
   }
   tab <- table(x) / length(x)
   -sum(tab * log2(tab))
+}
+
+#' Create summary statistics for systematic test results
+#'
+#' Aggregates validation results across replicates, computing mean/SD accuracy
+#' and worst class statistics for precision, recall, and F1 scores.
+#'
+#' @param df_raw Tibble from map_dfr(all_results, combine_validation_results)
+#' @param grouping_vars Character vector of column names to group by
+#'
+#' @return List with two tibbles:
+#'   \describe{
+#'     \item{accuracy}{Mean and SD accuracy by grouping variables}
+#'     \item{worst_classes}{Worst class identification and entropy across metrics}
+#'   }
+#'
+#' @keywords internal
+create_systematic_summaries <- function(df_raw, grouping_vars) {
+  # Validate grouping variables exist
+  missing_vars <- setdiff(grouping_vars, names(df_raw))
+  if (length(missing_vars) > 0) {
+    cli::cli_abort(c(
+      "Grouping variables not found in data:",
+      "x" = "{.val {missing_vars}}"
+    ))
+  }
+
+  # Accuracy summary
+  df_summary <- df_raw |>
+    summarize(
+      mean_accuracy = mean(validation_accuracy),
+      sd_accuracy = sd(validation_accuracy),
+      .by = all_of(grouping_vars)
+    ) |>
+    mutate(
+      across(
+        where(is.numeric) & !matches("mean_|sd_"),
+        factor
+      )
+    )
+
+  # Worst class summary
+  df_worst_summary <- df_raw |>
+    summarize(
+      # Precision-based worst class
+      worst_class_precision = mode_random(worst_class_precision),
+      worst_precision_entropy = entropy(worst_class_precision),
+      mean_worst_precision = mean(worst_precision, na.rm = TRUE),
+
+      # Recall-based worst class
+      worst_class_recall = mode_random(worst_class_recall),
+      worst_recall_entropy = entropy(worst_class_recall),
+      mean_worst_recall = mean(worst_recall, na.rm = TRUE),
+
+      # F1-based worst class
+      worst_class_f1 = mode_random(worst_class_f1),
+      worst_f1_entropy = entropy(worst_class_f1),
+      mean_worst_f1 = mean(worst_f1, na.rm = TRUE),
+
+      .by = all_of(grouping_vars)
+    ) |>
+    mutate(
+      across(
+        where(is.numeric) & !matches("mean_|entropy|alpha"),
+        factor
+      ),
+
+      # Normalized entropy for alpha mapping
+      precision_entropy_norm = worst_precision_entropy /
+        max(worst_precision_entropy, na.rm = TRUE),
+      recall_entropy_norm = worst_recall_entropy /
+        max(worst_recall_entropy, na.rm = TRUE),
+      f1_entropy_norm = worst_f1_entropy /
+        max(worst_f1_entropy, na.rm = TRUE),
+
+      # Alpha values (high entropy = low alpha = more transparent)
+      alpha_precision = 1 - precision_entropy_norm,
+      alpha_recall = 1 - recall_entropy_norm,
+      alpha_f1 = 1 - f1_entropy_norm
+    )
+
+  list(
+    accuracy = df_summary,
+    worst_classes = df_worst_summary
+  )
 }
