@@ -6,23 +6,48 @@ library(furrr)
 
 devtools::load_all()
 source("systematic_test_functions.R")
+set.seed(12345)
+
+# Parse command line arguments -------------------------------------------------
+args <- commandArgs(trailingOnly = TRUE)
+
+if (length(args) != 2) {
+  cli::cli_abort(
+    "Usage: Rscript systematic_test_neuralnet.R <pattern_type> <results_dir>
+  pattern_type: 'selforg' or 'ecotones'
+  results_dir: directory for output"
+  )
+}
+
+pattern_type <- args[1]
+results_dir <- args[2]
+
+# Define patterns based on type ------------------------------------------------
+if (pattern_type == "selforg") {
+  patterns <- c("bare", "spots", "labyrinth", "gaps", "dense")
+  metric_level <- "class"
+  class_filter <- 1
+} else if (pattern_type == "ecotones") {
+  patterns <- c("random", "sharp", "diffuse", "fingers", "clustered", "bands")
+  metric_level <- "landscape"
+  class_filter <- NULL
+} else {
+  cli::cli_abort(
+    "pattern_type must be 'selforg' or 'ecotones', got: {pattern_type}"
+  )
+}
+
+cli::cli_alert_info("Running experiments for pattern type: {pattern_type}")
+cli::cli_alert_info("Metric level: {metric_level}")
+if (!is.null(class_filter)) {
+  cli::cli_alert_info("Class filter: {class_filter}")
+}
+cli::cli_alert_info("Results will be saved to: {results_dir}")
 
 #--------------------------------------------------------------------
 # Configuration
 #--------------------------------------------------------------------
-result_path <- "systematic_test_neuralnet_ecotone_results.rds"
-seed <- 12345
-n_cores <- 4 # Adjust based on your system
-
-# ecotone types
-ecotone_patterns = c(
-  "random",
-  "sharp",
-  "diffuse",
-  "fingers",
-  "clustered",
-  "bands"
-)
+n_cores <- 4
 
 config <- tidyr::expand_grid(
   rep = 1:10,
@@ -37,36 +62,18 @@ config <- tidyr::expand_grid(
   nlayers = 1:3
 )
 
-#--------------------------------------------------------------------
-# Main Execution
-#--------------------------------------------------------------------
-set.seed(seed)
-
-# Setup parallel backend
-plan(multisession, workers = n_cores)
-
-cli_alert_info("Preparing test landscapes...")
-test_data_lookup <- prepare_test_data(
-  reps = unique(config$rep),
-  requested_patterns = ecotone_patterns
-)
-
-cli_alert_info("Preparing training landscapes and metrics (parallel)...")
-training_combos <- config |>
-  distinct(rep, training_size)
-
+#----------------------------------------------------------------
 
 # PARALLEL: This is the bottleneck so I parallelized it
 training_data_lookup <- training_combos |>
   future_pmap(
     \(rep, training_size) {
-      # Load package functions in each worker
       devtools::load_all()
       prepare_training_data_single(
         rep = rep,
         training_size = training_size,
-        requested_patterns = ecotone_patterns,
-        metric_level = "landscape"
+        requested_patterns = patterns,
+        metric_level = metric_level
       )
     },
     .options = furrr_options(seed = TRUE)
@@ -80,7 +87,8 @@ best_metrics_combos <- config |>
 
 best_metrics_lookup <- prepare_best_metrics(
   best_metric_combos = best_metrics_combos,
-  training_data_lookup = training_data_lookup
+  training_data_lookup = training_data_lookup,
+  class_filter = class_filter
 )
 
 cli_alert_info("Training neural networks...")
@@ -102,7 +110,13 @@ results_list <- config |>
 results_list <- set_names(results_list, map_chr(results_list, "name"))
 
 cli_alert_info("Saving results...")
-readr::write_rds(results_list, file = result_path)
+readr::write_rds(
+  results_list,
+  file.path(
+    results_dir,
+    paste0("systematic_test_", pattern_type, "_results.rds")
+  )
+)
 cli_alert_success("Complete! Trained {length(results_list)} models.")
 
 plan(sequential)

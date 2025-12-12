@@ -6,11 +6,15 @@
 #SBATCH --nodes=1
 #SBATCH -c 4
 #SBATCH --ntasks=1
-#SBATCH --mem=50G
-#SBATCH --time=24:00:00
+#SBATCH --mem=10G
+#SBATCH --time=10:00:00
 #SBATCH --qos=standard
+#SBATCH --output=nn_selforg_%j.out
 
 module add GDAL
 module add R
 
-Rscript "systematic_test_neuralnet_selforg.R" 
+# Create output directory
+mkdir -p results/nn_systematic_tests/selforg
+
+Rscript systematic_test_neuralnet.R selforg results/nn_systematic_tests/selforg
