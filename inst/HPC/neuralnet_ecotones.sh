@@ -14,8 +14,5 @@
 module add GDAL
 module add R
 
-# Create output directory
-mkdir -p results/nn_systematic_tests/ecotones
-
-Rscript systematic_test_neuralnet.R ecotones results/nn_systematic_tests/ecotones
+Rscript systematic_test_neuralnet.R ecotones ../analyses/data/
 

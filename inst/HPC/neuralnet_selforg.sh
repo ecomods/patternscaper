@@ -14,7 +14,4 @@
 module add GDAL
 module add R
 
-# Create output directory
-mkdir -p results/nn_systematic_tests/selforg
-
-Rscript systematic_test_neuralnet.R selforg results/nn_systematic_tests/selforg
+Rscript systematic_test_neuralnet.R selforg ../analyses/data/

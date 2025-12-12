@@ -22,3 +22,7 @@ inst/examples/SelfOrga_Results_Class/Results/NeuralNet_SelfOrga_Test_Rep2_T150.R
 inst/examples/SelfOrga_Results_Class/Results/NeuralNet_SelfOrga_Test_Rep6_T150.RData
 inst/examples/SelfOrga_Results_Class/Results/NeuralNet_SelfOrga_Test_Rep4_T150.RData
 inst/extdata/landscape_class_metrics.csv
+
+# Ignore result files from Cluster
+inst/HPC/results_ecotones/*
+inst/HPC/results_ecotones/*
