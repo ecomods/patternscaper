@@ -299,19 +299,20 @@ keras_all_systematic_plots <- function(result_path, output_dir) {
 
 # Apply the function for ecotones and selfor landscapes
 
-systematic_path <- "inst/analyses/keras_systematic_tests"
+result_path <- "inst/analyses/keras_systematic_tests"
+data_path <- "inst/analyses/data/"
 
 data_path_ecotones <- paste0(
-  systematic_path,
-  "/data/systematic_test_results_keras_ecotones.rds"
+  data_path,
+  "systematic_test_results_keras_ecotones.rds"
 )
 data_path_selforg <- paste0(
-  systematic_path,
-  "/data/systematic_test_results_keras_selforg.rds"
+  data_path,
+  "systematic_test_results_keras_selforg.rds"
 )
 
-output_dir_ecotones <- file.path(systematic_path, "figures_ecotones")
-output_dir_selforg <- file.path(systematic_path, "figures_selforg")
+output_dir_ecotones <- file.path(result_path, "figures_ecotones")
+output_dir_selforg <- file.path(result_path, "figures_selforg")
 
 keras_all_systematic_plots(data_path_ecotones, output_dir_ecotones)
 keras_all_systematic_plots(data_path_selforg, output_dir_selforg)
