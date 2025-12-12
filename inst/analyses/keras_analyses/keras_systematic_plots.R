@@ -71,11 +71,11 @@ keras_all_systematic_plots <- function(result_path, output_dir) {
     ) +
     labs(
       x = "Epochs",
-      y = "Number of Landscapes"
+      y = "Number of training landscapes"
     ) +
     theme_systematic_tests()
 
-  # Precision-based worst class plot
+  # Precision-based worst class plot ----------------------------------
   p_worst_precision <- ggplot(
     df_worst_summary,
     aes(
