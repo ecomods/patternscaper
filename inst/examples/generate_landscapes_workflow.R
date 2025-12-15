@@ -9,7 +9,7 @@ set.seed(123)
 # Generate multiple training landscapes --------------------------------------
 # ----------------------------------------------------------------------------#
 
-landscapes <- create_training_landscapes(n = 20)
+landscapes <- create_training_landscapes(n = 20) # maximum = 36
 
 # Randomly sampled landscape types (by default the function balances the types)
 landscapes <- create_training_landscapes(
