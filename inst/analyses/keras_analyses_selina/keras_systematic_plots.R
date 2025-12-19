@@ -3,7 +3,6 @@ library(tidyverse)
 # Set seed for reproducibility
 set.seed(12345)
 
-
 keras_all_systematic_plots <- function(result_path, output_dir) {
   # load functions to extract results in the right format and make the plots
   source(here::here("inst/analyses/functions/plot_systematic_tests.R"))
@@ -268,7 +267,7 @@ keras_all_systematic_plots <- function(result_path, output_dir) {
 
 # Apply the function for ecotones and selfor landscapes
 
-result_path <- "inst/analyses/keras_analyses/"
+result_path <- "inst/analyses/keras_analyses_selina/"
 data_path <- "inst/analyses/data/"
 
 data_path_ecotones <- paste0(
