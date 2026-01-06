@@ -2,8 +2,9 @@
 #----------------------------------------------------------------------------------------
 # Use Case 1: Ecotone transitions
 # The two approaches (neural net using landscape metrics as input and neural net using pixel data)
-# are tested different transition types in ecotones.
-# The plots from this script are used in the manuscript on the R package.
+# are tested different transition types in ecotones:
+#   sharp, diffuse, clustered, fingers, bands, random (no transition at all).
+# The plots from this script are used in initial R package description by Tietjen, Baldauf, Berger (202x).
 #----------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------
 
@@ -12,47 +13,10 @@
 #--------------------------------------------------------------------
 
 devtools::load_all()
-library(ggplot2)
-set.seed(53)
+set.seed(53) #set seed for reproducibility
 directory <- "inst/analyses/pics_for_paper/"
-
-#--------------------------------------------------------------------
-# Helper function to save plots in different formats (jpg, png, pdf)
-#--------------------------------------------------------------------
-save_plot_multi <- function(
-  plot,
-  directory, 
-  filename_base, 
-  width = 6, 
-  height = 6,
-  dpi = 300
-) {
-
-  #ensure directory ends with /
-  if (!grepl("/$", directory)) {
-    directory <- paste0(directory, "/")
-  }
-  ggsave( #jpg
-    filename = paste0(directory, filename_base, ".jpg"),
-    plot = plot,
-    width = width,
-    height = height,
-    dpi = dpi
-  )
-  ggsave( #png
-    filename = paste0(directory, filename_base, ".png"),
-    plot = plot,
-    width = width,
-    height = height,
-    dpi = dpi
-  )
-  ggsave( #pdf
-    filename = paste0(directory, filename_base, ".pdf"),
-    plot = plot,
-    width = width,
-    height = height
-  )
-}
+#use help function to plot different formats
+source("inst/analyses/functions/plot_different_formats.R")
 
 #--------------------------------------------------------------------
 # General landscape types and their titles
@@ -255,6 +219,8 @@ model_ecotones_pix <- train_nn_landscapes(
   cv_method = "k-fold",
   cv_folds = 5,
   epochs = 100,
+  batch_size = 8,
+  dropout_rate = 0.4
 )
 
 # check the model accuracy
@@ -273,6 +239,8 @@ model_ecotones_pix_400 <- train_nn_landscapes(
   cv_method = "k-fold",
   cv_folds = 5,
   epochs = 100,
+  batch_size = 16,
+  dropout_rate = 0.3
 )
 
 # check the model accuracy
@@ -289,7 +257,7 @@ plot_classified_landscapes(
 )
 
 # -------------------------------------------------------------------
-# Apply the models to new landscapes
+# Apply the model to new landscapes
 # -------------------------------------------------------------------
 
 # apply the model to the test landscapes
@@ -314,16 +282,17 @@ fig_misclass_ecotone_pix_400 <- plot_classified_landscapes(
   show_legend = F,
   ncol = 6
 )
-#--> currently too many!
 
 fig_misclass_ecotone_pix_400
 
+#save the plot
 save_plot_multi(
   plot = fig_misclass_ecotone_pix_400,
-  filename_base = "fig_supp_ecotone_pixel_misclassified",
+  filename_base = "fig_supp_ecotone_pixel_400_misclassified",
   directory = directory,
-  width = 4.5,
-  height = 1.5,
+  width = 6,
+  height = 6,
   dpi = 300
 )
 
+#save.image(file="usecase_1_all_data.RData")

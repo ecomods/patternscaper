@@ -1,22 +1,37 @@
-# -------------------------------------------------------------------
-# Apply the model to pictures from
-# Meron et al. 2004: doi:10.1016/S0960-0779(03)00049-3
-# -------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+# Use Case 1: Self-organized landscape patterns
+# The two approaches (neural net using landscape metrics as input and neural net using pixel data)
+# are tested different types of self-organized landscapes:
+#   bare, spots, labyrinth, gaps, dense.
+# In addition, pictures (photographs and satellite) are used for testing.
+# The plots from this script are used in initial R package description by Tietjen, Baldauf, Berger (202x).
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Load all functions in the package and prepare everything
+#--------------------------------------------------------------------
 
 devtools::load_all()
+#additional libraries are required to handle and show the pictures
 library(ggplot2)
 library(png)
 library(magick)
 library(colorspace)
 library(raster)
-
-#for reproducibility
+# for reproducibility
 set.seed(321)
+#directory <- "inst/analyses/selfOrga_results_class/"
+directory <- "inst/analyses/pics_for_paper/"
+#use help function to plot different formats
+source("inst/analyses/functions/plot_different_formats.R")
 
-directory <- "inst/analyses/selfOrga_results_class/"
-result_figs <- "inst/analyses/pics_for_paper/"
+#--------------------------------------------------------------------
+# General landscape types and their titles
+#--------------------------------------------------------------------
 
-#pattern types to be distinguished
+# pattern types to be distinguished
 selforga_types = c(
   "bare",
   "spots",
@@ -25,12 +40,12 @@ selforga_types = c(
   "dense"
 )
 
-#plotting for manuscript
+# plotting for manuscript - create landscapes
 landscapes_manuscript <- list()
 landscapes_manuscript[[1]] <- create_landscape_random(
   tree_prop = 0.05
 )
-landscapes_manuscript[[1]]$pattern <- "bare"
+landscapes_manuscript[[1]]$pattern <- "bare" #type "bare" does not exist in our list
 landscapes_manuscript[[2]] <- create_landscape_spots(
   n_spots = 5,
   spot_radius = 18,
@@ -54,8 +69,9 @@ landscapes_manuscript[[4]] <- create_landscape_gaps(
 landscapes_manuscript[[5]] <- create_landscape_random(
   tree_prop = 0.9
 )
-landscapes_manuscript[[5]]$pattern <- "dense"
+landscapes_manuscript[[5]]$pattern <- "dense" #type "dense" does not exist in our list
 
+# add letters for figure
 fig_sub_letter <- c("a", "b", "c", "d", "e")
 for (i in 1:5) {
   landscapes_manuscript[[i]]$pattern <- paste(
@@ -67,51 +83,53 @@ for (i in 1:5) {
   )
 }
 
+# make plot
 fig_pattern_selforga <- plot_landscape_list(
   landscapes_manuscript,
   ncol = 5,
   show_legend = F
 )
+fig_pattern_selforga
 
-ggsave(
-  filename = paste(
-    result_figs,
-    "fig_selforga",
-    ".jpg",
-    sep = ""
-  ),
+# save plot
+save_plot_multi(
   plot = fig_pattern_selforga,
-  width = 8,
-  height = 2,
+  filename_base = "fig_selforga",
+  directory = directory,
+  width = 5,
+  height = 1.5,
   dpi = 300
 )
 
+#--------------------------------------------------------------------
+# Generate training and testing landscapes
+#--------------------------------------------------------------------
 
-#for reproducibility
+# for reproducibility
 set.seed(321)
 
-
-#create new landscapes for training (20 of each type)
-training_landscapes <- list()
+# create new landscapes for training (20 of each type)
+training_landscapes_selforga <- list()
 for (i in 1:20) {
   j <- (i - 1) * 5 + 1
+  l_size <- sample(x = seq(120, 150), size = 1)
   temp_landscape <- create_landscape_gaps(
-    width = sample(x = seq(120, 150), size = 1),
-    height = sample(x = seq(120, 150), size = 1),
+    width = l_size,
+    height = l_size,
     n_spots = sample(x = seq(3, 5), size = 1),
     spot_radius = sample(x = seq(20, 25), size = 1),
     spot_radius_sd = sample(x = seq(3, 8), size = 1),
     radius_noise_fraction = runif(n = 1, min = 0.05, max = 0.6),
     regular_spots = sample(x = c(T, F), size = 1)
   )
-  plot_landscape(temp_landscape)
   landscape_name <- paste("landscape_gaps_", i, sep = "")
   temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
-  training_landscapes[[j]] <- temp_landscape
+  training_landscapes_selforga[[j]] <- temp_landscape
   j <- j + 1
+  l_size <- sample(x = seq(120, 150), size = 1)
   temp_landscape <- create_landscape_spots(
-    width = sample(x = seq(120, 150), size = 1),
-    height = sample(x = seq(120, 150), size = 1),
+    width = l_size,
+    height = l_size,
     n_spots = sample(x = seq(3, 5), size = 1),
     spot_radius = sample(x = seq(20, 25), size = 1),
     spot_radius_sd = sample(x = seq(3, 8), size = 1),
@@ -120,12 +138,12 @@ for (i in 1:20) {
   )
   landscape_name <- paste("landscape_spots_", i, sep = "")
   temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
-  training_landscapes[[j]] <- temp_landscape
+  training_landscapes_selforga[[j]] <- temp_landscape
   j <- j + 1
-  wh <- sample(seq(120, 150), 1)
+  l_size <- sample(x = seq(120, 150), size = 1)
   temp_landscape <- create_landscape_labyrinth(
-    width = wh,
-    height = wh,
+    width = l_size,
+    height = l_size,
     frequency = runif(n = 1, min = 1, max = 10) * wh / 100,
     veg_threshold = runif(n = 1, min = 0.5, max = 0.7),
     band_fuzziness = runif(n = 1, min = 0, max = 0.005),
@@ -133,70 +151,215 @@ for (i in 1:20) {
   )
   landscape_name <- paste("landscape_labyrinth_", i, sep = "")
   temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
-  training_landscapes[[j]] <- temp_landscape
+  training_landscapes_selforga[[j]] <- temp_landscape
   j <- j + 1
+  l_size <- sample(x = seq(120, 150), size = 1)
   temp_landscape <- create_landscape_random(
-    width = sample(x = seq(120, 150), size = 1),
-    height = sample(x = seq(120, 150), size = 1),
+    width = l_size,
+    height = l_size,
     tree_prop = runif(n = 1, min = 0.01, max = 0.2)
   )
   temp_landscape$pattern <- "bare"
   landscape_name <- paste("landscape_bare_", i, sep = "")
   temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
-  training_landscapes[[j]] <- temp_landscape
+  training_landscapes_selforga[[j]] <- temp_landscape
   j <- j + 1
+  l_size <- sample(x = seq(120, 150), size = 1)
   temp_landscape <- create_landscape_random(
-    width = sample(x = seq(120, 150), size = 1),
-    height = sample(x = seq(120, 150), size = 1),
+    width = l_size,
+    height = l_size,
     tree_prop = runif(n = 1, min = 0.8, max = 0.99)
   )
   temp_landscape$pattern <- "dense"
   landscape_name <- paste("landscape_dense_", i, sep = "")
   temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
-  training_landscapes[[j]] <- temp_landscape
+  training_landscapes_selforga[[j]] <- temp_landscape
 }
 
 # check how many landscapes of each pattern were generated
-table(purrr::map_chr(training_landscapes, ~ .x$pattern))
+table(purrr::map_chr(training_landscapes_selforga, ~ .x$pattern))
+
+# generate test landscapes
+test_landscapes_selforga <- list()
+for (i in 1:20) {
+  j <- (i - 1) * 5 + 1
+  l_size <- sample(x = seq(120, 150), size = 1)
+  temp_landscape <- create_landscape_gaps(
+    width = l_size,
+    height = l_size,
+    n_spots = sample(x = seq(3, 5), size = 1),
+    spot_radius = sample(x = seq(20, 25), size = 1),
+    spot_radius_sd = sample(x = seq(3, 8), size = 1),
+    radius_noise_fraction = runif(n = 1, min = 0.05, max = 0.6),
+    regular_spots = sample(x = c(T, F), size = 1)
+  )
+  landscape_name <- paste("landscape_gaps_", i, sep = "")
+  temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
+  test_landscapes_selforga[[j]] <- temp_landscape
+  j <- j + 1
+  l_size <- sample(x = seq(120, 150), size = 1)
+  temp_landscape <- create_landscape_spots(
+    width = l_size,
+    height = l_size,
+    n_spots = sample(x = seq(3, 5), size = 1),
+    spot_radius = sample(x = seq(20, 25), size = 1),
+    spot_radius_sd = sample(x = seq(3, 8), size = 1),
+    radius_noise_fraction = runif(n = 1, min = 0.05, max = 0.6),
+    regular_spots = sample(x = c(T, F), size = 1)
+  )
+  landscape_name <- paste("landscape_spots_", i, sep = "")
+  temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
+  test_landscapes_selforga[[j]] <- temp_landscape
+  j <- j + 1
+  l_size <- sample(x = seq(120, 150), size = 1)
+  temp_landscape <- create_landscape_labyrinth(
+    width = l_size,
+    height = l_size,
+    frequency = runif(n = 1, min = 1, max = 10) * wh / 100,
+    veg_threshold = runif(n = 1, min = 0.5, max = 0.7),
+    band_fuzziness = runif(n = 1, min = 0, max = 0.005),
+    octaves = sample(x = seq(1, 5), size = 1)
+  )
+  landscape_name <- paste("landscape_labyrinth_", i, sep = "")
+  temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
+  test_landscapes_selforga[[j]] <- temp_landscape
+  j <- j + 1
+  l_size <- sample(x = seq(120, 150), size = 1)
+  temp_landscape <- create_landscape_random(
+    width = l_size,
+    height = l_size,
+    tree_prop = runif(n = 1, min = 0.01, max = 0.2)
+  )
+  temp_landscape$pattern <- "bare"
+  landscape_name <- paste("landscape_bare_", i, sep = "")
+  temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
+  test_landscapes_selforga[[j]] <- temp_landscape
+  j <- j + 1
+  l_size <- sample(x = seq(120, 150), size = 1)
+  temp_landscape <- create_landscape_random(
+    width = l_size,
+    height = l_size,
+    tree_prop = runif(n = 1, min = 0.8, max = 0.99)
+  )
+  temp_landscape$pattern <- "dense"
+  landscape_name <- paste("landscape_dense_", i, sep = "")
+  temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
+  test_landscapes_selforga[[j]] <- temp_landscape
+}
+
+
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+# Approach 1: neural net trained on landscape metrics
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Calculate landscapes metrics and determine best ones
+#--------------------------------------------------------------------
 
 # calculate landscape metrics at the class level
 landscape_class_metrics_all <- calculate_landscape_metrics(
-  landscapes = training_landscapes,
+  landscapes = training_landscapes_selforga,
   level = "class"
 )
 
 #focus on vegetation class only
 metric_class <- 1
-landscape_class_metrics <- landscape_class_metrics_all %>%
+landscape_class_metrics_selforga <- landscape_class_metrics_all %>%
   filter(class == metric_class)
 
 #determine best 10 metrics to distinguish pattern types
-best_10 <- evaluate_landscape_metrics(
-  metrics = landscape_class_metrics,
+best_10_selforga <- evaluate_landscape_metrics(
+  metrics = landscape_class_metrics_selforga,
   metrics_number = 10,
   method = "kruskal_p"
 )
-best_10
+best_10_selforga
 
+# plot the 10 best metrics
+fig_metrics_selforga <- plot_metrics(
+  metrics = landscape_class_metrics_selforga,
+  selected_metrics = best_10_selforga,
+  force = TRUE
+)
+fig_metrics_selforga
+
+# save into different formats
+save_plot_multi(
+  plot = fig_metrics_selforga,
+  filename_base = "fig_supp_selforga_metrics",
+  directory = directory,
+  width = 6,
+  height = 4.5,
+  dpi = 300
+)
 
 #--------------------------------------------------------------------
-# Train neural network with landscapes metrics
+# Train neural network with landscapes metrics and test
 #--------------------------------------------------------------------
 
 # train a network
-model_selforga_pics <- train_nn_metrics(
-  metrics = landscape_class_metrics,
-  metrics_selected = best_10,
+model_selforga_metrics <- train_nn_metrics(
+  metrics = landscape_class_metrics_selforga,
+  metrics_selected = best_10_selforga,
   cv_method = "k-fold"
 )
 
 # look at the model object
-model_selforga_pics$performance$accuracy
+model_selforga_metrics$performance$accuracy
+
+# test model on new data
+validation_results_selforga_lm <- apply_nn_metrics(
+  landscapes = test_landscapes_selforga,
+  nn_model = model_selforga_metrics,
+  return_performance = TRUE
+)
+
+# accuracy of the neural net for the test data
+validation_results_selforga_lm$performance$accuracy
+
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+# Approach 2: neural net trained on pixel input
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Train neural network with the input data itself
+#--------------------------------------------------------------------
+
+#save.image(file="usecase_2_all_data.RData")
+
+# train a model
+model_selforga_pix <- train_nn_landscapes(
+  landscapes = training_landscapes_selforga,
+  cv_method = "k-fold",
+  cv_folds = 5,
+  epochs = 100,
+  batch_size = 8,
+  dropout_rate = 0.4
+)
+
+#does not work!
+
+# check the model accuracy
+model_selforga_pix$performance$accuracy
+
+##################################################
+##################stopped here####################
+##################################################
+
 
 #--------------------------------------------------------------------
 # Read in pictures and evaluate them
 #--------------------------------------------------------------------
 
+
+# -------------------------------------------------------------------
+# Apply the model to pictures from
+# Meron et al. 2004: doi:10.1016/S0960-0779(03)00049-3
+# -------------------------------------------------------------------
 pic_dir <- paste(directory, "Pics/", sep = "") #folder name
 pic_names <- list.files(pic_dir) #file names
 pic_names
@@ -383,3 +546,5 @@ ggsave(
   height = 6,
   dpi = 300
 )
+
+#save.image(file="usecase_2_all_data.RData")
