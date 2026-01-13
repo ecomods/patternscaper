@@ -410,6 +410,39 @@ plot_landscape_list(list(
   random_rotated
 ))
 
+# Labyrinth vegetation ------------------------------------------------------
+# Default labyrinth vegetation
+labyrinth_default <- create_landscape("labyrinth", name = "Default")
+# Modified labyrinth with higher frequency and multiple octaves
+labyrinth_modified <- create_landscape(
+  "labyrinth",
+  name = "Modified",
+  frequency = 8,
+  octaves = 3,
+  band_fuzziness = 0.05
+)
+# One landscape with rotation
+labyrinth_rotated <- create_landscape(
+  "labyrinth",
+  name = "Rotated",
+  frequency = 5,
+  veg_threshold = 0.6,
+  rotation = 45
+)
+# Plot all labyrinth vegetation together
+plot_landscape_list(list(
+  labyrinth_default,
+  labyrinth_modified,
+  labyrinth_rotated
+))
+
+# generate a set of labyrinth landscapes
+set.seed(123)
+labyrinths <- create_training_landscapes(
+  patterns = "labyrinth",
+  n = 36
+)
+plot_landscape_list(labyrinths)
 
 # Stripes vegetation ----------------------------------------------------------
 # Default stripes vegetation
