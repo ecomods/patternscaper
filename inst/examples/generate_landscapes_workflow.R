@@ -421,19 +421,10 @@ labyrinth_modified <- create_landscape(
   octaves = 3,
   band_fuzziness = 0.05
 )
-# One landscape with rotation
-labyrinth_rotated <- create_landscape(
-  "labyrinth",
-  name = "Rotated",
-  frequency = 5,
-  veg_threshold = 0.6,
-  rotation = 45
-)
 # Plot all labyrinth vegetation together
 plot_landscape_list(list(
   labyrinth_default,
-  labyrinth_modified,
-  labyrinth_rotated
+  labyrinth_modified
 ))
 
 # Try the effect of octaves by creating multiple landscapes with different octaves
@@ -453,7 +444,7 @@ plot_landscape_list(labyrinth_octaves)
 
 # Understand the effect of veg_threshold
 labyrinth_veg_threshold <- list()
-for (i in seq(0.4, 0.7, by = 0.1)) {
+for (i in seq(0.3, 0.6, by = 0.05)) {
   set.seed(123)
   labyrinth_veg_threshold[[as.character(i)]] <- create_landscape(
     "labyrinth",
@@ -468,7 +459,7 @@ plot_landscape_list(labyrinth_veg_threshold)
 
 # understand the effect of band_fuzziness
 labyrinth_band_fuzziness <- list()
-for (i in c(0, 0.05, 0.1, 0.2, 0.3)) {
+for (i in c(0, 0.05, 0.1, 0.2, 0.3, 0.5)) {
   set.seed(123)
   labyrinth_band_fuzziness[[as.character(i)]] <- create_landscape(
     "labyrinth",
