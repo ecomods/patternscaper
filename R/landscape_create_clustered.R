@@ -1,7 +1,7 @@
-#' Create a Landscape with Clustered Trees
+#' Create a Landscape with Clustered Features
 #'
-#' Generates a binary landscape with clustered trees below a treeline.
-#' Trees are arranged in clusters within a scatter zone that extends below
+#' Generates a binary landscape with clustered features below a treeline.
+#' Features are arranged in clusters within a scatter zone that extends below
 #' the treeline. Clusters can be elongated in x or y directions to create
 #' elliptical patterns.
 #'
@@ -16,13 +16,19 @@
 #' @param scatter_zone_prop Numeric. Proportion of height for scatter zone
 #'   measured downward from treeline (0-1, default: 0.3).
 #' @param elongation_x Numeric. Horizontal elongation factor for clusters.
-#'   Values > 1 create horizontally elongated clusters (default: 1).
+#'   Values > 1 stretch clusters horizontally, creating wider ellipses.
+#'   Values < 1 compress horizontally (default: 1).
 #' @param elongation_y Numeric. Vertical elongation factor for clusters.
-#'   Values > 1 create vertically elongated clusters (default: 1).
-#' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
+#'   Values > 1 stretch clusters vertically, creating taller ellipses.
+#'   Values < 1 compress vertically (default: 1).
+#' @param rotation Numeric. Angle to rotate landscape in degrees, clockwise.
+#'   The landscape is expanded before rotation and cropped back to target size
+#'   to prevent edge clipping (default: 0).
 #'
-#' @return A landscape object with pattern "clustered" containing the generated
-#'   landscape data and parameters.
+#' @return A landscape object with pattern "clustered" containing:
+#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+#'   \item{pattern}{Character string "clustered"}
+#'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @importFrom stats runif
 #' @importFrom terra as.matrix
@@ -30,10 +36,10 @@
 #' @keywords internal
 #'
 #' @examples
-#' # Default clustered trees
+#' # Default clustered features
 #' clustered_default <- create_landscape_clustered()
 #'
-#' # Modified clustered trees with horizontally elongated clusters
+#' # Modified clustered features with horizontally elongated clusters
 #' clustered_modified <- create_landscape_clustered(
 #'   treeline_position = 0.2,
 #'   n_clusters = 8,
@@ -70,18 +76,22 @@ create_landscape_clustered <- function(
   validate_random_spots(random_spots = random_spots)
   validate_rotation(rotation = rotation)
 
-  # Convert parameters to the right types
-  n_clusters <- as.integer(n_clusters)
-
+  # n_clusters must be a positive integer
+  # Validate before conversion
   if (
     !is.numeric(n_clusters) ||
+      length(n_clusters) != 1 ||
+      is.na(n_clusters) ||
       n_clusters < 1
   ) {
     cli::cli_abort(c(
-      "{.arg n_clusters} must be a positive integer.",
+      "{.arg n_clusters} must be a positive number.",
       "x" = "You supplied {.val {n_clusters}}"
     ))
   }
+
+  # Convert to integer (truncates decimals like 12.7 -> 12)
+  n_clusters <- as.integer(n_clusters)
 
   if (!is.numeric(cluster_radius) || cluster_radius <= 0) {
     cli::cli_abort(c(
@@ -115,7 +125,8 @@ create_landscape_clustered <- function(
     ))
   }
 
-  # Calculate dimensions based on rotation
+  # Scale factor for rotated landscapes: 1.5x provides sufficient padding
+  # to prevent clipping of rotated content
   rotation_scale_factor <- 1.5
   height_actual <- ifelse(rotation == 0, height, height * rotation_scale_factor)
   width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
@@ -164,12 +175,30 @@ create_landscape_clustered <- function(
     treeline_row + floor(max_row * scatter_zone_prop)
   )
 
+  # Validate that cluster centers can be placed within scatter zone
+  sample_row_start <- treeline_row + cluster_radius + 1
+  sample_row_end <- floor(scatter_zone_end - cluster_radius)
+
+  if (sample_row_start > sample_row_end) {
+    cli::cli_abort(c(
+      "Cannot place clusters: insufficient vertical space in scatter zone.",
+      "i" = "Row range [{sample_row_start}, {sample_row_end}] is invalid.",
+      "i" = "Increase {.arg scatter_zone_prop} or decrease {.arg cluster_radius}."
+    ))
+  }
+
+  if (min_col > max_col) {
+    cli::cli_abort(c(
+      "Cannot place clusters: insufficient horizontal space.",
+      "i" = "Column range [{min_col}, {max_col}] is invalid.",
+      "i" = "This may indicate an issue with rotation parameters."
+    ))
+  }
+
   # Generate random cluster centers within safe boundaries
   cluster_centers <- data.frame(
     row = sample(
-      (treeline_row + cluster_radius + 1):floor(
-        scatter_zone_end - cluster_radius
-      ),
+      sample_row_start:sample_row_end,
       n_clusters,
       replace = TRUE
     ),
