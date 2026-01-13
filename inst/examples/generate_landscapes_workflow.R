@@ -436,6 +436,66 @@ plot_landscape_list(list(
   labyrinth_rotated
 ))
 
+# Try the effect of octaves by creating multiple landscapes with different octaves
+labyrinth_octaves <- list()
+for (i in 1:6) {
+  set.seed(123)
+  labyrinth_octaves[[i]] <- create_landscape(
+    "labyrinth",
+    name = paste0("Octaves: ", i),
+    frequency = 5,
+    veg_threshold = 0.5,
+    band_fuzziness = 0.1,
+    octaves = i
+  )
+}
+plot_landscape_list(labyrinth_octaves)
+
+# Understand the effect of veg_threshold
+labyrinth_veg_threshold <- list()
+for (i in seq(0.4, 0.7, by = 0.1)) {
+  set.seed(123)
+  labyrinth_veg_threshold[[as.character(i)]] <- create_landscape(
+    "labyrinth",
+    name = paste0("Veg threshold: ", i),
+    frequency = 5,
+    veg_threshold = i,
+    band_fuzziness = 0.1,
+    octaves = 6
+  )
+}
+plot_landscape_list(labyrinth_veg_threshold)
+
+# understand the effect of band_fuzziness
+labyrinth_band_fuzziness <- list()
+for (i in c(0, 0.05, 0.1, 0.2, 0.3)) {
+  set.seed(123)
+  labyrinth_band_fuzziness[[as.character(i)]] <- create_landscape(
+    "labyrinth",
+    name = paste0("Band fuzziness: ", i),
+    frequency = 5,
+    veg_threshold = 0.5,
+    band_fuzziness = i,
+    octaves = 6
+  )
+}
+plot_landscape_list(labyrinth_band_fuzziness)
+
+# understand the effect of frequency
+labyrinth_frequency <- list()
+for (i in c(1, 3, 5, 7, 9)) {
+  set.seed(123)
+  labyrinth_frequency[[as.character(i)]] <- create_landscape(
+    "labyrinth",
+    name = paste0("Frequency: ", i),
+    frequency = i,
+    veg_threshold = 0.5,
+    band_fuzziness = 0.1,
+    octaves = 6
+  )
+}
+plot_landscape_list(labyrinth_frequency)
+
 # generate a set of labyrinth landscapes
 set.seed(123)
 labyrinths <- create_training_landscapes(
