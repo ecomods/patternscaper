@@ -7,7 +7,7 @@
 #' @param tree_prop Numeric. Probability of tree presence (0-1) (default: 0.5).
 #'    Higher values result in a denser tree cover.
 #'
-#' @return A landscape object with pattern "random" containing the generated landscape data and parameters.
+#' @return @return A landscape object containing the generated landscape data and parameters.
 #'
 #' @keywords internal
 #'
@@ -15,10 +15,11 @@
 #' # Default randomly distributed trees
 #' random_default <- create_landscape_random()
 #'
-#' # Modified random trees with higher density
-#' random_modified <- create_landscape_random(
-#'   tree_prop = 0.7
-#' )
+#' # Higher tree density
+#' random_dense <- create_landscape_random(tree_prop = 0.7)
+#'
+#' # Custom dimensions
+#' random_large <- create_landscape_random(width = 200, height = 150)
 #'
 #' @importFrom stats rbinom
 create_landscape_random <- function(
