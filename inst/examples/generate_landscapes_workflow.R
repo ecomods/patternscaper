@@ -387,6 +387,30 @@ plot_landscape_list(many_spots)
 regular <- purrr::map_lgl(many_spots, \(x) x$params$regular_spots)
 plot_landscape_list(many_spots[regular])
 
+# Random landscapes ---------------------------------------------------------
+
+# Default random landscape
+random_default <- create_landscape("random", name = "Default")
+# Modified random landscape with higher tree density
+random_modified <- create_landscape(
+  "random",
+  name = "Modified",
+  tree_prop = 0.7
+)
+# One landscape with rotation
+random_rotated <- create_landscape(
+  "random",
+  name = "Rotated",
+  tree_prop = 0.2,
+  rotation = 10
+)
+# Plot all random landscapes together
+plot_landscape_list(list(
+  random_default,
+  random_modified,
+  random_rotated
+))
+
 
 # Stripes vegetation ----------------------------------------------------------
 # Default stripes vegetation
