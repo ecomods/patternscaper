@@ -383,10 +383,23 @@ create_training_landscapes <- function(
     )
   }
 
+  # Define which patterns support rotation
+  patterns_with_rotation <- c(
+    "sharp",
+    "diffuse",
+    "curvy",
+    "fingers",
+    "clustered",
+    "bands",
+    "spots",
+    "gaps",
+    "stripes",
+    "labyrinth"
+  )
+
   # Generate each landscape
   for (i in 1:n) {
     pattern <- sampled_patterns[i]
-    rotation <- sampled_rotations[i]
 
     # Get parameter ranges for this pattern
     pattern_params <- params_list[[pattern]]
@@ -414,7 +427,18 @@ create_training_landscapes <- function(
     # Add common parameters
     sampled_params$width <- width
     sampled_params$height <- height
-    sampled_params$rotation <- rotation
+
+    # Only add rotation for patterns that support it
+    if (pattern %in% patterns_with_rotation) {
+      rotation <- if (add_rotation) {
+        sample(rotation_angles, 1)
+      } else {
+        0
+      }
+      sampled_params$rotation <- rotation
+    } else {
+      rotation <- 0 # For naming purposes only
+    }
 
     # Generate the landscape
     tryCatch(
