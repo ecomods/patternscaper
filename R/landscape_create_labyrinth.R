@@ -38,6 +38,8 @@
 #' )
 #'
 #' @keywords internal
+#' @importFrom ambient long_grid gen_perlin
+#' @importFrom stats rbinom
 create_landscape_labyrinth <- function(
   width = 100,
   height = 100,
@@ -95,13 +97,16 @@ create_landscape_labyrinth <- function(
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
-  # Make coordinates (required by gen_perlin())
-  aspect <- width_actual / height_actual
+  # Create coordinate grid for noise generation
+  # Perlin noise requires x,y coordinates for each pixel
+  aspect_ratio <- width_actual / height_actual
   grid <- ambient::long_grid(
-    x = seq(0, aspect, length.out = width_actual),
+    x = seq(0, aspect_ratio, length.out = width_actual),
     y = seq(0, 1, length.out = height_actual)
   )
-  # Calculate Perlin Noise
+
+  # Generate fractal Brownian motion noise field
+  # Combines multiple octaves of Perlin noise for natural-looking patterns
   grid$noise <- fbm_perlin(
     x = grid$x,
     y = grid$y,
@@ -109,24 +114,38 @@ create_landscape_labyrinth <- function(
     octaves = octaves
   )
 
-  # Normalize to 0-1
-  n <- (grid$noise - min(grid$noise)) / (max(grid$noise) - min(grid$noise))
+  # Normalize noise values to 0-1 range
+  # Makes threshold comparisons consistent regardless of noise amplitude
+  noise_normalized <- (grid$noise - min(grid$noise)) /
+    (max(grid$noise) - min(grid$noise))
 
-  th <- median(n)
+  # Calculate threshold for initial binary classification
+  # Uses median to create approximately equal areas of vegetation/bare ground
+  threshold_median <- median(noise_normalized)
 
-  # First: strong threshold
-  landscape_vec <- ifelse(n > th, 1, 0)
-  #  landscape_vec <- ifelse(n > veg_threshold, 1, 0)
+  # Apply initial hard threshold using median
+  # Creates base binary pattern before adding fuzzy boundaries
+  landscape_vec <- ifelse(noise_normalized > threshold_median, 1, 0)
 
-  # Then fuzziness around boundary
-  fuzzy_band <- abs(n - veg_threshold) < band_fuzziness
-  prob <- (n - (veg_threshold - band_fuzziness)) / (2 * band_fuzziness)
-  prob <- pmin(pmax(prob, 0), 1)
+  # Add probabilistic fuzziness around veg_threshold boundary
+  # Identifies cells within the fuzzy transition zone
+  in_fuzzy_zone <- abs(noise_normalized - veg_threshold) < band_fuzziness
 
-  # Randomness only in fuzzy boundary
-  landscape_vec[fuzzy_band] <- rbinom(sum(fuzzy_band), 1, prob[fuzzy_band])
+  # Calculate probability of vegetation for cells in fuzzy zone
+  # Linear transition from 0 to 1 across the fuzzy band width
+  transition_prob <- (noise_normalized - (veg_threshold - band_fuzziness)) /
+    (2 * band_fuzziness)
+  transition_prob <- pmin(pmax(transition_prob, 0), 1) # Clamp to [0, 1]
 
-  # Convert to matrix
+  # Apply probabilistic assignment only in fuzzy boundary zone
+  # Adds natural irregularity to vegetation edges
+  landscape_vec[in_fuzzy_zone] <- stats::rbinom(
+    n = sum(in_fuzzy_zone),
+    size = 1,
+    prob = transition_prob[in_fuzzy_zone]
+  )
+
+  # Convert vector back to matrix format
   mat <- matrix(
     landscape_vec,
     nrow = height_actual,
@@ -174,6 +193,7 @@ create_landscape_labyrinth <- function(
 #' @param gain Numeric. Multiplier applied to the amplitude at each octave. Default: 0.5.
 #'
 #' @return A combined noise value for coordinate x,y
+#' @keywords internal
 fbm_perlin <- function(
   x,
   y,
@@ -182,21 +202,26 @@ fbm_perlin <- function(
   lacunarity = 2,
   gain = 0.5
 ) {
-  total <- 0
-  amp <- 1
-  freq <- frequency
+  total_noise <- 0
+  amplitude <- 1
+  current_frequency <- frequency
 
+  # Sum contributions from each octave
+  # Each octave adds detail at a finer scale with reduced amplitude
   for (i in seq_len(octaves)) {
-    total <- total +
-      amp *
+    # Add this octave's Perlin noise, scaled by current amplitude
+    total_noise <- total_noise +
+      amplitude *
         ambient::gen_perlin(
-          x = x * freq,
-          y = y * freq
+          x = x * current_frequency,
+          y = y * current_frequency
         )
 
-    freq <- freq * lacunarity
-    amp <- amp * gain
+    # Increase frequency and decrease amplitude for next octave
+    # Creates self-similar fractal pattern across scales
+    current_frequency <- current_frequency * lacunarity
+    amplitude <- amplitude * gain
   }
 
-  total
+  total_noise
 }
