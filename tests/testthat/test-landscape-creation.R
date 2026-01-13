@@ -8,6 +8,7 @@ test_that("landscape generators create valid landscape objects", {
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
+    gaps = create_landscape_gaps, # Add this
     sine_bands = create_landscape_bands
   )
 
@@ -484,6 +485,42 @@ test_that("create_landscape_spots handles edge cases", {
     spot_radius = 1
   )
   expect_true(is_landscape(l_small))
+})
+
+# Gaps (after spots tests, around line 385) -------------------------------
+test_that("create_landscape_gaps inverts by default (vegetation in bare ground)", {
+  set.seed(123)
+
+  # Gaps should invert by default
+  gaps <- create_landscape_gaps(
+    width = 20,
+    height = 20,
+    n_spots = 5,
+    spot_radius = 4
+  )
+
+  set.seed(123)
+  # Spots with invert=TRUE should match gaps
+  spots_inverted <- create_landscape_spots(
+    width = 20,
+    height = 20,
+    n_spots = 5,
+    spot_radius = 4,
+    invert_landscape = TRUE
+  )
+
+  # Pattern labels differ
+  expect_equal(gaps$pattern, "gaps")
+  expect_equal(spots_inverted$pattern, "spots")
+
+  # But data should be identical
+  expect_identical(
+    terra::values(gaps$data),
+    terra::values(spots_inverted$data)
+  )
+
+  # Gaps should have invert_landscape = TRUE stored
+  expect_true(gaps$params$invert_landscape)
 })
 
 # Sine bands ------------------------------------------------------------------
