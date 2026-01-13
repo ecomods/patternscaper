@@ -7,19 +7,16 @@
 create_landscape_labyrinth(
   width = 100,
   height = 100,
-  rotation = 0,
   frequency = 5,
   veg_threshold = 0.5,
   band_fuzziness = 0.1,
-  octaves = 1
+  octaves = 6
 )
 }
 \arguments{
 \item{width}{Integer. Number of columns in the landscape (default: 100).}
 
 \item{height}{Integer. Number of rows in the landscape (default: 100).}
-
-\item{rotation}{Numeric. Number between 0 and 360 giving the degree of landscape rotation (default: 0).}
 
 \item{frequency}{Numeric. Controls the spatial scale of the noise pattern:
 Lower values produce broad, smooth bands, higher values produce finer, maze-like structures (default: 5).}
@@ -28,13 +25,15 @@ Lower values produce broad, smooth bands, higher values produce finer, maze-like
 from non-vegetated cells. Values above the threshold become vegetation.
 Adjusting this changes the overall proportion of vegetated area (default: 0.5).}
 
-\item{band_fuzziness}{Numeric and << 1. Controls how sharp or soft the vegetation boundary
-is around the threshold. At 0, boundaries are sharp, larger values introduce
-randomness at the edges, making the pattern more natural and irregular (default: 0.1).}
+\item{band_fuzziness}{Numeric between 0 and 0.5. Controls the width of the
+probabilistic transition zone at vegetation boundaries. At 0, boundaries
+are sharp and crisp. Values of 0.1-0.2 create natural-looking irregular
+edges. Values above 0.3 produce increasingly random patterns as the fuzzy
+zone becomes wider than the structured features (default: 0.1).}
 
 \item{octaves}{Integer >= 1. The number of layers of noise combined to
 generate the pattern. A single octave gives smooth, simple structures.
-More octaves add detail and complexity, similar to fractal patterns (default: 1).}
+More octaves add detail and complexity, similar to fractal patterns (default: 6).}
 }
 \value{
 A landscape object with pattern "labyrinth" containing the generated landscape data and parameters.
@@ -42,6 +41,24 @@ A landscape object with pattern "labyrinth" containing the generated landscape d
 \description{
 Generates a landscape with banded and spotted vegetation (labyrinth),
 this mimics Turing patterns.
+}
+\details{
+The labyrinth pattern is generated using fractal Brownian motion (fBm):
+
+1. **Noise generation**: Creates a continuous noise field using multiple
+   octaves of Perlin noise with `fbm_perlin()`.
+
+2. **Normalization**: Scales noise values to [0, 1] range.
+
+3. **Thresholding**: Applies `veg_threshold` to create binary pattern.
+   Cells with noise > threshold become vegetation.
+
+4. **Fuzzy boundaries**: Adds probabilistic transitions within
+   `band_fuzziness` distance of the threshold for natural-looking edges.
+
+
+The combination of `frequency` and `octaves` controls pattern complexity,
+while `veg_threshold` determines vegetation proportion.
 }
 \examples{
 # Default labyrinth pattern
@@ -57,8 +74,17 @@ labyrinth_modified <- create_landscape_labyrinth(
 # With rotation
 labyrinth_rotated <- create_landscape_labyrinth(
   frequency = 5,
-  veg_threshold = 0.6,
-  rotation = 45
+  veg_threshold = 0.6
+)
+
+# Adjust vegetation coverage
+labyrinth_sparse <- create_landscape_labyrinth(
+  veg_threshold = 0.6  # Less vegetation
+)
+
+labyrinth_dense <- create_landscape_labyrinth(
+  veg_threshold = 0.3  # More vegetation
 )
 
 }
+\keyword{internal}

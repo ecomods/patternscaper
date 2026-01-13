@@ -78,7 +78,7 @@ bands_rotated <- create_landscape(
 
 \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
 
-\code{\link{create_landscape_clustered_trees}} for "clusters" pattern parameters
+\code{\link{create_landscape_clustered}} for "clusters" pattern parameters
 
 \code{\link{create_landscape_bands}} for "bands" pattern parameters
 

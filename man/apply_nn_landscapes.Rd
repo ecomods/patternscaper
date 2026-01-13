@@ -31,5 +31,6 @@ When actual classes unavailable or return_performance=FALSE: tibble with columns
 }
 \description{
 Applies a trained CNN model to classify new landscapes based on their
-spatial patterns.
+spatial patterns. Automatically resizes input landscapes to match the
+model's expected dimensions.
 }

@@ -20,6 +20,7 @@ train_nn_landscapes(
   optimizer = "adam",
   metrics = c("accuracy"),
   callbacks = NULL,
+  patience = 10,
   verbose = 1
 )
 }
@@ -57,6 +58,9 @@ Common additions: "categorical_accuracy", "top_k_categorical_accuracy".}
 
 \item{callbacks}{List. Optional keras callbacks for advanced training control (default: NULL).
 Examples: early stopping, learning rate scheduling, model checkpointing.}
+
+\item{patience}{Integer. Number of epochs with no improvement after which training stops (default: 10).
+Only used when callbacks is NULL. Set to NULL to disable early stopping.}
 
 \item{verbose}{Integer. Verbosity mode: 0 = silent, 1 = progress bar, 2 = one line per epoch (default: 1).}
 }

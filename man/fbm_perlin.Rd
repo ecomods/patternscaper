@@ -27,3 +27,4 @@ Generates a fractal Brownian motion (fBm) noise value by combining multiple
 layers (octaves) of Perlin noise at increasing frequencies and decreasing
 amplitudes. Used internally for generating labyrinth structures.
 }
+\keyword{internal}
