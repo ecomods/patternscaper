@@ -393,8 +393,7 @@ create_training_landscapes <- function(
     "bands",
     "spots",
     "gaps",
-    "stripes",
-    "labyrinth"
+    "stripes"
   )
 
   # Generate each landscape

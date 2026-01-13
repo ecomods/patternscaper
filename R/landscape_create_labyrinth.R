@@ -4,7 +4,6 @@
 #' this mimics Turing patterns.
 #' @param width Integer. Number of columns in the landscape (default: 100).
 #' @param height Integer. Number of rows in the landscape (default: 100).
-#' @param rotation Numeric. Number between 0 and 360 giving the degree of landscape rotation (default: 0).
 #' @param frequency Numeric. Controls the spatial scale of the noise pattern:
 #'    Lower values produce broad, smooth bands, higher values produce finer, maze-like structures (default: 5).
 #' @param veg_threshold Numeric between 0 and 1. Defines the cutoff value that separates vegetated
@@ -33,8 +32,6 @@
 #' 4. **Fuzzy boundaries**: Adds probabilistic transitions within
 #'    `band_fuzziness` distance of the threshold for natural-looking edges.
 #'
-#' 5. **Rotation** (optional): If specified, generates at 1.5x size,
-#'    rotates, and crops to target dimensions.
 #'
 #' The combination of `frequency` and `octaves` controls pattern complexity,
 #' while `veg_threshold` determines vegetation proportion.
@@ -53,8 +50,7 @@
 #' # With rotation
 #' labyrinth_rotated <- create_landscape_labyrinth(
 #'   frequency = 5,
-#'   veg_threshold = 0.6,
-#'   rotation = 45
+#'   veg_threshold = 0.6
 #' )
 #'
 #' # Adjust vegetation coverage
@@ -72,7 +68,6 @@
 create_landscape_labyrinth <- function(
   width = 100,
   height = 100,
-  rotation = 0,
   frequency = 5,
   veg_threshold = 0.5,
   band_fuzziness = 0.1,
@@ -80,7 +75,6 @@ create_landscape_labyrinth <- function(
 ) {
   # Validate common parameters
   validate_dimensions(width = width, height = height)
-  validate_rotation(rotation = rotation)
 
   # Validate frequency
   if (!is.numeric(frequency) || frequency <= 0) {
@@ -122,16 +116,12 @@ create_landscape_labyrinth <- function(
   # Convert to integer (truncates decimals like 2.7 -> 2)
   octaves <- as.integer(octaves)
 
-  # Calculate dimensions based on rotation
-  height_actual <- ifelse(rotation == 0, height, height * 1.5)
-  width_actual <- ifelse(rotation == 0, width, width * 1.5)
-
   # Create coordinate grid for noise generation
   # Perlin noise requires x,y coordinates for each pixel
-  aspect_ratio <- width_actual / height_actual
+  aspect_ratio <- width / height
   grid <- ambient::long_grid(
-    x = seq(0, aspect_ratio, length.out = width_actual),
-    y = seq(0, 1, length.out = height_actual)
+    x = seq(0, aspect_ratio, length.out = width),
+    y = seq(0, 1, length.out = height)
   )
 
   # Generate fractal Brownian motion noise field
@@ -173,20 +163,10 @@ create_landscape_labyrinth <- function(
   # Convert vector back to matrix format
   mat <- matrix(
     landscape_vec,
-    nrow = height_actual,
-    ncol = width_actual,
+    nrow = height,
+    ncol = width,
     byrow = TRUE
   )
-
-  # Apply rotation if specified
-  if (rotation != 0) {
-    mat <- rotate_and_crop_matrix(
-      mat,
-      rotation,
-      width,
-      height
-    )
-  }
 
   # Create and return landscape object
   landscape(
@@ -195,7 +175,6 @@ create_landscape_labyrinth <- function(
     params = list(
       width = width,
       height = height,
-      rotation = rotation,
       frequency = frequency,
       veg_threshold = veg_threshold,
       band_fuzziness = band_fuzziness,
