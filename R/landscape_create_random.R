@@ -20,19 +20,33 @@
 #' random_modified <- create_landscape_random(
 #'   tree_prop = 0.7
 #' )
+#'
+#' @importFrom stats rbinom
 create_landscape_random <- function(
   width = 100,
   height = 100,
   tree_prop = 0.5,
   rotation = 0
 ) {
+  # Validate common parameters
+  validate_dimensions(width = width, height = height)
+  validate_rotation(rotation = rotation)
+
+  # Validate tree_prop
+  if (!is.numeric(tree_prop) || tree_prop < 0 || tree_prop > 1) {
+    cli::cli_abort(c(
+      "{.arg tree_prop} must be between 0 and 1.",
+      "x" = "You supplied {.val {tree_prop}}"
+    ))
+  }
+
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
   # Get landscape with random distribution of trees
   mat <- matrix(
-    rbinom(width_actual * height_actual, size = 1, prob = tree_prop),
+    stats::rbinom(width_actual * height_actual, size = 1, prob = tree_prop),
     nrow = height_actual,
     ncol = width_actual
   )
