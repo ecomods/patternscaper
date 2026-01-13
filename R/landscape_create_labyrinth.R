@@ -15,7 +15,7 @@
 #'    randomness at the edges, making the pattern more natural and irregular (default: 0.1).
 #' @param octaves Integer >= 1. The number of layers of noise combined to
 #'    generate the pattern. A single octave gives smooth, simple structures.
-#'    More octaves add detail and complexity, similar to fractal patterns (default: 1).
+#'    More octaves add detail and complexity, similar to fractal patterns (default: 6).
 #'
 #' @return A landscape object with pattern "labyrinth" containing the generated landscape data and parameters.
 #'
@@ -45,7 +45,7 @@ create_landscape_labyrinth <- function(
   frequency = 5,
   veg_threshold = 0.5,
   band_fuzziness = 0.1,
-  octaves = 1
+  octaves = 6
 ) {
   # Validate common parameters
   validate_dimensions(width = width, height = height)
@@ -106,7 +106,7 @@ create_landscape_labyrinth <- function(
     x = grid$x,
     y = grid$y,
     frequency = frequency,
-    octaves = 6
+    octaves = octaves
   )
 
   # Normalize to 0-1
