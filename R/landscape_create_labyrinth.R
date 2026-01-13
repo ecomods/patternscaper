@@ -119,13 +119,9 @@ create_landscape_labyrinth <- function(
   noise_normalized <- (grid$noise - min(grid$noise)) /
     (max(grid$noise) - min(grid$noise))
 
-  # Calculate threshold for initial binary classification
-  # Uses median to create approximately equal areas of vegetation/bare ground
-  threshold_median <- median(noise_normalized)
-
   # Apply initial hard threshold using median
   # Creates base binary pattern before adding fuzzy boundaries
-  landscape_vec <- ifelse(noise_normalized > threshold_median, 1, 0)
+  landscape_vec <- ifelse(noise_normalized > veg_threshold, 1, 0)
 
   # Add probabilistic fuzziness around veg_threshold boundary
   # Identifies cells within the fuzzy transition zone
