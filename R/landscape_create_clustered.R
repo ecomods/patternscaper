@@ -31,10 +31,10 @@
 #'
 #' @examples
 #' # Default clustered trees
-#' clustered_default <- create_landscape_clustered_trees()
+#' clustered_default <- create_landscape_clustered()
 #'
 #' # Modified clustered trees with horizontally elongated clusters
-#' clustered_modified <- create_landscape_clustered_trees(
+#' clustered_modified <- create_landscape_clustered(
 #'   treeline_position = 0.2,
 #'   n_clusters = 8,
 #'   cluster_radius = 7,
@@ -44,7 +44,7 @@
 #' )
 #'
 #' # Rotated landscape with mixed parameters
-#' clustered_rotated <- create_landscape_clustered_trees(
+#' clustered_rotated <- create_landscape_clustered(
 #'   n_clusters = 20,
 #'   cluster_radius = 2,
 #'   scatter_zone_prop = 0.5,
@@ -52,7 +52,7 @@
 #'   elongation_y = 1.4,
 #'   rotation = 45
 #' )
-create_landscape_clustered_trees <- function(
+create_landscape_clustered <- function(
   width = 100,
   height = 100,
   treeline_position = 0.5,

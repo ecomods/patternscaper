@@ -166,7 +166,7 @@ something else, they can do so explicitly and the seed is set inside the functio
 No ecotones, because they have no treeline. Does this make sense? In theory, spots can also be created with a slightly adjusted scattered trees algorithm:
 
 ```r
-create_landscape_clustered_trees(
+create_landscape_clustered(
     treeline_position = 0,
     n_clusters = 5,
     cluster_radius = 5,

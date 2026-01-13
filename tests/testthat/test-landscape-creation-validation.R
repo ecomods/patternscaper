@@ -9,7 +9,7 @@ test_that("landscape generators validate width parameter", {
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
-    clustered = create_landscape_clustered_trees,
+    clustered = create_landscape_clustered,
     spots = create_landscape_spots,
     sine_bands = create_landscape_sine_bands
   )
@@ -50,7 +50,7 @@ test_that("landscape generators validate height parameter", {
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
-    clustered = create_landscape_clustered_trees,
+    clustered = create_landscape_clustered,
     spots = create_landscape_spots,
     sine_bands = create_landscape_sine_bands
   )
@@ -91,7 +91,7 @@ test_that("landscape generators validate treeline_position parameter", {
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
-    clustered = create_landscape_clustered_trees,
+    clustered = create_landscape_clustered,
     sine_bands = create_landscape_sine_bands
   )
 
@@ -125,7 +125,7 @@ test_that("landscape generators validate rotation parameter", {
     diffuse = create_landscape_diffuse_treeline,
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
-    clustered = create_landscape_clustered_trees,
+    clustered = create_landscape_clustered,
     spots = create_landscape_spots,
     sine_bands = create_landscape_sine_bands
   )
@@ -159,7 +159,7 @@ test_that("landscape generators validate random_spots parameter", {
     sharp = create_landscape_sharp_treeline,
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
-    clustered = create_landscape_clustered_trees
+    clustered = create_landscape_clustered
   )
 
   for (name in names(generators)) {
@@ -337,13 +337,13 @@ test_that("curvy fingers treeline warns about large sine_height_mean", {
 # Pattern-specific validation: Clustered trees --------------------------------
 test_that("clustered trees validates n_clusters parameter", {
   expect_error(
-    create_landscape_clustered_trees(n_clusters = -5),
+    create_landscape_clustered(n_clusters = -5),
     "must be a positive integer",
     info = "Testing clustered with negative n_clusters"
   )
 
   expect_error(
-    create_landscape_clustered_trees(n_clusters = 0),
+    create_landscape_clustered(n_clusters = 0),
     "must be a positive integer",
     info = "Testing clustered with zero n_clusters"
   )
@@ -351,19 +351,19 @@ test_that("clustered trees validates n_clusters parameter", {
 
 test_that("clustered trees validates cluster_radius parameter", {
   expect_error(
-    create_landscape_clustered_trees(cluster_radius = "5"),
+    create_landscape_clustered(cluster_radius = "5"),
     "must be a positive number",
     info = "Testing clustered with non-numeric cluster_radius"
   )
 
   expect_error(
-    create_landscape_clustered_trees(cluster_radius = -3),
+    create_landscape_clustered(cluster_radius = -3),
     "must be a positive number",
     info = "Testing clustered with negative cluster_radius"
   )
 
   expect_error(
-    create_landscape_clustered_trees(cluster_radius = 0),
+    create_landscape_clustered(cluster_radius = 0),
     "must be a positive number",
     info = "Testing clustered with zero cluster_radius"
   )
@@ -371,25 +371,25 @@ test_that("clustered trees validates cluster_radius parameter", {
 
 test_that("clustered trees validates scatter_zone_prop parameter", {
   expect_error(
-    create_landscape_clustered_trees(scatter_zone_prop = "0.3"),
+    create_landscape_clustered(scatter_zone_prop = "0.3"),
     "must be between 0 and 1",
     info = "Testing clustered with non-numeric scatter_zone_prop"
   )
 
   expect_error(
-    create_landscape_clustered_trees(scatter_zone_prop = -0.1),
+    create_landscape_clustered(scatter_zone_prop = -0.1),
     "must be between 0 and 1",
     info = "Testing clustered with negative scatter_zone_prop"
   )
 
   expect_error(
-    create_landscape_clustered_trees(scatter_zone_prop = 0),
+    create_landscape_clustered(scatter_zone_prop = 0),
     "must be between 0 and 1",
     info = "Testing clustered with zero scatter_zone_prop"
   )
 
   expect_error(
-    create_landscape_clustered_trees(scatter_zone_prop = 1.5),
+    create_landscape_clustered(scatter_zone_prop = 1.5),
     "must be between 0 and 1",
     info = "Testing clustered with scatter_zone_prop > 1"
   )
@@ -397,19 +397,19 @@ test_that("clustered trees validates scatter_zone_prop parameter", {
 
 test_that("clustered trees validates elongation_x parameter", {
   expect_error(
-    create_landscape_clustered_trees(elongation_x = "1.5"),
+    create_landscape_clustered(elongation_x = "1.5"),
     "must be a positive number",
     info = "Testing clustered with non-numeric elongation_x"
   )
 
   expect_error(
-    create_landscape_clustered_trees(elongation_x = -2),
+    create_landscape_clustered(elongation_x = -2),
     "must be a positive number",
     info = "Testing clustered with negative elongation_x"
   )
 
   expect_error(
-    create_landscape_clustered_trees(elongation_x = 0),
+    create_landscape_clustered(elongation_x = 0),
     "must be a positive number",
     info = "Testing clustered with zero elongation_x"
   )
@@ -417,19 +417,19 @@ test_that("clustered trees validates elongation_x parameter", {
 
 test_that("clustered trees validates elongation_y parameter", {
   expect_error(
-    create_landscape_clustered_trees(elongation_y = "1.5"),
+    create_landscape_clustered(elongation_y = "1.5"),
     "must be a positive number",
     info = "Testing clustered with non-numeric elongation_y"
   )
 
   expect_error(
-    create_landscape_clustered_trees(elongation_y = -2),
+    create_landscape_clustered(elongation_y = -2),
     "must be a positive number",
     info = "Testing clustered with negative elongation_y"
   )
 
   expect_error(
-    create_landscape_clustered_trees(elongation_y = 0),
+    create_landscape_clustered(elongation_y = 0),
     "must be a positive number",
     info = "Testing clustered with zero elongation_y"
   )

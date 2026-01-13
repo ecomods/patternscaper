@@ -28,7 +28,7 @@
 #'
 #' \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
 #'
-#' \code{\link{create_landscape_clustered_trees}} for "clusters" pattern parameters
+#' \code{\link{create_landscape_clustered}} for "clusters" pattern parameters
 #'
 #' \code{\link{create_landscape_bands}} for "bands" pattern parameters
 #'
@@ -127,7 +127,7 @@ create_landscape <- function(
     diffuse = create_landscape_diffuse_treeline(...),
     curvy = create_landscape_curvy_treeline(...),
     fingers = create_landscape_fingers(...),
-    clustered = create_landscape_clustered_trees(...),
+    clustered = create_landscape_clustered(...),
     bands = create_landscape_bands(...),
     spots = create_landscape_spots(...),
     gaps = create_landscape_gaps(...),
