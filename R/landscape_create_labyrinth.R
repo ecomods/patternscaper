@@ -37,7 +37,7 @@
 #'   rotation = 45
 #' )
 #'
-#' @export
+#' @keywords internal
 create_landscape_labyrinth <- function(
   width = 100,
   height = 100,
@@ -47,6 +47,50 @@ create_landscape_labyrinth <- function(
   band_fuzziness = 0.1,
   octaves = 1
 ) {
+  # Validate common parameters
+  validate_dimensions(width = width, height = height)
+  validate_rotation(rotation = rotation)
+
+  # Validate frequency
+  if (!is.numeric(frequency) || frequency <= 0) {
+    cli::cli_abort(c(
+      "{.arg frequency} must be a positive number.",
+      "x" = "You supplied {.val {frequency}}"
+    ))
+  }
+
+  # Validate veg_threshold
+  if (!is.numeric(veg_threshold) || veg_threshold < 0 || veg_threshold > 1) {
+    cli::cli_abort(c(
+      "{.arg veg_threshold} must be between 0 and 1.",
+      "x" = "You supplied {.val {veg_threshold}}"
+    ))
+  }
+
+  # Validate band_fuzziness
+  if (!is.numeric(band_fuzziness) || band_fuzziness < 0) {
+    cli::cli_abort(c(
+      "{.arg band_fuzziness} must be a non-negative number.",
+      "x" = "You supplied {.val {band_fuzziness}}"
+    ))
+  }
+
+  # Validate octaves - must be a positive number
+  if (
+    !is.numeric(octaves) ||
+      length(octaves) != 1 ||
+      is.na(octaves) ||
+      octaves < 1
+  ) {
+    cli::cli_abort(c(
+      "{.arg octaves} must be a positive number.",
+      "x" = "You supplied {.val {octaves}}"
+    ))
+  }
+
+  # Convert to integer (truncates decimals like 2.7 -> 2)
+  octaves <- as.integer(octaves)
+
   # Calculate dimensions based on rotation
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
@@ -72,7 +116,7 @@ create_landscape_labyrinth <- function(
 
   # First: strong threshold
   landscape_vec <- ifelse(n > th, 1, 0)
-#  landscape_vec <- ifelse(n > veg_threshold, 1, 0)
+  #  landscape_vec <- ifelse(n > veg_threshold, 1, 0)
 
   # Then fuzziness around boundary
   fuzzy_band <- abs(n - veg_threshold) < band_fuzziness
@@ -130,19 +174,28 @@ create_landscape_labyrinth <- function(
 #' @param gain Numeric. Multiplier applied to the amplitude at each octave. Default: 0.5.
 #'
 #' @return A combined noise value for coordinate x,y
-fbm_perlin <- function(x, y, frequency, octaves = 6, lacunarity = 2, gain = 0.5) {
+fbm_perlin <- function(
+  x,
+  y,
+  frequency,
+  octaves = 6,
+  lacunarity = 2,
+  gain = 0.5
+) {
   total <- 0
   amp <- 1
   freq <- frequency
 
   for (i in seq_len(octaves)) {
-    total <- total + amp * ambient::gen_perlin(
-      x = x * freq,
-      y = y * freq
-    )
+    total <- total +
+      amp *
+        ambient::gen_perlin(
+          x = x * freq,
+          y = y * freq
+        )
 
     freq <- freq * lacunarity
-    amp  <- amp  * gain
+    amp <- amp * gain
   }
 
   total
