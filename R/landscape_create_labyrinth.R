@@ -19,6 +19,26 @@
 #'
 #' @return A landscape object with pattern "labyrinth" containing the generated landscape data and parameters.
 #'
+#' @details
+#' The labyrinth pattern is generated using fractal Brownian motion (fBm):
+#'
+#' 1. **Noise generation**: Creates a continuous noise field using multiple
+#'    octaves of Perlin noise with `fbm_perlin()`.
+#'
+#' 2. **Normalization**: Scales noise values to [0, 1] range.
+#'
+#' 3. **Thresholding**: Applies `veg_threshold` to create binary pattern.
+#'    Cells with noise > threshold become vegetation.
+#'
+#' 4. **Fuzzy boundaries**: Adds probabilistic transitions within
+#'    `band_fuzziness` distance of the threshold for natural-looking edges.
+#'
+#' 5. **Rotation** (optional): If specified, generates at 1.5x size,
+#'    rotates, and crops to target dimensions.
+#'
+#' The combination of `frequency` and `octaves` controls pattern complexity,
+#' while `veg_threshold` determines vegetation proportion.
+#'
 #' @examples
 #' # Default labyrinth pattern
 #' labyrinth_default <- create_landscape_labyrinth()
@@ -35,6 +55,15 @@
 #'   frequency = 5,
 #'   veg_threshold = 0.6,
 #'   rotation = 45
+#' )
+#'
+#' # Adjust vegetation coverage
+#' labyrinth_sparse <- create_landscape_labyrinth(
+#'   veg_threshold = 0.6  # Less vegetation
+#' )
+#'
+#' labyrinth_dense <- create_landscape_labyrinth(
+#'   veg_threshold = 0.3  # More vegetation
 #' )
 #'
 #' @keywords internal
@@ -119,8 +148,8 @@ create_landscape_labyrinth <- function(
   noise_normalized <- (grid$noise - min(grid$noise)) /
     (max(grid$noise) - min(grid$noise))
 
-  # Apply initial hard threshold using median
-  # Creates base binary pattern before adding fuzzy boundaries
+  # Apply hard threshold to create base binary pattern
+  # Cells above veg_threshold become vegetation (1), below become bare ground (0)
   landscape_vec <- ifelse(noise_normalized > veg_threshold, 1, 0)
 
   # Add probabilistic fuzziness around veg_threshold boundary
