@@ -401,8 +401,7 @@ random_modified <- create_landscape(
 random_rotated <- create_landscape(
   "random",
   name = "Rotated",
-  tree_prop = 0.2,
-  rotation = 10
+  tree_prop = 0.2
 )
 # Plot all random landscapes together
 plot_landscape_list(list(

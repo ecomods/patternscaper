@@ -6,7 +6,6 @@
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param tree_prop Numeric. Probability of tree presence (0-1) (default: 0.5).
 #'    Higher values result in a denser tree cover.
-#' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
 #' @return A landscape object with pattern "random" containing the generated landscape data and parameters.
 #'
@@ -25,12 +24,10 @@
 create_landscape_random <- function(
   width = 100,
   height = 100,
-  tree_prop = 0.5,
-  rotation = 0
+  tree_prop = 0.5
 ) {
   # Validate common parameters
   validate_dimensions(width = width, height = height)
-  validate_rotation(rotation = rotation)
 
   # Validate tree_prop
   if (!is.numeric(tree_prop) || tree_prop < 0 || tree_prop > 1) {
@@ -40,26 +37,12 @@ create_landscape_random <- function(
     ))
   }
 
-  # Calculate dimensions based on rotation
-  height_actual <- ifelse(rotation == 0, height, height * 1.5)
-  width_actual <- ifelse(rotation == 0, width, width * 1.5)
-
   # Get landscape with random distribution of trees
   mat <- matrix(
-    stats::rbinom(width_actual * height_actual, size = 1, prob = tree_prop),
-    nrow = height_actual,
-    ncol = width_actual
+    stats::rbinom(width * height, size = 1, prob = tree_prop),
+    nrow = height,
+    ncol = width
   )
-
-  # Apply rotation if specified
-  if (rotation != 0) {
-    mat <- rotate_and_crop_matrix(
-      mat,
-      rotation,
-      width,
-      height
-    )
-  }
 
   # Create and return landscape object
   landscape(
@@ -68,8 +51,7 @@ create_landscape_random <- function(
     params = list(
       width = width,
       height = height,
-      tree_prop = tree_prop,
-      rotation = rotation
+      tree_prop = tree_prop
     )
   )
 }
