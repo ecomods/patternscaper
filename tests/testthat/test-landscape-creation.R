@@ -8,7 +8,7 @@ test_that("landscape generators create valid landscape objects", {
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
-    sine_bands = create_landscape_sine_bands
+    sine_bands = create_landscape_bands
   )
 
   for (name in names(generators)) {
@@ -33,7 +33,7 @@ test_that("landscape generators support rotation parameter", {
     curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
-    sine_bands = create_landscape_sine_bands
+    sine_bands = create_landscape_bands
   )
 
   for (name in names(generators_with_rotation)) {
@@ -487,10 +487,10 @@ test_that("create_landscape_spots handles edge cases", {
 })
 
 # Sine bands ------------------------------------------------------------------
-test_that("create_landscape_sine_bands creates treeline with bands below", {
+test_that("create_landscape_bands creates treeline with bands below", {
   set.seed(123)
 
-  l <- create_landscape_sine_bands(
+  l <- create_landscape_bands(
     width = 30,
     height = 30,
     treeline_position = 0.4,
@@ -512,8 +512,8 @@ test_that("create_landscape_sine_bands creates treeline with bands below", {
   expect_true(sum(lower_half == 1) > 0)
 })
 
-test_that("create_landscape_sine_bands handles zero amplitude (straight treeline)", {
-  l <- create_landscape_sine_bands(
+test_that("create_landscape_bands handles zero amplitude (straight treeline)", {
+  l <- create_landscape_bands(
     width = 20,
     height = 20,
     treeline_position = 0.5,
@@ -524,11 +524,11 @@ test_that("create_landscape_sine_bands handles zero amplitude (straight treeline
   expect_true(is_landscape(l))
 })
 
-test_that("create_landscape_sine_bands noise_sd adds variation to bands", {
+test_that("create_landscape_bands noise_sd adds variation to bands", {
   set.seed(123)
 
   # Without noise
-  l_no_noise <- create_landscape_sine_bands(
+  l_no_noise <- create_landscape_bands(
     width = 25,
     height = 25,
     band_spacing = 5,
@@ -538,7 +538,7 @@ test_that("create_landscape_sine_bands noise_sd adds variation to bands", {
 
   set.seed(123)
   # With noise
-  l_with_noise <- create_landscape_sine_bands(
+  l_with_noise <- create_landscape_bands(
     width = 25,
     height = 25,
     band_spacing = 5,
@@ -553,11 +553,11 @@ test_that("create_landscape_sine_bands noise_sd adds variation to bands", {
   expect_false(identical(vals_no_noise, vals_with_noise))
 })
 
-test_that("create_landscape_sine_bands frequency affects wave pattern", {
+test_that("create_landscape_bands frequency affects wave pattern", {
   set.seed(123)
 
   # Low frequency (long waves)
-  l_low_freq <- create_landscape_sine_bands(
+  l_low_freq <- create_landscape_bands(
     width = 30,
     height = 30,
     frequency = 0.1,
@@ -565,7 +565,7 @@ test_that("create_landscape_sine_bands frequency affects wave pattern", {
   )
 
   # High frequency (short waves)
-  l_high_freq <- create_landscape_sine_bands(
+  l_high_freq <- create_landscape_bands(
     width = 30,
     height = 30,
     frequency = 0.5,
@@ -581,9 +581,9 @@ test_that("create_landscape_sine_bands frequency affects wave pattern", {
   expect_false(identical(vals_low, vals_high))
 })
 
-test_that("create_landscape_sine_bands warns when bands cannot fit", {
+test_that("create_landscape_bands warns when bands cannot fit", {
   expect_warning(
-    l <- create_landscape_sine_bands(
+    l <- create_landscape_bands(
       width = 20,
       height = 20,
       treeline_position = 0.7,
@@ -594,8 +594,8 @@ test_that("create_landscape_sine_bands warns when bands cannot fit", {
   )
 })
 
-test_that("create_landscape_sine_bands stores all params correctly", {
-  l <- create_landscape_sine_bands(
+test_that("create_landscape_bands stores all params correctly", {
+  l <- create_landscape_bands(
     width = 30,
     height = 40,
     treeline_position = 0.6,
@@ -620,9 +620,9 @@ test_that("create_landscape_sine_bands stores all params correctly", {
   expect_equal(l$params$rotation, 45)
 })
 
-test_that("create_landscape_sine_bands produces reproducible results with seed", {
+test_that("create_landscape_bands produces reproducible results with seed", {
   set.seed(789)
-  l1 <- create_landscape_sine_bands(
+  l1 <- create_landscape_bands(
     width = 25,
     height = 25,
     band_spacing = 6,
@@ -630,7 +630,7 @@ test_that("create_landscape_sine_bands produces reproducible results with seed",
   )
 
   set.seed(789)
-  l2 <- create_landscape_sine_bands(
+  l2 <- create_landscape_bands(
     width = 25,
     height = 25,
     band_spacing = 6,
@@ -642,9 +642,9 @@ test_that("create_landscape_sine_bands produces reproducible results with seed",
   expect_identical(vals1, vals2)
 })
 
-test_that("create_landscape_sine_bands handles edge cases", {
+test_that("create_landscape_bands handles edge cases", {
   # Very small band zone
-  l_small_zone <- create_landscape_sine_bands(
+  l_small_zone <- create_landscape_bands(
     width = 20,
     height = 20,
     band_zone_prop = 0.05,
@@ -653,7 +653,7 @@ test_that("create_landscape_sine_bands handles edge cases", {
   expect_true(is_landscape(l_small_zone))
 
   # Very thick bands
-  l_thick <- create_landscape_sine_bands(
+  l_thick <- create_landscape_bands(
     width = 20,
     height = 20,
     band_thickness = 8,

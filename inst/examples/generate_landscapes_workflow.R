@@ -192,6 +192,43 @@ plot_landscape_list(list(
   fingers_rotated
 ))
 
+# Sine bands -----------------------------------------------------------------
+# Default sine bands
+bands_default <- create_landscape("bands", name = "Default")
+
+# Modified sine bands with thicker bands, wider spacing and noise
+bands_modified <- create_landscape(
+  "bands",
+  name = "Modified",
+  treeline_position = 0.3,
+  band_zone_prop = 0.5,
+  band_thickness = 5,
+  band_spacing = 15,
+  frequency = 1,
+  amplitude = 8,
+  noise_sd = 1.5
+)
+
+# One landscape with rotation
+bands_rotated <- create_landscape(
+  "bands",
+  name = "Rotated",
+  band_thickness = 4,
+  band_spacing = 12,
+  amplitude = 6,
+  noise_sd = 2,
+  rotation = 45
+)
+
+# Plot all sine bands together
+plot_landscape_list(
+  list(
+    bands_default,
+    bands_modified,
+    bands_rotated
+  )
+)
+
 # Clustered trees ------------------------------------------------------------
 all_clustered <- function() {
   # Default clustered trees
@@ -297,42 +334,6 @@ plot_landscape_list(
   title = "name"
 )
 
-# Sine bands -----------------------------------------------------------------
-# Default sine bands
-bands_default <- create_landscape("bands", name = "Default")
-
-# Modified sine bands with thicker bands, wider spacing and noise
-sine_bands_modified <- create_landscape(
-  "bands",
-  name = "Modified",
-  treeline_position = 0.3,
-  band_zone_prop = 0.5,
-  band_thickness = 5,
-  band_spacing = 15,
-  frequency = 1,
-  amplitude = 8,
-  noise_sd = 1.5
-)
-
-# One landscape with rotation
-bands_rotated <- create_landscape(
-  "bands",
-  name = "Rotated",
-  band_thickness = 4,
-  band_spacing = 12,
-  amplitude = 6,
-  noise_sd = 2,
-  rotation = 45
-)
-
-# Plot all sine bands together
-plot_landscape_list(
-  list(
-    bands_default,
-    bands_modified,
-    bands_rotated
-  )
-)
 
 # Spots ----------------------------------------------------------------------
 # Default spots
