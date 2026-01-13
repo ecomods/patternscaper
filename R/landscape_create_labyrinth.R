@@ -9,9 +9,11 @@
 #' @param veg_threshold Numeric between 0 and 1. Defines the cutoff value that separates vegetated
 #'    from non-vegetated cells. Values above the threshold become vegetation.
 #'    Adjusting this changes the overall proportion of vegetated area (default: 0.5).
-#' @param band_fuzziness Numeric and << 1. Controls how sharp or soft the vegetation boundary
-#'    is around the threshold. At 0, boundaries are sharp, larger values introduce
-#'    randomness at the edges, making the pattern more natural and irregular (default: 0.1).
+#' @param band_fuzziness Numeric between 0 and 0.5. Controls the width of the
+#'    probabilistic transition zone at vegetation boundaries. At 0, boundaries
+#'    are sharp and crisp. Values of 0.1-0.2 create natural-looking irregular
+#'    edges. Values above 0.3 produce increasingly random patterns as the fuzzy
+#'    zone becomes wider than the structured features (default: 0.1).
 #' @param octaves Integer >= 1. The number of layers of noise combined to
 #'    generate the pattern. A single octave gives smooth, simple structures.
 #'    More octaves add detail and complexity, similar to fractal patterns (default: 6).
@@ -93,10 +95,13 @@ create_landscape_labyrinth <- function(
   }
 
   # Validate band_fuzziness
-  if (!is.numeric(band_fuzziness) || band_fuzziness < 0) {
+  if (
+    !is.numeric(band_fuzziness) || band_fuzziness < 0 || band_fuzziness > 0.5
+  ) {
     cli::cli_abort(c(
-      "{.arg band_fuzziness} must be a non-negative number.",
-      "x" = "You supplied {.val {band_fuzziness}}"
+      "{.arg band_fuzziness} must be between 0 and 0.5.",
+      "x" = "You supplied {.val {band_fuzziness}}",
+      "i" = "Values above 0.3 produce increasingly random-looking patterns."
     ))
   }
 
