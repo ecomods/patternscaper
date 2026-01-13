@@ -8,7 +8,7 @@
 #' @inheritParams create_landscape_spots
 #' @param invert_landscape Logical. If TRUE (default), creates vegetation patches in bare ground
 #'     (gaps pattern). If FALSE, creates bare spots in vegetation (equivalent to spots pattern).
-#'     Provided for consistency with other landscape generators.
+#'     This parameter is exposed to allow users to override the default behavior if needed.
 #'
 #' @details
 #' The distinction between "spots" and "gaps":
