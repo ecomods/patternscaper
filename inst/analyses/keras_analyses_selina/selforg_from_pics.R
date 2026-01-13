@@ -16,8 +16,7 @@ training_landscapes <- create_training_landscapes(
   ),
   width = 100,
   height = 100,
-  add_rotation = TRUE,
-  rotation_angles = c(0, 45, 90, 135, 180)
+  add_rotation = TRUE
 )
 
 test_landscapes <- create_training_landscapes(
@@ -30,9 +29,7 @@ test_landscapes <- create_training_landscapes(
     "dense"
   ),
   width = 100,
-  height = 100,
-  add_rotation = TRUE,
-  rotation_angles = c(0, 45, 90, 135, 180)
+  height = 100
 )
 
 # Train a model
@@ -57,6 +54,13 @@ plot_landscape_list(pics_landscapes, titles = "both")
 picture_classification <- apply_nn_landscapes(
   nn_model = model,
   landscape = pics_landscapes
+)
+
+#show landscapes that are not classified correctly
+plot_classified_landscapes(
+  classification = picture_classification,
+  landscapes = pic_landscapes,
+  only_misclassified = FALSE
 )
 
 # Save the classification results
