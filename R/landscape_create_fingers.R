@@ -107,6 +107,16 @@ create_landscape_fingers <- function(
   # random trends
   noise_smooth <- function(x, mean_val, sd_val, smooth_span = 0.1) {
     raw <- rnorm(length(x), mean_val, sd_val)
+
+    # loess needs at least ceiling(1/span) points for the given span
+    min_points_needed <- ceiling(1 / smooth_span)
+
+    if (length(x) < min_points_needed) {
+      # Skip smoothing for very small landscapes
+      raw[raw < 0.1] <- 0.1
+      return(raw)
+    }
+
     smooth <- stats::loess(raw ~ x, span = smooth_span)$fitted
     smooth[smooth < 0.1] <- 0.1
     return(smooth)
