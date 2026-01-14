@@ -136,40 +136,44 @@ rotate_and_crop_matrix <- function(
   return(mat)
 }
 
-#' Fill NA Values in a Matrix Using Nearest Neighbor Interpolation
+#' Fill NA Values in a Matrix Using Linear Interpolation
 #'
-#' This function fills NA values in a matrix by applying nearest neighbor interpolation
-#' row-wise sing the \code{na.approx} function from the \code{zoo} package.
-#' Optionally, the function can binarize the resulting matrix based on a threshold of 0.5.
+#' This function fills NA values in a matrix by applying linear interpolation
+#' row-wise and then column-wise using \code{zoo::na.approx}. Optionally, the
+#' function can binarize the resulting matrix based on a threshold of 0.5.
 #'
 #' @param mat A numeric matrix containing NA values to be filled.
 #' @param binarize Logical. If TRUE (default), the output matrix will be binarized,
-#'   with values < 0.5 set to 0 and values >= 0.5 set to 1. If FALSE, the interpolated
-#'   values are returned as is.
+#'   with values < 0.5 set to 0 and values >= 0.5 set to 1. If FALSE, the
+#'   interpolated values are returned as is.
 #'
-#' @return A numeric matrix with NA values filled using nearest neighbor interpolation.
+#' @return A numeric matrix with NA values filled using linear interpolation.
 #'   If \code{binarize = TRUE}, the matrix will contain only 0s and 1s.
 #'
-#' @details The function applies \code{zoo::na.approx} with \code{rule = 2} to ensure that
-#'   NA values at the edges are filled with the nearest non-NA value. The interpolation
-#'   is performed first row by row and then column by column to ensure all NA values are filled.
+#' @details The function applies \code{zoo::na.approx} with \code{rule = 2} to
+#'   ensure that NA values at the edges are filled with the nearest non-NA value.
+#'   Interpolation is performed first row-wise, then column-wise to fill all
+#'   remaining NAs. If any NAs remain after both passes, they are filled with 0.
+#'
+#' @keywords internal
 fill_na_with_nearest <- function(mat, binarize = TRUE) {
   # Check if the input is a matrix
   if (!is.matrix(mat)) {
-    stop(
-      "mat must be a matrix, but is of class: ",
-      class(mat)
-    )
+    cli::cli_abort("mat must be a matrix, but is of class: {class(mat)}")
   }
 
   # Apply na.approx row by row
-  for (i in 1:nrow(mat)) {
-    mat[i, ] <- zoo::na.approx(
-      mat[i, ],
-      na.rm = FALSE,
-      rule = 2
-    )
+  for (i in seq_len(nrow(mat))) {
+    mat[i, ] <- zoo::na.approx(mat[i, ], na.rm = FALSE, rule = 2)
   }
+
+  # Apply na.approx column by column to catch remaining NAs
+  for (j in seq_len(ncol(mat))) {
+    mat[, j] <- zoo::na.approx(mat[, j], na.rm = FALSE, rule = 2)
+  }
+
+  # Fill any remaining NAs (e.g., entire corners) with 0
+  mat[is.na(mat)] <- 0
 
   if (binarize) {
     mat[mat < 0.5] <- 0
