@@ -214,9 +214,18 @@ create_training_landscapes <- function(
   balance_patterns = TRUE
 ) {
   # Validate inputs
-  if (!is.numeric(n) || n < 1) {
-    stop("'n' must be a positive integer")
+  if (!is.numeric(n) || length(n) != 1) {
+    cli::cli_abort("'n' must be a single numeric value")
   }
+
+  n <- as.integer(n)
+
+  if (is.na(n) || n < 1) {
+    cli::cli_abort("'n' must be a positive integer")
+  }
+
+  # Validate width and height
+  validate_dimensions(width, height)
 
   # Filter out invalid patterns
   valid_patterns <- c(
