@@ -246,7 +246,7 @@ create_training_landscapes <- function(
   patterns <- intersect(patterns, valid_patterns)
 
   if (length(patterns) == 0) {
-    stop("No valid landscape patterns specified")
+    cli::cli_abort("No valid landscape patterns specified")
   }
 
   # Set default parameter ranges if not provided
@@ -461,13 +461,8 @@ create_training_landscapes <- function(
         names(all_landscapes)[i] <- landscape_name
       },
       error = function(e) {
-        warning(
-          "Error generating landscape ",
-          i,
-          " of pattern '",
-          pattern,
-          "': ",
-          e$message
+        cli::cli_alert_warning(
+          "Failed landscape {i}: {landscape_metadata[[i]]$pattern} (rotation: {landscape_metadata[[i]]$rotation}°)"
         )
         all_landscapes[[i]] <- NULL
       }
