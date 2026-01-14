@@ -262,6 +262,7 @@ create_landscape_spots <- function(
       n_spots = n_spots,
       spot_radius = spot_radius,
       spot_radius_sd = spot_radius_sd,
+      radius_noise_fraction = radius_noise_fraction,
       regular_spots = regular_spots,
       rotation = rotation
     )
