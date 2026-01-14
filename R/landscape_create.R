@@ -337,15 +337,6 @@ create_training_landscapes <- function(
   # Initialize results list
   all_landscapes <- list()
 
-  # Sample the rotation angles if add_rotation is TRUE
-  if (add_rotation) {
-    # Each landscape gets a random rotation from rotation_angles
-    sampled_rotations <- sample(rotation_angles, n, replace = TRUE)
-  } else {
-    # All landscapes have 0 rotation
-    sampled_rotations <- rep(0, n)
-  }
-
   # Determine how to distribute landscape patterns
   if (balance_patterns) {
     # Calculate how many of each pattern to generate
