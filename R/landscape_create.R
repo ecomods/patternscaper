@@ -169,8 +169,8 @@ create_landscape <- function(
 #' @param pattern_probs Numeric vector. Probability that a specific landscape pattern is chosen.
 #'     By default, all patterns have equal probability (1) of being chosen.
 #'     Must be the same length as 'patterns' (default NULL which means equal probability).
-#' @param balance_patterns Logical. If TRUE, ensures all landscape patterns appear approximately equally.
-#'     This overrides pattern_probs unless it's explicitly set. (default: TRUE)
+#' @param balance_patterns Logical. If TRUE, ensures all landscape patterns appear approximately equally,
+#'     overriding any weights specified in pattern_probs. (default: TRUE)
 #'
 #' @return A named list of landscape objects. Names indicate the pattern and optional rotation.
 #'
@@ -333,12 +333,9 @@ create_training_landscapes <- function(
   # Ensure all selected patterns have parameter ranges
   for (pattern in patterns) {
     if (!(pattern %in% names(params_list))) {
-      warning(
-        "Pattern '",
-        pattern,
-        "' not found in params_list. Using default parameters."
+      cli::cli_alert_warning(
+        "Pattern '{pattern}' not found in params_list. Using default parameters."
       )
-      # Add default parameters for missing pattern
       params_list[[pattern]] <- list(treeline_position = c(0.3, 0.7))
     }
   }
@@ -385,7 +382,7 @@ create_training_landscapes <- function(
     if (is.null(pattern_probs)) {
       pattern_probs <- rep(1, length(patterns))
     } else if (length(pattern_probs) != length(patterns)) {
-      warning(
+      cli::cli_alert_warning(
         "Length of pattern_probs doesn't match length of patterns. Using equal weights."
       )
       pattern_probs <- rep(1, length(patterns))
@@ -485,7 +482,7 @@ create_training_landscapes <- function(
       },
       error = function(e) {
         cli::cli_alert_warning(
-          "Failed landscape {i}: {landscape_metadata[[i]]$pattern} (rotation: {landscape_metadata[[i]]$rotation}°)"
+          "Failed to create landscape {i} (pattern: {pattern}): {conditionMessage(e)}"
         )
         all_landscapes[[i]] <- NULL
       }
