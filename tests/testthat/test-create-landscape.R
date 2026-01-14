@@ -55,7 +55,12 @@ test_that("create_landscape creates correct landscape types", {
     "fingers"
   )
   expect_equal(
-    create_landscape("clustered", width = 10, height = 10)$pattern,
+    create_landscape(
+      "clustered",
+      width = 10,
+      height = 10,
+      cluster_radius = 1
+    )$pattern,
     "clustered"
   )
   expect_equal(
@@ -63,11 +68,11 @@ test_that("create_landscape creates correct landscape types", {
     "bands"
   )
   expect_equal(
-    create_landscape("spots", width = 10, height = 10)$pattern,
+    create_landscape("spots", width = 10, height = 10, spot_radius = 1)$pattern,
     "spots"
   )
   expect_equal(
-    create_landscape("gaps", width = 10, height = 10)$pattern,
+    create_landscape("gaps", width = 10, height = 10, spot_radius = 1)$pattern,
     "gaps"
   )
   expect_equal(
@@ -109,7 +114,7 @@ test_that("create_landscape passes parameters correctly", {
 
 test_that("create_landscape returns valid landscape objects", {
   # Test a few different patterns
-  patterns_to_test <- c("random", "sharp", "diffuse", "clustered")
+  patterns_to_test <- c("random", "sharp", "diffuse", "bands")
 
   for (pattern in patterns_to_test) {
     l <- create_landscape(pattern, width = 20, height = 20)
