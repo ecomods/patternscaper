@@ -346,6 +346,22 @@ create_training_landscapes <- function(
   # Initialize results list
   all_landscapes <- list()
 
+  # Define which parameters should be integers so they are not treated
+  # as numeric
+  integer_params <- c(
+    "n_clusters",
+    "cluster_radius",
+    "band_thickness",
+    "band_spacing",
+    "n_spots",
+    "spot_radius",
+    "nhills",
+    "nbands",
+    "frequency",
+    "octaves",
+    "amplitude"
+  )
+
   # Determine how to distribute landscape patterns
   if (balance_patterns) {
     # Calculate how many of each pattern to generate
@@ -407,12 +423,19 @@ create_training_landscapes <- function(
     sampled_params <- list()
     for (param_name in names(pattern_params)) {
       param_range <- pattern_params[[param_name]]
+
       if (is.logical(param_range)) {
         # For logical parameters, randomly choose TRUE or FALSE
         sampled_params[[param_name]] <- sample(param_range, 1)
       } else if (length(param_range) == 1) {
         # For single values, use as is
         sampled_params[[param_name]] <- param_range
+      } else if (param_name %in% integer_params) {
+        # For integer parameters, sample from integer sequence
+        sampled_params[[param_name]] <- sample(
+          seq(from = param_range[1], to = param_range[2], by = 1),
+          size = 1
+        )
       } else {
         # For numeric ranges, sample uniformly
         sampled_params[[param_name]] <- runif(
