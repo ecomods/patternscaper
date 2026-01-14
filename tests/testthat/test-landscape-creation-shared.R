@@ -324,7 +324,7 @@ test_that("landscape generators handle very large landscapes", {
   }
 })
 
-test_that("landscape generators handle non-square landscapes", {
+test_that("landscape generators handle non-square landscapes without rotation", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
@@ -341,53 +341,69 @@ test_that("landscape generators handle non-square landscapes", {
   for (name in names(generators)) {
     gen <- generators[[name]]
 
-    # Without rotation
-    l_wide <- gen(width = 100, height = 20)
-    l_tall <- gen(width = 20, height = 100)
-    # With rotation
-    l_wide_rotated <- gen(width = 100, height = 20, rotation = 45)
-    l_tall_rotated <- gen(width = 20, height = 100, rotation = 45)
+    l_wide <- gen(width = 100, height = 50)
+    l_tall <- gen(width = 50, height = 100)
 
-    # Not rotated
     expect_equal(
       terra::ncol(l_wide$data),
       100,
-      info = paste("Testing", name, "wide not rotated")
+      info = paste("Testing", name, "wide")
     )
     expect_equal(
       terra::nrow(l_wide$data),
-      20,
-      info = paste("Testing", name, "wide not rotated")
+      50,
+      info = paste("Testing", name, "wide")
     )
     expect_equal(
       terra::ncol(l_tall$data),
-      20,
-      info = paste("Testing", name, "tall not rotated")
+      50,
+      info = paste("Testing", name, "tall")
     )
     expect_equal(
       terra::nrow(l_tall$data),
       100,
-      info = paste("Testing", name, "tall not rotated")
+      info = paste("Testing", name, "tall")
     )
-    # Rotated cases
+  }
+})
+
+test_that("landscape generators with rotation handle non-square landscapes", {
+  generators_with_rotation <- list(
+    sharp = create_landscape_sharp_treeline,
+    diffuse = create_landscape_diffuse_treeline,
+    curvy = create_landscape_curvy_treeline,
+    fingers = create_landscape_fingers,
+    spots = create_landscape_spots,
+    bands = create_landscape_bands,
+    clustered = create_landscape_clustered,
+    gaps = create_landscape_gaps
+  )
+
+  for (name in names(generators_with_rotation)) {
+    gen <- generators_with_rotation[[name]]
+
+    l_wide_rotated <- gen(width = 100, height = 50, rotation = 45)
+    l_tall_rotated <- gen(width = 50, height = 100, rotation = 45)
+
+    # With rotation, dimensions swap
     expect_equal(
       terra::ncol(l_wide_rotated$data),
-      20,
+      100,
       info = paste("Testing", name, "wide rotated")
     )
     expect_equal(
       terra::nrow(l_wide_rotated$data),
-      100,
+      50,
       info = paste("Testing", name, "wide rotated")
     )
     expect_equal(
       terra::ncol(l_tall_rotated$data),
-      100,
+      50,
       info = paste("Testing", name, "tall rotated")
     )
     expect_equal(
       terra::nrow(l_tall_rotated$data),
-      20,
+      100,
       info = paste("Testing", name, "tall rotated")
     )
   }
