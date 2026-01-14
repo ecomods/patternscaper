@@ -465,8 +465,20 @@ create_training_landscapes <- function(
     )
   }
 
-  # Remove any NULL entries (from errors)
-  all_landscapes <- all_landscapes[!sapply(all_landscapes, is.null)]
+  n_requested <- n
+  n_failed <- sum(sapply(all_landscapes, is.null))
+  all_landscapes <- Filter(Negate(is.null), all_landscapes)
+  n_actual <- length(all_landscapes)
+
+  if (n_failed > 0) {
+    cli::cli_alert_warning(
+      "Generated {n_actual}/{n_requested} landscapes ({n_failed} failed)"
+    )
+  } else {
+    cli::cli_alert_success(
+      "Successfully generated all {n_requested} training landscapes"
+    )
+  }
 
   return(all_landscapes)
 }
