@@ -113,3 +113,97 @@ test_that("set_landscape_name and set_landscape_pattern work with multiple lands
   expect_equal(result_patterns[[1]]$pattern, "sharp_treeline")
   expect_equal(result_patterns[[2]]$pattern, "random_pattern")
 })
+
+# Test rotate_and_crop_matrix --------------------------------------------------
+
+test_that("rotate_and_crop_matrix preserves target dimensions", {
+  # Create test matrix
+  test_mat <- matrix(1, nrow = 100, ncol = 100)
+  test_mat[1:50, ] <- 0
+
+  # Test with square output
+  result_square <- rotate_and_crop_matrix(
+    mat = test_mat,
+    rotation = 45,
+    target_width = 50,
+    target_height = 50
+  )
+
+  expect_equal(nrow(result_square), 50)
+  expect_equal(ncol(result_square), 50)
+
+  # Test with non-square output
+  result_wide <- rotate_and_crop_matrix(
+    mat = test_mat,
+    rotation = 45,
+    target_width = 60,
+    target_height = 40
+  )
+
+  expect_equal(nrow(result_wide), 40)
+  expect_equal(ncol(result_wide), 60)
+
+  result_tall <- rotate_and_crop_matrix(
+    mat = test_mat,
+    rotation = 45,
+    target_width = 40,
+    target_height = 60
+  )
+
+  expect_equal(nrow(result_tall), 60)
+  expect_equal(ncol(result_tall), 40)
+})
+
+test_that("rotate_and_crop_matrix crops from center", {
+  # Create matrix with identifiable edges and center
+  test_mat <- matrix(0, nrow = 100, ncol = 100)
+  test_mat[1:10, ] <- 2 # Top edge
+  test_mat[91:100, ] <- 2 # Bottom edge
+  test_mat[, 1:10] <- 2 # Left edge
+  test_mat[, 91:100] <- 2 # Right edge
+  test_mat[45:55, 45:55] <- 1 # Center marker
+
+  result <- rotate_and_crop_matrix(
+    mat = test_mat,
+    rotation = 0,
+    target_width = 30,
+    target_height = 30
+  )
+
+  # Should contain center values (0 and 1) but not edge values (2)
+  expect_true(all(result %in% c(0, 1)))
+  expect_false(any(result == 2))
+
+  # Should contain some center marker values
+  expect_true(any(result == 1))
+})
+
+test_that("rotate_and_crop_matrix returns binary values after filling", {
+  test_mat <- matrix(runif(10000), nrow = 100, ncol = 100)
+
+  result <- rotate_and_crop_matrix(
+    mat = test_mat,
+    rotation = 45,
+    target_width = 50,
+    target_height = 50
+  )
+
+  # After binarization, should only contain 0 and 1
+  expect_true(all(result %in% c(0, 1)))
+})
+
+test_that("rotate_and_crop_matrix handles zero rotation", {
+  test_mat <- matrix(0, nrow = 100, ncol = 100)
+  test_mat[1:50, ] <- 1
+
+  result <- rotate_and_crop_matrix(
+    mat = test_mat,
+    rotation = 0,
+    target_width = 50,
+    target_height = 50
+  )
+
+  expect_equal(nrow(result), 50)
+  expect_equal(ncol(result), 50)
+  expect_true(all(result %in% c(0, 1)))
+})
