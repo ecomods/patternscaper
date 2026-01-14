@@ -103,9 +103,9 @@ set_landscape_pattern <- function(x, pattern) {
 #'
 #' @details The function uses \code{omnibus::rotateMatrix} for rotation and
 #'   centers the crop on the rotated matrix. Missing values after cropping are
-#'   filled using the \code{fill_na_with_nearest} function.
+#'   filled using the \code{fill_and_binarize_matrix} function.
 #'
-#' @seealso \code{\link[omnibus]{rotateMatrix}}, \code{fill_na_with_nearest}
+#' @seealso \code{\link[omnibus]{rotateMatrix}}, \code{fill_and_binarize_matrix}
 #' @keywords internal
 rotate_and_crop_matrix <- function(
   mat,
@@ -131,7 +131,7 @@ rotate_and_crop_matrix <- function(
   mat <- mat[start_row:end_row, start_col:end_col]
 
   # Fill missing values with nearest neighbor interpolation
-  mat <- fill_na_with_nearest(mat, binarize = TRUE)
+  mat <- fill_and_binarize_matrix(mat, binarize = TRUE)
 
   return(mat)
 }
@@ -156,7 +156,7 @@ rotate_and_crop_matrix <- function(
 #'   remaining NAs. If any NAs remain after both passes, they are filled with 0.
 #'
 #' @keywords internal
-fill_na_with_nearest <- function(mat, binarize = TRUE) {
+fill_and_binarize_matrix <- function(mat, binarize = TRUE) {
   # Check if the input is a matrix
   if (!is.matrix(mat)) {
     cli::cli_abort("mat must be a matrix, but is of class: {class(mat)}")

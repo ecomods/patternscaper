@@ -208,25 +208,25 @@ test_that("rotate_and_crop_matrix handles zero rotation", {
   expect_true(all(result %in% c(0, 1)))
 })
 
-# Test fill_na_with_nearest -------------------------------------------------
+# Test fill_and_binarize_matrix -------------------------------------------------
 
-test_that("fill_na_with_nearest handles row-wise NAs", {
+test_that("fill_and_binarize_matrix handles row-wise NAs", {
   test_mat <- matrix(c(1, NA, NA, 0, 1, 0), nrow = 2, ncol = 3, byrow = TRUE)
 
-  result <- fill_na_with_nearest(test_mat, binarize = FALSE)
+  result <- fill_and_binarize_matrix(test_mat, binarize = FALSE)
 
   expect_false(any(is.na(result)))
 })
 
-test_that("fill_na_with_nearest handles column-wise NAs", {
+test_that("fill_and_binarize_matrix handles column-wise NAs", {
   test_mat <- matrix(c(1, NA, 0, NA, 1, 0), nrow = 3, ncol = 2, byrow = FALSE)
 
-  result <- fill_na_with_nearest(test_mat, binarize = FALSE)
+  result <- fill_and_binarize_matrix(test_mat, binarize = FALSE)
 
   expect_false(any(is.na(result)))
 })
 
-test_that("fill_na_with_nearest handles corner NAs from rotation", {
+test_that("fill_and_binarize_matrix handles corner NAs from rotation", {
   # Simulate rotated matrix with NA corners
   test_mat <- matrix(1, nrow = 50, ncol = 50)
   test_mat[1:5, 1:5] <- NA # Top-left corner
@@ -234,26 +234,26 @@ test_that("fill_na_with_nearest handles corner NAs from rotation", {
   test_mat[46:50, 1:5] <- NA # Bottom-left corner
   test_mat[46:50, 46:50] <- NA # Bottom-right corner
 
-  result <- fill_na_with_nearest(test_mat, binarize = TRUE)
+  result <- fill_and_binarize_matrix(test_mat, binarize = TRUE)
 
   expect_false(any(is.na(result)))
   expect_true(all(result %in% c(0, 1)))
 })
 
-test_that("fill_na_with_nearest binarizes correctly", {
+test_that("fill_and_binarize_matrix binarizes correctly", {
   test_mat <- matrix(c(0.2, 0.6, NA, 0.8, 0.3, 0.9), nrow = 2, ncol = 3)
 
-  result <- fill_na_with_nearest(test_mat, binarize = TRUE)
+  result <- fill_and_binarize_matrix(test_mat, binarize = TRUE)
 
   expect_true(all(result %in% c(0, 1)))
   expect_equal(result[1, 1], 0) # 0.2 < 0.5
   expect_equal(result[2, 1], 1) # 0.6 >= 0.5
 })
 
-test_that("fill_na_with_nearest without binarization preserves interpolated values", {
+test_that("fill_and_binarize_matrix without binarization preserves interpolated values", {
   test_mat <- matrix(c(0, NA, 1), nrow = 1, ncol = 3)
 
-  result <- fill_na_with_nearest(test_mat, binarize = FALSE)
+  result <- fill_and_binarize_matrix(test_mat, binarize = FALSE)
 
   # Linear interpolation: NA should become 0.5
   expect_equal(result[1, 2], 0.5)
@@ -272,11 +272,15 @@ test_that("rotated landscapes have no NA values", {
     clustered = create_landscape_clustered,
     gaps = create_landscape_gaps
   )
-  
+
   for (name in names(generators_with_rotation)) {
-    l <- generators_with_rotation[[name]](width = 50, height = 50, rotation = 45)
+    l <- generators_with_rotation[[name]](
+      width = 50,
+      height = 50,
+      rotation = 45
+    )
     vals <- terra::values(l$data)
-    
+
     expect_false(any(is.na(vals)), info = paste("Testing", name))
     expect_true(all(vals %in% c(0, 1)), info = paste("Testing", name))
   }
@@ -285,10 +289,10 @@ test_that("rotated landscapes have no NA values", {
 test_that("non-square rotated landscapes have correct dimensions", {
   l_wide <- create_landscape_fingers(width = 60, height = 30, rotation = 45)
   l_tall <- create_landscape_fingers(width = 30, height = 60, rotation = 45)
-  
+
   expect_equal(terra::ncol(l_wide$data), 60)
   expect_equal(terra::nrow(l_wide$data), 30)
-  
+
   expect_equal(terra::ncol(l_tall$data), 30)
   expect_equal(terra::nrow(l_tall$data), 60)
 })
