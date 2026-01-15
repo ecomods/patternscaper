@@ -195,16 +195,18 @@ get_valid_param_specs <- function() {
 #' Validate Parameter List Structure
 #'
 #' Validates that params_list contains valid parameter ranges for each pattern.
+#' Removes any unknown parameters with a warning.
 #'
 #' @param params_list List. Parameter ranges for each landscape pattern.
 #' @param patterns Character vector. Patterns to validate.
 #'
-#' @return NULL (invisibly). Called for side effects (validation).
+#' @return List. Cleaned params_list with unknown parameters removed.
 #'
 #' @keywords internal
 #' @noRd
 validate_params_list <- function(params_list, patterns) {
   specs <- get_valid_param_specs()
+  cleaned_params <- list()
 
   for (pattern in patterns) {
     if (!pattern %in% names(params_list)) {
@@ -228,7 +230,9 @@ validate_params_list <- function(params_list, patterns) {
       ))
     }
 
-    # Check each parameter in the user's params_list
+    # Filter to only valid parameters
+    cleaned_pattern_params <- list()
+
     for (param_name in names(pattern_params)) {
       param_value <- pattern_params[[param_name]]
 
@@ -237,7 +241,7 @@ validate_params_list <- function(params_list, patterns) {
         cli::cli_alert_warning(
           "Unknown parameter {.val {param_name}} for pattern {.val {pattern}} - will be ignored"
         )
-        next
+        next # Skip unknown parameter
       }
 
       spec <- pattern_specs[[param_name]]
@@ -250,10 +254,15 @@ validate_params_list <- function(params_list, patterns) {
       } else if (spec$type == "numeric") {
         validate_numeric_param(param_value, param_name, pattern, spec)
       }
+
+      # Keep valid parameter
+      cleaned_pattern_params[[param_name]] <- param_value
     }
+
+    cleaned_params[[pattern]] <- cleaned_pattern_params
   }
 
-  invisible(NULL)
+  cleaned_params
 }
 
 #' Validate Logical Parameter

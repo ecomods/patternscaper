@@ -322,10 +322,10 @@ create_training_landscapes <- function(
 
   # If user provided params, validate and merge with defaults
   if (!is.null(params_list)) {
-    # Validate user-provided params first
-    validate_params_list(params_list, patterns)
+    # Validate and clean user-provided params
+    params_list <- validate_params_list(params_list, patterns)
 
-    # Merge user params with defaults
+    # Merge with defaults
     merged_params <- list()
     for (pattern in patterns) {
       if (pattern %in% names(params_list)) {
