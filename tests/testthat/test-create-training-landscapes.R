@@ -460,3 +460,155 @@ test_that("create_training_landscapes rejects invalid parameter values", {
     "min.*must be < max"
   )
 })
+
+# Retry mechanism tests ---------------------------------------------------
+
+test_that("create_training_landscapes retries failed landscapes", {
+  set.seed(123)
+
+  # Use a pattern that might occasionally fail with extreme params
+  landscapes <- create_training_landscapes(
+    n = 10,
+    patterns = "clustered",
+    width = 30,
+    height = 30,
+    max_retries = 5
+  )
+
+  # Should still generate landscapes (retries should help)
+  expect_true(length(landscapes) >= 8) # Allow some failures
+  expect_true(all(sapply(landscapes, is_landscape)))
+})
+
+test_that("create_training_landscapes respects max_retries parameter", {
+  set.seed(456)
+
+  # With max_retries = 0, should fail more often
+  expect_message(
+    # Use a pattern that might occasionally fail with extreme params
+    landscapes_no_retry <- create_training_landscapes(
+      n = 10,
+      patterns = "clustered",
+      width = 30,
+      height = 30,
+      max_retries = 0
+    )
+  )
+
+  # With max_retries = 5, should succeed more often
+  landscapes_retry <- create_training_landscapes(
+    n = 10,
+    patterns = "clustered",
+    width = 30,
+    height = 30,
+    max_retries = 5
+  )
+
+  # More retries should result in more successful landscapes
+  expect_true(length(landscapes_retry) >= length(landscapes_no_retry))
+})
+
+test_that("sample_landscape_params samples within ranges", {
+  pattern_params <- list(
+    treeline_position = c(0.3, 0.7),
+    n_clusters = c(5, 10),
+    regular_spots = c(TRUE, FALSE)
+  )
+
+  # Sample multiple times to check range
+  samples <- replicate(
+    20,
+    {
+      sample_landscape_params(
+        pattern_params,
+        integer_params = c("n_clusters"),
+        width = 100,
+        height = 100
+      )
+    },
+    simplify = FALSE
+  )
+
+  # Check treeline_position is in range
+  treeline_vals <- sapply(samples, function(x) x$treeline_position)
+  expect_true(all(treeline_vals >= 0.3 & treeline_vals <= 0.7))
+
+  # Check n_clusters is integer in range
+  cluster_vals <- sapply(samples, function(x) x$n_clusters)
+  expect_true(all(cluster_vals >= 5 & cluster_vals <= 10))
+  expect_true(all(cluster_vals == as.integer(cluster_vals)))
+
+  # Check logical sampling
+  spot_vals <- sapply(samples, function(x) x$regular_spots)
+  expect_true(all(spot_vals %in% c(TRUE, FALSE)))
+
+  # Check width/height added
+  expect_true(all(sapply(samples, function(x) x$width == 100)))
+  expect_true(all(sapply(samples, function(x) x$height == 100)))
+})
+
+test_that("try_create_landscape returns NULL on error", {
+  # Invalid parameters that should cause error
+  bad_params <- list(
+    width = 10,
+    height = 10,
+    treeline_position = 5 # Invalid - out of range
+  )
+
+  result <- try_create_landscape("sharp", bad_params, 1, 0)
+
+  expect_null(result)
+})
+
+test_that("try_create_landscape creates valid landscape on success", {
+  good_params <- list(
+    width = 50,
+    height = 50,
+    treeline_position = 0.5
+  )
+
+  result <- try_create_landscape("sharp", good_params, 42, 90)
+
+  expect_true(is_landscape(result))
+  expect_equal(result$pattern, "sharp")
+  expect_equal(result$name, "sharp_42_rot90")
+  expect_equal(result$params$treeline_position, 0.5)
+})
+
+test_that("retry mechanism maintains pattern distribution", {
+  set.seed(789)
+
+  landscapes <- create_training_landscapes(
+    n = 30,
+    patterns = c("sharp", "diffuse", "clustered"),
+    width = 30,
+    height = 30,
+    balance_patterns = TRUE,
+    max_retries = 5
+  )
+
+  # Count patterns
+  pattern_counts <- table(sapply(landscapes, function(x) x$pattern))
+
+  # Should be roughly balanced (within 20% of expected)
+  expected_per_pattern <- 30 / 3
+  expect_true(all(pattern_counts >= expected_per_pattern * 0.8))
+  expect_true(all(pattern_counts <= expected_per_pattern * 1.2))
+})
+
+test_that("create_training_landscapes shows appropriate messages", {
+  set.seed(123)
+
+  # Successful generation should show success message
+  expect_message(
+    landscapes <- create_training_landscapes(
+      n = 5,
+      patterns = "random",
+      width = 20,
+      height = 20
+    ),
+    "Successfully generated all"
+  )
+
+  expect_equal(length(landscapes), 5)
+})
