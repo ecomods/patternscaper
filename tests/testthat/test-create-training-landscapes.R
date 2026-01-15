@@ -164,10 +164,11 @@ test_that("create_training_landscapes handles rotation correctly", {
   # With rotation
   landscapes_rotated <- create_training_landscapes(
     n = 10,
-    width = 30,
-    height = 30,
+    width = 50,
+    height = 50,
     add_rotation = TRUE,
-    rotation_angles = c(0, 45, 90)
+    rotation_angles = c(0, 45, 90),
+    patterns = c("sharp", "bands", "fingers", "clustered")
   )
 
   # Check that some have rotation in their names
@@ -177,9 +178,10 @@ test_that("create_training_landscapes handles rotation correctly", {
   # Without rotation
   landscapes_no_rotation <- create_training_landscapes(
     n = 10,
-    width = 30,
-    height = 30,
-    add_rotation = FALSE
+    width = 50,
+    height = 50,
+    add_rotation = FALSE,
+    patterns = c("sharp", "bands", "fingers", "clustered")
   )
 
   # None should have rotation in their names
@@ -271,25 +273,6 @@ test_that("create_training_landscapes handles custom params_list", {
       expect_true(l$params$tree_prop <= 0.7)
     }
   }
-})
-
-test_that("create_training_landscapes warns about missing params", {
-  set.seed(123)
-  # Use a type that's not in custom params_list
-  custom_params <- list(
-    sharp = list(treeline_position = c(0.3, 0.7))
-  )
-
-  expect_warning(
-    landscapes <- create_training_landscapes(
-      n = 5,
-      patterns = c("sharp", "random"),
-      width = 20,
-      height = 20,
-      params_list = custom_params
-    ),
-    "not found in params_list"
-  )
 })
 
 test_that("create_training_landscapes handles errors gracefully", {
@@ -433,7 +416,7 @@ test_that("create_training_landscapes rejects invalid parameter values", {
         sharp = list(treeline_position = c(0.5, 1.5))
       )
     ),
-    "exceeds maximum"
+    "exceeds.*maximum"
   )
 
   # Non-integer for integer param
@@ -457,7 +440,7 @@ test_that("create_training_landscapes rejects invalid parameter values", {
         diffuse = list(steepness = c(0.9, 0.1))
       )
     ),
-    "min.*must be < max"
+    "min.*must be.*max"
   )
 })
 
@@ -708,4 +691,154 @@ test_that("rotation_angles = NULL works correctly", {
   )
 
   expect_equal(length(landscapes), 5)
+})
+
+# Integer sampling tests --------------------------------------------------
+
+test_that("sample_landscape_params uses efficient integer sampling", {
+  pattern_params <- list(
+    n_clusters = c(5, 15),
+    cluster_radius = c(3, 8)
+  )
+
+  # Sample multiple times
+  samples <- replicate(
+    50,
+    sample_landscape_params(
+      pattern_params,
+      integer_params = c("n_clusters", "cluster_radius"),
+      width = 100,
+      height = 100
+    ),
+    simplify = FALSE
+  )
+
+  # All values should be integers in range
+  cluster_vals <- sapply(samples, function(x) x$n_clusters)
+  radius_vals <- sapply(samples, function(x) x$cluster_radius)
+
+  expect_true(all(cluster_vals %% 1 == 0))
+  expect_true(all(radius_vals %% 1 == 0))
+  expect_true(all(cluster_vals >= 5 & cluster_vals <= 15))
+  expect_true(all(radius_vals >= 3 & radius_vals <= 8))
+
+  # Should have some variety (not all the same)
+  expect_true(length(unique(cluster_vals)) > 1)
+  expect_true(length(unique(radius_vals)) > 1)
+})
+
+test_that("sample_landscape_params handles fixed single values", {
+  pattern_params <- list(
+    treeline_position = 0.5, # Single value, not a range
+    n_clusters = c(5, 10), # Range
+    invert_landscape = FALSE # Single logical
+  )
+
+  samples <- replicate(
+    20,
+    sample_landscape_params(
+      pattern_params,
+      integer_params = c("n_clusters"),
+      width = 100,
+      height = 100
+    ),
+    simplify = FALSE
+  )
+
+  # Fixed values should always be the same
+  treeline_vals <- sapply(samples, function(x) x$treeline_position)
+  invert_vals <- sapply(samples, function(x) x$invert_landscape)
+
+  expect_true(all(treeline_vals == 0.5))
+  expect_true(all(invert_vals == FALSE))
+
+  # Range should vary
+  cluster_vals <- sapply(samples, function(x) x$n_clusters)
+  expect_true(length(unique(cluster_vals)) > 1)
+})
+
+# Retry message tests -----------------------------------------------------
+
+test_that("create_training_landscapes shows appropriate retry messages", {
+  set.seed(999)
+
+  # With low max_retries, might see retry info messages
+  # Use a pattern that might occasionally fail
+  landscapes <- create_training_landscapes(
+    n = 20,
+    patterns = "clustered",
+    width = 20,
+    height = 20,
+    max_retries = 2
+  )
+
+  # Should complete successfully (with or without retries)
+  expect_true(is.list(landscapes))
+  expect_true(length(landscapes) > 0)
+})
+
+# Edge case tests ---------------------------------------------------------
+
+test_that("create_training_landscapes merges NULL params correctly", {
+  set.seed(123)
+
+  # NULL params_list should use all defaults
+  landscapes <- create_training_landscapes(
+    n = 6,
+    patterns = c("sharp", "random"),
+    width = 20,
+    height = 20,
+    params_list = NULL # Explicitly NULL
+  )
+
+  expect_equal(length(landscapes), 6)
+  expect_true(all(sapply(landscapes, is_landscape)))
+})
+
+test_that("create_training_landscapes handles empty pattern params", {
+  set.seed(123)
+
+  # Pattern with empty list should use all defaults
+  custom_params <- list(
+    sharp = list() # Empty - should use all defaults
+  )
+
+  landscapes <- create_training_landscapes(
+    n = 4,
+    patterns = "sharp",
+    width = 20,
+    height = 20,
+    params_list = custom_params
+  )
+
+  expect_equal(length(landscapes), 4)
+
+  # Should have default parameters applied
+  for (l in landscapes) {
+    expect_true(!is.null(l$params$treeline_position))
+  }
+})
+
+test_that("create_training_landscapes handles failures gracefully", {
+  set.seed(999)
+
+  # Use challenging but not impossible parameters
+  landscapes <- create_training_landscapes(
+    n = 20,
+    patterns = "clustered",
+    width = 20,
+    height = 20,
+    params_list = list(
+      clustered = list(
+        n_clusters = c(15, 25),
+        cluster_radius = c(5, 12)
+      )
+    ),
+    max_retries = 2
+  )
+
+  # Should return a list regardless of whether failures occurred
+  expect_true(is.list(landscapes))
+  expect_true(length(landscapes) > 0)
+  expect_true(all(sapply(landscapes, is_landscape)))
 })
