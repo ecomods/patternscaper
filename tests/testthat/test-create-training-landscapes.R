@@ -326,3 +326,137 @@ test_that("create_training_landscapes works with all default landscape patterns"
   # Should have multiple types
   expect_true(length(unique_patterns) > 5)
 })
+
+# Parameter merging and validation tests ----------------------------------
+
+test_that("create_training_landscapes merges partial params with defaults", {
+  set.seed(123)
+
+  # Only specify one parameter for clustered
+  custom_params <- list(
+    clustered = list(n_clusters = c(15, 20))
+    # Other clustered params missing - should use defaults
+  )
+
+  landscapes <- create_training_landscapes(
+    n = 4,
+    patterns = "clustered",
+    width = 100,
+    height = 100,
+    params_list = custom_params
+  )
+
+  # Should succeed with merged params
+  expect_equal(length(landscapes), 4)
+
+  # Check custom param is in range
+  for (l in landscapes) {
+    expect_true(l$params$n_clusters >= 15)
+    expect_true(l$params$n_clusters <= 20)
+
+    # Check default params are present
+    expect_true(!is.null(l$params$cluster_radius))
+    expect_true(!is.null(l$params$treeline_position))
+  }
+})
+
+test_that("create_training_landscapes fills missing patterns with defaults", {
+  set.seed(123)
+
+  custom_params <- list(
+    sharp = list(treeline_position = c(0.6, 0.8))
+    # diffuse missing entirely
+  )
+
+  landscapes <- create_training_landscapes(
+    n = 6,
+    patterns = c("sharp", "diffuse"),
+    width = 20,
+    height = 20,
+    params_list = custom_params,
+    balance_patterns = TRUE
+  )
+
+  # Should succeed
+  expect_equal(length(landscapes), 6)
+
+  # Check both patterns are present
+  patterns <- sapply(landscapes, function(x) x$pattern)
+  expect_true("sharp" %in% patterns)
+  expect_true("diffuse" %in% patterns)
+
+  # Sharp should use custom params
+  sharp_landscapes <- landscapes[patterns == "sharp"]
+  for (l in sharp_landscapes) {
+    expect_true(l$params$treeline_position >= 0.6)
+    expect_true(l$params$treeline_position <= 0.8)
+  }
+})
+
+test_that("create_training_landscapes removes unknown params without failing", {
+  set.seed(123)
+
+  custom_params <- list(
+    sharp = list(
+      treeline_position = c(0.3, 0.7),
+      fake_param = c(1, 2)
+    )
+  )
+
+  expect_message(
+    landscapes <- create_training_landscapes(
+      n = 4,
+      patterns = "sharp",
+      width = 20,
+      height = 20,
+      params_list = custom_params
+    ),
+    "Unknown parameter.*fake_param"
+  )
+
+  # Should succeed despite unknown param
+  expect_equal(length(landscapes), 4)
+
+  # fake_param should not be in landscape params
+  for (l in landscapes) {
+    expect_false("fake_param" %in% names(l$params))
+  }
+})
+
+test_that("create_training_landscapes rejects invalid parameter values", {
+  # treeline_position > 1.0
+  expect_error(
+    create_training_landscapes(
+      n = 4,
+      patterns = "sharp",
+      params_list = list(
+        sharp = list(treeline_position = c(0.5, 1.5))
+      )
+    ),
+    "exceeds maximum"
+  )
+
+  # Non-integer for integer param
+  expect_error(
+    create_training_landscapes(
+      n = 4,
+      patterns = "spots",
+      params_list = list(
+        spots = list(n_spots = c(5.5, 10))
+      )
+    ),
+    "whole number"
+  )
+
+  # Min > max
+  expect_error(
+    create_training_landscapes(
+      n = 4,
+      patterns = "diffuse",
+      params_list = list(
+        diffuse = list(steepness = c(0.9, 0.1))
+      )
+    ),
+    "min.*must be < max"
+  )
+})
