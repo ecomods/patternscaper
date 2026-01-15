@@ -340,6 +340,9 @@ create_training_landscapes <- function(
     }
   }
 
+  # Validate parameters (user provided and defaults)
+  validate_params_list(params_list, patterns)
+
   # Initialize results list
   all_landscapes <- list()
 
