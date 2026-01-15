@@ -612,3 +612,100 @@ test_that("create_training_landscapes shows appropriate messages", {
 
   expect_equal(length(landscapes), 5)
 })
+
+# Rotation angle validation tests ----------------------------------------
+
+test_that("create_training_landscapes accepts valid rotation angles", {
+  set.seed(123)
+
+  # Vector of angles
+  landscapes_vector <- create_training_landscapes(
+    n = 5,
+    patterns = "sharp",
+    width = 20,
+    height = 20,
+    rotation_angles = c(0, 45, 90, 135)
+  )
+
+  expect_equal(length(landscapes_vector), 5)
+
+  # Single angle
+  landscapes_single <- create_training_landscapes(
+    n = 5,
+    patterns = "sharp",
+    width = 20,
+    height = 20,
+    rotation_angles = 90
+  )
+
+  expect_equal(length(landscapes_single), 5)
+
+  # Edge values
+  landscapes_edges <- create_training_landscapes(
+    n = 5,
+    patterns = "sharp",
+    width = 20,
+    height = 20,
+    rotation_angles = c(0, 360)
+  )
+
+  expect_equal(length(landscapes_edges), 5)
+})
+
+test_that("create_training_landscapes rejects invalid rotation angles", {
+  # Negative angle
+  expect_error(
+    create_training_landscapes(
+      n = 5,
+      patterns = "sharp",
+      rotation_angles = c(0, -45, 90)
+    ),
+    "must be between 0 and 360"
+  )
+
+  # Angle > 360
+  expect_error(
+    create_training_landscapes(
+      n = 5,
+      patterns = "sharp",
+      rotation_angles = c(0, 45, 400)
+    ),
+    "must be between 0 and 360"
+  )
+
+  # Non-numeric
+  expect_error(
+    create_training_landscapes(
+      n = 5,
+      patterns = "sharp",
+      rotation_angles = "45"
+    ),
+    "must be numeric"
+  )
+
+  # Contains NA
+  expect_error(
+    create_training_landscapes(
+      n = 5,
+      patterns = "sharp",
+      rotation_angles = c(0, NA, 90)
+    ),
+    "cannot contain NA"
+  )
+})
+
+test_that("rotation_angles = NULL works correctly", {
+  set.seed(123)
+
+  # NULL should skip validation and work
+  landscapes <- create_training_landscapes(
+    n = 5,
+    patterns = "sharp",
+    width = 20,
+    height = 20,
+    rotation_angles = NULL,
+    add_rotation = FALSE
+  )
+
+  expect_equal(length(landscapes), 5)
+})

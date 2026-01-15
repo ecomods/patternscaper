@@ -229,6 +229,11 @@ create_training_landscapes <- function(
   # Validate width and height
   validate_dimensions(width, height)
 
+  # Validate rotation angles
+  if (!is.null(rotation_angles)) {
+    validate_rotation(rotation_angles)
+  }
+
   # Filter out invalid patterns
   valid_patterns <- c(
     "random",

@@ -29,18 +29,33 @@ validate_dimensions <- function(width, height) {
 
 #' Validate Rotation Parameter
 #'
-#' Validates rotation angle parameter.
+#' Validates rotation angle parameter(s).
 #'
-#' @param rotation Numeric. Angle to rotate landscape in degrees.
+#' @param rotation Numeric. Angle(s) to rotate landscape in degrees.
+#'     Can be a single value or a vector of values.
 #'
 #' @return NULL (invisibly). Called for side effects (validation).
 #'
 #' @keywords internal
 #' @noRd
 validate_rotation <- function(rotation) {
-  if (!is.numeric(rotation) || rotation < 0 || rotation > 360) {
+  if (!is.numeric(rotation)) {
     cli::cli_abort(c(
-      "{.arg rotation} must be numeric and between 0 and 360.",
+      "{.arg rotation} must be numeric.",
+      "x" = "You supplied {.type {rotation}}"
+    ))
+  }
+
+  if (any(is.na(rotation))) {
+    cli::cli_abort(c(
+      "{.arg rotation} cannot contain NA values.",
+      "x" = "You supplied {.val {rotation}}"
+    ))
+  }
+
+  if (any(rotation < 0) || any(rotation > 360)) {
+    cli::cli_abort(c(
+      "{.arg rotation} must be between 0 and 360 degrees.",
       "x" = "You supplied {.val {rotation}}"
     ))
   }
