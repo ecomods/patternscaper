@@ -249,99 +249,106 @@ create_training_landscapes <- function(
     cli::cli_abort("No valid landscape patterns specified")
   }
 
-  # Set default parameter ranges if not provided
-  if (is.null(params_list)) {
-    params_list <- list(
-      random = list(
-        tree_prop = c(0.1, 0.9)
-      ),
-      bare = list(
-        tree_prop = c(0, 0.2)
-      ),
-      dense = list(
-        tree_prop = c(0.8, 1)
-      ),
-      sharp = list(
-        treeline_position = c(0.2, 0.8)
-      ),
-      diffuse = list(
-        steepness = c(0.1, 1),
-        treeline_position = c(0.1, 0.4)
-      ),
-      curvy = list(
-        treeline_position = c(0.3, 0.6),
-        sine_length = c(0.2 * width, 0.4 * width),
-        sine_height = c(0.03 * height, 0.2 * height)
-      ),
-      fingers = list(
-        treeline_position = c(0.3, 0.6),
-        sine_length_mean = c(0.2, 0.4) * width,
-        sine_length_sd = c(0.1, 0.6) * width,
-        sine_height_mean = c(0.03, 0.2) * height,
-        sine_height_sd = c(0.1, 0.3) * height
-      ),
-      clustered = list(
-        treeline_position = c(0.4, 0.6), # numeric
-        n_clusters = c(5, 12), # integer
-        cluster_radius = c(5, 10), # integer
-        scatter_zone_prop = c(0.2, 1), # numeric
-        elongation_x = c(0.5, 1.5), # numeric
-        elongation_y = c(0.5, 1.5) # numeric
-      ),
-      bands = list(
-        treeline_position = c(0.3, 0.5), # numeric
-        band_zone_prop = c(0.2, 0.5), # numeric
-        band_thickness = c(2, 5), #integer
-        band_spacing = c(7, 15), #integer
-        frequency = c(0.1, 0.3), # numeric
-        amplitude = c(0, 6), # integer
-        noise_sd = c(0, 1) # numeric
-      ),
-      spots = list(
-        n_spots = c(5, 20), # integer
-        spot_radius = c(8, 12), # integer
-        spot_radius_sd = c(0, 2), # numeric
-        regular_spots = c(TRUE, FALSE), #Bool
-        invert_landscape = c(FALSE)
-      ),
-      gaps = list(
-        n_spots = c(5, 20), # integer
-        spot_radius = c(8, 12), # integer
-        spot_radius_sd = c(0, 2), # numeric
-        regular_spots = c(TRUE, FALSE), #Bool
-        invert_landscape = c(TRUE)
-      ),
-      stripes = list(
-        nhills = c(1, 5), #integer
-        nbands = c(3, 8), #integer
-        regular_hilltop = c(TRUE, FALSE), #Bool
-        top_elevation_mean = c(25, 35),
-        top_elevation_sd = c(0, 3),
-        x_ext_hill_sd = c(0, 0.5),
-        y_ext_hill_sd = c(0, 0.5),
-        noise_sd = c(0, 0.25)
-      ),
-      labyrinth = list(
-        frequency = c(2, 5), # integer
-        veg_threshold = c(0.4, 0.5), # numeric
-        band_fuzziness = c(0, 0.1), #numeric
-        octaves = c(2, 6) #integer
-      )
+  # Create full default parameter list
+  default_params_list <- list(
+    random = list(tree_prop = c(0.1, 0.9)),
+    bare = list(tree_prop = c(0, 0.2)),
+    dense = list(tree_prop = c(0.8, 1)),
+    sharp = list(treeline_position = c(0.2, 0.8)),
+    diffuse = list(
+      steepness = c(0.1, 1),
+      treeline_position = c(0.1, 0.4)
+    ),
+    curvy = list(
+      treeline_position = c(0.3, 0.6),
+      sine_length = c(0.2 * width, 0.4 * width),
+      sine_height = c(0.03 * height, 0.2 * height)
+    ),
+    fingers = list(
+      treeline_position = c(0.3, 0.6),
+      sine_length_mean = c(0.2, 0.4) * width,
+      sine_length_sd = c(0.1, 0.6) * width,
+      sine_height_mean = c(0.03, 0.2) * height,
+      sine_height_sd = c(0.1, 0.3) * height
+    ),
+    clustered = list(
+      treeline_position = c(0.4, 0.6),
+      n_clusters = c(5, 12),
+      cluster_radius = c(5, 10),
+      scatter_zone_prop = c(0.2, 1),
+      elongation_x = c(0.5, 1.5),
+      elongation_y = c(0.5, 1.5)
+    ),
+    bands = list(
+      treeline_position = c(0.3, 0.5),
+      band_zone_prop = c(0.2, 0.5),
+      band_thickness = c(2, 5),
+      band_spacing = c(7, 15),
+      frequency = c(0.1, 0.3),
+      amplitude = c(0, 6),
+      noise_sd = c(0, 1)
+    ),
+    spots = list(
+      n_spots = c(5, 20),
+      spot_radius = c(8, 12),
+      spot_radius_sd = c(0, 2),
+      regular_spots = c(TRUE, FALSE),
+      invert_landscape = c(FALSE)
+    ),
+    gaps = list(
+      n_spots = c(5, 20),
+      spot_radius = c(8, 12),
+      spot_radius_sd = c(0, 2),
+      regular_spots = c(TRUE, FALSE),
+      invert_landscape = c(TRUE)
+    ),
+    stripes = list(
+      nhills = c(1, 5),
+      nbands = c(3, 8),
+      regular_hilltop = c(TRUE, FALSE),
+      top_elevation_mean = c(25, 35),
+      top_elevation_sd = c(0, 3),
+      x_ext_hill_sd = c(0, 0.5),
+      y_ext_hill_sd = c(0, 0.5),
+      noise_sd = c(0, 0.25)
+    ),
+    labyrinth = list(
+      frequency = c(2, 5),
+      veg_threshold = c(0.4, 0.5),
+      band_fuzziness = c(0, 0.1),
+      octaves = c(2, 6)
     )
-  }
+  )
 
-  # Ensure all selected patterns have parameter ranges
-  for (pattern in patterns) {
-    if (!(pattern %in% names(params_list))) {
-      cli::cli_alert_warning(
-        "Pattern '{pattern}' not found in params_list. Using default parameters."
-      )
-      params_list[[pattern]] <- list(treeline_position = c(0.3, 0.7))
+  # If user provided params, validate and merge with defaults
+  if (!is.null(params_list)) {
+    # Validate user-provided params first
+    validate_params_list(params_list, patterns)
+
+    # Merge user params with defaults
+    merged_params <- list()
+    for (pattern in patterns) {
+      if (pattern %in% names(params_list)) {
+        # Start with defaults for this pattern
+        merged_params[[pattern]] <- default_params_list[[pattern]]
+
+        # Override with user-specified parameters
+        for (param_name in names(params_list[[pattern]])) {
+          merged_params[[pattern]][[param_name]] <- params_list[[pattern]][[
+            param_name
+          ]]
+        }
+      } else {
+        # Pattern missing entirely, use all defaults
+        merged_params[[pattern]] <- default_params_list[[pattern]]
+      }
     }
-  }
 
-  # Validate parameters (user provided and defaults)
-  validate_params_list(params_list, patterns)
+    params_list <- merged_params
+  } else {
+    # No user params, use defaults for all requested patterns
+    params_list <- default_params_list[patterns]
+  }
 
   # Initialize results list
   all_landscapes <- list()
