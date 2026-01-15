@@ -171,6 +171,7 @@ create_landscape <- function(
 #'     Must be the same length as 'patterns' (default NULL which means equal probability).
 #' @param balance_patterns Logical. If TRUE, ensures all landscape patterns appear approximately equally,
 #'     overriding any weights specified in pattern_probs. (default: TRUE)
+#' @param max_retries Integer. Maximum number of retries for failed landscape generations (default: 3).
 #'
 #' @return A named list of landscape objects. Names indicate the pattern and optional rotation.
 #'
@@ -211,7 +212,8 @@ create_training_landscapes <- function(
   rotation_angles = c(0, 45, 90, 135),
   params_list = NULL,
   pattern_probs = NULL,
-  balance_patterns = TRUE
+  balance_patterns = TRUE,
+  max_retries = 3
 ) {
   # Validate inputs
   if (!is.numeric(n) || length(n) != 1) {
@@ -422,81 +424,53 @@ create_training_landscapes <- function(
   # Generate each landscape
   for (i in 1:n) {
     pattern <- sampled_patterns[i]
+    landscape <- NULL
+    retry_count <- 0
 
-    # Get parameter ranges for this pattern
-    pattern_params <- params_list[[pattern]]
+    # Retry loop
+    while (is.null(landscape) && retry_count <= max_retries) {
+      # Sample parameters (new sample each retry)
+      sampled_params <- sample_landscape_params(
+        params_list[[pattern]],
+        integer_params,
+        width,
+        height
+      )
 
-    # Sample parameter values from ranges
-    sampled_params <- list()
-    for (param_name in names(pattern_params)) {
-      param_range <- pattern_params[[param_name]]
-
-      if (is.logical(param_range)) {
-        # For logical parameters, randomly choose TRUE or FALSE
-        sampled_params[[param_name]] <- sample(param_range, 1)
-      } else if (length(param_range) == 1) {
-        # For single values, use as is
-        sampled_params[[param_name]] <- param_range
-      } else if (param_name %in% integer_params) {
-        # For integer parameters, sample from integer sequence
-        sampled_params[[param_name]] <- sample(
-          seq(from = param_range[1], to = param_range[2], by = 1),
-          size = 1
-        )
+      # Handle rotation for patterns that support it
+      if (pattern %in% patterns_with_rotation) {
+        rotation <- if (add_rotation) sample(rotation_angles, 1) else 0
+        sampled_params$rotation <- rotation
       } else {
-        # For numeric ranges, sample uniformly
-        sampled_params[[param_name]] <- runif(
-          1,
-          min = param_range[1],
-          max = param_range[2]
-        )
+        rotation <- 0
       }
+
+      # Attempt to create landscape
+      landscape <- try_create_landscape(pattern, sampled_params, i, rotation)
+
+      # Handle failure
+      if (is.null(landscape)) {
+        if (retry_count < max_retries) {
+          cli::cli_alert_info(
+            "Retry {retry_count + 1}/{max_retries} for landscape {i} (pattern: {pattern})"
+          )
+        } else {
+          cli::cli_alert_warning(
+            "Failed to create landscape {i} (pattern: {pattern}) after {max_retries} retries"
+          )
+        }
+      }
+
+      retry_count <- retry_count + 1
     }
 
-    # Add common parameters
-    sampled_params$width <- width
-    sampled_params$height <- height
-
-    # Only add rotation for patterns that support it
-    if (pattern %in% patterns_with_rotation) {
-      rotation <- if (add_rotation) {
-        sample(rotation_angles, 1)
-      } else {
-        0
-      }
-      sampled_params$rotation <- rotation
+    # Store result (NULL if all retries failed)
+    if (!is.null(landscape)) {
+      all_landscapes[[i]] <- landscape
+      names(all_landscapes)[i] <- landscape$name
     } else {
-      rotation <- 0 # For naming purposes only
+      all_landscapes[[i]] <- NULL
     }
-
-    # Generate the landscape
-    tryCatch(
-      {
-        landscape <- do.call(
-          create_landscape,
-          c(list(pattern = pattern), sampled_params)
-        )
-
-        # Set descriptive name
-        landscape_name <- paste0(
-          pattern,
-          "_",
-          i,
-          if (rotation != 0) paste0("_rot", rotation) else ""
-        )
-        landscape <- set_landscape_name(landscape, landscape_name)
-
-        # Store the landscape object
-        all_landscapes[[i]] <- landscape
-        names(all_landscapes)[i] <- landscape_name
-      },
-      error = function(e) {
-        cli::cli_alert_warning(
-          "Failed to create landscape {i} (pattern: {pattern}): {conditionMessage(e)}"
-        )
-        all_landscapes[[i]] <- NULL
-      }
-    )
   }
 
   n_requested <- n
@@ -515,4 +489,91 @@ create_training_landscapes <- function(
   }
 
   return(all_landscapes)
+}
+
+#' Sample Parameters for Landscape Generation
+#'
+#' Samples random values from parameter ranges for landscape creation.
+#'
+#' @param pattern_params List. Parameter ranges for a pattern.
+#' @param integer_params Character vector. Names of integer parameters.
+#' @param width Integer. Landscape width.
+#' @param height Integer. Landscape height.
+#'
+#' @return List of sampled parameter values.
+#'
+#' @keywords internal
+#' @noRd
+sample_landscape_params <- function(
+  pattern_params,
+  integer_params,
+  width,
+  height
+) {
+  sampled_params <- list()
+
+  for (param_name in names(pattern_params)) {
+    param_range <- pattern_params[[param_name]]
+
+    if (is.logical(param_range)) {
+      sampled_params[[param_name]] <- sample(param_range, 1)
+    } else if (length(param_range) == 1) {
+      sampled_params[[param_name]] <- param_range
+    } else if (param_name %in% integer_params) {
+      sampled_params[[param_name]] <- sample(
+        seq(from = param_range[1], to = param_range[2], by = 1),
+        size = 1
+      )
+    } else {
+      sampled_params[[param_name]] <- runif(
+        1,
+        min = param_range[1],
+        max = param_range[2]
+      )
+    }
+  }
+
+  # Add common parameters
+  sampled_params$width <- width
+  sampled_params$height <- height
+
+  sampled_params
+}
+
+#' Attempt to Create a Single Landscape
+#'
+#' Tries to generate a landscape with given parameters, handling errors gracefully.
+#'
+#' @param pattern Character. Pattern type.
+#' @param params List. Parameters for landscape creation.
+#' @param index Integer. Landscape index in the sequence.
+#' @param rotation Numeric. Rotation angle.
+#'
+#' @return Landscape object on success, NULL on failure.
+#'
+#' @keywords internal
+#' @noRd
+try_create_landscape <- function(pattern, params, index, rotation) {
+  tryCatch(
+    {
+      landscape <- do.call(
+        create_landscape,
+        c(list(pattern = pattern), params)
+      )
+
+      # Set descriptive name
+      landscape_name <- paste0(
+        pattern,
+        "_",
+        index,
+        if (rotation != 0) paste0("_rot", rotation) else ""
+      )
+      landscape <- set_landscape_name(landscape, landscape_name)
+
+      landscape
+    },
+    error = function(e) {
+      NULL
+    }
+  )
 }
