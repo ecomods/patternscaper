@@ -162,8 +162,7 @@ test_that("plot_landscape_list respects ncol parameter", {
   landscapes <- list(
     create_landscape("sharp", width = 10, height = 10),
     create_landscape("random", width = 10, height = 10),
-    create_landscape("diffuse", width = 10, height = 10),
-    create_landscape("curvy", width = 10, height = 10)
+    create_landscape("diffuse", width = 10, height = 10)
   )
 
   p <- plot_landscape_list(landscapes, ncol = 2)

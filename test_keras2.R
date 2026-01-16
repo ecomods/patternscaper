@@ -32,7 +32,6 @@ training_landscapes <- generate_training_landscapes(
   types = c(
     "sharp",
     "diffuse",
-    "curvy",
     "fingers",
     "clustered",
     "bands"

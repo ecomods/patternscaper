@@ -47,10 +47,6 @@ test_that("create_landscape creates correct landscape types", {
     "diffuse"
   )
   expect_equal(
-    create_landscape("curvy", width = 10, height = 10)$pattern,
-    "curvy"
-  )
-  expect_equal(
     create_landscape("fingers", width = 10, height = 10)$pattern,
     "fingers"
   )

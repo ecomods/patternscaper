@@ -5,7 +5,7 @@
 #' parameter.
 #'
 #' @param pattern Character. pattern of landscape to generate: "random", "sharp", "diffuse",
-#'        "curvy", "fingers", "bands", "clusters", "spots", "gaps",
+#'        "fingers", "bands", "clusters", "spots", "gaps",
 #'        "stripes", "labyrinth"
 #' @param name Character. Optional name for the landscape (default: NULL).
 #' @param custom_pattern Character. Optional pattern for the landscape (default: NULL uses the default
@@ -23,8 +23,6 @@
 #' \code{\link{create_landscape_sharp_treeline}} for "sharp" pattern parameters
 #'
 #' \code{\link{create_landscape_diffuse_treeline}} for "diffuse" pattern parameters
-#'
-#' \code{\link{create_landscape_curvy_treeline}} for "curvy" pattern parameters
 #'
 #' \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
 #'
@@ -79,7 +77,6 @@ create_landscape <- function(
     "dense",
     "sharp",
     "diffuse",
-    "curvy",
     "fingers",
     "clustered",
     "bands",
@@ -125,7 +122,6 @@ create_landscape <- function(
     dense = create_landscape_dense(...),
     sharp = create_landscape_sharp_treeline(...),
     diffuse = create_landscape_diffuse_treeline(...),
-    curvy = create_landscape_curvy_treeline(...),
     fingers = create_landscape_fingers(...),
     clustered = create_landscape_clustered(...),
     bands = create_landscape_bands(...),
@@ -192,7 +188,6 @@ create_training_landscapes <- function(
     "dense",
     "sharp",
     "diffuse",
-    "curvy",
     "fingers",
     "clustered",
     "bands",
@@ -236,7 +231,6 @@ create_training_landscapes <- function(
     "dense",
     "sharp",
     "diffuse",
-    "curvy",
     "fingers",
     "clustered",
     "bands",
@@ -260,11 +254,6 @@ create_training_landscapes <- function(
     diffuse = list(
       steepness = c(0.1, 1),
       treeline_position = c(0.1, 0.4)
-    ),
-    curvy = list(
-      treeline_position = c(0.3, 0.6),
-      sine_length = c(0.2 * width, 0.4 * width),
-      sine_height = c(0.03 * height, 0.2 * height)
     ),
     fingers = list(
       treeline_position = c(0.3, 0.6),
@@ -412,7 +401,6 @@ create_training_landscapes <- function(
   patterns_with_rotation <- c(
     "sharp",
     "diffuse",
-    "curvy",
     "fingers",
     "clustered",
     "bands",

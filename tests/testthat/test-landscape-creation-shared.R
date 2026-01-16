@@ -9,7 +9,6 @@ test_that("landscape generators create valid landscape objects", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
-    curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
     gaps = create_landscape_gaps,
@@ -38,7 +37,6 @@ test_that("landscape generators support rotation parameter", {
   generators_with_rotation <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
-    curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
     gaps = create_landscape_gaps,
@@ -77,7 +75,6 @@ test_that("landscape generators validate width parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
-    curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered,
     spots = create_landscape_spots,
@@ -121,7 +118,6 @@ test_that("landscape generators validate height parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
-    curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered,
     spots = create_landscape_spots,
@@ -166,7 +162,6 @@ test_that("landscape generators validate treeline_position parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
-    curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered,
     bands = create_landscape_bands
@@ -200,7 +195,6 @@ test_that("landscape generators validate rotation parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
-    curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered,
     spots = create_landscape_spots,
@@ -235,7 +229,6 @@ test_that("landscape generators validate rotation parameter", {
 test_that("landscape generators validate random_spots parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
-    curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered
   )
@@ -280,7 +273,6 @@ test_that("landscape generators handle very small landscapes", {
   generators <- list(
     sharp = list(fn = create_landscape_sharp_treeline, params = list()),
     diffuse = list(fn = create_landscape_diffuse_treeline, params = list()),
-    curvy = list(fn = create_landscape_curvy_treeline, params = list()),
     fingers = list(fn = create_landscape_fingers, params = list()),
     spots = list(fn = create_landscape_spots, params = list(spot_radius = 3)),
     gaps = list(fn = create_landscape_gaps, params = list(spot_radius = 3)),
@@ -305,7 +297,6 @@ test_that("landscape generators handle very large landscapes", {
     diffuse = create_landscape_diffuse_treeline,
     spots = create_landscape_spots,
     fingers = create_landscape_fingers,
-    curvy = create_landscape_curvy_treeline,
     clustered = create_landscape_clustered,
     bands = create_landscape_bands,
     gaps = create_landscape_gaps,
@@ -328,7 +319,6 @@ test_that("landscape generators handle non-square landscapes without rotation", 
   generators <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
-    curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
     bands = create_landscape_bands,
@@ -371,7 +361,6 @@ test_that("landscape generators with rotation handle non-square landscapes", {
   generators_with_rotation <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
-    curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
     bands = create_landscape_bands,
@@ -414,7 +403,6 @@ test_that("landscape generators with rotation handle extreme angles", {
   generators_with_rotation <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
-    curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots
   )

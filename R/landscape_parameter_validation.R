@@ -145,11 +145,6 @@ get_valid_param_specs <- function() {
       steepness = list(type = "numeric", min = 0, max = Inf),
       treeline_position = list(type = "numeric", min = 0, max = 1)
     ),
-    curvy = list(
-      treeline_position = list(type = "numeric", min = 0, max = 1),
-      sine_length = list(type = "numeric", min = 0, max = Inf),
-      sine_height = list(type = "numeric", min = 0, max = Inf)
-    ),
     fingers = list(
       treeline_position = list(type = "numeric", min = 0, max = 1),
       sine_length_mean = list(type = "numeric", min = 0, max = Inf),

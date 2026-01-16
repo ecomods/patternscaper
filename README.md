@@ -8,7 +8,6 @@
 - Create landscapes with different patterns including:
   - Sharp treelines
   - Diffuse treelines
-  - Curvy treelines
   - Clustered vegetation
   - Finger-like extensions
   - Sine wave bands

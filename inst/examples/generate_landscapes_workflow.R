@@ -127,46 +127,12 @@ plot_landscape_list(
   )
 )
 
-# Curvy treeline -------------------------------------------------------------
-# Default curvy treeline
-curvy_default <- create_landscape("curvy", name = "Default")
-
-# Modified curvy treeline with increased sine parameters
-curvy_modified <- create_landscape(
-  "curvy",
-  name = "Modified",
-  treeline_position = 0.3,
-  random_spots = c(0.05, 0.05),
-  sine_length = 100,
-  sine_height = 50
-)
-plot_landscape(curvy_modified)
-
-# One landscape with rotation
-curvy_rotated <- create_landscape(
-  "curvy",
-  name = "Rotated",
-  treeline_position = 0.6,
-  sine_length = 10,
-  sine_height = 10,
-  rotation = 45
-)
-
-# Plot all curvy treelines together
-plot_landscape_list(
-  list(
-    curvy_default,
-    curvy_modified,
-    curvy_rotated
-  )
-)
-
 # Curvy fingers ---------------------------------------------------------------
 # Default fingers pattern
 fingers_default <- create_landscape(
   "fingers",
   name = "Default",
-  pattern = "curvy"
+  pattern = "fingers"
 )
 fingers_modified <- create_landscape(
   "fingers",
@@ -436,7 +402,7 @@ for (i in 1:6) {
     name = paste0("Octaves: ", i),
     frequency = 5,
     veg_threshold = 0.5,
-    band_fuzziness = 0.1,
+    band_fuzziness = 0,
     octaves = i
   )
 }
@@ -481,7 +447,7 @@ for (i in c(1, 3, 5, 7, 9)) {
     name = paste0("Frequency: ", i),
     frequency = i,
     veg_threshold = 0.5,
-    band_fuzziness = 0.1,
+    band_fuzziness = 0,
     octaves = 6
   )
 }
@@ -526,3 +492,69 @@ plot_landscape_list(list(
   stripes_modified,
   stripes_rotated
 ))
+
+# Generate a set of each landscape type for showcase --------------------------
+spatial_patterns <- c(
+  "random",
+  "bare",
+  "dense",
+  "sharp",
+  "diffuse",
+  "fingers",
+  "clustered",
+  "bands",
+  "spots",
+  "gaps",
+  "stripes",
+  "labyrinth"
+)
+
+n <- 36
+
+create_training_landscapes(
+  patterns = spatial_patterns[2],
+  n = n
+) |>
+  plot_
+
+t + plot_annotation(title = "Showcase of available spatial patterns")
+
+
+showcase_landscapes <- spatial_patterns |>
+  purrr::map(\(pattern) {
+    set.seed(123)
+    print(pattern)
+    create_training_landscapes(
+      patterns = pattern,
+      n = n
+    )
+  })
+
+showcase_plots <- purrr::map2(
+  showcase_landscapes,
+  spatial_patterns,
+  \(landscape_list, pattern) {
+    plot <- plot_landscape_list(
+      landscape_list,
+      title = "none",
+      show_legend = FALSE
+    )
+    plot +
+      plot_annotation(title = pattern) &
+      ggplot2::theme(plot.title = ggtext::element_markdown(size = 20))
+  }
+)
+
+# Save them all
+purrr::walk2(
+  showcase_plots,
+  spatial_patterns,
+  \(plot, pattern) {
+    ggplot2::ggsave(
+      filename = paste0("inst/examples/plots/showcase_", pattern, ".png"),
+      plot = plot,
+      width = 10,
+      height = 10
+    )
+  }
+)

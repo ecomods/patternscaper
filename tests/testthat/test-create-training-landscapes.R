@@ -33,7 +33,6 @@ test_that("create_training_landscapes returns correct number of landscapes", {
       "random",
       "sharp",
       "diffuse",
-      "curvy",
       "fingers",
       "clustered",
       "bands",
@@ -124,7 +123,7 @@ test_that("create_training_landscapes balances patterns correctly", {
   set.seed(123)
   landscapes <- create_training_landscapes(
     n = 12,
-    patterns = c("sharp", "diffuse", "curvy"),
+    patterns = c("sharp", "diffuse", "fingers"),
     width = 20,
     height = 20,
     balance_patterns = TRUE
@@ -201,7 +200,6 @@ test_that("create_training_landscapes respects width and height", {
       "random",
       "sharp",
       "diffuse",
-      "curvy",
       "fingers",
       "clustered",
       "bands",

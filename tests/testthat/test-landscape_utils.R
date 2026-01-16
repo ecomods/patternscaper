@@ -265,7 +265,6 @@ test_that("rotated landscapes have no NA values", {
   generators_with_rotation <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
-    curvy = create_landscape_curvy_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
     bands = create_landscape_bands,
