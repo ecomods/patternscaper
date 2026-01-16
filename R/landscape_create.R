@@ -121,8 +121,8 @@ create_landscape <- function(
   landscape <- switch(
     matched,
     random = create_landscape_random(...),
-    bare = create_landscape_random(...),
-    dense = create_landscape_random(...),
+    bare = create_landscape_random(tree_prop = 0.1, ...),
+    dense = create_landscape_random(tree_prop = 0.9, ...),
     sharp = create_landscape_sharp_treeline(...),
     diffuse = create_landscape_diffuse_treeline(...),
     curvy = create_landscape_curvy_treeline(...),
