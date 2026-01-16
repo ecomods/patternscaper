@@ -6,7 +6,7 @@
 #'
 #' @param pattern Character. pattern of landscape to generate: "random", "sharp", "diffuse",
 #'        "fingers", "bands", "clusters", "spots", "gaps",
-#'        "stripes", "labyrinth"
+#'        "labyrinth"
 #' @param name Character. Optional name for the landscape (default: NULL).
 #' @param custom_pattern Character. Optional pattern for the landscape (default: NULL uses the default
 #'     pattern of the corresponding function).
@@ -33,8 +33,6 @@
 #' \code{\link{create_landscape_spots}} for "spots" pattern parameters
 #'
 #' \code{\link{create_landscape_gaps}} for "gaps" pattern parameters
-#'
-#' \code{\link{create_landscape_stripes}} for "stripes" pattern parameters
 #'
 #' \code{\link{create_landscape_labyrinth}} for "labyrinth" pattern parameters
 #'
@@ -82,7 +80,6 @@ create_landscape <- function(
     "bands",
     "spots",
     "gaps",
-    "stripes",
     "labyrinth"
   ),
   name = NULL,
@@ -127,7 +124,6 @@ create_landscape <- function(
     bands = create_landscape_bands(...),
     spots = create_landscape_spots(...),
     gaps = create_landscape_gaps(...),
-    stripes = create_landscape_stripes(...),
     labyrinth = create_landscape_labyrinth(...)
   )
 
@@ -193,7 +189,6 @@ create_training_landscapes <- function(
     "bands",
     "spots",
     "gaps",
-    "stripes",
     "labyrinth"
   ),
   width = 100,
@@ -236,7 +231,6 @@ create_training_landscapes <- function(
     "bands",
     "spots",
     "gaps",
-    "stripes",
     "labyrinth"
   )
   patterns <- intersect(patterns, valid_patterns)
@@ -292,16 +286,6 @@ create_training_landscapes <- function(
       spot_radius_sd = c(0, 0.02) * width,
       regular_spots = c(TRUE, FALSE),
       invert_landscape = c(TRUE)
-    ),
-    stripes = list(
-      nhills = c(1, 5),
-      nbands = c(3, 8),
-      regular_hilltop = c(TRUE, FALSE),
-      top_elevation_mean = c(25, 35),
-      top_elevation_sd = c(0, 3),
-      x_ext_hill_sd = c(0, 0.5),
-      y_ext_hill_sd = c(0, 0.5),
-      noise_sd = c(0, 0.25)
     ),
     labyrinth = list(
       frequency = c(2, 6),
@@ -405,8 +389,7 @@ create_training_landscapes <- function(
     "clustered",
     "bands",
     "spots",
-    "gaps",
-    "stripes"
+    "gaps"
   )
 
   # Generate each landscape

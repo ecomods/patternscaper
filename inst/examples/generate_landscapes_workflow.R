@@ -20,20 +20,20 @@ landscapes <- create_training_landscapes(
 # generate only specific landscape types
 landscapes <- create_training_landscapes(
   n = 20,
-  patterns = c("stripes", "spots", "clustered")
+  patterns = c("labyrinth", "spots", "clustered")
 )
 
 # give different weights for the landscapes (higher weights will be generated more often)
 landscapes <- create_training_landscapes(
   n = 20,
-  patterns = c("stripes", "spots", "clustered"),
+  patterns = c("labyrinth", "spots", "clustered"),
   balance_patterns = FALSE,
   pattern_probs = c(0.1, 1, 0.2)
 )
 
 landscapes <- create_training_landscapes(
   n = 20,
-  patterns = c("spots", "stripes")
+  patterns = c("spots", "labyrinth")
 )
 
 # Look at landscape objects (printed with info in the console)
@@ -461,38 +461,6 @@ labyrinths <- create_training_landscapes(
 )
 plot_landscape_list(labyrinths)
 
-# Stripes vegetation ----------------------------------------------------------
-# Default stripes vegetation
-stripes_default <- create_landscape("stripes", name = "Default")
-
-# Modified stripes vegetation with more stripes and different hill parameters
-stripes_modified <- create_landscape(
-  "stripes",
-  name = "Modified",
-  nbands = 9,
-  regular_hilltop = FALSE,
-  top_elevation_mean = 25,
-  noise_sd = 0.5
-)
-
-# One landscape with rotation
-stripes_rotated <- create_landscape(
-  "stripes",
-  name = "Rotated",
-  nbands = 9,
-  regular_hilltop = FALSE,
-  top_elevation_mean = 25,
-  noise_sd = 0.5,
-  rotation = 45
-)
-
-# Plot all striped vegetation together
-plot_landscape_list(list(
-  stripes_default,
-  stripes_modified,
-  stripes_rotated
-))
-
 # Generate a set of each landscape type for showcase --------------------------
 spatial_patterns <- c(
   "random",
@@ -505,7 +473,6 @@ spatial_patterns <- c(
   "bands",
   "spots",
   "gaps",
-  "stripes",
   "labyrinth"
 )
 

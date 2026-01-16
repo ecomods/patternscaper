@@ -72,10 +72,6 @@ test_that("create_landscape creates correct landscape types", {
     "gaps"
   )
   expect_equal(
-    create_landscape("stripes", width = 10, height = 10)$pattern,
-    "stripes"
-  )
-  expect_equal(
     create_landscape("labyrinth", width = 10, height = 10)$pattern,
     "labyrinth"
   )

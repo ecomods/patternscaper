@@ -36,7 +36,6 @@ test_that("create_training_landscapes returns correct number of landscapes", {
       "fingers",
       "clustered",
       "bands",
-      "stripes",
       "labyrinth"
     ),
     width = 20,
@@ -203,7 +202,6 @@ test_that("create_training_landscapes respects width and height", {
       "fingers",
       "clustered",
       "bands",
-      "stripes",
       "labyrinth"
     ),
     n = 5,

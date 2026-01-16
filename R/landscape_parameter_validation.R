@@ -183,16 +183,6 @@ get_valid_param_specs <- function() {
       regular_spots = list(type = "logical"),
       invert_landscape = list(type = "logical")
     ),
-    stripes = list(
-      nhills = list(type = "integer", min = 1, max = Inf),
-      nbands = list(type = "integer", min = 1, max = Inf),
-      regular_hilltop = list(type = "logical"),
-      top_elevation_mean = list(type = "numeric", min = -Inf, max = Inf),
-      top_elevation_sd = list(type = "numeric", min = 0, max = Inf),
-      x_ext_hill_sd = list(type = "numeric", min = 0, max = Inf),
-      y_ext_hill_sd = list(type = "numeric", min = 0, max = Inf),
-      noise_sd = list(type = "numeric", min = 0, max = Inf)
-    ),
     labyrinth = list(
       frequency = list(type = "integer", min = 1, max = Inf),
       veg_threshold = list(type = "numeric", min = 0, max = 1),

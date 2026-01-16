@@ -24,7 +24,7 @@ create_test_metrics <- function(
 # Add helper for integration tests
 create_real_test_metrics <- function(
   n_landscapes = 10,
-  patterns = c("stripes", "clustered", "labyrinth")
+  patterns = c("spots", "clustered", "labyrinth")
 ) {
   landscapes <- create_training_landscapes(
     n = n_landscapes,

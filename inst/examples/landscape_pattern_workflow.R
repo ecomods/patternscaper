@@ -15,7 +15,7 @@ set.seed(123)
 landscapes <- generate_training_landscapes(
   n = 100,
   add_rotation = FALSE,
-  types = c("spots", "gaps", "stripes", "labyrinth")
+  types = c("spots", "gaps", "clustered", "labyrinth")
 )
 
 # Check how many landscapes of each type were generated
@@ -115,7 +115,7 @@ plot_classified_landscapes(
 test_landscapes <- generate_training_landscapes(
   n = 20,
   add_rotation = FALSE,
-  types = c("spots", "gaps", "stripes", "labyrinth")
+  types = c("spots", "gaps", "clustered", "labyrinth")
 )
 
 # plot all landscapes
