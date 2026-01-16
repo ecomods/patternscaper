@@ -7,6 +7,7 @@
 #'        - "name": uses only the landscape name
 #'        - "pattern": uses only the landscape pattern
 #'        - "both": uses "name (pattern)" format
+#'        - "none": no title
 #'        - Any other string: used as a custom title
 #'        Default: "pattern"
 #' @param show_legend Logical. Whether to show legend (default: TRUE).
@@ -41,7 +42,7 @@ plot_landscape <- function(
 ) {
   # Validate landscape is a landscape object
   if (!is_landscape(landscape)) {
-    stop("'landscape' must be a landscape object", call. = FALSE)
+    cli::cli_abort("'landscape' must be a landscape object")
   }
 
   # Generate the base plot using plot.landscape
@@ -62,6 +63,7 @@ plot_landscape <- function(
       if (!is.na(landscape$pattern)) landscape$pattern else "unclassified",
       ")"
     ),
+    none = NULL, # No title
     title # Use custom title as provided if not one of the special keywords
   )
 
@@ -115,6 +117,7 @@ plot_landscape <- function(
 #'        - "name": uses only the landscape name
 #'        - "pattern": uses only the landscape pattern
 #'        - "both": uses "name (pattern)" format
+#'        - "none": no title
 #'        - A character vector with custom titles for each landscape. If providing
 #'        `subset_index`, ensure titles match the subset length.
 #'        Default is "pattern"
@@ -224,10 +227,9 @@ plot_landscape_list <- function(
   # Generate title strings to pass to plot_landscape for each landscape
   if (length(titles) == 1) {
     # check that titles is one of the special keywords
-    if (!titles %in% c("name", "pattern", "both")) {
-      warning(
-        "Using a single custom title for multiple landscapes. All plots will have the same title.",
-        call. = FALSE
+    if (!titles %in% c("name", "pattern", "both", "none")) {
+      cli::cli_alert_warning(
+        "Using a single custom title for multiple landscapes. All plots will have the same title."
       )
     }
     titles <- rep(titles, length(landscapes))
