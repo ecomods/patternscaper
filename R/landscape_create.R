@@ -204,7 +204,7 @@ create_training_landscapes <- function(
   width = 100,
   height = 100,
   add_rotation = TRUE,
-  rotation_angles = c(0, 45, 90, 135),
+  rotation_angles = 0:360,
   params_list = NULL,
   pattern_probs = NULL,
   balance_patterns = TRUE,
@@ -254,7 +254,7 @@ create_training_landscapes <- function(
   # Create full default parameter list
   default_params_list <- list(
     random = list(tree_prop = c(0.1, 0.9)),
-    bare = list(tree_prop = c(0, 0.2)),
+    bare = list(tree_prop = c(0, 0.1)),
     dense = list(tree_prop = c(0.8, 1)),
     sharp = list(treeline_position = c(0.2, 0.8)),
     diffuse = list(
@@ -268,10 +268,10 @@ create_training_landscapes <- function(
     ),
     fingers = list(
       treeline_position = c(0.3, 0.6),
-      sine_length_mean = c(0.2, 0.4) * width,
-      sine_length_sd = c(0.1, 0.6) * width,
-      sine_height_mean = c(0.03, 0.2) * height,
-      sine_height_sd = c(0.1, 0.3) * height
+      sine_length_mean = c(0.3, 0.7) * width,
+      sine_length_sd = c(0.05, 0.2) * width,
+      sine_height_mean = c(0.05, 0.2) * height,
+      sine_height_sd = c(0.02, 0.15) * height
     ),
     clustered = list(
       treeline_position = c(0.4, 0.6),
@@ -283,24 +283,24 @@ create_training_landscapes <- function(
     ),
     bands = list(
       treeline_position = c(0.3, 0.5),
-      band_zone_prop = c(0.2, 0.5),
-      band_thickness = c(2, 5),
-      band_spacing = c(7, 15),
+      band_zone_prop = c(0.3, 0.6),
+      band_thickness = c(0.02, 0.04) * height,
+      band_spacing = c(0.1, 0.2) * height,
       frequency = c(0.1, 0.3),
-      amplitude = c(0, 6),
-      noise_sd = c(0, 1)
+      amplitude = c(0, 0.06) * height,
+      noise_sd = c(0, 0.01) * height
     ),
     spots = list(
-      n_spots = c(5, 20),
-      spot_radius = c(8, 12),
-      spot_radius_sd = c(0, 2),
+      n_spots = c(5, 10),
+      spot_radius = c(0.1, 0.2) * width,
+      spot_radius_sd = c(0, 0.02) * width,
       regular_spots = c(TRUE, FALSE),
       invert_landscape = c(FALSE)
     ),
     gaps = list(
-      n_spots = c(5, 20),
-      spot_radius = c(8, 12),
-      spot_radius_sd = c(0, 2),
+      n_spots = c(5, 10),
+      spot_radius = c(0.1, 0.2) * width,
+      spot_radius_sd = c(0, 0.02) * width,
       regular_spots = c(TRUE, FALSE),
       invert_landscape = c(TRUE)
     ),
@@ -315,10 +315,10 @@ create_training_landscapes <- function(
       noise_sd = c(0, 0.25)
     ),
     labyrinth = list(
-      frequency = c(2, 5),
+      frequency = c(2, 6),
       veg_threshold = c(0.4, 0.5),
       band_fuzziness = c(0, 0.1),
-      octaves = c(2, 6)
+      octaves = c(1, 6)
     )
   )
 
