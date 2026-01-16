@@ -121,8 +121,8 @@ create_landscape <- function(
   landscape <- switch(
     matched,
     random = create_landscape_random(...),
-    bare = create_landscape_random(tree_prop = 0.1, ...),
-    dense = create_landscape_random(tree_prop = 0.9, ...),
+    bare = create_landscape_bare(...),
+    dense = create_landscape_dense(...),
     sharp = create_landscape_sharp_treeline(...),
     diffuse = create_landscape_diffuse_treeline(...),
     curvy = create_landscape_curvy_treeline(...),
@@ -139,12 +139,7 @@ create_landscape <- function(
   if (!is.null(name)) {
     landscape <- set_landscape_name(landscape, name)
   }
-  # If the pattern is bare or dense, set the pattern accordingly
-  # because it uses the random landscape function which sets the pattern to
-  # random
-  if (matched %in% c("bare", "dense")) {
-    landscape <- set_landscape_pattern(landscape, matched)
-  }
+
   # Set a pattern different from the default if requested
   if (!is.null(custom_pattern)) {
     landscape <- set_landscape_pattern(landscape, custom_pattern)
