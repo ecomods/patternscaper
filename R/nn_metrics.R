@@ -134,19 +134,20 @@ train_nn_metrics <- function(
     c("landscape_id", "landscape_name", "pattern")
   )
 
-  na_rows <- metrics_wide |>
-    dplyr::select(dplyr::all_of(predictor_cols)) |>
-    purrr::pmap_lgl(~ any(is.na(c(...))))
+  # Check for rows with any NA values in predictor columns
+  na_rows <- rowSums(is.na(metrics_wide[, predictor_cols])) > 0
 
   if (any(na_rows)) {
     n_removed <- sum(na_rows)
     removed_names <- metrics_wide$landscape_name[na_rows]
 
-    cli::cli_alert_warning(
-      "Removed {n_removed} landscape{?s} with incomplete metrics: {paste(removed_names, collapse = ', ')}"
-    )
+    cli::cli_warn(c(
+      "Removed {n_removed} landscape{?s} with incomplete metrics",
+      "i" = "Removed: {.val {removed_names}}"
+    ))
 
     metrics_wide <- metrics_wide[!na_rows, ]
+
     # Check if we have any landscapes left
     if (nrow(metrics_wide) == 0) {
       cli::cli_abort(c(
@@ -392,17 +393,17 @@ apply_nn_metrics <- function(
     c("landscape_id", "landscape_name", "pattern")
   )
 
-  na_rows <- metrics_wide |>
-    dplyr::select(dplyr::all_of(predictor_cols)) |>
-    purrr::pmap_lgl(~ any(is.na(c(...))))
+  # Check for rows with any NA values in predictor columns
+  na_rows <- rowSums(is.na(metrics_wide[, predictor_cols])) > 0
 
   if (any(na_rows)) {
     n_removed <- sum(na_rows)
     removed_names <- metrics_wide$landscape_name[na_rows]
 
-    cli::cli_alert_warning(
-      "Removed {n_removed} landscape{?s} with incomplete metrics: {paste(removed_names, collapse = ', ')}"
-    )
+    cli::cli_warn(c(
+      "Removed {n_removed} landscape{?s} with incomplete metrics",
+      "i" = "Removed: {.val {removed_names}}"
+    ))
 
     metrics_wide <- metrics_wide[!na_rows, ]
 
