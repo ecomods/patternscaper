@@ -78,9 +78,9 @@ train_nn_metrics <- function(
     c("landscape_id", "landscape_name", "pattern")
   )
 
-  na_rows <- apply(metrics_wide[, predictor_cols], 1, function(row) {
-    any(is.na(row))
-  })
+  na_rows <- metrics_wide |>
+    dplyr::select(dplyr::all_of(predictor_cols)) |>
+    purrr::pmap_lgl(~ any(is.na(c(...))))
 
   if (any(na_rows)) {
     n_removed <- sum(na_rows)
@@ -310,8 +310,7 @@ apply_nn_metrics <- function(
   # Subset the metrics to get only those needed for prediction (if we have level
   # class, we calculated metrics for both classes and we need to remove the
   # metrics for the classes that we do not want to include)
-  metrics <- metrics |>
-    dplyr::filter(metric %in% nn_model$features)
+  metrics <- metrics |> dplyr::filter(metric %in% metrics_selected)
 
   # Convert metrics to wide format with 1 row per landscape
   metrics_wide <- metrics_to_wide(metrics)
@@ -323,9 +322,9 @@ apply_nn_metrics <- function(
     c("landscape_id", "landscape_name", "pattern")
   )
 
-  na_rows <- apply(metrics_wide[, predictor_cols], 1, function(row) {
-    any(is.na(row))
-  })
+  na_rows <- metrics_wide |>
+    dplyr::select(dplyr::all_of(predictor_cols)) |>
+    purrr::pmap_lgl(~ any(is.na(c(...))))
 
   if (any(na_rows)) {
     n_removed <- sum(na_rows)
