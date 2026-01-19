@@ -5,11 +5,23 @@
 #'
 #' @param metrics tibble. Metrics from calculate_landscape_metrics().
 #' @param metrics_selected Character vector. Names of metrics to use as features.
-#' @param hidden_layers List of Integers. Number of neurons in each hidden layer (default: c(3,3)).
-#' @param threshold Numeric. Threshold for the partial derivatives of the error function as stopping criteria in neuralnet. Default: 0.01,
-#' @param stepmax = Ingeger. Maximum steps for the training of the neural network in neuralnet. Reaching this maximum leads to a stop of the neural network's training process.Default: 1e+05,
+#' @param cv_method Character. Cross-validation method: "none", "k-fold", or "loo". Default: "k-fold".
+#' @param cv_folds Integer. Number of folds for k-fold cross-validation. Default: 5.
+#' @param hidden_layers Integer vector. Number of neurons in each hidden layer. Default: 6.
+#' @param threshold Numeric. Threshold for partial derivatives as stopping criteria. Default: 0.01.
+#' @param stepmax Integer. Maximum training steps. Default: 1e+05.
+#' @param model_path Character. Optional path to save trained model. Default: NULL.
+#' @param verbose Logical. Print training details. Default: TRUE.
 #'
-#' @return List. Trained neural network model and associated metadata.
+#' @return List containing:
+#'   \describe{
+#'     \item{model}{Trained neuralnet model object}
+#'     \item{features}{Character vector of metric names used as features}
+#'     \item{features_level}{Metric aggregation level ("landscape" or "class")}
+#'     \item{scaling}{List with 'center' and 'scale' parameters for normalization}
+#'     \item{classes}{Character vector of class names in alphabetical order}
+#'     \item{performance}{Performance metrics from cross-validation (NULL if cv_method = "none")}
+#'   }
 #' @export
 train_nn_metrics <- function(
   metrics,
@@ -47,10 +59,10 @@ train_nn_metrics <- function(
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold", "loo")) {
-    stop('cv_method must be one of: "none", "k-fold", or "loo"')
+    cli::cli_abort('cv_method must be one of: "none", "k-fold", or "loo"')
   }
 
-  # subset selected metrics if provided
+  # Subset selected metrics if provided
   if (!is.null(metrics_selected)) {
     # Subset only the selected metrics
     metrics <- subset(metrics, metric %in% metrics_selected)
@@ -61,7 +73,6 @@ train_nn_metrics <- function(
 
   # Deal with NA values -------------------------------------------------------
   # Check if we have any NA values in the predictor columns
-  # If yes, warn the user and remove the landscape
   predictor_cols <- setdiff(
     colnames(metrics_wide),
     c("landscape_id", "landscape_name", "pattern")
@@ -111,7 +122,7 @@ train_nn_metrics <- function(
   # Explicitly set factor levels in alphabetical order for consistency
   class_names <- sort(unique(metrics_wide$pattern))
 
-  metrics_scaled <- data.frame(
+  training_data <- data.frame(
     predictors_scaled,
     pattern = factor(metrics_wide$pattern, levels = class_names)
   )
@@ -119,10 +130,10 @@ train_nn_metrics <- function(
   # Cross-validation ----------------------------------------------------------
   # Validate and adjust CV parameters
   cv_params <- validate_cv_params(
-    patterns = metrics_scaled$pattern,
+    patterns = training_data$pattern,
     cv_method = cv_method,
     cv_folds = cv_folds,
-    n_predictors = ncol(metrics_scaled) - 1
+    n_predictors = ncol(training_data) - 1
   )
 
   # Update cv_method and cv_folds based on validation
@@ -134,10 +145,10 @@ train_nn_metrics <- function(
   if (cv_method != "none") {
     # Create stratified fold assignments ---------------------------------------
     if (cv_method == "loo") {
-      # If method is "loo", each sample is it's own fold
-      fold_indices <- seq_len(nrow(metrics_scaled))
+      # If method is "loo", each sample is its own fold
+      fold_indices <- seq_len(nrow(training_data))
     } else {
-      fold_indices <- find_balanced_cv_folds(metrics_scaled$pattern, cv_folds)
+      fold_indices <- find_balanced_cv_folds(training_data$pattern, cv_folds)
     }
 
     # Initialize storage for CV results of each fold
@@ -152,8 +163,8 @@ train_nn_metrics <- function(
       train_indices <- fold_indices != fold
       val_indices <- fold_indices == fold
 
-      train_data <- metrics_scaled[train_indices, ]
-      val_data <- metrics_scaled[val_indices, ]
+      train_data <- training_data[train_indices, ]
+      val_data <- training_data[val_indices, ]
 
       # Train model on training data
       fold_model <- neuralnet::neuralnet(
@@ -201,7 +212,7 @@ train_nn_metrics <- function(
   # Train final model on all data
   final_model <- neuralnet::neuralnet(
     formula = pattern ~ .,
-    data = metrics_scaled,
+    data = training_data,
     hidden = hidden_layers,
     threshold = threshold,
     stepmax = stepmax
