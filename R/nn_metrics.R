@@ -64,8 +64,14 @@ train_nn_metrics <- function(
 
   # Subset selected metrics if provided
   if (!is.null(metrics_selected)) {
-    # Subset only the selected metrics
-    metrics <- subset(metrics, metric %in% metrics_selected)
+    missing_metrics <- setdiff(metrics_selected, unique(metrics$metric))
+    if (length(missing_metrics) > 0) {
+      cli::cli_abort(c(
+        "Some selected metrics not found in data:",
+        "x" = "{.val {missing_metrics}}"
+      ))
+    }
+    metrics <- metrics |> dplyr::filter(metric %in% metrics_selected)
   }
 
   # Convert metrics to wide format with 1 row per landscape
