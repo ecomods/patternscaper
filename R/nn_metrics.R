@@ -336,10 +336,17 @@ apply_nn_metrics <- function(
   nn_model,
   return_performance = FALSE
 ) {
-  # Input validation
+  # Input validation ---------------------------------------------------------
+  if (!is.logical(return_performance) || length(return_performance) != 1) {
+    cli::cli_abort("return_performance must be a single logical value")
+  }
+
   if (
     !is.list(nn_model) ||
-      !all(c("model", "scaling", "classes", "features") %in% names(nn_model))
+      !all(
+        c("model", "scaling", "classes", "features", "features_level") %in%
+          names(nn_model)
+      )
   ) {
     cli::cli_abort("'nn_model' must be a trained model from train_nn_metrics()")
   }
@@ -357,13 +364,11 @@ apply_nn_metrics <- function(
   class_names <- nn_model$classes
   level <- nn_model$features_level
 
-  # features are the metrics with information on the class level (if at class level).
-  # We need to extract the correct metric name
-  # if the level is not landscape
+  # Determine metrics to calculate based on level
   if (level == "landscape") {
     metrics_to_calculate <- nn_model$features
   } else if (level == "class") {
-    # remove the last _part after last underscore
+    # Remove the last part after last underscore
     metrics_to_calculate <- gsub("_[^_]+$", "", nn_model$features)
   } else {
     cli::cli_abort(
@@ -378,16 +383,13 @@ apply_nn_metrics <- function(
     level = level
   )
 
-  # Subset the metrics to get only those needed for prediction (if we have level
-  # class, we calculated metrics for both classes and we need to remove the
-  # metrics for the classes that we do not want to include)
-  metrics <- metrics |> dplyr::filter(metric %in% metrics_selected)
+  # Filter to only features needed by the model
+  metrics <- metrics |> dplyr::filter(metric %in% nn_model$features)
 
   # Convert metrics to wide format with 1 row per landscape
   metrics_wide <- metrics_to_wide(metrics)
 
-  # Check if we have any NA values in the predictor columns
-  # If yes, warn the user and remove the landscape
+  # Deal with NA values -------------------------------------------------------
   predictor_cols <- setdiff(
     colnames(metrics_wide),
     c("landscape_id", "landscape_name", "pattern")
@@ -416,7 +418,7 @@ apply_nn_metrics <- function(
     }
   }
 
-  # Normalize the predictor variables (remove landscape columns)
+  # Prepare predictors -------------------------------------------------------
   predictors <- metrics_wide |>
     dplyr::select(
       -dplyr::any_of(c(
@@ -426,20 +428,31 @@ apply_nn_metrics <- function(
       ))
     )
 
-  # Check if we have more predictor columns than features in data
-  # This can happen if the user trained the model on class level metrics, but
-  # only inputs values for one class and not the other
+  # Validate we have all required features
   predictor_names <- colnames(predictors)
-  missing_predictors <- setdiff(predictor_names, nn_model$features)
+  missing_features <- setdiff(nn_model$features, predictor_names)
 
-  # Remove the additional predictors that are no features in the model
-  if (length(missing_predictors) > 0) {
-    cli::cli_warn(
-      "Input landscapes contain additional metrics not used by the model: {paste(missing_predictors, collapse = ', ')}. These will be ignored."
-    )
-    predictors <- predictors |>
-      dplyr::select(dplyr::all_of(nn_model$features))
+  if (length(missing_features) > 0) {
+    cli::cli_abort(c(
+      "Input landscapes missing required metrics",
+      "x" = "Missing: {.val {missing_features}}",
+      "i" = "Model requires: {.val {nn_model$features}}"
+    ))
   }
+
+  # Check for extra predictors (can happen with class-level metrics)
+  extra_predictors <- setdiff(predictor_names, nn_model$features)
+
+  if (length(extra_predictors) > 0) {
+    cli::cli_warn(c(
+      "Input landscapes contain additional metrics not used by the model",
+      "i" = "Ignored: {.val {extra_predictors}}"
+    ))
+  }
+
+  # Select only model features in correct order
+  predictors <- predictors |>
+    dplyr::select(dplyr::all_of(nn_model$features))
 
   # Scale the metrics using the same parameters as during training
   predictors_scaled <- scale(
@@ -448,7 +461,7 @@ apply_nn_metrics <- function(
     scale = scaling_params$scale
   )
 
-  # Make predictions using the neural network
+  # Make predictions ---------------------------------------------------------
   pred <- predict(
     model,
     newdata = predictors_scaled,
@@ -458,8 +471,9 @@ apply_nn_metrics <- function(
   # Add class names as column names
   colnames(pred) <- class_names
 
-  # turn into a tibble and add columns for actual and predicted class and confidence
+  # Turn into a tibble and add columns for predicted class and confidence
   predictions <- tibble::as_tibble(pred)
+
   # Find the confidence (the probability for the predicted class)
   predictions$confidence <- apply(pred, 1, max)
 
@@ -481,7 +495,7 @@ apply_nn_metrics <- function(
       dplyr::any_of(c("landscape_id", "landscape_name", "pattern"))
     )
 
-  # rename pattern to actual_class if it exists
+  # Rename pattern to actual_class if it exists
   if ("pattern" %in% colnames(landscape_info)) {
     landscape_info <- landscape_info |>
       dplyr::rename(actual_class = pattern)
@@ -489,7 +503,7 @@ apply_nn_metrics <- function(
 
   predictions <- dplyr::bind_cols(landscape_info, predictions)
 
-  # Evaluate performance if actual classes are available -----------------------
+  # Evaluate performance if actual classes are available ---------------------
   if ("actual_class" %in% colnames(predictions) & return_performance) {
     # Check if actual classes match model's trained classes
     unique_actual <- unique(predictions$actual_class)
@@ -497,8 +511,8 @@ apply_nn_metrics <- function(
 
     if (length(unknown_classes) > 0) {
       cli::cli_warn(c(
-        "Input landscapes contain classes not seen during training:",
-        "x" = "{.val {unknown_classes}}",
+        "Input landscapes contain classes not seen during training",
+        "x" = "Unknown: {.val {unknown_classes}}",
         "i" = "Model trained on: {.val {class_names}}",
         "i" = "Performance evaluation skipped - returning predictions only"
       ))
@@ -523,7 +537,7 @@ apply_nn_metrics <- function(
       cv_actual = cv_actual,
       cv_landscape_ids = cv_landscape_ids,
       class_names = class_names,
-      cv_method = "none", # Not actual CV, just test set evaluation
+      cv_method = "none",
       cv_folds = 1,
       verbose = TRUE,
       return_predictions = FALSE
