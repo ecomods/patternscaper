@@ -98,14 +98,12 @@ train_nn_metrics <- function(
     "value"
   )
   if (!all(needed_columns %in% colnames(metrics))) {
-    cli::cli_abort(
-      "Metrics data is missing required columns. Missing columns are: ",
-      paste(
-        needed_columns[!needed_columns %in% colnames(metrics)],
-        collapse = ", "
-      ),
-      ". Make sure that metrics is calculated by `calculate_landscape_metrics()`"
-    )
+    missing_cols <- needed_columns[!needed_columns %in% colnames(metrics)]
+    cli::cli_abort(c(
+      "Metrics data is missing required columns",
+      "x" = "Missing: {.val {missing_cols}}",
+      "i" = "Make sure metrics is calculated by {.fn calculate_landscape_metrics}"
+    ))
   }
 
   # Validate cv_method parameter
