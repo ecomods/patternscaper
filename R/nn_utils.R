@@ -383,3 +383,43 @@ evaluate_cv_performance <- function(
 
   return(result)
 }
+
+#' Remove landscapes with incomplete metrics
+#'
+#' Checks for and removes landscapes that have NA values in any predictor
+#' columns. Issues a warning listing removed landscapes and aborts if no
+#' landscapes remain after removal.
+#'
+#' @param metrics_wide Data frame in wide format. Output from metrics_to_wide().
+#' @param predictor_cols Character vector. Names of predictor columns to check for NAs.
+#'
+#' @return Data frame with incomplete landscapes removed.
+#'
+#' @keywords internal
+#' @importFrom cli cli_warn cli_abort
+remove_incomplete_landscapes <- function(metrics_wide, predictor_cols) {
+  # Check for rows with any NA values in predictor columns
+  na_rows <- rowSums(is.na(metrics_wide[, predictor_cols])) > 0
+
+  if (any(na_rows)) {
+    n_removed <- sum(na_rows)
+    removed_names <- metrics_wide$landscape_name[na_rows]
+
+    cli::cli_warn(c(
+      "Removed {n_removed} landscape{?s} with incomplete metrics",
+      "i" = "Removed: {.val {removed_names}}"
+    ))
+
+    metrics_wide <- metrics_wide[!na_rows, ]
+
+    # Check if we have any landscapes left
+    if (nrow(metrics_wide) == 0) {
+      cli::cli_abort(c(
+        "No landscapes remaining after removing those with incomplete metrics",
+        "i" = "All {n_removed} landscape{?s} had NA values in required features"
+      ))
+    }
+  }
+
+  return(metrics_wide)
+}

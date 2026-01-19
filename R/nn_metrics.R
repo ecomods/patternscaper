@@ -128,34 +128,12 @@ train_nn_metrics <- function(
   metrics_wide <- metrics_to_wide(metrics)
 
   # Deal with NA values -------------------------------------------------------
-  # Check if we have any NA values in the predictor columns
   predictor_cols <- setdiff(
     colnames(metrics_wide),
     c("landscape_id", "landscape_name", "pattern")
   )
 
-  # Check for rows with any NA values in predictor columns
-  na_rows <- rowSums(is.na(metrics_wide[, predictor_cols])) > 0
-
-  if (any(na_rows)) {
-    n_removed <- sum(na_rows)
-    removed_names <- metrics_wide$landscape_name[na_rows]
-
-    cli::cli_warn(c(
-      "Removed {n_removed} landscape{?s} with incomplete metrics",
-      "i" = "Removed: {.val {removed_names}}"
-    ))
-
-    metrics_wide <- metrics_wide[!na_rows, ]
-
-    # Check if we have any landscapes left
-    if (nrow(metrics_wide) == 0) {
-      cli::cli_abort(c(
-        "No landscapes remaining after removing those with incomplete metrics",
-        "i" = "All {n_removed} landscape{?s} had NA values in required features"
-      ))
-    }
-  }
+  metrics_wide <- remove_incomplete_landscapes(metrics_wide, predictor_cols)
 
   # Normalize the predictor variables (remove landscape columns)
   predictors <- metrics_wide |>
@@ -395,28 +373,7 @@ apply_nn_metrics <- function(
     c("landscape_id", "landscape_name", "pattern")
   )
 
-  # Check for rows with any NA values in predictor columns
-  na_rows <- rowSums(is.na(metrics_wide[, predictor_cols])) > 0
-
-  if (any(na_rows)) {
-    n_removed <- sum(na_rows)
-    removed_names <- metrics_wide$landscape_name[na_rows]
-
-    cli::cli_warn(c(
-      "Removed {n_removed} landscape{?s} with incomplete metrics",
-      "i" = "Removed: {.val {removed_names}}"
-    ))
-
-    metrics_wide <- metrics_wide[!na_rows, ]
-
-    # Check if we have any landscapes left
-    if (nrow(metrics_wide) == 0) {
-      cli::cli_abort(c(
-        "No landscapes remaining after removing those with incomplete metrics",
-        "i" = "All {n_removed} landscape{?s} had NA values in required features"
-      ))
-    }
-  }
+  metrics_wide <- remove_incomplete_landscapes(metrics_wide, predictor_cols)
 
   # Prepare predictors -------------------------------------------------------
   predictors <- metrics_wide |>
