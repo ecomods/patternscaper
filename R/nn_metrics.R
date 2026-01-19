@@ -1,28 +1,45 @@
 #' Train a multi-layer Neural Network for Landscape Classification
 #'
 #' Trains a multi-layer neural network model to classify landscapes
-#' based on metrics. Uses neuralnet package.
+#' based on landscape metrics. Uses the neuralnet package.
 #'
-#' @param metrics tibble. Metrics from calculate_landscape_metrics().
-#' @param metrics_selected Character vector. Names of metrics to use as features.
-#' @param cv_method Character. Cross-validation method: "none", "k-fold", or "loo". Default: "k-fold".
-#' @param cv_folds Integer. Number of folds for k-fold cross-validation. Default: 5.
-#' @param hidden_layers Integer vector. Number of neurons in each hidden layer. Default: 6.
-#' @param threshold Numeric. Threshold for partial derivatives as stopping criteria. Default: 0.01.
-#' @param stepmax Integer. Maximum training steps. Default: 1e+05.
-#' @param model_path Character. Optional path to save trained model. Default: NULL.
-#' @param verbose Logical. Print training details. Default: TRUE.
+#' @param metrics Tibble or data frame. Output from calculate_landscape_metrics()
+#'   containing landscape metrics in long format with required columns:
+#'   landscape_id, landscape_name, pattern, level, class, id, metric, value.
+#' @param metrics_selected Character vector of metric names to use as features,
+#'   or NULL to use all available metrics. Default: NULL.
+#' @param cv_method Character. Cross-validation method: "none", "k-fold", or "loo".
+#'   May be automatically adjusted based on dataset size via validate_cv_params().
+#'   Default: "k-fold".
+#' @param cv_folds Integer. Number of folds for k-fold cross-validation.
+#'   May be automatically reduced if dataset is too small. Default: 5.
+#' @param hidden_layers Integer vector. Number of neurons in each hidden layer.
+#'   Length determines number of hidden layers. Default: 6 (single hidden layer with 6 neurons).
+#' @param threshold Numeric. Threshold for partial derivatives as stopping criteria.
+#'   Smaller values = more training iterations. Default: 0.01.
+#' @param stepmax Integer. Maximum number of training steps. Default: 1e+05.
+#' @param model_path Character. Optional file path (must end in .rds) to save
+#'   the trained model. Default: NULL (no saving).
+#' @param verbose Logical. Print training details and cross-validation results.
+#'   Default: TRUE.
 #'
 #' @return List containing:
 #'   \describe{
 #'     \item{model}{Trained neuralnet model object}
 #'     \item{features}{Character vector of metric names used as features}
-#'     \item{features_level}{Metric aggregation level ("landscape" or "class")}
+#'     \item{features_level}{Character. Metric aggregation level ("landscape" or "class")}
 #'     \item{scaling}{List with 'center' and 'scale' parameters for normalization}
 #'     \item{classes}{Character vector of class names in alphabetical order}
-#'     \item{performance}{Performance metrics from cross-validation (NULL if cv_method = "none")}
+#'     \item{performance}{List from evaluate_cv_performance() with confusion matrix,
+#'       accuracy, per-class metrics, and validation results. NULL if cv_method = "none".}
 #'   }
+#'
 #' @export
+#' @importFrom cli cli_abort cli_alert_warning
+#' @importFrom dplyr filter select any_of all_of
+#' @importFrom purrr pmap_lgl
+#' @importFrom neuralnet neuralnet
+#' @importFrom readr write_rds
 train_nn_metrics <- function(
   metrics,
   metrics_selected = NULL,
@@ -278,29 +295,43 @@ train_nn_metrics <- function(
 }
 
 
-#' Apply Neural Network (from neuralnet package) for Landscape Classification
+#' Apply Neural Network for Landscape Classification
 #'
 #' Applies a trained neural network model to classify new landscapes. The function
-#' automatically calculates the required landscape metrics needed by the model.
+#' automatically calculates the required landscape metrics needed by the model
+#' and scales them appropriately.
 #'
-#' @param landscapes landscape object, or list of landscape objects. Landscape(s) to classify.
-#' @param nn_model List. Neural network model from train_nn_metrics().
+#' @param landscapes Landscape object (single) or list of landscape objects to classify.
+#'   Landscapes must have valid raster data that can be analyzed by landscapemetrics.
+#' @param nn_model List. Trained model object returned from train_nn_metrics().
+#'   Must contain elements: model, scaling, classes, features, and features_level.
+#' @param return_performance Logical. If TRUE and landscapes contain known classes
+#'   (pattern attribute), calculate and return performance metrics. If FALSE or
+#'   classes unknown, only return predictions. Default: FALSE.
 #'
-#' @return When actual classes unavailable: tibble with columns:
+#' @return When return_performance = FALSE or actual classes unavailable:
+#'   Tibble with columns:
 #'   \describe{
 #'     \item{landscape_id}{Numeric landscape identifier}
 #'     \item{landscape_name}{Character landscape name (if available)}
 #'     \item{predicted_class}{Predicted landscape pattern}
-#'     \item{confidence}{Prediction confidence (max probability)}
-#'     \item{<class_name>}{Probability for each trained class}
+#'     \item{confidence}{Prediction confidence (maximum probability across classes)}
+#'     \item{<class_name>}{Probability for each class the model was trained on}
 #'   }
 #'
-#'   When actual classes available: List containing:
+#'   When return_performance = TRUE and actual classes available:
+#'   List containing:
 #'   \describe{
 #'     \item{predictions}{Tibble as above, plus actual_class column}
-#'     \item{performance}{Performance metrics from evaluate_cv_performance()}
+#'     \item{performance}{Performance metrics from evaluate_cv_performance():
+#'       confusion matrix, accuracy, and per-class recall/precision/F1}
 #'   }
+#'
 #' @export
+#' @importFrom cli cli_abort cli_alert_warning cli_warn
+#' @importFrom dplyr filter select any_of all_of relocate rename bind_cols
+#' @importFrom purrr pmap_lgl
+#' @importFrom tibble as_tibble
 apply_nn_metrics <- function(
   landscapes,
   nn_model,
