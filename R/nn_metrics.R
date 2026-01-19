@@ -199,7 +199,7 @@ train_nn_metrics <- function(
       cv_predictions[[fold]] <- predictions
       cv_probabilities[[fold]] <- probs
       cv_actual[[fold]] <- val_data$pattern
-      cv_landscape_ids[[fold]] <- which(val_indices)
+      cv_landscape_ids[[fold]] <- metrics_wide$landscape_id[val_indices]
     }
 
     # Evaluate cv performance -------------------------------------------------
