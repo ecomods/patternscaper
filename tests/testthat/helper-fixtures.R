@@ -66,3 +66,27 @@ create_test_landscape <- function(
   mat[na_indices] <- NA
   return(mat)
 }
+
+# Load pre-calculated metrics fixtures (speeds up tests)
+load_metrics_fixtures <- function() {
+  list(
+    # Minimal (6 landscapes, 2 classes) - for basic validation
+    minimal_landscapes = readRDS(test_path("fixtures/minimal_landscapes.rds")),
+    minimal_metrics = readRDS(test_path("fixtures/minimal_metrics.rds")),
+
+    # Small (30 landscapes, 3 classes) - for standard tests
+    small_landscapes = readRDS(test_path("fixtures/small_landscapes.rds")),
+    small_metrics_landscape = readRDS(test_path(
+      "fixtures/small_metrics_landscape.rds"
+    )),
+    small_metrics_class = readRDS(test_path(
+      "fixtures/small_metrics_class.rds"
+    )),
+
+    # Balanced (24 landscapes, 4 classes) - for CV and multi-class tests
+    balanced_landscapes = readRDS(test_path(
+      "fixtures/balanced_landscapes.rds"
+    )),
+    balanced_metrics = readRDS(test_path("fixtures/balanced_metrics.rds"))
+  )
+}
