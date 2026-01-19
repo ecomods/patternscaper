@@ -67,26 +67,38 @@ create_test_landscape <- function(
   return(mat)
 }
 
-# Load pre-calculated metrics fixtures (speeds up tests)
+# Load pre-calculated metrics fixtures and create landscapes on-demand
 load_metrics_fixtures <- function() {
   list(
-    # Minimal (6 landscapes, 2 classes) - for basic validation
-    minimal_landscapes = readRDS(test_path("fixtures/minimal_landscapes.rds")),
+    # Metrics (pre-calculated)
     minimal_metrics = readRDS(test_path("fixtures/minimal_metrics.rds")),
-
-    # Small (30 landscapes, 3 classes) - for standard tests
-    small_landscapes = readRDS(test_path("fixtures/small_landscapes.rds")),
     small_metrics_landscape = readRDS(test_path(
       "fixtures/small_metrics_landscape.rds"
     )),
     small_metrics_class = readRDS(test_path(
       "fixtures/small_metrics_class.rds"
     )),
-
-    # Balanced (24 landscapes, 4 classes) - for CV and multi-class tests
-    balanced_landscapes = readRDS(test_path(
-      "fixtures/balanced_landscapes.rds"
-    )),
     balanced_metrics = readRDS(test_path("fixtures/balanced_metrics.rds"))
+  )
+}
+
+# Create landscapes on-demand (cannot be saved as RDS due to terra pointers)
+create_fixture_landscapes <- function(
+  type = c("minimal", "small", "balanced")
+) {
+  type <- match.arg(type)
+
+  params <- readRDS(test_path(paste0(
+    "fixtures/",
+    type,
+    "_landscape_params.rds"
+  )))
+
+  # Set seed for reproducibility
+  set.seed(params$seed)
+
+  create_training_landscapes(
+    n = params$n,
+    patterns = params$patterns
   )
 }
