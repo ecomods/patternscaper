@@ -34,6 +34,41 @@ train_nn_metrics <- function(
   model_path = NULL,
   verbose = TRUE
 ) {
+  # Validate input parameters -------------------------------------------------
+  if (!is.logical(verbose) || length(verbose) != 1) {
+    cli::cli_abort("verbose must be a single logical value (TRUE or FALSE)")
+  }
+
+  if (
+    !is.numeric(hidden_layers) ||
+      any(hidden_layers < 1) ||
+      any(hidden_layers != floor(hidden_layers))
+  ) {
+    cli::cli_abort("hidden_layers must be positive integer(s)")
+  }
+
+  if (!is.numeric(threshold) || length(threshold) != 1 || threshold <= 0) {
+    cli::cli_abort("threshold must be a single positive numeric value")
+  }
+
+  if (
+    !is.numeric(stepmax) ||
+      length(stepmax) != 1 ||
+      stepmax < 1 ||
+      stepmax != floor(stepmax)
+  ) {
+    cli::cli_abort("stepmax must be a single positive integer")
+  }
+
+  if (!is.null(model_path)) {
+    if (!is.character(model_path) || length(model_path) != 1) {
+      cli::cli_abort("model_path must be a single character string")
+    }
+    if (!grepl("\\.rds$", model_path, ignore.case = TRUE)) {
+      cli::cli_abort("model_path must end with .rds extension")
+    }
+  }
+
   # Validate columns of metrics
   needed_columns <- c(
     "landscape_id",
