@@ -26,3 +26,4 @@ inst/extdata/landscape_class_metrics.csv
 # Ignore result files from Cluster
 inst/HPC/results_ecotones/*
 inst/HPC/results_ecotones/*
+docs/
