@@ -323,3 +323,348 @@ test_that("train_nn_metrics errors when all landscapes have NAs", {
     "No landscapes remaining after removing those with incomplete metrics"
   )
 })
+
+# apply_nn_metrics tests ---------------------------------------------------
+
+test_that("apply_nn_metrics validates return_performance parameter", {
+  # Train a simple model first
+  model <- train_nn_metrics(
+    fixtures$minimal_metrics,
+    cv_method = "none",
+    verbose = FALSE
+  )
+
+  # Create landscapes on-demand
+  minimal_landscapes <- create_fixture_landscapes("minimal")
+
+  expect_error(
+    apply_nn_metrics(
+      minimal_landscapes,
+      model,
+      return_performance = "yes"
+    ),
+    "return_performance must be a single logical value"
+  )
+
+  expect_error(
+    apply_nn_metrics(
+      minimal_landscapes,
+      model,
+      return_performance = c(TRUE, FALSE)
+    ),
+    "return_performance must be a single logical value"
+  )
+})
+
+test_that("apply_nn_metrics validates nn_model structure", {
+  # Create landscapes on-demand
+  minimal_landscapes <- create_fixture_landscapes("minimal")
+
+  expect_error(
+    apply_nn_metrics(
+      minimal_landscapes,
+      list(model = "not a model")
+    ),
+    "'nn_model' must be a trained model from train_nn_metrics()"
+  )
+
+  expect_error(
+    apply_nn_metrics(
+      minimal_landscapes,
+      "not a list"
+    ),
+    "'nn_model' must be a trained model from train_nn_metrics()"
+  )
+})
+
+test_that("apply_nn_metrics validates landscapes parameter", {
+  model <- train_nn_metrics(
+    fixtures$minimal_metrics,
+    cv_method = "none",
+    verbose = FALSE
+  )
+
+  expect_error(
+    apply_nn_metrics(
+      "not a landscape",
+      model
+    ),
+    "'landscapes' must be a landscape object or list of landscapes"
+  )
+
+  expect_error(
+    apply_nn_metrics(
+      data.frame(x = 1),
+      model
+    ),
+    "All elements must be landscape objects"
+  )
+})
+
+test_that("apply_nn_metrics works with single landscape", {
+  # Train model
+  model <- train_nn_metrics(
+    fixtures$minimal_metrics,
+    cv_method = "none",
+    verbose = FALSE
+  )
+
+  # Create landscapes on-demand
+  minimal_landscapes <- create_fixture_landscapes("minimal")
+
+  # Apply to single landscape
+  result <- apply_nn_metrics(
+    minimal_landscapes[[1]],
+    model,
+    return_performance = FALSE
+  )
+
+  # Check structure
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 1)
+  expect_true(all(
+    c("landscape_id", "predicted_class", "confidence") %in% names(result)
+  ))
+
+  # Check predictions
+  expect_true(result$predicted_class %in% model$classes)
+  expect_gte(result$confidence, 0)
+  expect_lte(result$confidence, 1)
+
+  # Should have probability columns for each class
+  expect_true(all(model$classes %in% names(result)))
+})
+
+test_that("apply_nn_metrics works with list of landscapes", {
+  # Train model
+  model <- train_nn_metrics(
+    fixtures$minimal_metrics,
+    cv_method = "none",
+    verbose = FALSE
+  )
+
+  # Create landscapes on-demand
+  minimal_landscapes <- create_fixture_landscapes("minimal")
+
+  # Apply to list of landscapes
+  result <- apply_nn_metrics(
+    minimal_landscapes,
+    model,
+    return_performance = FALSE
+  )
+
+  # Check structure
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), length(minimal_landscapes))
+
+  # All predictions should be valid classes
+  expect_true(all(result$predicted_class %in% model$classes))
+})
+
+test_that("apply_nn_metrics returns performance when requested", {
+  # Train model
+  model <- train_nn_metrics(
+    fixtures$minimal_metrics,
+    cv_method = "none",
+    verbose = FALSE
+  )
+
+  # Create landscapes on-demand
+  minimal_landscapes <- create_fixture_landscapes("minimal")
+
+  # Apply with performance evaluation
+  result <- apply_nn_metrics(
+    minimal_landscapes,
+    model,
+    return_performance = TRUE
+  )
+
+  # Should return a list with predictions and performance
+  expect_type(result, "list")
+  expect_named(result, c("predictions", "performance"))
+
+  # Check predictions
+  expect_s3_class(result$predictions, "tbl_df")
+  expect_true("actual_class" %in% names(result$predictions))
+
+  # Check performance
+  expect_type(result$performance, "list")
+  expect_true(all(
+    c("confusion_matrix", "accuracy", "per_class_metrics") %in%
+      names(result$performance)
+  ))
+
+  # Accuracy should be valid
+  expect_gte(result$performance$accuracy, 0)
+  expect_lte(result$performance$accuracy, 1)
+})
+
+test_that("apply_nn_metrics returns only predictions when classes unknown", {
+  # Train model
+  model <- train_nn_metrics(
+    fixtures$minimal_metrics,
+    cv_method = "none",
+    verbose = FALSE
+  )
+
+  # Create landscapes on-demand
+  minimal_landscapes <- create_fixture_landscapes("minimal")
+
+  # Remove pattern from landscapes to simulate unknown classes
+  for (i in seq_along(minimal_landscapes)) {
+    minimal_landscapes[[i]]$pattern <- "unclassified"
+  }
+
+  # Apply with return_performance = TRUE (should still return only predictions)
+  result <- apply_nn_metrics(
+    minimal_landscapes,
+    model,
+    return_performance = TRUE
+  )
+
+  # Should return tibble (not list) since no actual classes available
+  expect_s3_class(result, "tbl_df")
+})
+
+test_that("apply_nn_metrics warns about unknown classes", {
+  # Use balanced fixture which has more classes
+  if (length(unique(fixtures$balanced_metrics$pattern)) > 2) {
+    # Train on subset of classes
+    metrics_subset <- fixtures$balanced_metrics |>
+      dplyr::filter(pattern %in% c("spots", "labyrinth"))
+
+    model_subset <- train_nn_metrics(
+      metrics_subset,
+      cv_method = "none",
+      verbose = FALSE
+    )
+
+    # Create balanced landscapes
+    balanced_landscapes <- create_fixture_landscapes("balanced")
+
+    # Get landscapes with different class
+    other_class <- setdiff(
+      unique(fixtures$balanced_metrics$pattern),
+      c("spots", "labyrinth")
+    )[1]
+
+    landscapes_other <- balanced_landscapes[
+      sapply(balanced_landscapes, function(x) x$pattern == other_class)
+    ][1]
+
+    # Should warn about unknown class
+    expect_warning(
+      result <- apply_nn_metrics(
+        landscapes_other,
+        model_subset,
+        return_performance = TRUE
+      ),
+      "Input landscapes contain classes not seen during training"
+    )
+
+    # Should return only predictions (not performance)
+    expect_s3_class(result, "tbl_df")
+  }
+})
+
+test_that("apply_nn_metrics works with class-level metrics", {
+  # Filter to single class
+  metrics_class <- fixtures$small_metrics_class |>
+    dplyr::filter(class == 0)
+
+  # Train model
+  model <- train_nn_metrics(
+    metrics_class,
+    cv_method = "none",
+    verbose = FALSE
+  )
+
+  # Create small landscapes
+  small_landscapes <- create_fixture_landscapes("small")
+
+  # Apply model
+  result <- apply_nn_metrics(
+    small_landscapes[1:3],
+    model,
+    return_performance = FALSE
+  )
+
+  # Should work with class-level features
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 3)
+  expect_equal(model$features_level, "class")
+})
+
+test_that("apply_nn_metrics errors when metrics cannot be calculated", {
+  # Train model
+  model <- train_nn_metrics(
+    fixtures$minimal_metrics,
+    cv_method = "none",
+    verbose = FALSE
+  )
+
+  # Create minimal landscapes
+  minimal_landscapes <- create_fixture_landscapes("minimal")
+
+  # Create invalid landscape (empty raster)
+  invalid_landscape <- minimal_landscapes[[1]]
+  invalid_landscape$data <- terra::rast(matrix(NA, 10, 10))
+
+  # Should error when trying to calculate metrics
+  expect_error(
+    apply_nn_metrics(
+      invalid_landscape,
+      model,
+      return_performance = FALSE
+    )
+  )
+})
+
+test_that("apply_nn_metrics includes landscape_name when available", {
+  # Train model
+  model <- train_nn_metrics(
+    fixtures$minimal_metrics,
+    cv_method = "none",
+    verbose = FALSE
+  )
+
+  # Create minimal landscapes
+  minimal_landscapes <- create_fixture_landscapes("minimal")
+
+  # Apply model
+  result <- apply_nn_metrics(
+    minimal_landscapes,
+    model,
+    return_performance = FALSE
+  )
+
+  # Should include landscape_name if present
+  if ("name" %in% names(minimal_landscapes[[1]])) {
+    expect_true("landscape_name" %in% names(result))
+  }
+})
+
+test_that("apply_nn_metrics maintains landscape order", {
+  # Train model
+  model <- train_nn_metrics(
+    fixtures$minimal_metrics,
+    cv_method = "none",
+    verbose = FALSE
+  )
+
+  # Create minimal landscapes
+  minimal_landscapes <- create_fixture_landscapes("minimal")
+
+  # Apply model
+  result <- apply_nn_metrics(
+    minimal_landscapes,
+    model,
+    return_performance = FALSE
+  )
+
+  # landscape_id should match input order
+  expect_equal(
+    result$landscape_id,
+    seq_along(minimal_landscapes)
+  )
+})
