@@ -626,7 +626,10 @@ apply_nn_landscapes <- function(
       cli::cli_warn(
         "No valid actual classes found - returning predictions only"
       )
-      return(predictions)
+      return(list(
+        predictions = predictions,
+        performance = NULL
+      ))
     }
 
     # Check unknown classes only on valid rows
@@ -642,7 +645,10 @@ apply_nn_landscapes <- function(
         "i" = "Performance evaluation skipped - returning predictions only"
       ))
 
-      return(predictions) # Return all predictions, not just valid ones
+      return(list(
+        predictions = predictions,
+        performance = NULL
+      ))
     }
 
     # Evaluate only on valid rows
