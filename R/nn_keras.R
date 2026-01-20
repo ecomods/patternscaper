@@ -85,7 +85,7 @@ train_nn_landscapes <- function(
   })
 
   # Show distribution of landscape types
-  cat("Landscape type distribution:\n")
+  cli::cli_alert_info("Landscape type distribution:")
   print(table(training_labels))
 
   # Get the unique class names
@@ -221,7 +221,9 @@ train_nn_landscapes <- function(
         evaluation = evaluation
       )
 
-      cat("Fold", fold, "accuracy:", evaluation[["accuracy"]], "\n")
+      cli::cli_alert_success(
+        "Fold {fold} accuracy: {round(evaluation[['accuracy']], 4)}"
+      )
     }
 
     # Evaluate cv performance -------------------------------------------------
@@ -242,8 +244,13 @@ train_nn_landscapes <- function(
     # Header
     cli::cli_h2("Accuracy and loss across folds")
 
-    cat("Mean accuracy:", mean(accuracies), "±", sd(accuracies), "\n")
-    cat("Mean loss:", mean(losses), "±", sd(losses), "\n\n")
+    cli::cli_text(
+      "Mean accuracy: {round(mean(accuracies), 4)} ± {round(sd(accuracies), 4)}"
+    )
+    cli::cli_text(
+      "Mean loss: {round(mean(losses), 4)} ± {round(sd(losses), 4)}"
+    )
+    cli::cli_text("")
 
     # Build final model with all data
     final_model <- create_keras_model(
@@ -273,7 +280,9 @@ train_nn_landscapes <- function(
       )
   } else {
     # No cross-validation: simple train/validation split
-    cat("\nTraining with validation split (no cross-validation)...\n")
+    cli::cli_alert_info(
+      "Training with validation split (no cross-validation)..."
+    )
 
     final_model <- create_keras_model(
       architecture = architecture,
@@ -308,9 +317,9 @@ train_nn_landscapes <- function(
     )]
     val_loss <- history$metrics$val_loss[length(history$metrics$val_loss)]
 
-    cat("\nTraining Results (with validation split):\n")
-    cat("Final validation accuracy:", round(val_accuracy, 4), "\n")
-    cat("Final validation loss:", round(val_loss, 4), "\n")
+    cli::cli_h2("Training Results (with validation split)")
+    cli::cli_text("Final validation accuracy: {round(val_accuracy, 4)}")
+    cli::cli_text("Final validation loss: {round(val_loss, 4)}")
 
     # Create performance metrics structure
     performance <- list(
