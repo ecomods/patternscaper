@@ -22,7 +22,6 @@ library(colorspace)
 library(raster)
 # for reproducibility
 set.seed(321)
-#directory <- "inst/analyses/selfOrga_results_class/"
 directory <- "inst/analyses/pics_for_paper/"
 #use help function to plot different formats
 source("inst/analyses/functions/plot_different_formats.R")
@@ -315,7 +314,7 @@ validation_results_selforga_lm <- apply_nn_metrics(
 # accuracy of the neural net for the test data
 validation_results_selforga_lm$performance$accuracy
 
-#plot_classification_results(validation_results_selforga_lm)
+#show misclassified landscapes (if any)
 plot_classified_landscapes(
   validation_results_selforga_lm$predictions,
   test_landscapes_selforga,
@@ -343,25 +342,32 @@ model_selforga_pix <- train_nn_landscapes(
   dropout_rate = 0.4
 )
 
-#does not work!
-
 # check the model accuracy
 model_selforga_pix$performance$accuracy
 
-##################################################
-##################stopped here####################
-##################################################
+validation_results_selforga_pix <- apply_nn_landscapes(
+  landscapes = test_landscapes_selforga,
+  nn_model = model_selforga_pix,
+  return_performance = T
+)
 
+# accuracy of the neural net for the test data
+validation_results_selforga_pix$performance$accuracy
 
-#--------------------------------------------------------------------
-# Read in pictures and evaluate them
-#--------------------------------------------------------------------
+#show misclassified landscapes (if any)
+plot_classified_landscapes(
+  validation_results_selforga_pix$predictions,
+  test_landscapes_selforga,
+  only_misclassified = T
+)
 
-
-# -------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
 # Apply the model to pictures from
-# Meron et al. 2004: doi:10.1016/S0960-0779(03)00049-3
-# -------------------------------------------------------------------
+# Meron et al. 2004: doi: 10.1016/S0960-0779(03)00049-3 and
+# Mander et al. 2017: doi: 10.1098/rsos.160443
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
 pic_dir <- paste(directory, "Pics/", sep = "") #folder name
 pic_names <- list.files(pic_dir) #file names
 pic_names
@@ -469,22 +475,42 @@ for (i in 1:length(pic_names)) {
   pic_landscapes[[i]] <- test_raster_l
 }
 
-# apply the neural network model to the landscape object
+#-------------------------------------------------------------------
+# apply the neural network models to the landscape object
+#-------------------------------------------------------------------
+# a) metrics model
 pic_classification_metrics <- apply_nn_metrics(
   landscapes = pic_landscapes,
   nn_model = model_selforga_metrics
 )
-
 pic_classification_metrics
+# b) pixel model
+pic_classification_pix <- apply_nn_landscapes(
+  landscapes = pic_landscapes,
+  nn_model = model_selforga_pix
+)
+pic_classification_pix
 
-#show landscapes that are not classified correctly
+#-------------------------------------------------------------------
+# show landscapes and classification
+#-------------------------------------------------------------------
+# a) metrics model
 plot_classified_landscapes(
   classification = pic_classification_metrics,
   landscapes = pic_landscapes,
   only_misclassified = FALSE
 )
+# b) pixel model
+plot_classified_landscapes(
+  classification = pic_classification_pix,
+  landscapes = pic_landscapes,
+  only_misclassified = FALSE
+)
 
-#compare metrics for training and test data
+#-------------------------------------------------------------------
+# further analyses for metrics network
+#-------------------------------------------------------------------
+# compare metrics for training and test data
 training_class_metrics_for_plot <- landscape_class_metrics_selforga %>%
   filter(pattern == "gaps" | pattern == "labyrinth" | pattern == "spots")
 
@@ -498,7 +524,7 @@ pic_landscape_class_metrics_all <- calculate_landscape_metrics(
   landscapes = pic_landscapes,
   level = "class"
 )
-#filter only those metrics that match the best 10
+#filter only those metrics that match the best 10 (first and second set of pics)
 pic_subset1 <- pic_landscape_class_metrics_all %>%
   filter(metric %in% best_10_selforga & landscape_id %in% seq(1, 3)) %>%
   mutate(class = as.factor(class))
@@ -512,14 +538,14 @@ fig_metrics <- ptraining +
     data = pic_subset1,
     aes(x = pattern, y = value),
     size = 2,
-    color = "royalblue2",
+    color = "royalblue2", # first set of pictures
     shape = 15
   ) +
   geom_point(
     data = pic_subset2,
     aes(x = pattern, y = value),
     size = 2,
-    color = "purple3",
+    color = "purple3", # second set of pictures
     shape = 15
   ) +
   theme(legend.position = "none")
