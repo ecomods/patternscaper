@@ -8,10 +8,7 @@ devtools::load_all()
 # install.packages("keras3")
 # keras3::install_keras()
 
-# ----------------------------------------------------------------------------#
-# Prewarm Keras ---------------------------------------------------------------
-# ----------------------------------------------------------------------------#
-
+set_random_seed(123456)
 # Test Keras NN ---------------------------------------------------------
 # Increase number of landscapes for better training
 training_landscapes <- create_training_landscapes(
@@ -26,16 +23,37 @@ training_landscapes <- create_training_landscapes(
   ),
   width = 100,
   height = 100,
-  add_rotation = TRUE,
-  rotation_angles = c(0, 45, 90, 135, 180)
+  add_rotation = TRUE
 )
 
 # Train a model
 model <- train_nn_landscapes(
   landscapes = training_landscapes,
   cv_method = "k-fold",
-  cv_folds = 5,
-  epochs = 10
+  cv_folds = 5
+)
+
+
+# create test landscapes
+test_landscapes <- create_training_landscapes(
+  n = 20,
+  patterns = c(
+    "sharp",
+    "diffuse",
+    "clustered",
+    "fingers",
+    "bands",
+    "random"
+  ),
+  add_rotation = TRUE
+)
+
+
+# Apply the model to the test landscape(s)
+apply_nn_landscapes(
+  landscape = test_landscapes,
+  nn_model = model,
+  return_performance = TRUE
 )
 
 # Look at the model object

@@ -1,3 +1,44 @@
+#' Set Random Seeds for Reproducible Neural Network Training
+#'
+#' Sets random seeds for R and Keras to ensure reproducible results when
+#' training neural networks. This is a convenience wrapper around [base::set.seed()]
+#' and [keras3::set_random_seed()].
+#'
+#' @param seed Integer seed value.
+#'
+#' @details
+#' Neural network training involves randomness from:
+#' - R's RNG (data shuffling, CV fold creation)
+#' - Keras/TensorFlow's RNG (weight initialization, dropout)
+#'
+#' Both must be seeded for reproducible results. Note that minor variations
+#' may still occur across different hardware/software configurations.
+#'
+#' @return Invisibly returns `NULL`. Called for side effects.
+#'
+#' @export
+#' @examples
+#' \dontrun{
+#' # Ensure reproducible training
+#' set_random_seed(42)
+#' model <- train_nn_landscapes(landscapes, cv_folds = 5)
+#' }
+set_random_seed <- function(seed) {
+  if (!is.numeric(seed) || length(seed) != 1) {
+    cli::cli_abort("{.arg seed} must be a single integer value")
+  }
+
+  seed <- as.integer(seed)
+
+  # R's RNG
+  set.seed(seed)
+
+  # Keras3's RNG (includes TensorFlow backend)
+  keras3::set_random_seed(seed)
+
+  invisible(NULL)
+}
+
 #' Convert landscape metrics from long to wide format
 #'
 #' This function transforms landscape metrics from a long format to a wide
