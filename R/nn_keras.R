@@ -28,8 +28,11 @@
 #'   Common additions: "categorical_accuracy", "top_k_categorical_accuracy".
 #' @param callbacks List. Optional keras callbacks for advanced training control (default: NULL).
 #'   Examples: early stopping, learning rate scheduling, model checkpointing.
+#'   Note: Only applies to final model training. CV folds always use patience-based
+#'   early stopping if patience is specified.
 #' @param patience Integer. Number of epochs with no improvement after which training stops (default: 15).
-#'   Only used when callbacks is NULL. Set to NULL to disable early stopping.
+#'   Only used when callbacks is NULL. Applies to CV fold training and final model.
+#'   Set to NULL to disable early stopping entirely.
 #' @param verbose Integer. Verbosity mode: 0 = silent, 1 = progress bar, 2 = one line per epoch (default: 1).
 #'
 #' @return List. Trained CNN model and associated metadata.
