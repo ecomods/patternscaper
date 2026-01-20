@@ -25,15 +25,6 @@ training_landscapes <- create_training_landscapes(
   height = 100,
   add_rotation = TRUE
 )
-
-# Train a model
-model <- train_nn_landscapes(
-  landscapes = training_landscapes,
-  cv_method = "k-fold",
-  cv_folds = 5
-)
-
-
 # create test landscapes
 test_landscapes <- create_training_landscapes(
   n = 20,
@@ -48,10 +39,16 @@ test_landscapes <- create_training_landscapes(
   add_rotation = TRUE
 )
 
+# Train a model
+model <- train_nn_landscapes(
+  landscapes = training_landscapes,
+  cv_method = "k-fold",
+  cv_folds = 5
+)
 
-# Apply the model to the test landscape(s)
-apply_nn_landscapes(
-  landscape = test_landscapes,
+# Apply trained model to test landscapes
+validation_results <- apply_nn_landscapes(
+  landscapes = test_landscapes,
   nn_model = model,
   return_performance = TRUE
 )
