@@ -623,24 +623,25 @@ apply_nn_landscapes <- function(
     is.na(landscape_pattern) | landscape_pattern == "unclassified"
   )
 
-  # Add actual classes if available
-  if (has_actual_classes) {
-    # Check for mixed scenario
-    valid_mask <- !is.na(landscape_pattern) &
-      landscape_pattern != "unclassified"
-    n_valid <- sum(valid_mask)
-    n_total <- length(landscape_pattern)
+  # When return_performance is TRUE, always add actual_class column
+  if (return_performance) {
+    predictions$actual_class <- landscape_pattern
 
-    if (n_valid < n_total) {
-      if (verbose) {
-        cli::cli_alert_info(
-          "Evaluating performance on {n_valid}/{n_total} landscapes with known classes"
-        )
+    # Check for mixed scenario (some valid, some invalid actual classes)
+    if (has_actual_classes) {
+      valid_mask <- !is.na(landscape_pattern) &
+        landscape_pattern != "unclassified"
+      n_valid <- sum(valid_mask)
+      n_total <- length(landscape_pattern)
+
+      if (n_valid < n_total) {
+        if (verbose) {
+          cli::cli_alert_info(
+            "Evaluating performance on {n_valid}/{n_total} landscapes with known classes"
+          )
+        }
       }
     }
-
-    # Add actual classes column (all rows for consistent structure)
-    predictions$actual_class <- landscape_pattern
   }
 
   # Reorder columns: landscape info, then actual (if present), then predicted
@@ -709,14 +710,30 @@ apply_nn_landscapes <- function(
       return_predictions = FALSE
     )
 
-    # Return ALL predictions, but performance only on valid subset
+    # Return all predictions, but performance only on valid subset
     return(list(
       predictions = predictions,
       performance = performance
     ))
   } else {
-    # No actual classes or performance not requested - just return predictions
-    return(predictions)
+    # No actual classes or performance not requested
+    if (return_performance) {
+      # Check if user requested performance but we have no valid classes
+      if (!has_actual_classes) {
+        cli::cli_warn(
+          "No valid actual classes found - returning predictions only"
+        )
+      }
+
+      # Return a list for consistency
+      return(list(
+        predictions = predictions,
+        performance = NULL
+      ))
+    } else {
+      # Just predictions requested
+      return(predictions)
+    }
   }
 }
 
