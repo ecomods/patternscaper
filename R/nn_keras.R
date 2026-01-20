@@ -611,13 +611,6 @@ apply_nn_landscapes <- function(
   predicted_class <- colnames(pred)[max_col]
   predictions$predicted_class <- predicted_class
 
-  # Reorder the columns
-  predictions <- predictions |>
-    dplyr::relocate(c(
-      predicted_class,
-      confidence
-    ))
-
   # Add landscape information
   predictions$landscape_id <- seq_len(nrow(predictions))
 
