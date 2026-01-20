@@ -591,6 +591,19 @@ apply_nn_landscapes <- function(
 
   # Add actual classes if available
   if (has_actual_classes) {
+    # Check for mixed scenario
+    valid_mask <- !is.na(landscape_pattern) &
+      landscape_pattern != "unclassified"
+    n_valid <- sum(valid_mask)
+    n_total <- length(landscape_pattern)
+
+    if (n_valid < n_total) {
+      cli::cli_alert_info(
+        "Evaluating performance on {n_valid}/{n_total} landscapes with known classes"
+      )
+    }
+
+    # Add actual classes column (all rows for consistent structure)
     predictions$actual_class <- landscape_pattern
   }
 
@@ -605,10 +618,20 @@ apply_nn_landscapes <- function(
 
   # Evaluate performance if actual classes are available and requested----------
   if (has_actual_classes & return_performance) {
-    # Check if actual classes match model's trained classes
-    unique_actual <- unique(landscape_pattern[
-      !is.na(landscape_pattern) & landscape_pattern != "unclassified"
-    ])
+    # Filter to only valid rows for evaluation
+    valid_mask <- !is.na(predictions$actual_class) &
+      predictions$actual_class != "unclassified"
+
+    if (!any(valid_mask)) {
+      cli::cli_warn(
+        "No valid actual classes found - returning predictions only"
+      )
+      return(predictions)
+    }
+
+    # Check unknown classes only on valid rows
+    valid_predictions <- predictions[valid_mask, ]
+    unique_actual <- unique(valid_predictions$actual_class)
     unknown_classes <- setdiff(unique_actual, class_names)
 
     if (length(unknown_classes) > 0) {
@@ -619,18 +642,17 @@ apply_nn_landscapes <- function(
         "i" = "Performance evaluation skipped - returning predictions only"
       ))
 
-      return(predictions)
+      return(predictions) # Return all predictions, not just valid ones
     }
 
-    # All classes are valid - proceed with performance evaluation
-    # Create single-fold structure for evaluate_cv_performance
-    cv_predictions <- list(predictions$predicted_class)
+    # Evaluate only on valid rows
+    cv_predictions <- list(valid_predictions$predicted_class)
     cv_probabilities <- list(as.matrix(
-      predictions |>
+      valid_predictions |>
         dplyr::select(dplyr::all_of(class_names))
     ))
-    cv_actual <- list(predictions$actual_class)
-    cv_landscape_ids <- list(predictions$landscape_id)
+    cv_actual <- list(valid_predictions$actual_class)
+    cv_landscape_ids <- list(valid_predictions$landscape_id)
 
     # Evaluate performance using same function as training
     performance <- evaluate_cv_performance(
@@ -645,6 +667,7 @@ apply_nn_landscapes <- function(
       return_predictions = FALSE
     )
 
+    # Return ALL predictions, but performance only on valid subset
     return(list(
       predictions = predictions,
       performance = performance
