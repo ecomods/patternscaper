@@ -156,3 +156,242 @@ test_that("train_nn_landscapes respects patience parameter", {
 
   expect_equal(length(model$history$metrics$loss), 5)
 })
+
+# Apply_nn_landscapes test -------------------------------------------------
+
+test_that("apply_nn_landscapes validates model structure", {
+  expect_error(
+    apply_nn_landscapes(
+      landscapes = list(),
+      nn_model = list(wrong = "structure")
+    ),
+    "must be a trained model from train_nn_landscapes"
+  )
+})
+
+test_that("apply_nn_landscapes validates landscapes input", {
+  skip_if_not_installed("keras3")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+  model <- train_nn_landscapes(
+    landscapes,
+    cv_method = "none",
+    epochs = 2,
+    verbose = FALSE
+  )
+
+  expect_error(
+    apply_nn_landscapes(
+      landscapes = "not_a_landscape",
+      nn_model = model
+    ),
+    "must be a landscape object or list"
+  )
+
+  expect_error(
+    apply_nn_landscapes(
+      landscapes = list("not", "landscapes"),
+      nn_model = model
+    ),
+    "All elements must be landscape objects"
+  )
+})
+
+test_that("apply_nn_landscapes returns predictions for single landscape", {
+  skip_if_not_installed("keras3")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  model <- train_nn_landscapes(
+    landscapes,
+    cv_method = "none",
+    epochs = 2,
+    verbose = FALSE
+  )
+
+  # Single landscape
+  result <- apply_nn_landscapes(
+    landscapes = landscapes[[1]],
+    nn_model = model
+  )
+
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 1)
+  expect_named(
+    result,
+    c(
+      "landscape_id",
+      "landscape_name",
+      "actual_class",
+      "predicted_class",
+      "confidence",
+      "diffuse",
+      "random",
+      "sharp"
+    )
+  )
+})
+
+test_that("apply_nn_landscapes returns predictions for multiple landscapes", {
+  skip_if_not_installed("keras3")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  model <- train_nn_landscapes(
+    landscapes,
+    cv_method = "none",
+    epochs = 2,
+    verbose = FALSE
+  )
+
+  result <- apply_nn_landscapes(
+    landscapes = landscapes[1:5],
+    nn_model = model
+  )
+
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 5)
+  expect_true(all(result$confidence >= 0 & result$confidence <= 1))
+})
+
+test_that("apply_nn_landscapes returns performance when requested", {
+  skip_if_not_installed("keras3")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  model <- train_nn_landscapes(
+    landscapes,
+    cv_method = "none",
+    epochs = 2,
+    verbose = FALSE
+  )
+
+  result <- apply_nn_landscapes(
+    landscapes = landscapes,
+    nn_model = model,
+    return_performance = TRUE,
+    verbose = FALSE
+  )
+
+  expect_type(result, "list")
+  expect_named(result, c("predictions", "performance"))
+  expect_s3_class(result$predictions, "tbl_df")
+  expect_true("actual_class" %in% names(result$predictions))
+  expect_s3_class(result$performance$confusion_matrix, "table")
+})
+
+test_that("apply_nn_landscapes handles mixed valid/NA classes", {
+  skip_if_not_installed("keras3")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  model <- train_nn_landscapes(
+    landscapes,
+    cv_method = "none",
+    epochs = 2,
+    verbose = FALSE
+  )
+
+  # Set some to NA
+  test_landscapes <- landscapes[1:6]
+  test_landscapes[[2]]$pattern <- NA
+  test_landscapes[[4]]$pattern <- "unclassified"
+
+  result <- apply_nn_landscapes(
+    landscapes = test_landscapes,
+    nn_model = model,
+    return_performance = TRUE,
+    verbose = FALSE
+  )
+
+  # Should return list structure with NULL performance or valid performance
+  expect_type(result, "list")
+  expect_equal(nrow(result$predictions), 6)
+  # Performance should only be on 4 valid landscapes
+  if (!is.null(result$performance)) {
+    expect_true(sum(result$performance$class_counts, na.rm = TRUE) <= 4)
+  }
+})
+
+test_that("apply_nn_landscapes returns NULL performance for all invalid classes", {
+  skip_if_not_installed("keras3")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  model <- train_nn_landscapes(
+    landscapes,
+    cv_method = "none",
+    epochs = 2,
+    verbose = FALSE
+  )
+
+  # All to NA classes
+  test_landscapes <- landscapes[1:3]
+  for (i in 1:3) {
+    test_landscapes[[i]]$pattern <- NA
+  }
+
+  expect_warning(
+    result <- apply_nn_landscapes(
+      landscapes = test_landscapes,
+      nn_model = model,
+      return_performance = TRUE
+    ),
+    "No valid actual classes"
+  )
+
+  expect_type(result, "list")
+  expect_null(result$performance)
+  expect_equal(nrow(result$predictions), 3)
+})
+
+test_that("apply_nn_landscapes warns about unknown classes", {
+  skip_if_not_installed("keras3")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  model <- train_nn_landscapes(
+    landscapes,
+    cv_method = "none",
+    epochs = 2,
+    verbose = FALSE
+  )
+
+  # Add unknown class
+  test_landscapes <- landscapes[1:3]
+  test_landscapes[[2]]$pattern <- "unknown_pattern"
+
+  expect_warning(
+    result <- apply_nn_landscapes(
+      landscapes = test_landscapes,
+      nn_model = model,
+      return_performance = TRUE
+    ),
+    "classes not seen during training"
+  )
+
+  expect_type(result, "list")
+  expect_null(result$performance)
+})
+
+test_that("apply_nn_landscapes handles resizing correctly", {
+  skip_if_not_installed("keras3")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  model <- train_nn_landscapes(
+    landscapes,
+    cv_method = "none",
+    epochs = 2,
+    verbose = FALSE
+  )
+
+  # Create smaller landscape
+  small_landscape <- create_landscape(
+    pattern = "sharp",
+    width = 25,
+    height = 25
+  )
+
+  result <- apply_nn_landscapes(
+    landscapes = small_landscape,
+    nn_model = model,
+    verbose = FALSE
+  )
+
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 1)
+})
