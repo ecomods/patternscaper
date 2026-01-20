@@ -7,7 +7,7 @@
 #' @param landscapes List. List of landscape objects created by `create_landscape()` or `create_training_landscapes()`.
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #' @param cv_folds Integer. Number of cross-validation folds when cv_method="k-fold" (default: 5).
-#' @param epochs Integer. Number of training epochs (default: 20).
+#' @param epochs Integer. Number of training epochs (default: 50).
 #' @param batch_size Integer. Batch size for training (default: 16).
 #' @param validation_split Numeric. Proportion of data to use for validation when cv_method="none" (default: 0.2).
 #' @param learning_rate Numeric. Learning rate for Adam optimizer (default: 0.001).
@@ -23,7 +23,7 @@
 #'   Common additions: "categorical_accuracy", "top_k_categorical_accuracy".
 #' @param callbacks List. Optional keras callbacks for advanced training control (default: NULL).
 #'   Examples: early stopping, learning rate scheduling, model checkpointing.
-#' @param patience Integer. Number of epochs with no improvement after which training stops (default: 10).
+#' @param patience Integer. Number of epochs with no improvement after which training stops (default: 15).
 #'   Only used when callbacks is NULL. Set to NULL to disable early stopping.
 #' @param verbose Integer. Verbosity mode: 0 = silent, 1 = progress bar, 2 = one line per epoch (default: 1).
 #'
@@ -33,7 +33,7 @@ train_nn_landscapes <- function(
   landscapes,
   cv_method = "k-fold",
   cv_folds = 5,
-  epochs = 20,
+  epochs = 50,
   batch_size = 16,
   validation_split = 0.2,
   learning_rate = 0.001,
@@ -45,7 +45,7 @@ train_nn_landscapes <- function(
   optimizer = "adam",
   metrics = c("accuracy"),
   callbacks = NULL,
-  patience = 10,
+  patience = 15,
   verbose = 1
 ) {
   # Validate cv_method parameter
