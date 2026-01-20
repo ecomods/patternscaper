@@ -187,7 +187,19 @@ train_nn_landscapes <- function(
         optimizer = optimizer,
         metrics = metrics
       )
-      # Train the fold model
+
+      # Create fold-specific callbacks
+      fold_callbacks <- NULL
+      if (!is.null(patience)) {
+        fold_callbacks <- list(
+          keras3::callback_early_stopping(
+            monitor = "val_loss",
+            patience = patience,
+            restore_best_weights = TRUE
+          )
+        )
+      }
+
       fold_model |>
         keras3::fit(
           x = x_train,
@@ -195,7 +207,7 @@ train_nn_landscapes <- function(
           epochs = epochs,
           batch_size = batch_size,
           validation_data = list(x_val, y_val),
-          callbacks = callbacks,
+          callbacks = fold_callbacks, # ← Fresh callback each fold
           verbose = verbose
         )
 
