@@ -255,7 +255,7 @@ train_nn_landscapes <- function(
     )
     # Compile the fold model
     final_model <- compile_keras_model(
-      model = fold_model,
+      model = final_model,
       learning_rate = learning_rate,
       loss = loss,
       optimizer = optimizer,
