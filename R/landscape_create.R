@@ -288,10 +288,10 @@ create_training_landscapes <- function(
       invert_landscape = c(TRUE)
     ),
     labyrinth = list(
-      frequency = c(2, 6),
-      veg_threshold = c(0.4, 0.5),
-      band_fuzziness = c(0, 0.1),
-      octaves = c(1, 6)
+      frequency = c(2.5, 3.5),
+      veg_threshold = c(0.45, 0.55),
+      band_fuzziness = c(0.06, 0.25),
+      octaves = c(2,4)
     )
   )
 

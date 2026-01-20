@@ -5,18 +5,25 @@
 #' @param width Integer. Number of columns in the landscape (default: 100).
 #' @param height Integer. Number of rows in the landscape (default: 100).
 #' @param frequency Numeric. Controls the spatial scale of the noise pattern:
-#'    Lower values produce broad, smooth bands, higher values produce finer, maze-like structures (default: 5).
+#'    Lower values produce broad, smooth bands, higher values produce finer, maze-like structures (default: 3).
 #' @param veg_threshold Numeric between 0 and 1. Defines the cutoff value that separates vegetated
 #'    from non-vegetated cells. Values above the threshold become vegetation.
 #'    Adjusting this changes the overall proportion of vegetated area (default: 0.5).
-#' @param band_fuzziness Numeric between 0 and 0.5. Controls the width of the
-#'    probabilistic transition zone at vegetation boundaries. At 0, boundaries
-#'    are sharp and crisp. Values of 0.1-0.2 create natural-looking irregular
-#'    edges. Values above 0.3 produce increasingly random patterns as the fuzzy
-#'    zone becomes wider than the structured features (default: 0.1).
-#' @param octaves Integer >= 1. The number of layers of noise combined to
-#'    generate the pattern. A single octave gives smooth, simple structures.
-#'    More octaves add detail and complexity, similar to fractal patterns (default: 6).
+#' @param band_fuzziness Numeric between 0 and 0.5. Controls the amount of
+#'    geometric edge roughness applied *after* thresholding. At 0, vegetation 
+#'    boundaries are sharp and fully deterministic. Small values (≈ 0.05–0.1) 
+#'    introduce slight, irregular boundary perturbations without changing the 
+#'    overall topology of the pattern. Larger values progressively erode vegetation 
+#'    edges and can fragmet bands if set too high. This parameter affects boundary 
+#'    geometry only and does not influence the global structure or connectivity 
+#'    of the labyrinth. (default: 0.08)
+#' @param octaves Integer >= 1. Number of noise layers (octaves) combined to
+#'    generate the underlying continuous field. A single octave produces very smooth, 
+#'    large-scale bands. Using two to three octaves adds limited fine structure while preserving
+#'    a dominant wavelength, which is characteristic of labyrinth (Turing-like)
+#'    patterns. Higher values introduce fractal detail at smaller scales and can obscure
+#'    the banded structure, making patterns less clearly classifiable as
+#'    labyrinths. (default: 2).
 #'
 #' @return A landscape object with pattern "labyrinth" containing the generated landscape data and parameters.
 #'
@@ -49,12 +56,6 @@
 #'   band_fuzziness = 0.05
 #' )
 #'
-#' # With rotation
-#' labyrinth_rotated <- create_landscape_labyrinth(
-#'   frequency = 5,
-#'   veg_threshold = 0.6
-#' )
-#'
 #' # Adjust vegetation coverage
 #' labyrinth_sparse <- create_landscape_labyrinth(
 #'   veg_threshold = 0.6  # Less vegetation
@@ -66,14 +67,13 @@
 #'
 #' @keywords internal
 #' @importFrom ambient long_grid gen_perlin
-#' @importFrom stats rbinom
 create_landscape_labyrinth <- function(
   width = 100,
   height = 100,
-  frequency = 5,
+  frequency = 3,
   veg_threshold = 0.5,
-  band_fuzziness = 0.1,
-  octaves = 6
+  band_fuzziness = 0.08,
+  octaves = 2
 ) {
   # Validate common parameters
   validate_dimensions(width = width, height = height)
@@ -143,39 +143,30 @@ create_landscape_labyrinth <- function(
   noise_normalized <- (grid$noise - min(grid$noise)) /
     (max(grid$noise) - min(grid$noise))
 
+
   # Apply hard threshold to create base binary pattern
   # Cells above veg_threshold become vegetation (1), below become bare ground (0)
-  landscape_vec <- ifelse(noise_normalized > veg_threshold, 1, 0)
-
-  # Add probabilistic fuzziness around veg_threshold boundary
-  # Identifies cells within the fuzzy transition zone
-  in_fuzzy_zone <- abs(noise_normalized - veg_threshold) < band_fuzziness
-
-  # Calculate probability of vegetation for cells in fuzzy zone
-  # Linear transition from 0 to 1 across the fuzzy band width
-  transition_prob <- (noise_normalized - (veg_threshold - band_fuzziness)) /
-    (2 * band_fuzziness)
-  transition_prob <- pmin(pmax(transition_prob, 0), 1) # Clamp to [0, 1]
-
-  # Apply probabilistic assignment only in fuzzy boundary zone
-  # Adds natural irregularity to vegetation edges
-  landscape_vec[in_fuzzy_zone] <- stats::rbinom(
-    n = sum(in_fuzzy_zone),
-    size = 1,
-    prob = transition_prob[in_fuzzy_zone]
-  )
-
-  # Convert vector back to matrix format
   mat <- matrix(
-    landscape_vec,
+    noise_normalized > veg_threshold,
     nrow = height,
-    ncol = width,
     byrow = TRUE
   )
 
+  # Controlled edge roughness only
+  if (band_fuzziness > 0) {
+    edge <- mat & stats::filter(
+      !mat,
+      matrix(1, 3, 3),
+      circular = TRUE
+    ) > 0
+
+    jitter <- runif(sum(edge)) < band_fuzziness
+    mat[which(edge)[jitter]] <- FALSE
+  }
+
   # Create and return landscape object
   landscape(
-    data = mat,
+    data = mat * 1L,
     pattern = "labyrinth",
     params = list(
       width = width,
