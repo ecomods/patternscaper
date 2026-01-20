@@ -6,12 +6,15 @@
 #'
 #' @param landscapes List. List of landscape objects created by `create_landscape()` or `create_training_landscapes()`.
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
-#'   Note: Method may be automatically downgraded if dataset is too small for requested method.
+#'   \itemize{
+#'     \item "k-fold" or "loo": Performs cross-validation and returns performance metrics
+#'     \item "none": Trains on ALL provided data without validation. Use apply_nn_landscapes()
+#'           with a separate test set to evaluate performance.
+#'   }
 #' @param cv_folds Integer. Number of cross-validation folds when cv_method="k-fold" (default: 5).
 #'   Note: May be automatically reduced to ensure adequate samples per fold.
 #' @param epochs Integer. Number of training epochs (default: 50).
 #' @param batch_size Integer. Batch size for training (default: 16).
-#' @param validation_split Numeric. Proportion of data to use for validation when cv_method="none" (default: 0.2).
 #' @param learning_rate Numeric. Learning rate for Adam optimizer (default: 0.001).
 #' @param model_path Character. Path to save model (default: NULL means model is not saved).
 #' @param architecture Character. CNN architecture: "multiscale" (default).
@@ -37,7 +40,6 @@ train_nn_landscapes <- function(
   cv_folds = 5,
   epochs = 50,
   batch_size = 16,
-  validation_split = 0.2,
   learning_rate = 0.001,
   architecture = "multiscale",
   dropout_rate = 0.3,
@@ -276,9 +278,9 @@ train_nn_landscapes <- function(
         verbose = verbose
       )
   } else {
-    # No cross-validation: simple train/validation split
+    # No cross-validation: train on ALL data
     cli::cli_alert_info(
-      "Training with validation split (no cross-validation)..."
+      "Training on all data (no validation split)..."
     )
 
     final_model <- create_keras_model(
@@ -288,7 +290,6 @@ train_nn_landscapes <- function(
       dropout_rate = dropout_rate,
       dense_units = dense_units
     )
-
     final_model <- compile_keras_model(
       model = final_model,
       learning_rate = learning_rate,
@@ -303,34 +304,15 @@ train_nn_landscapes <- function(
         y = y_data,
         epochs = epochs,
         batch_size = batch_size,
-        validation_split = validation_split,
         callbacks = callbacks,
         verbose = verbose
       )
 
-    # Get validation metrics from history
-    val_accuracy <- history$metrics$val_accuracy[length(
-      history$metrics$val_accuracy
-    )]
-    val_loss <- history$metrics$val_loss[length(history$metrics$val_loss)]
-
-    cli::cli_h2("Training Results (with validation split)")
-    cli::cli_text("Final validation accuracy: {round(val_accuracy, 4)}")
-    cli::cli_text("Final validation loss: {round(val_loss, 4)}")
-
-    # Create performance metrics structure
+    # No validation metrics available
     performance <- list(
-      accuracy = val_accuracy,
-      loss = val_loss,
       cv_method = "none",
-      validation_split = validation_split
+      message = "Model trained on all data. Use apply_nn_landscapes() to evaluate on test set."
     )
-
-    # Create empty structures for consistency with CV path
-    cv_probabilities <- list()
-    cv_landscape_ids <- list()
-    cv_actual <- list()
-    cv_predictions <- list()
   }
 
   # Prepare return object
