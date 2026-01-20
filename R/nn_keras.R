@@ -100,24 +100,6 @@ train_nn_landscapes <- function(
   x_data <- abind::abind(training_arrays, along = 0)
   input_shape <- c(dim(x_data)[2], dim(x_data)[3], dim(x_data)[4])
 
-  # Create the model with selected architecture
-  model <- create_keras_model(
-    architecture = architecture,
-    input_shape = input_shape,
-    n_classes = n_classes,
-    dropout_rate = dropout_rate,
-    dense_units = dense_units
-  )
-
-  # Compile model
-  model <- compile_keras_model(
-    model = model,
-    learning_rate = learning_rate,
-    loss = loss,
-    optimizer = optimizer,
-    metrics = metrics
-  )
-
   # Setup callbacks ---------------------------------------------------------
   # If user didn't provide callbacks and patience is specified, add early stopping
   if (is.null(callbacks) && !is.null(patience)) {
