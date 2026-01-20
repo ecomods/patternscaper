@@ -448,6 +448,11 @@ train_nn_landscapes <- function(
 #' model's expected dimensions.
 #'
 #' @param landscapes landscape object, or list of landscape objects. Landscape(s) to classify.
+#'   Landscapes will be automatically resized to match the model's input dimensions using
+#'   nearest neighbor interpolation, which preserves categorical cell values.
+#'   **Note**: Input landscapes must contain categorical/discrete habitat data (e.g., 0/1 for
+#'   two habitat types, or 0/1/2 for three types). Continuous data (e.g., elevation,
+#'   gradients) is not supported.
 #' @param nn_model List. CNN model from train_nn_landscapes().
 #' @param return_performance Logical. Whether to return performance metrics when actual classes are available (default: FALSE).
 #' @param verbose Logical. Show informational messages and performance summaries (default: TRUE).
