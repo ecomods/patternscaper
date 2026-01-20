@@ -122,6 +122,24 @@ train_nn_landscapes <- function(
     cli::cli_abort("learning_rate must be between 0 and 1")
   }
 
+  # Validate and normalize model_path if provided
+  if (!is.null(model_path)) {
+    if (!stringr::str_detect(model_path, "\\.keras$")) {
+      cli::cli_alert_info(
+        "model_path should end with .keras (current: {model_path}). Automatically adding .keras extension."
+      )
+      model_path <- paste0(model_path, ".keras")
+    }
+
+    # Check if directory exists and is writable
+    model_dir <- dirname(model_path)
+    if (!dir.exists(model_dir)) {
+      cli::cli_abort(
+        "Directory for model_path does not exist: {model_dir}. Please create it first."
+      )
+    }
+  }
+
   # Check if landscapes is empty
   if (length(landscapes) == 0) {
     cli::cli_abort("landscapes must contain at least one landscape object")
@@ -411,25 +429,12 @@ train_nn_landscapes <- function(
 
   # Save model if requested
   if (!is.null(model_path)) {
-    # check if the model path ends with .keras. Otherwise replace/add .keras file
-    # ending and warn the user
-    keras_file_ending <- stringr::str_detect(model_path, "\\.keras$")
-
-    if (!keras_file_ending) {
-      cli::cli_alert_info(
-        "model_path should end with .keras (current: {model_path}). Automatically adding .keras file ending."
-      )
-      model_path <- paste0(model_path, ".keras")
-    }
-
     keras3::save_model(final_model, model_path)
+
     # Save metadata separately
     metadata_path <- gsub("\\.keras$", "_metadata.rds", model_path)
-    if (model_path == metadata_path) {
-      metadata_path <- paste0(model_path, "_metadata.rds")
-    }
     metadata <- result
-    metadata$model <- NULL # Remove model from metadata to avoid duplication
+    metadata$model <- NULL
     readr::write_rds(metadata, metadata_path)
   }
 
