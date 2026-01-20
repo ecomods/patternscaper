@@ -314,7 +314,10 @@ train_nn_landscapes <- function(
     # No validation metrics available
     performance <- list(
       cv_method = "none",
-      message = "Model trained on all data. Use apply_nn_landscapes() to evaluate on test set."
+      n_training_samples = nrow(x_data),
+      n_classes = n_classes,
+      class_distribution = table(training_labels),
+      note = "Model trained on all data. Use apply_nn_landscapes() to evaluate on test set."
     )
   }
 
