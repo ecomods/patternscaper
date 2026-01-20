@@ -123,7 +123,7 @@ train_nn_landscapes <- function(
   if (is.null(callbacks) && !is.null(patience)) {
     callbacks <- list(
       keras3::callback_early_stopping(
-        monitor = "loss",
+        monitor = "val_loss",
         patience = patience,
         restore_best_weights = TRUE
       )
