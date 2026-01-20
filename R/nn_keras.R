@@ -518,19 +518,49 @@ apply_nn_landscapes <- function(
   })
 
   # Convert all landscapes to arrays, resizing if needed
-  landscape_arrays <- lapply(landscapes, function(l) {
+  # First, check which ones need resizing
+  resize_info <- lapply(landscapes, function(l) {
     landscape_data <- l$data
-
-    # Check current dimensions
     current_height <- terra::nrow(landscape_data)
     current_width <- terra::ncol(landscape_data)
+    needs_resize <- current_height != expected_height ||
+      current_width != expected_width
 
-    # Resize if dimensions don't match
-    if (current_height != expected_height || current_width != expected_width) {
+    list(
+      needs_resize = needs_resize,
+      current_height = current_height,
+      current_width = current_width
+    )
+  })
+
+  # Print batched resize message
+  needs_resize <- sapply(resize_info, function(x) x$needs_resize)
+  if (any(needs_resize)) {
+    n_resize <- sum(needs_resize)
+
+    # Get unique dimension pairs
+    unique_dims <- unique(lapply(resize_info[needs_resize], function(x) {
+      c(x$current_height, x$current_width)
+    }))
+
+    if (length(unique_dims) == 1) {
+      dims <- unique_dims[[1]]
       cli::cli_alert_info(
-        "Resizing landscape from {current_height}x{current_width} to {expected_height}x{expected_width}"
+        "Resizing {n_resize} landscape{?s} from {dims[1]}x{dims[2]} to {expected_height}x{expected_width}"
       )
+    } else {
+      cli::cli_alert_info(
+        "Resizing {n_resize} landscape{?s} to {expected_height}x{expected_width}"
+      )
+    }
+  }
 
+  # Now do the actual conversion/resizing
+  landscape_arrays <- lapply(seq_along(landscapes), function(i) {
+    l <- landscapes[[i]]
+    landscape_data <- l$data
+
+    if (resize_info[[i]]$needs_resize) {
       # Create template raster with target dimensions
       template <- terra::rast(
         nrows = expected_height,
