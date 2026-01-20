@@ -33,7 +33,9 @@
 #' @param patience Integer. Number of epochs with no improvement after which training stops (default: 15).
 #'   Only used when callbacks is NULL. Applies to CV fold training and final model.
 #'   Set to NULL to disable early stopping entirely.
-#' @param verbose Integer. Verbosity mode: 0 = silent, 1 = progress bar, 2 = one line per epoch (default: 1).
+#' @param verbose Logical. Show training progress and performance summaries (default: TRUE).
+#'   When TRUE, displays progress bar for final model training and prints performance metrics.
+#'   When FALSE, runs silently. CV fold training always runs silently to reduce output clutter.
 #'
 #' @return List. Trained CNN model and associated metadata.
 #' @export
@@ -53,8 +55,12 @@ train_nn_landscapes <- function(
   metrics = c("accuracy"),
   callbacks = NULL,
   patience = 15,
-  verbose = 1
+  verbose = TRUE # ← Change from 1 to TRUE
 ) {
+  # Configure keras verbosity levels
+  fold_verbose <- 0 # Always silent for CV folds to reduce output
+  final_verbose <- if (verbose) 1 else 0
+
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold", "loo")) {
@@ -137,6 +143,7 @@ train_nn_landscapes <- function(
   # Check cross-validation method and parameters -------------------------------
   # Run model with cross validation --------------------------------------------
   if (cv_method != "none") {
+    cli::cli_h2("Cross-validation ({cv_method}, {cv_folds} folds)")
     # Create stratified fold assignments ---------------------------------------
     if (cv_method == "loo") {
       # If method is "loo", each sample is it's own fold
@@ -199,7 +206,7 @@ train_nn_landscapes <- function(
           batch_size = batch_size,
           validation_data = list(x_val, y_val),
           callbacks = fold_callbacks,
-          verbose = verbose
+          verbose = fold_verbose
         )
 
       # Evaluate the model on the validation fold
@@ -224,8 +231,9 @@ train_nn_landscapes <- function(
         evaluation = evaluation
       )
 
+      # Conditional fold accuracy
       cli::cli_alert_success(
-        "Fold {fold} accuracy: {round(evaluation[['accuracy']], 4)}"
+        "Fold {fold}/{cv_folds} accuracy: {round(evaluation[['accuracy']], 4)}"
       )
     }
 
@@ -238,22 +246,24 @@ train_nn_landscapes <- function(
       class_names = class_names,
       cv_method = cv_method,
       cv_folds = cv_folds,
-      verbose = TRUE
+      verbose = verbose
     )
     # Calculate average accuracy and loss across folds
     accuracies <- sapply(cv_evaluation, function(x) x$evaluation[["accuracy"]])
     losses <- sapply(cv_evaluation, function(x) x$evaluation[["loss"]])
 
     # Header
-    cli::cli_h2("Accuracy and loss across folds")
+    if (verbose) {
+      cli::cli_h2("Accuracy and loss across folds")
 
-    cli::cli_text(
-      "Mean accuracy: {round(mean(accuracies), 4)} ± {round(sd(accuracies), 4)}"
-    )
-    cli::cli_text(
-      "Mean loss: {round(mean(losses), 4)} ± {round(sd(losses), 4)}"
-    )
-    cli::cli_text("")
+      cli::cli_text(
+        "Mean accuracy: {round(mean(accuracies), 4)} ± {round(sd(accuracies), 4)}"
+      )
+      cli::cli_text(
+        "Mean loss: {round(mean(losses), 4)} ± {round(sd(losses), 4)}"
+      )
+      cli::cli_text("")
+    }
 
     # Build final model with all data
     final_model <- create_keras_model(
@@ -279,13 +289,16 @@ train_nn_landscapes <- function(
         epochs = epochs,
         batch_size = batch_size,
         callbacks = callbacks,
-        verbose = verbose
+        verbose = final_verbose
       )
   } else {
     # No cross-validation: train on ALL data
-    cli::cli_alert_info(
-      "Training on all data (no validation split)..."
-    )
+    cli::cli_h2("Training final model on all data")
+    if (verbose) {
+      cli::cli_alert_info(
+        "Training on all data (no validation split)..."
+      )
+    }
 
     final_model <- create_keras_model(
       architecture = architecture,
@@ -309,7 +322,7 @@ train_nn_landscapes <- function(
         epochs = epochs,
         batch_size = batch_size,
         callbacks = callbacks,
-        verbose = verbose
+        verbose = final_verbose
       )
 
     # No validation metrics available
