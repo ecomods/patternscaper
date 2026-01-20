@@ -6,7 +6,9 @@
 #'
 #' @param landscapes List. List of landscape objects created by `create_landscape()` or `create_training_landscapes()`.
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
+#'   Note: Method may be automatically downgraded if dataset is too small for requested method.
 #' @param cv_folds Integer. Number of cross-validation folds when cv_method="k-fold" (default: 5).
+#'   Note: May be automatically reduced to ensure adequate samples per fold.
 #' @param epochs Integer. Number of training epochs (default: 50).
 #' @param batch_size Integer. Batch size for training (default: 16).
 #' @param validation_split Numeric. Proportion of data to use for validation when cv_method="none" (default: 0.2).
@@ -113,7 +115,8 @@ train_nn_landscapes <- function(
   }
 
   # Cross-validation ----------------------------------------------------------
-  # Validate and adjust CV parameters
+  # Validate and adjust CV parameters based on class distribution
+  # May downgrade CV method (k-fold -> LOO) or reduce folds if dataset is small
   cv_params <- validate_cv_params(
     patterns = training_labels,
     cv_method = cv_method,
