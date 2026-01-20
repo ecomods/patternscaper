@@ -30,15 +30,59 @@
 #'   Examples: early stopping, learning rate scheduling, model checkpointing.
 #'   Note: Only applies to final model training. CV folds always use patience-based
 #'   early stopping if patience is specified.
-#' @param patience Integer. Number of epochs with no improvement after which training stops (default: 15).
-#'   Only used when callbacks is NULL. Applies to CV fold training and final model.
-#'   Set to NULL to disable early stopping entirely.
+#' @param patience Integer. Number of epochs with no improvement before early stopping (default: 15).
+#'   Applied to both CV fold training (monitors validation loss) and final model training (monitors training loss).
+#'   Only used when callbacks=NULL. Set to NULL to train for full epoch count without early stopping.
 #' @param verbose Logical. Show training progress and performance summaries (default: TRUE).
 #'   When TRUE, displays progress bar for final model training and prints performance metrics.
 #'   When FALSE, runs silently. CV fold training always runs silently to reduce output clutter.
 #'
-#' @return List. Trained CNN model and associated metadata.
+#' @return List containing:
+#'   \describe{
+#'     \item{model}{Trained keras model object}
+#'     \item{history}{Training history object from keras3::fit()}
+#'     \item{classes}{Character vector of class names used during training}
+#'     \item{input_shape}{Integer vector of input dimensions (height, width, channels)}
+#'     \item{architecture}{Character, architecture type used ("multiscale")}
+#'     \item{performance}{Performance metrics. When cv_method != "none", contains
+#'       results from evaluate_cv_performance() including confusion matrix, per-class
+#'       metrics, and overall accuracy. When cv_method = "none", contains training
+#'       metadata only (see note field for evaluation instructions).}
+#'   }
 #' @export
+#' @examples
+#' \dontrun{
+#' # Create training data
+#' training_landscapes <- create_training_landscapes(
+#'   n = 200,
+#'   patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
+#' )
+#'
+#' # Train with cross-validation
+#' model <- train_nn_landscapes(
+#'   landscapes = training_landscapes,
+#'   cv_method = "k-fold",
+#'   cv_folds = 5
+#' )
+#'
+#' # Train on all data for final deployment model
+#' final_model <- train_nn_landscapes(
+#'   landscapes = training_landscapes,
+#'   cv_method = "none",
+#'   epochs = 100
+#' )
+#'
+#' # Evaluate on separate test set
+#' test_landscapes <- create_training_landscapes(
+#'   n = 100,
+#'   patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
+#' )
+#' results <- apply_nn_landscapes(
+#'   landscapes = test_landscapes,
+#'   nn_model = final_model,
+#'   return_performance = TRUE
+#' )
+#' }
 train_nn_landscapes <- function(
   landscapes,
   cv_method = "k-fold",
@@ -55,7 +99,7 @@ train_nn_landscapes <- function(
   metrics = c("accuracy"),
   callbacks = NULL,
   patience = 15,
-  verbose = TRUE # ← Change from 1 to TRUE
+  verbose = TRUE
 ) {
   # Configure keras verbosity levels
   fold_verbose <- 0 # Always silent for CV folds to reduce output
@@ -64,7 +108,23 @@ train_nn_landscapes <- function(
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold", "loo")) {
-    stop('cv_method must be one of: "none", "k-fold", or "loo"')
+    cli::cli_abort('cv_method must be one of: "none", "k-fold", or "loo"')
+  }
+
+  # Validate numeric parameters
+  if (epochs < 1 || !is.numeric(epochs)) {
+    cli::cli_abort("epochs must be a positive integer")
+  }
+  if (batch_size < 1 || !is.numeric(batch_size)) {
+    cli::cli_abort("batch_size must be a positive integer")
+  }
+  if (learning_rate <= 0 || learning_rate >= 1) {
+    cli::cli_abort("learning_rate must be between 0 and 1")
+  }
+
+  # Check if landscapes is empty
+  if (length(landscapes) == 0) {
+    cli::cli_abort("landscapes must contain at least one landscape object")
   }
 
   # Check if landscapes is a list of landscape objects
@@ -98,8 +158,10 @@ train_nn_landscapes <- function(
   })
 
   # Show distribution of landscape types
-  cli::cli_alert_info("Landscape type distribution:")
-  print(table(training_labels))
+  if (verbose) {
+    cli::cli_h2("Landscape type distribution:")
+    print(table(training_labels))
+  }
 
   # Get the unique class names
   class_names <- sort(unique(training_labels))
@@ -252,7 +314,6 @@ train_nn_landscapes <- function(
     accuracies <- sapply(cv_evaluation, function(x) x$evaluation[["accuracy"]])
     losses <- sapply(cv_evaluation, function(x) x$evaluation[["loss"]])
 
-    # Header
     if (verbose) {
       cli::cli_h2("Accuracy and loss across folds")
 
@@ -264,6 +325,8 @@ train_nn_landscapes <- function(
       )
       cli::cli_text("")
     }
+
+    cli::cli_h2("Training final model on all data")
 
     # Build final model with all data
     final_model <- create_keras_model(
