@@ -109,10 +109,11 @@ train_nn_landscapes <- function(
 
   # Setup callbacks ---------------------------------------------------------
   # If user didn't provide callbacks and patience is specified, add early stopping
+  # This callback will be used for final model training (not CV folds)
   if (is.null(callbacks) && !is.null(patience)) {
     callbacks <- list(
       keras3::callback_early_stopping(
-        monitor = "val_loss",
+        monitor = "loss",
         patience = patience,
         restore_best_weights = TRUE
       )
@@ -197,7 +198,7 @@ train_nn_landscapes <- function(
           epochs = epochs,
           batch_size = batch_size,
           validation_data = list(x_val, y_val),
-          callbacks = fold_callbacks, # ← Fresh callback each fold
+          callbacks = fold_callbacks,
           verbose = verbose
         )
 
