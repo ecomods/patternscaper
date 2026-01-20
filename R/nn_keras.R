@@ -450,6 +450,9 @@ train_nn_landscapes <- function(
 #' @param landscapes landscape object, or list of landscape objects. Landscape(s) to classify.
 #' @param nn_model List. CNN model from train_nn_landscapes().
 #' @param return_performance Logical. Whether to return performance metrics when actual classes are available (default: FALSE).
+#' @param verbose Logical. Show informational messages and performance summaries (default: TRUE).
+#'   When TRUE, displays resize operations and performance evaluation results.
+#'   When FALSE, runs silently. Warnings about unknown classes or invalid data always appear.
 #'
 #' @return When actual classes unavailable or return_performance=FALSE: tibble with columns:
 #'   \describe{
@@ -469,7 +472,8 @@ train_nn_landscapes <- function(
 apply_nn_landscapes <- function(
   landscapes,
   nn_model,
-  return_performance = FALSE
+  return_performance = FALSE,
+  verbose = TRUE
 ) {
   # Input validation
   if (
@@ -543,15 +547,17 @@ apply_nn_landscapes <- function(
       c(x$current_height, x$current_width)
     }))
 
-    if (length(unique_dims) == 1) {
-      dims <- unique_dims[[1]]
-      cli::cli_alert_info(
-        "Resizing {n_resize} landscape{?s} from {dims[1]}x{dims[2]} to {expected_height}x{expected_width}"
-      )
-    } else {
-      cli::cli_alert_info(
-        "Resizing {n_resize} landscape{?s} to {expected_height}x{expected_width}"
-      )
+    if (verbose) {
+      if (length(unique_dims) == 1) {
+        dims <- unique_dims[[1]]
+        cli::cli_alert_info(
+          "Resizing {n_resize} landscape{?s} from {dims[1]}x{dims[2]} to {expected_height}x{expected_width}"
+        )
+      } else {
+        cli::cli_alert_info(
+          "Resizing {n_resize} landscape{?s} to {expected_height}x{expected_width}"
+        )
+      }
     }
   }
 
@@ -628,9 +634,11 @@ apply_nn_landscapes <- function(
     n_total <- length(landscape_pattern)
 
     if (n_valid < n_total) {
-      cli::cli_alert_info(
-        "Evaluating performance on {n_valid}/{n_total} landscapes with known classes"
-      )
+      if (verbose) {
+        cli::cli_alert_info(
+          "Evaluating performance on {n_valid}/{n_total} landscapes with known classes"
+        )
+      }
     }
 
     # Add actual classes column (all rows for consistent structure)
@@ -699,7 +707,7 @@ apply_nn_landscapes <- function(
       class_names = class_names,
       cv_method = "none", # Not actual CV, just test set evaluation
       cv_folds = 1,
-      verbose = TRUE,
+      verbose = verbose,
       return_predictions = FALSE
     )
 
