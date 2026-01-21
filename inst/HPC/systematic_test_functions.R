@@ -2,11 +2,15 @@
 # Helper Functions
 #--------------------------------------------------------------------
 
-prepare_test_data <- function(reps, requested_patterns) {
+prepare_test_data <- function(
+  reps,
+  requested_patterns,
+  n_test_landscapes = 100
+) {
   reps |>
     map(\(r) {
       test_landscapes <- create_training_landscapes(
-        n = 100,
+        n = n_test_landscapes,
         patterns = requested_patterns
       )
       list(
