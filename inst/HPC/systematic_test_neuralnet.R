@@ -66,9 +66,6 @@ config <- tidyr::expand_grid(
 # Main Execution
 #--------------------------------------------------------------------
 
-# Setup parallel backend
-plan(multisession, workers = n_cores)
-
 cli_alert_info("Preparing test landscapes...")
 test_data_lookup <- prepare_test_data(
   reps = unique(config$rep),
@@ -79,7 +76,9 @@ cli_alert_info("Preparing training landscapes and metrics (parallel)...")
 training_combos <- config |>
   distinct(rep, training_size)
 
-# PARALLEL: This is the bottleneck so I parallelized it
+# Setup parallel backend
+plan(multisession, workers = n_cores)
+
 training_data_lookup <- training_combos |>
   future_pmap(
     \(rep, training_size) {
@@ -96,6 +95,8 @@ training_data_lookup <- training_combos |>
   set_names(with(training_combos, paste0(rep, "_", training_size)))
 
 
+plan(sequential) # Close workers to free memory
+
 cli_alert_info("Evaluating best metrics...")
 best_metrics_combos <- config |>
   distinct(rep, training_size, metrics_method, n_input_metrics)
@@ -106,20 +107,28 @@ best_metrics_lookup <- prepare_best_metrics(
   class_filter = class_filter
 )
 
-cli_alert_info("Training neural networks...")
+
+# Step 2: Parallel model training
+cli_alert_info("Training neural networks (parallel)...")
+plan(multisession, workers = n_cores)
+
 results_list <- config |>
   transpose() |>
-  map(
+  future_map(
     \(row) {
+      devtools::load_all()
       train_and_validate(
         config_row = row,
         test_data_lookup = test_data_lookup,
         training_data_lookup = training_data_lookup,
         best_metrics_lookup = best_metrics_lookup
       )
-    }
+    },
+    .options = furrr_options(seed = TRUE)
   ) |>
   compact()
+
+plan(sequential)
 
 # Set names of the result list
 results_list <- set_names(results_list, map_chr(results_list, "name"))
@@ -133,5 +142,3 @@ readr::write_rds(
   )
 )
 cli_alert_success("Complete! Trained {length(results_list)} models.")
-
-plan(sequential)
