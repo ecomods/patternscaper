@@ -251,10 +251,10 @@ create_training_landscapes <- function(
     ),
     fingers = list(
       treeline_position = c(0.3, 0.6),
-      sine_length_mean = c(0.2, 0.5) * width, 
-      sine_length_sd = c(0.1, 0.5) * width, 
+      sine_length_mean = c(0.2, 0.5) * width,
+      sine_length_sd = c(0.1, 0.5) * width,
       sine_height_mean = c(0.05, 0.2) * height,
-      sine_height_sd = c(0.05, 0.25) * height 
+      sine_height_sd = c(0.05, 0.25) * height
     ),
     clustered = list(
       treeline_position = c(0.4, 0.6),
@@ -291,7 +291,7 @@ create_training_landscapes <- function(
       frequency = c(2.5, 3.5),
       veg_threshold = c(0.45, 0.55),
       band_fuzziness = c(0.06, 0.25),
-      octaves = c(2,4)
+      octaves = c(2, 4)
     )
   )
 
