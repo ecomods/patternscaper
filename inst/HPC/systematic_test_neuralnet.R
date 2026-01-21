@@ -5,27 +5,36 @@ library(cli)
 library(furrr)
 
 devtools::load_all()
-source("systematic_test_functions.R")
-
-set.seed(12345)
+source("inst/HPC/systematic_test_functions.R")
+# source("systematic_test_functions.R")
 
 # Parse command line arguments -------------------------------------------------
-args <- commandArgs(trailingOnly = TRUE)
+# args <- commandArgs(trailingOnly = TRUE)
 
-if (length(args) != 2) {
-  cli::cli_abort(
-    "Usage: Rscript systematic_test_neuralnet.R <pattern_type> <results_dir>
-  pattern_type: 'selforg' or 'ecotones'
-  results_dir: directory for output"
-  )
-}
+# if (length(args) != 3) {
+#   # Changed from 2 to 3
+#   cli::cli_abort(
+#     "Usage: Rscript systematic_test_neuralnet.R <pattern_type> <results_dir> <rep>
+#   pattern_type: 'selforg' or 'ecotones'
+#   results_dir: directory for output
+#   rep: replicate number (from SLURM_ARRAY_TASK_ID)"
+#   )
+# }
 
-pattern_type <- args[1]
-results_dir <- args[2]
+# pattern_type <- args[1]
+# results_dir <- args[2]
+# rep <- as.integer(args[3])
 
 # Add test values instead:
-# pattern_type <- "ecotones"
-# results_dir <- "test_output"
+pattern_type <- "ecotones"
+results_dir <- "test_output"
+rep <- 1
+
+set.seed(12345 + rep * 1000)
+
+cli::cli_alert_info(
+  "Processing replicate {rep} for pattern type: {pattern_type}"
+)
 
 # Validate and create output directory -----------------------------------------
 if (!dir.exists(results_dir)) {
@@ -73,12 +82,10 @@ cli::cli_alert_info("Results will be saved to: {results_dir}")
 #--------------------------------------------------------------------
 # Configuration
 #--------------------------------------------------------------------
-n_cores <- as.integer(Sys.getenv("SLURM_CPUS_PER_TASK", "4"))
-# n_cores <- 4 # For local testing
 n_test_landscapes <- 10 #100
 
 config <- tidyr::expand_grid(
-  rep = 1:10,
+  rep = rep,
   training_size = c(50, 100, 150),
   n_input_metrics = c(5, 7, 10, 13, 15, 20),
   metrics_method = c(
@@ -91,7 +98,7 @@ config <- tidyr::expand_grid(
 )
 
 config <- tidyr::expand_grid(
-  rep = 1:2, # 10 -> 2 reps
+  rep = rep, # 10 -> 2 reps
   training_size = 50, # c(50, 100, 150) -> just 50
   n_input_metrics = c(5, 7), # c(5, 7, 10, 13, 15, 20) -> just 2
   metrics_method = "coeffvar_all", # 4 methods -> 1
@@ -114,11 +121,8 @@ cli_alert_info("Preparing training landscapes and metrics (parallel)...")
 training_combos <- config |>
   distinct(rep, training_size)
 
-# Setup parallel backend
-plan(multisession, workers = n_cores)
-
 training_data_lookup <- training_combos |>
-  future_pmap(
+  pmap(
     \(rep, training_size) {
       devtools::load_all()
       prepare_training_data_single(
@@ -127,13 +131,9 @@ training_data_lookup <- training_combos |>
         requested_patterns = patterns,
         metric_level = metric_level
       )
-    },
-    .options = furrr_options(seed = TRUE)
+    }
   ) |>
   set_names(with(training_combos, paste0(rep, "_", training_size)))
-
-
-plan(sequential) # Close workers to free memory
 
 cli_alert_info("Evaluating best metrics...")
 best_metrics_combos <- config |>
@@ -146,13 +146,12 @@ best_metrics_lookup <- prepare_best_metrics(
 )
 
 
-# Step 2: Parallel model training
-cli_alert_info("Training neural networks (parallel)...")
-plan(multisession, workers = n_cores)
+# Step 2: model training
+cli_alert_info("Training neural networks ...")
 
 results_list <- config |>
   transpose() |>
-  future_map(
+  map(
     \(row) {
       devtools::load_all()
       #source("inst/HPC/load_package_functions.R")
@@ -162,25 +161,23 @@ results_list <- config |>
         training_data_lookup = training_data_lookup,
         best_metrics_lookup = best_metrics_lookup
       )
-    },
-    .options = furrr_options(
-      seed = TRUE,
-      packages = c("nnet", "terra", "landscapemetrics", "dplyr", "purrr", "cli")
-    )
+    }
   ) |>
   compact()
-
-plan(sequential)
 
 # Set names of the result list
 results_list <- set_names(results_list, map_chr(results_list, "name"))
 
+# Save results with replicate number
 cli_alert_info("Saving results...")
 readr::write_rds(
   results_list,
   file.path(
     results_dir,
-    paste0("systematic_test_", pattern_type, "_results.rds")
+    paste0("systematic_test_", pattern_type, "_rep", rep, "_results.rds")
   )
 )
-cli_alert_success("Complete! Trained {length(results_list)} models.")
+
+cli_alert_success(
+  "Complete! Trained {length(results_list)} models for replicate {rep}."
+)
