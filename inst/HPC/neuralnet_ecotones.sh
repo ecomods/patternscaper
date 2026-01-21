@@ -6,7 +6,7 @@
 #SBATCH --nodes=1
 #SBATCH -c 1
 #SBATCH --ntasks=1
-#SBATCH --mem=1G
+#SBATCH --mem=5G
 #SBATCH --time=00:05:00
 #SBATCH --qos=standard
 #SBATCH --array=1-2

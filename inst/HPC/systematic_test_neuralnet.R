@@ -5,30 +5,30 @@ library(cli)
 library(furrr)
 
 devtools::load_all()
-source("inst/HPC/systematic_test_functions.R")
-# source("systematic_test_functions.R")
+# source("inst/HPC/systematic_test_functions.R")
+source("systematic_test_functions.R")
 
 # Parse command line arguments -------------------------------------------------
-# args <- commandArgs(trailingOnly = TRUE)
+args <- commandArgs(trailingOnly = TRUE)
 
-# if (length(args) != 3) {
-#   # Changed from 2 to 3
-#   cli::cli_abort(
-#     "Usage: Rscript systematic_test_neuralnet.R <pattern_type> <results_dir> <rep>
-#   pattern_type: 'selforg' or 'ecotones'
-#   results_dir: directory for output
-#   rep: replicate number (from SLURM_ARRAY_TASK_ID)"
-#   )
-# }
+if (length(args) != 3) {
+  # Changed from 2 to 3
+  cli::cli_abort(
+    "Usage: Rscript systematic_test_neuralnet.R <pattern_type> <results_dir> <rep>
+  pattern_type: 'selforg' or 'ecotones'
+  results_dir: directory for output
+  rep: replicate number (from SLURM_ARRAY_TASK_ID)"
+  )
+}
 
-# pattern_type <- args[1]
-# results_dir <- args[2]
-# rep <- as.integer(args[3])
+pattern_type <- args[1]
+results_dir <- args[2]
+rep <- as.integer(args[3])
 
 # Add test values instead:
-pattern_type <- "ecotones"
-results_dir <- "test_output"
-rep <- 1
+# pattern_type <- "ecotones"
+# results_dir <- "test_output"
+# rep <- 1
 
 set.seed(12345 + rep * 1000)
 
