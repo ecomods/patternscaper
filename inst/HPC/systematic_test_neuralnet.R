@@ -27,6 +27,27 @@ results_dir <- args[2]
 # pattern_type <- "ecotones"
 # results_dir <- "test_output"
 
+# Validate and create output directory -----------------------------------------
+if (!dir.exists(results_dir)) {
+  cli::cli_alert_info("Creating output directory: {results_dir}")
+  dir.create(results_dir, recursive = TRUE, showWarnings = FALSE)
+}
+
+# Test write permissions
+test_file <- file.path(results_dir, ".write_test")
+tryCatch(
+  {
+    writeLines("test", test_file)
+    file.remove(test_file)
+  },
+  error = function(e) {
+    cli::cli_abort("Cannot write to directory {results_dir}: {e$message}")
+  }
+)
+
+cli::cli_alert_success("Output directory validated: {results_dir}")
+
+
 # Define patterns based on type ------------------------------------------------
 if (pattern_type == "selforg") {
   patterns <- c("bare", "spots", "labyrinth", "gaps", "dense")
