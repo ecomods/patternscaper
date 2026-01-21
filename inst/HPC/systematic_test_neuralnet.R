@@ -6,6 +6,7 @@ library(furrr)
 
 devtools::load_all()
 source("systematic_test_functions.R")
+
 set.seed(12345)
 
 # Parse command line arguments -------------------------------------------------
@@ -21,6 +22,10 @@ if (length(args) != 2) {
 
 pattern_type <- args[1]
 results_dir <- args[2]
+
+# Add test values instead:
+# pattern_type <- "ecotones"
+# results_dir <- "test_output"
 
 # Define patterns based on type ------------------------------------------------
 if (pattern_type == "selforg") {
@@ -47,7 +52,9 @@ cli::cli_alert_info("Results will be saved to: {results_dir}")
 #--------------------------------------------------------------------
 # Configuration
 #--------------------------------------------------------------------
-n_cores <- 4
+n_cores <- as.integer(Sys.getenv("SLURM_CPUS_PER_TASK", "4"))
+# n_cores <- 4 # For local testing
+n_test_landscapes <- 10 #100
 
 config <- tidyr::expand_grid(
   rep = 1:10,
@@ -62,6 +69,15 @@ config <- tidyr::expand_grid(
   nlayers = 1:3
 )
 
+config <- tidyr::expand_grid(
+  rep = 1:2, # 10 -> 2 reps
+  training_size = 50, # c(50, 100, 150) -> just 50
+  n_input_metrics = c(5, 7), # c(5, 7, 10, 13, 15, 20) -> just 2
+  metrics_method = "coeffvar_all", # 4 methods -> 1
+  nlayers = 1 # 1:3 -> just 1
+)
+# This gives you 2 * 1 * 2 * 1 * 1 = 4 models
+
 #--------------------------------------------------------------------
 # Main Execution
 #--------------------------------------------------------------------
@@ -69,7 +85,8 @@ config <- tidyr::expand_grid(
 cli_alert_info("Preparing test landscapes...")
 test_data_lookup <- prepare_test_data(
   reps = unique(config$rep),
-  requested_patterns = patterns
+  requested_patterns = patterns,
+  n_test_landscapes = n_test_landscapes
 )
 
 cli_alert_info("Preparing training landscapes and metrics (parallel)...")
@@ -117,6 +134,7 @@ results_list <- config |>
   future_map(
     \(row) {
       devtools::load_all()
+      #source("inst/HPC/load_package_functions.R")
       train_and_validate(
         config_row = row,
         test_data_lookup = test_data_lookup,
@@ -124,7 +142,10 @@ results_list <- config |>
         best_metrics_lookup = best_metrics_lookup
       )
     },
-    .options = furrr_options(seed = TRUE)
+    .options = furrr_options(
+      seed = TRUE,
+      packages = c("nnet", "terra", "landscapemetrics", "dplyr", "purrr", "cli")
+    )
   ) |>
   compact()
 
