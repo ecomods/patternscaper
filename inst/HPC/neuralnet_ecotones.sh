@@ -14,5 +14,5 @@
 module add GDAL
 module add R
 
-Rscript systematic_test_neuralnet.R ecotones ../analyses/data/
+Rscript systematic_test_neuralnet.R ecotones results/nn_metrics/ecotones
 
