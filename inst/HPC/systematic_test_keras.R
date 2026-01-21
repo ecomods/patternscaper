@@ -5,21 +5,25 @@ library(cli)
 
 devtools::load_all()
 
-set.seed(12345)
-
 # Parse command line arguments -------------------------------------------------
 args <- commandArgs(trailingOnly = TRUE)
 
-if (length(args) != 2) {
+if (length(args) != 3) {
   cli::cli_abort(
-    "Usage: Rscript systematic_test_keras.R <pattern_type> <results_dir>
+    "Usage: Rscript systematic_test_keras.R <pattern_type> <results_dir> <replicate_id>
   pattern_type: 'selforg' or 'ecotones'
   results_dir: directory for output"
   )
 }
 
+# args <- c("ecotones", "results/keras/test_run", "1")
+
 pattern_type <- args[1]
 results_dir <- args[2]
+replicate_id <- as.integer(args[3])
+
+# Set unique seed per replicate
+set_random_seed(12345 + replicate_id * 1000)
 
 # Define patterns based on type ------------------------------------------------
 if (pattern_type == "selforg") {
@@ -38,40 +42,40 @@ cli::cli_alert_info("Results will be saved to: {results_dir}")
 # Create parameter grid --------------------------------------------------------
 
 # Minimal test configuration (4 experiments)
-# param_grid <- tidyr::expand_grid(
-#   n_landscapes = c(12, 24),
-#   epochs = c(5),
-#   learning_rate = c(0.001),
-#   replicate = 1:2
-# ) |>
-#   dplyr::mutate(
-#     batch_size = 4,
-#     dropout_rate = 0.4,
-#     dense_units = 64,
-#     optimizer = "adam",
-#     cv_method = "none"
-#   )
-
-# Full systematic test configuration (180 experiments)
 param_grid <- tidyr::expand_grid(
-  n_landscapes = c(50, 100, 200, 400, 800),
-  epochs = c(20, 50, 100),
-  learning_rate = c(0.0001, 0.001, 0.01),
-  replicate = 1:5
+  n_landscapes = c(12, 24),
+  epochs = c(5),
+  learning_rate = c(0.001)
 ) |>
   dplyr::mutate(
-    batch_size = dplyr::case_when(
-      n_landscapes <= 100 ~ 8,
-      .default = 16
-    ),
-    dropout_rate = dplyr::case_when(
-      n_landscapes <= 100 ~ 0.4,
-      .default = 0.3
-    ),
-    dense_units = 128,
+    replicate = replicate_id,
+    batch_size = 4,
+    dropout_rate = 0.4,
+    dense_units = 64,
     optimizer = "adam",
     cv_method = "none"
   )
+
+# Full systematic test configuration (180 experiments)
+# param_grid <- tidyr::expand_grid(
+#   n_landscapes = c(50, 100, 200, 400, 800),
+#   epochs = c(20, 50, 100),
+#   learning_rate = c(0.0001, 0.001, 0.01)
+# ) |>
+#   dplyr::mutate(
+#     replicate = replicate_id,
+#     batch_size = dplyr::case_when(
+#       n_landscapes <= 100 ~ 8,
+#       .default = 16
+#     ),
+#     dropout_rate = dplyr::case_when(
+#       n_landscapes <= 100 ~ 0.4,
+#       .default = 0.3
+#     ),
+#     dense_units = 128,
+#     optimizer = "adam",
+#     cv_method = "none"
+#   )
 
 # Directories ------------------------------------------------------------------
 
@@ -85,7 +89,7 @@ cli::cli_alert_info("Generating {max_n + n_validation} landscapes...")
 
 training_pool <- create_training_landscapes(
   patterns = patterns,
-  n = max_n + length(patterns) * 5,
+  n = max_n,
   width = 100,
   height = 100
 )
@@ -154,14 +158,12 @@ run_single_experiment <- function(
       model_result <- train_nn_landscapes(
         landscapes = training_landscapes,
         cv_method = "none",
-        validation_split = 0.2,
         epochs = epochs,
         batch_size = batch_size,
         learning_rate = learning_rate,
         dropout_rate = dropout_rate,
         dense_units = dense_units,
         optimizer = optimizer,
-        patience = 10,
         verbose = FALSE
       )
 
@@ -276,12 +278,17 @@ summary_df <- purrr::map_dfr(all_results, function(x) {
 
 readr::write_rds(
   all_results,
-  file.path(results_dir, "systematic_test_results.rds")
+  file.path(
+    results_dir,
+    paste0("systematic_test_results_rep", replicate_id, ".rds")
+  )
 )
 
 readr::write_csv(
   summary_df,
-  file.path(results_dir, "experiment_summary.csv")
+  file.path(results_dir, paste0("experiment_summary_rep", replicate_id, ".csv"))
 )
 
-cli::cli_alert_success("Results saved to {results_dir}")
+cli::cli_alert_success(
+  "Results saved to {results_dir} (replicate {replicate_id})"
+)
