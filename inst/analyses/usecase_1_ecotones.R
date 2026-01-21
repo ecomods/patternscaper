@@ -15,6 +15,8 @@
 devtools::load_all()
 set.seed(53) #set seed for reproducibility
 directory <- "inst/analyses/pics_for_paper/"
+#additional libraries are required for plotting
+library(ggplot2)
 #use help function to plot different formats
 source("inst/analyses/functions/plot_different_formats.R")
 
@@ -82,6 +84,8 @@ save_plot_multi(
 #--------------------------------------------------------------------
 # Generate training and testing landscapes
 #--------------------------------------------------------------------
+
+set.seed(42) #set seed for reproducibility
 
 # generate training landscapes
 ecotone_landscapes <- create_training_landscapes(
@@ -209,6 +213,9 @@ save_plot_multi(
 #----------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------
 
+#set seed for Keras (needs to be done separately)
+set_random_seed(123456) 
+
 #--------------------------------------------------------------------
 # Train neural network with the input data itself
 #--------------------------------------------------------------------
@@ -226,6 +233,17 @@ model_ecotones_pix <- train_nn_landscapes(
 # check the model accuracy
 model_ecotones_pix$performance$accuracy
 #--> very low --> increase number of landscapes to 400
+
+model_ecotones_pix$performance
+
+plot_classified_landscapes(
+  classification = model_ecotones_pix_400$performance$validation_results,
+  landscapes = ecotone_landscapes_400,
+  only_misclassified = TRUE,
+  show_legend = F,
+  ncol = 6
+)
+
 
 # generate new (more!) training landscapes
 ecotone_landscapes_400 <- create_training_landscapes(

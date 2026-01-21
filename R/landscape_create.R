@@ -251,10 +251,10 @@ create_training_landscapes <- function(
     ),
     fingers = list(
       treeline_position = c(0.3, 0.6),
-      sine_length_mean = c(0.3, 0.7) * width,
-      sine_length_sd = c(0.05, 0.2) * width,
+      sine_length_mean = c(0.2, 0.5) * width, 
+      sine_length_sd = c(0.1, 0.5) * width, 
       sine_height_mean = c(0.05, 0.2) * height,
-      sine_height_sd = c(0.02, 0.15) * height
+      sine_height_sd = c(0.05, 0.25) * height 
     ),
     clustered = list(
       treeline_position = c(0.4, 0.6),
