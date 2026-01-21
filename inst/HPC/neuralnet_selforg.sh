@@ -1,17 +1,19 @@
 #!/bin/bash -e
 
-#SBATCH --job-name=systematic_test_neuralnet_selforg
+#SBATCH --job-name=systematic_neuralnet_selforg
 #SBATCH --mail-user=ujcuz@zedat.fu-berlin.de
 #SBATCH --mail-type=end
 #SBATCH --nodes=1
-#SBATCH -c 4
+#SBATCH -c 1
 #SBATCH --ntasks=1
-#SBATCH --mem=10G
-#SBATCH --time=10:00:00
+#SBATCH --mem=5G
+#SBATCH --time=05:00:00
 #SBATCH --qos=standard
-#SBATCH --output=nn_selforg_%j.out
+#SBATCH --array=1-10
+#SBATCH --output=log/nn_selforg_rep_%a_%j.out
 
 module add GDAL
 module add R
 
-Rscript systematic_test_neuralnet.R selforg ../analyses/data/
+# Run the R script with arguments
+Rscript "systematic_test_neuralnet.R" selforg results/nn_metrics/selforg/ ${SLURM_ARRAY_TASK_ID}

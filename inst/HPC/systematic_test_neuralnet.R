@@ -12,7 +12,6 @@ source("systematic_test_functions.R")
 args <- commandArgs(trailingOnly = TRUE)
 
 if (length(args) != 3) {
-  # Changed from 2 to 3
   cli::cli_abort(
     "Usage: Rscript systematic_test_neuralnet.R <pattern_type> <results_dir> <rep>
   pattern_type: 'selforg' or 'ecotones'
@@ -82,7 +81,7 @@ cli::cli_alert_info("Results will be saved to: {results_dir}")
 #--------------------------------------------------------------------
 # Configuration
 #--------------------------------------------------------------------
-n_test_landscapes <- 10 #100
+n_test_landscapes <- 100
 
 config <- tidyr::expand_grid(
   rep = rep,
@@ -97,13 +96,13 @@ config <- tidyr::expand_grid(
   nlayers = 1:3
 )
 
-config <- tidyr::expand_grid(
-  rep = rep, # 10 -> 2 reps
-  training_size = 50, # c(50, 100, 150) -> just 50
-  n_input_metrics = c(5, 7), # c(5, 7, 10, 13, 15, 20) -> just 2
-  metrics_method = "coeffvar_all", # 4 methods -> 1
-  nlayers = 1 # 1:3 -> just 1
-)
+# config <- tidyr::expand_grid(
+#   rep = rep, # 10 -> 2 reps
+#   training_size = 50, # c(50, 100, 150) -> just 50
+#   n_input_metrics = c(5, 7), # c(5, 7, 10, 13, 15, 20) -> just 2
+#   metrics_method = "coeffvar_all", # 4 methods -> 1
+#   nlayers = 1 # 1:3 -> just 1
+# )
 # This gives you 2 * 1 * 2 * 1 * 1 = 4 models
 
 #--------------------------------------------------------------------
@@ -174,7 +173,7 @@ readr::write_rds(
   results_list,
   file.path(
     results_dir,
-    paste0("systematic_test_", pattern_type, "_rep", rep, "_results.rds")
+    paste0("systematic_test_nn_", pattern_type, "_rep", rep, "_results.rds")
   )
 )
 
