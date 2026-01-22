@@ -326,11 +326,13 @@ plot_classified_landscapes(
 #----------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------
 
+#set seed for Keras (needs to be done separately)
+set_random_seed(123456) 
+
 #--------------------------------------------------------------------
 # Train neural network with the input data itself
 #--------------------------------------------------------------------
 
-#save.image(file="usecase_2_all_data.RData")
 
 # train a model
 model_selforga_pix <- train_nn_landscapes(
@@ -484,6 +486,7 @@ pic_classification_metrics <- apply_nn_metrics(
   nn_model = model_selforga_metrics
 )
 pic_classification_metrics
+
 # b) pixel model
 pic_classification_pix <- apply_nn_landscapes(
   landscapes = pic_landscapes,
@@ -564,4 +567,4 @@ ggsave(
   dpi = 300
 )
 
-#save.image(file="usecase_2_all_data.RData")
+save.image(file="usecase_2_all_data.RData")

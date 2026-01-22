@@ -13,7 +13,6 @@
 #--------------------------------------------------------------------
 
 devtools::load_all()
-set.seed(53) #set seed for reproducibility
 directory <- "inst/analyses/pics_for_paper/"
 #additional libraries are required for plotting
 library(ggplot2)
@@ -23,6 +22,8 @@ source("inst/analyses/functions/plot_different_formats.R")
 #--------------------------------------------------------------------
 # General landscape types and their titles
 #--------------------------------------------------------------------
+
+set.seed(1234) #set seed for reproducibility
 
 # only those types that refer to ecotones (or random)
 ecotone_types = c(
@@ -99,7 +100,6 @@ test_landscapes_ecotone <- create_training_landscapes(
   add_rotation = TRUE,
   patterns = ecotone_types
 )
-
 
 #----------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------
@@ -203,7 +203,7 @@ save_plot_multi(
   filename_base = "fig_supp_ecotone_misclassified",
   directory = directory,
   width = 4.5,
-  height = 1.5,
+  height = 3,
   dpi = 300
 )
 
@@ -232,26 +232,162 @@ model_ecotones_pix <- train_nn_landscapes(
 
 # check the model accuracy
 model_ecotones_pix$performance$accuracy
-#--> very low --> increase number of landscapes to 400
+model_ecotones_pix$performance$confusion_matrix
 
-model_ecotones_pix$performance
-
+# plot the landscapes that were misclassified
 plot_classified_landscapes(
-  classification = model_ecotones_pix_400$performance$validation_results,
-  landscapes = ecotone_landscapes_400,
+  classification = model_ecotones_pix$performance$validation_results,
+  landscapes = ecotone_landscapes,
   only_misclassified = TRUE,
   show_legend = F,
   ncol = 6
 )
 
+# -------------------------------------------------------------------
+# Apply the model to new landscapes
+# -------------------------------------------------------------------
 
-# generate new (more!) training landscapes
+# apply the model to the test landscapes
+validation_results_ecotone_pix <- apply_nn_landscapes(
+  landscapes = test_landscapes_ecotone,
+  nn_model = model_ecotones_pix,
+  return_performance = TRUE
+)
+
+# accuracy of the neural net for the test data
+validation_results_ecotone_pix$performance$accuracy
+# confusion matrix (correct/uncorrect classifications)
+validation_results_ecotone_pix$performance$confusion_matrix
+# per class metrics
+validation_results_ecotone_pix$performance$per_class_metrics
+
+# plot the landscapes that were misclassified
+fig_misclass_ecotone_pix <- plot_classified_landscapes(
+  classification = validation_results_ecotone_pix$predictions,
+  landscapes = test_landscapes_ecotone,
+  only_misclassified = TRUE,
+  show_legend = F,
+  ncol = 6
+)
+
+fig_misclass_ecotone_pix
+
+#save the plot
+save_plot_multi(
+  plot = fig_misclass_ecotone_pix,
+  filename_base = "fig_supp_ecotone_pixel_misclassified",
+  directory = directory,
+  width = 6,
+  height = 6,
+  dpi = 300
+)
+
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+# Repeat evaluations for both approaches with 400 training landscapes
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------
+# generate more training landscapes to test if neuronal net performs better,
+# these results are generated below the main results
+# -------------------------------------------------------------------
 ecotone_landscapes_400 <- create_training_landscapes(
   n = 400,
   patterns = ecotone_types
 )
 
-# train the model again
+# -------------------------------------------------------------------
+# landscape metrics
+# -------------------------------------------------------------------
+# calculate landscape metrics for the 400 landscapes on the landscape level
+landscape_metrics_400 <- calculate_landscape_metrics(
+  landscapes = ecotone_landscapes_400,
+  level = "landscape"
+)
+
+# find the 10 best metrics
+best_10_400 <- evaluate_landscape_metrics(
+  metrics = landscape_metrics_400,
+  metrics_number = 10,
+  method = "kruskal_p"
+)
+
+# plot the 10 best metrics
+fig_metrics_400 <- plot_metrics(
+  metrics = landscape_metrics_400,
+  selected_metrics = best_10_400,
+  force = TRUE
+)
+fig_metrics_400
+
+# save into different formats
+save_plot_multi(
+  plot = fig_metrics_400,
+  filename_base = "fig_supp_ecotone_metrics_400",
+  directory = directory,
+  width = 6,
+  height = 4.5,
+  dpi = 300
+)
+
+# train a network
+model_ecotones_lm_400 <- train_nn_metrics(
+  metrics = landscape_metrics_400,
+  metrics_selected = best_10_400,
+  hidden_layers = c(8, 8),
+  cv_method = "k-fold"
+)
+
+# look at the model object
+model_ecotones_lm_400$performance$accuracy
+
+# plot the landscapes that were misclassified
+plot_classified_landscapes(
+  classification = model_ecotones_lm_400$performance$validation_results,
+  landscapes = ecotone_landscapes_400,
+  only_misclassified = TRUE  
+)
+
+# apply the model to the test landscapes
+validation_results_ecotone_lm_400 <- apply_nn_metrics(
+  landscapes = test_landscapes_ecotone,
+  nn_model = model_ecotones_lm_400,
+  return_performance = TRUE
+)
+
+# accuracy of the neural net for the test data
+validation_results_ecotone_lm_400$performance$accuracy
+# confusion matrix (correct/uncorrect classifications)
+validation_results_ecotone_lm_400$performance$confusion_matrix
+# per class metrics
+validation_results_ecotone_lm_400$performance$per_class_metrics
+
+# show landscapes that are not classified correctly
+fig_misclass_400 <- plot_classified_landscapes(
+  classification = validation_results_ecotone_lm_400$predictions,
+  landscapes = test_landscapes_ecotone,
+  only_misclassified = TRUE,
+  show_legend = F,
+  ncol=4
+)
+fig_misclass_400
+
+# save into different formats
+save_plot_multi(
+  plot = fig_misclass_400,
+  filename_base = "fig_supp_ecotone_misclassified_400",
+  directory = directory,
+  width = 4.5,
+  height = 1.5,
+  dpi = 300
+)
+
+# -------------------------------------------------------------------
+# pixel data
+# -------------------------------------------------------------------
+
+# train the model
 model_ecotones_pix_400 <- train_nn_landscapes(
   landscapes = ecotone_landscapes_400,
   cv_method = "k-fold",
@@ -273,10 +409,6 @@ plot_classified_landscapes(
   show_legend = F,
   ncol = 6
 )
-
-# -------------------------------------------------------------------
-# Apply the model to new landscapes
-# -------------------------------------------------------------------
 
 # apply the model to the test landscapes
 validation_results_ecotone_pix_400 <- apply_nn_landscapes(
@@ -313,4 +445,7 @@ save_plot_multi(
   dpi = 300
 )
 
-#save.image(file="usecase_1_all_data.RData")
+# -------------------------------------------------------------------
+# save all data
+# -------------------------------------------------------------------
+save.image(file="usecase_1_all_data.RData")
