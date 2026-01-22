@@ -100,6 +100,7 @@ train_and_validate <- function(
   n_input_metrics <- config_row$n_input_metrics
   metrics_method <- config_row$metrics_method
   nlayers <- config_row$nlayers
+  n_neurons <- config_row$n_neurons
 
   # Lookup pre-computed data
   test_key <- as.character(rep)
@@ -120,16 +121,9 @@ train_and_validate <- function(
 
   # Calculate layer configuration based on number of layers
   # Scale neurons proportionally to input metrics
-  base_neurons <- round(n_input_metrics * 0.8, 0) # Fixed: use n_input_metrics directly
+  base_neurons <- round(n_input_metrics * n_neurons, 0) # Fixed: use n_input_metrics directly
 
-  # Create actual multi-layer configurations
-  layers_config <- list(
-    c(base_neurons), # 1 layer
-    c(base_neurons, round(base_neurons * 0.6)), # 2 layers
-    c(base_neurons, round(base_neurons * 0.6), round(base_neurons * 0.4)) # 3 layers
-  )
-
-  hidden_layers <- layers_config[[nlayers]] # Fixed: use layers_config
+  hidden_layers <- rep(base_neurons, nlayers) # Fixed: use base_neurons for all layers
   layer_name <- paste(hidden_layers, collapse = "-")
 
   # Train model

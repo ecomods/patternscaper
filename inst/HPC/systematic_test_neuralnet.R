@@ -10,6 +10,7 @@ source("systematic_test_functions.R")
 
 # Parse command line arguments -------------------------------------------------
 args <- commandArgs(trailingOnly = TRUE)
+# args <- c("ecotones", "test_output", "1") # For testing locally
 
 if (length(args) != 3) {
   cli::cli_abort(
@@ -24,11 +25,7 @@ pattern_type <- args[1]
 results_dir <- args[2]
 rep <- as.integer(args[3])
 
-# Add test values instead:
-# pattern_type <- "ecotones"
-# results_dir <- "test_output"
-# rep <- 1
-
+# Set seed for reproducibility
 set.seed(12345 + rep * 1000)
 
 cli::cli_alert_info(
@@ -93,7 +90,8 @@ config <- tidyr::expand_grid(
     "fisher_score",
     "kruskal_p"
   ),
-  nlayers = 1:3
+  nlayers = 1:3,
+  n_neurons = c(3 / 5, 4 / 5, 1)
 )
 
 # config <- tidyr::expand_grid(
@@ -101,7 +99,8 @@ config <- tidyr::expand_grid(
 #   training_size = 50, # c(50, 100, 150) -> just 50
 #   n_input_metrics = c(5, 7), # c(5, 7, 10, 13, 15, 20) -> just 2
 #   metrics_method = "coeffvar_all", # 4 methods -> 1
-#   nlayers = 1 # 1:3 -> just 1
+#   nlayers = 1:3, # 1:3 -> just 1
+#   n_neurons = c(3 / 5, 4 / 5, 1)
 # )
 # This gives you 2 * 1 * 2 * 1 * 1 = 4 models
 
