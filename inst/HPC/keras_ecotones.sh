@@ -6,10 +6,10 @@
 #SBATCH --nodes=1
 #SBATCH -c 1
 #SBATCH --ntasks=1
-#SBATCH --mem=10G
-#SBATCH --time=16:00:00
+#SBATCH --mem=7G
+#SBATCH --time=18:00:00
 #SBATCH --qos=standard
-#SBATCH --array=1-10
+#SBATCH --array=10
 #SBATCH --output=log/keras_ecotones_rep_%a_%j.out
 
 module add GDAL
