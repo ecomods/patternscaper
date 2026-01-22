@@ -6,8 +6,8 @@
 #SBATCH --nodes=1
 #SBATCH -c 1
 #SBATCH --ntasks=1
-#SBATCH --mem=5G
-#SBATCH --time=05:00:00
+#SBATCH --mem=3G
+#SBATCH --time=02:30:00
 #SBATCH --qos=standard
 #SBATCH --array=1-10
 #SBATCH --output=log/nn_selforg_rep_%a_%j.out
