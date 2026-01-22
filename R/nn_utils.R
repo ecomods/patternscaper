@@ -99,45 +99,50 @@ metrics_to_wide <- function(metrics, return_only_metrics = FALSE) {
 #'
 #' @param patterns Factor or character vector. Class labels for training data.
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", or "loo".
+#'   Already validated by calling function.
 #' @param cv_folds Integer. Number of folds for k-fold CV.
-#' @param n_predictors Integer. Number of predictor variables (optional, for sample-to-predictor ratio check).
+#'   Already validated by calling function when cv_method = "k-fold".
+#' @param n_predictors Integer. Number of predictor variables (optional, for
+#'   sample-to-predictor ratio check).
+#' @param min_samples_per_fold Integer. Minimum samples per class per fold for
+#'   k-fold CV (default: 3).
 #'
 #' @return List with validated/adjusted CV parameters:
 #'   \item{cv_method}{Adjusted CV method (may switch from k-fold to loo)}
-#'   \item{cv_folds}{Adjusted number of folds}
+#'   \item{cv_folds}{Integer number of folds, or 1L for "none"}
 #'   \item{class_counts}{Named vector of sample counts per class}
 #'   \item{total_samples}{Total number of samples}
 #'
 #' @keywords internal
-#' @importFrom cli cli_warn cli_abort cli_alert_warning
+#' @importFrom cli cli_warn cli_alert_info
 validate_cv_params <- function(
   patterns,
   cv_method,
   cv_folds,
-  n_predictors = NULL
+  n_predictors = NULL,
+  min_samples_per_fold = 3
 ) {
   # Get sample counts
   class_counts <- table(patterns)
   min_class_count <- min(class_counts)
   total_samples <- length(patterns)
 
-  # No validation needed for cv_method = "none"
+  # Return early for cv_method = "none"
   if (cv_method == "none") {
     return(list(
       cv_method = cv_method,
-      cv_folds = NULL,
+      cv_folds = 1L,
       class_counts = class_counts,
       total_samples = total_samples
     ))
   }
 
-  # Check sample-to-predictor ratio if n_predictors provided
-  # TODO: Check if this is recommended
+  # Check sample-to-predictor ratio if provided
   if (!is.null(n_predictors)) {
-    min_total_samples <- n_predictors * 5
-    if (total_samples < min_total_samples) {
-      cli::cli_warn(
-        "Small sample-to-predictor ratio ({total_samples} samples, {n_predictors} predictors). Consider LOO CV or reducing features."
+    samples_per_predictor <- total_samples / n_predictors
+    if (samples_per_predictor < 5) {
+      cli::cli_alert_info(
+        "Low sample-to-predictor ratio ({round(samples_per_predictor, 1)}:1). Consider LOO CV or reducing features."
       )
     }
   }
@@ -145,51 +150,34 @@ validate_cv_params <- function(
   # Check for severe class imbalance
   imbalance_ratio <- max(class_counts) / min(class_counts)
   if (imbalance_ratio > 5) {
-    cli::cli_warn(
-      "Severe class imbalance detected (ratio: {round(imbalance_ratio, 1)}:1). CV results may be unreliable for minority classes."
+    cli::cli_alert_info(
+      "Severe class imbalance detected (ratio {round(imbalance_ratio, 1)}:1). CV results may be unreliable for minority classes."
     )
   }
 
   # Validate and adjust k-fold parameters
   if (cv_method == "k-fold") {
-    # Minimum samples per class per fold (3 recommended for stable training)
-    min_samples_per_fold <- 3
+    # Calculate maximum suitable folds to maintain min_samples_per_fold
+    max_suitable_folds <- floor(min_class_count / min_samples_per_fold)
 
-    # Check if dataset is fundamentally too small for k-fold
-    if (total_samples < 30 || min_class_count < 5) {
-      cli::cli_warn(
-        "Dataset is small (n={total_samples}) or has classes with few samples (min={min_class_count}). Switching to leave-one-out CV for more reliable estimates."
+    # If we can't maintain enough samples even with 2 folds
+    if (max_suitable_folds < 2) {
+      cli::cli_alert_info(
+        "Cannot maintain {min_samples_per_fold} samples per class per fold (smallest class: {min_class_count}). Switching to LOO CV."
       )
       cv_method <- "loo"
-    } else {
-      # Calculate maximum suitable folds to maintain min_samples_per_fold
-      max_suitable_folds <- floor(min_class_count / min_samples_per_fold)
-
-      # If we can't maintain enough samples even with 2 folds
-      if (max_suitable_folds < 2) {
-        cli::cli_warn(
-          "Cannot maintain {min_samples_per_fold} samples per class per fold. Switching to leave-one-out CV."
-        )
-        cv_method <- "loo"
-      } else if (cv_folds > max_suitable_folds) {
-        # Reduce folds but keep k-fold CV
-        cli::cli_warn(
-          "Reducing CV folds from {cv_folds} to {max_suitable_folds} to ensure at least {min_samples_per_fold} samples per class per fold."
-        )
-        cv_folds <- max_suitable_folds
-      }
+      cv_folds <- total_samples
+    } else if (cv_folds > max_suitable_folds) {
+      # Reduce folds but keep k-fold CV
+      cli::cli_alert_info(
+        "Reducing CV folds from {cv_folds} to {max_suitable_folds} to maintain {min_samples_per_fold} samples per class per fold."
+      )
+      cv_folds <- max_suitable_folds
     }
   }
 
   # Validate LOO parameters
   if (cv_method == "loo") {
-    # Warn if LOO will be computationally expensive
-    if (total_samples > 500) {
-      cli::cli_warn(
-        "LOO CV with {total_samples} samples will be slow. Consider k-fold CV instead."
-      )
-    }
-
     # Check for singleton classes (fatal for LOO)
     if (any(class_counts == 1)) {
       singleton_classes <- names(class_counts[class_counts == 1])
@@ -198,15 +186,22 @@ validate_cv_params <- function(
       )
     }
 
-    # Set cv_folds to total samples for reporting
+    # Warn if LOO will be computationally expensive
+    # LOO is reasonable up to ~200 samples for metrics, ~100 for keras
+    if (total_samples > 100) {
+      cli::cli_alert_info(
+        "LOO CV with {total_samples} samples may be slow. Consider k-fold CV instead."
+      )
+    }
+
     cv_folds <- total_samples
   }
 
   # Warn about very small classes
-  small_classes <- names(class_counts[class_counts < 3])
+  small_classes <- names(class_counts[class_counts < min_samples_per_fold])
   if (length(small_classes) > 0) {
-    cli::cli_warn(
-      "Some classes have very few samples (< 3): {.val {small_classes}}. Cross-validation results for these classes may be unreliable."
+    cli::cli_alert_info(
+      "Some classes have few samples (< {min_samples_per_fold}): {.val {small_classes}}. CV results for these may be unreliable."
     )
   }
 
