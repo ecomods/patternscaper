@@ -12,7 +12,12 @@ nn_all_systematic_plots <- function(result_path, output_dir) {
   source(here::here("inst/analyses/functions/plot_theme.R"))
 
   # Read results
-  all_results <- read_rds(result_path)
+  all_results_files <- list.files(result_path, full.names = TRUE)
+
+  all_results <- map(all_results_files, read_rds)
+
+  # Put all results into one list instead of a list of lists
+  all_results <- flatten(all_results)
 
   # Prepare the data ---------------------------------------------------------
   # Extract all info from the list and put it in a single table
@@ -300,26 +305,33 @@ nn_all_systematic_plots <- function(result_path, output_dir) {
   )
 }
 
-result_path <- "inst/analyses/systematic_tests_neuralnet/"
-data_path <- "inst/analyses/data/"
+result_path <- "inst/analyses/pics_for_paper/systematic_tests/nn_metrics/"
+data_path <- "inst/analyses/data/systematic_tests/nn_metrics/"
 
 data_path_ecotones <- file.path(
   data_path,
-  "systematic_test_neuralnet_ecotone_results.rds"
+  "ecotones"
 )
+
 data_path_selforg <- file.path(
   data_path,
-  "systematic_test_neuralnet_selforg_results.rds"
+  "selforg"
 )
 
 output_dir_ecotones <- file.path(
   result_path,
-  "neuralnet_systematic_ecotone_plots"
+  "ecotones"
 )
 output_dir_selforg <- file.path(
   result_path,
-  "neuralnet_systematic_selforg_plots"
+  "selforg"
 )
 
-nn_all_systematic_plots(data_path_ecotones, output_dir_ecotones)
-nn_all_systematic_plots(data_path_selforg, output_dir_selforg)
+nn_all_systematic_plots(
+  result_path = data_path_ecotones,
+  output_dir = output_dir_ecotones
+)
+nn_all_systematic_plots(
+  result_path = data_path_selforg,
+  output_dir = output_dir_selforg
+)
