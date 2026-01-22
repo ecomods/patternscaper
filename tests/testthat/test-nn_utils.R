@@ -304,3 +304,202 @@ test_that("evaluate_cv_performance handles LOO correctly", {
   expect_equal(result$cv_method, "loo")
   expect_equal(result$cv_folds, 3)
 })
+
+# Tests for validate_cv_params() --------------------------------------------
+
+test_that("validate_cv_params returns correct structure for cv_method = 'none'", {
+  patterns <- factor(c(rep("A", 10), rep("B", 10), rep("C", 10)))
+
+  result <- validate_cv_params(
+    patterns = patterns,
+    cv_method = "none",
+    cv_folds = 5 # Should be ignored
+  )
+
+  expect_type(result, "list")
+  expect_named(
+    result,
+    c("cv_method", "cv_folds", "class_counts", "total_samples")
+  )
+  expect_equal(result$cv_method, "none")
+  expect_equal(result$cv_folds, 1L)
+  expect_equal(result$total_samples, 30)
+  expect_equal(as.vector(result$class_counts), c(10, 10, 10))
+})
+
+test_that("validate_cv_params maintains k-fold when dataset is adequate", {
+  patterns <- factor(c(rep("A", 20), rep("B", 20), rep("C", 20)))
+
+  result <- validate_cv_params(
+    patterns = patterns,
+    cv_method = "k-fold",
+    cv_folds = 5
+  )
+
+  expect_equal(result$cv_method, "k-fold")
+  expect_equal(result$cv_folds, 5)
+})
+
+test_that("validate_cv_params reduces cv_folds when necessary", {
+  # With 15 samples per class and min_samples_per_fold = 3,
+  # max_suitable_folds = floor(15/3) = 5
+  patterns <- factor(c(rep("A", 15), rep("B", 15), rep("C", 15)))
+
+  expect_message(
+    result <- validate_cv_params(
+      patterns = patterns,
+      cv_method = "k-fold",
+      cv_folds = 10, # Too many folds
+      min_samples_per_fold = 3
+    ),
+    "Reducing CV folds from 10 to 5"
+  )
+
+  expect_equal(result$cv_method, "k-fold")
+  expect_equal(result$cv_folds, 5)
+})
+
+test_that("validate_cv_params switches k-fold to LOO when needed", {
+  # With 5 samples per class and min_samples_per_fold = 3,
+  # max_suitable_folds = floor(5/3) = 1 < 2, so switch to LOO
+  patterns <- factor(c(rep("A", 5), rep("B", 5), rep("C", 5)))
+
+  expect_message(
+    result <- validate_cv_params(
+      patterns = patterns,
+      cv_method = "k-fold",
+      cv_folds = 5,
+      min_samples_per_fold = 3
+    ),
+    "Switching to LOO CV"
+  )
+
+  expect_equal(result$cv_method, "loo")
+  expect_equal(result$cv_folds, 15) # total_samples
+})
+
+test_that("validate_cv_params validates LOO requirements", {
+  # LOO requires at least 2 samples per class
+  patterns <- factor(c("A", rep("B", 10), rep("C", 10)))
+
+  expect_error(
+    validate_cv_params(
+      patterns = patterns,
+      cv_method = "loo",
+      cv_folds = 21
+    ),
+    "Cannot perform LOO CV.*only 1 sample"
+  )
+})
+
+test_that("validate_cv_params warns about computationally expensive LOO", {
+  # Create dataset with > 100 samples
+  patterns <- factor(rep(LETTERS[1:5], each = 25)) # 125 samples
+
+  expect_message(
+    result <- validate_cv_params(
+      patterns = patterns,
+      cv_method = "loo",
+      cv_folds = 125
+    ),
+    "LOO CV with 125 samples may be slow"
+  )
+
+  expect_equal(result$cv_method, "loo")
+  expect_equal(result$cv_folds, 125)
+})
+
+test_that("validate_cv_params detects low sample-to-predictor ratio", {
+  patterns <- factor(c(rep("A", 10), rep("B", 10)))
+
+  expect_message(
+    validate_cv_params(
+      patterns = patterns,
+      cv_method = "k-fold",
+      cv_folds = 5,
+      n_predictors = 50 # 20 samples / 50 predictors = 0.4 < 5
+    ),
+    "Low sample-to-predictor ratio"
+  )
+})
+
+test_that("validate_cv_params detects class imbalance", {
+  # 10:1 imbalance ratio
+  patterns <- factor(c(rep("A", 100), rep("B", 10)))
+
+  expect_message(
+    validate_cv_params(
+      patterns = patterns,
+      cv_method = "k-fold",
+      cv_folds = 5
+    ),
+    "Severe class imbalance.*ratio 10:1"
+  )
+})
+
+test_that("validate_cv_params warns about small classes", {
+  patterns <- factor(c(rep("A", 2), rep("B", 20), rep("C", 20)))
+
+  expect_message(
+    result <- validate_cv_params(
+      patterns = patterns,
+      cv_method = "k-fold",
+      cv_folds = 5,
+      min_samples_per_fold = 3
+    ),
+    "Some classes have few samples.*A"
+  )
+})
+
+test_that("validate_cv_params respects min_samples_per_fold parameter", {
+  patterns <- factor(c(rep("A", 10), rep("B", 10)))
+
+  # With min_samples_per_fold = 2, max_folds = 10/2 = 5
+  result <- validate_cv_params(
+    patterns = patterns,
+    cv_method = "k-fold",
+    cv_folds = 7,
+    min_samples_per_fold = 2
+  )
+
+  expect_equal(result$cv_folds, 5)
+
+  # With min_samples_per_fold = 5, max_folds = 10/5 = 2
+  result <- validate_cv_params(
+    patterns = patterns,
+    cv_method = "k-fold",
+    cv_folds = 7,
+    min_samples_per_fold = 5
+  )
+
+  expect_equal(result$cv_folds, 2)
+})
+
+test_that("validate_cv_params sets cv_folds to total_samples for LOO", {
+  patterns <- factor(c(rep("A", 15), rep("B", 15)))
+
+  result <- validate_cv_params(
+    patterns = patterns,
+    cv_method = "loo",
+    cv_folds = 30 # Should be maintained as total_samples
+  )
+
+  expect_equal(result$cv_method, "loo")
+  expect_equal(result$cv_folds, 30)
+})
+
+test_that("validate_cv_params handles edge case with exactly min samples", {
+  # Each class has exactly min_samples_per_fold * cv_folds samples
+  patterns <- factor(c(rep("A", 15), rep("B", 15))) # 15 = 3 * 5
+
+  result <- validate_cv_params(
+    patterns = patterns,
+    cv_method = "k-fold",
+    cv_folds = 5,
+    min_samples_per_fold = 3
+  )
+
+  # Should not reduce folds or switch methods
+  expect_equal(result$cv_method, "k-fold")
+  expect_equal(result$cv_folds, 5)
+})
