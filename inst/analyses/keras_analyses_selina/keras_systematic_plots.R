@@ -8,7 +8,13 @@ keras_all_systematic_plots <- function(result_path, output_dir) {
   source(here::here("inst/analyses/functions/plot_systematic_tests.R"))
   source(here::here("inst/analyses/functions/plot_theme.R"))
 
-  all_results <- read_rds(result_path)
+  # Read results
+  all_results_files <- list.files(result_path, full.names = TRUE)
+
+  all_results <- map(all_results_files, read_rds)
+
+  # Put all results into one list instead of a list of lists
+  all_results <- flatten(all_results)
 
   # Prepare the data ---------------------------------------------------------
   # Extract all info from the list and put it in a single table
@@ -266,21 +272,26 @@ keras_all_systematic_plots <- function(result_path, output_dir) {
 }
 
 # Apply the function for ecotones and selfor landscapes
-
-result_path <- "inst/analyses/keras_analyses_selina/"
-data_path <- "inst/analyses/data/"
+result_path <- "inst/analyses/pics_for_paper/systematic_tests/keras/"
+data_path <- "inst/analyses/data/systematic_tests/keras/"
 
 data_path_ecotones <- paste0(
   data_path,
-  "systematic_test_results_keras_ecotones.rds"
+  "ecotones"
 )
 data_path_selforg <- paste0(
   data_path,
-  "systematic_test_results_keras_selforg.rds"
+  "selforg"
 )
 
-output_dir_ecotones <- file.path(result_path, "figures_ecotones")
-output_dir_selforg <- file.path(result_path, "figures_selforg")
+output_dir_ecotones <- file.path(result_path, "ecotones")
+output_dir_selforg <- file.path(result_path, "selforg")
 
-keras_all_systematic_plots(data_path_ecotones, output_dir_ecotones)
-keras_all_systematic_plots(data_path_selforg, output_dir_selforg)
+keras_all_systematic_plots(
+  result_path = data_path_ecotones,
+  output_dir = output_dir_ecotones
+)
+keras_all_systematic_plots(
+  result_path = data_path_selforg,
+  output_dir = output_dir_selforg
+)
