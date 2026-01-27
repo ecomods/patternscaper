@@ -198,21 +198,23 @@ create_systematic_summaries <- function(df_raw, grouping_vars) {
     summarize(
       # Precision-based worst class
       worst_class_precision = mode_random(worst_class_precision),
-      worst_precision_entropy = entropy(worst_class_precision),
+      worst_precision_entropy = entropy(worst_precision),
       mean_worst_precision = mean(worst_precision, na.rm = TRUE),
 
       # Recall-based worst class
       worst_class_recall = mode_random(worst_class_recall),
-      worst_recall_entropy = entropy(worst_class_recall),
+      worst_recall_entropy = entropy(worst_recall),
       mean_worst_recall = mean(worst_recall, na.rm = TRUE),
 
       # F1-based worst class
       worst_class_f1 = mode_random(worst_class_f1),
-      worst_f1_entropy = entropy(worst_class_f1),
+      worst_f1_entropy = entropy(worst_f1),
       mean_worst_f1 = mean(worst_f1, na.rm = TRUE),
 
       .by = all_of(grouping_vars)
-    ) |>
+    )
+
+  df_worst_summary <- df_worst_summary |>
     mutate(
       across(
         where(is.numeric) & !matches("mean_|entropy|alpha"),
