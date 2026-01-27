@@ -37,271 +37,364 @@ nn_all_systematic_plots <- function(result_path, output_dir) {
     return(df)
   })
 
+  # rename column for number of inputs metrics
+  summaries <- map(summaries, function(df) {
+    df |>
+      rename(
+        Inputs = inputmetrics
+      )
+  })
+
+  # Order characters (neurons and layers) numerically
+  summaries <- map(summaries, function(df) {
+    df$neurons <- factor(
+      df$neurons,
+      levels = as.character(
+        sort(
+          as.numeric(
+            unique(df$neurons)
+          )
+        )
+      )
+    )
+    df$n_layers <- factor(
+      df$n_layers,
+      levels = as.character(
+        sort(
+          as.numeric(
+            unique(df$n_layers)
+          )
+        )
+      )
+    )
+    return(df)
+  })
+
   df_summary <- summaries$accuracy
   df_worst_summary <- summaries$worst_classes
 
-  # Plot accuracy ---------------------------------------------------------------
-  # Create color scale
+  # Get all unique classes across all worst class columns
+  all_classes <- unique(c(
+    df_worst_summary$worst_class_precision,
+    df_worst_summary$worst_class_recall,
+    df_worst_summary$worst_class_f1
+  ))
+
+  # Set consistent factor levels for all worst class columns
+  df_worst_summary <- df_worst_summary |>
+    mutate(
+      worst_class_precision = factor(
+        worst_class_precision,
+        levels = all_classes
+      ),
+      worst_class_recall = factor(worst_class_recall, levels = all_classes),
+      worst_class_f1 = factor(worst_class_f1, levels = all_classes)
+    )
+
+  # Create color scale ------------------------------------------------
   scale_params <- create_accuracy_scale(
     range(df_summary$mean_accuracy),
     threshold = 0.8
   )
+  # Plot functions ---------------------------------------------------------------
+  plot_accuracy <- function(
+    data,
+    current_n,
+    fill_variable,
+    fill_name
+  ) {
+    ggplot(
+      data |>
+        filter(n_landscapes == current_n),
+      aes(x = neurons, y = n_layers, fill = !!sym(fill_variable))
+    ) +
+      geom_tile(color = "white") +
+      ggh4x::facet_nested(
+        "Metric selection" + metric ~ "Number of inputs" + Inputs,
+        scales = "free_x",
+        space = "free"
+      ) +
+      scale_fill_gradientn(
+        colours = scale_params$colours,
+        values = scale_params$values,
+        limits = scale_params$limits,
+        name = fill_name
+      ) +
+      labs(
+        x = "Number of neurons",
+        y = "Number of layers",
+        title = paste("Training landscapes:", current_n)
+      ) +
+      theme_systematic_tests()
+  }
 
-  p_accuracy <- ggplot(
-    df_summary,
-    aes(x = layers, y = n_landscapes, fill = mean_accuracy)
-  ) +
-    geom_tile(color = "white") +
-    facet_grid(
-      metric ~ inputmetrics,
-      scales = "free_x",
-      labeller = label_both
-    ) +
-    scale_fill_gradientn(
-      colours = scale_params$colours,
-      values = scale_params$values,
-      limits = scale_params$limits,
-      name = "Mean Accuracy"
-    ) +
-    labs(
-      x = "Layer-architecture",
-      y = "Number of training landscapes"
-    ) +
-    theme_systematic_tests()
+  # plot class-based results
+  plot_class <- function(
+    data,
+    current_n,
+    fill_variable,
+    fill_name,
+    alpha_variable
+  ) {
+    # get all levels for consistent coloring
+    all_levels <- levels(data[[fill_variable]])
 
-  # Plot standard deviation ------------------------------------------------------
-  p_sd_accuracy <- ggplot(
-    df_summary,
-    aes(x = layers, y = n_landscapes, fill = sd_accuracy)
-  ) +
-    geom_tile(color = "white") +
-    facet_grid(
-      metric ~ inputmetrics,
-      scales = "free_x",
-      labeller = label_both
-    ) +
-    scale_fill_viridis_c(
-      option = "viridis",
-      direction = -1,
-      name = "SD Accuracy"
-    ) +
-    labs(
-      x = "Layer-architecture",
-      y = "Number of training landscapes"
-    ) +
-    theme_systematic_tests()
-  # Precision-based worst class plot ----------------------------------
-  p_worst_precision <- ggplot(
-    df_worst_summary,
-    aes(
-      x = layers,
-      y = n_landscapes,
-      fill = worst_class_precision,
-      alpha = alpha_precision
+    # Filter the data
+    plot_data <- data |> filter(n_landscapes == current_n)
+
+    # Ensure the fill variable has all levels even if not present
+    plot_data[[fill_variable]] <- factor(
+      plot_data[[fill_variable]],
+      levels = all_levels
     )
-  ) +
-    geom_tile(color = "white") +
-    facet_grid(
-      metric ~ inputmetrics,
-      scales = "free_x",
-      labeller = label_both
-    ) +
-    scale_fill_manual(
-      values = class_colors,
-      na.value = "grey90",
-      drop = FALSE
-    ) +
-    scale_alpha(range = c(0.3, 1), guide = "none") +
-    labs(
-      x = "Layer-architecture",
-      y = "Number of training landscapes",
-      fill = "Worst class\n(precision)",
-      caption = "Transparency indicates entropy (consistency) across replicates"
-    ) +
-    theme_systematic_tests()
 
-  # Recall-based worst class plot
-  p_worst_recall <- ggplot(
-    df_worst_summary,
-    aes(
-      x = layers,
-      y = n_landscapes,
-      fill = worst_class_recall,
-      alpha = alpha_recall
+    ggplot(
+      plot_data,
+      aes(
+        x = neurons,
+        y = n_layers,
+        fill = !!sym(fill_variable),
+        alpha = !!sym(alpha_variable)
+      )
+    ) +
+      geom_tile(color = "white", show.legend = TRUE) +
+      ggh4x::facet_nested(
+        "Metric selection" + metric ~ "Number of inputs" + Inputs,
+        scales = "free_x",
+        space = "free"
+      ) +
+      scale_fill_manual(
+        values = class_colors,
+        na.value = "grey90",
+        drop = FALSE,
+        limits = levels(data[[fill_variable]])
+      ) +
+      scale_alpha(range = c(0.3, 1), guide = "none") +
+      labs(
+        x = "Number of neurons",
+        y = "Number of layers",
+        fill = fill_name,
+        caption = "Transparency indicates entropy (consistency) across replicates"
+      ) +
+      theme_systematic_tests()
+  }
+
+  # Plot other continuous variables
+  plot_continuous <- function(
+    data,
+    current_n,
+    fill_variable,
+    fill_name,
+    limits = NULL
+  ) {
+    ggplot(
+      data |> filter(n_landscapes == current_n),
+      aes(x = neurons, y = n_layers, fill = !!sym(fill_variable))
+    ) +
+      geom_tile(color = "white") +
+      ggh4x::facet_nested(
+        "Metric selection" + metric ~ "Number of inputs" + Inputs,
+        scales = "free_x",
+        space = "free"
+      ) +
+      scale_fill_viridis_c(
+        option = "viridis",
+        direction = -1,
+        name = fill_name,
+        limits = limits
+      ) +
+      labs(
+        x = "Number of neurons",
+        y = "Number of layers",
+        title = paste("Training landscapes:", current_n)
+      ) +
+      theme_systematic_tests()
+  }
+
+  # Make the plots (separately for each n_landscapes) ----------------------------
+  p_accuracy <- map(unique(df_summary$n_landscapes), function(current_n) {
+    plot_accuracy(
+      data = df_summary,
+      current_n = current_n,
+      fill_variable = "mean_accuracy",
+      fill_name = "Mean Accuracy"
     )
-  ) +
-    geom_tile(color = "white") +
-    facet_grid(
-      metric ~ inputmetrics,
-      scales = "free_x",
-      labeller = label_both
-    ) +
-    scale_fill_manual(
-      values = class_colors,
-      na.value = "grey90",
-      drop = FALSE
-    ) +
-    scale_alpha(range = c(0.3, 1), guide = "none") +
-    labs(
-      x = "Layer-architecture",
-      y = "Number of training landscapes",
-      fill = "Worst class\n(recall)",
-      caption = "Transparency indicates entropy (consistency) across replicates"
-    ) +
-    theme_systematic_tests()
+  })
 
-  # F1-based worst class plot
-  p_worst_f1 <- ggplot(
-    df_worst_summary,
-    aes(
-      x = layers,
-      y = n_landscapes,
-      fill = worst_class_f1,
-      alpha = alpha_f1
+  p_worst_precision <- map(
+    unique(df_worst_summary$n_landscapes),
+    function(current_n) {
+      plot_class(
+        data = df_worst_summary,
+        current_n = current_n,
+        fill_variable = "worst_class_precision",
+        fill_name = "Worst class\n(precision)",
+        alpha_variable = "alpha_precision"
+      )
+    }
+  )
+
+  p_worst_recall <- map(
+    unique(df_worst_summary$n_landscapes),
+    function(current_n) {
+      plot_class(
+        data = df_worst_summary,
+        current_n = current_n,
+        fill_variable = "worst_class_recall",
+        fill_name = "Worst class\n(recall)",
+        alpha_variable = "alpha_recall"
+      )
+    }
+  )
+
+  p_worst_f1 <- map(unique(df_worst_summary$n_landscapes), function(current_n) {
+    plot_class(
+      data = df_worst_summary,
+      current_n = current_n,
+      fill_variable = "worst_class_f1",
+      fill_name = "Worst class\n(F1)",
+      alpha_variable = "alpha_f1"
     )
-  ) +
-    geom_tile(color = "white") +
-    facet_grid(
-      metric ~ inputmetrics,
-      scales = "free_x",
-      labeller = label_both
-    ) +
-    scale_fill_manual(
-      values = class_colors,
-      na.value = "grey90",
-      drop = FALSE
-    ) +
-    scale_alpha(range = c(0.3, 1), guide = "none") +
-    labs(
-      x = "Layer-architecture",
-      y = "Number of training landscapes",
-      fill = "Worst class\n(F1)",
-      caption = "Transparency indicates entropy (consistency) across replicates"
-    ) +
-    theme_systematic_tests()
+  })
+  # Continuous plots -------------------------------------------------------------
+  # Calculate limits once for each variable
+  sd_limits <- range(df_summary$sd_accuracy, na.rm = TRUE)
+  mean_worst_precision_limits <- range(
+    df_worst_summary$mean_worst_precision,
+    na.rm = TRUE
+  )
+  mean_worst_recall_limits <- range(
+    df_worst_summary$mean_worst_recall,
+    na.rm = TRUE
+  )
+  mean_worst_f1_limits <- range(df_worst_summary$mean_worst_f1, na.rm = TRUE)
 
-  # Mean precision of worst class
-  p_mean_worst_precision <- ggplot(
-    df_worst_summary,
-    aes(x = layers, y = n_landscapes, fill = mean_worst_precision)
-  ) +
-    geom_tile(color = "white") +
-    facet_grid(
-      metric ~ inputmetrics,
-      scales = "free_x",
-      labeller = label_both
-    ) +
-    scale_fill_viridis_c(
-      option = "viridis",
-      direction = -1,
-      name = "Mean Worst\nPrecision"
-    ) +
-    labs(
-      x = "Layer-architecture",
-      y = "Number of training landscapes"
-    ) +
-    theme_systematic_tests()
+  p_sd_accuracy <- map(unique(df_summary$n_landscapes), function(current_n) {
+    plot_continuous(
+      data = df_summary,
+      current_n = current_n,
+      fill_variable = "sd_accuracy",
+      fill_name = "SD Accuracy",
+      limits = sd_limits
+    )
+  })
+  p_mean_worst_precision <- map(
+    unique(df_worst_summary$n_landscapes),
+    function(current_n) {
+      plot_continuous(
+        data = df_worst_summary,
+        current_n = current_n,
+        fill_variable = "mean_worst_precision",
+        fill_name = "Mean Worst\nPrecision",
+        limits = mean_worst_precision_limits
+      )
+    }
+  )
 
-  # Mean recall of worst class
-  p_mean_worst_recall <- ggplot(
-    df_worst_summary,
-    aes(x = layers, y = n_landscapes, fill = mean_worst_recall)
-  ) +
-    geom_tile(color = "white") +
-    facet_grid(
-      metric ~ inputmetrics,
-      scales = "free_x",
-      labeller = label_both
-    ) +
-    scale_fill_viridis_c(
-      option = "viridis",
-      direction = -1,
-      name = "Mean Worst\nRecall"
-    ) +
-    labs(
-      x = "Layer-architecture",
-      y = "Number of training landscapes"
-    ) +
-    theme_systematic_tests()
+  p_mean_worst_recall <- map(
+    unique(df_worst_summary$n_landscapes),
+    function(current_n) {
+      plot_continuous(
+        data = df_worst_summary,
+        current_n = current_n,
+        fill_variable = "mean_worst_recall",
+        fill_name = "Mean Worst\nRecall",
+        limits = mean_worst_recall_limits
+      )
+    }
+  )
 
-  # Mean F1 of worst class
-  p_mean_worst_f1 <- ggplot(
-    df_worst_summary,
-    aes(x = layers, y = n_landscapes, fill = mean_worst_f1)
-  ) +
-    geom_tile(color = "white") +
-    facet_grid(
-      metric ~ inputmetrics,
-      scales = "free_x",
-      labeller = label_both
-    ) +
-    scale_fill_viridis_c(
-      option = "viridis",
-      direction = -1,
-      name = "Mean Worst\nF1"
-    ) +
-    labs(
-      x = "Layer-architecture",
-      y = "Number of training landscapes"
-    ) +
-    theme_systematic_tests()
+  p_mean_worst_f1 <- map(
+    unique(df_worst_summary$n_landscapes),
+    function(current_n) {
+      plot_continuous(
+        data = df_worst_summary,
+        current_n = current_n,
+        fill_variable = "mean_worst_f1",
+        fill_name = "Mean Worst\nF1",
+        limits = mean_worst_f1_limits
+      )
+    }
+  )
+
+  # Function to wrap plots into one figure
+  wrap_all_plots <- function(plot_list) {
+    patchwork::wrap_plots(plot_list) +
+      patchwork::plot_layout(
+        nrow = 2,
+        ncol = 2,
+        guides = "collect",
+        axes = "collect",
+        axis_titles = "collect"
+      )
+  }
+
+  # Wrap all plots into one figure
+  p_accuracy <- wrap_all_plots(p_accuracy)
+  p_sd_accuracy <- wrap_all_plots(p_sd_accuracy)
+  p_worst_precision <- wrap_all_plots(p_worst_precision)
+  p_worst_recall <- wrap_all_plots(p_worst_recall)
+  p_worst_f1 <- wrap_all_plots(p_worst_f1)
+  p_mean_worst_precision <- wrap_all_plots(p_mean_worst_precision)
+  p_mean_worst_recall <- wrap_all_plots(p_mean_worst_recall)
+  p_mean_worst_f1 <- wrap_all_plots(p_mean_worst_f1)
 
   # Save all plots ------------------------------------------------------------
 
   ggsave(
     filename = file.path(output_dir, "p_accuracy.png"),
     plot = p_accuracy,
-    width = 10,
-    height = 7
+    width = 14,
+    height = 10
   )
 
   ggsave(
     filename = file.path(output_dir, "p_sd_accuracy.png"),
     plot = p_sd_accuracy,
-    width = 10,
-    height = 7
+    width = 14,
+    height = 10
   )
 
   ggsave(
     filename = file.path(output_dir, "p_worst_precision.png"),
     plot = p_worst_precision,
-    width = 10,
-    height = 7
+    width = 14,
+    height = 10
   )
 
   ggsave(
     filename = file.path(output_dir, "p_worst_recall.png"),
     plot = p_worst_recall,
-    width = 10,
-    height = 7
+    width = 14,
+    height = 10
   )
 
   ggsave(
     filename = file.path(output_dir, "p_worst_f1.png"),
     plot = p_worst_f1,
-    width = 10,
-    height = 7
+    width = 14,
+    height = 10
   )
 
   ggsave(
     filename = file.path(output_dir, "p_mean_worst_precision.png"),
     plot = p_mean_worst_precision,
-    width = 10,
-    height = 7
+    width = 14,
+    height = 10
   )
 
   ggsave(
     filename = file.path(output_dir, "p_mean_worst_recall.png"),
     plot = p_mean_worst_recall,
-    width = 10,
-    height = 7
+    width = 14,
+    height = 10
   )
 
   ggsave(
     filename = file.path(output_dir, "p_mean_worst_f1.png"),
     plot = p_mean_worst_f1,
-    width = 10,
-    height = 7
+    width = 14,
+    height = 10
   )
 }
 
