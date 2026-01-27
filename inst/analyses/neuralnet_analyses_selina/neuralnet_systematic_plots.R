@@ -174,6 +174,7 @@ nn_all_systematic_plots <- function(result_path, output_dir) {
         x = "Number of neurons",
         y = "Number of layers",
         fill = fill_name,
+        title = paste("Training landscapes:", current_n),
         caption = "Transparency indicates entropy (consistency) across replicates"
       ) +
       theme_systematic_tests()
