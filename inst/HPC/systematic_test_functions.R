@@ -121,9 +121,9 @@ train_and_validate <- function(
 
   # Calculate layer configuration based on number of layers
   # Scale neurons proportionally to input metrics
-  base_neurons <- round(n_input_metrics * n_neurons, 0) # Fixed: use n_input_metrics directly
+  base_neurons <- round(n_input_metrics * n_neurons, 0)
 
-  hidden_layers <- rep(base_neurons, nlayers) # Fixed: use base_neurons for all layers
+  hidden_layers <- rep(base_neurons, nlayers)
   layer_name <- paste(hidden_layers, collapse = "-")
 
   # Train model
