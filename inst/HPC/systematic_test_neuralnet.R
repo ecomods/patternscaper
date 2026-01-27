@@ -82,7 +82,7 @@ n_test_landscapes <- 100
 
 config <- tidyr::expand_grid(
   rep = rep,
-  training_size = c(50, 100, 150),
+  training_size = c(50, 100, 150, 200),
   n_input_metrics = c(5, 7, 10, 13, 15, 20),
   metrics_method = c(
     "coeffvar_all",
