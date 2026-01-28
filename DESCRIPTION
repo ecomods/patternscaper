@@ -38,3 +38,4 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 Config/Needs/website: rmarkdown
+URL: https://ecomods.github.io/ecotoneClassifyR/
