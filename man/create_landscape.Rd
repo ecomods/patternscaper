@@ -5,8 +5,8 @@
 \title{Create a Landscape with Specified Pattern}
 \usage{
 create_landscape(
-  pattern = c("random", "bare", "dense", "sharp", "diffuse", "curvy", "fingers",
-    "clustered", "bands", "spots", "gaps", "stripes", "labyrinth"),
+  pattern = c("random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
+    "bands", "spots", "gaps", "labyrinth"),
   name = NULL,
   custom_pattern = NULL,
   ...
@@ -14,8 +14,8 @@ create_landscape(
 }
 \arguments{
 \item{pattern}{Character. pattern of landscape to generate: "random", "sharp", "diffuse",
-"curvy", "fingers", "bands", "clusters", "spots", "gaps",
-"stripes", "labyrinth"}
+"fingers", "bands", "clusters", "spots", "gaps",
+"labyrinth"}
 
 \item{name}{Character. Optional name for the landscape (default: NULL).}
 
@@ -74,8 +74,6 @@ bands_rotated <- create_landscape(
 
 \code{\link{create_landscape_diffuse_treeline}} for "diffuse" pattern parameters
 
-\code{\link{create_landscape_curvy_treeline}} for "curvy" pattern parameters
-
 \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
 
 \code{\link{create_landscape_clustered}} for "clusters" pattern parameters
@@ -85,8 +83,6 @@ bands_rotated <- create_landscape(
 \code{\link{create_landscape_spots}} for "spots" pattern parameters
 
 \code{\link{create_landscape_gaps}} for "gaps" pattern parameters
-
-\code{\link{create_landscape_stripes}} for "stripes" pattern parameters
 
 \code{\link{create_landscape_labyrinth}} for "labyrinth" pattern parameters
 }

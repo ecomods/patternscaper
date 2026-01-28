@@ -18,6 +18,7 @@ plot_landscape(
 - "name": uses only the landscape name
 - "pattern": uses only the landscape pattern
 - "both": uses "name (pattern)" format
+- "none": no title
 - Any other string: used as a custom title
 Default: "pattern"}
 

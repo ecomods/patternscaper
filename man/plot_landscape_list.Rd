@@ -23,6 +23,7 @@ plot_landscape_list(
 - "name": uses only the landscape name
 - "pattern": uses only the landscape pattern
 - "both": uses "name (pattern)" format
+- "none": no title
 - A character vector with custom titles for each landscape. If providing
 `subset_index`, ensure titles match the subset length.
 Default is "pattern"}

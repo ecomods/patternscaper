@@ -2,32 +2,42 @@
 % Please edit documentation in R/nn_metrics.R
 \name{apply_nn_metrics}
 \alias{apply_nn_metrics}
-\title{Apply Neural Network (from neuralnet package) for Landscape Classification}
+\title{Apply Neural Network for Landscape Classification}
 \usage{
 apply_nn_metrics(landscapes, nn_model, return_performance = FALSE)
 }
 \arguments{
-\item{landscapes}{landscape object, or list of landscape objects. Landscape(s) to classify.}
+\item{landscapes}{Landscape object (single) or list of landscape objects to classify.
+Landscapes must have valid raster data that can be analyzed by landscapemetrics.}
 
-\item{nn_model}{List. Neural network model from train_nn_metrics().}
+\item{nn_model}{List. Trained model object returned from train_nn_metrics().
+Must contain elements: model, scaling, classes, features, and features_level.}
+
+\item{return_performance}{Logical. If TRUE and landscapes contain known classes
+(pattern attribute), calculate and return performance metrics. If FALSE or
+classes unknown, only return predictions. Default: FALSE.}
 }
 \value{
-When actual classes unavailable: tibble with columns:
+When return_performance = FALSE or actual classes unavailable:
+  Tibble with columns:
   \describe{
     \item{landscape_id}{Numeric landscape identifier}
     \item{landscape_name}{Character landscape name (if available)}
     \item{predicted_class}{Predicted landscape pattern}
-    \item{confidence}{Prediction confidence (max probability)}
-    \item{<class_name>}{Probability for each trained class}
+    \item{confidence}{Prediction confidence (maximum probability across classes)}
+    \item{<class_name>}{Probability for each class the model was trained on}
   }
 
-  When actual classes available: List containing:
+  When return_performance = TRUE and actual classes available:
+  List containing:
   \describe{
     \item{predictions}{Tibble as above, plus actual_class column}
-    \item{performance}{Performance metrics from evaluate_cv_performance()}
+    \item{performance}{Performance metrics from evaluate_cv_performance():
+      confusion matrix, accuracy, and per-class recall/precision/F1}
   }
 }
 \description{
 Applies a trained neural network model to classify new landscapes. The function
-automatically calculates the required landscape metrics needed by the model.
+automatically calculates the required landscape metrics needed by the model
+and scales them appropriately.
 }

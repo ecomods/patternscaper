@@ -4,14 +4,28 @@
 \alias{apply_nn_landscapes}
 \title{Apply a Keras CNN Model for Landscape Classification}
 \usage{
-apply_nn_landscapes(landscapes, nn_model, return_performance = FALSE)
+apply_nn_landscapes(
+  landscapes,
+  nn_model,
+  return_performance = FALSE,
+  verbose = TRUE
+)
 }
 \arguments{
-\item{landscapes}{landscape object, or list of landscape objects. Landscape(s) to classify.}
+\item{landscapes}{landscape object, or list of landscape objects. Landscape(s) to classify.
+Landscapes will be automatically resized to match the model's input dimensions using
+nearest neighbor interpolation, which preserves categorical cell values.
+**Note**: Input landscapes must contain categorical/discrete habitat data (e.g., 0/1 for
+two habitat types, or 0/1/2 for three types). Continuous data (e.g., elevation,
+gradients) is not supported.}
 
 \item{nn_model}{List. CNN model from train_nn_landscapes().}
 
 \item{return_performance}{Logical. Whether to return performance metrics when actual classes are available (default: FALSE).}
+
+\item{verbose}{Logical. Show informational messages and performance summaries (default: TRUE).
+When TRUE, displays resize operations and performance evaluation results.
+When FALSE, runs silently. Warnings about unknown classes or invalid data always appear.}
 }
 \value{
 When actual classes unavailable or return_performance=FALSE: tibble with columns:

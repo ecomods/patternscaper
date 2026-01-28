@@ -17,20 +17,47 @@ train_nn_metrics(
 )
 }
 \arguments{
-\item{metrics}{tibble. Metrics from calculate_landscape_metrics().}
+\item{metrics}{Tibble or data frame. Output from calculate_landscape_metrics()
+containing landscape metrics in long format with required columns:
+landscape_id, landscape_name, pattern, level, class, id, metric, value.}
 
-\item{metrics_selected}{Character vector. Names of metrics to use as features.}
+\item{metrics_selected}{Character vector of metric names to use as features,
+or NULL to use all available metrics. Default: NULL.}
 
-\item{hidden_layers}{List of Integers. Number of neurons in each hidden layer (default: c(3,3)).}
+\item{cv_method}{Character. Cross-validation method: "none", "k-fold", or "loo".
+May be automatically adjusted based on dataset size via validate_cv_params().
+Default: "k-fold".}
 
-\item{threshold}{Numeric. Threshold for the partial derivatives of the error function as stopping criteria in neuralnet. Default: 0.01,}
+\item{cv_folds}{Integer. Number of folds for k-fold cross-validation.
+May be automatically reduced if dataset is too small. Default: 5.}
 
-\item{stepmax}{= Ingeger. Maximum steps for the training of the neural network in neuralnet. Reaching this maximum leads to a stop of the neural network's training process.Default: 1e+05,}
+\item{hidden_layers}{Integer vector. Number of neurons in each hidden layer.
+Length determines number of hidden layers. Default: 6 (single hidden layer with 6 neurons).}
+
+\item{threshold}{Numeric. Threshold for partial derivatives as stopping criteria.
+Smaller values = more training iterations. Default: 0.01.}
+
+\item{stepmax}{Integer. Maximum number of training steps. Default: 1e+05.}
+
+\item{model_path}{Character. Optional file path (must end in .rds) to save
+the trained model. Default: NULL (no saving).}
+
+\item{verbose}{Logical. Print training details and cross-validation results.
+Default: TRUE.}
 }
 \value{
-List. Trained neural network model and associated metadata.
+List containing:
+  \describe{
+    \item{model}{Trained neuralnet model object}
+    \item{features}{Character vector of metric names used as features}
+    \item{features_level}{Character. Metric aggregation level ("landscape" or "class")}
+    \item{scaling}{List with 'center' and 'scale' parameters for normalization}
+    \item{classes}{Character vector of class names in alphabetical order}
+    \item{performance}{List from evaluate_cv_performance() with confusion matrix,
+      accuracy, per-class metrics, and validation results. NULL if cv_method = "none".}
+  }
 }
 \description{
 Trains a multi-layer neural network model to classify landscapes
-based on metrics. Uses neuralnet package.
+based on landscape metrics. Uses the neuralnet package.
 }

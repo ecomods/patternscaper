@@ -6,15 +6,16 @@
 \usage{
 create_training_landscapes(
   n = 50,
-  patterns = c("random", "bare", "dense", "sharp", "diffuse", "curvy", "fingers",
-    "clustered", "bands", "spots", "gaps", "stripes", "labyrinth"),
+  patterns = c("random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
+    "bands", "spots", "gaps", "labyrinth"),
   width = 100,
   height = 100,
   add_rotation = TRUE,
-  rotation_angles = c(0, 45, 90, 135),
+  rotation_angles = 0:360,
   params_list = NULL,
   pattern_probs = NULL,
-  balance_patterns = TRUE
+  balance_patterns = TRUE,
+  max_retries = 3
 )
 }
 \arguments{
@@ -36,8 +37,10 @@ create_training_landscapes(
 By default, all patterns have equal probability (1) of being chosen.
 Must be the same length as 'patterns' (default NULL which means equal probability).}
 
-\item{balance_patterns}{Logical. If TRUE, ensures all landscape patterns appear approximately equally.
-This overrides pattern_probs unless it's explicitly set. (default: TRUE)}
+\item{balance_patterns}{Logical. If TRUE, ensures all landscape patterns appear approximately equally,
+overriding any weights specified in pattern_probs. (default: TRUE)}
+
+\item{max_retries}{Integer. Maximum number of retries for failed landscape generations (default: 3).}
 }
 \value{
 A named list of landscape objects. Names indicate the pattern and optional rotation.

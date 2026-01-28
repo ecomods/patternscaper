@@ -4,21 +4,33 @@
 \alias{validate_cv_params}
 \title{Validate and adjust cross-validation parameters}
 \usage{
-validate_cv_params(patterns, cv_method, cv_folds, n_predictors = NULL)
+validate_cv_params(
+  patterns,
+  cv_method,
+  cv_folds,
+  n_predictors = NULL,
+  min_samples_per_fold = 3
+)
 }
 \arguments{
 \item{patterns}{Factor or character vector. Class labels for training data.}
 
-\item{cv_method}{Character. Cross-validation method: "none", "k-fold", or "loo".}
+\item{cv_method}{Character. Cross-validation method: "none", "k-fold", or "loo".
+Already validated by calling function.}
 
-\item{cv_folds}{Integer. Number of folds for k-fold CV.}
+\item{cv_folds}{Integer. Number of folds for k-fold CV.
+Already validated by calling function when cv_method = "k-fold".}
 
-\item{n_predictors}{Integer. Number of predictor variables (optional, for sample-to-predictor ratio check).}
+\item{n_predictors}{Integer. Number of predictor variables (optional, for
+sample-to-predictor ratio check).}
+
+\item{min_samples_per_fold}{Integer. Minimum samples per class per fold for
+k-fold CV (default: 3).}
 }
 \value{
 List with validated/adjusted CV parameters:
   \item{cv_method}{Adjusted CV method (may switch from k-fold to loo)}
-  \item{cv_folds}{Adjusted number of folds}
+  \item{cv_folds}{Integer number of folds, or 1L for "none"}
   \item{class_counts}{Named vector of sample counts per class}
   \item{total_samples}{Total number of samples}
 }

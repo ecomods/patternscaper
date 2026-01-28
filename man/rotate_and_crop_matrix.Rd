@@ -11,24 +11,25 @@ rotate_and_crop_matrix(mat, rotation, target_width, target_height)
 
 \item{rotation}{Numeric value specifying the rotation angle (in degrees).}
 
-\item{target_width}{Integer specifying the desired width of the cropped matrix.}
+\item{target_width}{Integer specifying the desired number of columns in the output.}
 
-\item{target_height}{Integer specifying the desired height of the cropped matrix.}
+\item{target_height}{Integer specifying the desired number of rows in the output.}
 }
 \value{
-A matrix of size \code{target_width} x \code{target_height}, rotated
-  and cropped from the input landscape, with missing values filled.
+A matrix with \code{target_height} rows and \code{target_width} columns,
+  rotated and cropped from the input landscape, with missing values filled.
 }
 \description{
 Rotates a given landscape matrix by a specified angle and crops the rotated
-matrix to the target width and height, centering the crop. Any missing values
-after cropping are filled with the values of their nearest neighbors.
+matrix to the target dimensions, centering the crop. Any missing values
+after cropping are filled using nearest neighbor interpolation and binarized.
 }
 \details{
 The function uses \code{omnibus::rotateMatrix} for rotation and
   centers the crop on the rotated matrix. Missing values after cropping are
-  filled using the \code{fill_na_with_nearest} function.
+  filled using the \code{fill_and_binarize_matrix} function.
 }
 \seealso{
-\code{\link[omnibus]{rotateMatrix}}, \code{fill_na_with_nearest}
+\code{\link[omnibus]{rotateMatrix}}, \code{fill_and_binarize_matrix}
 }
+\keyword{internal}

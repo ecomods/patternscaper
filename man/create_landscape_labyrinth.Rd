@@ -7,10 +7,10 @@
 create_landscape_labyrinth(
   width = 100,
   height = 100,
-  frequency = 5,
+  frequency = 3,
   veg_threshold = 0.5,
-  band_fuzziness = 0.1,
-  octaves = 6
+  band_fuzziness = 0.08,
+  octaves = 2
 )
 }
 \arguments{
@@ -19,21 +19,28 @@ create_landscape_labyrinth(
 \item{height}{Integer. Number of rows in the landscape (default: 100).}
 
 \item{frequency}{Numeric. Controls the spatial scale of the noise pattern:
-Lower values produce broad, smooth bands, higher values produce finer, maze-like structures (default: 5).}
+Lower values produce broad, smooth bands, higher values produce finer, maze-like structures (default: 3).}
 
 \item{veg_threshold}{Numeric between 0 and 1. Defines the cutoff value that separates vegetated
 from non-vegetated cells. Values above the threshold become vegetation.
 Adjusting this changes the overall proportion of vegetated area (default: 0.5).}
 
-\item{band_fuzziness}{Numeric between 0 and 0.5. Controls the width of the
-probabilistic transition zone at vegetation boundaries. At 0, boundaries
-are sharp and crisp. Values of 0.1-0.2 create natural-looking irregular
-edges. Values above 0.3 produce increasingly random patterns as the fuzzy
-zone becomes wider than the structured features (default: 0.1).}
+\item{band_fuzziness}{Numeric between 0 and 0.5. Controls the amount of
+geometric edge roughness applied *after* thresholding. At 0, vegetation 
+boundaries are sharp and fully deterministic. Small values (≈ 0.05–0.1) 
+introduce slight, irregular boundary perturbations without changing the 
+overall topology of the pattern. Larger values progressively erode vegetation 
+edges and can fragmet bands if set too high. This parameter affects boundary 
+geometry only and does not influence the global structure or connectivity 
+of the labyrinth. (default: 0.08)}
 
-\item{octaves}{Integer >= 1. The number of layers of noise combined to
-generate the pattern. A single octave gives smooth, simple structures.
-More octaves add detail and complexity, similar to fractal patterns (default: 6).}
+\item{octaves}{Integer >= 1. Number of noise layers (octaves) combined to
+generate the underlying continuous field. A single octave produces very smooth, 
+large-scale bands. Using two to three octaves adds limited fine structure while preserving
+a dominant wavelength, which is characteristic of labyrinth (Turing-like)
+patterns. Higher values introduce fractal detail at smaller scales and can obscure
+the banded structure, making patterns less clearly classifiable as
+labyrinths. (default: 2).}
 }
 \value{
 A landscape object with pattern "labyrinth" containing the generated landscape data and parameters.
@@ -69,12 +76,6 @@ labyrinth_modified <- create_landscape_labyrinth(
   frequency = 8,
   octaves = 3,
   band_fuzziness = 0.05
-)
-
-# With rotation
-labyrinth_rotated <- create_landscape_labyrinth(
-  frequency = 5,
-  veg_threshold = 0.6
 )
 
 # Adjust vegetation coverage
