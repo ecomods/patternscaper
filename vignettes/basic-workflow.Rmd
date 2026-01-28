@@ -58,18 +58,14 @@ By default, the `generate_training_landscapes()` function generates landscapes o
 
 ```{r generate_landscapes}
 # Generate training landscapes with different ecotone patterns
-landscapes <- generate_training_landscapes(
-  n = 20, # number of landscapes to generate
-  seed = 42, # random seed for reproducibility
-  add_rotation = TRUE # whether to add random rotations to the landscapes
-)
+
 ```
 
 You can visualize a few or all of the generated landscapes to see the different patterns:
 
 ```{r visualize_landscapes}
 # Visualize a few of the generated landscapes
-plot_landscape_list(landscapes)
+
 ```
 
 ## 2. Calculating Landscape Metrics
@@ -79,8 +75,7 @@ Next, we'll calculate landscape metrics for each of our training landscapes. The
 You have the option to list all available metrics using the `list_lsm()` function from the `landscapemetrics` package:
 
 ```{r list_metrics}
-# List all available landscape metrics
-landscapemetrics::list_lsm()
+
 ```
 
 Landscape metrics can be calculated at different levels: "landscape", "patch", or "class".
@@ -88,14 +83,7 @@ Here, we calculate all metrics on the landscape level. This calculation takes
 some time and the runtime increases with the number of landscapes and the number of metrics.
 
 ```{r calculate_metrics}
-# Calculate landscape metrics for the generated landscapes
-training_metrics <- calculate_landscape_metrics(
-  landscapes,
-  level = "landscape" # one of "landscape", "patch", or "class"
-)
 
-# View the first few rows
-head(training_metrics)
 ```
 
 ## 3. Evaluating Landscape Metrics
@@ -109,13 +97,7 @@ the [landscape metrics vignette](landscape-metrics.html).
 
 ```{r evaluate_metrics}
 # Find the 10 best metrics
-best_10 <- evaluate_landscape_metrics(
-  training_metrics,
-  metrics_number = 10, # number of metrics to select
-  method = "coeffvar_all" # one of: "coeffvar_all", "lin_mod_r2", "mean_groups"
-)
-# Display the selected metrics
-best_10
+
 ```
 
 ### Caveat
@@ -126,28 +108,7 @@ I recommend using all metrics but removing the ones that either contain NAs or
 are constant across all landscapes.
 
 ```{r remove_constant_metrics}
-# Find metrics with NA values
-na_metrics <- training_metrics |>
-  filter(is.na(value) | is.nan(value)) |>
-  pull(metric) |>
-  unique()
-
-# Remove metrics with NA values
-training_metrics_filtered <- training_metrics |>
-  filter(!(metric %in% na_metrics))
-
-# Find metrics that are constant (zero standard deviation)
-constant_metrics <- training_metrics_filtered |>
-  summarise(sd = sd(value, na.rm = TRUE), .by = metric) |>
-  filter(sd == 0) |>
-  pull(metric)
-
-# Remove constant metrics
-training_metrics_filtered <- training_metrics_filtered |>
-  filter(!(metric %in% constant_metrics))
-
-# See how many metrics we have left
-length(unique(training_metrics_filtered$metric))
+# Find metrics with NA value
 ```
 
 ## 4. Training the Neural Network Model
@@ -160,19 +121,13 @@ Also, we can specify the cross validation method (kfold or leave-one-out) and th
 For a low number of data points, the function will automatically use leave-one-out cross-validation.
 
 ```{r train_model}
-# Train neural network model with cross-validation
-model <- train_nn_metrics(
-  metrics = training_metrics_filtered,
-  cv_folds = 5,
-  cv_method = "k-fold" # one of "k-fold", "loo", "none"
-)
+
 ```
 
 The trained model comes as an object including cross-validation results and performance checks. Just have a look at the model object:
 
 ```{r model_summary}
-# Display model summary
-model
+
 ```
 
 ## 5. Visualizing Model Performance
@@ -180,9 +135,6 @@ model
 We can visualize the performance of our model using several different plots:
 
 ```{r visualize_performance}
-# Or get all plots at once
-all_plots <- plot_classification_results(model, return_all = TRUE)
-patchwork::wrap_plots(all_plots)
 
 # Or plot individual plots
 # Plot confusion matrix
@@ -203,53 +155,13 @@ patchwork::wrap_plots(all_plots)
 Finally, we can apply our trained model to classify new landscapes. For this, we first need to generate new landscapes and calculate their metrics.
 
 ```{r apply_model}
-# Generate a new test landscape
-test_landscape <- create_landscape(
-  pattern = "clustered",
-  width = 100,
-  height = 100,
-  treeline_position = 0.5,
-  n_clusters = 10,
-  cluster_radius = 5,
-  seed = 43,
-  rotation = 0,
-  add_metadata = TRUE
-)
 
-# Visualize the test landscape
-plot_landscape(test_landscape)
-
-# Classify the landscape
-classification <- apply_nn_metrics(
-  landscape = test_landscape,
-  nn_model = model
-)
-
-# Display classification results
-classification
 ```
 
 We can also apply our model to a list of landscapes:
 
 ```{r apply_model_list}
-# Generate multiple test landscapes
-test_landscapes <- generate_training_landscapes(
-  n = 5,
-  seed = 43,
-  add_rotation = TRUE
-)
 
-# Visualize test landscapes
-plot_landscape_list(test_landscapes)
-
-# Classify all landscapes
-classifications <- apply_nn_metrics(
-  landscape = test_landscapes,
-  nn_model = model
-)
-
-# Display classification results
-classifications
 ```
 
 
