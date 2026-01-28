@@ -1,8 +1,8 @@
-# ecotoneClassifyR
+# spatPatClassifyR
 
 ## What This Package Does
 
-`ecotoneClassifyR` is an R package for creating and classifying landscape patterns with a focus on ecological ecotones - transition areas between different ecological communities. The package allows you to:
+`spatPatClassifyR` is an R package for creating and classifying landscape patterns with a focus on ecological ecotones - transition areas between different ecological communities. The package allows you to:
 
 - Generate synthetic landscape patterns with various ecotone characteristics
 - Create landscapes with different patterns including:
@@ -20,20 +20,20 @@ This package is useful for ecologists, landscape ecologists, and researchers stu
 
 ### Installation
 
-You can install the development version of `ecotoneClassifyR` directly from GitHub:
+You can install the development version of `spatPatClassifyR` directly from GitHub:
 
 ```r
 # Install devtools if you don't have it
 if (!require("devtools")) install.packages("devtools")
 
-# Install ecotoneClassifyR from GitHub
-devtools::install_github("ecomods/ecotoneClassifyR"))
+# Install spatPatClassifyR from GitHub
+devtools::install_github("ecomods/spatPatClassifyR"))
 ```
 
 ### Basic usage
 
 ```r
-library(ecotoneClassifyR)
+library(spatPatClassifyR)
 ```
 
 ## Development guide
@@ -78,8 +78,8 @@ devtools::build()
 
 ### Issue tracking
 
-If you find a bug or have a feature request, please open an issue on the [GitHub Issues page](https://github.com/ecomods/ecotoneClassifyR/issues).
-Add smaller, active todos to the [Active TODOs issue](https://github.com/ecomods/ecotoneClassifyR/issues/1), for bigger bugs or features, please open a new issue.
+If you find a bug or have a feature request, please open an issue on the [GitHub Issues page](https://github.com/ecomods/spatPatClassifyR/issues).
+Add smaller, active todos to the [Active TODOs issue](https://github.com/ecomods/spatPatClassifyR/issues/1), for bigger bugs or features, please open a new issue.
 
 ### Via GitHub Desktop
 
@@ -109,8 +109,8 @@ Add smaller, active todos to the [Active TODOs issue](https://github.com/ecomods
 1. **Clone the repository**:
 
 ```bash
-git clone https://github.com/selinabaldauf/ecotoneClassifyR.git
-cd ecotoneClassifyR
+git clone https://github.com/selinabaldauf/spatPatClassifyR.git
+cd spatPatClassifyR
 ```
 
 1. **Before making changes, always pull the latest updates**:

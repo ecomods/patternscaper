@@ -1,4 +1,4 @@
-# ecotoneClassifyR Coding Guidelines
+# spatPatClassifyR Coding Guidelines
 
 ## Architecture Overview
 

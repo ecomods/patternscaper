@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(ecotoneClassifyR)
+library(spatPatClassifyR)
 
-test_check("ecotoneClassifyR")
+test_check("spatPatClassifyR")

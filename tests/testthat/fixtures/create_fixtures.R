@@ -1,4 +1,4 @@
-# Generate test fixtures for ecotoneClassifyR tests
+# Generate test fixtures for spatPatClassifyR tests
 #
 # This script is NOT run during package testing - it's for manual regeneration
 # Run this when:

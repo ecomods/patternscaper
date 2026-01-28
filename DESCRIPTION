@@ -1,4 +1,4 @@
-Package: ecotoneClassifyR
+Package: spatPatClassifyR
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
@@ -38,4 +38,4 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 Config/Needs/website: rmarkdown
-URL: https://ecomods.github.io/ecotoneClassifyR/
+URL: https://ecomods.github.io/spatPatClassifyR/

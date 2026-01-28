@@ -1,8 +1,8 @@
 ---
-title: "Basic Workflow with ecotoneClassifyR"
+title: "Basic Workflow with spatPatClassifyR"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Basic Workflow with ecotoneClassifyR}
+  %\VignetteIndexEntry{Basic Workflow with spatPatClassifyR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,15 +15,15 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(ecotoneClassifyR)
+library(spatPatClassifyR)
 library(tidyverse)
 ```
 
 # Introduction
 
-This vignette demonstrates the basic workflow for using the `ecotoneClassifyR` package to classify ecological ecotone patterns. The package provides tools for generating synthetic landscapes, calculating landscape metrics, training a neural network model for classification, and applying that model to new landscapes.
+This vignette demonstrates the basic workflow for using the `spatPatClassifyR` package to classify ecological ecotone patterns. The package provides tools for generating synthetic landscapes, calculating landscape metrics, training a neural network model for classification, and applying that model to new landscapes.
 
-Ecotones are transition zones between different ecological communities. The `ecotoneClassifyR` package focuses on classifying different patterns that these transitions can take, such as sharp treelines, diffuse transitions, clustered vegetation patterns, and more.
+Ecotones are transition zones between different ecological communities. The `spatPatClassifyR` package focuses on classifying different patterns that these transitions can take, such as sharp treelines, diffuse transitions, clustered vegetation patterns, and more.
 
 ## Basic Workflow Overview
 

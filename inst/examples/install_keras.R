@@ -1,4 +1,4 @@
-#' Complete Installation Guide for ecotoneClassifyR with keras3
+#' Complete Installation Guide for spatPatClassifyR with keras3
 #'
 #' This script guides you through installing Python, TensorFlow, and keras3
 #' from scratch. Run each section in order.
@@ -157,14 +157,14 @@ cat("═════════════════════════
 cat("✓ Installation Complete!\n")
 cat("═══════════════════════════════════════════════════════════════\n")
 cat("\n")
-cat("You can now use ecotoneClassifyR with keras3.\n")
+cat("You can now use spatPatClassifyR with keras3.\n")
 cat("\n")
 cat("For each new R session, run:\n")
 cat("  library(keras3)\n")
 cat("  prewarm_keras()  # Optional: absorbs 10-30s initialization upfront\n")
 cat("\n")
 cat("Then proceed with your analysis:\n")
-cat("  library(ecotoneClassifyR)\n")
+cat("  library(spatPatClassifyR)\n")
 cat("  model <- train_nn_landscapes(...)\n")
 cat("\n")
 cat("═══════════════════════════════════════════════════════════════\n")
