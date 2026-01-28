@@ -21,9 +21,7 @@ library(tidyverse)
 
 # Introduction
 
-This vignette demonstrates the basic workflow for using the `spatPatClassifyR` package to classify ecological ecotone patterns. The package provides tools for generating synthetic landscapes, calculating landscape metrics, training a neural network model for classification, and applying that model to new landscapes.
-
-Ecotones are transition zones between different ecological communities. The `spatPatClassifyR` package focuses on classifying different patterns that these transitions can take, such as sharp treelines, diffuse transitions, clustered vegetation patterns, and more.
+This vignette demonstrates the basic workflow for using the `spatPatClassifyR` package to classify landscapes patterns.
 
 ## Basic Workflow Overview
 
