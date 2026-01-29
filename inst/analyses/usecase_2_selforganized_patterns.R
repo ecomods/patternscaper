@@ -660,30 +660,28 @@ fig_metrics <- ptraining +
   geom_point(
     data = pic_subset1,
     aes(x = pattern, y = value),
-    size = 2,
-    color = "royalblue2", # first set of pictures
+    size = 4,
+    color = "skyblue", # first set of pictures
     shape = 15
   ) +
   geom_point(
     data = pic_subset2,
     aes(x = pattern, y = value),
-    size = 2,
+    size = 4,
     color = "purple3", # second set of pictures
-    shape = 15
+    shape = 17
   ) +
   theme(legend.position = "none")
 fig_metrics
 
-ggsave(
-  filename = paste(
-    fig_metrics,
-    "supp_fig_metrics_selforga_pictures",
-    i,
-    ".jpg",
-    sep = ""
-  ),
+save_plot_multi(
   plot = fig_metrics,
+  filename_base = paste("fig_supp_selforga_pics_metrics_",length(selforga_types)*n_landscapes_per_type[t],sep=""),
+  directory = directory,
   width = 8,
   height = 6,
   dpi = 300
 )
+
+#save.image(file = "usecase_2_everything.RData") 
+
