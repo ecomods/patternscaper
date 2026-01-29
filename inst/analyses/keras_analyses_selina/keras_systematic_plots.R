@@ -36,6 +36,16 @@ keras_all_systematic_plots <- function(result_path, output_dir) {
   df_summary <- summaries$accuracy
   df_worst_summary <- summaries$worst_classes
 
+  # Write the data summaries to CSV files
+  readr::write_csv(
+    df_summary,
+    file.path(result_path, "keras_systematic_summary_accuracy.csv")
+  )
+  readr::write_csv(
+    df_worst_summary,
+    file.path(result_path, "keras_systematic_summary_worst_classes.csv")
+  )
+
   # Plot accuracy ---------------------------------------------------------------
 
   # Create color scale
