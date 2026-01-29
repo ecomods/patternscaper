@@ -1,13 +1,24 @@
 ---
-title: "spatPatClassifyR"
+title: "get-started"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{spatPatClassifyR}
+  %\VignetteIndexEntry{get-started}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-- Goal of the pkg: Classify spatial patterns in landscapes using machine learning techniques.
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(spatPatClassifyR)
+```
+
+## Workflow Overview
 
 - Input to train the models are landscapes with known patterns from
   - a) synthetic landscape generator provided in the pkg
@@ -23,16 +34,6 @@ vignette: >
   - b) Using user-provided landscapes
 
 - User provided landscapes must be converted to the pkg landscape format first.
-
-![Workflow Diagram](img/workflow.png)
-
-
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
 
 ## Basic Workflow Overview
 
@@ -59,7 +60,7 @@ To visualize some of the generated landscapes, we can use the `plot_landscapes()
 
 ```{r plot_landscapes}
 # Plots the first 36 training landscapes
-plot_landscapes(landscapes)
+plot_landscape_list(landscapes)
 ```
 
 ### Train the classification model
