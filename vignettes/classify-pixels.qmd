@@ -47,14 +47,13 @@ training_landscapes <- create_training_landscapes(
 
 ## Step 2: Train Neural Network Classifier
 
-The model can be trained with or without cross-validation. Here, we use 5-fold cross-validation to evaluate model performance during training.
-If cross-validation is used, performance will be returned and printed to the console. For details and more options, see the documentation of `train_nn_landscapes()`.
+The model can be trained with or without cross-validation. Here, we use no cross-validation for simplicity. If cross-validation is used, performance will be returned and printed to the console. For details and more options, see the documentation of `train_nn_landscapes()`.
 
 ```{r}
 #| label: train-model
 model <- train_nn_landscapes(
   landscapes = training_landscapes,
-  cv_method = "k-fold",
+  cv_method = "none",
   cv_folds = 3
 )
 ```
