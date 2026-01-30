@@ -7,3 +7,7 @@
 ^docs$
 ^pkgdown$
 ^CODE_OF_CONDUCT\.md$
+^vignettes/\.quarto$
+^vignettes/*_files$
+^vignettes/articles/\.quarto$
+^vignettes/articles/*_files$

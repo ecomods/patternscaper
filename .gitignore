@@ -29,3 +29,4 @@ inst/HPC/results_ecotones/*
 docs/
 docs
 inst/analyses/data/systematic_tests/*/*/*.rds
+**/.quarto/

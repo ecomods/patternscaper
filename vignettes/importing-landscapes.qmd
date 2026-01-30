@@ -1,20 +1,17 @@
 ---
 title: "importing-landscapes"
-output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{importing-landscapes}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: '#>'
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
-
-```{r setup}
+```{r}
+#| label: setup
 library(spatPatClassifyR)
 ```
 

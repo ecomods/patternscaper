@@ -1,19 +1,18 @@
 ---
-title: "Generate different landscapes"
-output: rmarkdown::html_vignette
+title: "landscape-generation"
 vignette: >
-  %\VignetteIndexEntry{Generate different landscapes}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{landscape-generation}
+  %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: '#>'
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.width = 7,
-  fig.height = 5
-)
+```{r}
+#| label: setup
+library(spatPatClassifyR)
 ```
 
 ## Overview

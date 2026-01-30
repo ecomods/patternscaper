@@ -1,24 +1,16 @@
 ---
-title: "Landscape Pattern Showcase"
-description: >
-  Comprehensive visual guide to all 13 landscape patterns with parameter demonstrations
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Landscape Pattern Showcase}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+title: "pattern-showcase"
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: '#>'
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
-
-```{r setup}
+```{r}
+#| label: setup
 library(spatPatClassifyR)
 ```
+
 
 # Introduction
 Brief overview of landscape patterns and their ecological relevance.
