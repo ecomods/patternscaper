@@ -1,7 +1,7 @@
 ---
-title: "classify-pixels"
+title: "classify-landscapes-keras"
 vignette: >
-  %\VignetteIndexEntry{classify-pixels}
+  %\VignetteIndexEntry{classify-landscapes-keras}
   %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
 knitr:
@@ -13,4 +13,76 @@ knitr:
 ```{r}
 #| label: setup
 library(spatPatClassifyR)
+set.seed(123456)
 ```
+
+This vignette demonstrates how to classify landscape patterns using a convolutional neural network (Keras backend) trained directly on landscape raster data.
+
+The workflow consists of:
+
+1. Generating training landscapes with known patterns using the `create_training_landscapes()` function.
+2. Training a neural network on the landscape data using the `train_nn_landscapes()` function.
+3. Classify new landscapes using the trained model with the `apply_nn_landscapes()` function.
+
+## Setup Keras
+
+Models are trained using the R package `keras3`. It requires a working installation of TensorFlow.
+
+:::{.callout-warning}
+
+This is still missing and I need to add it
+
+:::
+
+## Step 1: Generate Training Landscapes
+
+
+```{r}
+#| label: generate-landscapes
+training_landscapes <- create_training_landscapes(
+  n = 100,
+  patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
+)
+```
+
+## Step 2: Train Neural Network Classifier
+
+The model can be trained with or without cross-validation. Here, we use 5-fold cross-validation to evaluate model performance during training.
+If cross-validation is used, performance will be returned and printed to the console. For details and more options, see the documentation of `train_nn_landscapes()`.
+
+```{r}
+#| label: train-model
+model <- train_nn_landscapes(
+  landscapes = training_landscapes,
+  cv_method = "k-fold",
+  cv_folds = 3
+)
+```
+
+## Step 3: Apply Model to New Landscapes
+
+```{r}
+#| label: test-landscapes
+test_landscapes <- create_training_landscapes(
+  n = 20,
+  patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random"),
+  add_rotation = TRUE
+)
+
+validation_results <- apply_nn_landscapes(
+  landscapes = test_landscapes,
+  nn_model = model
+)
+```
+
+We can plot the classified landscapes along with their true and predicted patterns.
+
+```{r}
+#| label: plot-results
+plot_classified_landscapes(
+  classification = validation_results$predictions,
+  landscapes = test_landscapes,
+  only_misclassified = FALSE
+)
+```
+

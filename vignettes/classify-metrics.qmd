@@ -13,4 +13,128 @@ knitr:
 ```{r}
 #| label: setup
 library(spatPatClassifyR)
+
+# Set seed for reproducibility
+set.seed(123456)
+```
+
+This vignette provides an overview of the workflow that can be used to train a neural network on landscape metrics and use the trained network to classify landscapes.
+
+The workflow consists of the following steps:
+
+1. Generate training landscapes with known patterns using the `create_training_landscapes()` function.
+2. Calculate landscape metrics for the training landscapes using the `calculate_landscape_metrics()` function.
+3. Select most informative metrics using the `evaluate_landscape_metrics()` function.
+4. Train a neural network using the selected metrics with the `train_nn_metrics()` function.
+5. Classify new landscapes using the trained neural network with the `apply_nn_metrics()` function.
+
+
+## Step 1: Generate Training Landscapes
+
+Here we generate a set of training landscapes with known patterns.
+
+
+```{r}
+#| label: generate-landscapes
+# Generate 100 training landscapes
+landscapes <- create_training_landscapes(
+  n = 100,
+  patterns = c("labyrinth", "random", "clustered"),
+  add_rotation = TRUE
+)
+```
+
+## Step 2: Calculate Landscape Metrics
+
+Next, we calculate landscape metrics for the generated training landscapes. Here we use class-level metrics, but landscape-level metrics can also be calculated by setting `level = "landscape"`.
+
+
+```{r}
+#| label: calculate-metrics
+# Calculate landscape metrics on the landscape level
+landscape_metrics <- calculate_landscape_metrics(
+  landscapes,
+  level = "class"
+)
+```
+
+## Step 3: Evaluate Landscape Metrics
+
+Now we select the 10 most informative metrics for classification based on their relative variablility across landscapes (for more details see `vignette("landscape-metrics")`). We can plot the differences between patterns for the selected metrics using `plot_metrics`
+
+```{r}
+#| label: evaluate-metrics
+best_10 <- evaluate_landscape_metrics(
+  metrics = landscape_metrics,
+  method = "kruskal_p",
+  metrics_number = 10,
+  verbose = FALSE
+)
+
+# Plot selected metrics
+plot_metrics(
+  metrics = landscape_metrics,
+  selected_metrics = best_10
+)
+```
+
+## Step 4: Train Neural Network
+
+The model can be trained using the selected metrics.
+Training can be done with or without cross-validation.
+Valid options for `cv_method` are `"none"`, `"k-fold"` (k-fold cross-validation) and `"loo"` (leave-one-out cross-validation).
+For details and further options see the function help `?train_nn_metrics()`.
+
+
+```{r}
+#| label: train-model
+# Train neural network with k-fold cross-validation (3 folds)
+model <- train_nn_metrics(
+  metrics = landscape_metrics,
+  metrics_selected = best_10,
+  cv_method = "k-fold",
+  cv_folds = 3,
+  verbose = FALSE
+)
+```
+
+To check the model performance, we can look at the confusion matrix from cross-validation:
+
+```{r}
+# Confusion matrix from cross-validation
+model$performance$confusion_matrix
+```
+
+To access other performance metrics, see `model$performance`.
+
+## Step 5: Classify New Landscapes
+
+Finally, we can create some new test landscapes and classify them using the trained model. In this example, we create 10 new landscapes for testing. In reality this could be landscapes read in from files or created in other ways.
+
+```{r}
+#| label: classify-landscapes
+# Create 10 new test landscapes
+test_landscapes <- create_training_landscapes(
+  n = 10,
+  patterns = c("labyrinth", "random", "clustered")
+)
+# Classify test landscapes using the trained model
+predictions <- apply_nn_metrics(test_landscapes, model)
+```
+
+We can look at the predicted patterns for the test landscapes:
+
+```{r}
+# Predicted patterns
+predictions
+```
+
+We can also visualize the classified landscapes along with their true and predicted patterns. Correctly classified landscapes are shown in green, misclassified ones in red. To plot only missclassified landscapes, set `only_misclassified = TRUE`.
+
+```{r}
+# Visualize true and predicted patterns
+plot_classified_landscapes(
+  classification = predictions,
+  landscapes = test_landscapes
+)
 ```

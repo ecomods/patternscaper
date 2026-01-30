@@ -13,10 +13,6 @@ knitr:
 ```{r}
 #| label: setup
 library(spatPatClassifyR)
-```
-
-```{r setup}
-library(spatPatClassifyR)
 
 set.seed(123456)
 
@@ -27,7 +23,6 @@ sample_landscapes <- create_training_landscapes(
   width = 50,
   height = 50
 )
-
 ```
 
 This vignette shows how to calculate landscape metrics from `landscape` objects and how to find metrics that are informative for distinguishing different spatial patterns.
@@ -86,7 +81,9 @@ metric_evaluation <- evaluate_landscape_metrics(
 
 To visually compare the top 10 metrics, use the `plot_metrics()` function:
 
-```{r, fig.width = 8, fig.height = 6, fig.alt = "Boxplots showing the distribution of the top 10 informative landscape metrics across different spatial patterns", fig.cap = "Distribution of the top 10 informative landscape metrics across different spatial patterns. Each dot is a landscape, the boxplots show the distribution of metric values for each spatial pattern."}
+```{r}
+#| fig.alt: "Boxplots showing the distribution of the top 10 informative landscape metrics across different spatial patterns"
+#| fig.cap: "Distribution of the top 10 informative landscape metrics across different spatial patterns. Each dot is a landscape, the boxplots show the distribution of metric values for each spatial pattern."
 plot_metrics(
   landscape_metrics,
   selected_metrics = metric_evaluation

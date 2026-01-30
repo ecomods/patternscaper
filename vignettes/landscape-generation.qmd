@@ -101,6 +101,13 @@ landscapes <- create_training_landscapes(n = 20)
 plot_landscape_list(landscapes)
 ```
 
+By default, landscapes are created in a balanced way, so that each pattern type is represented equally in the generated set.
+
+```{r}
+# Check how many landscapes of each type were generated
+table(purrr::map_chr(landscapes, ~ .x$pattern))
+```
+
 ### Selecting Specific Patterns
 
 You can also select only specific patterns to include in the generated landscapes:
