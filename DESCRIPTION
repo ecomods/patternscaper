@@ -34,7 +34,8 @@ Imports:
     stringr,
     terra,
     tidyr,
-    zoo
+    zoo,
+    readr
 Suggests: 
     knitr,
     quarto,
