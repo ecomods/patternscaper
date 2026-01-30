@@ -16,4 +16,78 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(spatPatClassifyR)
+
+set.seed(123456)
+
+# Generate sample landscapes
+sample_landscapes <- create_training_landscapes(
+  n = 20,
+  patterns = c("random", "sharp", "labyrinth"),
+  width = 50,
+  height = 50
+)
+
+```
+
+This vignette shows how to calculate landscape metrics from `landscape` objects and how to find metrics that are informative for distinguishing different spatial patterns.
+
+## Calculating Landscape Metrics
+
+Landscape metrics can be calculated using the `calculate_landscape_metrics()` function. By default, this function computes all landscape metrics available in the [`landscapemetrics` package](https://r-spatialecology.github.io/landscapemetrics/). Users can also specify a subset of metrics to calculate by providing a vector of metric names. To find available metric names, use:
+
+```{r}
+# Select either the landscape-level or class-level metrics
+landscapemetrics::list_lsm(level = "landscape")
+```
+
+Metrics can be calculated on the landscape level (one metric for the entire landscape) or on the class level (one metric per land cover class in the landscape).
+
+```{r}
+# Calculate all landscape-level metrics for the sample landscapes
+landscape_metrics <- calculate_landscape_metrics(
+  sample_landscapes,
+  level = "landscape"
+)
+```
+
+To calculate selected metrics, provide a vector of valide metric names to the `metrics` argument. Find available metric names using `landscapemetrics::list_lsm()` as shown above.
+
+```{r}
+# Calculate all class-level metrics for the sample landscapes
+class_metrics <- calculate_landscape_metrics(
+  sample_landscapes,
+  level = "class",
+  metrics = c("ai", "area_cv", "cai_cv") # Define a subset of metrics to calculates
+)
+```
+
+## Finding Informative Metrics
+
+The package includes different methods to evaluate the calculated landscape metrics and find those that are most informative for distinguishing different spatial patterns. The general function to evaluate landscape metrics is `evaluate_landscape_metrics()`. It supports different methods for metric evaluation:
+
+- `coeffvar_all`: Coefficient of Variation (CV = SD/mean). Ranks metrics by their relative variability across landscapes.
+- `lin_mod_r2`: Fits value ~ pattern for each metric and ranks by R².
+- `mean_groups`: Calculates relative differences between pattern-specific means and overall mean, then sums across patterns.
+- `fisher_score`: Fisher Score (ratio of between-group to within-group variance). 
+- `kruskal_p`: Kruskal-Wallis H test p-values. Non-parametric test for differences between groups.
+
+By default, the function excludes metrics with high correlation (above 0.7). This can be adjusted using the `correlation_threshold` argument.
+
+```{r}
+# Evaluate landscape metrics using Fisher Score
+metric_evaluation <- evaluate_landscape_metrics(
+  landscape_metrics,
+  method = "fisher_score",
+  metrics_number = 10, # Select top 10 informative metrics
+  correlation_threshold = 0.7
+)
+```
+
+To visually compare the top 10 metrics, use the `plot_metrics()` function:
+
+```{r, fig.width = 8, fig.height = 6, fig.alt = "Boxplots showing the distribution of the top 10 informative landscape metrics across different spatial patterns", fig.cap = "Distribution of the top 10 informative landscape metrics across different spatial patterns. Each dot is a landscape, the boxplots show the distribution of metric values for each spatial pattern."}
+plot_metrics(
+  landscape_metrics,
+  selected_metrics = metric_evaluation
+)
 ```

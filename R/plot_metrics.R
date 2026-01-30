@@ -205,5 +205,9 @@ plot_metrics <- function(
       y = "Metric Value"
     )
 
+  # Adjust theme
+
+  p <- p + ggplot2::theme_bw()
+
   return(p)
 }

@@ -69,24 +69,6 @@ model <- train_nn_metrics(
 # Look at the model object
 model
 
-# Visualize classification results
-# Get all plots in a list
-all_plots <- plot_classification_results(model, return_all = TRUE)
-patchwork::wrap_plots(all_plots)
-
-# Or create individual plots with the wrapper
-plot_classification_results(model, plot_type = "confusion")
-plot_classification_results(model, plot_type = "probabilities")
-plot_classification_results(model, plot_type = "confidence")
-plot_classification_results(model, plot_type = "misclassifications")
-
-# Plot the landscapes that were misclassified
-plot_classified_landscapes(
-  classification = model$performance$validation_results,
-  landscapes = landscapes,
-  only_misclassified = TRUE
-)
-
 # Apply the model ----------------------------------------------------
 # generate test landscapes
 test_landscapes <- create_training_landscapes(
