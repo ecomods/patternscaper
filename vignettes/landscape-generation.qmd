@@ -10,9 +10,12 @@ knitr:
     comment: '#>'
 ---
 
-```{r}
-#| label: setup
+## Setup
+
+```{r setup}
 library(spatPatClassifyR)
+# For reproducibility
+set.seed(123456)
 ```
 
 ## Overview
@@ -80,13 +83,7 @@ plot_landscape_list(list(spots, gaps, labyrinth), show_legend = FALSE)
 
 For detailed parameter descriptions and examples of each pattern type, see `?create_landscape` and the individual pattern help pages (e.g., `?create_landscape_spots`, `?create_landscape_clustered`).
 
-## Setup
 
-```{r setup}
-library(spatPatClassifyR)
-# For reproducibility
-set.seed(123456)
-```
 
 ## Creating Multiple Training Landscapes
 
@@ -124,7 +121,7 @@ plot_landscape_list(landscapes)
 
 ### Control landscape parameters
 
-You can modify default parameters for all generated landscapes of a specific pattern type by passing a list of parameter values to the `pattern_params` argument. For example, to create landscapes with more spots of larger size:
+You can modify default parameters for all generated landscapes of a specific pattern type by passing a list of parameter values to the `params_list ` argument. For example, to create landscapes with more spots of larger size:
 
 ```{r, fig.width = 8, fig.height = 6, fig.alt = "Grid showing landscapes with many large spots"}
 # Custom parameters for spot patterns
@@ -138,7 +135,7 @@ pattern_params <- list(
 landscapes <- create_training_landscapes(
   n = 12,
   patterns = "spots",
-  pattern_params = pattern_params
+  params_list = pattern_params
 )
 ```
 

@@ -10,10 +10,12 @@ knitr:
     comment: '#>'
 ---
 
-```{r}
-#| label: setup
-library(spatPatClassifyR)
-```
+:::{.callout-note}
+
+I am not sure what to put here. I though to put an overview of the general workflow
+But maybe this is redundant with the other vignettes?
+
+:::
 
 ## Workflow Overview
 
