@@ -29,6 +29,6 @@ may still occur across different hardware/software configurations.
 \dontrun{
 # Ensure reproducible training
 set_random_seed(42)
-model <- train_nn_landscapes(landscapes, cv_folds = 5)
+model <- train_nn_pixels(landscapes, cv_folds = 5)
 }
 }
