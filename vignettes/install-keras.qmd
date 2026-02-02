@@ -108,4 +108,4 @@ The first time you run Keras functions after installation, TensorFlow needs to i
 keras3::to_categorical(0)
 ```
 
-If this prints a matrix without errors, your Keras installation is working correctly!
+If this prints a matrix without errors, your Keras installation is working correctly.
