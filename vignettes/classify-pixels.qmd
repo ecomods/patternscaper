@@ -15,9 +15,6 @@ This vignette shows how to classify landscape patterns using a convolutional neu
 ```{r}
 #| label: setup
 library(spatPatClassifyR)
-
-# Set seed for reproducibility
-set.seed(123456)
 ```
 
 The workflow consists of the following steps:
@@ -40,6 +37,16 @@ keras3::to_categorical(0)
 ```
 
 If the function does not return an error, your Keras installation is working correctly.
+
+## Set seed for reproducibility
+
+Keras models do not use R's random number generator (RNG). Therefore, it is not enough to set a seed with `set.seed()`.
+To set both a seed for R and for Keras RNG, you can use the `set_random_seed()` function from `spatPatClassifyR`.
+
+```{r}
+#| label: set-seed
+set_random_seed(123456)
+```
 
 ## Step 1: Generate Training Landscapes
 
