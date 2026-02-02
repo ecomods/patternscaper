@@ -1,5 +1,5 @@
 ---
-title: "landscape-generation"
+title: "Generate landscapes with different spatial patterns"
 vignette: >
   %\VignetteIndexEntry{landscape-generation}
   %\VignetteEngine{quarto::html}
@@ -10,23 +10,24 @@ knitr:
     comment: '#>'
 ---
 
-## Setup
+This vignette shows how to generate artificial landscapes with different spatial patterns. These landscapes are designed for training and testing spatial pattern classifiers. For details on how to use the generated landscapes for training classifiers, see the [classify-metrics](classify-metrics.qmd) and [classify-pixels](classify-pixels.qmd) vignettes.
 
-```{r setup}
+```{r}
+#| label: setup
+
 library(spatPatClassifyR)
-# For reproducibility
+# Set seed for reproducibility
 set.seed(123456)
 ```
 
 ## Overview
 
-This vignette shows how to generate artificial landscapes with different spatial patterns. These landscapes are designed for training and testing spatial pattern classifiers.
-
 You can:
 
 - Generate batches of training landscapes with `create_training_landscapes()`
 - Create individual landscapes with custom parameters using `create_landscape()`
-- Visualize an individual landscape or a list of landscapes with `plot_landscape()` and `plot_landscape_list()`
+- Visualize an individual landscape with `plot_landscape()
+- Visualize multiple landscapes in a grid with `plot_landscape_list()`
 
 ### Available patterns
 
@@ -35,27 +36,38 @@ There are 11 different spatial patterns available:
 #### Control patterns
 
 - **random**: Randomly distributed vegetation
-- **bare**: No vegetation (control)
-- **dense**: Complete vegetation cover (control)
+- **bare**: No/minimal vegetation (control)
+- **dense**: Complete/maximal vegetation cover (control)
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.alt="Three landscapes showing control patterns: random, bare, and dense"}
+```{r}
+#| label: control-patterns
+#| echo: false
+#| fig.width: 8
+#| fig.height: 3
+#| fig-alt: "Three landscapes showing control patterns: random, bare, and dense"
+
 random <- create_landscape("random", name = "Random")
 bare <- create_landscape("bare", name = "Bare")
 dense <- create_landscape("dense", name = "Dense")
 
 plot_landscape_list(list(random, bare, dense), show_legend = FALSE)
-
 ```
 
 #### Ecotone patterns
 
-- **sharp**: Sharp treeline boundary
-- **diffuse**: Gradual treeline transition
-- **fingers**: Curvy finger-like extensions
-- **clustered**: Vegetation clusters above treeline
+- **sharp**: Sharp boundary
+- **diffuse**: Gradual transition
+- **fingers**: Curvy, finger-like extensions
+- **clustered**: Vegetation clusters above a treeline
 - **bands**: Sinusoidal vegetation bands
 
-```{r, echo=FALSE, fig.width=8, fig.height=5, fig.alt="Five landscapes showing ecotone patterns: sharp, diffuse, fingers, clustered, and bands"}
+```{r}
+#| label: ecotone-patterns
+#| echo: false
+#| fig-width: 8
+#| fig-height: 6
+#| fig-alt: "Five landscapes showing ecotone patterns: sharp, diffuse, fingers, clustered, and bands"
+
 sharp <- create_landscape("sharp", name = "Sharp treeline")
 diffuse <- create_landscape("diffuse", name = "Diffuse treeline")
 fingers <- create_landscape("fingers", name = "Fingers")
@@ -64,7 +76,7 @@ bands <- create_landscape("bands", name = "Bands")
 plot_landscape_list(
   list(sharp, diffuse, fingers, clustered, bands),
   show_legend = FALSE,
-  ncol = 5
+  ncol = 3
 )
 ```
 
@@ -74,15 +86,20 @@ plot_landscape_list(
 - **gaps**: Circular vegetation gaps
 - **labyrinth**: Maze-like vegetation patterns
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.alt="Three landscapes showing patch patterns: spots, gaps, and labyrinth"}
+```{r}
+#| label: patch-patterns
+#| echo: false
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Three landscapes showing patch patterns: spots, gaps, and labyrinth"
+
 spots <- create_landscape("spots", name = "Spots")
 gaps <- create_landscape("gaps", name = "Gaps")
 labyrinth <- create_landscape("labyrinth", name = "Labyrinth")
 plot_landscape_list(list(spots, gaps, labyrinth), show_legend = FALSE)
 ```
 
-For detailed parameter descriptions and examples of each pattern type, see `?create_landscape` and the individual pattern help pages (e.g., `?create_landscape_spots`, `?create_landscape_clustered`).
-
+For detailed parameter descriptions and examples of each pattern type, see `?create_landscape`.
 
 
 ## Creating Multiple Training Landscapes
@@ -90,10 +107,21 @@ For detailed parameter descriptions and examples of each pattern type, see `?cre
 The quickest way to generate training data is with `create_training_landscapes()`.
 It generates multiple landscapes balanced across all available patterns.
 
-```{r, fig.width = 8, fig.height = 6, fig.alt = "Grid showing 20 randomly generated landscapes with different spatial patterns"}
+```{r}
+#| label: create-training-landscapes
+#| fig-width: 8
+#| fig-height: 6
+#| fig-alt: "Grid showing 20 randomly generated landscapes with different spatial patterns"
+
 # Create 20 landscapes balanced across all pattern types
 landscapes <- create_training_landscapes(n = 20)
+```
 
+The `landscapes` are returned as a list of `landscape` objects (see [below](landscape-generation.qmd#landscape-object-structure) for more info on the data structure).
+
+They can be visualized using the `plot_landscape_list()` function:
+
+```{r}
 # Plot all landscapes
 plot_landscape_list(landscapes)
 ```
@@ -101,15 +129,22 @@ plot_landscape_list(landscapes)
 By default, landscapes are created in a balanced way, so that each pattern type is represented equally in the generated set.
 
 ```{r}
+#| label: check-pattern-distribution
+
 # Check how many landscapes of each type were generated
 table(purrr::map_chr(landscapes, ~ .x$pattern))
 ```
 
 ### Selecting Specific Patterns
 
-You can also select only specific patterns to include in the generated landscapes:
+Specific patterns can be selected to create only a subset of patterns using the `patterns` argument. For example, to create landscapes with only labyrinth, spots, and clustered patterns:
 
-```{r, fig.width = 8, fig.height = 6, fig.alt = "Grid showing landscapes with only labyrinth, spots, and clustered patterns"}
+```{r}
+#| label: specific-patterns
+#| fig-width: 8
+#| fig-height: 6
+#| fig-alt: "Grid showing landscapes with only labyrinth, spots, and clustered patterns"
+
 # Generate only specific patterns
 landscapes <- create_training_landscapes(
   n = 12,
@@ -121,9 +156,66 @@ plot_landscape_list(landscapes)
 
 ### Control landscape parameters
 
-You can modify default parameters for all generated landscapes of a specific pattern type by passing a list of parameter values to the `params_list ` argument. For example, to create landscapes with more spots of larger size:
+#### Landscape size
 
-```{r, fig.width = 8, fig.height = 6, fig.alt = "Grid showing landscapes with many large spots"}
+To modify the size (number of pixels in x- and y-direction) of all generated landscapes, use the `ncol` and `nrow` arguments. By default, landscapes are created with a size of 100x100 pixels.
+
+```{r}
+#| label: custom-size
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Three landscapes showing different sizes: 50x20 pixels"
+non_square <- create_training_landscapes(
+  n = 3,
+  width = 50,
+  height = 20
+)
+# Plot landscapes with custom size
+plot_landscape_list(non_square)
+```
+
+#### Landscape rotation
+
+By default, landscapes are rotated by angles randomly chosen between 0 and 360 degrees.
+This ensures that classifiers trained on these landscapes are invariant to landscape orientation.
+
+You can disable random rotation by setting the `add_rotation` parameter to `FALSE`.
+
+You can also control used rotation angles directly using `rotation_angles`.
+
+```{r}
+#| label: rotation-example
+#| message: false
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Landscapes showing the same pattern rotated at different angles"
+
+no_rotation <- create_training_landscapes(
+  n = 3,
+  patterns = c("clustered", "sharp", "bands"),
+  add_rotation = FALSE
+)
+
+defined_angles <- create_training_landscapes(
+  n = 3,
+  patterns = "clustered",
+  rotation_angles = c(45, 90)
+)
+
+plot_landscape_list(c(no_rotation, defined_angles))
+```
+
+#### Pattern-specific parameters
+
+You can modify default parameters for all generated landscapes of a specific pattern by passing a list of parameter values to the `params_list ` argument. For example, to create landscapes with more spots of larger size:
+
+```{r}
+#| label: custom-parameters
+#| message: false
+#| fig-width: 8
+#| fig-height: 6
+#| fig-alt: "Grid showing landscapes with many large spots"
+
 # Custom parameters for spot patterns
 pattern_params <- list(
   spots = list(
@@ -132,22 +224,29 @@ pattern_params <- list(
     spot_radius_sd = 3
   )
 )
-landscapes <- create_training_landscapes(
+bigger_spots <- create_training_landscapes(
   n = 12,
   patterns = "spots",
   params_list = pattern_params
 )
+
+plot_landscape_list(bigger_spots)
 ```
 
 To check parameter names and default values for each pattern type, see the function help `create_landscape()`.
 
-## Creating Individual Landscapes
+## Creating Single Landscapes
 
-To create individual landscapes with specific parameters, use the `create_landscape()` function. Check the help page `?create_landscape` for a full list of available parameters for each pattern type.
+To create single landscapes of all patterns with specific parameters, use the `create_landscape()` function. Check the help page `?create_landscape` for a full list of available parameters for each pattern type.
 
 ### Spot Patterns
 
-```{r, fig.width = 8, fig.height = 5, fig.alt = "Four landscapes showing spot patterns with different numbers and sizes of vegetation patches"}
+```{r}
+#| label: spot-patterns-examples
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Three landscapes showing spot patterns with different numbers and sizes of vegetation patches"
+
 # Default spots
 spots_default <- create_landscape("spots", name = "Default")
 
@@ -178,7 +277,12 @@ plot_landscape_list(
 
 ### Clustered Patterns
 
-```{r, fig.width = 8, fig.height = 5, fig.alt = "Three landscapes showing clustered vegetation with different cluster sizes and numbers"}
+```{r}
+#| label: clustered-patterns-examples
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Three landscapes showing clustered vegetation with different cluster sizes and numbers"
+
 # Few large clusters
 clustered_large <- create_landscape(
   "clustered",
@@ -220,7 +324,12 @@ plot_landscape_list(
 
 ### Labyrinth Patterns
 
-```{r, fig.width = 8, fig.height = 3, fig.alt = "Two landscapes showing labyrinth-like vegetation patterns with different frequencies"}
+```{r}
+#| label: labyrinth-patterns-examples
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Two landscapes showing labyrinth-like vegetation patterns with different frequencies"
+
 # Default labyrinth
 labyrinth_default <- create_landscape("labyrinth", name = "Default")
 
@@ -240,25 +349,29 @@ plot_landscape_list(list(labyrinth_default, labyrinth_complex), titles = "name")
 
 In `spatPatClassifyR`,  landscapes are stored as lists containing the landscape data and metadata. All landscape generation functions return landscapes in this format and all other functions expect landscapes to be provided in this format. 
 
-To learn how to transform your own raster data into this format, see `vignette("importing-landscapes")`.
+To learn how to transform your own raster data into this format, see [vignette on importing landscapes](importing-landscapes.qmd).
 
 Each landscapes is stored as a list with the following components:
-
-```{r}
-landscape_example <- create_landscape("spots", name = "Example")
-str(landscape_example)
-```
 
 - data: The landscape object as a `SpatRaster` class
 - pattern: Pattern type (e.g., "spots", "clustered")
 - name: User-defined name
 - params: List of parameters used to generate the landscape
 
+```{r}
+#| label: landscape-object-structure
+
+landscape_example <- create_landscape("spots", name = "Example")
+str(landscape_example)
+```
+
 #### Modifying Landscape Metadata
 
 Users can modify landscape metadata using the helper functions `set_landscape_pattern()` and `set_landscape_name()`. For example, to change the pattern label or name of existing landscapes:
 
 ```{r}
+#| label: modify-metadata
+
 landscapes_example <- set_landscape_name(
   landscape_example,
   "New Landscape Name"
@@ -268,22 +381,6 @@ landscapes_example <- set_landscape_pattern(
   "custom_pattern"
 )
 landscapes_example
-```
-
-## Rotating Landscapes
-
-Landscape generators support rotation via the `rotation` parameter in `create_landscape()` or the `rotation_angles` parameter in `create_training_landscapes()`. This is useful for testing classifier invariance to landscape orientation.
-
-```{r, fig.width = 8, fig.height = 3, fig.alt = "Two landscapes showing the same pattern rotated at different angles"}
-# Same pattern, different rotations
-clustered_0 <- create_landscape("clustered", name = "0 degrees")
-clustered_45 <- create_landscape(
-  "clustered",
-  name = "45 degrees",
-  rotation = 45
-)
-
-plot_landscape_list(list(clustered_0, clustered_45))
 ```
 
 ## Next Steps
