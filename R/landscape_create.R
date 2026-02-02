@@ -354,9 +354,9 @@ create_training_landscapes <- function(
     # Create balanced distribution
     sampled_patterns <- rep(patterns, each = landscapes_per_pattern)
 
-    # Distribute any remaining landscapes randomly
+    # Distribute extras deterministically to first N patterns
     if (extras > 0) {
-      extra_patterns <- sample(patterns, extras, replace = TRUE)
+      extra_patterns <- patterns[1:extras]
       sampled_patterns <- c(sampled_patterns, extra_patterns)
     }
 
