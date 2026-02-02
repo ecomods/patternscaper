@@ -40,5 +40,6 @@ Suggests:
     knitr,
     quarto,
     rmarkdown
-VignetteBuilder: knitr, quarto
+VignetteBuilder:
+    quarto
 Config/Needs/website: rmarkdown, quarto

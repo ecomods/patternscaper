@@ -154,7 +154,7 @@ You can look at the predicted patterns for each test landscape individually and
 compare actual and predicted classes:
 
 ```{r}
-#| label: view-predictions
+#| label: view-predictions-2
 # Predicted patterns
 classification$predictions
 ```
@@ -162,7 +162,7 @@ classification$predictions
 You can also look at performance summaries like confusion matrix:
 
 ```{r}
-#| label: view-performance
+#| label: view-performance-2
 # Performance summary
 classification$performance$confusion_matrix
 ```
@@ -170,7 +170,7 @@ classification$performance$confusion_matrix
 And other metrics like accuracy, precision, recall, and F1-score:
 
 ```{r}
-#| label: view-per-class-metrics
+#| label: view-per-class-metrics-2
 # Other performance metrics
 classification$performance$per_class_metrics
 ```
