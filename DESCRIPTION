@@ -3,15 +3,19 @@ Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
 Authors@R: c(
-    person("Selina", "Baldauf", , "selina.baldauf@fu-berlin.de", role = c("aut", "cre")),
-    person("Britta", "Tietjen", , "britta.tietjen@fu-berlin.de", role = c("aut"))
+    person("Selina", "Baldauf", , "selina.baldauf@fu-berlin.de", role = c("aut", "cre"),
+    comment = c(ORCID = "0000-0002-3393-725X")),
+    person("Britta", "Tietjen", , "britta.tietjen@fu-berlin.de", role = c("aut"),
+    comment = c(ORCID = "0000-0003-4767-6406")),
+    person("Uta", "Berger", ,"uta.berger@tu-dresden.de", role = c("aut"),
+    comment = c(ORCID = "0000-0001-6920-136X"))
   )
 Description: Classification of landscapes using a neural network. 
     The neural network is either trained for two-dimensional landscapes
     (using the keras package) or for landscapes metrics 
     (using the landscapemetrics package). 
 URL: https://github.com/ecomods/spatPatClassifyR/
-BugReports: ://github.com/ecomods/spatPatClassifyR/issues
+BugReports: https://github.com/ecomods/spatPatClassifyR/issues
 Encoding: UTF-8
 LazyData: true
 License: GPL (>= 3)
@@ -41,5 +45,6 @@ Suggests:
     quarto,
     rmarkdown
 VignetteBuilder:
+    knitr,
     quarto
 Config/Needs/website: rmarkdown, quarto
