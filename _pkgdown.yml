@@ -1,4 +1,22 @@
 url: https://ecomods.github.io/spatPatClassifyR/
 template:
   bootstrap: 5
+  light-switch: true
 
+navbar:
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: "Generate landscapes"
+        href: articles/landscape-generation.html
+      - text: "Classify with metrics"
+        href: articles/classify-metrics.html
+      - text: "Classify with pixels"
+        href: articles/classify-pixels.html
+      - text: "User-defined landscapes"
+        href: articles/importing-landscapes.html
+      - text: "Calculate Landscape metrics"
+        href: articles/landscape-metrics.html
+      - text: "Installing Keras"
+        href: articles/install-keras.html
