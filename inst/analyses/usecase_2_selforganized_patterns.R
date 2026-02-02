@@ -113,7 +113,6 @@ save_plot_multi(
 #----------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------
 
-
 #--------------------------------------------------------------------
 # Generate training and testing landscapes for general analysis
 #--------------------------------------------------------------------
@@ -142,8 +141,8 @@ test_landscapes_selforga_general <- create_training_landscapes(
 #--------------------------------------------------------------------
 
 landscape_class_metrics_all_general <- calculate_landscape_metrics(
-    landscapes = training_landscapes_selforga_general,
-    level = "class"
+  landscapes = training_landscapes_selforga_general,
+  level = "class"
 )
 
 #focus on vegetation class only (no bare soil)
@@ -152,7 +151,7 @@ landscape_class_metrics_all_general <- landscape_class_metrics_all_general %>%
   filter(class == metric_class)
 
 #determine best 10 metrics to distinguish pattern types
- best_10_selforga_general <- evaluate_landscape_metrics(
+best_10_selforga_general <- evaluate_landscape_metrics(
   metrics = landscape_class_metrics_all_general,
   metrics_number = 10,
   method = "kruskal_p"
@@ -160,10 +159,10 @@ landscape_class_metrics_all_general <- landscape_class_metrics_all_general %>%
 
 # plot the 10 best metrics
 fig_metrics_selforga_general <- plot_metrics(
-    metrics = landscape_class_metrics_all_general,
-    selected_metrics = best_10_selforga_general,
-    force = TRUE
-  )
+  metrics = landscape_class_metrics_all_general,
+  selected_metrics = best_10_selforga_general,
+  force = TRUE
+)
 fig_metrics_selforga_general
 
 # save into different formats
@@ -224,14 +223,14 @@ save_plot_multi(
 #----------------------------------------------------------------------------------------
 
 #set seed for Keras (needs to be done separately)
-set_random_seed(53) 
+set_random_seed(53)
 
 #--------------------------------------------------------------------
 # Train neural network with the input data itself
 #--------------------------------------------------------------------
 
 # train a model
-model_selforga_pix_general <- train_nn_landscapes(
+model_selforga_pix_general <- train_nn_pixels(
   landscapes = training_landscapes_selforga_general,
   cv_method = "k-fold",
   learning_rate = 0.0001,
@@ -242,7 +241,7 @@ model_selforga_pix_general <- train_nn_landscapes(
 model_selforga_pix_general$performance$accuracy
 
 #validate model with new landscapes
-validation_results_selforga_pix_general <- apply_nn_landscapes(
+validation_results_selforga_pix_general <- apply_nn_pixels(
   landscapes = test_landscapes_selforga_general,
   nn_model = model_selforga_pix_general,
   return_performance = T
@@ -290,7 +289,7 @@ selforga_types = c(
   "gaps"
 )
 
-n_landscapes_per_type <- c(20,40,80,160) 
+n_landscapes_per_type <- c(20, 40, 80, 160)
 # number of models
 n_models <- length(n_landscapes_per_type)
 # number of landscapes
@@ -302,12 +301,19 @@ training_landscapes_selforga <- list(list())
 #size of the landscapes - adjusted to size of pictures
 l_size <- 200
 for (n_l in 1:n_models) {
-  print(paste("number of landscapes: ",length(selforga_types)*n_landscapes_per_type[n_l],sep=""))
-  training_landscapes_selforga[[n_l]] <- vector("list", n_landscapes_per_type[n_l])
+  print(paste(
+    "number of landscapes: ",
+    length(selforga_types) * n_landscapes_per_type[n_l],
+    sep = ""
+  ))
+  training_landscapes_selforga[[n_l]] <- vector(
+    "list",
+    n_landscapes_per_type[n_l]
+  )
   for (i in 1:n_landscapes_per_type[n_l]) {
     j <- (i - 1) * length(selforga_types) + 1
     n_sp <- sample(x = seq(3, 20), size = 1)
-    n_rad <- sample(x = seq(round(90/n_sp), round(250/n_sp)), size = 1) #sample(x = seq(round(45/n_sp), round(150/n_sp)), size = 1)
+    n_rad <- sample(x = seq(round(90 / n_sp), round(250 / n_sp)), size = 1) #sample(x = seq(round(45/n_sp), round(150/n_sp)), size = 1)
     temp_landscape <- create_landscape_gaps(
       width = l_size,
       height = l_size,
@@ -317,12 +323,12 @@ for (n_l in 1:n_models) {
       radius_noise_fraction = runif(n = 1, min = 0.05, max = 0.4),
       regular_spots = T #sample(x = c(T, F), size = 1)
     )
-    landscape_name <- paste("landscape_gaps_", n_l,"_",i, sep = "")
+    landscape_name <- paste("landscape_gaps_", n_l, "_", i, sep = "")
     temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
     training_landscapes_selforga[[n_l]][[j]] <- temp_landscape
     j <- j + 1
     n_sp <- sample(x = seq(3, 20), size = 1)
-    n_rad <- sample(x = seq(round(90/n_sp), round(250/n_sp)), size = 1) #sample(x = seq(round(45/n_sp), round(150/n_sp)), size = 1)
+    n_rad <- sample(x = seq(round(90 / n_sp), round(250 / n_sp)), size = 1) #sample(x = seq(round(45/n_sp), round(150/n_sp)), size = 1)
     temp_landscape <- create_landscape_spots(
       width = l_size,
       height = l_size,
@@ -332,7 +338,7 @@ for (n_l in 1:n_models) {
       radius_noise_fraction = runif(n = 1, min = 0.05, max = 0.4),
       regular_spots = T #sample(x = c(T, F), size = 1)
     )
-    landscape_name <- paste("landscape_spots_", n_l,"_",i, sep = "")
+    landscape_name <- paste("landscape_spots_", n_l, "_", i, sep = "")
     temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
     training_landscapes_selforga[[n_l]][[j]] <- temp_landscape
     j <- j + 1
@@ -344,7 +350,7 @@ for (n_l in 1:n_models) {
       band_fuzziness = runif(n = 1, min = 0.06, max = 0.2),
       octaves = sample(x = seq(2, 4), size = 1)
     )
-    landscape_name <- paste("landscape_labyrinth_", n_l,"_",i, sep = "")
+    landscape_name <- paste("landscape_labyrinth_", n_l, "_", i, sep = "")
     temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
     training_landscapes_selforga[[n_l]][[j]] <- temp_landscape
     j <- j + 1
@@ -354,7 +360,7 @@ for (n_l in 1:n_models) {
       tree_prop = runif(n = 1, min = 0.01, max = 0.99)
     )
     temp_landscape$pattern <- "random"
-    landscape_name <- paste("landscape_random_", n_l,"_",i, sep = "")
+    landscape_name <- paste("landscape_random_", n_l, "_", i, sep = "")
     temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
     training_landscapes_selforga[[n_l]][[j]] <- temp_landscape
   }
@@ -378,14 +384,20 @@ fig_metrics_selforga <- list()
 
 # calculate landscape metrics at the class level
 for (n_l in 1:n_models) {
-  print(paste("number of landscapes: ",length(selforga_types)*n_landscapes_per_type[n_l],sep=""))
+  print(paste(
+    "number of landscapes: ",
+    length(selforga_types) * n_landscapes_per_type[n_l],
+    sep = ""
+  ))
   landscape_class_metrics_all[[n_l]] <- calculate_landscape_metrics(
     landscapes = training_landscapes_selforga[[n_l]],
     level = "class"
   )
   #focus on vegetation class only (no bare soil)
   metric_class <- 1
-  landscape_class_metrics_selforga[[n_l]] <- landscape_class_metrics_all[[n_l]] %>%
+  landscape_class_metrics_selforga[[n_l]] <- landscape_class_metrics_all[[
+    n_l
+  ]] %>%
     filter(class == metric_class)
 
   #determine best 10 metrics to distinguish pattern types
@@ -395,30 +407,38 @@ for (n_l in 1:n_models) {
     method = "kruskal_p"
   )
 
-# plot the 10 best metrics
+  # plot the 10 best metrics
   fig_metrics_selforga[[n_l]] <- plot_metrics(
     metrics = landscape_class_metrics_selforga[[n_l]],
     selected_metrics = best_10_selforga[[n_l]],
     force = TRUE
   )
 
-# save into different formats
+  # save into different formats
   save_plot_multi(
     plot = fig_metrics_selforga[[n_l]],
-    filename_base = paste("fig_supp_selforga_metrics_",length(selforga_types)*n_landscapes_per_type[n_l],sep=""),
+    filename_base = paste(
+      "fig_supp_selforga_metrics_",
+      length(selforga_types) * n_landscapes_per_type[n_l],
+      sep = ""
+    ),
     directory = directory,
     width = 6,
     height = 4.5,
     dpi = 300
   )
 }
-  
+
 #make lists for different results (different number of training landscapes)
 model_selforga_metrics <- list()
 
-  # train the neural network model
+# train the neural network model
 for (n_l in 1:n_models) {
-  print(paste("number of landscapes: ",length(selforga_types)*n_landscapes_per_type[n_l],sep=""))
+  print(paste(
+    "number of landscapes: ",
+    length(selforga_types) * n_landscapes_per_type[n_l],
+    sep = ""
+  ))
   # train a network
   model_selforga_metrics[[n_l]] <- train_nn_metrics(
     metrics = landscape_class_metrics_selforga[[n_l]],
@@ -432,15 +452,19 @@ for (n_l in 1:n_models) {
 #----------------------------------------------------------------------------------------
 
 #set seed for Keras (needs to be done separately)
-set_random_seed(123456) 
+set_random_seed(123456)
 
 model_selforga_pix <- list()
 
 # train the neural network model
 for (n_l in 1:n_models) {
-  print(paste("number of landscapes: ",length(selforga_types)*n_landscapes_per_type[n_l],sep=""))
+  print(paste(
+    "number of landscapes: ",
+    length(selforga_types) * n_landscapes_per_type[n_l],
+    sep = ""
+  ))
   # train a model
-  model_selforga_pix[[n_l]] <- train_nn_landscapes(
+  model_selforga_pix[[n_l]] <- train_nn_pixels(
     landscapes = training_landscapes_selforga[[n_l]],
     cv_method = "k-fold",
     learning_rate = 0.0001,
@@ -537,7 +561,7 @@ for (i in 1:length(pic_names)) {
   #save plots
   save_plot_multi(
     plot = pic_bin,
-    filename_base = paste("fig_selforga_binary_",i,sep=""),
+    filename_base = paste("fig_selforga_binary_", i, sep = ""),
     directory = directory,
     width = 5,
     height = 5,
@@ -545,7 +569,7 @@ for (i in 1:length(pic_names)) {
   )
   save_plot_multi(
     plot = combined_pic,
-    filename_base = paste("fig_selforga_both_",i,sep=""),
+    filename_base = paste("fig_selforga_both_", i, sep = ""),
     directory = directory,
     width = 5,
     height = 5,
@@ -568,7 +592,7 @@ plot_landscape_list(pic_landscapes)
 # apply the neural network models to the landscape object
 #-------------------------------------------------------------------
 
-pic_classification_metrics <-list()
+pic_classification_metrics <- list()
 pic_classification_pix <- list()
 
 for (n_l in 1:n_models) {
@@ -579,7 +603,7 @@ for (n_l in 1:n_models) {
   )
 
   # b) pixel model
-  pic_classification_pix[[n_l]] <- apply_nn_landscapes(
+  pic_classification_pix[[n_l]] <- apply_nn_pixels(
     landscapes = pic_landscapes,
     nn_model = model_selforga_pix[[n_l]]
   )
@@ -605,7 +629,7 @@ for (i in 1:n_models) {
 result_table_metrics
 result_table_pix
 
-  #-------------------------------------------------------------------
+#-------------------------------------------------------------------
 # show landscapes and classification
 #-------------------------------------------------------------------
 # a) metrics model
@@ -617,8 +641,10 @@ plot_classified_landscapes(
 )
 
 # b) pixel model
-for(n_l in 1:n_models){
-  pic_classification_pix[[n_l]]$actual_class <- pic_classification_metrics[[1]]$actual_class
+for (n_l in 1:n_models) {
+  pic_classification_pix[[n_l]]$actual_class <- pic_classification_metrics[[
+    1
+  ]]$actual_class
 }
 
 plot_classified_landscapes(
@@ -676,12 +702,15 @@ fig_metrics
 
 save_plot_multi(
   plot = fig_metrics,
-  filename_base = paste("fig_supp_selforga_pics_metrics_",length(selforga_types)*n_landscapes_per_type[t],sep=""),
+  filename_base = paste(
+    "fig_supp_selforga_pics_metrics_",
+    length(selforga_types) * n_landscapes_per_type[t],
+    sep = ""
+  ),
   directory = directory,
   width = 8,
   height = 6,
   dpi = 300
 )
 
-#save.image(file = "usecase_2_everything.RData") 
-
+#save.image(file = "usecase_2_everything.RData")

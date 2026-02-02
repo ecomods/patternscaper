@@ -40,14 +40,14 @@ test_landscapes <- create_training_landscapes(
 )
 
 # Train a model
-model <- train_nn_landscapes(
+model <- train_nn_pixels(
   landscapes = training_landscapes,
   cv_method = "k-fold",
   cv_folds = 5
 )
 
 # Apply trained model to test landscapes
-validation_results <- apply_nn_landscapes(
+validation_results <- apply_nn_pixels(
   landscapes = test_landscapes,
   nn_model = model,
   return_performance = TRUE
@@ -104,12 +104,12 @@ test_cluster <- create_landscape(
 plot_landscape(test_cluster)
 
 # Apply the model to the test landscape(s)
-apply_nn_landscapes(
+apply_nn_pixels(
   landscape = test_cluster,
   nn_model = model
 )
 
-validation_results <- apply_nn_landscapes(
+validation_results <- apply_nn_pixels(
   landscapes = test_landscapes,
   nn_model = model,
   return_performance = TRUE

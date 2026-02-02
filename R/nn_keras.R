@@ -8,7 +8,7 @@
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #'   \itemize{
 #'     \item "k-fold" or "loo": Performs cross-validation and returns performance metrics
-#'     \item "none": Trains on ALL provided data without validation. Use apply_nn_landscapes()
+#'     \item "none": Trains on ALL provided data without validation. Use apply_nn_pixels()
 #'           with a separate test set to evaluate performance.
 #'   }
 #' @param cv_folds Integer. Number of cross-validation folds when cv_method="k-fold" (default: 5).
@@ -59,14 +59,14 @@
 #' )
 #'
 #' # Train with cross-validation
-#' model <- train_nn_landscapes(
+#' model <- train_nn_pixels(
 #'   landscapes = training_landscapes,
 #'   cv_method = "k-fold",
 #'   cv_folds = 5
 #' )
 #'
 #' # Train on all data for final deployment model
-#' final_model <- train_nn_landscapes(
+#' final_model <- train_nn_pixels(
 #'   landscapes = training_landscapes,
 #'   cv_method = "none",
 #'   epochs = 100
@@ -77,13 +77,13 @@
 #'   n = 100,
 #'   patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
 #' )
-#' results <- apply_nn_landscapes(
+#' results <- apply_nn_pixels(
 #'   landscapes = test_landscapes,
 #'   nn_model = final_model,
 #'   return_performance = TRUE
 #' )
 #' }
-train_nn_landscapes <- function(
+train_nn_pixels <- function(
   landscapes,
   cv_method = "k-fold",
   cv_folds = 5,
@@ -412,7 +412,7 @@ train_nn_landscapes <- function(
       n_training_samples = nrow(x_data),
       n_classes = n_classes,
       class_distribution = table(training_labels),
-      note = "Model trained on all data. Use apply_nn_landscapes() to evaluate on test set."
+      note = "Model trained on all data. Use apply_nn_pixels() to evaluate on test set."
     )
   }
 
@@ -453,7 +453,7 @@ train_nn_landscapes <- function(
 #'   **Note**: Input landscapes must contain categorical/discrete habitat data (e.g., 0/1 for
 #'   two habitat types, or 0/1/2 for three types). Continuous data (e.g., elevation,
 #'   gradients) is not supported.
-#' @param nn_model List. CNN model from train_nn_landscapes().
+#' @param nn_model List. CNN model from train_nn_pixels().
 #' @param return_performance Logical. Whether to return performance metrics when actual classes are available (default: FALSE).
 #' @param verbose Logical. Show informational messages and performance summaries (default: TRUE).
 #'   When TRUE, displays resize operations and performance evaluation results.
@@ -474,7 +474,7 @@ train_nn_landscapes <- function(
 #'     \item{performance}{Performance metrics from evaluate_cv_performance()}
 #'   }
 #' @export
-apply_nn_landscapes <- function(
+apply_nn_pixels <- function(
   landscapes,
   nn_model,
   return_performance = FALSE,
@@ -486,7 +486,7 @@ apply_nn_landscapes <- function(
       !all(c("model", "classes", "input_shape") %in% names(nn_model))
   ) {
     cli::cli_abort(
-      "'nn_model' must be a trained model from train_nn_landscapes()"
+      "'nn_model' must be a trained model from train_nn_pixels()"
     )
   }
 

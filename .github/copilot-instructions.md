@@ -50,7 +50,7 @@ Use `cli` package for all user-facing messages:
 - Functions should accept `width` and `height` parameters but default to 100
 
 #### Cross-Validation
-Both `train_nn_landscapes()` and `train_nn_metrics()` support:
+Both `train_nn_pixels()` and `train_nn_metrics()` support:
 - `cv_method`: "none", "k-fold", "loo"
 - Return structure includes `landscape_id` to map predictions back to input order (important: CV shuffles data)
 

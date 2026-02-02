@@ -107,7 +107,6 @@ test_landscapes_ecotone <- create_training_landscapes(
 #----------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------
 
-
 #--------------------------------------------------------------------
 # Calculate landscapes metrics and determine best ones
 #--------------------------------------------------------------------
@@ -193,7 +192,7 @@ fig_misclass <- plot_classified_landscapes(
   landscapes = test_landscapes_ecotone,
   only_misclassified = TRUE,
   show_legend = F,
-  ncol=4
+  ncol = 4
 )
 fig_misclass
 
@@ -214,14 +213,14 @@ save_plot_multi(
 #----------------------------------------------------------------------------------------
 
 #set seed for Keras (needs to be done separately)
-set_random_seed(123456) 
+set_random_seed(123456)
 
 #--------------------------------------------------------------------
 # Train neural network with the input data itself
 #--------------------------------------------------------------------
 
 # train a model
-model_ecotones_pix <- train_nn_landscapes(
+model_ecotones_pix <- train_nn_pixels(
   landscapes = ecotone_landscapes,
   cv_method = "k-fold",
   cv_folds = 5,
@@ -248,7 +247,7 @@ plot_classified_landscapes(
 # -------------------------------------------------------------------
 
 # apply the model to the test landscapes
-validation_results_ecotone_pix <- apply_nn_landscapes(
+validation_results_ecotone_pix <- apply_nn_pixels(
   landscapes = test_landscapes_ecotone,
   nn_model = model_ecotones_pix,
   return_performance = TRUE
@@ -346,7 +345,7 @@ model_ecotones_lm_400$performance$accuracy
 plot_classified_landscapes(
   classification = model_ecotones_lm_400$performance$validation_results,
   landscapes = ecotone_landscapes_400,
-  only_misclassified = TRUE  
+  only_misclassified = TRUE
 )
 
 # apply the model to the test landscapes
@@ -369,7 +368,7 @@ fig_misclass_400 <- plot_classified_landscapes(
   landscapes = test_landscapes_ecotone,
   only_misclassified = TRUE,
   show_legend = F,
-  ncol=4
+  ncol = 4
 )
 fig_misclass_400
 
@@ -388,7 +387,7 @@ save_plot_multi(
 # -------------------------------------------------------------------
 
 # train the model
-model_ecotones_pix_400 <- train_nn_landscapes(
+model_ecotones_pix_400 <- train_nn_pixels(
   landscapes = ecotone_landscapes_400,
   cv_method = "k-fold",
   cv_folds = 5,
@@ -411,7 +410,7 @@ plot_classified_landscapes(
 )
 
 # apply the model to the test landscapes
-validation_results_ecotone_pix_400 <- apply_nn_landscapes(
+validation_results_ecotone_pix_400 <- apply_nn_pixels(
   landscapes = test_landscapes_ecotone,
   nn_model = model_ecotones_pix_400,
   return_performance = TRUE
@@ -448,4 +447,4 @@ save_plot_multi(
 # -------------------------------------------------------------------
 # save all data
 # -------------------------------------------------------------------
-save.image(file="usecase_1_all_data.RData")
+save.image(file = "usecase_1_all_data.RData")

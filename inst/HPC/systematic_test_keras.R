@@ -139,7 +139,7 @@ run_single_experiment <- function(
 
   tryCatch(
     {
-      model_result <- train_nn_landscapes(
+      model_result <- train_nn_pixels(
         landscapes = training_landscapes,
         cv_method = "none",
         epochs = epochs,
@@ -158,7 +158,7 @@ run_single_experiment <- function(
       ))
 
       # Validate on independent validation set
-      validation_results <- apply_nn_landscapes(
+      validation_results <- apply_nn_pixels(
         landscapes = validation_set,
         nn_model = model_result,
         return_performance = TRUE

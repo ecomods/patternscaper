@@ -20,8 +20,8 @@ library(spatPatClassifyR)
 The workflow consists of the following steps:
 
 1. Generate training landscapes with known patterns using the `create_training_landscapes()` function.
-2. Train a neural network on the landscape pixel data using the `train_nn_landscapes()` function.
-3. Classify new landscapes using the trained model with the `apply_nn_landscapes()` function.
+2. Train a neural network on the landscape pixel data using the `train_nn_pixels()` function.
+3. Classify new landscapes using the trained model with the `apply_nn_pixels()` function.
 
 ## Setup Keras
 
@@ -70,7 +70,7 @@ the cross-validation method `cv_method` are:
 - `"kfold"`: k-fold cross-validation with `cv_folds` number of folds.
 - `"loo"`: leave-one-out cross-validation.
 
-For details and further options see the function help of `train_nn_landscapes()`.
+For details and further options see the function help of `train_nn_pixels()`.
 
 :::{callout-warning}
 
@@ -92,7 +92,7 @@ consider increasing the number of training landscapes or check the function help
 #| label: train-model
 #| message: false
 #| output: false
-model <- train_nn_landscapes(
+model <- train_nn_pixels(
   landscapes = training_landscapes,
   cv_method = "k-fold",
   cv_folds = 2,
@@ -148,7 +148,7 @@ To get additional performance metrics, set `return_performance = TRUE` when appl
 ```{r}
 #| label: apply-model
 #| output: false
-classification <- apply_nn_landscapes(
+classification <- apply_nn_pixels(
   landscapes = test_landscapes,
   nn_model = model,
   return_performance = TRUE

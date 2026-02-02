@@ -33,7 +33,7 @@ test_landscapes <- create_training_landscapes(
 )
 
 # Train a model
-model <- train_nn_landscapes(
+model <- train_nn_pixels(
   landscapes = training_landscapes,
   cv_method = "none",
   learning_rate = 0.001,
@@ -41,7 +41,7 @@ model <- train_nn_landscapes(
 )
 
 # Validate on the test landscapes
-validation <- apply_nn_landscapes(
+validation <- apply_nn_pixels(
   nn_model = model,
   landscape = test_landscapes,
   return_performance = TRUE
@@ -51,7 +51,7 @@ validation <- apply_nn_landscapes(
 plot_landscape_list(pics_landscapes, titles = "both")
 
 # Apply the model to the pictures
-picture_classification <- apply_nn_landscapes(
+picture_classification <- apply_nn_pixels(
   nn_model = model,
   landscape = pics_landscapes
 )

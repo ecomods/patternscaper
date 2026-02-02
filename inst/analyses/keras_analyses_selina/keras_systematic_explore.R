@@ -66,7 +66,7 @@ cli::cli_alert_info("Validation set pattern distribution:")
 print(table(validation_patterns_sys))
 
 # Train with EXACT same parameters
-model_sys <- train_nn_landscapes(
+model_sys <- train_nn_pixels(
   landscapes = training_pool_sys,
   cv_method = "none",
   learning_rate = 0.001,
@@ -74,7 +74,7 @@ model_sys <- train_nn_landscapes(
 )
 
 # Validate on same independent set
-validation_sys <- apply_nn_landscapes(
+validation_sys <- apply_nn_pixels(
   nn_model = model_sys,
   landscape = validation_set_sys,
   return_performance = TRUE
