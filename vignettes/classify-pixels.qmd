@@ -1,5 +1,5 @@
 ---
-title: "classify-landscapes-keras"
+title: "Classify landscapes using Keras on landscape rasters"
 vignette: >
   %\VignetteIndexEntry{classify-landscapes-keras}
   %\VignetteEngine{quarto::html}
@@ -10,78 +10,177 @@ knitr:
     comment: '#>'
 ---
 
+This vignette shows how to classify landscape patterns using a convolutional neural network (Keras backend) trained directly on landscape raster data.
+
 ```{r}
 #| label: setup
 library(spatPatClassifyR)
+
+# Set seed for reproducibility
 set.seed(123456)
 ```
 
-This vignette demonstrates how to classify landscape patterns using a convolutional neural network (Keras backend) trained directly on landscape raster data.
+The workflow consists of the following steps:
 
-The workflow consists of:
-
-1. Generating training landscapes with known patterns using the `create_training_landscapes()` function.
-2. Training a neural network on the landscape data using the `train_nn_landscapes()` function.
+1. Generate training landscapes with known patterns using the `create_training_landscapes()` function.
+2. Train a neural network on the landscape pixel data using the `train_nn_landscapes()` function.
 3. Classify new landscapes using the trained model with the `apply_nn_landscapes()` function.
 
 ## Setup Keras
 
 Models are trained using the R package `keras3`. It requires a working installation of TensorFlow.
 
-:::{.callout-warning}
+You can refer to our [installation guide](install-keras.qmd) and the official [`keras3` package website](https://keras3.posit.co/) for instructions on how to install Keras and TensorFlow.
 
-This is still missing and I need to add it
+To quickly test if your setup is working, you can run the following simple function from the `keras3` package:
 
-:::
+```{r}
+#| label: test-keras
+keras3::to_categorical(0)
+```
+
+If the function does not return an error, your Keras installation is working correctly.
 
 ## Step 1: Generate Training Landscapes
 
+You can generate a set of training landscapes with known patterns.
+See [landscape generation vignette](landscape-generation.qmd) for details on landscape generation and available patterns and options.
 
 ```{r}
 #| label: generate-landscapes
 training_landscapes <- create_training_landscapes(
   n = 100,
-  patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
+  patterns = c("labyrinth", "random", "clustered")
 )
 ```
 
-## Step 2: Train Neural Network Classifier
+## Step 2: Train Neural Network
 
-The model can be trained with or without cross-validation. Here, we use no cross-validation for simplicity. If cross-validation is used, performance will be returned and printed to the console. For details and more options, see the documentation of `train_nn_landscapes()`.
+The model can be trained with or without cross-validation. Valid methods for 
+the cross-validation method `cv_method` are:
+
+- `"none"`: No cross-validation, train on all data.
+- `"kfold"`: k-fold cross-validation with `cv_folds` number of folds.
+- `"loo"`: leave-one-out cross-validation.
+
+For details and further options see the function help of `train_nn_landscapes()`.
+
+:::{callout-warning}
+
+Description of model architecture still missing.
+
+:::
+
+Here, we train the model using 2-fold cross-validation to keep computational time
+low.
+
+:::{.callout-note}
+## Low fold accuaracy
+
+The function will print fold accuracies during training (see below). If the accuracy is low,
+consider increasing the number of training landscapes or check the function help for other options to improve model performance.
+:::
 
 ```{r}
 #| label: train-model
 model <- train_nn_landscapes(
   landscapes = training_landscapes,
-  cv_method = "none",
-  cv_folds = 3
+  cv_method = "k-fold",
+  cv_folds = 2
 )
 ```
 
-## Step 3: Apply Model to New Landscapes
+To check the model performance, we can look at the confusion matrix from cross-validation:
+
+```{r}
+#| label: view-confusion-matrix
+# Confusion matrix from cross-validation
+model$performance$confusion_matrix
+```
+
+You can also check other performance metrics like overall accuracy:
+
+```{r}
+#| label: view-overall-accuracy
+# Overall accuracy
+model$performance$accuracy
+```
+
+Or per class metrics like precision, recall, and F1-score:
+
+```{r}
+#| label: view-per-class-metrics
+model$performance$per_class_metrics
+```
+
+## Step 3: Classify New Landscapes
+
+Finally, you can create some new test landscapes and classify them using the trained model. In this example, we create 20 new landscapes for testing. 
+
+In reality this could be landscapes read in from files or created in other ways.
+For details on importing own landscapes, see the [importing landscapes vignette](importing-landscapes.qmd).
 
 ```{r}
 #| label: test-landscapes
 test_landscapes <- create_training_landscapes(
   n = 20,
-  patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random"),
-  add_rotation = TRUE
-)
-
-validation_results <- apply_nn_landscapes(
-  landscapes = test_landscapes,
-  nn_model = model
+  patterns = c("labyrinth", "random", "clustered")
 )
 ```
 
-We can plot the classified landscapes along with their true and predicted patterns.
+If test landscapes have been created with `create_training_landscapes()`, their true patterns are known. Therefore they can be used to evaluate classification performance.
+
+:::{.callout-note}
+To get additional performance metrics, set `return_performance = TRUE` when applying the model. This only works if true patterns are known. If true patterns are not known, set `return_performance = FALSE` (default).
+:::
+
 
 ```{r}
-#| label: plot-results
-plot_classified_landscapes(
-  classification = validation_results$predictions,
+classification <- apply_nn_landscapes(
   landscapes = test_landscapes,
-  only_misclassified = FALSE
+  nn_model = model,
+  return_performance = TRUE
 )
 ```
 
+You can look at the predicted patterns for each test landscape individually and
+compare actual and predicted classes:
+
+```{r}
+#| label: view-predictions
+# Predicted patterns
+classification$predictions
+```
+
+You can also look at performance summaries like confusion matrix:
+
+```{r}
+#| label: view-performance
+# Performance summary
+classification$performance$confusion_matrix
+```
+
+And other metrics like accuracy, precision, recall, and F1-score:
+
+```{r}
+#| label: view-per-class-metrics
+# Other performance metrics
+classification$performance$per_class_metrics
+```
+
+To visualize the classified landscapes along with their true and predicted patterns
+use the function `plot_classified_landscapes`. Correctly classified landscapes are shown in green, misclassified ones in red. To plot only misclassified landscapes, set `only_misclassified = TRUE`.
+
+:::{.callout-note}
+If you classified landscapes where the true patterns are not known, the plot will
+show the landscape and the predicted pattern only.
+:::
+
+```{r}
+#| label: plot-classified-landscapes
+# Visualize true and predicted patterns
+plot_classified_landscapes(
+  classification = classification$predictions,
+  landscapes = test_landscapes
+)
+```
