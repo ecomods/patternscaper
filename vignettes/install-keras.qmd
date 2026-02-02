@@ -12,7 +12,7 @@ knitr:
     comment: '#>'
 ---
 
-The workflow to classify landscapes directly from raster data using neural networks (see [vignette](classify-pixels.qmd)) `keras3` and its correct configuration.
+The workflow to classify landscapes directly from raster data using neural networks (see [vignette](classify-pixels.html)) `keras3` and its correct configuration.
 
 In our experience, it can be a bit tricky to set up correctly, therefore we 
 provide this guide to help you with the installation.

@@ -10,7 +10,7 @@ knitr:
     comment: '#>'
 ---
 
-This vignette shows how to generate artificial landscapes with different spatial patterns. These landscapes are designed for training and testing spatial pattern classifiers. For details on how to use the generated landscapes for training classifiers, see the [classify-metrics](classify-metrics.qmd) and [classify-pixels](classify-pixels.qmd) vignettes.
+This vignette shows how to generate artificial landscapes with different spatial patterns. These landscapes are designed for training and testing spatial pattern classifiers. For details on how to use the generated landscapes for training classifiers, see the [classify-metrics](classify-metrics.html) and [classify-pixels](classify-pixels.html) vignettes.
 
 ```{r}
 #| label: setup
@@ -349,7 +349,7 @@ plot_landscape_list(list(labyrinth_default, labyrinth_complex), titles = "name")
 
 In `spatPatClassifyR`,  landscapes are stored as lists containing the landscape data and metadata. All landscape generation functions return landscapes in this format and all other functions expect landscapes to be provided in this format. 
 
-To learn how to transform your own raster data into this format, see [vignette on importing landscapes](importing-landscapes.qmd).
+To learn how to transform your own raster data into this format, see [vignette on importing landscapes](importing-landscapes.html).
 
 Each landscapes is stored as a list with the following components:
 

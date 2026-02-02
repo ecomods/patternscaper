@@ -33,7 +33,7 @@ The workflow consists of the following steps:
 ## Step 1: Generate Training Landscapes
 
 You can generate a set of training landscapes with known patterns.
-See [landscape generation vignette](landscape-generation.qmd) for details on landscape generation and available patterns and options.
+See [landscape generation vignette](landscape-generation.html) for details on landscape generation and available patterns and options.
 
 ```{r}
 #| label: generate-landscapes
@@ -49,7 +49,7 @@ landscapes <- create_training_landscapes(
 Next, you can calculate landscape metrics for the training landscapes. 
 Landscape metrics are calculated using the metrics and functions from the [`landscapemetrics`](https://r-spatialecology.github.io/landscapemetrics/) package.
 They can be calculated on the class level (i.e. for each land cover class separately) or on the landscape level (i.e. for the whole landscape).
-For details, see [landscape metrics vignette](landscape-metrics.qmd).
+For details, see [landscape metrics vignette](landscape-metrics.html).
 
 In this example, we calculate metrics on the landscape level.
 
@@ -66,7 +66,7 @@ landscape_metrics <- calculate_landscape_metrics(
 
 ## Step 3: Evaluate Landscape Metrics
 
-You can use the `evaluate_landscape_metrics` function to select the 10 most informative metrics for classification based on different methods. Here, we use the p-values of a Kruskal-Wallis H test (for more details and other options see [landscape metrics vignette](landscape-metrics.qmd)).
+You can use the `evaluate_landscape_metrics` function to select the 10 most informative metrics for classification based on different methods. Here, we use the p-values of a Kruskal-Wallis H test (for more details and other options see [landscape metrics vignette](landscape-metrics.html)).
 
 :::{.callout-note}
 Note, that some metrics may return `NA` for some landscapes. Also, some metrics may
@@ -152,7 +152,7 @@ model$performance$per_class_metrics
 Finally, you can create some new test landscapes and classify them using the trained model. In this example, we create 10 new landscapes for testing. 
 
 In reality this could be landscapes read in from files or created in other ways.
-For details on importing own landscapes, see the [importing landscapes vignette](importing-landscapes.qmd).
+For details on importing own landscapes, see the [importing landscapes vignette](importing-landscapes.html).
 
 ```{r}
 #| label: classify-landscapes

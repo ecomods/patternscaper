@@ -14,10 +14,10 @@ There are two main workflows to classify landscape patterns using the `spatPatCl
 
 Please refer to the respective vignettes for detailed guides on each workflow:
 
-- [Classify landscapes using landscape metrics](classify-metrics.qmd)
-- [Classify landscapes using Keras on landscape rasters](classify-pixels.qmd)
+- [Classify landscapes using landscape metrics](classify-metrics.html)
+- [Classify landscapes using Keras on landscape rasters](classify-pixels.html)
 
 There are also more detailed vignettes on specific topics:
 
-- [Importing user-defined landscapes](importing-landscapes.qmd)
-- [Landscape generation](landscape-generation.qmd)
+- [Importing user-defined landscapes](importing-landscapes.html)
+- [Landscape generation](landscape-generation.html)
