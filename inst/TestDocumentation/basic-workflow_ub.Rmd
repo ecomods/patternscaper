@@ -180,7 +180,22 @@ model
 We can visualize the performance of our model using several different plots:
 
 ```{r visualize_performance}
+# Or get all plots at once
+all_plots <- plot_classification_results(model, return_all = TRUE)
+patchwork::wrap_plots(all_plots)
 
+# Or plot individual plots
+# Plot confusion matrix
+# plot_classification_results(model, plot_type = "confusion")
+
+# Plot class probabilities
+# plot_classification_results(model, plot_type = "probabilities")
+
+# Plot classification confidence
+# plot_classification_results(model, plot_type = "confidence")
+
+# Plot misclassifications
+# plot_classification_results(model, plot_type = "misclassifications")
 ```
 
 ## 6. Applying the Model to New Landscapes
