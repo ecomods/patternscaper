@@ -623,23 +623,21 @@ apply_nn_landscapes <- function(
     is.na(landscape_pattern) | landscape_pattern == "unclassified"
   )
 
-  # When return_performance is TRUE, always add actual_class column
-  if (return_performance) {
-    predictions$actual_class <- landscape_pattern
+  # Always add actual_class column
+  predictions$actual_class <- landscape_pattern
 
-    # Check for mixed scenario (some valid, some invalid actual classes)
-    if (has_actual_classes) {
-      valid_mask <- !is.na(landscape_pattern) &
-        landscape_pattern != "unclassified"
-      n_valid <- sum(valid_mask)
-      n_total <- length(landscape_pattern)
+  # Check for mixed scenario (some valid, some invalid actual classes)
+  if (return_performance && has_actual_classes) {
+    valid_mask <- !is.na(landscape_pattern) &
+      landscape_pattern != "unclassified"
+    n_valid <- sum(valid_mask)
+    n_total <- length(landscape_pattern)
 
-      if (n_valid < n_total) {
-        if (verbose) {
-          cli::cli_alert_info(
-            "Evaluating performance on {n_valid}/{n_total} landscapes with known classes"
-          )
-        }
+    if (n_valid < n_total) {
+      if (verbose) {
+        cli::cli_alert_info(
+          "Evaluating performance on {n_valid}/{n_total} landscapes with known classes"
+        )
       }
     }
   }
