@@ -91,6 +91,7 @@ consider increasing the number of training landscapes or check the function help
 ```{r}
 #| label: train-model
 #| message: false
+#| output: false
 model <- train_nn_landscapes(
   landscapes = training_landscapes,
   cv_method = "k-fold",
@@ -145,6 +146,8 @@ To get additional performance metrics, set `return_performance = TRUE` when appl
 
 
 ```{r}
+#| label: apply-model
+#| output: false
 classification <- apply_nn_landscapes(
   landscapes = test_landscapes,
   nn_model = model,

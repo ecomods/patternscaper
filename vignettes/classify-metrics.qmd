@@ -92,6 +92,8 @@ best_10 <- evaluate_landscape_metrics(
 
 ```{r}
 #| label: plot-metrics
+#| fig.width: 8
+#| fig.height: 6
 #| fig.cap: "Boxplots show the distribution of the selected landscape metrics across different spatial patterns. Each point represents one training landscape and each panel is one of the selected metrics."
 # Plot selected metrics
 plot_metrics(

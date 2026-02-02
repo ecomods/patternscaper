@@ -122,6 +122,9 @@ The `landscapes` are returned as a list of `landscape` objects (see [below](land
 They can be visualized using the `plot_landscape_list()` function:
 
 ```{r}
+#| label: plot-training-landscapes
+#| fig.width: 8
+#| fig.height: 6
 # Plot all landscapes
 plot_landscape_list(landscapes)
 ```
@@ -163,7 +166,7 @@ To modify the size (number of pixels in x- and y-direction) of all generated lan
 ```{r}
 #| label: custom-size
 #| fig-width: 8
-#| fig-height: 3
+#| fig-height: 2
 #| fig-alt: "Three landscapes showing different sizes: 50x20 pixels"
 non_square <- create_training_landscapes(
   n = 3,

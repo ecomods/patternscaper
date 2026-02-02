@@ -40,7 +40,7 @@ If this returns `TRUE`, your installation is already working and you can skip th
 
 ## Specify Python Installation
 
-Before installing Keras, you should specify which Python installation to use. This ensures compatibility and prevents installation issues.
+Before installing Keras, you should specify which Python installation to use.
 
 **Step 1: Find your Python installations**
 
@@ -69,10 +69,10 @@ reticulate::use_python(
 reticulate::py_discover_config()
 ```
 
-This should display your Python installation details (version, path, etc.), not `NULL`.
+This should display your Python installation details, not `NULL`.
 
 :::{.callout-warning}
-**Avoid Python 3.13+** as TensorFlow may not fully support these newer versions yet. Python 3.10 or 3.11 are most reliable.
+**Avoid Python 3.13+** as TensorFlow does not fully support these newer versions yet.Use Python 3.10 or 3.11.
 :::
 
 ## Install Keras and TensorFlow
@@ -109,19 +109,3 @@ keras3::to_categorical(0)
 ```
 
 If this prints a matrix without errors, your Keras installation is working correctly!
-
-## Troubleshooting
-
-If you encounter errors about missing or corrupted Python installations:
-
-1. **Clear the reticulate cache**: 
-   - Close R/Positron completely
-   - Delete the cache folder:
-     - Windows: `C:\Users\<YourName>\AppData\Local\R\cache\R\reticulate\`
-     - macOS/Linux: `~/.local/share/r-reticulate/`
-   
-2. **Restart R** and specify your Python installation again using `use_python()`
-
-3. **Run `install_keras()` again**
-
-If problems persist, ensure you have Python 3.10 or 3.11 installed from [python.org](https://www.python.org/downloads/).
