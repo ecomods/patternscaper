@@ -1,5 +1,5 @@
 ---
-title: "importing-landscapes"
+title: "Importing user-defined landscapes"
 vignette: >
   %\VignetteIndexEntry{importing-landscapes}
   %\VignetteEngine{quarto::html}
@@ -10,25 +10,23 @@ knitr:
     comment: '#>'
 ---
 
+In addition to using landscapes generated with the functions in `spatPatClassifyR`, you can also import your own landscapes to use them for training or classification.
+These can be landscapes created manually as matrices or rasters, or landscapes read in from files (e.g. from classified remote sensing images).
+
+Please note that right now, we only support landscapes with categorical cover classes.
+
 ```{r}
 #| label: setup
 library(spatPatClassifyR)
 ```
 
-All functions in `spatPatClassifyR` expect landscapes to be a `landscape` object or a list of `landscape` objects. 
-If you want to train or classify with landscapes that you have created or read in from a file, you will need to convert them to `landscape` objects first. This vignette shows how to do that.
+All functions in `spatPatClassifyR` expect landscapes to be a `landscape` object or a list of `landscape` objects. You can convert your own landscapes to `landscape` objects using the `landscape()` function.
 
-Please note that right now, we only support categorical landscapes.
+You can convert landscapes from a matrix or a `SpatRaster` (provided from the
+[`terra` R package](https://rspatial.github.io/terra/index.html)).
 
-To convert your own landscapes to `landscape` objects, you can use the `landscape()` function
-
-The function excepts landscape data either as a matrix or a a `SpatRaster`.
-
-You can manually set `pattern`, `name` and `params` metadata fields.
-
-### From a matrix
-
-```{r }
+```{r}
+#| label: create-sample-landscapes
 # Create a sample matrix
 landscape_matrix <- matrix(
   data = sample(1:3, 100, replace = TRUE),
@@ -36,47 +34,53 @@ landscape_matrix <- matrix(
   ncol = 10
 )
 
-# Convert the matrix to a landscape object
-landscape_object <- landscape(
-  landscape_matrix,
-  name = "Sample Landscape",
-  pattern = "custom"
-)
-landscape_object
+# Create a sample SpatRaster
+landscape_raster <- terra::rast(landscape_matrix)
 ```
 
-### From a SpatRaster
+To convert these to `landscape` objects, use the `landscape()` function.
+The landscape object contains metadata about the landscape, such as its name and pattern.
+By default, the `name` is set to `"unnamed"` and the `pattern` to `"unclassified"`.
 
-Here, we use the `terra` package to create a `SpatRaster` from the matrix and then convert it to a `landscape` object. But this could also be a raster read in from a file.
+You can provide name and pattern when converting the landscape.
+
+:::{.callout-note}
+Providing a landscape pattern is only necessary if you want to use the landscape for training a model. If you want to classify landscapes without known patterns, you can leave the pattern as `"unclassified"`.
+:::
 
 ```{r }
-library(terra)
-# Create a sample SpatRaster
-landscape_raster <- rast(landscape_matrix)
+#| label: convert-matrix
+# Convert the matrix to a landscape object
+landscape_object_matrix <- landscape(
+  landscape_matrix,
+  name = "Sample Matrix Landscape",
+  pattern = "custom"
+)
 # Convert the SpatRaster to a landscape object
 landscape_object_raster <- landscape(
   landscape_raster,
   name = "Sample Raster Landscape",
   pattern = "custom"
 )
-landscape_object_raster
 ```
 
+Printing a landscape object shows its properties:
+
 ```{r}
-plot_landscape_list(
-  list(landscape_object, landscape_object_raster),
-  titles = "name"
-)
+#| label: print-landscape
+landscape_object_matrix
 ```
 
-## Converting multiple landscapes
+## Bulk-converting multiple landscapes
 
-If you have multiple landscapes to convert, you can use use the map function from the `purrr` package to apply the `landscape()` function to each landscape in a list. 
+If you have multiple landscapes to convert, you can use use `lapply` or the `pmap` function from the [`purrr` package](https://purrr.tidyverse.org/) to apply the `landscape()` function to each landscape in a list. 
 
-If you have for example a list of matrices, you batch convert them and optionally set the `name` and `pattern` for each landscape like this:
+Below you find an example of bulk-converting multiple matrices to landscape objects and
+setting their names and patterns accordingly.
 
 
 ```{r}
+#| label: bulk-convert
 library(purrr)
 # Create a list of sample matrices
 landscape_matrices <- list(
@@ -100,6 +104,12 @@ landscape_objects <- pmap(
     landscape(mat, name = name, pattern = pattern)
   }
 )
-# Plot the landscapes with their names and patterns as titles
-plot_landscape_list(landscape_objects, titles = "both")
+```
+
+After converting the landscapes, you can use them like any other landscape object in `spatPatClassifyR`.
+You can for example use the plotting functions to visualize them:
+
+```{r}
+#| label: plot-landscapes
+plot_landscape_list(landscape_objects)
 ```
