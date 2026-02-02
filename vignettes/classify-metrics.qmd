@@ -172,6 +172,7 @@ To get additional performance metrics, set `return_performance = TRUE` when appl
 ```{r}
 #| label: apply-model
 #| message: false
+#| warning: false
 # Classify test landscapes using the trained model
 classification <- apply_nn_metrics(
   landscapes = test_landscapes,
@@ -215,7 +216,10 @@ show the landscape and the predicted pattern only.
 
 ```{r}
 #| label: plot-classified-landscapes
+#| fig.width: 8
+#| fig.height: 6
 # Visualize true and predicted patterns
+
 plot_classified_landscapes(
   classification = classification$predictions,
   landscapes = test_landscapes

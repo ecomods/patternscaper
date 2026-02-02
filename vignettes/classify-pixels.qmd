@@ -90,10 +90,12 @@ consider increasing the number of training landscapes or check the function help
 
 ```{r}
 #| label: train-model
+#| message: false
 model <- train_nn_landscapes(
   landscapes = training_landscapes,
   cv_method = "k-fold",
-  cv_folds = 2
+  cv_folds = 2,
+  verbose = FALSE
 )
 ```
 
@@ -185,7 +187,10 @@ show the landscape and the predicted pattern only.
 
 ```{r}
 #| label: plot-classified-landscapes
+#| fig.width: 8
+#| fig.height: 8
 # Visualize true and predicted patterns
+
 plot_classified_landscapes(
   classification = classification$predictions,
   landscapes = test_landscapes

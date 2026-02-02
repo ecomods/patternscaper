@@ -84,6 +84,8 @@ To visually compare the top 10 metrics, use the `plot_metrics()` function:
 ```{r}
 #| fig.alt: "Boxplots showing the distribution of the top 10 informative landscape metrics across different spatial patterns"
 #| fig.cap: "Distribution of the top 10 informative landscape metrics across different spatial patterns. Each dot is a landscape, the boxplots show the distribution of metric values for each spatial pattern."
+#| fig.width: 8
+#| fig.height: 6
 plot_metrics(
   landscape_metrics,
   selected_metrics = metric_evaluation
