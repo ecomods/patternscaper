@@ -1,0 +1,223 @@
+---
+title: "Classify landscapes using landscape metrics"
+vignette: >
+  %\VignetteIndexEntry{classify-metrics}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: '#>'
+---
+
+This vignette provides an overview of the workflow to train a neural network on landscape metrics and then use the trained network to classify new landscapes based on the same metrics.
+
+```{r}
+#| label: setup
+library(spatPatClassifyR)
+
+# Set seed for reproducibility
+set.seed(123456)
+```
+
+
+The workflow consists of the following steps:
+
+1. Generate training landscapes with known patterns using the `create_training_landscapes()` function.
+2. Calculate landscape metrics for the training landscapes using the `calculate_landscape_metrics()` function.
+3. Select most informative metrics (i.e. metrics that differ the most between landscapes) using the `evaluate_landscape_metrics()` function.
+4. Train a neural network using the selected metrics with the `train_nn_metrics()` function.
+5. Classify new landscapes using the trained neural network with the `apply_nn_metrics()` function.
+
+
+## Step 1: Generate Training Landscapes
+
+You can generate a set of training landscapes with known patterns.
+See [landscape generation vignette](landscape-generation.qmd) for details on landscape generation and available patterns and options.
+
+```{r}
+#| label: generate-landscapes
+# Generate 100 training landscapes of 3 patterns
+landscapes <- create_training_landscapes(
+  n = 100,
+  patterns = c("labyrinth", "random", "clustered")
+)
+```
+
+## Step 2: Calculate Landscape Metrics
+
+Next, you can calculate landscape metrics for the training landscapes. 
+Landscape metrics are calculated using the metrics and functions from the [`landscapemetrics`](https://r-spatialecology.github.io/landscapemetrics/) package.
+They can be calculated on the class level (i.e. for each land cover class separately) or on the landscape level (i.e. for the whole landscape).
+For details, see [landscape metrics vignette](landscape-metrics.qmd).
+
+In this example, we calculate metrics on the landscape level.
+
+
+```{r}
+#| label: calculate-metrics
+#| message: false
+# Calculate landscape metrics on the landscape level
+landscape_metrics <- calculate_landscape_metrics(
+  landscapes,
+  level = "landscape"
+)
+```
+
+## Step 3: Evaluate Landscape Metrics
+
+You can use the `evaluate_landscape_metrics` function to select the 10 most informative metrics for classification based on different methods. Here, we use the p-values of a Kruskal-Wallis H test (for more details and other options see [landscape metrics vignette](landscape-metrics.qmd)).
+
+:::{.callout-note}
+Note, that some metrics may return `NA` for some landscapes. Also, some metrics may
+have the same value for each landscape (zero variance between the values). These
+metrics get removed before evaluation and the user gets warned about the 
+metrics that are removed.
+
+It is not recommended to set `exclude_na = FALSE`, as metrics with `NA` values cannot be used for training the neural network. They may however be informative and useful for other types of analyses.
+:::
+
+
+```{r}
+#| label: evaluate-metrics
+best_10 <- evaluate_landscape_metrics(
+  metrics = landscape_metrics,
+  method = "kruskal_p",
+  metrics_number = 10,
+  verbose = FALSE
+)
+```
+
+ You can plot the differences between patterns for the selected metrics using the `plot_metrics` function.
+
+```{r}
+#| label: plot-metrics
+#| fig.cap: "Boxplots show the distribution of the selected landscape metrics across different spatial patterns. Each point represents one training landscape and each panel is one of the selected metrics."
+# Plot selected metrics
+plot_metrics(
+  metrics = landscape_metrics,
+  selected_metrics = best_10
+)
+```
+
+## Step 4: Train Neural Network
+
+The model can now be trained using the selected metrics from step 3.
+Training can be done with or without cross-validation.
+Valid options for the cross-validation method `cv_method` are:
+
+- `"none"`: no cross-validation
+- `"k-fold"`: k-fold cross-validation with `cv_folds` number of folds
+- `"loo"`: leave-one-out cross-validation
+
+For details and further options see the function help `?train_nn_metrics()`.
+
+```{r}
+#| label: train-model
+# Train neural network with k-fold cross-validation (3 folds)
+model <- train_nn_metrics(
+  metrics = landscape_metrics,
+  metrics_selected = best_10,
+  cv_method = "k-fold",
+  cv_folds = 3,
+  verbose = FALSE
+)
+```
+
+To check the model performance, we can look at the confusion matrix from cross-validation:
+
+```{r}
+#| label: view-confusion-matrix
+# Confusion matrix from cross-validation
+model$performance$confusion_matrix
+```
+
+You can also check other performance metrics like overall accuracy:
+
+```{r}
+#| label: view-overall-accuracy
+# Overall accuracy
+model$performance$accuracy
+```
+
+Or per class metrics like precision, recall, and F1-score:
+
+```{r}
+#| label: view-per-class-metrics
+model$performance$per_class_metrics
+```
+
+## Step 5: Classify New Landscapes
+
+Finally, you can create some new test landscapes and classify them using the trained model. In this example, we create 10 new landscapes for testing. 
+
+In reality this could be landscapes read in from files or created in other ways.
+For details on importing own landscapes, see the [importing landscapes vignette](importing-landscapes.qmd).
+
+```{r}
+#| label: classify-landscapes
+# Create 10 new test landscapes using the same patterns as for training
+test_landscapes <- create_training_landscapes(
+  n = 10,
+  patterns = c("labyrinth", "random", "clustered")
+)
+```
+
+If test landscapes have been created with `create_training_landscapes()`, their true patterns are known. Therefore they can be used to evaluate classification performance.
+
+:::{.callout-note}
+To get additional performance metrics, set `return_performance = TRUE` when applying the model. This only works if true patterns are known. If true patterns are not known, set `return_performance = FALSE` (default).
+:::
+
+```{r}
+#| label: apply-model
+#| message: false
+# Classify test landscapes using the trained model
+classification <- apply_nn_metrics(
+  landscapes = test_landscapes,
+  nn_model = model,
+  return_performance = TRUE
+)
+```
+
+You can look at the predicted patterns for each test landscape individually and
+compare actual and predicted classes:
+
+```{r}
+#| label: view-predictions-2
+# Predicted patterns
+classification$predictions
+```
+
+You can also look at performance summaries like confusion matrix:
+
+```{r}
+#| label: view-performance-2
+# Performance summary
+classification$performance$confusion_matrix
+```
+
+And other metrics like accuracy, precision, recall, and F1-score:
+
+```{r}
+#| label: view-per-class-metrics-2
+# Other performance metrics
+classification$performance$per_class_metrics
+```
+
+To visualize the classified landscapes along with their true and predicted patterns
+use the function `plot_classified_landscapes`. Correctly classified landscapes are shown in green, misclassified ones in red. To plot only misclassified landscapes, set `only_misclassified = TRUE`.
+
+:::{.callout-note}
+If you classified landscapes where the true patterns are not known, the plot will
+show the landscape and the predicted pattern only.
+:::
+
+```{r}
+#| label: plot-classified-landscapes
+# Visualize true and predicted patterns
+plot_classified_landscapes(
+  classification = classification$predictions,
+  landscapes = test_landscapes
+)
+```
