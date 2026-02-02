@@ -88,17 +88,6 @@ model_l
 # a) for model using landscapes metrics
 #-------------------------------------------------
 
-# Visualize classification results
-# Get all plots in a list
-all_plots <- plot_classification_results(model_l, return_all = TRUE)
-patchwork::wrap_plots(all_plots)
-
-# Or create individual plots with the wrapper
-plot_classification_results(model_l, plot_type = "confusion")
-plot_classification_results(model_l, plot_type = "probabilities")
-plot_classification_results(model_l, plot_type = "confidence")
-plot_classification_results(model_l, plot_type = "misclassifications")
-
 # Plot the landscapes that were misclassified
 plot_classified_landscapes(
   classification = model_l$validation_results,
@@ -205,16 +194,6 @@ model_k
 # 3b) for model using keras
 #BRITTA - LÄUFT DERZEIT BEI MIR NICHT
 #-------------------------------------------------
-
-# Visualize classification results
-# Get all plots in a list
-all_plots <- plot_classification_results(model_l, return_all = TRUE)
-patchwork::wrap_plots(all_plots)
-
-plot_classification_results(model_l, plot_type = "confusion")
-plot_classification_results(model_l, plot_type = "probabilities")
-plot_classification_results(model_l, plot_type = "confidence")
-plot_classification_results(model_l, plot_type = "misclassifications")
 
 # Plot the landscapes that were misclassified
 plot_classified_landscapes(
