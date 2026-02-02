@@ -56,16 +56,6 @@ validation_results <- apply_nn_pixels(
 # Look at the model object
 model
 
-# Visualize classification results
-# Get all plots in a list
-all_plots <- plot_classification_results(model, return_all = TRUE)
-patchwork::wrap_plots(all_plots)
-
-plot_classification_results(model, plot_type = "confusion")
-plot_classification_results(model, plot_type = "probabilities")
-plot_classification_results(model, plot_type = "confidence")
-plot_classification_results(model, plot_type = "misclassifications")
-
 # Plot the landscapes that were misclassified
 plot_classified_landscapes(
   classification = model$performance$validation_results,
