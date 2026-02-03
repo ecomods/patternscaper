@@ -2,11 +2,12 @@
 
 ## What This Package Does
 
-- Overview of the package's main purpose and functionality and use cases
+The `spatPatClassifyR` package provides an automated approach to classifying spatial vegetation patterns into user-defined pattern types. It does so by training a neural network on multiple reference landscapes with known pattern types. Two alternative neural network approaches are implemented: (i) a multi-layered neural network, which is trained on landscape metrics and (ii) a convolutional neural network trained on the pixel data itself.
+Once trained, the neural network can be applied to new landscapes with unknown spatial patterns. In doing so, it estimates the likelihood for each possible pattern type, allowing users to assess the confidence of the classification.
 
-!!! more text !!!
+In the initial publication of the `spatPatClassifyR` package, two use cases are demonstrated: different pattern types in ecotones and different pattern types in self-organized landscapes. In both use cases we show the performance of both neural network approaches dependent on input configuratons. For the self-organized landscapes, we additionally demonstrate the application of neural networks trained with artificial landscapes on real-world photographies.  
 
-![](man/figures/workflow.png)
+[](man/figures/workflow.png)
 
 ## Installation
 
@@ -21,7 +22,10 @@ devtools::install_github("ecomods/spatPatClassifyR")
 ```
 
 ## Get started
-xxx link to get started page
+
+After successful installation, get started by following the detailed workflow description in:
+[Get started](spatPatClassifyR.html)
+
 
 ## Citation
 
