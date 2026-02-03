@@ -4,6 +4,8 @@
 
 - Overview of the package's main purpose and functionality and use cases
 
+!!! more text !!!
+
 ![](man/figures/workflow.png)
 
 ## Installation
@@ -17,6 +19,9 @@ if (!require("devtools")) install.packages("devtools")
 # Install spatPatClassifyR from GitHub
 devtools::install_github("ecomods/spatPatClassifyR")
 ```
+
+## Get started
+xxx link to get started page
 
 ## Citation
 
