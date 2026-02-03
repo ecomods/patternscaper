@@ -91,7 +91,7 @@
 </div>
 <p>The workflow consists of the following steps:</p>
 <ol type="1">
-<li>Generate training landscapes with known patterns using the <code><a href="../reference/create_training_landscapes.html">create_training_landscapes()</a></code> function.</li>
+<li>Generate training landscapes with known patterns using the <code><a href="../reference/create_landscapes.html">create_landscapes()</a></code> function.</li>
 <li>Calculate landscape metrics for the training landscapes using the <code><a href="../reference/calculate_landscape_metrics.html">calculate_landscape_metrics()</a></code> function.</li>
 <li>Select most informative metrics (i.e. metrics that differ the most between landscapes) using the <code><a href="../reference/evaluate_landscape_metrics.html">evaluate_landscape_metrics()</a></code> function.</li>
 <li>Train a neural network using the selected metrics with the <code><a href="../reference/train_nn_metrics.html">train_nn_metrics()</a></code> function.</li>
@@ -103,7 +103,7 @@
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate 100 training landscapes of 3 patterns</span></span>
-<span><span class="va">landscapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_training_landscapes.html">create_training_landscapes</a></span><span class="op">(</span></span>
+<span><span class="va">landscapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_landscapes.html">create_landscapes</a></span><span class="op">(</span></span>
 <span>  n <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  patterns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"labyrinth"</span>, <span class="st">"random"</span>, <span class="st">"clustered"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -123,11 +123,11 @@
 </div>
 </section><section class="level2"><h2 id="step-3-evaluate-landscape-metrics">Step 3: Evaluate Landscape Metrics<a class="anchor" aria-label="anchor" href="#step-3-evaluate-landscape-metrics"></a>
 </h2>
-<p>You can use the <code>evaluate_landscape_metrics</code> function to select the 10 most informative metrics for classification based on different methods. Here, we use the p-values of a Kruskal-Wallis H test (for more details and other options see <a href="landscape-metrics.html">landscape metrics vignette</a>).</p>
+<p>You can use the <code>evaluate_landscape_metrics</code> function to select the n (e.g. n=10) most informative metrics for classification based on different methods. Here, we use the p-values of a Kruskal-Wallis H test (for more details and other options see <a href="landscape-metrics.html">landscape metrics vignette</a>).</p>
 <div>
 <blockquote>
 <p><strong>Note</strong></p>
-<p>Note, that some metrics may return <code>NA</code> for some landscapes. Also, some metrics may have the same value for each landscape (zero variance between the values). These metrics get removed before evaluation and the user gets warned about the metrics that are removed.</p>
+<p>Note, that some metrics may return <code>NA</code> for some landscapes. Also, some metrics may have the same value for each landscape (zero variance between the values). By default, these metrics are removed before evaluation and the user gets warned about the metrics that are removed.</p>
 <p>It is not recommended to set <code>exclude_na = FALSE</code>, as metrics with <code>NA</code> values cannot be used for training the neural network. They may however be informative and useful for other types of analyses.</p>
 </blockquote>
 </div>
@@ -144,6 +144,7 @@
 <span><span class="co">#&gt; `exclude_NA_metrics = FALSE` to retain (not recommended for model training)</span></span>
 <span><span class="co">#&gt; Warning: Excluded 1 metrics with zero variance: "pr"</span></span></code></pre></div>
 </div>
+<p>Alternatively, you can manually select the metrics you want to use for further evaluation. For this, just provide a list of the metric names you are interested in.</p>
 <p>You can plot the differences between patterns for the selected metrics using the <code>plot_metrics</code> function.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
@@ -182,7 +183,7 @@
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
-<p>To check the model performance, we can look at the confusion matrix from cross-validation:</p>
+<p>To check the model performance, you can look at the confusion matrix from cross-validation:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Confusion matrix from cross-validation</span></span>
@@ -214,17 +215,17 @@
 </section><section class="level2"><h2 id="step-5-classify-new-landscapes">Step 5: Classify New Landscapes<a class="anchor" aria-label="anchor" href="#step-5-classify-new-landscapes"></a>
 </h2>
 <p>Finally, you can create some new test landscapes and classify them using the trained model. In this example, we create 10 new landscapes for testing.</p>
-<p>In reality this could be landscapes read in from files or created in other ways. For details on importing own landscapes, see the <a href="importing-landscapes.html">importing landscapes vignette</a>.</p>
+<p>In reality these could be landscapes read in from files or created in other ways (e.g. outputs of simulation models). For details on importing own landscapes, see the <a href="importing-landscapes.html">importing landscapes vignette</a>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create 10 new test landscapes using the same patterns as for training</span></span>
-<span><span class="va">test_landscapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_training_landscapes.html">create_training_landscapes</a></span><span class="op">(</span></span>
+<span><span class="va">test_landscapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_landscapes.html">create_landscapes</a></span><span class="op">(</span></span>
 <span>  n <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  patterns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"labyrinth"</span>, <span class="st">"random"</span>, <span class="st">"clustered"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; ✔ Successfully generated all 10 training landscapes</span></span></code></pre></div>
 </div>
-<p>If test landscapes have been created with <code><a href="../reference/create_training_landscapes.html">create_training_landscapes()</a></code>, their true patterns are known. Therefore they can be used to evaluate classification performance.</p>
+<p>If test landscapes have been created with <code><a href="../reference/create_landscapes.html">create_landscapes()</a></code>, their true patterns are known. Therefore they can be used to evaluate classification performance.</p>
 <div>
 <blockquote>
 <p><strong>Note</strong></p>

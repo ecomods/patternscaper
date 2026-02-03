@@ -88,7 +88,7 @@
 </div>
 <p>The workflow consists of the following steps:</p>
 <ol type="1">
-<li>Generate training landscapes with known patterns using the <code><a href="../reference/create_training_landscapes.html">create_training_landscapes()</a></code> function.</li>
+<li>Generate training landscapes with known patterns using the <code><a href="../reference/create_landscapes.html">create_landscapes()</a></code> function.</li>
 <li>Train a neural network on the landscape pixel data using the <code><a href="../reference/train_nn_pixels.html">train_nn_pixels()</a></code> function.</li>
 <li>Classify new landscapes using the trained model with the <code><a href="../reference/apply_nn_pixels.html">apply_nn_pixels()</a></code> function.</li>
 </ol>
@@ -116,7 +116,7 @@
 <p>You can generate a set of training landscapes with known patterns. See <a href="landscape-generation.html">landscape generation vignette</a> for details on landscape generation and available patterns and options.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">training_landscapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_training_landscapes.html">create_training_landscapes</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">training_landscapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_landscapes.html">create_landscapes</a></span><span class="op">(</span></span>
 <span>  n <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  patterns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"labyrinth"</span>, <span class="st">"random"</span>, <span class="st">"clustered"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -188,13 +188,13 @@
 <p>In reality this could be landscapes read in from files or created in other ways. For details on importing own landscapes, see the <a href="importing-landscapes.html">importing landscapes vignette</a>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">test_landscapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_training_landscapes.html">create_training_landscapes</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">test_landscapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_landscapes.html">create_landscapes</a></span><span class="op">(</span></span>
 <span>  n <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  patterns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"labyrinth"</span>, <span class="st">"random"</span>, <span class="st">"clustered"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; ✔ Successfully generated all 20 training landscapes</span></span></code></pre></div>
 </div>
-<p>If test landscapes have been created with <code><a href="../reference/create_training_landscapes.html">create_training_landscapes()</a></code>, their true patterns are known. Therefore they can be used to evaluate classification performance.</p>
+<p>If test landscapes have been created with <code><a href="../reference/create_landscapes.html">create_landscapes()</a></code>, their true patterns are known. Therefore they can be used to evaluate classification performance.</p>
 <div>
 <blockquote>
 <p><strong>Note</strong></p>

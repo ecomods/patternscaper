@@ -92,7 +92,7 @@
 </h2>
 <p>You can:</p>
 <ul>
-<li>Generate batches of training landscapes with <code><a href="../reference/create_training_landscapes.html">create_training_landscapes()</a></code>
+<li>Generate batches of training landscapes with <code><a href="../reference/create_landscapes.html">create_landscapes()</a></code>
 </li>
 <li>Create individual landscapes with custom parameters using <code><a href="../reference/create_landscape.html">create_landscape()</a></code>
 </li>
@@ -102,7 +102,7 @@
 </ul>
 <section class="level3"><h3 id="available-patterns">Available patterns<a class="anchor" aria-label="anchor" href="#available-patterns"></a>
 </h3>
-<p>There are 11 different spatial patterns available:</p>
+<p>Currently, there are 11 different spatial patterns available:</p>
 <section class="level4"><h4 id="control-patterns">Control patterns<a class="anchor" aria-label="anchor" href="#control-patterns"></a>
 </h4>
 <ul>
@@ -164,11 +164,11 @@
 <p>For detailed parameter descriptions and examples of each pattern type, see <code><a href="../reference/create_landscape.html">?create_landscape</a></code>.</p>
 </section></section></section><section class="level2"><h2 id="creating-multiple-training-landscapes">Creating Multiple Training Landscapes<a class="anchor" aria-label="anchor" href="#creating-multiple-training-landscapes"></a>
 </h2>
-<p>The quickest way to generate training data is with <code><a href="../reference/create_training_landscapes.html">create_training_landscapes()</a></code>. It generates multiple landscapes balanced across all available patterns.</p>
+<p>The quickest way to generate training data is with <code><a href="../reference/create_landscapes.html">create_landscapes()</a></code>. It generates multiple landscapes balanced across all available patterns.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create 20 landscapes balanced across all pattern types</span></span>
-<span><span class="va">landscapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_training_landscapes.html">create_training_landscapes</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">landscapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_landscapes.html">create_landscapes</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ✔ Successfully generated all 20 training landscapes</span></span></code></pre></div>
 </div>
 <p>The <code>landscapes</code> are returned as a list of <code>landscape</code> objects (see <a href="landscape-generation.qmd#landscape-object-structure">below</a> for more info on the data structure).</p>
@@ -201,7 +201,7 @@
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate only specific patterns</span></span>
-<span><span class="va">landscapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_training_landscapes.html">create_training_landscapes</a></span><span class="op">(</span></span>
+<span><span class="va">landscapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_landscapes.html">create_landscapes</a></span><span class="op">(</span></span>
 <span>  n <span class="op">=</span> <span class="fl">12</span>,</span>
 <span>  patterns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"labyrinth"</span>, <span class="st">"spots"</span>, <span class="st">"clustered"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -222,7 +222,7 @@
 <p>To modify the size (number of pixels in x- and y-direction) of all generated landscapes, use the <code>ncol</code> and <code>nrow</code> arguments. By default, landscapes are created with a size of 100x100 pixels.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">non_square</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_training_landscapes.html">create_training_landscapes</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">non_square</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_landscapes.html">create_landscapes</a></span><span class="op">(</span></span>
 <span>  n <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  width <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  height <span class="op">=</span> <span class="fl">20</span></span>
@@ -244,13 +244,13 @@
 <p>You can also control used rotation angles directly using <code>rotation_angles</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">no_rotation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_training_landscapes.html">create_training_landscapes</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">no_rotation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_landscapes.html">create_landscapes</a></span><span class="op">(</span></span>
 <span>  n <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  patterns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"clustered"</span>, <span class="st">"sharp"</span>, <span class="st">"bands"</span><span class="op">)</span>,</span>
 <span>  add_rotation <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">defined_angles</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_training_landscapes.html">create_training_landscapes</a></span><span class="op">(</span></span>
+<span><span class="va">defined_angles</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_landscapes.html">create_landscapes</a></span><span class="op">(</span></span>
 <span>  n <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  patterns <span class="op">=</span> <span class="st">"clustered"</span>,</span>
 <span>  rotation_angles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">45</span>, <span class="fl">90</span><span class="op">)</span></span>
@@ -277,7 +277,7 @@
 <span>    spot_radius_sd <span class="op">=</span> <span class="fl">3</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">bigger_spots</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_training_landscapes.html">create_training_landscapes</a></span><span class="op">(</span></span>
+<span><span class="va">bigger_spots</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_landscapes.html">create_landscapes</a></span><span class="op">(</span></span>
 <span>  n <span class="op">=</span> <span class="fl">12</span>,</span>
 <span>  patterns <span class="op">=</span> <span class="st">"spots"</span>,</span>
 <span>  params_list <span class="op">=</span> <span class="va">pattern_params</span></span>
