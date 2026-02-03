@@ -11,3 +11,4 @@
 ^vignettes/*_files$
 ^vignettes/articles/\.quarto$
 ^vignettes/articles/*_files$
+^README\.Rmd$
