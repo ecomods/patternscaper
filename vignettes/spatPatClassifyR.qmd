@@ -1,5 +1,5 @@
 ---
-title: "Get started with spatPatClassifyR"
+title: "Getting started with spatPatClassifyR"
 vignette: >
   %\VignetteIndexEntry{get-started}
   %\VignetteEngine{quarto::html}
@@ -12,12 +12,12 @@ knitr:
 
 There are two main workflows to classify landscape patterns using the `spatPatClassifyR` package: Either using landscape metrics as features for classification, or using convolutional neural networks (CNNs) to classify patterns directly from the pixel information of landscape images.
 
-Please refer to the respective vignettes for detailed guides on each workflow:
+Detailed guides for each workflow are provided in the corresponding vignettes:
 
 - [Classify landscapes using landscape metrics](classify-metrics.html)
 - [Classify landscapes using Keras on landscape rasters](classify-pixels.html)
 
-There are also more detailed vignettes on specific topics:
+There are also more detailed vignettes on specific landscape-related topics:
 
 - [Importing user-defined landscapes](importing-landscapes.html)
 - [Landscape generation](landscape-generation.html)

@@ -31,7 +31,7 @@ You can:
 
 ### Available patterns
 
-There are 11 different spatial patterns available:
+Currently, there are 11 different spatial patterns available:
 
 #### Control patterns
 
