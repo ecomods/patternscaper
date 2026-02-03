@@ -24,7 +24,7 @@ train_nn_pixels(
 )
 }
 \arguments{
-\item{landscapes}{List. List of landscape objects created by `create_landscape()` or `create_training_landscapes()`.}
+\item{landscapes}{List. List of landscape objects created by `create_landscape()` or `create_landscapes()`.}
 
 \item{cv_method}{Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 \itemize{
@@ -94,7 +94,7 @@ distinguishing different landscape patterns.
 \examples{
 \dontrun{
 # Create training data
-training_landscapes <- create_training_landscapes(
+training_landscapes <- create_landscapes(
   n = 200,
   patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
 )
@@ -114,7 +114,7 @@ final_model <- train_nn_pixels(
 )
 
 # Evaluate on separate test set
-test_landscapes <- create_training_landscapes(
+test_landscapes <- create_landscapes(
   n = 100,
   patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
 )

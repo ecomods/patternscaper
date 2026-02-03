@@ -47,7 +47,7 @@ This parameter is exposed to allow users to override the default behavior if nee
 using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).}
 
 \item{rotation}{Numeric. Rotation angle in degrees (unused, present for compatibility
-with other landscape generators). Required by \code{\link{create_training_landscapes}}.}
+with other landscape generators). Required by \code{\link{create_landscapes}}.}
 }
 \value{
 A landscape object with pattern "gaps" containing the generated landscape data and parameters.

@@ -17,7 +17,7 @@ plot_landscape_list(
 }
 \arguments{
 \item{landscapes}{List. List of landscape objects to plot. E.g. created by
-\code{\link{create_training_landscapes}}.}
+\code{\link{create_landscapes}}.}
 
 \item{titles}{Character. Controls the plot titles:
 - "name": uses only the landscape name
@@ -70,7 +70,7 @@ plot_landscape_list(landscapes,
                    legend_title = "Vegetation")
 
 # Create many landscapes and handle overflow
-many_landscapes <- create_training_landscapes(n = 50)
+many_landscapes <- create_landscapes(n = 50)
 plot_landscape_list(many_landscapes,
                    max_landscapes = 9,  # Show first 9 only
                    ncol = 3)            # In 3x3 grid
