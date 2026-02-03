@@ -21,7 +21,7 @@ all_results[[length(all_results)]]
 set.seed(12345)
 
 # Generate same way as systematic test
-training_pool_sys <- create_training_landscapes(
+training_pool_sys <- create_landscapes(
   patterns = c("bare", "spots", "labyrinth", "gaps", "dense"),
   n = 800 + 5 * 5, # max_n + length(patterns) * 5
   width = 100,
@@ -29,7 +29,7 @@ training_pool_sys <- create_training_landscapes(
   add_rotation = TRUE
 )
 
-validation_set_sys <- create_training_landscapes(
+validation_set_sys <- create_landscapes(
   patterns = c("bare", "spots", "labyrinth", "gaps", "dense"),
   n = 100,
   width = 100,

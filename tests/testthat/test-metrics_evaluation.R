@@ -26,7 +26,7 @@ create_real_test_metrics <- function(
   n_landscapes = 10,
   patterns = c("spots", "clustered", "labyrinth")
 ) {
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = n_landscapes,
     patterns = patterns,
     add_rotation = FALSE

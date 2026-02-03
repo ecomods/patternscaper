@@ -5,7 +5,7 @@ source("inst/analyses/functions/binarize_images.R")
 
 set.seed(12345)
 
-training_landscapes <- create_training_landscapes(
+training_landscapes <- create_landscapes(
   n = 800,
   patterns = c(
     "bare",
@@ -19,7 +19,7 @@ training_landscapes <- create_training_landscapes(
   add_rotation = TRUE
 )
 
-test_landscapes <- create_training_landscapes(
+test_landscapes <- create_landscapes(
   n = 100,
   patterns = c(
     "bare",

@@ -123,7 +123,7 @@ validate_random_spots <- function(random_spots) {
 #'
 #' @details
 #'     Is used in \code{\link{validate_params_list}} to check that user-supplied
-#'     parameters in \code{\link{create_training_landscapes}} are valid.
+#'     parameters in \code{\link{create_landscapes}} are valid.
 #'
 #' @keywords internal
 #' @noRd

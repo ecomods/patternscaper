@@ -19,7 +19,7 @@ library(spatPatClassifyR)
 
 The workflow consists of the following steps:
 
-1. Generate training landscapes with known patterns using the `create_training_landscapes()` function.
+1. Generate training landscapes with known patterns using the `create_landscapes()` function.
 2. Train a neural network on the landscape pixel data using the `train_nn_pixels()` function.
 3. Classify new landscapes using the trained model with the `apply_nn_pixels()` function.
 
@@ -55,7 +55,7 @@ See [landscape generation vignette](landscape-generation.html) for details on la
 
 ```{r}
 #| label: generate-landscapes
-training_landscapes <- create_training_landscapes(
+training_landscapes <- create_landscapes(
   n = 100,
   patterns = c("labyrinth", "random", "clustered")
 )
@@ -132,13 +132,13 @@ For details on importing own landscapes, see the [importing landscapes vignette]
 
 ```{r}
 #| label: test-landscapes
-test_landscapes <- create_training_landscapes(
+test_landscapes <- create_landscapes(
   n = 20,
   patterns = c("labyrinth", "random", "clustered")
 )
 ```
 
-If test landscapes have been created with `create_training_landscapes()`, their true patterns are known. Therefore they can be used to evaluate classification performance.
+If test landscapes have been created with `create_landscapes()`, their true patterns are known. Therefore they can be used to evaluate classification performance.
 
 :::{.callout-note}
 To get additional performance metrics, set `return_performance = TRUE` when applying the model. This only works if true patterns are known. If true patterns are not known, set `return_performance = FALSE` (default).

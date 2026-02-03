@@ -1,7 +1,7 @@
 # Test Fixtures (created once) --------------------------------------------
 
 # Create test landscapes (3 patterns for variety)
-test_landscapes <- create_training_landscapes(
+test_landscapes <- create_landscapes(
   n = 3,
   patterns = c("spots", "clustered", "labyrinth")
 )

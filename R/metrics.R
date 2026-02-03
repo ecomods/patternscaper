@@ -52,7 +52,7 @@ calculate_single_metric <- function(landscapes, function_name) {
 #' including landscape identifiers, metric values, and any warnings.
 #'
 #' @param landscapes A single landscape object (created with \code{\link{create_landscape}})
-#'   or a list of landscape objects (e.g. created with \code{\link{create_training_landscapes}}).
+#'   or a list of landscape objects (e.g. created with \code{\link{create_landscapes}}).
 #'   Each landscape object should contain a \code{data}
 #'   element with a SpatRaster, plus \code{name} and \code{pattern} metadata.
 #' @param metrics Character vector. Names of metrics to calculate (default: NULL for all
@@ -86,7 +86,7 @@ calculate_single_metric <- function(landscapes, function_name) {
 #' metrics <- calculate_landscape_metrics(landscape)
 #'
 #' # Calculate specific metrics for multiple landscapes
-#' landscapes <- create_training_landscapes(n = 10, patterns = "spots")
+#' landscapes <- create_landscapes(n = 10, patterns = "spots")
 #' metrics <- calculate_landscape_metrics(
 #'   landscapes,
 #'   metrics = c("ai", "lsi"),

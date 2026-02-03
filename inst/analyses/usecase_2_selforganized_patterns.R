@@ -120,13 +120,13 @@ save_plot_multi(
 # for reproducibility
 set.seed(42)
 
-training_landscapes_selforga_general <- create_training_landscapes(
+training_landscapes_selforga_general <- create_landscapes(
   n = 100,
   patterns = selforga_types_general
 )
 
 # generate test landscapes
-test_landscapes_selforga_general <- create_training_landscapes(
+test_landscapes_selforga_general <- create_landscapes(
   n = 100,
   patterns = selforga_types_general
 )

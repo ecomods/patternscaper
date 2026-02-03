@@ -4,7 +4,7 @@
 #' spatial patterns. The function uses a multiscale CNN architecture optimized for
 #' distinguishing different landscape patterns.
 #'
-#' @param landscapes List. List of landscape objects created by `create_landscape()` or `create_training_landscapes()`.
+#' @param landscapes List. List of landscape objects created by `create_landscape()` or `create_landscapes()`.
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #'   \itemize{
 #'     \item "k-fold" or "loo": Performs cross-validation and returns performance metrics
@@ -53,7 +53,7 @@
 #' @examples
 #' \dontrun{
 #' # Create training data
-#' training_landscapes <- create_training_landscapes(
+#' training_landscapes <- create_landscapes(
 #'   n = 200,
 #'   patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
 #' )
@@ -73,7 +73,7 @@
 #' )
 #'
 #' # Evaluate on separate test set
-#' test_landscapes <- create_training_landscapes(
+#' test_landscapes <- create_landscapes(
 #'   n = 100,
 #'   patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
 #' )

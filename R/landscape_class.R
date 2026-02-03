@@ -36,7 +36,7 @@ new_landscape <- function(
 #'     landscapes (default NA).
 #' @param params List of parameters used to create the landscape. Can be empty but
 #'     will be filled if landscapes are created automatically by the
-#'     \code{\link{create_landscapes}} or the \code{\link{create_training_landscapes}} function.
+#'     \code{\link{create_landscapes}} or the \code{\link{create_landscapes}} function.
 #'     Default is NULL.
 #' @return A landscape object
 #' @examples

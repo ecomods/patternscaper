@@ -108,7 +108,7 @@ model_selforga_pics <- train_nn_metrics(
 model_selforga_pics$performance$accuracy
 
 # And not with less manually selected landscapes-------------------------------
-training_landscapes_automatic <- create_training_landscapes(
+training_landscapes_automatic <- create_landscapes(
   n = 100,
   patterns = c(
     "bare",

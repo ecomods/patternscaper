@@ -49,7 +49,7 @@ set.seed(12345) #for run 1-5
 for (r in 1:nreps) {
   cat("Start - Replicate: ", r, " of ", nreps, sep = "", "\n")
 
-  test_landscapes <- create_training_landscapes(
+  test_landscapes <- create_landscapes(
     n = 100,
     patterns = ecotone_types
   )
@@ -68,7 +68,7 @@ for (r in 1:nreps) {
     )
 
     #same landscapes for different architectures of the neural net
-    training_landscapes <- create_training_landscapes(
+    training_landscapes <- create_landscapes(
       n = training[t],
       patterns = ecotone_types
     )

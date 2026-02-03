@@ -41,7 +41,7 @@ n_ecotones <- length(ecotone_types)
 #--------------------------------------------------------------------
 
 # generate landscapes
-landscapes_manuscript <- create_training_landscapes(
+landscapes_manuscript <- create_landscapes(
   n = n_ecotones,
   patterns = ecotone_types
 )
@@ -89,13 +89,13 @@ save_plot_multi(
 set.seed(42) #set seed for reproducibility
 
 # generate training landscapes
-ecotone_landscapes <- create_training_landscapes(
+ecotone_landscapes <- create_landscapes(
   n = 100,
   patterns = ecotone_types
 )
 
 # generate test landscapes
-test_landscapes_ecotone <- create_training_landscapes(
+test_landscapes_ecotone <- create_landscapes(
   n = 100,
   add_rotation = TRUE,
   patterns = ecotone_types
@@ -291,7 +291,7 @@ save_plot_multi(
 # generate more training landscapes to test if neuronal net performs better,
 # these results are generated below the main results
 # -------------------------------------------------------------------
-ecotone_landscapes_400 <- create_training_landscapes(
+ecotone_landscapes_400 <- create_landscapes(
   n = 400,
   patterns = ecotone_types
 )

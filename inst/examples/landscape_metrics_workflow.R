@@ -12,7 +12,7 @@ set.seed(123)
 # ----------------------------------------------------------------------------#
 
 # Create some landscapes (the more the better)
-landscapes <- create_training_landscapes(
+landscapes <- create_landscapes(
   n = 100,
   patterns = c("labyrinth", "spots", "labyrinth"),
   add_rotation = TRUE
@@ -71,7 +71,7 @@ model
 
 # Apply the model ----------------------------------------------------
 # generate test landscapes
-test_landscapes <- create_training_landscapes(
+test_landscapes <- create_landscapes(
   patterns = c("labyrinth", "spots", "labyrinth"),
   n = 20,
   add_rotation = TRUE

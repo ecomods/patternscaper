@@ -9,7 +9,7 @@ prepare_test_data <- function(
 ) {
   reps |>
     map(\(r) {
-      test_landscapes <- create_training_landscapes(
+      test_landscapes <- create_landscapes(
         n = n_test_landscapes,
         patterns = requested_patterns
       )
@@ -27,7 +27,7 @@ prepare_training_data_single <- function(
   requested_patterns,
   metric_level = "class"
 ) {
-  training_landscapes <- create_training_landscapes(
+  training_landscapes <- create_landscapes(
     n = training_size,
     patterns = requested_patterns
   )

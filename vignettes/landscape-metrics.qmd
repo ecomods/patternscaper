@@ -17,7 +17,7 @@ library(spatPatClassifyR)
 set.seed(123456)
 
 # Generate sample landscapes
-sample_landscapes <- create_training_landscapes(
+sample_landscapes <- create_landscapes(
   n = 20,
   patterns = c("random", "sharp", "labyrinth"),
   width = 50,

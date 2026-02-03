@@ -11,7 +11,7 @@ devtools::load_all()
 set_random_seed(123456)
 # Test Keras NN ---------------------------------------------------------
 # Increase number of landscapes for better training
-training_landscapes <- create_training_landscapes(
+training_landscapes <- create_landscapes(
   n = 200, # Larger dataset for better generalization
   patterns = c(
     "sharp",
@@ -26,7 +26,7 @@ training_landscapes <- create_training_landscapes(
   add_rotation = TRUE
 )
 # create test landscapes
-test_landscapes <- create_training_landscapes(
+test_landscapes <- create_landscapes(
   n = 20,
   patterns = c(
     "sharp",
@@ -65,7 +65,7 @@ plot_classified_landscapes(
 
 # Apply the model ----------------------------------------------------
 # create test landscapes
-test_landscapes <- create_training_landscapes(
+test_landscapes <- create_landscapes(
   n = 20,
   patterns = c(
     "sharp",

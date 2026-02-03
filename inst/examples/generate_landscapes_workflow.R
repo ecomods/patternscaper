@@ -9,29 +9,29 @@ set.seed(123)
 # Generate multiple training landscapes --------------------------------------
 # ----------------------------------------------------------------------------#
 
-landscapes <- create_training_landscapes(n = 20) # maximum = 36
+landscapes <- create_landscapes(n = 20) # maximum = 36
 
 # Randomly sampled landscape types (by default the function balances the types)
-landscapes <- create_training_landscapes(
+landscapes <- create_landscapes(
   n = 20,
   balance_patterns = FALSE
 )
 
 # generate only specific landscape types
-landscapes <- create_training_landscapes(
+landscapes <- create_landscapes(
   n = 20,
   patterns = c("labyrinth", "spots", "clustered")
 )
 
 # give different weights for the landscapes (higher weights will be generated more often)
-landscapes <- create_training_landscapes(
+landscapes <- create_landscapes(
   n = 20,
   patterns = c("labyrinth", "spots", "clustered"),
   balance_patterns = FALSE,
   pattern_probs = c(0.1, 1, 0.2)
 )
 
-landscapes <- create_training_landscapes(
+landscapes <- create_landscapes(
   n = 20,
   patterns = c("spots", "labyrinth")
 )
@@ -343,7 +343,7 @@ plot_landscape_list(
 )
 
 set.seed(123)
-many_spots <- create_training_landscapes(
+many_spots <- create_landscapes(
   patterns = "spots",
   n = 20
 )
@@ -455,7 +455,7 @@ plot_landscape_list(labyrinth_frequency)
 
 # generate a set of labyrinth landscapes
 set.seed(123)
-labyrinths <- create_training_landscapes(
+labyrinths <- create_landscapes(
   patterns = "labyrinth",
   n = 36
 )
@@ -478,7 +478,7 @@ spatial_patterns <- c(
 
 n <- 36
 
-create_training_landscapes(
+create_landscapes(
   patterns = spatial_patterns[2],
   n = n
 ) |>
@@ -491,7 +491,7 @@ showcase_landscapes <- spatial_patterns |>
   purrr::map(\(pattern) {
     set.seed(123)
     print(pattern)
-    create_training_landscapes(
+    create_landscapes(
       patterns = pattern,
       n = n
     )

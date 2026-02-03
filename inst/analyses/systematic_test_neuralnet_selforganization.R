@@ -49,7 +49,7 @@ set.seed(56) # for run 5 and 6
 for (r in 5:6) {
   cat("Start - Replicate: ", r, " of ", nreps, sep = "", "\n")
 
-  test_landscapes <- create_training_landscapes(
+  test_landscapes <- create_landscapes(
     n = 100,
     patterns = selforganization_types
   )
@@ -68,7 +68,7 @@ for (r in 5:6) {
     )
 
     #same landscapes for different architectures of the neural net
-    training_landscapes <- create_training_landscapes(
+    training_landscapes <- create_landscapes(
       n = training[t],
       patterns = selforganization_types
     )

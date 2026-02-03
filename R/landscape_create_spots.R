@@ -31,7 +31,7 @@
 #' @param regular_spots Logical. If TRUE, spots are arranged on a hexagonal grid
 #'     using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).
 #' @param rotation Numeric. Rotation angle in degrees (unused, present for compatibility
-#'     with other landscape generators). Required by \code{\link{create_training_landscapes}}.
+#'     with other landscape generators). Required by \code{\link{create_landscapes}}.
 #'
 #' @return A landscape object with pattern "spots" containing the generated landscape
 #'     data and parameters.

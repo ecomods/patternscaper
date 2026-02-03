@@ -1,6 +1,6 @@
 set.seed(123)
 # Create test fixtures once, outside all tests
-landscapes <- create_training_landscapes(
+landscapes <- create_landscapes(
   n = 3,
   patterns = c("spots", "clustered", "labyrinth")
 )

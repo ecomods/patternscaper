@@ -2,7 +2,7 @@ devtools::load_all()
 library(tidyverse)
 library(landscapemetrics)
 
-training_landscapes <- create_training_landscapes(
+training_landscapes <- create_landscapes(
   n = 500,
   add_rotation = TRUE
 )

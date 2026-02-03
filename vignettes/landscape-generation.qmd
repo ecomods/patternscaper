@@ -24,7 +24,7 @@ set.seed(123456)
 
 You can:
 
-- Generate batches of training landscapes with `create_training_landscapes()`
+- Generate batches of training landscapes with `create_landscapes()`
 - Create individual landscapes with custom parameters using `create_landscape()`
 - Visualize an individual landscape with `plot_landscape()
 - Visualize multiple landscapes in a grid with `plot_landscape_list()`
@@ -104,7 +104,7 @@ For detailed parameter descriptions and examples of each pattern type, see `?cre
 
 ## Creating Multiple Training Landscapes
 
-The quickest way to generate training data is with `create_training_landscapes()`.
+The quickest way to generate training data is with `create_landscapes()`.
 It generates multiple landscapes balanced across all available patterns.
 
 ```{r}
@@ -114,7 +114,7 @@ It generates multiple landscapes balanced across all available patterns.
 #| fig-alt: "Grid showing 20 randomly generated landscapes with different spatial patterns"
 
 # Create 20 landscapes balanced across all pattern types
-landscapes <- create_training_landscapes(n = 20)
+landscapes <- create_landscapes(n = 20)
 ```
 
 The `landscapes` are returned as a list of `landscape` objects (see [below](landscape-generation.qmd#landscape-object-structure) for more info on the data structure).
@@ -149,7 +149,7 @@ Specific patterns can be selected to create only a subset of patterns using the 
 #| fig-alt: "Grid showing landscapes with only labyrinth, spots, and clustered patterns"
 
 # Generate only specific patterns
-landscapes <- create_training_landscapes(
+landscapes <- create_landscapes(
   n = 12,
   patterns = c("labyrinth", "spots", "clustered")
 )
@@ -168,7 +168,7 @@ To modify the size (number of pixels in x- and y-direction) of all generated lan
 #| fig-width: 8
 #| fig-height: 2
 #| fig-alt: "Three landscapes showing different sizes: 50x20 pixels"
-non_square <- create_training_landscapes(
+non_square <- create_landscapes(
   n = 3,
   width = 50,
   height = 20
@@ -193,13 +193,13 @@ You can also control used rotation angles directly using `rotation_angles`.
 #| fig-height: 3
 #| fig-alt: "Landscapes showing the same pattern rotated at different angles"
 
-no_rotation <- create_training_landscapes(
+no_rotation <- create_landscapes(
   n = 3,
   patterns = c("clustered", "sharp", "bands"),
   add_rotation = FALSE
 )
 
-defined_angles <- create_training_landscapes(
+defined_angles <- create_landscapes(
   n = 3,
   patterns = "clustered",
   rotation_angles = c(45, 90)
@@ -227,7 +227,7 @@ pattern_params <- list(
     spot_radius_sd = 3
   )
 )
-bigger_spots <- create_training_landscapes(
+bigger_spots <- create_landscapes(
   n = 12,
   patterns = "spots",
   params_list = pattern_params

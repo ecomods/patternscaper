@@ -164,7 +164,7 @@ create_landscape <- function(
 #'
 #' @examples
 #' # Generate 20 training landscapes
-#' landscapes <- create_training_landscapes(n = 20)
+#' landscapes <- create_landscapes(n = 20)
 #'
 #' # Access a landscape
 #' landscapes[[1]]
@@ -176,7 +176,7 @@ create_landscape <- function(
 #' sapply(landscapes, function(x) x$pattern)
 #'
 #' @export
-create_training_landscapes <- function(
+create_landscapes <- function(
   n = 50,
   patterns = c(
     "random",

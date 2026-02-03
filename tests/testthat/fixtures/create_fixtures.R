@@ -17,7 +17,7 @@ devtools::load_all()
 set.seed(123456) # Fixed seed for reproducibility
 
 # 1. Minimal dataset (edge cases and basic validation) -----------------------
-minimal_landscapes <- create_training_landscapes(
+minimal_landscapes <- create_landscapes(
   n = 6,
   patterns = c("spots", "labyrinth")
 )
@@ -56,7 +56,7 @@ saveRDS(
 
 # 2. Small dataset (standard tests) -----------------------------------------
 
-small_landscapes <- create_training_landscapes(
+small_landscapes <- create_landscapes(
   n = 30,
   patterns = c("spots", "labyrinth", "gaps")
 )
@@ -112,7 +112,7 @@ saveRDS(
 
 # 3. Balanced dataset (CV and class imbalance tests) ---------------------------
 
-balanced_landscapes <- create_training_landscapes(
+balanced_landscapes <- create_landscapes(
   n = 24,
   patterns = c("spots", "labyrinth", "gaps", "sharp")
 )

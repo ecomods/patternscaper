@@ -97,7 +97,7 @@ create_fixture_landscapes <- function(
   # Set seed for reproducibility
   set.seed(params$seed)
 
-  create_training_landscapes(
+  create_landscapes(
     n = params$n,
     patterns = params$patterns
   )

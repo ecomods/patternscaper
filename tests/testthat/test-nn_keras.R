@@ -1,6 +1,6 @@
 # Use minimal landscapes for speed
 helper_create_tiny_training_set <- function(n_per_class = 3) {
-  create_training_landscapes(
+  create_landscapes(
     n = n_per_class * 3,
     patterns = c("sharp", "diffuse", "random"),
     width = 50,

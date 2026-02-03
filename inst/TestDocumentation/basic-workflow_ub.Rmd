@@ -40,7 +40,7 @@ Let's walk through each step.
 
 First, we'll generate a set of synthetic landscapes that represent different ecotone patterns. These will serve as our training data.
 
-The `create_training_landscapes()` function creates synthetic landscapes with different ecotone patterns.
+The `create_landscapes()` function creates synthetic landscapes with different ecotone patterns.
 The following patterns are generated:
 
 - sharp, diffuse or curvy boundaries
@@ -53,12 +53,12 @@ or which of the supported types should be included in the training landscapes.
 
 If you want to know more about the generation of specific landscapes, check out the [Landscape Generation](landscape-generation.html) vignette.
 
-By default, the `create_training_landscapes()` function generates landscapes of size
+By default, the `create_landscapes()` function generates landscapes of size
 100x100 pixles, including all supported landscape patterns at an equal probability.
 
 ```{r create_landscapes}
 # create training landscapes with different ecotone patterns
-landscapes <- create_training_landscapes(
+landscapes <- create_landscapes(
   n = 20, # number of landscapes to generate
   seed = 42, # random seed for reproducibility
   add_rotation = TRUE # whether to add random rotations to the landscapes

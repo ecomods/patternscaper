@@ -86,7 +86,7 @@ n_validation <- 100
 
 cli::cli_alert_info("Generating {max_n + n_validation} landscapes...")
 
-validation_set <- create_training_landscapes(
+validation_set <- create_landscapes(
   patterns = patterns,
   n = n_validation,
   width = 100,
@@ -127,7 +127,7 @@ run_single_experiment <- function(
   )
 
   # Generate only what this experiment needs
-  training_landscapes <- create_training_landscapes(
+  training_landscapes <- create_landscapes(
     patterns = patterns,
     n = n_train,
     width = 100,

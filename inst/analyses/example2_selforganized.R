@@ -26,12 +26,15 @@ n_selforga <- length(selforga_types)
 #--------------------------------------------------------------------
 
 # generate landscapes
-landscapes_manuscript <- create_training_landscapes(
+landscapes_manuscript <- create_landscapes(
   n = n_selforga,
   patterns = selforga_types
 )
 
-order_index <- match(sapply(landscapes_manuscript, function(x) x$pattern), selforga_types)
+order_index <- match(
+  sapply(landscapes_manuscript, function(x) x$pattern),
+  selforga_types
+)
 landscapes_manuscript <- landscapes_manuscript[order(order_index)]
 
 # plot all landscapes
@@ -46,7 +49,7 @@ plot_landscape_list(
 #--------------------------------------------------------------------
 
 #generate all training landscapes
-selforga_landscapes <- create_training_landscapes(
+selforga_landscapes <- create_landscapes(
   n = 100,
   patterns = selforga_types
 )
@@ -111,7 +114,7 @@ model_selforga_lm$performance$accuracy
 # -------------------------------------------------------------------
 
 # generate test landscapes
-test_landscapes_selforga <- create_training_landscapes(
+test_landscapes_selforga <- create_landscapes(
   n = 100,
   add_rotation = TRUE,
   patterns = selforga_types

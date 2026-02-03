@@ -1,33 +1,33 @@
-# Tests for create_training_landscapes() --------------------------------------
+# Tests for create_landscapes() --------------------------------------
 
 # Validation tests ------------------------------------------------------------
 
-test_that("create_training_landscapes validates inputs", {
+test_that("create_landscapes validates inputs", {
   # Invalid n - not positive
   expect_error(
-    create_training_landscapes(n = 0),
+    create_landscapes(n = 0),
     "'n' must be a positive integer"
   )
 
   expect_error(
-    create_training_landscapes(n = -5),
+    create_landscapes(n = -5),
     "'n' must be a positive integer"
   )
 
   # Invalid types - empty after filtering
   expect_error(
-    create_training_landscapes(n = 10, patterns = c("invalid1", "invalid2")),
+    create_landscapes(n = 10, patterns = c("invalid1", "invalid2")),
     "No valid landscape patterns specified"
   )
 })
 
 # Functionality tests ---------------------------------------------------------
 
-test_that("create_training_landscapes returns correct number of landscapes", {
+test_that("create_landscapes returns correct number of landscapes", {
   set.seed(123)
   # TODO: I removed spots and gaps for now because I get an error for them that
   # I cannot fix
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 10,
     patterns = c(
       "random",
@@ -45,8 +45,8 @@ test_that("create_training_landscapes returns correct number of landscapes", {
   expect_equal(length(landscapes), 10)
 })
 
-test_that("create_training_landscapes returns landscape objects", {
-  landscapes <- create_training_landscapes(
+test_that("create_landscapes returns landscape objects", {
+  landscapes <- create_landscapes(
     n = 5,
     width = 20,
     height = 20
@@ -60,9 +60,9 @@ test_that("create_training_landscapes returns landscape objects", {
   }
 })
 
-test_that("create_training_landscapes sets landscape names correctly", {
+test_that("create_landscapes sets landscape names correctly", {
   set.seed(123)
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 5,
     patterns = c("sharp", "random"),
     width = 20,
@@ -76,7 +76,7 @@ test_that("create_training_landscapes sets landscape names correctly", {
   }
 
   # With rotation
-  landscapes_rotated <- create_training_landscapes(
+  landscapes_rotated <- create_landscapes(
     n = 5,
     patterns = c("sharp"),
     width = 20,
@@ -99,10 +99,10 @@ test_that("create_training_landscapes sets landscape names correctly", {
   }
 })
 
-test_that("create_training_landscapes respects pattern selection", {
+test_that("create_landscapes respects pattern selection", {
   set.seed(123)
   # Generate only specific patterns
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 10,
     patterns = c("sharp", "diffuse"),
     width = 20,
@@ -118,9 +118,9 @@ test_that("create_training_landscapes respects pattern selection", {
   expect_true(all(unique_patterns %in% c("sharp", "diffuse")))
 })
 
-test_that("create_training_landscapes balances patterns correctly", {
+test_that("create_landscapes balances patterns correctly", {
   set.seed(123)
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 12,
     patterns = c("sharp", "diffuse", "fingers"),
     width = 20,
@@ -138,10 +138,10 @@ test_that("create_training_landscapes balances patterns correctly", {
   expect_true(all(pattern_counts <= 5))
 })
 
-test_that("create_training_landscapes respects type_probs when balance_patterns is FALSE", {
+test_that("create_landscapes respects type_probs when balance_patterns is FALSE", {
   # This is harder to test deterministically, but we can check that
   # the function runs without error
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 20,
     patterns = c("sharp", "diffuse", "random"),
     width = 20,
@@ -157,10 +157,10 @@ test_that("create_training_landscapes respects type_probs when balance_patterns 
   expect_true(all(patterns %in% c("sharp", "diffuse", "random")))
 })
 
-test_that("create_training_landscapes handles rotation correctly", {
+test_that("create_landscapes handles rotation correctly", {
   set.seed(123)
   # With rotation
-  landscapes_rotated <- create_training_landscapes(
+  landscapes_rotated <- create_landscapes(
     n = 10,
     width = 50,
     height = 50,
@@ -174,7 +174,7 @@ test_that("create_training_landscapes handles rotation correctly", {
   expect_true(has_rotation)
 
   # Without rotation
-  landscapes_no_rotation <- create_training_landscapes(
+  landscapes_no_rotation <- create_landscapes(
     n = 10,
     width = 50,
     height = 50,
@@ -191,10 +191,10 @@ test_that("create_training_landscapes handles rotation correctly", {
   expect_true(all(rotations == 0))
 })
 
-test_that("create_training_landscapes respects width and height", {
+test_that("create_landscapes respects width and height", {
   set.seed(123)
   # TODO: I removed spots and gaps for now because I get an error for them that
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     patterns = c(
       "random",
       "sharp",
@@ -216,15 +216,15 @@ test_that("create_training_landscapes respects width and height", {
   }
 })
 
-test_that("create_training_landscapes is reproducible with seed", {
+test_that("create_landscapes is reproducible with seed", {
   set.seed(456)
-  landscapes1 <- create_training_landscapes(
+  landscapes1 <- create_landscapes(
     n = 10,
     width = 20,
     height = 20
   )
   set.seed(456)
-  landscapes2 <- create_training_landscapes(
+  landscapes2 <- create_landscapes(
     n = 10,
     width = 20,
     height = 20
@@ -239,7 +239,7 @@ test_that("create_training_landscapes is reproducible with seed", {
   expect_equal(names(landscapes1), names(landscapes2))
 })
 
-test_that("create_training_landscapes handles custom params_list", {
+test_that("create_landscapes handles custom params_list", {
   set.seed(123)
   custom_params <- list(
     sharp = list(
@@ -250,7 +250,7 @@ test_that("create_training_landscapes handles custom params_list", {
     )
   )
 
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 10,
     patterns = c("sharp", "random"),
     width = 20,
@@ -271,11 +271,11 @@ test_that("create_training_landscapes handles custom params_list", {
   }
 })
 
-test_that("create_training_landscapes handles errors gracefully", {
+test_that("create_landscapes handles errors gracefully", {
   set.seed(123)
   # Use parameters that might cause errors in some cases
   # The function should handle errors and continue
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 20,
     width = 20,
     height = 20
@@ -286,10 +286,10 @@ test_that("create_training_landscapes handles errors gracefully", {
   expect_true(length(landscapes) <= 20)
 })
 
-test_that("create_training_landscapes works with all default landscape patterns", {
+test_that("create_landscapes works with all default landscape patterns", {
   set.seed(123)
   # Test that all types can be generated without errors
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 24, # 12 types * 2 = 24 for balanced distribution
     width = 20,
     height = 20,
@@ -308,7 +308,7 @@ test_that("create_training_landscapes works with all default landscape patterns"
 
 # Parameter merging and validation tests ----------------------------------
 
-test_that("create_training_landscapes merges partial params with defaults", {
+test_that("create_landscapes merges partial params with defaults", {
   set.seed(123)
 
   # Only specify one parameter for clustered
@@ -317,7 +317,7 @@ test_that("create_training_landscapes merges partial params with defaults", {
     # Other clustered params missing - should use defaults
   )
 
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 4,
     patterns = "clustered",
     width = 100,
@@ -339,7 +339,7 @@ test_that("create_training_landscapes merges partial params with defaults", {
   }
 })
 
-test_that("create_training_landscapes fills missing patterns with defaults", {
+test_that("create_landscapes fills missing patterns with defaults", {
   set.seed(123)
 
   custom_params <- list(
@@ -347,7 +347,7 @@ test_that("create_training_landscapes fills missing patterns with defaults", {
     # diffuse missing entirely
   )
 
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 6,
     patterns = c("sharp", "diffuse"),
     width = 20,
@@ -372,7 +372,7 @@ test_that("create_training_landscapes fills missing patterns with defaults", {
   }
 })
 
-test_that("create_training_landscapes removes unknown params without failing", {
+test_that("create_landscapes removes unknown params without failing", {
   set.seed(123)
 
   custom_params <- list(
@@ -383,7 +383,7 @@ test_that("create_training_landscapes removes unknown params without failing", {
   )
 
   expect_message(
-    landscapes <- create_training_landscapes(
+    landscapes <- create_landscapes(
       n = 4,
       patterns = "sharp",
       width = 20,
@@ -402,10 +402,10 @@ test_that("create_training_landscapes removes unknown params without failing", {
   }
 })
 
-test_that("create_training_landscapes rejects invalid parameter values", {
+test_that("create_landscapes rejects invalid parameter values", {
   # treeline_position > 1.0
   expect_error(
-    create_training_landscapes(
+    create_landscapes(
       n = 4,
       patterns = "sharp",
       params_list = list(
@@ -417,7 +417,7 @@ test_that("create_training_landscapes rejects invalid parameter values", {
 
   # Non-integer for integer param
   expect_error(
-    create_training_landscapes(
+    create_landscapes(
       n = 4,
       patterns = "spots",
       params_list = list(
@@ -429,7 +429,7 @@ test_that("create_training_landscapes rejects invalid parameter values", {
 
   # Min > max
   expect_error(
-    create_training_landscapes(
+    create_landscapes(
       n = 4,
       patterns = "diffuse",
       params_list = list(
@@ -442,11 +442,11 @@ test_that("create_training_landscapes rejects invalid parameter values", {
 
 # Retry mechanism tests ---------------------------------------------------
 
-test_that("create_training_landscapes retries failed landscapes", {
+test_that("create_landscapes retries failed landscapes", {
   set.seed(123)
 
   # Use a pattern that might occasionally fail with extreme params
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 10,
     patterns = "clustered",
     width = 30,
@@ -459,13 +459,13 @@ test_that("create_training_landscapes retries failed landscapes", {
   expect_true(all(sapply(landscapes, is_landscape)))
 })
 
-test_that("create_training_landscapes respects max_retries parameter", {
+test_that("create_landscapes respects max_retries parameter", {
   set.seed(456)
 
   # With max_retries = 0, should fail more often
   expect_message(
     # Use a pattern that might occasionally fail with extreme params
-    landscapes_no_retry <- create_training_landscapes(
+    landscapes_no_retry <- create_landscapes(
       n = 10,
       patterns = "clustered",
       width = 30,
@@ -475,7 +475,7 @@ test_that("create_training_landscapes respects max_retries parameter", {
   )
 
   # With max_retries = 5, should succeed more often
-  landscapes_retry <- create_training_landscapes(
+  landscapes_retry <- create_landscapes(
     n = 10,
     patterns = "clustered",
     width = 30,
@@ -557,7 +557,7 @@ test_that("try_create_landscape creates valid landscape on success", {
 test_that("retry mechanism maintains pattern distribution", {
   set.seed(789)
 
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 30,
     patterns = c("sharp", "diffuse", "clustered"),
     width = 30,
@@ -575,12 +575,12 @@ test_that("retry mechanism maintains pattern distribution", {
   expect_true(all(pattern_counts <= expected_per_pattern * 1.2))
 })
 
-test_that("create_training_landscapes shows appropriate messages", {
+test_that("create_landscapes shows appropriate messages", {
   set.seed(123)
 
   # Successful generation should show success message
   expect_message(
-    landscapes <- create_training_landscapes(
+    landscapes <- create_landscapes(
       n = 5,
       patterns = "random",
       width = 20,
@@ -594,11 +594,11 @@ test_that("create_training_landscapes shows appropriate messages", {
 
 # Rotation angle validation tests ----------------------------------------
 
-test_that("create_training_landscapes accepts valid rotation angles", {
+test_that("create_landscapes accepts valid rotation angles", {
   set.seed(123)
 
   # Vector of angles
-  landscapes_vector <- create_training_landscapes(
+  landscapes_vector <- create_landscapes(
     n = 5,
     patterns = "sharp",
     width = 20,
@@ -609,7 +609,7 @@ test_that("create_training_landscapes accepts valid rotation angles", {
   expect_equal(length(landscapes_vector), 5)
 
   # Single angle
-  landscapes_single <- create_training_landscapes(
+  landscapes_single <- create_landscapes(
     n = 5,
     patterns = "sharp",
     width = 20,
@@ -620,7 +620,7 @@ test_that("create_training_landscapes accepts valid rotation angles", {
   expect_equal(length(landscapes_single), 5)
 
   # Edge values
-  landscapes_edges <- create_training_landscapes(
+  landscapes_edges <- create_landscapes(
     n = 5,
     patterns = "sharp",
     width = 20,
@@ -631,10 +631,10 @@ test_that("create_training_landscapes accepts valid rotation angles", {
   expect_equal(length(landscapes_edges), 5)
 })
 
-test_that("create_training_landscapes rejects invalid rotation angles", {
+test_that("create_landscapes rejects invalid rotation angles", {
   # Negative angle
   expect_error(
-    create_training_landscapes(
+    create_landscapes(
       n = 5,
       patterns = "sharp",
       rotation_angles = c(0, -45, 90)
@@ -644,7 +644,7 @@ test_that("create_training_landscapes rejects invalid rotation angles", {
 
   # Angle > 360
   expect_error(
-    create_training_landscapes(
+    create_landscapes(
       n = 5,
       patterns = "sharp",
       rotation_angles = c(0, 45, 400)
@@ -654,7 +654,7 @@ test_that("create_training_landscapes rejects invalid rotation angles", {
 
   # Non-numeric
   expect_error(
-    create_training_landscapes(
+    create_landscapes(
       n = 5,
       patterns = "sharp",
       rotation_angles = "45"
@@ -664,7 +664,7 @@ test_that("create_training_landscapes rejects invalid rotation angles", {
 
   # Contains NA
   expect_error(
-    create_training_landscapes(
+    create_landscapes(
       n = 5,
       patterns = "sharp",
       rotation_angles = c(0, NA, 90)
@@ -677,7 +677,7 @@ test_that("rotation_angles = NULL works correctly", {
   set.seed(123)
 
   # NULL should skip validation and work
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 5,
     patterns = "sharp",
     width = 20,
@@ -755,12 +755,12 @@ test_that("sample_landscape_params handles fixed single values", {
 
 # Retry message tests -----------------------------------------------------
 
-test_that("create_training_landscapes shows appropriate retry messages", {
+test_that("create_landscapes shows appropriate retry messages", {
   set.seed(999)
 
   # With low max_retries, might see retry info messages
   # Use a pattern that might occasionally fail
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 20,
     patterns = "clustered",
     width = 20,
@@ -775,11 +775,11 @@ test_that("create_training_landscapes shows appropriate retry messages", {
 
 # Edge case tests ---------------------------------------------------------
 
-test_that("create_training_landscapes merges NULL params correctly", {
+test_that("create_landscapes merges NULL params correctly", {
   set.seed(123)
 
   # NULL params_list should use all defaults
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 6,
     patterns = c("sharp", "random"),
     width = 20,
@@ -791,7 +791,7 @@ test_that("create_training_landscapes merges NULL params correctly", {
   expect_true(all(sapply(landscapes, is_landscape)))
 })
 
-test_that("create_training_landscapes handles empty pattern params", {
+test_that("create_landscapes handles empty pattern params", {
   set.seed(123)
 
   # Pattern with empty list should use all defaults
@@ -799,7 +799,7 @@ test_that("create_training_landscapes handles empty pattern params", {
     sharp = list() # Empty - should use all defaults
   )
 
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 4,
     patterns = "sharp",
     width = 20,
@@ -815,11 +815,11 @@ test_that("create_training_landscapes handles empty pattern params", {
   }
 })
 
-test_that("create_training_landscapes handles failures gracefully", {
+test_that("create_landscapes handles failures gracefully", {
   set.seed(999)
 
   # Use challenging but not impossible parameters
-  landscapes <- create_training_landscapes(
+  landscapes <- create_landscapes(
     n = 20,
     patterns = "clustered",
     width = 20,
