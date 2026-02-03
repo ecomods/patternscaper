@@ -1,11 +1,13 @@
 #----------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------
-# Use Case 1: Self-organized landscape patterns
-# The two approaches (neural net using landscape metrics as input and neural net using pixel data)
-# are tested different types of self-organized landscapes:
+# Use case 1: Self-organized landscape patterns
+# Here, the landscape can exhibit the following self-organized patterns:
 #   bare, spots, labyrinth, gaps, dense.
-# In addition, pictures (photographs and satellite) are used for testing.
-# The plots from this script are used in initial R package description by Tietjen, Baldauf, Berger (202x).
+# In an additional file, we systematically analyse the sensitivity of both 
+# network approaches to different input configurations.
+# Here, we use pictures (photographs and satellite) for testing.
+# The plots from this script are used in initial R package description 
+# by Tietjen, Baldauf, Berger (202x).
 #----------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------
 
@@ -30,7 +32,7 @@ source("inst/analyses/functions/plot_different_formats.R")
 #----------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------
-# Step 1: General landscape types and their titles (overview figure)
+#  General landscape types for the overview figure
 #----------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------
@@ -105,172 +107,11 @@ save_plot_multi(
   dpi = 300
 )
 
-#----------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------
-# Step 2: Anaylse performance of neural networks for artificial data
-#----------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------
-
-#--------------------------------------------------------------------
-# Generate training and testing landscapes for general analysis
-#--------------------------------------------------------------------
-
-# for reproducibility
-set.seed(42)
-
-training_landscapes_selforga_general <- create_landscapes(
-  n = 100,
-  patterns = selforga_types_general
-)
-
-# generate test landscapes
-test_landscapes_selforga_general <- create_landscapes(
-  n = 100,
-  patterns = selforga_types_general
-)
-
-
-#----------------------------------------------------------------------------------------
-# Approach 1: neural net trained on landscape metrics
-#----------------------------------------------------------------------------------------
-
-#--------------------------------------------------------------------
-# Calculate landscapes metrics and determine best ones
-#--------------------------------------------------------------------
-
-landscape_class_metrics_all_general <- calculate_landscape_metrics(
-  landscapes = training_landscapes_selforga_general,
-  level = "class"
-)
-
-#focus on vegetation class only (no bare soil)
-metric_class <- 1
-landscape_class_metrics_all_general <- landscape_class_metrics_all_general %>%
-  filter(class == metric_class)
-
-#determine best 10 metrics to distinguish pattern types
-best_10_selforga_general <- evaluate_landscape_metrics(
-  metrics = landscape_class_metrics_all_general,
-  metrics_number = 10,
-  method = "kruskal_p"
-)
-
-# plot the 10 best metrics
-fig_metrics_selforga_general <- plot_metrics(
-  metrics = landscape_class_metrics_all_general,
-  selected_metrics = best_10_selforga_general,
-  force = TRUE
-)
-fig_metrics_selforga_general
-
-# save into different formats
-save_plot_multi(
-  plot = fig_metrics_selforga_general,
-  filename_base = "fig_supp_selforga_metrics",
-  directory = directory,
-  width = 6,
-  height = 4.5,
-  dpi = 300
-)
-
-#--------------------------------------------------------------------
-# Train neural network with landscapes metrics and test
-#--------------------------------------------------------------------
-
-# train a network
-model_selforga_metrics_general <- train_nn_metrics(
-  metrics = landscape_class_metrics_all_general,
-  metrics_selected = best_10_selforga_general,
-  cv_method = "k-fold"
-)
-
-# look at the model object
-model_selforga_metrics_general$performance$accuracy
-model_selforga_metrics_general$performance$confusion_matrix
-
-# test model on new data
-validation_results_selforga_lm_general <- apply_nn_metrics(
-  landscapes = test_landscapes_selforga_general,
-  nn_model = model_selforga_metrics_general,
-  return_performance = TRUE
-)
-
-# accuracy of the neural net for the test data
-validation_results_selforga_lm_general$performance$accuracy
-validation_results_selforga_lm_general$performance$confusion_matrix
-
-#show misclassified landscapes (if any)
-fig_supp_selforga_misclassified <- plot_classified_landscapes(
-  validation_results_selforga_lm_general$predictions,
-  test_landscapes_selforga_general,
-  only_misclassified = T
-)
-
-# save into different formats
-save_plot_multi(
-  plot = fig_supp_selforga_misclassified,
-  filename_base = "fig_supp_selforga_misclassified",
-  directory = directory,
-  width = 4.5,
-  height = 3,
-  dpi = 300
-)
-
-#----------------------------------------------------------------------------------------
-# Approach 2: neural net trained on pixel data
-#----------------------------------------------------------------------------------------
-
-#set seed for Keras (needs to be done separately)
-set_random_seed(53)
-
-#--------------------------------------------------------------------
-# Train neural network with the input data itself
-#--------------------------------------------------------------------
-
-# train a model
-model_selforga_pix_general <- train_nn_pixels(
-  landscapes = training_landscapes_selforga_general,
-  cv_method = "k-fold",
-  learning_rate = 0.0001,
-  epochs = 20,
-)
-
-# check the model accuracy
-model_selforga_pix_general$performance$accuracy
-
-#validate model with new landscapes
-validation_results_selforga_pix_general <- apply_nn_pixels(
-  landscapes = test_landscapes_selforga_general,
-  nn_model = model_selforga_pix_general,
-  return_performance = T
-)
-
-# accuracy of the neural net for the test data
-validation_results_selforga_pix_general$performance$accuracy
-
-#show misclassified landscapes (if any)
-fig_supp_selforga_misclassified_pix <- plot_classified_landscapes(
-  validation_results_selforga_pix_general$predictions,
-  test_landscapes_selforga_general,
-  only_misclassified = T
-)
-
-# save into different formats
-save_plot_multi(
-  plot = fig_supp_selforga_misclassified_pix,
-  filename_base = "fig_supp_selforga_misclassified_pix",
-  directory = directory,
-  width = 4.5,
-  height = 3,
-  dpi = 300
-)
 
 #----------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------
-# Step 3: Train and test models for photographs
+# Train and test both neural network model approaches for photographs
 #----------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------
@@ -289,8 +130,9 @@ selforga_types = c(
   "gaps"
 )
 
+# number of landscapes of each type
 n_landscapes_per_type <- c(20, 40, 80, 160)
-# number of models
+# number of models to train in total for each approach
 n_models <- length(n_landscapes_per_type)
 # number of landscapes
 pred_numbers <- length(selforga_types) * n_landscapes_per_type
@@ -327,8 +169,8 @@ for (n_l in 1:n_models) {
     temp_landscape <- set_landscape_name(temp_landscape, landscape_name)
     training_landscapes_selforga[[n_l]][[j]] <- temp_landscape
     j <- j + 1
-    n_sp <- sample(x = seq(3, 20), size = 1)
-    n_rad <- sample(x = seq(round(90 / n_sp), round(250 / n_sp)), size = 1) #sample(x = seq(round(45/n_sp), round(150/n_sp)), size = 1)
+    n_sp <- sample(x = seq(3, 12), size = 1)
+    n_rad <- sample(x = seq(round(150 / n_sp), round(200 / n_sp)), size = 1) #sample(x = seq(round(45/n_sp), round(150/n_sp)), size = 1)
     temp_landscape <- create_landscape_spots(
       width = l_size,
       height = l_size,
@@ -472,9 +314,8 @@ for (n_l in 1:n_models) {
   )
 }
 
-
 #----------------------------------------------------------------------------------------
-# Apply the model to pictures from
+# Apply the models to pictures from
 # Meron et al. 2004: doi: 10.1016/S0960-0779(03)00049-3 and
 # Mander et al. 2017: doi: 10.1098/rsos.160443
 #----------------------------------------------------------------------------------------
