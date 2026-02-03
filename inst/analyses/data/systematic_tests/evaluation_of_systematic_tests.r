@@ -75,6 +75,12 @@ for (i in 1:n_tot) {
           mean_accuracy = max(mean_accuracy, na.rm = TRUE),
           .groups = "drop"
     )
+    df_mean_accuracy_addon <- df %>%
+      group_by(n_landscapes,Inputs,metric ) %>%
+        dplyr::summarise(
+          mean_accuracy = mean(mean_accuracy, na.rm = TRUE),
+          .groups = "drop"
+    )
     df_min_accuracy <- df %>%
       group_by(n_landscapes,Inputs) %>%
         dplyr::summarise(
@@ -104,6 +110,12 @@ for (i in 1:n_tot) {
       group_by(n_landscapes,epochs,learning_rate) %>%
         dplyr::summarise(
           mean_accuracy = max(mean_accuracy, na.rm = TRUE),
+          .groups = "drop"
+    )
+    df_mean_accuracy_addon <- df %>%
+      group_by(n_landscapes,epochs,learning_rate) %>%
+        dplyr::summarise(
+          mean_accuracy = mean(mean_accuracy, na.rm = TRUE),
           .groups = "drop"
     )
     df_min_accuracy <- df %>%
@@ -140,6 +152,7 @@ for (i in 1:n_tot) {
     max_accuracy_grouped = df_max_accuracy,
     max_worst_accuracy_grouped = df_max_worst_accuracy,
     max_accuracy_grouped_addon = df_max_accuracy_addon,
+    mean_accuracy_grouped_addon = df_mean_accuracy_addon,
     min_accuracy_grouped_addon = df_min_accuracy
   )
 }
