@@ -27,7 +27,6 @@ dense <- create_landscape_dense()
 
 # Create very dense landscape
 very_dense <- create_landscape_dense(tree_prop = 0.95)
-
 }
 \seealso{
 \code{\link{create_landscape_random}}, \code{\link{create_landscape_bare}}

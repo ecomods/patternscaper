@@ -18,8 +18,6 @@
 #'
 #' # Create very sparse landscape
 #' very_bare <- create_landscape_bare(tree_prop = 0.05)
-#'
-#' @export
 create_landscape_bare <- function(
   tree_prop = 0.1,
   width = 100,
