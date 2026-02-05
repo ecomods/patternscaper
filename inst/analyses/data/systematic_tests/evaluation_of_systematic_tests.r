@@ -178,6 +178,8 @@ round(data_summary[[3]]$max_accuracy,2)
 print(n=45,data_summary[[3]]$max_accuracy_grouped_addon %>% dplyr::filter(learning_rate == 0.01))
 # effect of number of landscapes and epochs
 print(round(data_summary[[3]]$mean_accuracy_grouped,2))
+# effect of number of landscapes, epochs and learning rate
+print(n=30,data_summary[[3]]$mean_accuracy_grouped_addon%>% dplyr::filter(learning_rate < 0.01))
 # class with worst accuracy
 print(round(data_summary[[3]]$max_worst_accuracy_grouped,2))
 
