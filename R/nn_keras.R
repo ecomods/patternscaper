@@ -16,7 +16,8 @@
 #' @param epochs Integer. Number of training epochs (default: 50).
 #' @param batch_size Integer. Batch size for training (default: 16).
 #' @param learning_rate Numeric. Learning rate for Adam optimizer (default: 0.001).
-#' @param model_path Character. Path to save model (default: NULL means model is not saved).
+#' @param model_path Character. Path to save model. Models are saved as `.keras` files.
+#'     (default: NULL means model is not saved).
 #' @param architecture Character. CNN architecture: "multiscale" (default).
 #' @param dropout_rate Numeric. Dropout rate for regularization (default: 0.3).
 #' @param dense_units Integer. Units in dense layer (default: 128).
