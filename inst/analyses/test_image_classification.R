@@ -191,12 +191,12 @@ model_pixels <- train_nn_pixels(
 
 # Apply the models to the binarized images --------------------------------
 predictions_metrics <- apply_nn_metrics(
-  landscapes = images_binary,
+  landscapes = pics_landscapes,
   nn_model = model_metrics
 )
 
 predictions_pixel <- apply_nn_pixels(
-  landscapes = images_binary,
+  landscapes = pics_landscapes,
   nn_model = model_pixels
 )
 
