@@ -1,0 +1,20 @@
+# Convert matrix to SpatRaster
+
+Internal utility function to convert a numeric matrix to a SpatRaster
+object.
+
+## Usage
+
+``` r
+matrix_to_raster(x)
+```
+
+## Arguments
+
+- x:
+
+  Matrix; numeric matrix to convert.
+
+## Value
+
+A SpatRaster object.

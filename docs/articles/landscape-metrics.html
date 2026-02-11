@@ -127,7 +127,9 @@
 <span>  <span class="va">sample_landscapes</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"landscape"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;  ■■■■■■■■■■■■■■■■                  52% |  ETA:  3s</span></span></code></pre></div>
+<span><span class="co">#&gt;  ■■■■■■■■■                         26% |  ETA:  6s</span></span>
+<span><span class="co">#&gt;  ■■■■■■■■■■■■■■■■■■                58% |  ETA:  4s</span></span>
+<span><span class="co">#&gt;  ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■   98% |  ETA:  0s</span></span></code></pre></div>
 </div>
 <p>To calculate selected metrics, provide a vector of valide metric names to the <code>metrics</code> argument. Find available metric names using <code><a href="https://r-spatialecology.github.io/landscapemetrics/reference/list_lsm.html" class="external-link">landscapemetrics::list_lsm()</a></code> as shown above.</p>
 <div class="cell">
@@ -152,7 +154,7 @@
 <li>
 <code>fisher_score</code>: Fisher Score (ratio of between-group to within-group variance).</li>
 <li>
-<code>kruskal_p</code>: Kruskal-Wallis H test p-values. Non-parametric test for differences between groups.</li>
+<code>krustkal_effsize</code>: Kruskal-Wallis H test effect sizes. Non-parametric test for differences between groups.</li>
 </ul>
 <p>By default, the function excludes metrics with high correlation (above 0.7). This can be adjusted using the <code>correlation_threshold</code> argument.</p>
 <div class="cell">
@@ -277,7 +279,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

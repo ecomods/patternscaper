@@ -1,0 +1,123 @@
+# spatPatClassifyR
+
+The `spatPatClassifyR` package provides an automated approach to
+classifying spatial vegetation patterns into user-defined pattern types.
+It does so by training a neural network on multiple reference landscapes
+with known pattern types. Two alternative neural network approaches are
+implemented: (i) a multi-layered neural network, which is trained on
+landscape metrics and (ii) a convolutional neural network trained on the
+pixel data itself. Once trained, the neural network can be applied to
+new landscapes with unknown spatial patterns. In doing so, it estimates
+the likelihood for each possible pattern type, allowing users to assess
+the confidence of the classification.
+
+In the initial publication of the `spatPatClassifyR` package, two use
+cases are demonstrated: different pattern types in ecotones and
+different pattern types in self-organized landscapes. In both use cases
+we show the performance of both neural network approaches dependent on
+input configurations. For the self-organized landscapes, we additionally
+demonstrate the application of neural networks trained with artificial
+landscapes on real-world photographs.
+
+![](reference/figures/workflow.png)
+
+## Installation
+
+You can install the development version of spatPatClassifyR from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("ecomods/spatPatClassifyR")
+```
+
+## Get started
+
+After successful installation, get started by following the detailed
+workflow description in: [Get
+started](https://ecomods.github.io/spatPatClassifyR/spatPatClassifyR.md)
+
+## Citation
+
+To cite `spatPatClassifyR` in publications, please use:
+
+Tietjen et al. (2026). …
+
+To get a BibTex entry for citing, please use
+`citation("spatPatClassifyR")`.
+
+## Contributing
+
+Please see our [contributing
+guide](https://ecomods.github.io/spatPatClassifyR/CONTRIBUTING.html) for
+details on how to get involved.
+
+## Code of Conduct
+
+Please note that the spatPatClassifyR project is released with a
+[Contributor Code of
+Conduct](https://ecomods.github.io/spatPatClassifyR/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.
+
+# Package index
+
+## All functions
+
+- [`apply_nn_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_metrics.md)
+  : Apply Neural Network for Landscape Classification
+- [`apply_nn_pixels()`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_pixels.md)
+  : Apply a Keras CNN Model for Landscape Classification
+- [`calculate_landscape_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/calculate_landscape_metrics.md)
+  : Calculate Landscape Metrics
+- [`create_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md)
+  : Create a Landscape with Specified Pattern
+- [`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
+  : Create Training Landscapes
+- [`create_landscape_bare()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bare.md)
+  : Create a Bare Landscape
+- [`create_landscape_dense()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_dense.md)
+  : Create a Dense Landscape
+- [`evaluate_landscape_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/evaluate_landscape_metrics.md)
+  : Evaluate Landscape Metrics
+- [`landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/landscape.md)
+  : Create a landscape object
+- [`plot(`*`<landscape>`*`)`](https://ecomods.github.io/spatPatClassifyR/reference/plot.landscape.md)
+  : Plot method for landscape objects
+- [`plot_classified_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_classified_landscapes.md)
+  : Plot Neural Network Classification Landscapes
+- [`plot_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape.md)
+  : Plot a Landscape
+- [`plot_landscape_list()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape_list.md)
+  : Plot Multiple Landscapes
+- [`plot_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_metrics.md)
+  : Plot Landscape Metrics
+- [`print(`*`<landscape>`*`)`](https://ecomods.github.io/spatPatClassifyR/reference/print.landscape.md)
+  : Print a landscape object
+- [`set_landscape_name()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_name.md)
+  : Set Landscape Name
+- [`set_landscape_pattern()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_pattern.md)
+  : Set Landscape pattern
+- [`set_random_seed()`](https://ecomods.github.io/spatPatClassifyR/reference/set_random_seed.md)
+  : Set Random Seeds for Reproducible Neural Network Training
+- [`train_nn_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_metrics.md)
+  : Train a multi-layer Neural Network for Landscape Classification
+- [`train_nn_pixels()`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_pixels.md)
+  : Train a Convolutional Neural Network for Landscape Classification
+
+# Articles
+
+### All vignettes
+
+- [Classify landscapes using landscape
+  metrics](https://ecomods.github.io/spatPatClassifyR/articles/classify-metrics.md):
+- [Classify landscapes using Keras on landscape
+  rasters](https://ecomods.github.io/spatPatClassifyR/articles/classify-pixels.md):
+- [Importing user-defined
+  landscapes](https://ecomods.github.io/spatPatClassifyR/articles/importing-landscapes.md):
+- [Install Keras and TensorFlow for
+  R](https://ecomods.github.io/spatPatClassifyR/articles/install-keras.md):
+- [Generate landscapes with different spatial
+  patterns](https://ecomods.github.io/spatPatClassifyR/articles/landscape-generation.md):
+- [landscape-metrics](https://ecomods.github.io/spatPatClassifyR/articles/landscape-metrics.md):
+- [Get started with
+  spatPatClassifyR](https://ecomods.github.io/spatPatClassifyR/articles/spatPatClassifyR.md):

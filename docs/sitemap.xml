@@ -20,11 +20,13 @@
 <url><loc>https://ecomods.github.io/spatPatClassifyR/LICENSE.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_landscapes.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_metrics.html</loc></url>
+<url><loc>https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_pixels.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/calculate_landscape_metrics.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/calculate_single_metric.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/compile_keras_model.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_keras_model.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.html</loc></url>
+<url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bands.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bare.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_clustered.html</loc></url>
@@ -68,6 +70,7 @@
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/theme_landscape.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/train_nn_landscapes.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/train_nn_metrics.html</loc></url>
+<url><loc>https://ecomods.github.io/spatPatClassifyR/reference/train_nn_pixels.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/validate_cv_params.html</loc></url>
 </urlset>
 
