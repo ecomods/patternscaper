@@ -14,12 +14,12 @@
 Source:
 [`DESCRIPTION`](https://github.com/ecomods/spatPatClassifyR/blob/HEAD/DESCRIPTION)
 
-Baldauf S, Tietjen B, Berger U (2026). *spatPatClassifyR: What the
-Package Does (Title Case)*. R package version 0.1.0,
-<https://github.com/ecomods/spatPatClassifyR/>.
+Baldauf S, Tietjen B, Berger U (2026). *spatPatClassifyR: Classify
+Spatial Landscape Patterns Using Neural Networks*. R package version
+0.1.0, <https://github.com/ecomods/spatPatClassifyR/>.
 
     @Manual{,
-      title = {spatPatClassifyR: What the Package Does (Title Case)},
+      title = {spatPatClassifyR: Classify Spatial Landscape Patterns Using Neural Networks},
       author = {Selina Baldauf and Britta Tietjen and Uta Berger},
       year = {2026},
       note = {R package version 0.1.0},

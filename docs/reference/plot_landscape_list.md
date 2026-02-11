@@ -90,9 +90,7 @@ plot_landscape_list(landscapes,
 
 # Create many landscapes and handle overflow
 many_landscapes <- create_landscapes(n = 50)
-#> Warning: Regular spot placement requested 10 spots but only ~6 positions fit.
-#> ℹ  Adjusting to maximum feasible spots. Consider decreasing `spot_radius`.
-#> Warning: Regular spot placement requested 9 spots but only ~8 positions fit.
+#> Warning: Regular spot placement requested 10 spots but only ~8 positions fit.
 #> ℹ  Adjusting to maximum feasible spots. Consider decreasing `spot_radius`.
 #> ✔ Successfully generated all 50 training landscapes
 plot_landscape_list(many_landscapes,
