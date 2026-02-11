@@ -240,6 +240,7 @@ rank_by_coefficient_variation <- function(metrics) {
 #' @importFrom dplyr group_by arrange desc mutate
 #' @importFrom tidyr nest
 #' @importFrom purrr map_dbl
+#' @importFrom stats lm
 #' @noRd
 rank_by_linear_model <- function(
   metrics

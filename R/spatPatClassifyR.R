@@ -25,5 +25,7 @@ utils::globalVariables(c(
   "cv",
   "fisher_score",
   "data",
-  "kruskal_effsize"
+  "kruskal_effsize",
+  "predicted_class",
+  "mean_all"
 ))

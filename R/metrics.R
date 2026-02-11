@@ -9,6 +9,7 @@
 #' @keywords internal
 #' @importFrom purrr map_dfr
 #' @importFrom dplyr mutate
+#' @importFrom utils getFromNamespace
 calculate_single_metric <- function(landscapes, function_name) {
   # Get the function from landscapemetrics namespace
   func <- getFromNamespace(function_name, "landscapemetrics")

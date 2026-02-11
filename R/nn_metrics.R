@@ -40,6 +40,7 @@
 #' @importFrom purrr pmap_lgl
 #' @importFrom neuralnet neuralnet
 #' @importFrom readr write_rds
+#' @importFrom stats predict
 train_nn_metrics <- function(
   metrics,
   metrics_selected = NULL,
@@ -315,6 +316,7 @@ train_nn_metrics <- function(
 #' @importFrom dplyr filter select any_of all_of relocate rename bind_cols
 #' @importFrom purrr pmap_lgl
 #' @importFrom tibble as_tibble
+#' @importFrom stats predict
 apply_nn_metrics <- function(
   landscapes,
   nn_model,
