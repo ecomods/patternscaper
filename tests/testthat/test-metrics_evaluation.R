@@ -101,7 +101,7 @@ test_that("evaluate_landscape_metrics works with all ranking methods", {
     "lin_mod_r2",
     "mean_groups",
     "fisher_score",
-    "kruskal_p"
+    "krustkal_effsize"
   )
 
   for (method in methods) {

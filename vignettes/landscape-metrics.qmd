@@ -65,7 +65,7 @@ The package includes different methods to evaluate the calculated landscape metr
 - `lin_mod_r2`: Fits value ~ pattern for each metric and ranks by R².
 - `mean_groups`: Calculates relative differences between pattern-specific means and overall mean, then sums across patterns.
 - `fisher_score`: Fisher Score (ratio of between-group to within-group variance). 
-- `kruskal_p`: Kruskal-Wallis H test p-values. Non-parametric test for differences between groups.
+- `krustkal_effsize`: Kruskal-Wallis H test effect sizes. Non-parametric test for differences between groups.
 
 By default, the function excludes metrics with high correlation (above 0.7). This can be adjusted using the `correlation_threshold` argument.
 
