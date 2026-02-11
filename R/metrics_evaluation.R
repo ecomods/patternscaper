@@ -43,7 +43,8 @@ evaluate_landscape_metrics <- function(
   exclude_NA_metrics = TRUE,
   exclude_metrics = NULL,
   correlation_threshold = 0.7,
-  verbose = FALSE
+  verbose = FALSE,
+  scale = FALSE
 ) {
   # Validate input data - USE cli::cli_abort for all errors
   if (!is.data.frame(metrics) && !tibble::is_tibble(metrics)) {
@@ -79,7 +80,8 @@ evaluate_landscape_metrics <- function(
     "lin_mod_r2",
     "mean_groups",
     "fisher_score",
-    "kruskal_p"
+    "kruskal_p",
+    "kruskal_effsize"
   )
   if (!(method %in% valid_methods)) {
     cli::cli_abort(
@@ -158,6 +160,11 @@ evaluate_landscape_metrics <- function(
     )
   }
 
+  if (scale) {
+    metrics <- metrics |>
+      dplyr::mutate(value = scale(value)[, 1], .by = metric)
+  }
+
   # Get ranked metrics
   ranked_metrics <- rank_metrics_by_method(
     metrics = metrics,
@@ -204,6 +211,7 @@ rank_metrics_by_method <- function(metrics, method) {
     mean_groups = rank_by_mean_differences(metrics),
     fisher_score = rank_by_fisher_score(metrics),
     kruskal_p = rank_by_kruskal(metrics),
+    kruskal_effsize = rank_by_kruskal_effSize(metrics),
     cli::cli_abort("Unknown ranking method: {.val {method}}")
   )
 }
@@ -389,6 +397,38 @@ rank_by_kruskal <- function(metrics) {
 
   return(kruskal_results$metric)
 }
+
+
+#' Rank by Kruskal-Wallis H test
+#'
+#' Ranks metrics using Kruskal-Wallis H test p-values.
+#' More robust to non-normality than Fisher score.
+#'
+#' @param metrics tibble. Metrics data with columns 'metric', 'pattern', and 'value'.
+#'
+#' @return Character vector. Metrics ranked by p-value (smallest/most significant first).
+#' @noRd
+rank_by_kruskal_effSize <- function(metrics) {
+  kruskal_results <- metrics |>
+    dplyr::group_by(metric) |>
+    tidyr::nest() |>
+    dplyr::mutate(
+      kruskal_effsize = purrr::map_dbl(data, \(df) {
+        df <- df[!is.na(df$value), ]
+        if (length(unique(df$pattern)) < 2) {
+          return(NA_real_)
+        }
+        tryCatch(
+          rstatix::kruskal_effsize(value ~ pattern, data = df)$effsize,
+          error = function(e) NA_real_
+        )
+      })
+    ) |>
+    dplyr::arrange(dplyr::desc(kruskal_effsize))
+
+  return(kruskal_results$metric)
+}
+
 
 #' Select Uncorrelated Metrics
 #'
