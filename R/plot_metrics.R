@@ -5,9 +5,9 @@
 #'
 #' The function automatically limits the number of metrics based on the number of
 #' patterns to maintain readability:
-#' - 1-3 patterns: up to 12 metrics (3 rows × 4 columns)
-#' - 4-5 patterns: up to 8 metrics (2 rows × 4 columns)
-#' - 6+ patterns: up to 6 metrics (2 rows × 3 columns)
+#' - 1-3 patterns: up to 12 metrics (3 rows x 4 columns)
+#' - 4-5 patterns: up to 8 metrics (2 rows x 4 columns)
+#' - 6+ patterns: up to 6 metrics (2 rows x 3 columns)
 #'
 #' @param metrics Data frame from \code{\link{calculate_landscape_metrics}}.
 #'   Must contain columns: "level", "pattern", "metric", and "value".
@@ -158,7 +158,7 @@ plot_metrics <- function(
   if (force && total_facets > 30) {
     warning(
       sprintf(
-        "Creating %d facets (%d metrics × %d patterns). Plot may be difficult to read.",
+        "Creating %d facets (%d metrics x %d patterns). Plot may be difficult to read.",
         total_facets,
         length(selected_metrics),
         n_patterns

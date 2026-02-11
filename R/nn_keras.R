@@ -337,10 +337,10 @@ train_nn_pixels <- function(
       cli::cli_h2("Accuracy and loss across folds")
 
       cli::cli_text(
-        "Mean accuracy: {round(mean(accuracies), 4)} ± {round(sd(accuracies), 4)}"
+        "Mean accuracy: {round(mean(accuracies), 4)} +- {round(sd(accuracies), 4)}"
       )
       cli::cli_text(
-        "Mean loss: {round(mean(losses), 4)} ± {round(sd(losses), 4)}"
+        "Mean loss: {round(mean(losses), 4)} +- {round(sd(losses), 4)}"
       )
       cli::cli_text("")
     }
