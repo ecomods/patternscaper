@@ -53,8 +53,7 @@
 #' diffuse_modified <- create_landscape(
 #'   "diffuse",
 #'   treeline_position = 0.3,
-#'   scatter_density = 0.7,
-#'   scatter_zone_prop = 0.2
+#'   steepness = 0.1
 #' )
 #'
 #' # Create a rotated landscape
