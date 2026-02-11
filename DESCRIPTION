@@ -1,6 +1,6 @@
 Package: spatPatClassifyR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Classify Spatial Landscape Patterns Using Neural Networks
 Version: 0.1.0
 Authors@R: c(
     person("Selina", "Baldauf", , "selina.baldauf@fu-berlin.de", role = c("aut", "cre"),
@@ -20,6 +20,7 @@ Encoding: UTF-8
 LazyData: true
 License: GPL (>= 3)
 RoxygenNote: 7.3.3
+Depends: R(>= 4.1.0)
 Imports: 
     ambient,
     abind,
@@ -44,7 +45,8 @@ Imports:
 Suggests: 
     knitr,
     quarto,
-    rmarkdown
+    rmarkdown,
+    testthat
 VignetteBuilder:
     knitr,
     quarto
