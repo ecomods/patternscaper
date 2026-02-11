@@ -93,7 +93,7 @@ It supports different methods for metric evaluation:
   pattern-specific means and overall mean, then sums across patterns.
 - `fisher_score`: Fisher Score (ratio of between-group to within-group
   variance).
-- `krustkal_effsize`: Kruskal-Wallis H test effect sizes. Non-parametric
+- `kruskal_effsize`: Kruskal-Wallis H test effect sizes. Non-parametric
   test for differences between groups.
 
 By default, the function excludes metrics with high correlation (above

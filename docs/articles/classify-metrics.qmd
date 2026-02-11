@@ -82,7 +82,7 @@ It is not recommended to set `exclude_na = FALSE`, as metrics with `NA` values c
 #| label: evaluate-metrics
 best_10 <- evaluate_landscape_metrics(
   metrics = landscape_metrics,
-  method = "krustkal_effsize",
+  method = "kruskal_effsize",
   metrics_number = 10,
   verbose = FALSE
 )

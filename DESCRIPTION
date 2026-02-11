@@ -39,7 +39,9 @@ Imports:
     terra,
     tidyr,
     zoo,
-    readr
+    readr,
+    tibble,
+    rlang
 Suggests: 
     knitr,
     quarto,
