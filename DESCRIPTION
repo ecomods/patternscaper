@@ -39,7 +39,8 @@ Imports:
     zoo,
     readr,
     tibble,
-    rlang
+    rlang,
+    rstatix
 Suggests: 
     knitr,
     quarto,
