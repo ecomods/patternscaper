@@ -48,7 +48,8 @@ Note: May be automatically reduced to ensure adequate samples per fold.}
 
 \item{dense_units}{Integer. Units in dense layer (default: 128).}
 
-\item{model_path}{Character. Path to save model (default: NULL means model is not saved).}
+\item{model_path}{Character. Path to save model. Models are saved as `.keras` files.
+(default: NULL means model is not saved).}
 
 \item{loss}{Character. Loss function for training (default: "categorical_crossentropy").
 Common alternatives: "sparse_categorical_crossentropy", "kullback_leibler_divergence".}

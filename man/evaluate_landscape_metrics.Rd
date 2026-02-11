@@ -55,9 +55,8 @@ Identifies the most informative metrics for discriminating between landscape_nam
   \item{\code{fisher_score}}{Fisher Score (ratio of between-group to within-group variance).
     Higher scores indicate better separation between pattern types. Assumes normally
     distributed data within groups.}
-  \item{\code{kruskal_p}}{Kruskal-Wallis H test p-values. Non-parametric test for differences
-    between groups. Lower p-values (more significant) ranked first. More robust to
-    non-normality and outliers than Fisher score.}
+  \item{\code{kruskal_effsize}}{Kruskal-Wallis H test effect sizes. Non-parametric test for differences
+    between groups. Higher effect sizes indicate better discrimination between pattern types.}
 }
 }
 
