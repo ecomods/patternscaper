@@ -10,15 +10,15 @@
 #'    from non-vegetated cells. Values above the threshold become vegetation.
 #'    Adjusting this changes the overall proportion of vegetated area (default: 0.5).
 #' @param band_fuzziness Numeric between 0 and 0.5. Controls the amount of
-#'    geometric edge roughness applied *after* thresholding. At 0, vegetation 
-#'    boundaries are sharp and fully deterministic. Small values (≈ 0.05–0.1) 
-#'    introduce slight, irregular boundary perturbations without changing the 
-#'    overall topology of the pattern. Larger values progressively erode vegetation 
-#'    edges and can fragmet bands if set too high. This parameter affects boundary 
-#'    geometry only and does not influence the global structure or connectivity 
+#'    geometric edge roughness applied *after* thresholding. At 0, vegetation
+#'    boundaries are sharp and fully deterministic. Small values (≈ 0.05–0.1)
+#'    introduce slight, irregular boundary perturbations without changing the
+#'    overall topology of the pattern. Larger values progressively erode vegetation
+#'    edges and can fragmet bands if set too high. This parameter affects boundary
+#'    geometry only and does not influence the global structure or connectivity
 #'    of the labyrinth. (default: 0.08)
 #' @param octaves Integer >= 1. Number of noise layers (octaves) combined to
-#'    generate the underlying continuous field. A single octave produces very smooth, 
+#'    generate the underlying continuous field. A single octave produces very smooth,
 #'    large-scale bands. Using two to three octaves adds limited fine structure while preserving
 #'    a dominant wavelength, which is characteristic of labyrinth (Turing-like)
 #'    patterns. Higher values introduce fractal detail at smaller scales and can obscure
@@ -45,6 +45,7 @@
 #' The combination of `frequency` and `octaves` controls pattern complexity,
 #' while `veg_threshold` determines vegetation proportion.
 #'
+#' @export
 #' @examples
 #' # Default labyrinth pattern
 #' labyrinth_default <- create_landscape_labyrinth()
@@ -143,7 +144,6 @@ create_landscape_labyrinth <- function(
   noise_normalized <- (grid$noise - min(grid$noise)) /
     (max(grid$noise) - min(grid$noise))
 
-
   # Apply hard threshold to create base binary pattern
   # Cells above veg_threshold become vegetation (1), below become bare ground (0)
   mat <- matrix(
@@ -154,11 +154,13 @@ create_landscape_labyrinth <- function(
 
   # Controlled edge roughness only
   if (band_fuzziness > 0) {
-    edge <- mat & stats::filter(
-      !mat,
-      matrix(1, 3, 3),
-      circular = TRUE
-    ) > 0
+    edge <- mat &
+      stats::filter(
+        !mat,
+        matrix(1, 3, 3),
+        circular = TRUE
+      ) >
+        0
 
     jitter <- runif(sum(edge)) < band_fuzziness
     mat[which(edge)[jitter]] <- FALSE

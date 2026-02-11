@@ -15,7 +15,7 @@
 #'
 #' @return A landscape object with pattern "fingers" containing the generated landscape data and parameters.
 #'
-#' @keywords internal
+#' @export
 #' @importFrom cli cli_warn cli_abort
 #'
 #' @examples

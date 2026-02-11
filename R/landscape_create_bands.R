@@ -16,7 +16,7 @@
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
 #' @return A landscape object with pattern "bands" containing the generated landscape data and parameters.
-#'
+#' @export
 #' @examples
 #' # Default sine bands
 #' bands_default <- create_landscape_bands()

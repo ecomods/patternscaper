@@ -13,7 +13,7 @@
 #'
 #' @return A landscape object with pattern "diffuse" containing the generated landscape data and parameters.
 #'
-#' @keywords internal
+#' @export
 #' @importFrom cli cli_abort
 #' @importFrom stats runif
 #'

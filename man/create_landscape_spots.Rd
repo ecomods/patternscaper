@@ -95,4 +95,3 @@ spots_inverted <- create_landscape_spots(
 )
 
 }
-\keyword{internal}

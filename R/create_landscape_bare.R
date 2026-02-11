@@ -12,6 +12,7 @@
 #'
 #' @seealso \code{\link{create_landscape_random}}, \code{\link{create_landscape_dense}}
 #'
+#' @export
 #' @examples
 #' # Create default bare landscape (10% trees)
 #' bare <- create_landscape_bare()

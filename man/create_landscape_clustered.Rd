@@ -83,4 +83,3 @@ clustered_rotated <- create_landscape_clustered(
   rotation = 45
 )
 }
-\keyword{internal}

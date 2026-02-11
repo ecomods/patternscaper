@@ -10,7 +10,7 @@
 #'
 #' @return A landscape object with pattern "sharp" containing the generated landscape data and parameters.
 #'
-#' @keywords internal
+#' @export
 #'
 #' @examples
 #' # Default sharp treeline
