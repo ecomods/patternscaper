@@ -95,7 +95,7 @@ test_that("validate_numeric_param rejects values below minimum", {
 
   expect_error(
     validate_numeric_param(-0.1, "test_param", "test_pattern", spec),
-    "below minimum"
+    "below\\s+minimum"
   )
 })
 
@@ -104,7 +104,7 @@ test_that("validate_numeric_param rejects values above maximum", {
 
   expect_error(
     validate_numeric_param(1.5, "test_param", "test_pattern", spec),
-    "exceeds maximum"
+    "1\\.5 exceeds\\s+maximum 1"
   )
 })
 
@@ -113,7 +113,7 @@ test_that("validate_numeric_param rejects min >= max", {
 
   expect_error(
     validate_numeric_param(c(0.8, 0.2), "test_param", "test_pattern", spec),
-    "min.*must be < max"
+    "min.*must be <\\s+max"
   )
 })
 
@@ -159,12 +159,12 @@ test_that("validate_integer_param rejects non-whole numbers", {
 
   expect_error(
     validate_integer_param(5.5, "test_param", "test_pattern", spec),
-    "whole number"
+    "whole\\s+number"
   )
 
   expect_error(
     validate_integer_param(c(1, 5.5), "test_param", "test_pattern", spec),
-    "whole numbers"
+    "whole\\s+number"
   )
 })
 
@@ -173,12 +173,12 @@ test_that("validate_integer_param validates bounds", {
 
   expect_error(
     validate_integer_param(0, "test_param", "test_pattern", spec),
-    "below minimum"
+    "below\\s+minimum"
   )
 
   expect_error(
     validate_integer_param(11, "test_param", "test_pattern", spec),
-    "exceeds maximum"
+    "exceeds\\s+maximum"
   )
 })
 

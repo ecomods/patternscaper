@@ -207,19 +207,19 @@ test_that("landscape generators validate rotation parameter", {
 
     expect_error(
       gen(rotation = "45"),
-      "must be numeric and between 0 and 360.",
+      "must be numeric",
       info = paste("Testing", name, "with non-numeric rotation")
     )
 
     expect_error(
       gen(rotation = -10),
-      "must be numeric and between 0 and 360.",
+      "must be between 0 and 360 degrees",
       info = paste("Testing", name, "with negative rotation")
     )
 
     expect_error(
       gen(rotation = 400),
-      "must be numeric and between 0 and 360.",
+      "must be between 0 and 360 degrees",
       info = paste("Testing", name, "with rotation > 360")
     )
   }

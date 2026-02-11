@@ -201,7 +201,7 @@ test_that("plot_classified_landscapes rejects length mismatch", {
     confidence = c(0.95, 0.65)
   )
 
-  expect_error(
+  expect_warning(
     plot_classified_landscapes(classification, landscapes_more),
     "Length mismatch"
   )
@@ -220,7 +220,7 @@ test_that("plot_classified_landscapes rejects length mismatch", {
 
   expect_error(
     plot_classified_landscapes(classification2, landscapes_fewer),
-    "Length mismatch"
+    "Invalid landscape_id values detected"
   )
 })
 

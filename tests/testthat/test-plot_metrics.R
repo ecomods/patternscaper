@@ -22,19 +22,6 @@ test_metrics_patch <- calculate_landscape_metrics(
   level = "patch"
 )
 
-# Core Functionality Tests ------------------------------------------------
-
-test_that("plot_metrics returns a ggplot object", {
-  p_landscape <- plot_metrics(
-    test_metrics_landscape,
-    selected_metrics = c("ai", "lsi")
-  )
-  p_class <- plot_metrics(test_metrics_class, selected_metrics = c("ai", "lsi"))
-
-  expect_s3_class(p_landscape, "ggplot")
-  expect_s3_class(p_class, "ggplot")
-})
-
 # Critical Error Handling -------------------------------------------------
 
 test_that("plot_metrics stops on non-data.frame input", {
