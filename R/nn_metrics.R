@@ -211,12 +211,18 @@ train_nn_metrics <- function(
       )
 
       # Predict on validation data
-      probs <- predict(
+      probs_raw <- predict(
         fold_model,
         newdata = val_data[,
           -which(names(val_data) == "pattern")
         ]
       )
+
+      # Convert raw outputs to probabilities using softmax
+      probs <- t(apply(probs_raw, 1, function(x) {
+        exp_x <- exp(x - max(x))
+        exp_x / sum(exp_x)
+      }))
 
       # Add class names as column names
       colnames(probs) <- class_names
@@ -419,11 +425,17 @@ apply_nn_metrics <- function(
   )
 
   # Make predictions ---------------------------------------------------------
-  pred <- predict(
+  pred_raw <- predict(
     model,
     newdata = predictors_scaled,
     type = "raw"
   )
+
+  # Convert raw outputs to probabilities using softmax
+  pred <- t(apply(pred_raw, 1, function(x) {
+    exp_x <- exp(x - max(x))
+    exp_x / sum(exp_x)
+  }))
 
   # Add class names as column names
   colnames(pred) <- class_names
