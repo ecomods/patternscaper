@@ -29,9 +29,8 @@
 #'   \item{\code{fisher_score}}{Fisher Score (ratio of between-group to within-group variance).
 #'     Higher scores indicate better separation between pattern types. Assumes normally
 #'     distributed data within groups.}
-#'   \item{\code{kruskal_p}}{Kruskal-Wallis H test p-values. Non-parametric test for differences
-#'     between groups. Lower p-values (more significant) ranked first. More robust to
-#'     non-normality and outliers than Fisher score.}
+#'   \item{\code{kruskal_effsize}}{Kruskal-Wallis H test effect sizes. Non-parametric test for differences
+#'     between groups. Higher effect sizes indicate better discrimination between pattern types.}
 #' }
 #'
 #' @return Character vector. Names of most sensitive metrics.
@@ -43,8 +42,7 @@ evaluate_landscape_metrics <- function(
   exclude_NA_metrics = TRUE,
   exclude_metrics = NULL,
   correlation_threshold = 0.7,
-  verbose = FALSE,
-  scale = FALSE
+  verbose = FALSE
 ) {
   # Validate input data - USE cli::cli_abort for all errors
   if (!is.data.frame(metrics) && !tibble::is_tibble(metrics)) {
@@ -80,7 +78,6 @@ evaluate_landscape_metrics <- function(
     "lin_mod_r2",
     "mean_groups",
     "fisher_score",
-    "kruskal_p",
     "kruskal_effsize"
   )
   if (!(method %in% valid_methods)) {
@@ -160,11 +157,6 @@ evaluate_landscape_metrics <- function(
     )
   }
 
-  if (scale) {
-    metrics <- metrics |>
-      dplyr::mutate(value = scale(value)[, 1], .by = metric)
-  }
-
   # Get ranked metrics
   ranked_metrics <- rank_metrics_by_method(
     metrics = metrics,
@@ -210,8 +202,7 @@ rank_metrics_by_method <- function(metrics, method) {
     lin_mod_r2 = rank_by_linear_model(metrics),
     mean_groups = rank_by_mean_differences(metrics),
     fisher_score = rank_by_fisher_score(metrics),
-    kruskal_p = rank_by_kruskal(metrics),
-    kruskal_effsize = rank_by_kruskal_effSize(metrics),
+    kruskal_effsize = rank_by_kruskal(metrics),
     cli::cli_abort("Unknown ranking method: {.val {method}}")
   )
 }
@@ -367,48 +358,17 @@ rank_by_fisher_score <- function(metrics) {
   return(fisher_results$metric)
 }
 
-
 #' Rank by Kruskal-Wallis H test
 #'
-#' Ranks metrics using Kruskal-Wallis H test p-values.
+#' Ranks metrics using Kruskal-Wallis H test effect sizes.
+#' Higher effect sizes indicate better discrimination between pattern types.
 #' More robust to non-normality than Fisher score.
 #'
 #' @param metrics tibble. Metrics data with columns 'metric', 'pattern', and 'value'.
 #'
-#' @return Character vector. Metrics ranked by p-value (smallest/most significant first).
+#' @return Character vector. Metrics ranked by effect size (largest first).
 #' @noRd
 rank_by_kruskal <- function(metrics) {
-  kruskal_results <- metrics |>
-    dplyr::group_by(metric) |>
-    tidyr::nest() |>
-    dplyr::mutate(
-      kruskal_p = purrr::map_dbl(data, \(df) {
-        df <- df[!is.na(df$value), ]
-        if (length(unique(df$pattern)) < 2) {
-          return(NA_real_)
-        }
-        tryCatch(
-          kruskal.test(value ~ pattern, data = df)$p.value,
-          error = function(e) NA_real_
-        )
-      })
-    ) |>
-    dplyr::arrange(kruskal_p)
-
-  return(kruskal_results$metric)
-}
-
-
-#' Rank by Kruskal-Wallis H test
-#'
-#' Ranks metrics using Kruskal-Wallis H test p-values.
-#' More robust to non-normality than Fisher score.
-#'
-#' @param metrics tibble. Metrics data with columns 'metric', 'pattern', and 'value'.
-#'
-#' @return Character vector. Metrics ranked by p-value (smallest/most significant first).
-#' @noRd
-rank_by_kruskal_effSize <- function(metrics) {
   kruskal_results <- metrics |>
     dplyr::group_by(metric) |>
     tidyr::nest() |>
