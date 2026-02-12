@@ -2,7 +2,7 @@
 % Please edit documentation in R/nn_keras.R
 \name{apply_nn_pixels}
 \alias{apply_nn_pixels}
-\title{Apply a Keras CNN Model for Landscape Classification}
+\title{Apply a Keras CNN Model for Landscape Pattern Classification}
 \usage{
 apply_nn_pixels(
   landscapes,
@@ -42,6 +42,31 @@ When actual classes unavailable or return_performance=FALSE: tibble with columns
     \item{predictions}{Tibble as above, plus actual_class column}
     \item{performance}{Performance metrics from evaluate_cv_performance()}
   }
+#' @examples
+# Create training data
+training_landscapes <- create_landscapes(
+  n = 200,
+  patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
+)
+
+
+# Train on all data for final deployment model
+final_model <- train_nn_pixels(
+  landscapes = training_landscapes,
+  cv_method = "none",
+  epochs = 100
+)
+
+# Evaluate on separate test set
+test_landscapes <- create_landscapes(
+  n = 100,
+  patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
+)
+results <- apply_nn_pixels(
+  landscapes = test_landscapes,
+  nn_model = final_model,
+  return_performance = TRUE
+)
 }
 \description{
 Applies a trained CNN model to classify new landscapes based on their

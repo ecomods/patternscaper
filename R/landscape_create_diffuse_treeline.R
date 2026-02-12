@@ -11,8 +11,11 @@
 #'   where tree probability persists further below the treeline (default: 0.5).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
-#' @return A landscape object with pattern "diffuse" containing the generated landscape data and parameters.
-#'
+#' @return A landscape object with pattern "diffuse" containing:
+#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+#'   \item{pattern}{Character string "diffuse"}
+#'   \item{params}{List of all input parameters used to generate the landscape}
+#' 
 #' @keywords internal
 #' @importFrom cli cli_abort
 #' @importFrom stats runif

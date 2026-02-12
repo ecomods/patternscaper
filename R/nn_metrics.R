@@ -1,7 +1,10 @@
-#' Train a multi-layer Neural Network for Landscape Classification
+#' Train a Multi-Layer Neural Network for Landscape Pattern Classification
 #'
-#' Trains a multi-layer neural network model to classify landscapes
-#' based on landscape metrics. Uses the neuralnet package.
+#' Trains a multi-layer neural network model to classify landscapes 
+#' based on landscape metrics. Uses the neuralnet package. 
+#' The input neurons of the neural network refer to selected metrics 
+#' of the reference landscapes and the output by the pattern types 
+#' of the reference landscapes.
 #'
 #' @param metrics Tibble or data frame. Output from calculate_landscape_metrics()
 #'   containing landscape metrics in long format with required columns:
@@ -272,11 +275,11 @@ train_nn_metrics <- function(
 }
 
 
-#' Apply Neural Network for Landscape Classification
+#' Apply Neural Network for Landscape Pattern Classification Based on their Landscape Metrics
 #'
-#' Applies a trained neural network model to classify new landscapes. The function
-#' automatically calculates the required landscape metrics needed by the model
-#' and scales them appropriately.
+#' Applies a trained neural network model to classify new landscapes according to their 
+#' spatial pattern type. The function automatically calculates the required landscape 
+#' metrics needed by the model and scales them appropriately.
 #'
 #' @param landscapes Landscape object (single) or list of landscape objects to classify.
 #'   Landscapes must have valid raster data that can be analyzed by landscapemetrics.

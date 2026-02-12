@@ -8,8 +8,11 @@
 #' @param random_spots Numeric vector of length 2. Probabilities for flipping cells: [1→0, 0→1] (default: c(0,0)).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
-#' @return A landscape object with pattern "sharp" containing the generated landscape data and parameters.
-#'
+#' @return A landscape object with pattern "sharp" containing:
+#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+#'   \item{pattern}{Character string "sharp"}
+#'   \item{params}{List of all input parameters used to generate the landscape}
+#' 
 #' @keywords internal
 #'
 #' @examples

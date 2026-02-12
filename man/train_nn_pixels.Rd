@@ -2,7 +2,7 @@
 % Please edit documentation in R/nn_keras.R
 \name{train_nn_pixels}
 \alias{train_nn_pixels}
-\title{Train a Convolutional Neural Network for Landscape Classification}
+\title{Train a Convolutional Neural Network for Landscape Pattern Classification}
 \usage{
 train_nn_pixels(
   landscapes,
@@ -24,7 +24,12 @@ train_nn_pixels(
 )
 }
 \arguments{
-\item{landscapes}{List. List of landscape objects created by `create_landscape()` or `create_landscapes()`.}
+\item{landscapes}{List. List of landscape objects created by `create_landscape()` or 
+`create_landscapes()`. 
+**Note**: Input landscapes must contain categorical/discrete habitat data 
+(e.g., 0/1 for two habitat types, or 0/1/2 for three types). 
+Continuous data (e.g., elevation, gradients) is not supported. 
+All landscapes used for training are required to have the same spatial extent.}
 
 \item{cv_method}{Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 \itemize{
@@ -89,7 +94,7 @@ List containing:
 }
 \description{
 Trains a CNN model using the Keras framework to classify landscapes based on their
-spatial patterns. The function uses a multiscale CNN architecture optimized for
+spatial patterns (pixel data). The function uses a multiscale CNN architecture optimized for
 distinguishing different landscape patterns.
 }
 \examples{
@@ -112,17 +117,6 @@ final_model <- train_nn_pixels(
   landscapes = training_landscapes,
   cv_method = "none",
   epochs = 100
-)
-
-# Evaluate on separate test set
-test_landscapes <- create_landscapes(
-  n = 100,
-  patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
-)
-results <- apply_nn_pixels(
-  landscapes = test_landscapes,
-  nn_model = final_model,
-  return_performance = TRUE
 )
 }
 }

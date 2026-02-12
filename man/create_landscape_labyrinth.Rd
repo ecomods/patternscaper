@@ -43,11 +43,14 @@ the banded structure, making patterns less clearly classifiable as
 labyrinths. (default: 2).}
 }
 \value{
-A landscape object with pattern "labyrinth" containing the generated landscape data and parameters.
+A landscape object with pattern "labyrinth" containing:
+  \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+  \item{pattern}{Character string "labyrinth"}
+  \item{params}{List of all input parameters used to generate the landscape}
 }
 \description{
-Generates a landscape with banded and spotted vegetation (labyrinth),
-this mimics Turing patterns.
+Generates a landscape with a labyrinth-like vegetation pattern,
+ this mimics Turing patterns.
 }
 \details{
 The labyrinth pattern is generated using fractal Brownian motion (fBm):

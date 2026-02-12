@@ -43,7 +43,7 @@ Plotting more than 36 landscapes (6x6 grid) is not recommended.}
 Can be used to plot specific landscapes or change plot order (default: NULL).}
 }
 \value{
-A ggplot object combining all landscape plots.
+A ggplot object combining all landscape plots in a grid.
 }
 \description{
 Creates a grid of multiple landscape plots.

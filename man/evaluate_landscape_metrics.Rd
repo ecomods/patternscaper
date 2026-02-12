@@ -29,16 +29,21 @@ accept missing values.}
 \item{exclude_metrics}{Character vector. Metrics to exclude (default: NULL).}
 
 \item{correlation_threshold}{Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
-If you don't want to filter based on correlation, set to 1.}
+If you do not want to filter based on correlation, set to 1.}
 
 \item{verbose}{Logical. Whether to print detailed messages on excluded metrics
 or just a summary (default: FALSE).}
 }
 \value{
-Character vector. Names of most sensitive metrics.
+Character vector. Names of metrics that best discriminate between pattern types.
 }
 \description{
-Identifies the most informative metrics for discriminating between landscape_name types.
+Identifies the metrics most suitable for discriminating between different pattern types 
+based on a specified selection method. The choice of method affects the ranking: 
+parametric methods assume linear relationships and normally distributed residuals, 
+while non-parametric methods are more robust to outliers and deviations from normality. 
+This function is useful for selecting informative metrics to train the 
+metric-based neural network.
 }
 \section{Ranking Methods}{
 
@@ -60,3 +65,17 @@ Identifies the most informative metrics for discriminating between landscape_nam
 }
 }
 
+\examples{
+# Calculate most suitable metrics to discriminate between spots and random landscapes
+landscapes <- create_landscapes(n = 50, patterns = c("spots","random"))
+metrics <- calculate_landscape_metrics(
+  landscapes,
+  level = "landscape"
+)
+metric_list <- evaluate_landscape_metrics(
+  metrics = metrics,
+  metrics_number = 5,
+  method = "coeffvar_all"
+)
+
+}

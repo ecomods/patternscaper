@@ -15,7 +15,10 @@ create_landscape_random(width = 100, height = 100, tree_prop = 0.5)
 Higher values result in a denser tree cover.}
 }
 \value{
-@return A landscape object containing the generated landscape data and parameters.
+A landscape object with random pattern containing:
+  \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+  \item{pattern}{Character string "random"}
+  \item{params}{List of all input parameters used to generate the landscape}
 }
 \description{
 Generates a binary landscape with randomly distributed trees.

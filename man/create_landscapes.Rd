@@ -2,7 +2,7 @@
 % Please edit documentation in R/landscape_create.R
 \name{create_landscapes}
 \alias{create_landscapes}
-\title{Create Training Landscapes}
+\title{Create Multiple Landscapes}
 \usage{
 create_landscapes(
   n = 50,
@@ -46,11 +46,11 @@ overriding any weights specified in pattern_probs. (default: TRUE)}
 A named list of landscape objects. Names indicate the pattern and optional rotation.
 }
 \description{
-Create a series of landscape models with variations for training purposes.
+Create a series of landscape models with variations.
 Creates a total of n landscapes distributed across different landscape patterns.
 }
 \examples{
-# Generate 20 training landscapes
+# Generate 20 landscapes
 landscapes <- create_landscapes(n = 20)
 
 # Access a landscape

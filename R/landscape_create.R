@@ -4,17 +4,22 @@
 #' specialized functions. The pattern of landscape is determined by the 'pattern'
 #' parameter.
 #'
+#' @param width Integer. Width of the landscape in pixels (default: 100).
+#' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param pattern Character. pattern of landscape to generate: "random", "sharp", "diffuse",
 #'        "fingers", "bands", "clusters", "spots", "gaps",
 #'        "labyrinth"
 #' @param name Character. Optional name for the landscape (default: NULL).
 #' @param custom_pattern Character. Optional pattern for the landscape (default: NULL uses the default
 #'     pattern of the corresponding function).
+#' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param ... Parameters passed to specific landscape functions. See the documentation
 #'        of the individual functions for details on required and optional parameters.
 #'
-#' @return A landscape object with pattern corresponding to the pattern pattern, containing
-#'   the generated landscape data and parameters.
+#' @return A landscape object with pattern corresponding to the pattern, containing:
+#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+#'   \item{pattern}{Character string with the  pattern type}
+#'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @seealso
 #' \code{\link{create_landscape_random}} for "random" pattern parameters. "bare" and "dense" are aliases but
@@ -53,8 +58,7 @@
 #' diffuse_modified <- create_landscape(
 #'   "diffuse",
 #'   treeline_position = 0.3,
-#'   scatter_density = 0.7,
-#'   scatter_zone_prop = 0.2
+#'   steepness = 0.2
 #' )
 #'
 #' # Create a rotated landscape
@@ -141,9 +145,9 @@ create_landscape <- function(
 }
 
 
-#' Create Training Landscapes
+#' Create Multiple Landscapes
 #'
-#' Create a series of landscape models with variations for training purposes.
+#' Create a series of landscape models with variations.
 #' Creates a total of n landscapes distributed across different landscape patterns.
 #'
 #' @param n Integer. Total number of landscapes to create (default: 50).
@@ -163,7 +167,7 @@ create_landscape <- function(
 #' @return A named list of landscape objects. Names indicate the pattern and optional rotation.
 #'
 #' @examples
-#' # Generate 20 training landscapes
+#' # Generate 20 landscapes
 #' landscapes <- create_landscapes(n = 20)
 #'
 #' # Access a landscape

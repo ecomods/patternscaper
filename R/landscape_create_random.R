@@ -7,7 +7,10 @@
 #' @param tree_prop Numeric. Probability of tree presence (0-1) (default: 0.5).
 #'    Higher values result in a denser tree cover.
 #'
-#' @return @return A landscape object containing the generated landscape data and parameters.
+#' @return A landscape object with random pattern containing:
+#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+#'   \item{pattern}{Character string "random"}
+#'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @keywords internal
 #'

@@ -21,9 +21,7 @@
 #' @param elongation_y Numeric. Vertical elongation factor for clusters.
 #'   Values > 1 stretch clusters vertically, creating taller ellipses.
 #'   Values < 1 compress vertically (default: 1).
-#' @param rotation Numeric. Angle to rotate landscape in degrees, clockwise.
-#'   The landscape is expanded before rotation and cropped back to target size
-#'   to prevent edge clipping (default: 0).
+#' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
 #' @return A landscape object with pattern "clustered" containing:
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}

@@ -14,7 +14,10 @@ create_landscape_bare(tree_prop = 0.1, width = 100, height = 100)
 \item{height}{Integer. Height of landscape in cells. Default: 100.}
 }
 \value{
-A landscape object with pattern "bare".
+A landscape object with pattern "bare" containing.
+  \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+  \item{pattern}{Character string "bare"}
+  \item{params}{List of all input parameters used to generate the landscape}
 }
 \description{
 Creates a landscape with sparse tree coverage using random distribution.

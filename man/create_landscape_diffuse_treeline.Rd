@@ -27,7 +27,10 @@ where tree probability persists further below the treeline (default: 0.5).}
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
 \value{
-A landscape object with pattern "diffuse" containing the generated landscape data and parameters.
+A landscape object with pattern "diffuse" containing:
+  \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+  \item{pattern}{Character string "diffuse"}
+  \item{params}{List of all input parameters used to generate the landscape}
 }
 \description{
 Generates a binary landscape with a diffuse treeline where tree probability decreases with distance.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/nn_metrics.R
 \name{train_nn_metrics}
 \alias{train_nn_metrics}
-\title{Train a multi-layer Neural Network for Landscape Classification}
+\title{Train a Multi-Layer Neural Network for Landscape Pattern Classification}
 \usage{
 train_nn_metrics(
   metrics,
@@ -58,6 +58,9 @@ List containing:
   }
 }
 \description{
-Trains a multi-layer neural network model to classify landscapes
-based on landscape metrics. Uses the neuralnet package.
+Trains a multi-layer neural network model to classify landscapes 
+based on landscape metrics. Uses the neuralnet package. 
+The input neurons of the neural network refer to selected metrics 
+of the reference landscapes and the output by the pattern types 
+of the reference landscapes.
 }

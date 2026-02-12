@@ -130,7 +130,7 @@ plot_landscape <- function(
 #' @param subset_index Integer vector. Indices of landscapes to plot.
 #'     Can be used to plot specific landscapes or change plot order (default: NULL).
 #'
-#' @return A ggplot object combining all landscape plots.
+#' @return A ggplot object combining all landscape plots in a grid.
 #' @importFrom patchwork wrap_plots plot_layout
 #' @examples
 #' # Create a list of different landscapes

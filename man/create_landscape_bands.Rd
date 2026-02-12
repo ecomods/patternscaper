@@ -41,7 +41,10 @@ for the given band spacing, no bands will be drawn and a warning will be issued.
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
 \value{
-A landscape object with pattern "bands" containing the generated landscape data and parameters.
+A landscape object with pattern "bands" containing:
+  \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+  \item{pattern}{Character string "bands"}
+  \item{params}{List of all input parameters used to generate the landscape}
 }
 \description{
 Generates a binary landscape with parallel sine-wave bands.

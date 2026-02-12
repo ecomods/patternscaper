@@ -24,10 +24,18 @@ pattern of the corresponding function).}
 
 \item{...}{Parameters passed to specific landscape functions. See the documentation
 of the individual functions for details on required and optional parameters.}
+
+\item{width}{Integer. Width of the landscape in pixels (default: 100).}
+
+\item{height}{Integer. Height of the landscape in pixels (default: 100).}
+
+\item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
 \value{
-A landscape object with pattern corresponding to the pattern pattern, containing
-  the generated landscape data and parameters.
+A landscape object with pattern corresponding to the pattern, containing:
+  \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+  \item{pattern}{Character string with the  pattern type}
+  \item{params}{List of all input parameters used to generate the landscape}
 }
 \description{
 A generic function that creates various patterns of landscape matrices using
@@ -51,8 +59,7 @@ random_modified <- create_landscape(
 diffuse_modified <- create_landscape(
   "diffuse",
   treeline_position = 0.3,
-  scatter_density = 0.7,
-  scatter_zone_prop = 0.2
+  steepness = 0.2
 )
 
 # Create a rotated landscape

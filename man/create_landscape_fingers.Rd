@@ -36,7 +36,10 @@ create_landscape_fingers(
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
 \value{
-A landscape object with pattern "fingers" containing the generated landscape data and parameters.
+A landscape object with pattern "fingers" containing:
+  \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+  \item{pattern}{Character string "fingers"}
+  \item{params}{List of all input parameters used to generate the landscape}
 }
 \description{
 Generates a binary landscape with a curvy finger treeline following a sine wave pattern

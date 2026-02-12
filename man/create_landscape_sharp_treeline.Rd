@@ -24,7 +24,10 @@ create_landscape_sharp_treeline(
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
 \value{
-A landscape object with pattern "sharp" containing the generated landscape data and parameters.
+A landscape object with pattern "sharp" containing:
+  \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+  \item{pattern}{Character string "sharp"}
+  \item{params}{List of all input parameters used to generate the landscape}
 }
 \description{
 Generates a binary landscape with a sharp treeline.

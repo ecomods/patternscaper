@@ -15,7 +15,10 @@
 #' @param noise_sd Numeric. Standard deviation for random noise (default: 0).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
-#' @return A landscape object with pattern "bands" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "bands" containing:
+#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+#'   \item{pattern}{Character string "bands"}
+#'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @examples
 #' # Default sine bands

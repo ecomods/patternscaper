@@ -1,7 +1,7 @@
 #' Create a Landscape with Labyrinths as in Turing patterns
 #'
-#' Generates a landscape with banded and spotted vegetation (labyrinth),
-#' this mimics Turing patterns.
+#' Generates a landscape with a labyrinth-like vegetation pattern,
+#'  this mimics Turing patterns.
 #' @param width Integer. Number of columns in the landscape (default: 100).
 #' @param height Integer. Number of rows in the landscape (default: 100).
 #' @param frequency Numeric. Controls the spatial scale of the noise pattern:
@@ -25,7 +25,10 @@
 #'    the banded structure, making patterns less clearly classifiable as
 #'    labyrinths. (default: 2).
 #'
-#' @return A landscape object with pattern "labyrinth" containing the generated landscape data and parameters.
+#' @return A landscape object with pattern "labyrinth" containing:
+#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+#'   \item{pattern}{Character string "labyrinth"}
+#'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @details
 #' The labyrinth pattern is generated using fractal Brownian motion (fBm):

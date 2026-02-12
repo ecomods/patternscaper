@@ -8,7 +8,10 @@
 #' @param width Integer. Width of landscape in cells. Default: 100.
 #' @param height Integer. Height of landscape in cells. Default: 100.
 #'
-#' @return A landscape object with pattern "dense".
+#' @return A landscape object with pattern "dense" containing
+#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+#'   \item{pattern}{Character string "dense"}
+#'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @seealso \code{\link{create_landscape_random}}, \code{\link{create_landscape_bare}}
 #'

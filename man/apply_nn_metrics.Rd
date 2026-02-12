@@ -2,7 +2,7 @@
 % Please edit documentation in R/nn_metrics.R
 \name{apply_nn_metrics}
 \alias{apply_nn_metrics}
-\title{Apply Neural Network for Landscape Classification}
+\title{Apply Neural Network for Landscape Pattern Classification Based on their Landscape Metrics}
 \usage{
 apply_nn_metrics(landscapes, nn_model, return_performance = FALSE)
 }
@@ -37,7 +37,7 @@ When return_performance = FALSE or actual classes unavailable:
   }
 }
 \description{
-Applies a trained neural network model to classify new landscapes. The function
-automatically calculates the required landscape metrics needed by the model
-and scales them appropriately.
+Applies a trained neural network model to classify new landscapes according to their 
+spatial pattern type. The function automatically calculates the required landscape 
+metrics needed by the model and scales them appropriately.
 }

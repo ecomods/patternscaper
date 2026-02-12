@@ -11,7 +11,6 @@ create_landscape_gaps(
   spot_radius = 5,
   spot_radius_sd = 0,
   radius_noise_fraction = 0,
-  invert_landscape = TRUE,
   regular_spots = FALSE,
   rotation = 0
 )
@@ -29,8 +28,8 @@ cannot accommodate the requested number at the given `spot_radius`.}
 Must be positive and smaller than landscape dimensions.}
 
 \item{spot_radius_sd}{Numeric. Standard deviation for random variation in spot radius.
-Default is 0 (no variation). Each spot's radius is sampled from
-N(spot_radius, spot_radius_sd).}
+Each spot's radius is sampled from N(spot_radius, spot_radius_sd). 
+(detault: 0 - no variation)}
 
 \item{radius_noise_fraction}{Numeric (0 to 1). Proportion of the spot radius
 where gradual edge noise is applied. 0 creates sharp circular edges,
@@ -39,10 +38,6 @@ For example, 0.2 means the outer 20% of the radius has a gradient transition.
 Works independently of `spot_radius_sd` (which varies the overall size,
 while this parameter affects edge sharpness).}
 
-\item{invert_landscape}{Logical. If TRUE (default), creates vegetation patches in bare ground
-(gaps pattern). If FALSE, creates bare spots in vegetation (equivalent to spots pattern).
-This parameter is exposed to allow users to override the default behavior if needed.}
-
 \item{regular_spots}{Logical. If TRUE, spots are arranged on a hexagonal grid
 using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).}
 
@@ -50,10 +45,13 @@ using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).}
 with other landscape generators). Required by \code{\link{create_landscapes}}.}
 }
 \value{
-A landscape object with pattern "gaps" containing the generated landscape data and parameters.
+A landscape object with pattern "gaps" containing:
+  \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+  \item{pattern}{Character string "gaps"}
+  \item{params}{List of all input parameters used to generate the landscape}
 }
 \description{
-Generates a binary landscape with circular gaps (vegetation patches in bare ground).
+Generates a binary landscape with circular gaps (bare patches in vegetated ground).
 This is a convenience wrapper around \code{\link{create_landscape_spots}} with
 \code{invert_landscape = TRUE} by default, making "gaps" and "spots" semantically
 distinct pattern names for the same underlying algorithm.
@@ -61,8 +59,8 @@ distinct pattern names for the same underlying algorithm.
 \details{
 The distinction between "spots" and "gaps":
 \itemize{
-  \item \strong{spots}: Bare patches in vegetation matrix (\code{invert_landscape = FALSE})
-  \item \strong{gaps}: Vegetation patches in bare ground (\code{invert_landscape = TRUE})
+  \item \strong{gaps}: Bare patches in vegetation matrix)
+  \item \strong{spots}: Vegetation patches in bare ground)
 }
 
 Both patterns use the same algorithm; the pattern name primarily serves as a semantic

@@ -43,9 +43,7 @@ Values < 1 compress horizontally (default: 1).}
 Values > 1 stretch clusters vertically, creating taller ellipses.
 Values < 1 compress vertically (default: 1).}
 
-\item{rotation}{Numeric. Angle to rotate landscape in degrees, clockwise.
-The landscape is expanded before rotation and cropped back to target size
-to prevent edge clipping (default: 0).}
+\item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
 \value{
 A landscape object with pattern "clustered" containing:

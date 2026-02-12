@@ -13,8 +13,11 @@
 #' @param sine_height_sd Numeric. Standard deviation of amplitude in pixels (default: 4).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
-#' @return A landscape object with pattern "fingers" containing the generated landscape data and parameters.
-#'
+#' @return A landscape object with pattern "fingers" containing:
+#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+#'   \item{pattern}{Character string "fingers"}
+#'   \item{params}{List of all input parameters used to generate the landscape}
+#' 
 #' @keywords internal
 #' @importFrom cli cli_warn cli_abort
 #'
