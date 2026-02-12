@@ -39,8 +39,8 @@ A ggplot2 object showing boxplots of metric values by pattern type.
 
 The function automatically limits the number of metrics based on the
 number of patterns to maintain readability: - 1-3 patterns: up to 12
-metrics (3 rows × 4 columns) - 4-5 patterns: up to 8 metrics (2 rows × 4
-columns) - 6+ patterns: up to 6 metrics (2 rows × 3 columns)
+metrics (3 rows x 4 columns) - 4-5 patterns: up to 8 metrics (2 rows x 4
+columns) - 6+ patterns: up to 6 metrics (2 rows x 3 columns)
 
 ## Examples
 

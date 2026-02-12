@@ -72,7 +72,7 @@
 #'
 #' @importFrom stats kmeans rnorm runif
 #' @importFrom cli cli_alert_warning
-#' @keywords internal
+#' @export
 create_landscape_spots <- function(
   width = 100,
   height = 100,

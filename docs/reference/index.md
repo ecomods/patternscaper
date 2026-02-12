@@ -14,8 +14,18 @@
   : Create Training Landscapes
 - [`create_landscape_bare()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bare.md)
   : Create a Bare Landscape
+- [`create_landscape_clustered()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_clustered.md)
+  : Create a Landscape with Clustered Features
 - [`create_landscape_dense()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_dense.md)
   : Create a Dense Landscape
+- [`create_landscape_diffuse_treeline()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse_treeline.md)
+  : Create a Landscape with Diffuse Treeline
+- [`create_landscape_fingers()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_fingers.md)
+  : Create a Landscape with Finger-like Treeline
+- [`create_landscape_sharp_treeline()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp_treeline.md)
+  : Create a Landscape with Sharp Treeline
+- [`create_landscape_spots()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_spots.md)
+  : Create a Landscape with Spots Pattern
 - [`evaluate_landscape_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/evaluate_landscape_metrics.md)
   : Evaluate Landscape Metrics
 - [`landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/landscape.md)

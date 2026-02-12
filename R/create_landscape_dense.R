@@ -21,6 +21,7 @@
 #'
 #' # Create very dense landscape
 #' very_dense <- create_landscape_dense(tree_prop = 0.95)
+#' @export
 create_landscape_dense <- function(
   tree_prop = 0.9,
   width = 100,

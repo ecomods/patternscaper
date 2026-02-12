@@ -57,6 +57,7 @@ test_that("calculate_landscape_metrics produces correct output structure", {
     "layer",
     "class",
     "id",
+    "metric_name",
     "metric",
     "value",
     "warnings"

@@ -62,4 +62,3 @@ fingers_rotated <- create_landscape_fingers(
   rotation = 45
 )
 }
-\keyword{internal}

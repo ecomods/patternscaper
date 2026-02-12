@@ -128,36 +128,34 @@ overriding any weights specified in pattern_probs. (default: TRUE)</p></dd>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Generate 20 training landscapes</span></span></span>
 <span class="r-in"><span><span class="va">landscapes</span> <span class="op">&lt;-</span> <span class="fu">create_landscapes</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Regular spot placement requested 9 spots but only ~6 positions fit.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span>  Adjusting to maximum feasible spots. Consider decreasing `spot_radius`.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Successfully generated all 20 training landscapes</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Access a landscape</span></span></span>
 <span class="r-in"><span><span class="va">landscapes</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Landscape: "labyrinth_1" [ pattern: labyrinth ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Landscape: "clustered_1_rot106" [ pattern: clustered ]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -----------------------------------------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dimensions: 100x100 (10000 cells)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Resolution: 1.0x1.0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Extent    : xmin=0.0, xmax=100.0, ymin=0.0, ymax=100.0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Values    : min=0.0, max=1.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Parameters: width = 100, height = 100, frequency = 2.5, veg_threshold = 0.467092503677122, band_fuzziness = 0.244724491096567, octaves = 4 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Parameters: width = 100, height = 100, treeline_position = 0.439413185697049, n_clusters = 5, cluster_radius = 7, scatter_zone_prop = 0.73616346064955, elongation_x = 0.658146824687719, elongation_y = 1.14093149756081, rotation = 106, random_spots = c(0, 0) </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Check the pattern</span></span></span>
 <span class="r-in"><span><span class="va">landscapes</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">pattern</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "labyrinth"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clustered"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Get all landscape patterns</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">landscapes</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">pattern</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        labyrinth_1           random_2 clustered_3_rot154      bands_4_rot16 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        "labyrinth"           "random"        "clustered"            "bands" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sharp_5_rot107      gaps_6_rot234            dense_7   fingers_8_rot162 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            "sharp"             "gaps"            "dense"          "fingers" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      spots_9_rot37 clustered_10_rot10  fingers_11_rot253          random_12 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            "spots"        "clustered"          "fingers"           "random" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            bare_13     sharp_14_rot90    bands_15_rot209  diffuse_16_rot132 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             "bare"            "sharp"            "bands"          "diffuse" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     spots_17_rot41  diffuse_18_rot111            bare_19           dense_20 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            "spots"          "diffuse"             "bare"            "dense" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  clustered_1_rot106      sharp_2_rot228            random_3      spots_4_rot195 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         "clustered"             "sharp"            "random"             "spots" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    diffuse_5_rot242      bands_6_rot254    diffuse_7_rot333       gaps_8_rot287 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           "diffuse"             "bands"           "diffuse"              "gaps" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    fingers_9_rot306     spots_10_rot312             bare_11     fingers_12_rot5 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           "fingers"             "spots"              "bare"           "fingers" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           random_13            dense_14        labyrinth_15 clustered_16_rot235 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            "random"             "dense"         "labyrinth"         "clustered" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            dense_17             bare_18     bands_19_rot319     sharp_20_rot314 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             "dense"              "bare"             "bands"             "sharp" </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

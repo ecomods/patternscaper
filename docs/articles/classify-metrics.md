@@ -239,16 +239,16 @@ classification$predictions
 #> # A tibble: 10 × 8
 #>    landscape_id landscape_name actual_class predicted_class confidence clustered
 #>           <int> <chr>          <chr>        <chr>                <dbl>     <dbl>
-#>  1            1 clustered_1_r… clustered    clustered            1.00   1.00    
-#>  2            2 random_2       random       random               1.00   0.00142 
-#>  3            3 clustered_3_r… clustered    clustered            1.00   1.00    
-#>  4            4 random_4       random       random               1.00  -0.00613 
-#>  5            5 labyrinth_5    labyrinth    labyrinth            0.897  0.145   
-#>  6            6 random_6       random       random               1.00   0.000149
-#>  7            7 labyrinth_7    labyrinth    labyrinth            0.889  0.0975  
-#>  8            8 clustered_8_r… clustered    clustered            1.00   1.00    
-#>  9            9 labyrinth_9    labyrinth    labyrinth            0.980  0.0232  
-#> 10           10 labyrinth_10   labyrinth    labyrinth            0.769  0.190   
+#>  1            1 clustered_1_r… clustered    clustered            0.577     0.577
+#>  2            2 random_2       random       random               0.576     0.212
+#>  3            3 clustered_3_r… clustered    clustered            0.577     0.577
+#>  4            4 random_4       random       random               0.577     0.211
+#>  5            5 labyrinth_5    labyrinth    labyrinth            0.537     0.253
+#>  6            6 random_6       random       random               0.576     0.212
+#>  7            7 labyrinth_7    labyrinth    labyrinth            0.535     0.242
+#>  8            8 clustered_8_r… clustered    clustered            0.577     0.577
+#>  9            9 labyrinth_9    labyrinth    labyrinth            0.568     0.218
+#> 10           10 labyrinth_10   labyrinth    labyrinth            0.490     0.275
 #> # ℹ 2 more variables: labyrinth <dbl>, random <dbl>
 ```
 

@@ -20,6 +20,7 @@
 #'   \item{pattern}{Character string "bands"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
+#' @export
 #' @examples
 #' # Default sine bands
 #' bands_default <- create_landscape_bands()

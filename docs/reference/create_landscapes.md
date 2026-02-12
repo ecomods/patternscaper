@@ -83,34 +83,32 @@ optional rotation.
 ``` r
 # Generate 20 training landscapes
 landscapes <- create_landscapes(n = 20)
-#> Warning: Regular spot placement requested 9 spots but only ~6 positions fit.
-#> ℹ  Adjusting to maximum feasible spots. Consider decreasing `spot_radius`.
 #> ✔ Successfully generated all 20 training landscapes
 
 # Access a landscape
 landscapes[[1]]
-#> Landscape: "labyrinth_1" [ pattern: labyrinth ]
+#> Landscape: "clustered_1_rot106" [ pattern: clustered ]
 #> -----------------------------------------
 #> Dimensions: 100x100 (10000 cells)
 #> Resolution: 1.0x1.0
 #> Extent    : xmin=0.0, xmax=100.0, ymin=0.0, ymax=100.0
 #> Values    : min=0.0, max=1.0
-#> Parameters: width = 100, height = 100, frequency = 2.5, veg_threshold = 0.467092503677122, band_fuzziness = 0.244724491096567, octaves = 4 
+#> Parameters: width = 100, height = 100, treeline_position = 0.439413185697049, n_clusters = 5, cluster_radius = 7, scatter_zone_prop = 0.73616346064955, elongation_x = 0.658146824687719, elongation_y = 1.14093149756081, rotation = 106, random_spots = c(0, 0) 
 
 # Check the pattern
 landscapes[[1]]$pattern
-#> [1] "labyrinth"
+#> [1] "clustered"
 
 # Get all landscape patterns
 sapply(landscapes, function(x) x$pattern)
-#>        labyrinth_1           random_2 clustered_3_rot154      bands_4_rot16 
-#>        "labyrinth"           "random"        "clustered"            "bands" 
-#>     sharp_5_rot107      gaps_6_rot234            dense_7   fingers_8_rot162 
-#>            "sharp"             "gaps"            "dense"          "fingers" 
-#>      spots_9_rot37 clustered_10_rot10  fingers_11_rot253          random_12 
-#>            "spots"        "clustered"          "fingers"           "random" 
-#>            bare_13     sharp_14_rot90    bands_15_rot209  diffuse_16_rot132 
-#>             "bare"            "sharp"            "bands"          "diffuse" 
-#>     spots_17_rot41  diffuse_18_rot111            bare_19           dense_20 
-#>            "spots"          "diffuse"             "bare"            "dense" 
+#>  clustered_1_rot106      sharp_2_rot228            random_3      spots_4_rot195 
+#>         "clustered"             "sharp"            "random"             "spots" 
+#>    diffuse_5_rot242      bands_6_rot254    diffuse_7_rot333       gaps_8_rot287 
+#>           "diffuse"             "bands"           "diffuse"              "gaps" 
+#>    fingers_9_rot306     spots_10_rot312             bare_11     fingers_12_rot5 
+#>           "fingers"             "spots"              "bare"           "fingers" 
+#>           random_13            dense_14        labyrinth_15 clustered_16_rot235 
+#>            "random"             "dense"         "labyrinth"         "clustered" 
+#>            dense_17             bare_18     bands_19_rot319     sharp_20_rot314 
+#>             "dense"              "bare"             "bands"             "sharp" 
 ```

@@ -58,9 +58,9 @@ landscape_metrics <- calculate_landscape_metrics(
   sample_landscapes,
   level = "landscape"
 )
-#>  ■■■■■■■■■                         26% |  ETA:  6s
-#>  ■■■■■■■■■■■■■■■■■■                58% |  ETA:  4s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■   98% |  ETA:  0s
+#>  ■■■■■■■                           20% |  ETA:  6s
+#>  ■■■■■■■■■■■■■■■■■                 53% |  ETA:  4s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      89% |  ETA:  1s
 ```
 
 To calculate selected metrics, provide a vector of valide metric names
@@ -93,7 +93,7 @@ It supports different methods for metric evaluation:
   pattern-specific means and overall mean, then sums across patterns.
 - `fisher_score`: Fisher Score (ratio of between-group to within-group
   variance).
-- `krustkal_effsize`: Kruskal-Wallis H test effect sizes. Non-parametric
+- `kruskal_effsize`: Kruskal-Wallis H test effect sizes. Non-parametric
   test for differences between groups.
 
 By default, the function excludes metrics with high correlation (above

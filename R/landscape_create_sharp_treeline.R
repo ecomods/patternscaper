@@ -15,6 +15,8 @@
 #' 
 #' @keywords internal
 #'
+#' @export
+#'
 #' @examples
 #' # Default sharp treeline
 #' sharp_default <- create_landscape_sharp_treeline()

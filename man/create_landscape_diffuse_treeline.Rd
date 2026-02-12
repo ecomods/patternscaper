@@ -59,4 +59,3 @@ diffuse_rotated <- create_landscape_diffuse_treeline(
 )
 
 }
-\keyword{internal}

@@ -258,6 +258,7 @@ rank_by_coefficient_variation <- function(metrics) {
 #' @importFrom dplyr group_by arrange desc mutate
 #' @importFrom tidyr nest
 #' @importFrom purrr map_dbl
+#' @importFrom stats lm
 #' @noRd
 rank_by_linear_model <- function(
   metrics
@@ -397,7 +398,7 @@ rank_by_kruskal <- function(metrics) {
           return(NA_real_)
         }
         tryCatch(
-          rstatix::kruskal_effsize(value ~ pattern, data = df)$effsize,
+          kruskal_effsize(df, value ~ pattern),
           error = function(e) NA_real_
         )
       })
@@ -405,6 +406,27 @@ rank_by_kruskal <- function(metrics) {
     dplyr::arrange(dplyr::desc(kruskal_effsize))
 
   return(kruskal_results$metric)
+}
+
+#' Calculate Kruskal-Wallis Effect Size (Epsilon-Squared)
+#'
+#' Computes epsilon-squared effect size for Kruskal-Wallis test.
+#'
+#' @param data Data frame containing the data.
+#' @param formula Formula specifying the model (e.g., value ~ group).
+#'
+#' @return Numeric. The epsilon-squared effect size.
+#' @importFrom stats kruskal.test
+#' @noRd
+kruskal_effsize <- function(data, formula) {
+  # Run Kruskal-Wallis test
+  kt <- stats::kruskal.test(formula, data = data)
+
+  # Calculate epsilon-squared using H statistic
+  n <- nrow(data)
+  effsize <- kt$statistic / ((n^2 - 1) / (n + 1))
+
+  as.numeric(effsize)
 }
 
 

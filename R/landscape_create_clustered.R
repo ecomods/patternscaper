@@ -31,7 +31,7 @@
 #' @importFrom stats runif
 #' @importFrom terra as.matrix
 #' @importFrom cli cli_abort
-#' @keywords internal
+#' @export
 #'
 #' @examples
 #' # Default clustered features

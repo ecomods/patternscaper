@@ -23,7 +23,7 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #' 
 #' @seealso \code{\link{create_landscape_spots}} for the underlying implementation
-#'
+#' @export
 #' @examples
 #' # Default gaps (vegetation patches in bare ground)
 #' gaps_default <- create_landscape_gaps()

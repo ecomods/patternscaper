@@ -43,6 +43,7 @@
 #' @importFrom purrr pmap_lgl
 #' @importFrom neuralnet neuralnet
 #' @importFrom readr write_rds
+#' @importFrom stats predict
 train_nn_metrics <- function(
   metrics,
   metrics_selected = NULL,
@@ -214,12 +215,18 @@ train_nn_metrics <- function(
       )
 
       # Predict on validation data
-      probs <- predict(
+      probs_raw <- predict(
         fold_model,
         newdata = val_data[,
           -which(names(val_data) == "pattern")
         ]
       )
+
+      # Convert raw outputs to probabilities using softmax
+      probs <- t(apply(probs_raw, 1, function(x) {
+        exp_x <- exp(x - max(x))
+        exp_x / sum(exp_x)
+      }))
 
       # Add class names as column names
       colnames(probs) <- class_names
@@ -312,6 +319,7 @@ train_nn_metrics <- function(
 #' @importFrom dplyr filter select any_of all_of relocate rename bind_cols
 #' @importFrom purrr pmap_lgl
 #' @importFrom tibble as_tibble
+#' @importFrom stats predict
 apply_nn_metrics <- function(
   landscapes,
   nn_model,
@@ -422,11 +430,17 @@ apply_nn_metrics <- function(
   )
 
   # Make predictions ---------------------------------------------------------
-  pred <- predict(
+  pred_raw <- predict(
     model,
     newdata = predictors_scaled,
     type = "raw"
   )
+
+  # Convert raw outputs to probabilities using softmax
+  pred <- t(apply(pred_raw, 1, function(x) {
+    exp_x <- exp(x - max(x))
+    exp_x / sum(exp_x)
+  }))
 
   # Add class names as column names
   colnames(pred) <- class_names
