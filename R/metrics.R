@@ -172,6 +172,11 @@ calculate_landscape_metrics <- function(
       )
     )
 
+  # Remove unused id column (this is only interesting for the patch level
+  # which the package does not support)
+  all_results <- all_results |>
+    select(-id)
+
   # Reorganize columns for better readability
   all_results <- all_results |>
     dplyr::relocate(
