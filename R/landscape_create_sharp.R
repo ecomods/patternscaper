@@ -17,10 +17,10 @@
 #' @export
 #'
 #' @examples
-#' # Default sharp treeline
+#' # Default sharp vegetation boundary
 #' sharp_default <- create_landscape_sharp()
 #'
-#' # Modified sharp treeline with higher treeline position
+#' # Modified sharp vegetation boundary with higher boundary position
 #' sharp_modified <- create_landscape_sharp(
 #'   boundary_position = 0.7
 #' )
@@ -51,14 +51,14 @@ create_landscape_sharp <- function(
   width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
   # Convert position from proportion to row number
-  treeline_row <- round(height_actual * boundary_position)
+  boundary_row <- round(height_actual * boundary_position)
 
   # Create the landscape matrix
   mat <- matrix(0, nrow = height_actual, ncol = width_actual)
 
-  # Fill in other vegetation area (1) based on treeline position
-  if (treeline_row > 0) {
-    mat[1:treeline_row, ] <- 1
+  # Fill in other vegetation area (1) based on boundary position
+  if (boundary_row > 0) {
+    mat[1:boundary_row, ] <- 1
   }
 
   # Add random spots if requested
