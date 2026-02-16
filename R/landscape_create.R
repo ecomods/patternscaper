@@ -420,14 +420,23 @@ create_landscapes <- function(
 
       # Handle rotation for patterns that support it
       if (pattern %in% patterns_with_rotation) {
-        rotation <- if (add_rotation) sample(rotation_angles, 1) else 0
-        sampled_params$rotation <- rotation
+        if (length(rotation_angles) == 1) {
+          current_rotation <- rotation_angles
+        } else {
+          current_rotation <- sample(rotation_angles, 1)
+        }
+        sampled_params$rotation <- current_rotation
       } else {
-        rotation <- 0
+        current_rotation <- 0
       }
 
       # Attempt to create landscape
-      landscape <- try_create_landscape(pattern, sampled_params, i, rotation)
+      landscape <- try_create_landscape(
+        pattern,
+        sampled_params,
+        i,
+        current_rotation
+      )
 
       # Handle failure
       if (is.null(landscape)) {
