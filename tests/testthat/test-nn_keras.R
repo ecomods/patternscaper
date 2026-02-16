@@ -5,7 +5,7 @@ helper_create_tiny_training_set <- function(n_per_class = 3) {
     patterns = c("sharp", "diffuse", "random"),
     width = 50,
     height = 50,
-    add_rotation = FALSE
+    rotation = 0
   )
 }
 

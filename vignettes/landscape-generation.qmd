@@ -182,9 +182,8 @@ plot_landscape_list(non_square)
 By default, landscapes are rotated by angles randomly chosen between 0 and 360 degrees.
 This ensures that classifiers trained on these landscapes are invariant to landscape orientation.
 
-You can disable random rotation by setting the `add_rotation` parameter to `FALSE`.
-
-You can also control used rotation angles directly using `rotation_angles`.
+You can disable random rotation by setting the `rotation` parameter to `0`.
+This parameter can also be used to directly control the range of selected rotation angles. For example, to select only angles between 0 and 90 degrees:
 
 ```{r}
 #| label: rotation-example
@@ -196,13 +195,13 @@ You can also control used rotation angles directly using `rotation_angles`.
 no_rotation <- create_landscapes(
   n = 3,
   patterns = c("clustered", "sharp", "bands"),
-  add_rotation = FALSE
+  rotation = 0
 )
 
 defined_angles <- create_landscapes(
   n = 3,
   patterns = "clustered",
-  rotation_angles = c(45, 90)
+  rotation = c(45, 90)
 )
 
 plot_landscape_list(c(no_rotation, defined_angles))

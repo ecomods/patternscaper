@@ -163,8 +163,7 @@ create_landscape <- function(
 #' @param patterns Character vector. patterns of landscapes to sample from (default: all patterns).
 #' @param width Integer. Width of all landscapes in pixels (default: 100).
 #' @param height Integer. Height of all landscapes in pixels (default: 100).
-#' @param add_rotation Logical. Whether to include rotated versions (default: TRUE).
-#' @param rotation_angles Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).
+#' @param rotation Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).
 #' @param params_list List. List of parameter ranges for each landscape pattern (default: NULL).
 #' @param pattern_probs Numeric vector. Probability that a specific landscape pattern is chosen.
 #'     By default, all patterns have equal probability (1) of being chosen.
@@ -206,8 +205,7 @@ create_landscapes <- function(
   ),
   width = 100,
   height = 100,
-  add_rotation = TRUE,
-  rotation_angles = 0:360,
+  rotation = 0:360,
   params_list = NULL,
   pattern_probs = NULL,
   balance_patterns = TRUE,
@@ -228,8 +226,8 @@ create_landscapes <- function(
   validate_dimensions(width, height)
 
   # Validate rotation angles
-  if (!is.null(rotation_angles)) {
-    validate_rotation(rotation_angles)
+  if (!is.null(rotation)) {
+    validate_rotation(rotation)
   }
 
   # Filter out invalid patterns
@@ -420,10 +418,10 @@ create_landscapes <- function(
 
       # Handle rotation for patterns that support it
       if (pattern %in% patterns_with_rotation) {
-        if (length(rotation_angles) == 1) {
-          current_rotation <- rotation_angles
+        if (length(rotation) == 1) {
+          current_rotation <- rotation
         } else {
-          current_rotation <- sample(rotation_angles, 1)
+          current_rotation <- sample(rotation, 1)
         }
         sampled_params$rotation <- current_rotation
       } else {

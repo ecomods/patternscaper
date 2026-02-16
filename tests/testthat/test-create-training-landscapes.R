@@ -67,7 +67,7 @@ test_that("create_landscapes sets landscape names correctly", {
     patterns = c("sharp", "random"),
     width = 20,
     height = 20,
-    add_rotation = FALSE
+    rotation = 0
   )
 
   # Check that each landscape has its name property set
@@ -81,8 +81,7 @@ test_that("create_landscapes sets landscape names correctly", {
     patterns = c("sharp"),
     width = 20,
     height = 20,
-    add_rotation = TRUE,
-    rotation_angles = c(0, 45)
+    rotation = c(0, 45)
   )
 
   # Check names include rotation info where applicable
@@ -164,8 +163,7 @@ test_that("create_landscapes handles rotation correctly", {
     n = 10,
     width = 50,
     height = 50,
-    add_rotation = TRUE,
-    rotation_angles = c(0, 45, 90),
+    rotation = c(0, 45, 90),
     patterns = c("sharp", "bands", "fingers", "clustered")
   )
 
@@ -178,7 +176,7 @@ test_that("create_landscapes handles rotation correctly", {
     n = 10,
     width = 50,
     height = 50,
-    add_rotation = FALSE,
+    rotation = 0,
     patterns = c("sharp", "bands", "fingers", "clustered")
   )
 
@@ -603,7 +601,7 @@ test_that("create_landscapes accepts valid rotation angles", {
     patterns = "sharp",
     width = 20,
     height = 20,
-    rotation_angles = c(0, 45, 90, 135)
+    rotation = c(0, 45, 90, 135)
   )
 
   expect_equal(length(landscapes_vector), 5)
@@ -614,7 +612,7 @@ test_that("create_landscapes accepts valid rotation angles", {
     patterns = "sharp",
     width = 20,
     height = 20,
-    rotation_angles = 90
+    rotation = 90
   )
 
   expect_equal(length(landscapes_single), 5)
@@ -625,7 +623,7 @@ test_that("create_landscapes accepts valid rotation angles", {
     patterns = "sharp",
     width = 20,
     height = 20,
-    rotation_angles = c(0, 360)
+    rotation = c(0, 360)
   )
 
   expect_equal(length(landscapes_edges), 5)
@@ -637,7 +635,7 @@ test_that("create_landscapes rejects invalid rotation angles", {
     create_landscapes(
       n = 5,
       patterns = "sharp",
-      rotation_angles = c(0, -45, 90)
+      rotation = c(0, -45, 90)
     ),
     "must be between 0 and 360"
   )
@@ -647,7 +645,7 @@ test_that("create_landscapes rejects invalid rotation angles", {
     create_landscapes(
       n = 5,
       patterns = "sharp",
-      rotation_angles = c(0, 45, 400)
+      rotation = c(0, 45, 400)
     ),
     "must be between 0 and 360"
   )
@@ -657,7 +655,7 @@ test_that("create_landscapes rejects invalid rotation angles", {
     create_landscapes(
       n = 5,
       patterns = "sharp",
-      rotation_angles = "45"
+      rotation = "45"
     ),
     "must be numeric"
   )
@@ -667,13 +665,13 @@ test_that("create_landscapes rejects invalid rotation angles", {
     create_landscapes(
       n = 5,
       patterns = "sharp",
-      rotation_angles = c(0, NA, 90)
+      rotation = c(0, NA, 90)
     ),
     "cannot contain NA"
   )
 })
 
-test_that("rotation_angles = NULL works correctly", {
+test_that("rotation = NULL works correctly", {
   set.seed(123)
 
   # NULL should skip validation and work
@@ -682,8 +680,8 @@ test_that("rotation_angles = NULL works correctly", {
     patterns = "sharp",
     width = 20,
     height = 20,
-    rotation_angles = NULL,
-    add_rotation = FALSE
+    rotation = NULL,
+    rotation = 0
   )
 
   expect_equal(length(landscapes), 5)
