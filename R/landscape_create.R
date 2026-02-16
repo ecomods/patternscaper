@@ -51,7 +51,7 @@
 #' # Create a modified landscape with custom parameters
 #' random_modified <- create_landscape(
 #'   "random",
-#'   tree_prop = 0.3
+#'   veg_prop = 0.3
 #' )
 #'
 #' # Create a modified landscape with custom parameters
@@ -245,9 +245,9 @@ create_landscapes <- function(
 
   # Create full default parameter list
   default_params_list <- list(
-    random = list(tree_prop = c(0.1, 0.9)),
-    bare = list(tree_prop = c(0, 0.1)),
-    dense = list(tree_prop = c(0.8, 1)),
+    random = list(veg_prop = c(0.1, 0.9)),
+    bare = list(veg_prop = c(0, 0.1)),
+    dense = list(veg_prop = c(0.8, 1)),
     sharp = list(treeline_position = c(0.2, 0.8)),
     diffuse = list(
       steepness = c(0.1, 1),

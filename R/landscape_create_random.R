@@ -1,11 +1,10 @@
-#' Create a Landscape with Randomly Distributed Trees
+#' Create a Binary Landscape with Randomly Distributed Vegetation
 #'
-#' Generates a binary landscape with randomly distributed trees.
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param tree_prop Numeric. Probability of tree presence (0-1) (default: 0.5).
-#'    Higher values result in a denser tree cover.
+#' @param veg_prop Numeric. Probability of vegetation presence (0-1) (default: 0.5).
+#'    Higher values result in a denser vegetation cover.
 #'
 #' @return A landscape object with random pattern containing:
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
@@ -19,7 +18,7 @@
 #' random_default <- create_landscape_random()
 #'
 #' # Higher tree density
-#' random_dense <- create_landscape_random(tree_prop = 0.7)
+#' random_dense <- create_landscape_random(veg_prop = 0.7)
 #'
 #' # Custom dimensions
 #' random_large <- create_landscape_random(width = 200, height = 150)
@@ -29,22 +28,22 @@
 create_landscape_random <- function(
   width = 100,
   height = 100,
-  tree_prop = 0.5
+  veg_prop = 0.5
 ) {
   # Validate common parameters
   validate_dimensions(width = width, height = height)
 
-  # Validate tree_prop
-  if (!is.numeric(tree_prop) || tree_prop < 0 || tree_prop > 1) {
+  # Validate veg_prop
+  if (!is.numeric(veg_prop) || veg_prop < 0 || veg_prop > 1) {
     cli::cli_abort(c(
-      "{.arg tree_prop} must be between 0 and 1.",
-      "x" = "You supplied {.val {tree_prop}}"
+      "{.arg veg_prop} must be between 0 and 1.",
+      "x" = "You supplied {.val {veg_prop}}"
     ))
   }
 
   # Get landscape with random distribution of trees
   mat <- matrix(
-    stats::rbinom(width * height, size = 1, prob = tree_prop),
+    stats::rbinom(width * height, size = 1, prob = veg_prop),
     nrow = height,
     ncol = width
   )
@@ -56,7 +55,7 @@ create_landscape_random <- function(
     params = list(
       width = width,
       height = height,
-      tree_prop = tree_prop
+      veg_prop = veg_prop
     )
   )
 }

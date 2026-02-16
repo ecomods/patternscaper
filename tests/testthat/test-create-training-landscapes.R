@@ -246,7 +246,7 @@ test_that("create_landscapes handles custom params_list", {
       treeline_position = c(0.4, 0.6)
     ),
     random = list(
-      tree_prop = c(0.5, 0.7)
+      veg_prop = c(0.5, 0.7)
     )
   )
 
@@ -265,8 +265,8 @@ test_that("create_landscapes handles custom params_list", {
       expect_true(l$params$treeline_position <= 0.6)
     }
     if (l$pattern == "random") {
-      expect_true(l$params$tree_prop >= 0.5)
-      expect_true(l$params$tree_prop <= 0.7)
+      expect_true(l$params$veg_prop >= 0.5)
+      expect_true(l$params$veg_prop <= 0.7)
     }
   }
 })

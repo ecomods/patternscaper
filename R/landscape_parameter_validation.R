@@ -130,13 +130,13 @@ validate_random_spots <- function(random_spots) {
 get_valid_param_specs <- function() {
   list(
     random = list(
-      tree_prop = list(type = "numeric", min = 0, max = 1)
+      veg_prop = list(type = "numeric", min = 0, max = 1)
     ),
     bare = list(
-      tree_prop = list(type = "numeric", min = 0, max = 1)
+      veg_prop = list(type = "numeric", min = 0, max = 1)
     ),
     dense = list(
-      tree_prop = list(type = "numeric", min = 0, max = 1)
+      veg_prop = list(type = "numeric", min = 0, max = 1)
     ),
     sharp = list(
       treeline_position = list(type = "numeric", min = 0, max = 1)
