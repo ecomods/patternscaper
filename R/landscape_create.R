@@ -26,7 +26,7 @@
 #'
 #' \code{\link{create_landscape_sharp}} for "sharp" pattern parameters
 #'
-#' \code{\link{create_landscape_diffuse_treeline}} for "diffuse" pattern parameters
+#' \code{\link{create_landscape_diffuse}} for "diffuse" pattern parameters
 #'
 #' \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
 #'
@@ -127,7 +127,7 @@ create_landscape <- function(
       height = height,
       ...
     ),
-    diffuse = create_landscape_diffuse_treeline(
+    diffuse = create_landscape_diffuse(
       width = width,
       height = height,
       ...

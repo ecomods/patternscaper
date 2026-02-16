@@ -1,46 +1,46 @@
 # Tests for diffuse treeline landscape creation ------------------------------
 
 # Validation tests ------------------------------------------------------------
-test_that("create_landscape_diffuse_treeline validates steepness parameter", {
+test_that("create_landscape_diffuse validates steepness parameter", {
   expect_error(
-    create_landscape_diffuse_treeline(steepness = -0.1),
+    create_landscape_diffuse(steepness = -0.1),
     "between 0 and 1"
   )
   expect_error(
-    create_landscape_diffuse_treeline(steepness = 1.1),
+    create_landscape_diffuse(steepness = 1.1),
     "between 0 and 1"
   )
   expect_error(
-    create_landscape_diffuse_treeline(steepness = "invalid"),
+    create_landscape_diffuse(steepness = "invalid"),
     "must be numeric"
   )
   # Valid boundary values
-  expect_no_error(create_landscape_diffuse_treeline(steepness = 0))
-  expect_no_error(create_landscape_diffuse_treeline(steepness = 1))
+  expect_no_error(create_landscape_diffuse(steepness = 0))
+  expect_no_error(create_landscape_diffuse(steepness = 1))
 })
 
-test_that("create_landscape_diffuse_treeline validates rotation parameter", {
+test_that("create_landscape_diffuse validates rotation parameter", {
   expect_error(
-    create_landscape_diffuse_treeline(rotation = -1),
+    create_landscape_diffuse(rotation = -1),
     "between 0 and 360"
   )
   expect_error(
-    create_landscape_diffuse_treeline(rotation = 361),
+    create_landscape_diffuse(rotation = 361),
     "between 0 and 360"
   )
   expect_error(
-    create_landscape_diffuse_treeline(rotation = "invalid"),
+    create_landscape_diffuse(rotation = "invalid"),
     "must be numeric"
   )
   # Valid boundary values
-  expect_no_error(create_landscape_diffuse_treeline(rotation = 0))
-  expect_no_error(create_landscape_diffuse_treeline(rotation = 360))
+  expect_no_error(create_landscape_diffuse(rotation = 0))
+  expect_no_error(create_landscape_diffuse(rotation = 360))
 })
 
 # Functionality tests ---------------------------------------------------------
 
-test_that("create_landscape_diffuse_treeline creates valid landscape object", {
-  l <- create_landscape_diffuse_treeline(width = 50, height = 50)
+test_that("create_landscape_diffuse creates valid landscape object", {
+  l <- create_landscape_diffuse(width = 50, height = 50)
 
   expect_true(is_landscape(l))
   expect_s3_class(l, "landscape")
@@ -52,9 +52,9 @@ test_that("create_landscape_diffuse_treeline creates valid landscape object", {
   expect_equal(terra::nrow(l$data), 50)
 })
 
-test_that("create_landscape_diffuse_treeline steepness creates gradual transition", {
+test_that("create_landscape_diffuse steepness creates gradual transition", {
   # Low steepness should create sharp-ish transition
-  l_sharp <- create_landscape_diffuse_treeline(
+  l_sharp <- create_landscape_diffuse(
     width = 20,
     height = 20,
     boundary_position = 0.5,
@@ -62,7 +62,7 @@ test_that("create_landscape_diffuse_treeline steepness creates gradual transitio
   )
 
   # High steepness should create gradual transition
-  l_gradual <- create_landscape_diffuse_treeline(
+  l_gradual <- create_landscape_diffuse(
     width = 20,
     height = 20,
     boundary_position = 0.5,
@@ -80,8 +80,8 @@ test_that("create_landscape_diffuse_treeline steepness creates gradual transitio
   expect_true(all(vals_gradual >= 0 & vals_gradual <= 1))
 })
 
-test_that("create_landscape_diffuse_treeline stores all params correctly", {
-  l <- create_landscape_diffuse_treeline(
+test_that("create_landscape_diffuse stores all params correctly", {
+  l <- create_landscape_diffuse(
     width = 30,
     height = 40,
     boundary_position = 0.7,
@@ -96,8 +96,8 @@ test_that("create_landscape_diffuse_treeline stores all params correctly", {
   expect_equal(l$params$rotation, 45)
 })
 
-test_that("create_landscape_diffuse_treeline supports rotation", {
-  l <- create_landscape_diffuse_treeline(
+test_that("create_landscape_diffuse supports rotation", {
+  l <- create_landscape_diffuse(
     width = 50,
     height = 50,
     rotation = 45
@@ -111,25 +111,25 @@ test_that("create_landscape_diffuse_treeline supports rotation", {
 
 # Edge case tests -------------------------------------------------------------
 
-test_that("create_landscape_diffuse_treeline handles very small landscapes", {
-  l_small <- create_landscape_diffuse_treeline(width = 5, height = 5)
+test_that("create_landscape_diffuse handles very small landscapes", {
+  l_small <- create_landscape_diffuse(width = 5, height = 5)
 
   expect_true(is_landscape(l_small))
   expect_equal(terra::ncol(l_small$data), 5)
   expect_equal(terra::nrow(l_small$data), 5)
 })
 
-test_that("create_landscape_diffuse_treeline handles very large landscapes", {
-  l_large <- create_landscape_diffuse_treeline(width = 500, height = 500)
+test_that("create_landscape_diffuse handles very large landscapes", {
+  l_large <- create_landscape_diffuse(width = 500, height = 500)
 
   expect_true(is_landscape(l_large))
   expect_equal(terra::ncol(l_large$data), 500)
   expect_equal(terra::nrow(l_large$data), 500)
 })
 
-test_that("create_landscape_diffuse_treeline handles non-square landscapes", {
-  l_wide <- create_landscape_diffuse_treeline(width = 100, height = 50)
-  l_tall <- create_landscape_diffuse_treeline(width = 50, height = 100)
+test_that("create_landscape_diffuse handles non-square landscapes", {
+  l_wide <- create_landscape_diffuse(width = 100, height = 50)
+  l_tall <- create_landscape_diffuse(width = 50, height = 100)
 
   expect_true(is_landscape(l_wide))
   expect_equal(terra::ncol(l_wide$data), 100)
@@ -140,19 +140,19 @@ test_that("create_landscape_diffuse_treeline handles non-square landscapes", {
   expect_equal(terra::nrow(l_tall$data), 100)
 })
 
-test_that("create_landscape_diffuse_treeline handles extreme rotation angles", {
-  l_zero <- create_landscape_diffuse_treeline(rotation = 0)
-  l_max <- create_landscape_diffuse_treeline(rotation = 360)
-  l_mid <- create_landscape_diffuse_treeline(rotation = 180)
+test_that("create_landscape_diffuse handles extreme rotation angles", {
+  l_zero <- create_landscape_diffuse(rotation = 0)
+  l_max <- create_landscape_diffuse(rotation = 360)
+  l_mid <- create_landscape_diffuse(rotation = 180)
 
   expect_true(is_landscape(l_zero))
   expect_true(is_landscape(l_max))
   expect_true(is_landscape(l_mid))
 })
 
-test_that("create_landscape_diffuse_treeline handles boundary_position boundary values", {
+test_that("create_landscape_diffuse handles boundary_position boundary values", {
   # Exactly 0 - transition at top
-  l_zero <- create_landscape_diffuse_treeline(
+  l_zero <- create_landscape_diffuse(
     width = 20,
     height = 20,
     boundary_position = 0,
@@ -161,7 +161,7 @@ test_that("create_landscape_diffuse_treeline handles boundary_position boundary 
   expect_true(is_landscape(l_zero))
 
   # Exactly 1 - transition at bottom
-  l_one <- create_landscape_diffuse_treeline(
+  l_one <- create_landscape_diffuse(
     width = 20,
     height = 20,
     boundary_position = 1,
@@ -170,16 +170,16 @@ test_that("create_landscape_diffuse_treeline handles boundary_position boundary 
   expect_true(is_landscape(l_one))
 
   # Very close to boundaries
-  l_near_zero <- create_landscape_diffuse_treeline(boundary_position = 0.001)
-  l_near_one <- create_landscape_diffuse_treeline(boundary_position = 0.999)
+  l_near_zero <- create_landscape_diffuse(boundary_position = 0.001)
+  l_near_one <- create_landscape_diffuse(boundary_position = 0.999)
 
   expect_true(is_landscape(l_near_zero))
   expect_true(is_landscape(l_near_one))
 })
 
-test_that("create_landscape_diffuse_treeline handles steepness boundary values", {
+test_that("create_landscape_diffuse handles steepness boundary values", {
   # Minimum steepness (sharp transition)
-  l_min_steep <- create_landscape_diffuse_treeline(
+  l_min_steep <- create_landscape_diffuse(
     width = 20,
     height = 20,
     steepness = 0
@@ -187,7 +187,7 @@ test_that("create_landscape_diffuse_treeline handles steepness boundary values",
   expect_true(is_landscape(l_min_steep))
 
   # Maximum steepness (very gradual)
-  l_max_steep <- create_landscape_diffuse_treeline(
+  l_max_steep <- create_landscape_diffuse(
     width = 20,
     height = 20,
     steepness = 1
@@ -195,8 +195,8 @@ test_that("create_landscape_diffuse_treeline handles steepness boundary values",
   expect_true(is_landscape(l_max_steep))
 
   # Very close to boundaries
-  l_near_zero <- create_landscape_diffuse_treeline(steepness = 0.001)
-  l_near_one <- create_landscape_diffuse_treeline(steepness = 0.999)
+  l_near_zero <- create_landscape_diffuse(steepness = 0.001)
+  l_near_one <- create_landscape_diffuse(steepness = 0.999)
 
   expect_true(is_landscape(l_near_zero))
   expect_true(is_landscape(l_near_one))
@@ -204,9 +204,9 @@ test_that("create_landscape_diffuse_treeline handles steepness boundary values",
 
 # Integration tests -----------------------------------------------------------
 
-test_that("create_landscape_diffuse_treeline handles multiple edge cases together", {
+test_that("create_landscape_diffuse handles multiple edge cases together", {
   # Small landscape + extreme treeline + extreme steepness + rotation
-  l_extreme <- create_landscape_diffuse_treeline(
+  l_extreme <- create_landscape_diffuse(
     width = 5,
     height = 5,
     boundary_position = 0.999,
@@ -219,12 +219,12 @@ test_that("create_landscape_diffuse_treeline handles multiple edge cases togethe
   expect_equal(terra::nrow(l_extreme$data), 5)
 })
 
-test_that("create_landscape_diffuse_treeline produces consistent results with same seed", {
+test_that("create_landscape_diffuse produces consistent results with same seed", {
   set.seed(123)
-  l1 <- create_landscape_diffuse_treeline(width = 30, height = 30)
+  l1 <- create_landscape_diffuse(width = 30, height = 30)
 
   set.seed(123)
-  l2 <- create_landscape_diffuse_treeline(width = 30, height = 30)
+  l2 <- create_landscape_diffuse(width = 30, height = 30)
 
   expect_equal(terra::values(l1$data), terra::values(l2$data))
 })
