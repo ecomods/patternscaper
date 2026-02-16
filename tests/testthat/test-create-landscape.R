@@ -83,12 +83,12 @@ test_that("create_landscape passes parameters correctly", {
     "sharp",
     width = 30,
     height = 40,
-    treeline_position = 0.7
+    boundary_position = 0.7
   )
 
   expect_equal(terra::ncol(l$data), 30)
   expect_equal(terra::nrow(l$data), 40)
-  expect_equal(l$params$treeline_position, 0.7)
+  expect_equal(l$params$boundary_position, 0.7)
 
   # Test that name parameter is set correctly
   l_named <- create_landscape(

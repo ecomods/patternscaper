@@ -5,7 +5,7 @@
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
+#' @param boundary_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
 #' @param random_spots Numeric vector of length 2. Probabilities for flipping cells: [1→0, 0→1] (default: c(0,0)).
 #' @param sine_length_mean Numeric. Mean wavelength of sinusoidal curve in pixels (default: 20).
 #' @param sine_length_sd Numeric. Standard deviation of wavelength in pixels (default: 12).
@@ -17,7 +17,7 @@
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string "fingers"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
-#' 
+#'
 #' @keywords internal
 #'
 #' @export
@@ -42,7 +42,7 @@
 create_landscape_fingers <- function(
   width = 100,
   height = 100,
-  treeline_position = 0.5,
+  boundary_position = 0.5,
   random_spots = c(0, 0),
   sine_length_mean = 20,
   sine_length_sd = 12,
@@ -52,7 +52,7 @@ create_landscape_fingers <- function(
 ) {
   # Validate inputs
   validate_dimensions(width = width, height = height)
-  validate_treeline_position(treeline_position = treeline_position)
+  validate_boundary_position(boundary_position = boundary_position)
   validate_rotation(rotation = rotation)
   validate_random_spots(random_spots = random_spots)
 
@@ -96,7 +96,7 @@ create_landscape_fingers <- function(
   width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
   # Convert position from proportion to row number
-  treeline_row <- round(height_actual * treeline_position)
+  treeline_row <- round(height_actual * boundary_position)
 
   # Create the landscape matrix
   mat <- matrix(0, nrow = height_actual, ncol = width_actual)
@@ -181,7 +181,7 @@ create_landscape_fingers <- function(
     params = list(
       width = width,
       height = height,
-      treeline_position = treeline_position,
+      boundary_position = boundary_position,
       sine_length_mean = sine_length_mean,
       sine_length_sd = sine_length_sd,
       sine_height_mean = sine_height_mean,

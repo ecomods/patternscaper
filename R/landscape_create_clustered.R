@@ -7,7 +7,7 @@
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
+#' @param boundary_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
 #' @param random_spots Numeric vector of length 2. Probabilities for flipping
 #'   cells: `[prob(1→0), prob(0→1)]`. Used to add noise to the landscape
 #'   (default: c(0,0)).
@@ -39,7 +39,7 @@
 #'
 #' # Modified clustered features with horizontally elongated clusters
 #' clustered_modified <- create_landscape_clustered(
-#'   treeline_position = 0.2,
+#'   boundary_position = 0.2,
 #'   n_clusters = 8,
 #'   cluster_radius = 7,
 #'   scatter_zone_prop = 0.6,
@@ -59,7 +59,7 @@
 create_landscape_clustered <- function(
   width = 100,
   height = 100,
-  treeline_position = 0.5,
+  boundary_position = 0.5,
   random_spots = c(0, 0),
   n_clusters = 10,
   cluster_radius = 5,
@@ -70,7 +70,7 @@ create_landscape_clustered <- function(
 ) {
   # Input validation
   validate_dimensions(width = width, height = height)
-  validate_treeline_position(treeline_position = treeline_position)
+  validate_boundary_position(boundary_position = boundary_position)
   validate_random_spots(random_spots = random_spots)
   validate_rotation(rotation = rotation)
 
@@ -143,7 +143,7 @@ create_landscape_clustered <- function(
   base_landscape <- create_landscape_sharp_treeline(
     width = width_actual,
     height = height_actual,
-    treeline_position = treeline_position,
+    boundary_position = boundary_position,
     random_spots = random_spots,
     rotation = 0
   )
@@ -152,7 +152,7 @@ create_landscape_clustered <- function(
   mat <- terra::as.matrix(base_landscape$data, wide = TRUE)
 
   # Define scatter zone boundaries
-  treeline_row <- round(height_actual * treeline_position)
+  treeline_row <- round(height_actual * boundary_position)
 
   # For rotated landscapes, use inner portion to avoid edge artifacts after crop
   rotation_safe_margin <- 1 / 6
@@ -260,7 +260,7 @@ create_landscape_clustered <- function(
     params = list(
       width = width,
       height = height,
-      treeline_position = treeline_position,
+      boundary_position = boundary_position,
       n_clusters = n_clusters,
       cluster_radius = cluster_radius,
       scatter_zone_prop = scatter_zone_prop,

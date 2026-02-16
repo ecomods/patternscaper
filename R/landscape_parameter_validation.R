@@ -67,21 +67,21 @@ validate_rotation <- function(rotation) {
 #'
 #' Validates treeline position parameter for treeline-based landscapes.
 #'
-#' @param treeline_position Numeric. Relative position of treeline from top (0-1).
+#' @param boundary_position Numeric. Relative position of treeline from top (0-1).
 #'
 #' @return NULL (invisibly). Called for side effects (validation).
 #'
 #' @keywords internal
 #' @noRd
-validate_treeline_position <- function(treeline_position) {
+validate_boundary_position <- function(boundary_position) {
   if (
-    !is.numeric(treeline_position) ||
-      treeline_position < 0 ||
-      treeline_position > 1
+    !is.numeric(boundary_position) ||
+      boundary_position < 0 ||
+      boundary_position > 1
   ) {
     cli::cli_abort(c(
-      "{.arg treeline_position} must be between 0 and 1.",
-      "x" = "You supplied {.val {treeline_position}}"
+      "{.arg boundary_position} must be between 0 and 1.",
+      "x" = "You supplied {.val {boundary_position}}"
     ))
   }
 
@@ -139,21 +139,21 @@ get_valid_param_specs <- function() {
       veg_prop = list(type = "numeric", min = 0, max = 1)
     ),
     sharp = list(
-      treeline_position = list(type = "numeric", min = 0, max = 1)
+      boundary_position = list(type = "numeric", min = 0, max = 1)
     ),
     diffuse = list(
       steepness = list(type = "numeric", min = 0, max = Inf),
-      treeline_position = list(type = "numeric", min = 0, max = 1)
+      boundary_position = list(type = "numeric", min = 0, max = 1)
     ),
     fingers = list(
-      treeline_position = list(type = "numeric", min = 0, max = 1),
+      boundary_position = list(type = "numeric", min = 0, max = 1),
       sine_length_mean = list(type = "numeric", min = 0, max = Inf),
       sine_length_sd = list(type = "numeric", min = 0, max = Inf),
       sine_height_mean = list(type = "numeric", min = 0, max = Inf),
       sine_height_sd = list(type = "numeric", min = 0, max = Inf)
     ),
     clustered = list(
-      treeline_position = list(type = "numeric", min = 0, max = 1),
+      boundary_position = list(type = "numeric", min = 0, max = 1),
       n_clusters = list(type = "integer", min = 1, max = Inf),
       cluster_radius = list(type = "integer", min = 1, max = Inf),
       scatter_zone_prop = list(type = "numeric", min = 0, max = 1),
@@ -161,7 +161,7 @@ get_valid_param_specs <- function() {
       elongation_y = list(type = "numeric", min = 0, max = Inf)
     ),
     bands = list(
-      treeline_position = list(type = "numeric", min = 0, max = 1),
+      boundary_position = list(type = "numeric", min = 0, max = 1),
       band_zone_prop = list(type = "numeric", min = 0, max = 1),
       band_thickness = list(type = "integer", min = 1, max = Inf),
       band_spacing = list(type = "integer", min = 1, max = Inf),

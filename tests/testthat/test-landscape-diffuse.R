@@ -57,7 +57,7 @@ test_that("create_landscape_diffuse_treeline steepness creates gradual transitio
   l_sharp <- create_landscape_diffuse_treeline(
     width = 20,
     height = 20,
-    treeline_position = 0.5,
+    boundary_position = 0.5,
     steepness = 0.1
   )
 
@@ -65,7 +65,7 @@ test_that("create_landscape_diffuse_treeline steepness creates gradual transitio
   l_gradual <- create_landscape_diffuse_treeline(
     width = 20,
     height = 20,
-    treeline_position = 0.5,
+    boundary_position = 0.5,
     steepness = 0.9
   )
 
@@ -84,14 +84,14 @@ test_that("create_landscape_diffuse_treeline stores all params correctly", {
   l <- create_landscape_diffuse_treeline(
     width = 30,
     height = 40,
-    treeline_position = 0.7,
+    boundary_position = 0.7,
     steepness = 0.6,
     rotation = 45
   )
 
   expect_equal(l$params$width, 30)
   expect_equal(l$params$height, 40)
-  expect_equal(l$params$treeline_position, 0.7)
+  expect_equal(l$params$boundary_position, 0.7)
   expect_equal(l$params$steepness, 0.6)
   expect_equal(l$params$rotation, 45)
 })
@@ -150,12 +150,12 @@ test_that("create_landscape_diffuse_treeline handles extreme rotation angles", {
   expect_true(is_landscape(l_mid))
 })
 
-test_that("create_landscape_diffuse_treeline handles treeline_position boundary values", {
+test_that("create_landscape_diffuse_treeline handles boundary_position boundary values", {
   # Exactly 0 - transition at top
   l_zero <- create_landscape_diffuse_treeline(
     width = 20,
     height = 20,
-    treeline_position = 0,
+    boundary_position = 0,
     steepness = 0.5
   )
   expect_true(is_landscape(l_zero))
@@ -164,14 +164,14 @@ test_that("create_landscape_diffuse_treeline handles treeline_position boundary 
   l_one <- create_landscape_diffuse_treeline(
     width = 20,
     height = 20,
-    treeline_position = 1,
+    boundary_position = 1,
     steepness = 0.5
   )
   expect_true(is_landscape(l_one))
 
   # Very close to boundaries
-  l_near_zero <- create_landscape_diffuse_treeline(treeline_position = 0.001)
-  l_near_one <- create_landscape_diffuse_treeline(treeline_position = 0.999)
+  l_near_zero <- create_landscape_diffuse_treeline(boundary_position = 0.001)
+  l_near_one <- create_landscape_diffuse_treeline(boundary_position = 0.999)
 
   expect_true(is_landscape(l_near_zero))
   expect_true(is_landscape(l_near_one))
@@ -209,7 +209,7 @@ test_that("create_landscape_diffuse_treeline handles multiple edge cases togethe
   l_extreme <- create_landscape_diffuse_treeline(
     width = 5,
     height = 5,
-    treeline_position = 0.999,
+    boundary_position = 0.999,
     steepness = 0.001,
     rotation = 45
   )

@@ -106,7 +106,7 @@ test_that("clustered trees validates cluster placement", {
     create_landscape_clustered(
       width = 20,
       height = 20,
-      treeline_position = 0.8,
+      boundary_position = 0.8,
       scatter_zone_prop = 0.1,
       cluster_radius = 10
     ),
@@ -122,7 +122,7 @@ test_that("create_landscape_clustered creates clusters in scatter zone", {
   l <- create_landscape_clustered(
     width = 30,
     height = 30,
-    treeline_position = 0.4,
+    boundary_position = 0.4,
     n_clusters = 10,
     cluster_radius = 3,
     scatter_zone_prop = 0.4
@@ -149,7 +149,7 @@ test_that("create_landscape_clustered elongation affects cluster shape", {
   l_horizontal <- create_landscape_clustered(
     width = 80,
     height = 80,
-    treeline_position = 0.2,
+    boundary_position = 0.2,
     n_clusters = 1,
     cluster_radius = 5,
     elongation_x = 3,
@@ -177,7 +177,7 @@ test_that("create_landscape_clustered elongation affects cluster shape", {
   l_vertical <- create_landscape_clustered(
     width = 80,
     height = 80,
-    treeline_position = 0.2,
+    boundary_position = 0.2,
     n_clusters = 1,
     cluster_radius = 5,
     elongation_x = 1,
@@ -204,7 +204,7 @@ test_that("create_landscape_clustered stores all params correctly", {
   l <- create_landscape_clustered(
     width = 30,
     height = 40,
-    treeline_position = 0.6,
+    boundary_position = 0.6,
     random_spots = c(0.1, 0.05),
     n_clusters = 15,
     cluster_radius = 4,
@@ -216,7 +216,7 @@ test_that("create_landscape_clustered stores all params correctly", {
 
   expect_equal(l$params$width, 30)
   expect_equal(l$params$height, 40)
-  expect_equal(l$params$treeline_position, 0.6)
+  expect_equal(l$params$boundary_position, 0.6)
   expect_equal(l$params$random_spots, c(0.1, 0.05))
   expect_equal(l$params$n_clusters, 15)
   expect_equal(l$params$cluster_radius, 4)
@@ -333,7 +333,7 @@ test_that("create_landscape_clustered handles very small scatter zone", {
   l_small_zone <- create_landscape_clustered(
     width = 100,
     height = 100,
-    treeline_position = 0.9,
+    boundary_position = 0.9,
     scatter_zone_prop = 0.05,
     n_clusters = 2,
     cluster_radius = 2
@@ -345,7 +345,7 @@ test_that("create_landscape_clustered handles very large scatter zone", {
   l_large_zone <- create_landscape_clustered(
     width = 100,
     height = 100,
-    treeline_position = 0.1,
+    boundary_position = 0.1,
     scatter_zone_prop = 0.99,
     n_clusters = 10,
     cluster_radius = 5

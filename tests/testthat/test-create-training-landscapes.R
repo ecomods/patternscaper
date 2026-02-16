@@ -243,7 +243,7 @@ test_that("create_landscapes handles custom params_list", {
   set.seed(123)
   custom_params <- list(
     sharp = list(
-      treeline_position = c(0.4, 0.6)
+      boundary_position = c(0.4, 0.6)
     ),
     random = list(
       veg_prop = c(0.5, 0.7)
@@ -261,8 +261,8 @@ test_that("create_landscapes handles custom params_list", {
   # Check that parameters are within the specified ranges
   for (l in landscapes) {
     if (l$pattern == "sharp") {
-      expect_true(l$params$treeline_position >= 0.4)
-      expect_true(l$params$treeline_position <= 0.6)
+      expect_true(l$params$boundary_position >= 0.4)
+      expect_true(l$params$boundary_position <= 0.6)
     }
     if (l$pattern == "random") {
       expect_true(l$params$veg_prop >= 0.5)
@@ -335,7 +335,7 @@ test_that("create_landscapes merges partial params with defaults", {
 
     # Check default params are present
     expect_true(!is.null(l$params$cluster_radius))
-    expect_true(!is.null(l$params$treeline_position))
+    expect_true(!is.null(l$params$boundary_position))
   }
 })
 
@@ -343,7 +343,7 @@ test_that("create_landscapes fills missing patterns with defaults", {
   set.seed(123)
 
   custom_params <- list(
-    sharp = list(treeline_position = c(0.6, 0.8))
+    sharp = list(boundary_position = c(0.6, 0.8))
     # diffuse missing entirely
   )
 
@@ -367,8 +367,8 @@ test_that("create_landscapes fills missing patterns with defaults", {
   # Sharp should use custom params
   sharp_landscapes <- landscapes[patterns == "sharp"]
   for (l in sharp_landscapes) {
-    expect_true(l$params$treeline_position >= 0.6)
-    expect_true(l$params$treeline_position <= 0.8)
+    expect_true(l$params$boundary_position >= 0.6)
+    expect_true(l$params$boundary_position <= 0.8)
   }
 })
 
@@ -377,7 +377,7 @@ test_that("create_landscapes removes unknown params without failing", {
 
   custom_params <- list(
     sharp = list(
-      treeline_position = c(0.3, 0.7),
+      boundary_position = c(0.3, 0.7),
       fake_param = c(1, 2)
     )
   )
@@ -403,13 +403,13 @@ test_that("create_landscapes removes unknown params without failing", {
 })
 
 test_that("create_landscapes rejects invalid parameter values", {
-  # treeline_position > 1.0
+  # boundary_position > 1.0
   expect_error(
     create_landscapes(
       n = 4,
       patterns = "sharp",
       params_list = list(
-        sharp = list(treeline_position = c(0.5, 1.5))
+        sharp = list(boundary_position = c(0.5, 1.5))
       )
     ),
     "exceeds.*maximum"
@@ -489,7 +489,7 @@ test_that("create_landscapes respects max_retries parameter", {
 
 test_that("sample_landscape_params samples within ranges", {
   pattern_params <- list(
-    treeline_position = c(0.3, 0.7),
+    boundary_position = c(0.3, 0.7),
     n_clusters = c(5, 10),
     regular_spots = c(TRUE, FALSE)
   )
@@ -508,8 +508,8 @@ test_that("sample_landscape_params samples within ranges", {
     simplify = FALSE
   )
 
-  # Check treeline_position is in range
-  treeline_vals <- sapply(samples, function(x) x$treeline_position)
+  # Check boundary_position is in range
+  treeline_vals <- sapply(samples, function(x) x$boundary_position)
   expect_true(all(treeline_vals >= 0.3 & treeline_vals <= 0.7))
 
   # Check n_clusters is integer in range
@@ -531,7 +531,7 @@ test_that("try_create_landscape returns NULL on error", {
   bad_params <- list(
     width = 10,
     height = 10,
-    treeline_position = 5 # Invalid - out of range
+    boundary_position = 5 # Invalid - out of range
   )
 
   result <- try_create_landscape("sharp", bad_params, 1, 0)
@@ -543,7 +543,7 @@ test_that("try_create_landscape creates valid landscape on success", {
   good_params <- list(
     width = 50,
     height = 50,
-    treeline_position = 0.5
+    boundary_position = 0.5
   )
 
   result <- try_create_landscape("sharp", good_params, 42, 90)
@@ -551,7 +551,7 @@ test_that("try_create_landscape creates valid landscape on success", {
   expect_true(is_landscape(result))
   expect_equal(result$pattern, "sharp")
   expect_equal(result$name, "sharp_42_rot90")
-  expect_equal(result$params$treeline_position, 0.5)
+  expect_equal(result$params$boundary_position, 0.5)
 })
 
 test_that("retry mechanism maintains pattern distribution", {
@@ -725,7 +725,7 @@ test_that("sample_landscape_params uses efficient integer sampling", {
 
 test_that("sample_landscape_params handles fixed single values", {
   pattern_params <- list(
-    treeline_position = 0.5, # Single value, not a range
+    boundary_position = 0.5, # Single value, not a range
     n_clusters = c(5, 10), # Range
     invert_landscape = FALSE # Single logical
   )
@@ -742,7 +742,7 @@ test_that("sample_landscape_params handles fixed single values", {
   )
 
   # Fixed values should always be the same
-  treeline_vals <- sapply(samples, function(x) x$treeline_position)
+  treeline_vals <- sapply(samples, function(x) x$boundary_position)
   invert_vals <- sapply(samples, function(x) x$invert_landscape)
 
   expect_true(all(treeline_vals == 0.5))
@@ -811,7 +811,7 @@ test_that("create_landscapes handles empty pattern params", {
 
   # Should have default parameters applied
   for (l in landscapes) {
-    expect_true(!is.null(l$params$treeline_position))
+    expect_true(!is.null(l$params$boundary_position))
   }
 })
 

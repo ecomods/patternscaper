@@ -107,7 +107,7 @@ test_that("bands validates noise_sd parameter", {
 test_that("bands warns when no bands can fit", {
   expect_warning(
     create_landscape_bands(
-      treeline_position = 0.7,
+      boundary_position = 0.7,
       band_zone_prop = 0.15,
       band_spacing = 20
     ),
@@ -124,7 +124,7 @@ test_that("create_landscape_bands creates treeline with bands below", {
   l <- create_landscape_bands(
     width = 30,
     height = 30,
-    treeline_position = 0.4,
+    boundary_position = 0.4,
     band_zone_prop = 0.3,
     band_spacing = 5,
     band_thickness = 2
@@ -147,7 +147,7 @@ test_that("create_landscape_bands handles zero amplitude (straight treeline)", {
   l <- create_landscape_bands(
     width = 20,
     height = 20,
-    treeline_position = 0.5,
+    boundary_position = 0.5,
     amplitude = 0,
     band_spacing = 5
   )
@@ -216,7 +216,7 @@ test_that("create_landscape_bands stores all params correctly", {
   l <- create_landscape_bands(
     width = 30,
     height = 40,
-    treeline_position = 0.6,
+    boundary_position = 0.6,
     band_zone_prop = 0.3,
     band_thickness = 4,
     band_spacing = 8,
@@ -228,7 +228,7 @@ test_that("create_landscape_bands stores all params correctly", {
 
   expect_equal(l$params$width, 30)
   expect_equal(l$params$height, 40)
-  expect_equal(l$params$treeline_position, 0.6)
+  expect_equal(l$params$boundary_position, 0.6)
   expect_equal(l$params$band_zone_prop, 0.3)
   expect_equal(l$params$band_thickness, 4)
   expect_equal(l$params$band_spacing, 8)
@@ -267,7 +267,7 @@ test_that("create_landscape_bands warns when bands cannot fit", {
     l <- create_landscape_bands(
       width = 20,
       height = 20,
-      treeline_position = 0.7,
+      boundary_position = 0.7,
       band_zone_prop = 0.15,
       band_spacing = 20
     ),

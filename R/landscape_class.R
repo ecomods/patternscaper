@@ -52,7 +52,7 @@ new_landscape <- function(
 #'   mat,
 #'   pattern = "sharp",
 #'   name = "alpine_treeline",
-#'   params = list(treeline_position = 0.5, rotation = 0)
+#'   params = list(boundary_position = 0.5, rotation = 0)
 #' )
 #'
 #' # Create from SpatRaster

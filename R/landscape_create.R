@@ -56,7 +56,7 @@
 #' # Create a modified landscape with custom parameters
 #' diffuse_modified <- create_landscape(
 #'   "diffuse",
-#'   treeline_position = 0.3,
+#'   boundary_position = 0.3,
 #'   steepness = 0.1
 #' )
 #'
@@ -257,20 +257,20 @@ create_landscapes <- function(
     random = list(veg_prop = c(0.1, 0.9)),
     bare = list(veg_prop = c(0, 0.1)),
     dense = list(veg_prop = c(0.8, 1)),
-    sharp = list(treeline_position = c(0.2, 0.8)),
+    sharp = list(boundary_position = c(0.2, 0.8)),
     diffuse = list(
       steepness = c(0.1, 1),
-      treeline_position = c(0.1, 0.4)
+      boundary_position = c(0.1, 0.4)
     ),
     fingers = list(
-      treeline_position = c(0.3, 0.6),
+      boundary_position = c(0.3, 0.6),
       sine_length_mean = c(0.2, 0.5) * width,
       sine_length_sd = c(0.1, 0.5) * width,
       sine_height_mean = c(0.05, 0.2) * height,
       sine_height_sd = c(0.05, 0.25) * height
     ),
     clustered = list(
-      treeline_position = c(0.4, 0.6),
+      boundary_position = c(0.4, 0.6),
       n_clusters = c(5, 12),
       cluster_radius = c(5, 10),
       scatter_zone_prop = c(0.2, 1),
@@ -278,7 +278,7 @@ create_landscapes <- function(
       elongation_y = c(0.5, 1.5)
     ),
     bands = list(
-      treeline_position = c(0.3, 0.5),
+      boundary_position = c(0.3, 0.5),
       band_zone_prop = c(0.3, 0.6),
       band_thickness = c(0.02, 0.04) * height,
       band_spacing = c(0.1, 0.2) * height,

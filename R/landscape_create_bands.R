@@ -4,7 +4,7 @@
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
+#' @param boundary_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
 #' @param band_zone_prop Numeric. Proportion of height of the total landscape to
 #'     allocate for bands below the treeline (default: 0.2). If the band zone is too small
 #'     for the given band spacing, no bands will be drawn and a warning will be issued.
@@ -27,7 +27,7 @@
 #'
 #' # Modified sine bands with thicker bands, wider spacing and noise
 #' bands_modified <- create_landscape_bands(
-#'   treeline_position = 0.3,
+#'   boundary_position = 0.3,
 #'   band_zone_prop = 0.5,
 #'   band_thickness = 5,
 #'   band_spacing = 15,
@@ -50,7 +50,7 @@
 create_landscape_bands <- function(
   width = 100,
   height = 100,
-  treeline_position = 0.5,
+  boundary_position = 0.5,
   band_zone_prop = 0.2,
   band_thickness = 3,
   band_spacing = 10,
@@ -62,7 +62,7 @@ create_landscape_bands <- function(
   # Validate common parameters
   validate_dimensions(width = width, height = height)
   validate_rotation(rotation = rotation)
-  validate_treeline_position(treeline_position = treeline_position)
+  validate_boundary_position(boundary_position = boundary_position)
 
   # Validate band_zone_prop
   if (!is.numeric(band_zone_prop) || band_zone_prop < 0 || band_zone_prop > 1) {
@@ -123,7 +123,7 @@ create_landscape_bands <- function(
   base_sine <- amplitude * sin(frequency * seq_len(width_actual))
 
   # Determine the treeline
-  base_treeline <- round(height_actual * treeline_position + base_sine)
+  base_treeline <- round(height_actual * boundary_position + base_sine)
   base_treeline <- pmin(pmax(base_treeline, 1), height_actual)
 
   # Draw treeline: fill all cells above the treeline with trees (1)
@@ -148,7 +148,7 @@ create_landscape_bands <- function(
       "No bands can fit in available space.",
       "i" = "Available space below treeline: {available_space} px",
       "i" = "Band spacing required: {band_spacing} px",
-      "i" = "Consider decreasing {.arg band_spacing}, {.arg treeline_position}, or increasing {.arg band_zone_prop}."
+      "i" = "Consider decreasing {.arg band_spacing}, {.arg boundary_position}, or increasing {.arg band_zone_prop}."
     ))
   }
 
@@ -190,7 +190,7 @@ create_landscape_bands <- function(
     params = list(
       width = width,
       height = height,
-      treeline_position = treeline_position,
+      boundary_position = boundary_position,
       band_zone_prop = band_zone_prop,
       band_thickness = band_thickness,
       band_spacing = band_spacing,

@@ -1,10 +1,9 @@
-#' Create a Landscape with Sharp Treeline
+#' Create a Landscape with a Sharp Vegetation Boundary
 #'
-#' Generates a binary landscape with a sharp treeline.
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param treeline_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
+#' @param boundary_position Numeric. Relative position of vegetation boundary from top (0-1) (default: 0.5).
 #' @param random_spots Numeric vector of length 2. Probabilities for flipping cells: [1→0, 0→1] (default: c(0,0)).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
@@ -12,7 +11,7 @@
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string "sharp"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
-#' 
+#'
 #' @keywords internal
 #'
 #' @export
@@ -23,25 +22,25 @@
 #'
 #' # Modified sharp treeline with higher treeline position
 #' sharp_modified <- create_landscape_sharp_treeline(
-#'   treeline_position = 0.7
+#'   boundary_position = 0.7
 #' )
 #'
 #' # Landscape with rotation and some spots
 #' sharp_rotated <- create_landscape_sharp_treeline(
-#'   treeline_position = 0.3,
+#'   boundary_position = 0.3,
 #'   random_spots = c(0, 0.1),
 #'   rotation = 45
 #' )
 create_landscape_sharp_treeline <- function(
   width = 100,
   height = 100,
-  treeline_position = 0.5,
+  boundary_position = 0.5,
   random_spots = c(0, 0),
   rotation = 0
 ) {
   # Validate inputs
   validate_dimensions(width = width, height = height)
-  validate_treeline_position(treeline_position = treeline_position)
+  validate_boundary_position(boundary_position = boundary_position)
   validate_rotation(rotation = rotation)
   validate_random_spots(random_spots = random_spots)
 
@@ -52,7 +51,7 @@ create_landscape_sharp_treeline <- function(
   width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
   # Convert position from proportion to row number
-  treeline_row <- round(height_actual * treeline_position)
+  treeline_row <- round(height_actual * boundary_position)
 
   # Create the landscape matrix
   mat <- matrix(0, nrow = height_actual, ncol = width_actual)
@@ -93,7 +92,7 @@ create_landscape_sharp_treeline <- function(
     params = list(
       width = width,
       height = height,
-      treeline_position = treeline_position,
+      boundary_position = boundary_position,
       random_spots = random_spots,
       rotation = rotation
     )

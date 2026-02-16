@@ -83,7 +83,7 @@ test_that("create_landscape_fingers creates varying sinusoidal patterns", {
   l_straight <- create_landscape_fingers(
     width = 20,
     height = 20,
-    treeline_position = 0.5,
+    boundary_position = 0.5,
     sine_height_mean = 0,
     sine_height_sd = 0
   )
@@ -93,7 +93,7 @@ test_that("create_landscape_fingers creates varying sinusoidal patterns", {
   l_curvy <- create_landscape_fingers(
     width = 20,
     height = 20,
-    treeline_position = 0.5,
+    boundary_position = 0.5,
     sine_length_mean = 10,
     sine_length_sd = 3,
     sine_height_mean = 3,
@@ -112,7 +112,7 @@ test_that("create_landscape_fingers stores all params correctly", {
   l <- create_landscape_fingers(
     width = 30,
     height = 40,
-    treeline_position = 0.7,
+    boundary_position = 0.7,
     sine_length_mean = 25,
     sine_length_sd = 10,
     sine_height_mean = 8,
@@ -123,7 +123,7 @@ test_that("create_landscape_fingers stores all params correctly", {
 
   expect_equal(l$params$width, 30)
   expect_equal(l$params$height, 40)
-  expect_equal(l$params$treeline_position, 0.7)
+  expect_equal(l$params$boundary_position, 0.7)
   expect_equal(l$params$sine_length_mean, 25)
   expect_equal(l$params$sine_length_sd, 10)
   expect_equal(l$params$sine_height_mean, 8)
@@ -138,7 +138,7 @@ test_that("create_landscape_fingers random_spots parameter works", {
   l_no_random <- create_landscape_fingers(
     width = 20,
     height = 20,
-    treeline_position = 0.5,
+    boundary_position = 0.5,
     sine_height_mean = 3,
     random_spots = c(0, 0)
   )
@@ -148,7 +148,7 @@ test_that("create_landscape_fingers random_spots parameter works", {
   l_random <- create_landscape_fingers(
     width = 20,
     height = 20,
-    treeline_position = 0.5,
+    boundary_position = 0.5,
     sine_height_mean = 3,
     random_spots = c(0.2, 0.2)
   )
@@ -294,12 +294,12 @@ test_that("create_landscape_fingers handles sine_height boundary values", {
   expect_true(is_landscape(l_large_sd))
 })
 
-test_that("create_landscape_fingers handles treeline_position boundary values", {
+test_that("create_landscape_fingers handles boundary_position boundary values", {
   # Exactly 0 - transition at top
   l_zero <- create_landscape_fingers(
     width = 20,
     height = 20,
-    treeline_position = 0,
+    boundary_position = 0,
     sine_height_mean = 2
   )
   expect_true(is_landscape(l_zero))
@@ -308,14 +308,14 @@ test_that("create_landscape_fingers handles treeline_position boundary values", 
   l_one <- create_landscape_fingers(
     width = 20,
     height = 20,
-    treeline_position = 1,
+    boundary_position = 1,
     sine_height_mean = 2
   )
   expect_true(is_landscape(l_one))
 
   # Very close to boundaries
-  l_near_zero <- create_landscape_fingers(treeline_position = 0.001)
-  l_near_one <- create_landscape_fingers(treeline_position = 0.999)
+  l_near_zero <- create_landscape_fingers(boundary_position = 0.001)
+  l_near_one <- create_landscape_fingers(boundary_position = 0.999)
 
   expect_true(is_landscape(l_near_zero))
   expect_true(is_landscape(l_near_one))
@@ -349,7 +349,7 @@ test_that("create_landscape_fingers handles multiple edge cases together", {
   l_extreme <- create_landscape_fingers(
     width = 30,
     height = 30,
-    treeline_position = 0.999,
+    boundary_position = 0.999,
     sine_length_mean = 1,
     sine_length_sd = 2,
     sine_height_mean = 10,

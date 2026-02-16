@@ -157,8 +157,8 @@ test_that("landscape generators validate height parameter", {
   }
 })
 
-# treeline_position parameter validation --------------------------------------
-test_that("landscape generators validate treeline_position parameter", {
+# boundary_position parameter validation --------------------------------------
+test_that("landscape generators validate boundary_position parameter", {
   generators <- list(
     sharp = create_landscape_sharp_treeline,
     diffuse = create_landscape_diffuse_treeline,
@@ -171,21 +171,21 @@ test_that("landscape generators validate treeline_position parameter", {
     gen <- generators[[name]]
 
     expect_error(
-      gen(treeline_position = "0.5"),
+      gen(boundary_position = "0.5"),
       "must be between 0 and 1.",
-      info = paste("Testing", name, "with non-numeric treeline_position")
+      info = paste("Testing", name, "with non-numeric boundary_position")
     )
 
     expect_error(
-      gen(treeline_position = -0.1),
+      gen(boundary_position = -0.1),
       "must be between 0 and 1.",
-      info = paste("Testing", name, "with negative treeline_position")
+      info = paste("Testing", name, "with negative boundary_position")
     )
 
     expect_error(
-      gen(treeline_position = 10.5),
+      gen(boundary_position = 10.5),
       "must be between 0 and 1.",
-      info = paste("Testing", name, "with treeline_position > 1")
+      info = paste("Testing", name, "with boundary_position > 1")
     )
   }
 })

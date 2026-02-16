@@ -17,12 +17,12 @@ test_that("create_landscape_sharp_treeline creates valid landscape objects", {
   expect_equal(terra::nrow(l$data), 50)
 })
 
-test_that("create_landscape_sharp_treeline treeline_position creates correct patterns", {
+test_that("create_landscape_sharp_treeline boundary_position creates correct patterns", {
   # Position = 0.5 should split approximately in half
   l_half <- create_landscape_sharp_treeline(
     width = 20,
     height = 20,
-    treeline_position = 0.5
+    boundary_position = 0.5
   )
   vals <- terra::values(l_half$data)
   prop_ones <- sum(vals == 1) / length(vals)
@@ -33,14 +33,14 @@ test_that("create_landscape_sharp_treeline stores all params correctly", {
   l <- create_landscape_sharp_treeline(
     width = 30,
     height = 40,
-    treeline_position = 0.7,
+    boundary_position = 0.7,
     random_spots = c(0.1, 0.2),
     rotation = 45
   )
 
   expect_equal(l$params$width, 30)
   expect_equal(l$params$height, 40)
-  expect_equal(l$params$treeline_position, 0.7)
+  expect_equal(l$params$boundary_position, 0.7)
   expect_equal(l$params$random_spots, c(0.1, 0.2))
   expect_equal(l$params$rotation, 45)
 })
@@ -61,7 +61,7 @@ test_that("create_landscape_sharp_treeline handles extreme treeline positions", 
   l_bottom <- create_landscape_sharp_treeline(
     width = 50,
     height = 50,
-    treeline_position = 0
+    boundary_position = 0
   )
   expect_true(is_landscape(l_bottom))
 
@@ -69,7 +69,7 @@ test_that("create_landscape_sharp_treeline handles extreme treeline positions", 
   l_top <- create_landscape_sharp_treeline(
     width = 50,
     height = 50,
-    treeline_position = 1
+    boundary_position = 1
   )
   expect_true(is_landscape(l_top))
 })
@@ -101,7 +101,7 @@ test_that("create_landscape_sharp_treeline handles multiple extreme parameters",
   l_extreme <- create_landscape_sharp_treeline(
     width = 5,
     height = 5,
-    treeline_position = 0,
+    boundary_position = 0,
     rotation = 90,
     random_spots = c(0.5, 0.5)
   )

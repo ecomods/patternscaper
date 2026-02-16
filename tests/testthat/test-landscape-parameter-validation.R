@@ -4,10 +4,10 @@
 
 test_that("validate_params_list accepts valid parameter specifications", {
   params <- list(
-    sharp = list(treeline_position = c(0.3, 0.7)),
+    sharp = list(boundary_position = c(0.3, 0.7)),
     diffuse = list(
       steepness = c(0.1, 0.5),
-      treeline_position = c(0.2, 0.6)
+      boundary_position = c(0.2, 0.6)
     )
   )
 
@@ -21,7 +21,7 @@ test_that("validate_params_list accepts valid parameter specifications", {
 test_that("validate_params_list removes unknown parameters with warning", {
   params <- list(
     sharp = list(
-      treeline_position = c(0.3, 0.7),
+      boundary_position = c(0.3, 0.7),
       fake_param = c(1, 2)
     )
   )
@@ -33,12 +33,12 @@ test_that("validate_params_list removes unknown parameters with warning", {
 
   # fake_param should be removed
   expect_false("fake_param" %in% names(result$sharp))
-  expect_true("treeline_position" %in% names(result$sharp))
+  expect_true("boundary_position" %in% names(result$sharp))
 })
 
 test_that("validate_params_list handles missing patterns", {
   params <- list(
-    sharp = list(treeline_position = c(0.3, 0.7))
+    sharp = list(boundary_position = c(0.3, 0.7))
   )
 
   # diffuse is missing - should not error (filled with defaults later)
