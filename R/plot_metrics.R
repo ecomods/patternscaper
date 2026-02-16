@@ -26,7 +26,6 @@
 #' @importFrom ggplot2 ggplot aes geom_boxplot geom_jitter position_jitter facet_wrap coord_flip theme element_blank labs
 #'
 #' @examples
-#' \dontrun{
 #' landscapes <- create_landscapes(n = 20, patterns = c("labyrinth", "spots"))
 #' metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
 #' plot_metrics(metrics, selected_metrics = c("ai", "lsi"))
@@ -38,7 +37,6 @@
 #'
 #' # Override limits if needed
 #' plot_metrics(metrics, selected_metrics = many_metrics, force = TRUE)
-#' }
 plot_metrics <- function(
   metrics,
   selected_metrics = NULL,
