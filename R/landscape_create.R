@@ -12,7 +12,6 @@
 #' @param name Character. Optional name for the landscape (default: NULL).
 #' @param custom_pattern Character. Optional pattern for the landscape (default: NULL uses the default
 #'     pattern of the corresponding function).
-#' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #' @param ... Parameters passed to specific landscape functions. See the documentation
 #'        of the individual functions for details on required and optional parameters.
 #'
@@ -86,6 +85,8 @@ create_landscape <- function(
     "gaps",
     "labyrinth"
   ),
+  width = 100,
+  height = 100,
   name = NULL,
   custom_pattern = NULL,
   ...
@@ -118,17 +119,25 @@ create_landscape <- function(
   # Call the appropriate function based on the pattern
   landscape <- switch(
     matched,
-    random = create_landscape_random(...),
-    bare = create_landscape_bare(...),
-    dense = create_landscape_dense(...),
-    sharp = create_landscape_sharp_treeline(...),
-    diffuse = create_landscape_diffuse_treeline(...),
-    fingers = create_landscape_fingers(...),
-    clustered = create_landscape_clustered(...),
-    bands = create_landscape_bands(...),
-    spots = create_landscape_spots(...),
-    gaps = create_landscape_gaps(...),
-    labyrinth = create_landscape_labyrinth(...)
+    random = create_landscape_random(width = width, height = height, ...),
+    bare = create_landscape_bare(width = width, height = height, ...),
+    dense = create_landscape_dense(width = width, height = height, ...),
+    sharp = create_landscape_sharp_treeline(
+      width = width,
+      height = height,
+      ...
+    ),
+    diffuse = create_landscape_diffuse_treeline(
+      width = width,
+      height = height,
+      ...
+    ),
+    fingers = create_landscape_fingers(width = width, height = height, ...),
+    clustered = create_landscape_clustered(width = width, height = height, ...),
+    bands = create_landscape_bands(width = width, height = height, ...),
+    spots = create_landscape_spots(width = width, height = height, ...),
+    gaps = create_landscape_gaps(width = width, height = height, ...),
+    labyrinth = create_landscape_labyrinth(width = width, height = height, ...)
   )
 
   # Set the name if provided
