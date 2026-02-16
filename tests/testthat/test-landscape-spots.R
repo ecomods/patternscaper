@@ -250,8 +250,7 @@ test_that("create_landscape_spots stores all params correctly", {
     spot_radius_sd = 1.5,
     radius_noise_fraction = 0.2,
     invert_landscape = TRUE,
-    regular_spots = TRUE,
-    rotation = 45
+    regular_spots = TRUE
   )
 
   expect_equal(l$params$width, 30)
@@ -261,7 +260,6 @@ test_that("create_landscape_spots stores all params correctly", {
   expect_equal(l$params$spot_radius_sd, 1.5)
   expect_equal(l$params$invert_landscape, TRUE)
   expect_equal(l$params$regular_spots, TRUE)
-  expect_equal(l$params$rotation, 45)
 })
 
 test_that("create_landscape_spots produces reproducible results with seed", {
@@ -471,8 +469,7 @@ test_that("create_landscape_spots handles multiple edge cases together", {
     spot_radius = 3,
     spot_radius_sd = 1,
     radius_noise_fraction = 0.5,
-    invert_landscape = TRUE,
-    rotation = 45
+    invert_landscape = TRUE
   )
 
   expect_true(is_landscape(l_extreme))

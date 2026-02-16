@@ -266,10 +266,8 @@ test_that("rotated landscapes have no NA values", {
     sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse,
     fingers = create_landscape_fingers,
-    spots = create_landscape_spots,
     bands = create_landscape_bands,
-    clustered = create_landscape_clustered,
-    gaps = create_landscape_gaps
+    clustered = create_landscape_clustered
   )
 
   for (name in names(generators_with_rotation)) {

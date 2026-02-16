@@ -58,8 +58,7 @@ test_that("create_landscape_gaps stores all parameters correctly", {
     spot_radius = 6,
     spot_radius_sd = 2,
     radius_noise_fraction = 0.3,
-    regular_spots = TRUE,
-    rotation = 45
+    regular_spots = TRUE
   )
 
   expect_equal(result$params$width, 40)
@@ -69,7 +68,6 @@ test_that("create_landscape_gaps stores all parameters correctly", {
   expect_equal(result$params$spot_radius_sd, 2)
   expect_equal(result$params$radius_noise_fraction, 0.3)
   expect_true(result$params$regular_spots)
-  expect_equal(result$params$rotation, 45)
   expect_true(result$params$invert_landscape)
 })
 
@@ -98,23 +96,6 @@ test_that("create_landscape_gaps works with regular spots pattern", {
   expect_true(is_landscape(result))
   expect_true(result$params$regular_spots)
 })
-
-test_that("create_landscape_gaps works with rotation", {
-  result <- create_landscape_gaps(
-    width = 40,
-    height = 40,
-    n_spots = 6,
-    spot_radius = 5,
-    rotation = 90
-  )
-
-  expect_true(is_landscape(result))
-  expect_equal(result$params$rotation, 90)
-  # After 90 degree rotation, dimensions should swap
-  expect_equal(terra::nrow(result$data), 40)
-  expect_equal(terra::ncol(result$data), 40)
-})
-
 
 # Edge case tests ---------------------------------------------------------
 
@@ -229,23 +210,20 @@ test_that("create_landscape_gaps works with multiple extreme parameters", {
     spot_radius = 2,
     spot_radius_sd = 1,
     radius_noise_fraction = 1,
-    regular_spots = FALSE,
-    rotation = 45
+    regular_spots = FALSE
   )
 
   expect_true(is_landscape(result))
   expect_true(result$params$invert_landscape)
 })
 
-test_that("create_landscape_gaps with small landscape and rotation", {
+test_that("create_landscape_gaps with small landscape", {
   result <- create_landscape_gaps(
     width = 10,
     height = 10,
     n_spots = 3,
-    spot_radius = 2,
-    rotation = 90
+    spot_radius = 2
   )
 
   expect_true(is_landscape(result))
-  expect_equal(result$params$rotation, 90)
 })

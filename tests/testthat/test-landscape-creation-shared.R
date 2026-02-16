@@ -38,8 +38,6 @@ test_that("landscape generators support rotation parameter", {
     sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse,
     fingers = create_landscape_fingers,
-    spots = create_landscape_spots,
-    gaps = create_landscape_gaps,
     bands = create_landscape_bands,
     clustered = create_landscape_clustered
   )
@@ -197,8 +195,6 @@ test_that("landscape generators validate rotation parameter", {
     diffuse = create_landscape_diffuse,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered,
-    spots = create_landscape_spots,
-    gaps = create_landscape_gaps,
     bands = create_landscape_bands
   )
 
@@ -362,10 +358,8 @@ test_that("landscape generators with rotation handle non-square landscapes", {
     sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse,
     fingers = create_landscape_fingers,
-    spots = create_landscape_spots,
     bands = create_landscape_bands,
-    clustered = create_landscape_clustered,
-    gaps = create_landscape_gaps
+    clustered = create_landscape_clustered
   )
 
   for (name in names(generators_with_rotation)) {
@@ -404,7 +398,8 @@ test_that("landscape generators with rotation handle extreme angles", {
     sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse,
     fingers = create_landscape_fingers,
-    spots = create_landscape_spots
+    bands = create_landscape_bands,
+    clustered = create_landscape_clustered
   )
 
   for (name in names(generators_with_rotation)) {

@@ -663,22 +663,6 @@ test_that("create_landscapes rejects invalid rotation angles", {
   )
 })
 
-test_that("rotation = NULL works correctly", {
-  set.seed(123)
-
-  # NULL should skip validation and work
-  landscapes <- create_landscapes(
-    n = 5,
-    patterns = "sharp",
-    width = 20,
-    height = 20,
-    rotation = NULL,
-    rotation = 0
-  )
-
-  expect_equal(length(landscapes), 5)
-})
-
 # Integer sampling tests --------------------------------------------------
 
 test_that("sample_landscape_params uses efficient integer sampling", {
