@@ -21,7 +21,7 @@
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string "gaps"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
-#' 
+#'
 #' @seealso \code{\link{create_landscape_spots}} for the underlying implementation
 #' @export
 #' @examples
@@ -43,8 +43,7 @@ create_landscape_gaps <- function(
   spot_radius = 5,
   spot_radius_sd = 0,
   radius_noise_fraction = 0,
-  regular_spots = FALSE,
-  rotation = 0
+  regular_spots = FALSE
 ) {
   # Call create_landscape_spots with invert_landscape = TRUE
   result <- create_landscape_spots(
@@ -55,8 +54,7 @@ create_landscape_gaps <- function(
     spot_radius_sd = spot_radius_sd,
     radius_noise_fraction = radius_noise_fraction,
     invert_landscape = TRUE,
-    regular_spots = regular_spots,
-    rotation = rotation
+    regular_spots = regular_spots
   )
 
   # Update pattern to "gaps"

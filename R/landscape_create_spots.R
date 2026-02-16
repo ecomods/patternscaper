@@ -11,7 +11,7 @@
 #' @param spot_radius Numeric. Mean radius of each spot in cells.
 #'     Must be positive and smaller than landscape dimensions.
 #' @param spot_radius_sd Numeric. Standard deviation for random variation in spot radius.
-#'     Each spot's radius is sampled from N(spot_radius, spot_radius_sd). 
+#'     Each spot's radius is sampled from N(spot_radius, spot_radius_sd).
 #'     (detault: 0 - no variation)
 #' @param radius_noise_fraction Numeric (0 to 1). Proportion of the spot radius
 #'     where gradual edge noise is applied. 0 creates sharp circular edges,
@@ -30,8 +30,6 @@
 #'
 #' @param regular_spots Logical. If TRUE, spots are arranged on a hexagonal grid
 #'     using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).
-#' @param rotation Numeric. Rotation angle in degrees (unused, present for compatibility
-#'     with other landscape generators). Required by \code{\link{create_landscapes}}.
 #'
 #' @return A landscape object with pattern "spots" containing:
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
@@ -81,12 +79,10 @@ create_landscape_spots <- function(
   spot_radius_sd = 0,
   radius_noise_fraction = 0,
   invert_landscape = FALSE,
-  regular_spots = FALSE,
-  rotation = 0
+  regular_spots = FALSE
 ) {
   # Validate common parameters
   validate_dimensions(width = width, height = height)
-  validate_rotation(rotation = rotation)
 
   n_spots <- as.integer(n_spots)
   # Validate n_spots
@@ -265,8 +261,7 @@ create_landscape_spots <- function(
       spot_radius = spot_radius,
       spot_radius_sd = spot_radius_sd,
       radius_noise_fraction = radius_noise_fraction,
-      regular_spots = regular_spots,
-      rotation = rotation
+      regular_spots = regular_spots
     )
   )
 }

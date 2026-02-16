@@ -390,9 +390,7 @@ create_landscapes <- function(
     "diffuse",
     "fingers",
     "clustered",
-    "bands",
-    "spots",
-    "gaps"
+    "bands"
   )
 
   # Generate each landscape
