@@ -105,9 +105,6 @@ plot_metrics <- function(
       "\nPlease filter to a single level before plotting."
     ))
   }
-  if (level == "patch") {
-    stop("Plotting patch-level metrics is not supported.")
-  }
   if (!level %in% c("landscape", "class")) {
     stop(
       sprintf(

@@ -17,11 +17,6 @@ test_metrics_class <- calculate_landscape_metrics(
   level = "class"
 )
 
-test_metrics_patch <- calculate_landscape_metrics(
-  test_landscapes,
-  level = "patch"
-)
-
 # Critical Error Handling -------------------------------------------------
 
 test_that("plot_metrics stops on non-data.frame input", {
@@ -52,12 +47,6 @@ test_that("plot_metrics stops on multiple levels in data", {
   )
 })
 
-test_that("plot_metrics stops on patch-level metrics", {
-  expect_error(
-    plot_metrics(test_metrics_patch, selected_metrics = "area"),
-    "Plotting patch-level metrics is not supported"
-  )
-})
 
 # Dynamic Limiting (Core Behavior) ----------------------------------------
 

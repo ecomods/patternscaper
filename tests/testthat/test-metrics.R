@@ -56,7 +56,6 @@ test_that("calculate_landscape_metrics produces correct output structure", {
     "level",
     "layer",
     "class",
-    "id",
     "metric_name",
     "metric",
     "value",
@@ -122,15 +121,6 @@ test_that("calculate_landscape_metrics works with different levels", {
 
   expect_equal(unique(result_class$level), "class")
   expect_gt(nrow(result_class), 3) # Should have more rows due to multiple classes
-
-  # Test patch level
-  result_patch <- calculate_landscape_metrics(
-    landscapes,
-    level = "patch"
-  )
-
-  expect_equal(unique(result_patch$level), "patch")
-  expect_gt(nrow(result_patch), nrow(result_class)) # Should have even more rows due to individual patches
 })
 
 test_that("calculate_landscape_metrics validates inputs correctly", {

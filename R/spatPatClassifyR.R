@@ -15,7 +15,6 @@ utils::globalVariables(c(
   "importance_score",
   "landscape_name",
   "metric_name",
-  "id",
   "layer",
   "actual_class",
   "precicted_class",

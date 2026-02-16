@@ -59,7 +59,7 @@ calculate_single_metric <- function(landscapes, function_name) {
 #' @param metrics Character vector. Names of metrics to calculate (default: NULL for all
 #'   available metrics at the specified level). Use \code{list_lsm()} from landscapemetrics
 #'   to see available metrics.
-#' @param level Character. Level(s) of metrics to calculate: "patch", "class", "landscape"
+#' @param level Character. Level(s) of metrics to calculate:"class", "landscape"
 #'   (default: "landscape").
 #'
 #' @return A tibble with the following columns:
@@ -68,9 +68,8 @@ calculate_single_metric <- function(landscapes, function_name) {
 #'     \item{landscape_name}{Name of the landscape from the landscape object}
 #'     \item{pattern}{Pattern type from the landscape object (e.g., "labyrinth", "spots")}
 #'     \item{layer}{Layer number (from landscapemetrics output)}
-#'     \item{level}{Metric level: "patch", "class", or "landscape"}
-#'     \item{class}{Class value (for class- and patch-level metrics, NA for landscape-level)}
-#'     \item{id}{Patch ID (for patch-level metrics, NA otherwise)}
+#'     \item{level}{Metric level: "class", or "landscape"}
+#'     \item{class}{Class value (for class-level metrics, NA for landscape-level)}
 #'     \item{metric}{Name of the calculated metric}
 #'     \item{value}{Calculated metric value}
 #'     \item{warnings}{Any warnings generated during calculation (NA if none)}
@@ -119,12 +118,12 @@ calculate_landscape_metrics <- function(
   }
 
   # Check if level parameter is valid
-  valid_levels <- c("patch", "class", "landscape")
+  valid_levels <- c("class", "landscape")
   if (!all(level %in% valid_levels) || length(level) != 1) {
     stop(paste(
       "Invalid level:",
       paste(level, collapse = ", "),
-      "\nValid options are a single value of: 'patch', 'class', or 'landscape'"
+      "\nValid options are a single value of: 'class', or 'landscape'"
     ))
   }
 
@@ -182,7 +181,6 @@ calculate_landscape_metrics <- function(
       level,
       layer,
       class,
-      id,
       metric_name,
       metric,
       value,

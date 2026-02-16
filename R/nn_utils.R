@@ -45,13 +45,13 @@ set_random_seed <- function(seed) {
 #' format that is needed to train nn models
 #'
 #' @param metrics A data frame containing landscape metrics in long format.
-#'   Expected columns include: `metric`, `class`, `id`, `value`, `pattern`.
+#'   Expected columns include: `metric`, `class`, `value`, `pattern`.
 #'   Must include either `landscape_id` or `landscape_name` for identification.
 #' @param return_only_metrics Logical. Whether to return only the metrics or
 #'   also the the identification columns in output (default: FALSE).
 #'
 #' @return A data frame in wide format where each metric becomes a column and each
-#'   row is a landscape. Metric names are modified to include class and patch IDs
+#'   row is a landscape. Metric names are modified to include class IDs
 #'   when applicable (format: `metric_class_id`).
 #' @keywords internal
 #' @importFrom dplyr mutate select
@@ -66,7 +66,7 @@ metrics_to_wide <- function(metrics, return_only_metrics = FALSE) {
     )
   }
 
-  # Build metric names with class/patch ID when not at landscape level
+  # Build metric names with class ID when not at landscape level
   metrics <- metrics |>
     dplyr::select(dplyr::any_of(c(
       "landscape_id",
