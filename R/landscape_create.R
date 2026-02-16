@@ -164,7 +164,9 @@ create_landscape <- function(
 #' @param width Integer. Width of all landscapes in pixels (default: 100).
 #' @param height Integer. Height of all landscapes in pixels (default: 100).
 #' @param rotation Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).
-#' @param params_list List. List of parameter ranges for each landscape pattern (default: NULL).
+#' @param params_list List. List of parameter ranges or single values for the parameters of each landscape pattern (default: NULL).
+#'     The names and default parameter ranges for the different patterns can be found
+#'     in the documentation of \code{\link{create_landscape}}.
 #' @param pattern_probs Numeric vector. Probability that a specific landscape pattern is chosen from the list
 #'     of patterns. Should be a numeric vector of the same length as 'patterns'.
 #'     The default value NULL creates equally balanced patterns.
@@ -184,6 +186,23 @@ create_landscape <- function(
 #'
 #' # Get all landscape patterns
 #' sapply(landscapes, function(x) x$pattern)
+#'
+#' # Custom parameters for spot patterns and sharp vegetation boundary
+#' # Can be given as a range (min, max) or a single value.
+#' pattern_params <- list(
+#'   spots = list(
+#'     n_spots = 15,
+#'     spot_radius = 10,
+#'     spot_radius_sd = 3
+#'   ),
+#'   sharp = list(
+#'     boundary_position = c(0.4,0.6)
+#' ))
+#' landscapes_custom <- create_landscapes(
+#'   n = 12,
+#'  patterns = c("spots", "sharp"),
+#'  params_list = pattern_params
+#' )
 #'
 #' @export
 create_landscapes <- function(
