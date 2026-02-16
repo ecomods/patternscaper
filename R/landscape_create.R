@@ -165,11 +165,9 @@ create_landscape <- function(
 #' @param height Integer. Height of all landscapes in pixels (default: 100).
 #' @param rotation Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).
 #' @param params_list List. List of parameter ranges for each landscape pattern (default: NULL).
-#' @param pattern_probs Numeric vector. Probability that a specific landscape pattern is chosen.
-#'     By default, all patterns have equal probability (1) of being chosen.
-#'     Must be the same length as 'patterns' (default NULL which means equal probability).
-#' @param balance_patterns Logical. If TRUE, ensures all landscape patterns appear approximately equally,
-#'     overriding any weights specified in pattern_probs. (default: TRUE)
+#' @param pattern_probs Numeric vector. Probability that a specific landscape pattern is chosen from the list
+#'     of patterns. Should be a numeric vector of the same length as 'patterns'.
+#'     The default value NULL creates equally balanced patterns.
 #' @param max_retries Integer. Maximum number of retries for failed landscape generations (default: 3).
 #'
 #' @return A named list of landscape objects. Names indicate the pattern and optional rotation.
@@ -208,7 +206,6 @@ create_landscapes <- function(
   rotation = 0:360,
   params_list = NULL,
   pattern_probs = NULL,
-  balance_patterns = TRUE,
   max_retries = 3
 ) {
   # Validate inputs
@@ -355,7 +352,7 @@ create_landscapes <- function(
   )
 
   # Determine how to distribute landscape patterns
-  if (balance_patterns) {
+  if (is.null(pattern_probs)) {
     # Calculate how many of each pattern to generate
     num_patterns <- length(patterns)
     landscapes_per_pattern <- floor(n / num_patterns)
@@ -373,16 +370,12 @@ create_landscapes <- function(
     # Shuffle the patterns to avoid patterns
     sampled_patterns <- sample(sampled_patterns)
   } else {
-    # Setup pattern weights for sampling
-    if (is.null(pattern_probs)) {
-      pattern_probs <- rep(1, length(patterns))
-    } else if (length(pattern_probs) != length(patterns)) {
+    if (length(pattern_probs) != length(patterns)) {
       cli::cli_alert_warning(
         "Length of pattern_probs doesn't match length of patterns. Using equal weights."
       )
       pattern_probs <- rep(1, length(patterns))
     }
-    # Use weighted sampling as before
     sampled_patterns <- sample(
       patterns,
       size = n,

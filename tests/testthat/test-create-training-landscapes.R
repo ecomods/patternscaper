@@ -105,8 +105,7 @@ test_that("create_landscapes respects pattern selection", {
     n = 10,
     patterns = c("sharp", "diffuse"),
     width = 20,
-    height = 20,
-    balance_patterns = TRUE
+    height = 20
   )
 
   # Get all patterns
@@ -123,8 +122,7 @@ test_that("create_landscapes balances patterns correctly", {
     n = 12,
     patterns = c("sharp", "diffuse", "fingers"),
     width = 20,
-    height = 20,
-    balance_patterns = TRUE
+    height = 20
   )
 
   # Get pattern distribution
@@ -137,7 +135,7 @@ test_that("create_landscapes balances patterns correctly", {
   expect_true(all(pattern_counts <= 5))
 })
 
-test_that("create_landscapes respects type_probs when balance_patterns is FALSE", {
+test_that("create_landscapes respects pattern_probs when it's not NULL", {
   # This is harder to test deterministically, but we can check that
   # the function runs without error
   landscapes <- create_landscapes(
@@ -145,7 +143,6 @@ test_that("create_landscapes respects type_probs when balance_patterns is FALSE"
     patterns = c("sharp", "diffuse", "random"),
     width = 20,
     height = 20,
-    balance_patterns = FALSE,
     pattern_probs = c(0.5, 0.3, 0.2)
   )
 
@@ -286,12 +283,10 @@ test_that("create_landscapes handles errors gracefully", {
 
 test_that("create_landscapes works with all default landscape patterns", {
   set.seed(123)
-  # Test that all types can be generated without errors
   landscapes <- create_landscapes(
-    n = 24, # 12 types * 2 = 24 for balanced distribution
+    n = 24,
     width = 20,
-    height = 20,
-    balance_patterns = TRUE
+    height = 20
   )
 
   expect_true(length(landscapes) > 0)
@@ -342,7 +337,6 @@ test_that("create_landscapes fills missing patterns with defaults", {
 
   custom_params <- list(
     sharp = list(boundary_position = c(0.6, 0.8))
-    # diffuse missing entirely
   )
 
   landscapes <- create_landscapes(
@@ -350,8 +344,7 @@ test_that("create_landscapes fills missing patterns with defaults", {
     patterns = c("sharp", "diffuse"),
     width = 20,
     height = 20,
-    params_list = custom_params,
-    balance_patterns = TRUE
+    params_list = custom_params
   )
 
   # Should succeed
@@ -560,7 +553,6 @@ test_that("retry mechanism maintains pattern distribution", {
     patterns = c("sharp", "diffuse", "clustered"),
     width = 30,
     height = 30,
-    balance_patterns = TRUE,
     max_retries = 5
   )
 
