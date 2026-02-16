@@ -140,7 +140,7 @@ create_landscape_clustered <- function(
   }
 
   # Get base landscape with sharp treeline
-  base_landscape <- create_landscape_sharp_treeline(
+  base_landscape <- create_landscape_sharp(
     width = width_actual,
     height = height_actual,
     boundary_position = boundary_position,

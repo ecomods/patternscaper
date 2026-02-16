@@ -24,7 +24,7 @@
 #' \code{\link{create_landscape_random}} for "random" pattern parameters. "bare" and "dense" are aliases but
 #'     are produced either with low or high tree probabilities
 #'
-#' \code{\link{create_landscape_sharp_treeline}} for "sharp" pattern parameters
+#' \code{\link{create_landscape_sharp}} for "sharp" pattern parameters
 #'
 #' \code{\link{create_landscape_diffuse_treeline}} for "diffuse" pattern parameters
 #'
@@ -122,7 +122,7 @@ create_landscape <- function(
     random = create_landscape_random(width = width, height = height, ...),
     bare = create_landscape_bare(width = width, height = height, ...),
     dense = create_landscape_dense(width = width, height = height, ...),
-    sharp = create_landscape_sharp_treeline(
+    sharp = create_landscape_sharp(
       width = width,
       height = height,
       ...

@@ -18,20 +18,20 @@
 #'
 #' @examples
 #' # Default sharp treeline
-#' sharp_default <- create_landscape_sharp_treeline()
+#' sharp_default <- create_landscape_sharp()
 #'
 #' # Modified sharp treeline with higher treeline position
-#' sharp_modified <- create_landscape_sharp_treeline(
+#' sharp_modified <- create_landscape_sharp(
 #'   boundary_position = 0.7
 #' )
 #'
 #' # Landscape with rotation and some spots
-#' sharp_rotated <- create_landscape_sharp_treeline(
+#' sharp_rotated <- create_landscape_sharp(
 #'   boundary_position = 0.3,
 #'   random_spots = c(0, 0.1),
 #'   rotation = 45
 #' )
-create_landscape_sharp_treeline <- function(
+create_landscape_sharp <- function(
   width = 100,
   height = 100,
   boundary_position = 0.5,

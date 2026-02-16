@@ -4,8 +4,8 @@
 
 # Functionality tests ---------------------------------------------------------
 
-test_that("create_landscape_sharp_treeline creates valid landscape objects", {
-  l <- create_landscape_sharp_treeline(width = 50, height = 50)
+test_that("create_landscape_sharp creates valid landscape objects", {
+  l <- create_landscape_sharp(width = 50, height = 50)
 
   expect_true(is_landscape(l))
   expect_s3_class(l, "landscape")
@@ -17,9 +17,9 @@ test_that("create_landscape_sharp_treeline creates valid landscape objects", {
   expect_equal(terra::nrow(l$data), 50)
 })
 
-test_that("create_landscape_sharp_treeline boundary_position creates correct patterns", {
+test_that("create_landscape_sharp boundary_position creates correct patterns", {
   # Position = 0.5 should split approximately in half
-  l_half <- create_landscape_sharp_treeline(
+  l_half <- create_landscape_sharp(
     width = 20,
     height = 20,
     boundary_position = 0.5
@@ -29,8 +29,8 @@ test_that("create_landscape_sharp_treeline boundary_position creates correct pat
   expect_true(prop_ones > 0.4 && prop_ones < 0.6)
 })
 
-test_that("create_landscape_sharp_treeline stores all params correctly", {
-  l <- create_landscape_sharp_treeline(
+test_that("create_landscape_sharp stores all params correctly", {
+  l <- create_landscape_sharp(
     width = 30,
     height = 40,
     boundary_position = 0.7,
@@ -45,8 +45,8 @@ test_that("create_landscape_sharp_treeline stores all params correctly", {
   expect_equal(l$params$rotation, 45)
 })
 
-test_that("create_landscape_sharp_treeline supports rotation parameter", {
-  l <- create_landscape_sharp_treeline(width = 50, height = 50, rotation = 45)
+test_that("create_landscape_sharp supports rotation parameter", {
+  l <- create_landscape_sharp(width = 50, height = 50, rotation = 45)
 
   expect_true(is_landscape(l))
   expect_equal(terra::ncol(l$data), 50)
@@ -56,9 +56,9 @@ test_that("create_landscape_sharp_treeline supports rotation parameter", {
 
 # Edge case tests -------------------------------------------------------------
 
-test_that("create_landscape_sharp_treeline handles extreme treeline positions", {
+test_that("create_landscape_sharp handles extreme treeline positions", {
   # Treeline at bottom (position = 0)
-  l_bottom <- create_landscape_sharp_treeline(
+  l_bottom <- create_landscape_sharp(
     width = 50,
     height = 50,
     boundary_position = 0
@@ -66,7 +66,7 @@ test_that("create_landscape_sharp_treeline handles extreme treeline positions", 
   expect_true(is_landscape(l_bottom))
 
   # Treeline at top (position = 1)
-  l_top <- create_landscape_sharp_treeline(
+  l_top <- create_landscape_sharp(
     width = 50,
     height = 50,
     boundary_position = 1
@@ -74,9 +74,9 @@ test_that("create_landscape_sharp_treeline handles extreme treeline positions", 
   expect_true(is_landscape(l_top))
 })
 
-test_that("create_landscape_sharp_treeline handles extreme random_spots values", {
+test_that("create_landscape_sharp handles extreme random_spots values", {
   # No random spots
-  l_no_spots <- create_landscape_sharp_treeline(
+  l_no_spots <- create_landscape_sharp(
     width = 50,
     height = 50,
     random_spots = c(0, 0)
@@ -85,7 +85,7 @@ test_that("create_landscape_sharp_treeline handles extreme random_spots values",
   expect_equal(l_no_spots$params$random_spots, c(0, 0))
 
   # Maximum random spots
-  l_max_spots <- create_landscape_sharp_treeline(
+  l_max_spots <- create_landscape_sharp(
     width = 50,
     height = 50,
     random_spots = c(1, 1)
@@ -96,9 +96,9 @@ test_that("create_landscape_sharp_treeline handles extreme random_spots values",
 
 # Integration tests -----------------------------------------------------------
 
-test_that("create_landscape_sharp_treeline handles multiple extreme parameters", {
+test_that("create_landscape_sharp handles multiple extreme parameters", {
   # Small landscape + extreme position + rotation
-  l_extreme <- create_landscape_sharp_treeline(
+  l_extreme <- create_landscape_sharp(
     width = 5,
     height = 5,
     boundary_position = 0,

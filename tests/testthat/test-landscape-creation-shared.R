@@ -7,7 +7,7 @@
 # Basic landscape object creation tests ---------------------------------------
 test_that("landscape generators create valid landscape objects", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline,
+    sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
@@ -35,7 +35,7 @@ test_that("landscape generators create valid landscape objects", {
 
 test_that("landscape generators support rotation parameter", {
   generators_with_rotation <- list(
-    sharp = create_landscape_sharp_treeline,
+    sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
@@ -73,7 +73,7 @@ test_that("landscape generators support rotation parameter", {
 # Width parameter validation --------------------------------------------------
 test_that("landscape generators validate width parameter", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline,
+    sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse_treeline,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered,
@@ -116,7 +116,7 @@ test_that("landscape generators validate width parameter", {
 # Height parameter validation -------------------------------------------------
 test_that("landscape generators validate height parameter", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline,
+    sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse_treeline,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered,
@@ -160,7 +160,7 @@ test_that("landscape generators validate height parameter", {
 # boundary_position parameter validation --------------------------------------
 test_that("landscape generators validate boundary_position parameter", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline,
+    sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse_treeline,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered,
@@ -193,7 +193,7 @@ test_that("landscape generators validate boundary_position parameter", {
 # Rotation parameter validation -----------------------------------------------
 test_that("landscape generators validate rotation parameter", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline,
+    sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse_treeline,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered,
@@ -228,7 +228,7 @@ test_that("landscape generators validate rotation parameter", {
 # Pattern-specific validation: random_spots parameter ------------------------
 test_that("landscape generators validate random_spots parameter", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline,
+    sharp = create_landscape_sharp,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered
   )
@@ -271,7 +271,7 @@ test_that("landscape generators validate random_spots parameter", {
 # Extreme dimensions ----------------------------------------------------------
 test_that("landscape generators handle very small landscapes", {
   generators <- list(
-    sharp = list(fn = create_landscape_sharp_treeline, params = list()),
+    sharp = list(fn = create_landscape_sharp, params = list()),
     diffuse = list(fn = create_landscape_diffuse_treeline, params = list()),
     fingers = list(fn = create_landscape_fingers, params = list()),
     spots = list(fn = create_landscape_spots, params = list(spot_radius = 3)),
@@ -293,7 +293,7 @@ test_that("landscape generators handle very small landscapes", {
 
 test_that("landscape generators handle very large landscapes", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline,
+    sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse_treeline,
     spots = create_landscape_spots,
     fingers = create_landscape_fingers,
@@ -317,7 +317,7 @@ test_that("landscape generators handle very large landscapes", {
 
 test_that("landscape generators handle non-square landscapes without rotation", {
   generators <- list(
-    sharp = create_landscape_sharp_treeline,
+    sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
@@ -359,7 +359,7 @@ test_that("landscape generators handle non-square landscapes without rotation", 
 
 test_that("landscape generators with rotation handle non-square landscapes", {
   generators_with_rotation <- list(
-    sharp = create_landscape_sharp_treeline,
+    sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
@@ -401,7 +401,7 @@ test_that("landscape generators with rotation handle non-square landscapes", {
 # Extreme rotation angles -----------------------------------------------------
 test_that("landscape generators with rotation handle extreme angles", {
   generators_with_rotation <- list(
-    sharp = create_landscape_sharp_treeline,
+    sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots

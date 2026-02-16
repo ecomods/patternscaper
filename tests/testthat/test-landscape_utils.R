@@ -263,7 +263,7 @@ test_that("fill_and_binarize_matrix without binarization preserves interpolated 
 
 test_that("rotated landscapes have no NA values", {
   generators_with_rotation <- list(
-    sharp = create_landscape_sharp_treeline,
+    sharp = create_landscape_sharp,
     diffuse = create_landscape_diffuse_treeline,
     fingers = create_landscape_fingers,
     spots = create_landscape_spots,
