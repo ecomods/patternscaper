@@ -19,7 +19,7 @@
 #'     For example, 0.2 means the outer 20% of the radius has a gradient transition.
 #'     Works independently of `spot_radius_sd` (which varies the overall size,
 #'     while this parameter affects edge sharpness).
-#' @param invert_landscape Logical. If TRUE, creates bare patches invegetated ground
+#' @param invert_landscape Logical. If TRUE, creates bare patches in vegetated ground
 #'     (equivalent to "gaps" pattern). If FALSE (default), creates vegetated spots in bare ground.
 #'
 #' @details
