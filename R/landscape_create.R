@@ -288,8 +288,7 @@ create_landscapes <- function(
       n_spots = c(5, 10),
       spot_radius = c(0.1, 0.2) * width,
       spot_radius_sd = c(0, 0.02) * width,
-      regular_spots = c(TRUE, FALSE),
-      invert_landscape = c(TRUE)
+      regular_spots = c(TRUE, FALSE)
     ),
     labyrinth = list(
       frequency = c(2.5, 3.5),
