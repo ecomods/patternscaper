@@ -18,6 +18,7 @@ train_nn_pixels(
   loss = "categorical_crossentropy",
   optimizer = "adam",
   metrics = c("accuracy"),
+  validation_split = 0,
   callbacks = NULL,
   patience = 15,
   verbose = TRUE
@@ -73,6 +74,11 @@ Note: Advanced optimizer parameters (e.g., momentum, beta values) are not curren
 Additional options: "categorical_accuracy", "top_k_categorical_accuracy".
 Does not affect training, only monitoring. See \code{\link[keras3]{metric_accuracy}}.}
 
+\item{validation_split}{Numeric. Fraction of training data to use as validation set during
+final model training and passed to \code{\link[keras3]{fit}}(0-1, default: 0).
+When > 0, enables monitoring and early stopping on validation loss. Particularly useful when cv_method="none"
+to prevent overfitting. Ignored during CV fold training (which uses its own validation splits).}
+
 \item{callbacks}{List. Optional keras callbacks for advanced training control (default: NULL).
 Examples: early stopping, learning rate scheduling, model checkpointing.
 Note: Only applies to final model training. CV folds always use patience-based
@@ -80,13 +86,14 @@ early stopping if patience is specified. For an overview of available callbacks,
 see \code{\link[keras3]{callback_early_stopping}} (the callback used by default) and related `callback_` functions.}
 
 \item{patience}{Integer. Number of epochs with no improvement before early stopping (default: 15).
-Applied to both CV fold training (monitors validation loss) and final model training (monitors training loss).
+Applied to both CV fold training (monitors validation loss) and final model training (monitors validation loss if `validation_split` > 0).
 Only used when callbacks=NULL. Set to NULL to train for full epoch count without early stopping.
 Is passed to \code{\link[keras3]{callback_early_stopping}}.}
 
 \item{verbose}{Logical. Show training progress and performance summaries (default: TRUE).
-When TRUE, displays progress bar for final model training and prints performance metrics.
-When FALSE, runs silently. CV fold training always runs silently to reduce output clutter.}
+When TRUE, displays epoch-by-epoch training/validation metrics during final model training,
+plus CV fold accuracies and final performance summaries. CV fold epoch details are not shown.
+When FALSE, runs silently.}
 }
 \value{
 List containing:

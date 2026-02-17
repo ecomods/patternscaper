@@ -19,7 +19,7 @@ plot_landscape(
 - "pattern": uses only the landscape pattern
 - "both": uses "name (pattern)" format
 - "none": no title
-- Any other string: used as a custom title
+- Any other string: used as-is as a custom title
 Default: "pattern"}
 
 \item{show_legend}{Logical. Whether to show legend (default: TRUE).}
@@ -30,7 +30,8 @@ Default: "pattern"}
 ggplot object. Plot of the landscape.
 }
 \description{
-A wrapper function for the S3 method \code{plot.landscape} with additional customization options.
+Create a customizable plot of a landscape object with options for titles,
+legends, and display preferences.
 }
 \examples{
 

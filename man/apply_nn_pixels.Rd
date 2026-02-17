@@ -19,7 +19,7 @@ nearest neighbor interpolation, which preserves categorical cell values.
 two habitat types, or 0/1/2 for three types). Continuous data (e.g., elevation,
 gradients) is not supported.}
 
-\item{nn_model}{List. CNN model from train_nn_pixels().}
+\item{nn_model}{List. CNN model object from \code{\link{train_nn_pixels}}.}
 
 \item{return_performance}{Logical. Whether to return performance metrics when actual classes are available (default: FALSE).}
 
@@ -42,7 +42,14 @@ When actual classes unavailable or return_performance=FALSE: tibble with columns
     \item{predictions}{Tibble as above, plus actual_class column}
     \item{performance}{Performance metrics from evaluate_cv_performance()}
   }
-#' @examples
+}
+\description{
+Applies a trained CNN model to classify new landscapes based on their
+spatial patterns. Automatically resizes input landscapes to match the
+model's expected dimensions.
+}
+\examples{
+\dontrun{
 # Create training data
 training_landscapes <- create_landscapes(
   n = 200,
@@ -59,7 +66,7 @@ final_model <- train_nn_pixels(
 
 # Evaluate on separate test set
 test_landscapes <- create_landscapes(
-  n = 100,
+  n = 10,
   patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
 )
 results <- apply_nn_pixels(
@@ -68,8 +75,4 @@ results <- apply_nn_pixels(
   return_performance = TRUE
 )
 }
-\description{
-Applies a trained CNN model to classify new landscapes based on their
-spatial patterns. Automatically resizes input landscapes to match the
-model's expected dimensions.
 }
