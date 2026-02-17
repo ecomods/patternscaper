@@ -502,7 +502,7 @@ train_nn_pixels <- function(
 #'   **Note**: Input landscapes must contain categorical/discrete habitat data (e.g., 0/1 for
 #'   two habitat types, or 0/1/2 for three types). Continuous data (e.g., elevation,
 #'   gradients) is not supported.
-#' @param nn_model List. CNN model from train_nn_pixels().
+#' @param nn_model List. CNN model object from \code{\link{train_nn_pixels}}.
 #' @param return_performance Logical. Whether to return performance metrics when actual classes are available (default: FALSE).
 #' @param verbose Logical. Show informational messages and performance summaries (default: TRUE).
 #'   When TRUE, displays resize operations and performance evaluation results.
@@ -522,7 +522,8 @@ train_nn_pixels <- function(
 #'     \item{predictions}{Tibble as above, plus actual_class column}
 #'     \item{performance}{Performance metrics from evaluate_cv_performance()}
 #'   }
-#' #' @examples
+#' @examples
+#' \dontrun{
 #' # Create training data
 #' training_landscapes <- create_landscapes(
 #'   n = 200,
@@ -539,7 +540,7 @@ train_nn_pixels <- function(
 #'
 #' # Evaluate on separate test set
 #' test_landscapes <- create_landscapes(
-#'   n = 100,
+#'   n = 10,
 #'   patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
 #' )
 #' results <- apply_nn_pixels(
@@ -547,6 +548,7 @@ train_nn_pixels <- function(
 #'   nn_model = final_model,
 #'   return_performance = TRUE
 #' )
+#' }
 #' @export
 apply_nn_pixels <- function(
   landscapes,
