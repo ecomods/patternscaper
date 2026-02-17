@@ -49,7 +49,8 @@
 #'   Applied to both CV fold training (monitors validation loss) and final model training (monitors validation loss if `validation_split` > 0).
 #'   Only used when callbacks=NULL. Set to NULL to train for full epoch count without early stopping.
 #'   Is passed to \code{\link[keras3]{callback_early_stopping}}.
-#' @param validation_split Numeric. Fraction of training data to use as validation set during final model training (0-1, default: 0).
+#' @param validation_split Numeric. Fraction of training data to use as validation set during
+#'   final model training and passed to \code{\link[keras3]{fit}}(0-1, default: 0).
 #'   When > 0, enables monitoring and early stopping on validation loss. Particularly useful when cv_method="none"
 #'   to prevent overfitting. Ignored during CV fold training (which uses its own validation splits).
 #' @param verbose Logical. Show training progress and performance summaries (default: TRUE).
