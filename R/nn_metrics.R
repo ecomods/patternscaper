@@ -16,10 +16,10 @@
 #' @param cv_folds Integer. Number of folds for k-fold cross-validation.
 #'   May be automatically reduced if dataset is too small. Default: 5.
 #' @param hidden_layers Integer vector. Number of neurons in each hidden layer
-#'   passed to \code{\link{neuralnet::neuralnet()}}.
+#'   passed to \code{\link[neuralnet]{neuralnet}}.
 #'   Length determines number of hidden layers. Default: 6 (single hidden layer with 6 neurons).
 #' @param threshold Numeric. Threshold for partial derivatives as stopping criteria
-#'   passed to \code{\link{neuralnet::neuralnet()}}.
+#'   passed to \code{\link[neuralnet]{neuralnet}}.
 #'   Smaller values = more training iterations. Default: 0.01.
 #' @param stepmax Integer. Maximum number of training steps passed to \code{\link{neuralnet::neuralnet()}}. Default: 1e+05.
 #' @param model_path Character. Optional file path (must end in .rds) to save
