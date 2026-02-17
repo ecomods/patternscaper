@@ -1,6 +1,7 @@
 #' Plot a Landscape
 #'
-#' A wrapper function for the S3 method \code{plot.landscape} with additional customization options.
+#' Create a customizable plot of a landscape object with options for titles,
+#' legends, and display preferences.
 #'
 #' @param landscape A landscape object to plot.
 #' @param title Character. Controls the plot title:
@@ -8,7 +9,7 @@
 #'        - "pattern": uses only the landscape pattern
 #'        - "both": uses "name (pattern)" format
 #'        - "none": no title
-#'        - Any other string: used as a custom title
+#'        - Any other string: used as-is as a custom title
 #'        Default: "pattern"
 #' @param show_legend Logical. Whether to show legend (default: TRUE).
 #' @param legend_title Character. Title for the legend (default: "Value").
