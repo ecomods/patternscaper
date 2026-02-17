@@ -1,11 +1,11 @@
 #' Train a Convolutional Neural Network for Landscape Pattern Classification
 #'
-#' Trains a CNN model using the Keras framework to classify landscapes based on their
+#' Trains a CNN model using the Keras framework via \pkg{keras3} to classify landscapes based on their
 #' spatial patterns (pixel data). The function uses a multiscale CNN architecture optimized for
 #' distinguishing different landscape patterns.
 #'
-#' @param landscapes List. List of landscape objects created by `create_landscape()` or 
-#' `create_landscapes()`. 
+#' @param landscapes List. List of landscape objects created by \code{\link{create_landscape}} or
+#' \code{\link{create_landscapes}}.
 #' **Note**: Input landscapes must contain categorical/discrete habitat data 
 #' (e.g., 0/1 for two habitat types, or 0/1/2 for three types). 
 #' Continuous data (e.g., elevation, gradients) is not supported. 
@@ -13,7 +13,7 @@
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #'   \itemize{
 #'     \item "k-fold" or "loo": Performs cross-validation and returns performance metrics
-#'     \item "none": Trains on ALL provided data without validation. Use apply_nn_pixels()
+#'     \item "none": Trains on ALL provided data without validation. Use \code{\link{apply_nn_pixels}}
 #'           with a separate test set to evaluate performance.
 #'   }
 #' @param cv_folds Integer. Number of cross-validation folds when cv_method="k-fold" (default: 5).
@@ -22,22 +22,31 @@
 #' @param batch_size Integer. Batch size for training (default: 16).
 #' @param learning_rate Numeric. Learning rate for Adam optimizer (default: 0.001).
 #' @param model_path Character. Path to save model. Models are saved as `.keras` files.
-#'     (default: NULL means model is not saved).
-#' @param architecture Character. CNN architecture: "multiscale" (default).
-#' @param dropout_rate Numeric. Dropout rate for regularization (default: 0.3).
-#' @param dense_units Integer. Units in dense layer (default: 128).
+#'   (default: NULL means model is not saved).
+#' @param architecture Character. CNN architecture (default: "multiscale").
+#'   Currently only "multiscale" is supported, which uses multiple kernel sizes
+#'   (3x3 and 5x5) to capture patterns at different spatial scales.
+#' @param dropout_rate Numeric. Dropout rate for regularization (0-1, default: 0.3).
+#'  Higher values reduce overfitting but may decrease model capacity. Applied between
+#'  convolutional and dense layers.
+#' @param dense_units Integer. Number of units in the final dense layer before output
+#'  (default: 128). Controls model capacity for learning complex pattern combinations.
 #' @param loss Character. Loss function for training (default: "categorical_crossentropy").
-#'   Common alternatives: "sparse_categorical_crossentropy", "kullback_leibler_divergence".
-#' @param optimizer Character. Optimizer to use: "adam" (default), "sgd", "rmsprop".
-#'   Note: optimizer-specific parameters like momentum are currently not exposed.
+#'   Use "sparse_categorical_crossentropy" if labels are integers rather than one-hot encoded.
+#'   See \code{\link[keras3]{loss_categorical_crossentropy}} for details.
+#' @param optimizer Character. Optimizer algorithm: "adam" (default), "sgd", "rmsprop".
+#'   Adam is recommended for most cases. See \code{\link[keras3]{optimizer_adam}}.
+#'   Note: Advanced optimizer parameters (e.g., momentum, beta values) are not currently exposed.
 #' @param metrics Character vector. Metrics to track during training (default: c("accuracy")).
-#'   Common additions: "categorical_accuracy", "top_k_categorical_accuracy".
+#'   Additional options: "categorical_accuracy", "top_k_categorical_accuracy".
+#'   Does not affect training, only monitoring. See \code{\link[keras3]{metric_accuracy}}.
 #' @param callbacks List. Optional keras callbacks for advanced training control (default: NULL).
 #'   Examples: early stopping, learning rate scheduling, model checkpointing.
 #'   Note: Only applies to final model training. CV folds always use patience-based
-#'   early stopping if patience is specified.
+#'   early stopping if patience is specified. For an overview of available callbacks,
+#'   see \code{\link[keras3]{callback_early_stopping}} (the callback used by default) and related `callback_` functions.
 #' @param patience Integer. Number of epochs with no improvement before early stopping (default: 15).
-#'   Applied to both CV fold training (monitors validation loss) and final model training (monitors training loss).
+#'   Applied to both CV fold training (monitors validation loss) and final model training (monitors validation loss if `validation_split` > 0).
 #'   Only used when callbacks=NULL. Set to NULL to train for full epoch count without early stopping.
 #' @param verbose Logical. Show training progress and performance summaries (default: TRUE).
 #'   When TRUE, displays progress bar for final model training and prints performance metrics.
