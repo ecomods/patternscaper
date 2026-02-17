@@ -2,12 +2,12 @@
 % Please edit documentation in R/create_landscape_dense.R
 \name{create_landscape_dense}
 \alias{create_landscape_dense}
-\title{Create a Dense Landscape}
+\title{Create a bare landscape with very dense vegetation}
 \usage{
-create_landscape_dense(tree_prop = 0.9, width = 100, height = 100)
+create_landscape_dense(veg_prop = 0.9, width = 100, height = 100)
 }
 \arguments{
-\item{tree_prop}{Numeric. Proportion of cells with trees (0-1). Default: 0.9.}
+\item{veg_prop}{Numeric. Proportion of cells with vegetation (0-1). Default: 0.1.}
 
 \item{width}{Integer. Width of landscape in cells. Default: 100.}
 
@@ -20,16 +20,16 @@ A landscape object with pattern "dense" containing
   \item{params}{List of all input parameters used to generate the landscape}
 }
 \description{
-Creates a landscape with dense tree coverage using random distribution.
+Creates a landscape with dense vegetation cover using random distribution.
 This is a specialized wrapper around \code{\link{create_landscape_random}}
-with high tree proportions.
+with high vegetation proportions.
 }
 \examples{
-# Create default dense landscape (90\% trees)
+# Create default dense landscape (90\% vegetation)
 dense <- create_landscape_dense()
 
 # Create very dense landscape
-very_dense <- create_landscape_dense(tree_prop = 0.95)
+very_dense <- create_landscape_dense(veg_prop = 0.95)
 }
 \seealso{
 \code{\link{create_landscape_random}}, \code{\link{create_landscape_bare}}

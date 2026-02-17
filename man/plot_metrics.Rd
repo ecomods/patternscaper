@@ -34,7 +34,6 @@ patterns to maintain readability:
 - 6+ patterns: up to 6 metrics (2 rows x 3 columns)
 }
 \examples{
-\dontrun{
 landscapes <- create_landscapes(n = 20, patterns = c("labyrinth", "spots"))
 metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
 plot_metrics(metrics, selected_metrics = c("ai", "lsi"))
@@ -46,5 +45,4 @@ plot_metrics(metrics, selected_metrics = many_metrics)
 
 # Override limits if needed
 plot_metrics(metrics, selected_metrics = many_metrics, force = TRUE)
-}
 }

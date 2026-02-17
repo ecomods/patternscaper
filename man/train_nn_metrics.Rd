@@ -19,7 +19,7 @@ train_nn_metrics(
 \arguments{
 \item{metrics}{Tibble or data frame. Output from calculate_landscape_metrics()
 containing landscape metrics in long format with required columns:
-landscape_id, landscape_name, pattern, level, class, id, metric, value.}
+landscape_id, landscape_name, pattern, level, class, metric, value.}
 
 \item{metrics_selected}{Character vector of metric names to use as features,
 or NULL to use all available metrics. Default: NULL.}
@@ -31,13 +31,15 @@ Default: "k-fold".}
 \item{cv_folds}{Integer. Number of folds for k-fold cross-validation.
 May be automatically reduced if dataset is too small. Default: 5.}
 
-\item{hidden_layers}{Integer vector. Number of neurons in each hidden layer.
+\item{hidden_layers}{Integer vector. Number of neurons in each hidden layer
+passed to \code{\link[neuralnet]{neuralnet}}.
 Length determines number of hidden layers. Default: 6 (single hidden layer with 6 neurons).}
 
-\item{threshold}{Numeric. Threshold for partial derivatives as stopping criteria.
+\item{threshold}{Numeric. Threshold for partial derivatives as stopping criteria
+passed to \code{\link[neuralnet]{neuralnet}}.
 Smaller values = more training iterations. Default: 0.01.}
 
-\item{stepmax}{Integer. Maximum number of training steps. Default: 1e+05.}
+\item{stepmax}{Integer. Maximum number of training steps passed to \code{\link{neuralnet::neuralnet()}}. Default: 1e+05.}
 
 \item{model_path}{Character. Optional file path (must end in .rds) to save
 the trained model. Default: NULL (no saving).}
@@ -58,9 +60,36 @@ List containing:
   }
 }
 \description{
-Trains a multi-layer neural network model to classify landscapes 
-based on landscape metrics. Uses the neuralnet package. 
-The input neurons of the neural network refer to selected metrics 
-of the reference landscapes and the output by the pattern types 
-of the reference landscapes.
+Trains a multi-layer neural network model to classify landscapes
+using landscape metrics as features and using the \pkg{neuralnet} package.
+The network's input layer has one neuron per metric, and the
+output layer represents the pattern classes.
+}
+\examples{
+\donttest{
+# Generate training landscapes
+landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse"))
+
+# Calculate landscape metrics
+metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
+
+# Train model with cross-validation
+model <- train_nn_metrics(metrics, cv_method = "k-fold", cv_folds = 3)
+
+# Train with specific metrics
+selected <- c("ai", "lsi", "ed", "np")
+model <- train_nn_metrics(
+  metrics,
+  metrics_selected = selected,
+  hidden_layers = c(8, 4)
+)
+}
+
+\dontrun{
+# Save model to file
+model <- train_nn_metrics(
+  metrics,
+  model_path = "models/landscape_classifier.rds"
+)
+}
 }

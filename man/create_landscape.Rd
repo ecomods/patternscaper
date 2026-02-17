@@ -7,6 +7,8 @@
 create_landscape(
   pattern = c("random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
     "bands", "spots", "gaps", "labyrinth"),
+  width = 100,
+  height = 100,
   name = NULL,
   custom_pattern = NULL,
   ...
@@ -17,6 +19,10 @@ create_landscape(
 "fingers", "bands", "clusters", "spots", "gaps",
 "labyrinth"}
 
+\item{width}{Integer. Width of the landscape in pixels (default: 100).}
+
+\item{height}{Integer. Height of the landscape in pixels (default: 100).}
+
 \item{name}{Character. Optional name for the landscape (default: NULL).}
 
 \item{custom_pattern}{Character. Optional pattern for the landscape (default: NULL uses the default
@@ -24,12 +30,6 @@ pattern of the corresponding function).}
 
 \item{...}{Parameters passed to specific landscape functions. See the documentation
 of the individual functions for details on required and optional parameters.}
-
-\item{width}{Integer. Width of the landscape in pixels (default: 100).}
-
-\item{height}{Integer. Height of the landscape in pixels (default: 100).}
-
-\item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
 \value{
 A landscape object with pattern corresponding to the pattern, containing:
@@ -52,13 +52,13 @@ clustered_default <- create_landscape("clustered")
 # Create a modified landscape with custom parameters
 random_modified <- create_landscape(
   "random",
-  tree_prop = 0.3
+  veg_prop = 0.3
 )
 
 # Create a modified landscape with custom parameters
 diffuse_modified <- create_landscape(
   "diffuse",
-  treeline_position = 0.3,
+  boundary_position = 0.3,
   steepness = 0.1
 )
 
@@ -77,9 +77,9 @@ bands_rotated <- create_landscape(
 \code{\link{create_landscape_random}} for "random" pattern parameters. "bare" and "dense" are aliases but
     are produced either with low or high tree probabilities
 
-\code{\link{create_landscape_sharp_treeline}} for "sharp" pattern parameters
+\code{\link{create_landscape_sharp}} for "sharp" pattern parameters
 
-\code{\link{create_landscape_diffuse_treeline}} for "diffuse" pattern parameters
+\code{\link{create_landscape_diffuse}} for "diffuse" pattern parameters
 
 \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
 

@@ -12,8 +12,7 @@ create_landscape_spots(
   spot_radius_sd = 0,
   radius_noise_fraction = 0,
   invert_landscape = FALSE,
-  regular_spots = FALSE,
-  rotation = 0
+  regular_spots = FALSE
 )
 }
 \arguments{
@@ -29,7 +28,7 @@ cannot accommodate the requested number at the given `spot_radius`.}
 Must be positive and smaller than landscape dimensions.}
 
 \item{spot_radius_sd}{Numeric. Standard deviation for random variation in spot radius.
-Each spot's radius is sampled from N(spot_radius, spot_radius_sd). 
+Each spot's radius is sampled from N(spot_radius, spot_radius_sd).
 (detault: 0 - no variation)}
 
 \item{radius_noise_fraction}{Numeric (0 to 1). Proportion of the spot radius
@@ -39,14 +38,11 @@ For example, 0.2 means the outer 20% of the radius has a gradient transition.
 Works independently of `spot_radius_sd` (which varies the overall size,
 while this parameter affects edge sharpness).}
 
-\item{invert_landscape}{Logical. If TRUE, creates bare patches invegetated ground
+\item{invert_landscape}{Logical. If TRUE, creates bare patches in vegetated ground
 (equivalent to "gaps" pattern). If FALSE (default), creates vegetated spots in bare ground.}
 
 \item{regular_spots}{Logical. If TRUE, spots are arranged on a hexagonal grid
 using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).}
-
-\item{rotation}{Numeric. Rotation angle in degrees (unused, present for compatibility
-with other landscape generators). Required by \code{\link{create_landscapes}}.}
 }
 \value{
 A landscape object with pattern "spots" containing:

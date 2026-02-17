@@ -2,12 +2,12 @@
 % Please edit documentation in R/create_landscape_bare.R
 \name{create_landscape_bare}
 \alias{create_landscape_bare}
-\title{Create a Bare Landscape}
+\title{Create a bare landscape with very sparse vegetation}
 \usage{
-create_landscape_bare(tree_prop = 0.1, width = 100, height = 100)
+create_landscape_bare(veg_prop = 0.1, width = 100, height = 100)
 }
 \arguments{
-\item{tree_prop}{Numeric. Proportion of cells with trees (0-1). Default: 0.1.}
+\item{veg_prop}{Numeric. Proportion of cells with vegetation (0-1). Default: 0.1.}
 
 \item{width}{Integer. Width of landscape in cells. Default: 100.}
 
@@ -20,16 +20,16 @@ A landscape object with pattern "bare" containing.
   \item{params}{List of all input parameters used to generate the landscape}
 }
 \description{
-Creates a landscape with sparse tree coverage using random distribution.
+Creates a landscape with sparse vegetation cover using random distribution.
 This is a specialized wrapper around \code{\link{create_landscape_random}}
-with low tree proportions.
+with low vegetation proportions.
 }
 \examples{
-# Create default bare landscape (10\% trees)
+# Create default bare landscape (10\% vegetation)
 bare <- create_landscape_bare()
 
 # Create very sparse landscape
-very_bare <- create_landscape_bare(tree_prop = 0.05)
+very_bare <- create_landscape_bare(veg_prop = 0.05)
 }
 \seealso{
 \code{\link{create_landscape_random}}, \code{\link{create_landscape_dense}}

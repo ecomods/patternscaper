@@ -7,7 +7,7 @@
 evaluate_landscape_metrics(
   metrics,
   metrics_number = 10,
-  method = "coeffvar_all",
+  method = "kruskal_effsize",
   exclude_NA_metrics = TRUE,
   exclude_metrics = NULL,
   correlation_threshold = 0.7,
@@ -19,7 +19,7 @@ evaluate_landscape_metrics(
 
 \item{metrics_number}{Integer. Number of top metrics to return (default: 10).}
 
-\item{method}{Character. Selection method to use (default: "coeffvar_all").
+\item{method}{Character. Selection method to use (default: "kruskal_effsize").
 See 'Ranking Methods' section below for details.}
 
 \item{exclude_NA_metrics}{Logical. Whether to exclude metrics with NA values (default: TRUE).
@@ -38,11 +38,11 @@ or just a summary (default: FALSE).}
 Character vector. Names of metrics that best discriminate between pattern types.
 }
 \description{
-Identifies the metrics most suitable for discriminating between different pattern types 
-based on a specified selection method. The choice of method affects the ranking: 
-parametric methods assume linear relationships and normally distributed residuals, 
-while non-parametric methods are more robust to outliers and deviations from normality. 
-This function is useful for selecting informative metrics to train the 
+Identifies the metrics most suitable for discriminating between different pattern types
+based on a specified selection method. The choice of method affects the ranking:
+parametric methods assume linear relationships and normally distributed residuals,
+while non-parametric methods are more robust to outliers and deviations from normality.
+This function is useful for selecting informative metrics to train the
 metric-based neural network.
 }
 \section{Ranking Methods}{

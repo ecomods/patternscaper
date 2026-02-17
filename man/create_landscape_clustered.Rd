@@ -7,7 +7,7 @@
 create_landscape_clustered(
   width = 100,
   height = 100,
-  treeline_position = 0.5,
+  boundary_position = 0.5,
   random_spots = c(0, 0),
   n_clusters = 10,
   cluster_radius = 5,
@@ -22,7 +22,7 @@ create_landscape_clustered(
 
 \item{height}{Integer. Height of the landscape in pixels (default: 100).}
 
-\item{treeline_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
+\item{boundary_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
 
 \item{random_spots}{Numeric vector of length 2. Probabilities for flipping
 cells: `[prob(1→0), prob(0→1)]`. Used to add noise to the landscape
@@ -63,7 +63,7 @@ clustered_default <- create_landscape_clustered()
 
 # Modified clustered features with horizontally elongated clusters
 clustered_modified <- create_landscape_clustered(
-  treeline_position = 0.2,
+  boundary_position = 0.2,
   n_clusters = 8,
   cluster_radius = 7,
   scatter_zone_prop = 0.6,

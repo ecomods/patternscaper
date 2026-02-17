@@ -25,7 +25,8 @@ When return_performance = FALSE or actual classes unavailable:
     \item{landscape_name}{Character landscape name (if available)}
     \item{predicted_class}{Predicted landscape pattern}
     \item{confidence}{Prediction confidence (maximum probability across classes)}
-    \item{<class_name>}{Probability for each class the model was trained on}
+    \item{<class_name>}{Probability for each class the model was trained on.
+          Probabilities are derived from raw neural network outputs using softmax transformation.}
   }
 
   When return_performance = TRUE and actual classes available:
@@ -37,7 +38,31 @@ When return_performance = FALSE or actual classes unavailable:
   }
 }
 \description{
-Applies a trained neural network model to classify new landscapes according to their 
-spatial pattern type. The function automatically calculates the required landscape 
+Applies a trained neural network model to classify new landscapes according to their
+spatial pattern type. The function automatically calculates the required landscape
 metrics needed by the model and scales them appropriately.
+}
+\examples{
+\donttest{
+# Train a model on reference landscapes
+train_landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse"))
+metrics <- calculate_landscape_metrics(train_landscapes, level = "landscape")
+model <- train_nn_metrics(metrics, cv_method = "k-fold", cv_folds = 3)
+
+# Apply to new landscapes
+new_landscapes <- create_landscapes(n = 5, patterns = c("random", "sharp"))
+predictions <- apply_nn_metrics(new_landscapes, model)
+predictions
+
+# Evaluate performance on labeled data
+results <- apply_nn_metrics(new_landscapes, model, return_performance = TRUE)
+results$predictions
+results$performance
+}
+
+\dontrun{
+# Load a saved model
+model <- readr::read_rds("models/landscape_classifier.rds")
+predictions <- apply_nn_metrics(new_landscapes, model)
+}
 }

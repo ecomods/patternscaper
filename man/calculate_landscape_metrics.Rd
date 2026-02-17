@@ -16,7 +16,7 @@ element with a SpatRaster, plus \code{name} and \code{pattern} metadata.}
 available metrics at the specified level). Use \code{list_lsm()} from landscapemetrics
 to see available metrics.}
 
-\item{level}{Character. Level(s) of metrics to calculate: "patch", "class", "landscape"
+\item{level}{Character. Level(s) of metrics to calculate:"class", "landscape"
 (default: "landscape").}
 }
 \value{
@@ -26,9 +26,8 @@ A tibble with the following columns:
     \item{landscape_name}{Name of the landscape from the landscape object}
     \item{pattern}{Pattern type from the landscape object (e.g., "labyrinth", "spots")}
     \item{layer}{Layer number (from landscapemetrics output)}
-    \item{level}{Metric level: "patch", "class", or "landscape"}
-    \item{class}{Class value (for class- and patch-level metrics, NA for landscape-level)}
-    \item{id}{Patch ID (for patch-level metrics, NA otherwise)}
+    \item{level}{Metric level: "class", or "landscape"}
+    \item{class}{Class value (for class-level metrics, NA for landscape-level)}
     \item{metric}{Name of the calculated metric}
     \item{value}{Calculated metric value}
     \item{warnings}{Any warnings generated during calculation (NA if none)}

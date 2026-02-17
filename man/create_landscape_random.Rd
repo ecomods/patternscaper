@@ -2,17 +2,17 @@
 % Please edit documentation in R/landscape_create_random.R
 \name{create_landscape_random}
 \alias{create_landscape_random}
-\title{Create a Landscape with Randomly Distributed Trees}
+\title{Create a Binary Landscape with Randomly Distributed Vegetation}
 \usage{
-create_landscape_random(width = 100, height = 100, tree_prop = 0.5)
+create_landscape_random(width = 100, height = 100, veg_prop = 0.5)
 }
 \arguments{
 \item{width}{Integer. Width of the landscape in pixels (default: 100).}
 
 \item{height}{Integer. Height of the landscape in pixels (default: 100).}
 
-\item{tree_prop}{Numeric. Probability of tree presence (0-1) (default: 0.5).
-Higher values result in a denser tree cover.}
+\item{veg_prop}{Numeric. Probability of vegetation presence (0-1) (default: 0.5).
+Higher values result in a denser vegetation cover.}
 }
 \value{
 A landscape object with random pattern containing:
@@ -21,14 +21,14 @@ A landscape object with random pattern containing:
   \item{params}{List of all input parameters used to generate the landscape}
 }
 \description{
-Generates a binary landscape with randomly distributed trees.
+Create a Binary Landscape with Randomly Distributed Vegetation
 }
 \examples{
 # Default randomly distributed trees
 random_default <- create_landscape_random()
 
 # Higher tree density
-random_dense <- create_landscape_random(tree_prop = 0.7)
+random_dense <- create_landscape_random(veg_prop = 0.7)
 
 # Custom dimensions
 random_large <- create_landscape_random(width = 200, height = 150)

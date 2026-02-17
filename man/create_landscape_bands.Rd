@@ -7,7 +7,7 @@
 create_landscape_bands(
   width = 100,
   height = 100,
-  treeline_position = 0.5,
+  boundary_position = 0.5,
   band_zone_prop = 0.2,
   band_thickness = 3,
   band_spacing = 10,
@@ -22,7 +22,7 @@ create_landscape_bands(
 
 \item{height}{Integer. Height of the landscape in pixels (default: 100).}
 
-\item{treeline_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
+\item{boundary_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
 
 \item{band_zone_prop}{Numeric. Proportion of height of the total landscape to
 allocate for bands below the treeline (default: 0.2). If the band zone is too small
@@ -55,7 +55,7 @@ bands_default <- create_landscape_bands()
 
 # Modified sine bands with thicker bands, wider spacing and noise
 bands_modified <- create_landscape_bands(
-  treeline_position = 0.3,
+  boundary_position = 0.3,
   band_zone_prop = 0.5,
   band_thickness = 5,
   band_spacing = 15,
