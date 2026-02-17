@@ -6,9 +6,9 @@
 #'
 #' @param landscapes List. List of landscape objects created by \code{\link{create_landscape}} or
 #' \code{\link{create_landscapes}}.
-#' **Note**: Input landscapes must contain categorical/discrete habitat data 
-#' (e.g., 0/1 for two habitat types, or 0/1/2 for three types). 
-#' Continuous data (e.g., elevation, gradients) is not supported. 
+#' **Note**: Input landscapes must contain categorical/discrete habitat data
+#' (e.g., 0/1 for two habitat types, or 0/1/2 for three types).
+#' Continuous data (e.g., elevation, gradients) is not supported.
 #' All landscapes used for training are required to have the same spatial extent.
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #'   \itemize{
@@ -48,9 +48,14 @@
 #' @param patience Integer. Number of epochs with no improvement before early stopping (default: 15).
 #'   Applied to both CV fold training (monitors validation loss) and final model training (monitors validation loss if `validation_split` > 0).
 #'   Only used when callbacks=NULL. Set to NULL to train for full epoch count without early stopping.
+#'   Is passed to \code{\link[keras3]{callback_early_stopping}}.
+#' @param validation_split Numeric. Fraction of training data to use as validation set during final model training (0-1, default: 0).
+#'   When > 0, enables monitoring and early stopping on validation loss. Particularly useful when cv_method="none"
+#'   to prevent overfitting. Ignored during CV fold training (which uses its own validation splits).
 #' @param verbose Logical. Show training progress and performance summaries (default: TRUE).
-#'   When TRUE, displays progress bar for final model training and prints performance metrics.
-#'   When FALSE, runs silently. CV fold training always runs silently to reduce output clutter.
+#'   When TRUE, displays epoch-by-epoch training/validation metrics during final model training,
+#'   plus CV fold accuracies and final performance summaries. CV fold epoch details are not shown.
+#'   When FALSE, runs silently.
 #'
 #' @return List containing:
 #'   \describe{
@@ -80,7 +85,7 @@
 #'   cv_folds = 5
 #' )
 #'
-#' # Train on all data for final deployment model
+#' # Train without cross validation on all data
 #' final_model <- train_nn_pixels(
 #'   landscapes = training_landscapes,
 #'   cv_method = "none",
@@ -101,14 +106,11 @@ train_nn_pixels <- function(
   loss = "categorical_crossentropy",
   optimizer = "adam",
   metrics = c("accuracy"),
+  validation_split = 0,
   callbacks = NULL,
   patience = 15,
   verbose = TRUE
 ) {
-  # Configure keras verbosity levels
-  fold_verbose <- 0 # Always silent for CV folds to reduce output
-  final_verbose <- if (verbose) 1 else 0
-
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold", "loo")) {
@@ -124,6 +126,10 @@ train_nn_pixels <- function(
   }
   if (learning_rate <= 0 || learning_rate >= 1) {
     cli::cli_abort("learning_rate must be between 0 and 1")
+  }
+  # validate validation_split
+  if (validation_split < 0 || validation_split >= 1) {
+    cli::cli_abort("validation_split must be between 0 and 1")
   }
 
   # Validate and normalize model_path if provided
@@ -198,16 +204,50 @@ train_nn_pixels <- function(
   input_shape <- c(dim(x_data)[2], dim(x_data)[3], dim(x_data)[4])
 
   # Setup callbacks ---------------------------------------------------------
-  # If user didn't provide callbacks and patience is specified, add early stopping
+  # If user didn't provide callbacks, patience is specified and the user
+  # wants to add a validation split to final model training, add early stopping
   # This callback will be used for final model training (not CV folds)
-  if (is.null(callbacks) && !is.null(patience)) {
+  if (is.null(callbacks) && !is.null(patience) && validation_split > 0) {
     callbacks <- list(
       keras3::callback_early_stopping(
-        monitor = "loss",
+        monitor = "val_loss",
         patience = patience,
         restore_best_weights = TRUE
       )
     )
+  }
+
+  # Add a progress callback when verbose = TRUE
+  if (verbose) {
+    progress_callback <- keras3::callback_lambda(
+      on_epoch_end = function(epoch, logs) {
+        # Check if we have validation data
+        if (validation_split > 0) {
+          cat(sprintf(
+            "Epoch %d - loss: %.4f - acc: %.4f - val_loss: %.4f - val_acc: %.4f\n",
+            epoch,
+            logs$loss,
+            logs$accuracy,
+            logs$val_loss,
+            logs$val_accuracy
+          ))
+        } else {
+          cat(sprintf(
+            "Epoch %d - loss: %.4f - accuracy: %.4f\n",
+            epoch,
+            logs$loss,
+            logs$accuracy
+          ))
+        }
+        flush.console()
+      }
+    )
+
+    if (is.null(callbacks)) {
+      callbacks <- list(progress_callback)
+    } else {
+      callbacks <- c(callbacks, progress_callback)
+    }
   }
 
   # Cross-validation ----------------------------------------------------------
@@ -290,7 +330,7 @@ train_nn_pixels <- function(
           batch_size = batch_size,
           validation_data = list(x_val, y_val),
           callbacks = fold_callbacks,
-          verbose = fold_verbose
+          verbose = 0
         )
 
       # Evaluate the model on the validation fold
@@ -348,7 +388,9 @@ train_nn_pixels <- function(
       cli::cli_text("")
     }
 
-    cli::cli_h2("Training final model on all data")
+    cli::cli_h2(
+      "Training final model on all data (validation split: {validation_split})"
+    )
 
     # Build final model with all data
     final_model <- create_keras_model(
@@ -374,14 +416,15 @@ train_nn_pixels <- function(
         epochs = epochs,
         batch_size = batch_size,
         callbacks = callbacks,
-        verbose = final_verbose
+        validation_split = validation_split,
+        verbose = 0
       )
   } else {
     # No cross-validation: train on ALL data
     cli::cli_h2("Training final model on all data")
     if (verbose) {
       cli::cli_alert_info(
-        "Training on all data (no validation split)..."
+        "Training on all data (validation split is {validation_split})..."
       )
     }
 
@@ -406,8 +449,9 @@ train_nn_pixels <- function(
         y = y_data,
         epochs = epochs,
         batch_size = batch_size,
+        validation_split = validation_split,
         callbacks = callbacks,
-        verbose = final_verbose
+        verbose = 0
       )
 
     # No validation metrics available
