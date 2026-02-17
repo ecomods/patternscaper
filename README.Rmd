@@ -46,7 +46,7 @@ After successful installation, get started by following the detailed workflow de
 
 To cite `spatPatClassifyR` in publications, please use:
 
-Tietjen et al. (2026). ...
+WILL BE ADDED AFTER PEER REVIEW
 
 To get a BibTex entry for citing, please use `citation("spatPatClassifyR")`.
 

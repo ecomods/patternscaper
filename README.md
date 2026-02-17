@@ -26,7 +26,7 @@ input configurations. For the self-organized landscapes, we additionally
 demonstrate the application of neural networks trained with artificial
 landscapes on real-world photographs.
 
-<img src="man/figures/workflow.png" width="100%" />
+<img src="man/figures/workflow.png" alt="" width="100%" />
 
 ## Installation
 
@@ -47,7 +47,7 @@ workflow description in: [Get started](spatPatClassifyR.html)
 
 To cite `spatPatClassifyR` in publications, please use:
 
-Tietjen et al. (2026). …
+WILL BE ADDED AFTER PEER REVIEW
 
 To get a BibTex entry for citing, please use
 `citation("spatPatClassifyR")`.

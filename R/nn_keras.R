@@ -39,7 +39,7 @@
 #'   Note: Advanced optimizer parameters (e.g., momentum, beta values) are not currently exposed.
 #' @param metrics Character vector. Metrics to track during training (default: c("accuracy")).
 #'   Additional options: "categorical_accuracy", "top_k_categorical_accuracy".
-#'   Does not affect training, only monitoring. See \code{\link[keras3]{metric_accuracy}}.
+#'   Does not affect training, only monitoring. See \code{\link[keras3]{compile}}.
 #' @param callbacks List. Optional keras callbacks for advanced training control (default: NULL).
 #'   Examples: early stopping, learning rate scheduling, model checkpointing.
 #'   Note: Only applies to final model training. CV folds always use patience-based
@@ -71,6 +71,7 @@
 #'       metadata only (see note field for evaluation instructions).}
 #'   }
 #' @export
+#' @importFrom utils flush.console
 #' @examples
 #' \dontrun{
 #' # Create training data

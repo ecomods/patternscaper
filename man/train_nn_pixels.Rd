@@ -72,7 +72,7 @@ Note: Advanced optimizer parameters (e.g., momentum, beta values) are not curren
 
 \item{metrics}{Character vector. Metrics to track during training (default: c("accuracy")).
 Additional options: "categorical_accuracy", "top_k_categorical_accuracy".
-Does not affect training, only monitoring. See \code{\link[keras3]{metric_accuracy}}.}
+Does not affect training, only monitoring. See \code{\link[keras3]{compile}}.}
 
 \item{validation_split}{Numeric. Fraction of training data to use as validation set during
 final model training and passed to \code{\link[keras3]{fit}}(0-1, default: 0).

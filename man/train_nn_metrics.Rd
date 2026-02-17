@@ -39,7 +39,7 @@ Length determines number of hidden layers. Default: 6 (single hidden layer with 
 passed to \code{\link[neuralnet]{neuralnet}}.
 Smaller values = more training iterations. Default: 0.01.}
 
-\item{stepmax}{Integer. Maximum number of training steps passed to \code{\link{neuralnet::neuralnet()}}. Default: 1e+05.}
+\item{stepmax}{Integer. Maximum number of training steps passed to \code{\link[neuralnet]{neuralnet}}. Default: 1e+05.}
 
 \item{model_path}{Character. Optional file path (must end in .rds) to save
 the trained model. Default: NULL (no saving).}

@@ -21,7 +21,7 @@
 #' @param threshold Numeric. Threshold for partial derivatives as stopping criteria
 #'   passed to \code{\link[neuralnet]{neuralnet}}.
 #'   Smaller values = more training iterations. Default: 0.01.
-#' @param stepmax Integer. Maximum number of training steps passed to \code{\link{neuralnet::neuralnet()}}. Default: 1e+05.
+#' @param stepmax Integer. Maximum number of training steps passed to \code{\link[neuralnet]{neuralnet}}. Default: 1e+05.
 #' @param model_path Character. Optional file path (must end in .rds) to save
 #'   the trained model. Default: NULL (no saving).
 #' @param verbose Logical. Print training details and cross-validation results.
@@ -345,7 +345,9 @@ train_nn_metrics <- function(
 #' # Train a model on reference landscapes
 #' train_landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse"))
 #' metrics <- calculate_landscape_metrics(train_landscapes, level = "landscape")
-#' model <- train_nn_metrics(metrics, cv_method = "k-fold", cv_folds = 3)
+#' # find the best 10 metics for classification
+#' best_10 <- best_10 <- evaluate_landscape_metrics(metrics, metrics_number =  10)
+#' model <- train_nn_metrics(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
 #'
 #' # Apply to new landscapes
 #' new_landscapes <- create_landscapes(n = 5, patterns = c("random", "sharp"))
