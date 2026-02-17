@@ -5,9 +5,11 @@
 #' can be shown.
 #'
 #' @param classification A data frame with columns: \code{landscape_id},
-#'   \code{actual_class}, \code{predicted_class}, and \code{confidence}.
-#' @param landscapes A list of landscape objects
-#'   corresponding to the classification results.
+#'   \code{actual_class}, \code{predicted_class}, and \code{confidence}. Can be
+#'   obtained from the CV-fold results of \code{\link{train_nn_metrics}}/\code{\link{train_nn_pixels}} or
+#'   the output of \code{\link{apply_nn_metrics}}/\code{\link{apply_nn_pixels}}.
+#' @param landscapes A list of landscape objects corresponding one-to-one and in the same order as the rows in `classification`.
+#'   The easiest way to ensure this is to use the same list of landscapes for both training and plotting.
 #' @param only_misclassified Logical; if \code{TRUE}, only misclassified
 #'   landscapes are plotted. Default is \code{FALSE}.
 #' @param ... Additional arguments passed to \code{\link{plot_landscape_list}},
@@ -16,23 +18,7 @@
 #'
 #' @return A patchwork object combining landscape plots with classification annotations.
 #'
-#' @details The function checks input validity, filters misclassified
-#'   landscapes if requested, and generates annotated plots for each landscape.
-#'
-#'   The \code{titles} parameter is automatically generated from classification
-#'   results and cannot be overridden via \code{...}.
-#'
 #' @examples
-#' # Example usage:
-#' # plots <- plot_classified_landscapes(classification, landscape_list)
-#'
-#' # With custom legend and grid layout
-#' # plots <- plot_classified_landscapes(
-#' #   classification,
-#' #   landscape_list,
-#' #   show_legend = FALSE,
-#' #   ncol = 4
-#' # )
 #' \dontrun{
 #' # Train model and get validation results
 #' model <- train_nn_metrics(landscapes, metrics)
