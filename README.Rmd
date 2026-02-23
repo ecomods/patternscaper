@@ -23,7 +23,7 @@ Once trained, the neural network can be applied to new landscapes with unknown s
 
 In the initial publication of the `spatPatClassifyR` package, two use cases are demonstrated: different pattern types in ecotones and different pattern types in self-organized landscapes. In both use cases we show the performance of both neural network approaches dependent on input configurations. For the self-organized landscapes, we additionally demonstrate the application of neural networks trained with artificial landscapes on real-world photographs.
 
-```{r, fig.width=8, fig.height=6, echo=FALSE}
+```{r, fig.width=8, fig.height=6, echo=FALSE, fig.alt="Diagram showing the spatPatClassifyR workflow in two phases: (1) Training phase where training landscapes are fed into a neural network using either landscape metrics or pixel information, and (2) Application phase where new artificial or real landscapes are classified by the trained neural network to predict the most likely landscape pattern class."}
 knitr::include_graphics("man/figures/workflow.png")
 ```
 

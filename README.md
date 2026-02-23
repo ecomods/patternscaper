@@ -26,7 +26,7 @@ input configurations. For the self-organized landscapes, we additionally
 demonstrate the application of neural networks trained with artificial
 landscapes on real-world photographs.
 
-<img src="man/figures/workflow.png" alt="" width="100%" />
+<img src="man/figures/workflow.png" alt="Diagram showing the spatPatClassifyR workflow in two phases: (1) Training phase where training landscapes are fed into a neural network using either landscape metrics or pixel information, and (2) Application phase where new artificial or real landscapes are classified by the trained neural network to predict the most likely landscape pattern class." width="100%" />
 
 ## Installation
 
