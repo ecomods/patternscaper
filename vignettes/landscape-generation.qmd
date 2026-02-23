@@ -353,7 +353,7 @@ In `spatPatClassifyR`,  landscapes are stored as lists containing the landscape 
 
 To learn how to transform your own raster data into this format, see [vignette on importing landscapes](importing-landscapes.html).
 
-Each landscapes is stored as a list with the following components:
+Each landscape is stored as a list with the following components:
 
 - data: The landscape object as a `SpatRaster` class
 - pattern: Pattern type (e.g., "spots", "clustered")

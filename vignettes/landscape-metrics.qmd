@@ -46,14 +46,14 @@ landscape_metrics <- calculate_landscape_metrics(
 )
 ```
 
-To calculate selected metrics, provide a vector of valide metric names to the `metrics` argument. Find available metric names using `landscapemetrics::list_lsm()` as shown above.
+To calculate selected metrics, provide a vector of valid metric names to the `metrics` argument. Find available metric names using `landscapemetrics::list_lsm()` as shown above.
 
 ```{r}
 # Calculate all class-level metrics for the sample landscapes
 class_metrics <- calculate_landscape_metrics(
   sample_landscapes,
   level = "class",
-  metrics = c("ai", "area_cv", "cai_cv") # Define a subset of metrics to calculates
+  metrics = c("ai", "area_cv", "cai_cv") # Define a subset of metrics to calculate
 )
 ```
 

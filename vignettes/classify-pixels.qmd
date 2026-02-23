@@ -78,7 +78,7 @@ Here, we train the model using 2-fold cross-validation to keep computational tim
 low.
 
 :::{.callout-note}
-## Low fold accuaracy
+## Low fold accuracy
 
 The function will print fold accuracies during training (see below). If the accuracy is low,
 consider increasing the number of training landscapes or check the function help for other options to improve model performance.
