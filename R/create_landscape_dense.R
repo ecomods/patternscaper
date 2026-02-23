@@ -1,4 +1,4 @@
-#' Create a bare landscape with very dense vegetation
+#' Create a landscape with very dense vegetation
 #'
 #' Creates a landscape with dense vegetation cover using random distribution.
 #' This is a specialized wrapper around \code{\link{create_landscape_random}}
