@@ -67,7 +67,7 @@ The model can be trained with or without cross-validation. Valid methods for
 the cross-validation method `cv_method` are:
 
 - `"none"`: No cross-validation, train on all data.
-- `"kfold"`: k-fold cross-validation with `cv_folds` number of folds.
+- `"k-fold"`: k-fold cross-validation with `cv_folds` number of folds.
 - `"loo"`: leave-one-out cross-validation.
 
 For details and further options see the function help of `train_nn_pixels()`.
