@@ -1,7 +1,7 @@
 ---
-title: "landscape-metrics"
+title: "Calculate and evaluate landscape metrics"
 vignette: >
-  %\VignetteIndexEntry{landscape-metrics}
+  %\VignetteIndexEntry{Calculate and evaluate landscape metrics}
   %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
 knitr:

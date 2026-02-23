@@ -26,7 +26,7 @@ You can:
 
 - Generate batches of training landscapes with `create_landscapes()`
 - Create individual landscapes with custom parameters using `create_landscape()`
-- Visualize an individual landscape with `plot_landscape()
+- Visualize an individual landscape with `plot_landscape()`
 - Visualize multiple landscapes in a grid with `plot_landscape_list()`
 
 ### Available patterns
@@ -209,7 +209,7 @@ plot_landscape_list(c(no_rotation, defined_angles))
 
 #### Pattern-specific parameters
 
-You can modify default parameters for all generated landscapes of a specific pattern by passing a list of parameter values to the `params_list ` argument. For example, to create landscapes with more spots of larger size:
+You can modify default parameters for all generated landscapes of a specific pattern by passing a list of parameter values to the `params_list` argument. For example, to create landscapes with more spots of larger size:
 
 ```{r}
 #| label: custom-parameters
@@ -349,7 +349,7 @@ plot_landscape_list(list(labyrinth_default, labyrinth_complex), titles = "name")
 
 ## The landscape Object
 
-In `spatPatClassifyR`,  landscapes are stored as lists containing the landscape data and metadata. All landscape generation functions return landscapes in this format and all other functions expect landscapes to be provided in this format. 
+In `spatPatClassifyR`, landscapes are stored as lists containing the landscape data and metadata. All landscape generation functions return landscapes in this format and all other functions expect landscapes to be provided in this format.
 
 To learn how to transform your own raster data into this format, see [vignette on importing landscapes](importing-landscapes.html).
 
@@ -389,5 +389,5 @@ landscapes_example
 
 - See `vignette("landscape-metrics")` for extracting landscape features and finding the most informative metrics
 - See `vignette("classify-metrics")` for training spatial pattern classifiers on the landscape metrics
-- see `vignette("classify-pixels")` for training spatial pattern classifiers on the raw landscape data using keras
+- See `vignette("classify-pixels")` for training spatial pattern classifiers on the raw landscape data using Keras
 
