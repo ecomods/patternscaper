@@ -12,7 +12,7 @@ knitr:
     comment: '#>'
 ---
 
-The workflow to classify landscapes directly from raster data using neural networks (see [vignette](classify-pixels.html)) `keras3` and its correct configuration.
+The workflow to classify landscapes directly from raster data using neural networks (see [vignette](classify-pixels.html)) requires `keras3` and its correct configuration.
 
 In our experience, it can be a bit tricky to set up correctly, therefore we 
 provide this guide to help you with the installation.
@@ -72,7 +72,7 @@ reticulate::py_discover_config()
 This should display your Python installation details, not `NULL`.
 
 :::{.callout-warning}
-**Avoid Python 3.13+** as TensorFlow does not fully support these newer versions yet.Use Python 3.10 or 3.11.
+**Avoid Python 3.13+** as TensorFlow does not fully support these newer versions yet. Use Python 3.10 or 3.11.
 :::
 
 ## Install Keras and TensorFlow
