@@ -19,6 +19,7 @@ utils::globalVariables(c(
   "actual_class",
   "precicted_class",
   "var",
+  "id",
   "var_value",
   "sd",
   "cv",
