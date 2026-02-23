@@ -15,6 +15,8 @@ test_that("landscape generators create valid landscape objects", {
     bands = create_landscape_bands,
     clustered = create_landscape_clustered,
     random = create_landscape_random,
+    bare = create_landscape_bare,
+    dense = create_landscape_dense,
     labyrinth = create_landscape_labyrinth
   )
 

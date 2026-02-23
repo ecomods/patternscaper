@@ -503,3 +503,25 @@ test_that("validate_cv_params handles edge case with exactly min samples", {
   expect_equal(result$cv_method, "k-fold")
   expect_equal(result$cv_folds, 5)
 })
+
+# set_random_seed tests --------------------------------------------------------
+
+test_that("set_random_seed makes R random results reproducible", {
+  set_random_seed(42)
+  x1 <- runif(10)
+
+  set_random_seed(42)
+  x2 <- runif(10)
+
+  expect_equal(x1, x2)
+})
+
+test_that("set_random_seed with different seeds gives different results", {
+  set_random_seed(42)
+  x1 <- runif(10)
+
+  set_random_seed(99)
+  x2 <- runif(10)
+
+  expect_false(all(x1 == x2))
+})
