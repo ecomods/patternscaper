@@ -62,7 +62,7 @@ evaluate_landscape_metrics <- function(
   correlation_threshold = 0.7,
   verbose = FALSE
 ) {
-  # Validate input data - USE cli::cli_abort for all errors
+  # Validate input data
   if (!is.data.frame(metrics) && !tibble::is_tibble(metrics)) {
     cli::cli_abort("metrics must be a data frame or tibble")
   }
@@ -181,12 +181,12 @@ evaluate_landscape_metrics <- function(
     method = method
   )
 
-  # Verbose output - KEEP as message() or use cli::cli_alert_info
+  # Verbose output
   if (verbose) {
     cli::cli_alert_info("Ranked metrics ({method}): {.val {ranked_metrics}}")
   }
 
-  # Return early if no correlation filtering needed - NO MESSAGE (expected behavior)
+  # Return early if no correlation filtering needed
   if (correlation_threshold >= 1) {
     available_count <- min(length(ranked_metrics), metrics_number)
     return(ranked_metrics[seq_len(available_count)])
