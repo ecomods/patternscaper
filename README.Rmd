@@ -29,7 +29,7 @@ knitr::include_graphics("man/figures/workflow.png")
 
 ## Installation
 
-You can install the development version of spatPatClassifyR from [GitHub](https://github.com/) with:
+You can install the development version of spatPatClassifyR from [GitHub](https://github.com/ecomods/spatPatClassifyR) with:
 
 ``` r
 # install.packages("pak")
@@ -39,7 +39,7 @@ pak::pak("ecomods/spatPatClassifyR")
 ## Get started
 
 After successful installation, get started by following the detailed workflow description in:
-[Get started](spatPatClassifyR.html)
+[Get started](https://ecomods.github.io/spatPatClassifyR/articles/spatPatClassifyR.html)
 
 
 ## Citation

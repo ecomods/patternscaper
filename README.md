@@ -31,7 +31,7 @@ landscapes on real-world photographs.
 ## Installation
 
 You can install the development version of spatPatClassifyR from
-[GitHub](https://github.com/) with:
+[GitHub](https://github.com/ecomods/spatPatClassifyR) with:
 
 ``` r
 # install.packages("pak")
@@ -41,7 +41,7 @@ pak::pak("ecomods/spatPatClassifyR")
 ## Get started
 
 After successful installation, get started by following the detailed
-workflow description in: [Get started](spatPatClassifyR.html)
+workflow description in: [Get started](https://ecomods.github.io/spatPatClassifyR/articles/spatPatClassifyR.html)
 
 ## Citation
 
