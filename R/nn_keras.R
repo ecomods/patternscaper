@@ -75,7 +75,7 @@
 #' @export
 #' @importFrom utils flush.console
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Create training data
 #' training_landscapes <- create_landscapes(
 #'   n = 200,
@@ -526,7 +526,7 @@ train_nn_pixels <- function(
 #'     \item{performance}{Performance metrics from evaluate_cv_performance()}
 #'   }
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Create training data
 #' training_landscapes <- create_landscapes(
 #'   n = 200,
@@ -552,6 +552,8 @@ train_nn_pixels <- function(
 #'   return_performance = TRUE
 #' )
 #' }
+#' @seealso \code{\link{train_nn_pixels}}, \code{\link{plot_classified_landscapes}}
+#' @family neural network application
 #' @export
 apply_nn_pixels <- function(
   landscapes,

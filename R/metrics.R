@@ -87,7 +87,7 @@ calculate_single_metric <- function(landscapes, function_name) {
 #' @importFrom purrr map_dfr
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Calculate all landscape-level metrics for a single landscape
 #' landscape <- create_landscape(pattern = "labyrinth")
 #' metrics <- calculate_landscape_metrics(landscape)

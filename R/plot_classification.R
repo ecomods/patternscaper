@@ -19,7 +19,7 @@
 #' @return A patchwork object combining landscape plots with classification annotations.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Train model and get validation results
 #' model <- train_nn_metrics(landscapes, metrics)
 #'

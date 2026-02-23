@@ -19,7 +19,7 @@
 #' @family neural network training
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Ensure reproducible training
 #' set_random_seed(42)
 #' model <- train_nn_pixels(landscapes, cv_folds = 5)

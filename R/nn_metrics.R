@@ -60,7 +60,7 @@
 #' )
 #' }
 #'
-#' \dontrun{
+#' \donttest{
 #' # Save model to file
 #' model <- train_nn_metrics(
 #'   metrics,
@@ -365,11 +365,13 @@ train_nn_metrics <- function(
 #' results$performance
 #' }
 #'
-#' \dontrun{
+#' \donttest{
 #' # Load a saved model
 #' model <- readr::read_rds("models/landscape_classifier.rds")
 #' predictions <- apply_nn_metrics(new_landscapes, model)
 #' }
+#' @seealso \code{\link{train_nn_metrics}}, \code{\link{plot_classified_landscapes}}
+#' @family neural network application
 #' @export
 #' @importFrom cli cli_abort cli_alert_warning cli_warn
 #' @importFrom dplyr filter select any_of all_of relocate rename bind_cols
