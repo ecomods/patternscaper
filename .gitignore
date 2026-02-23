@@ -2,6 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
+.Renviron
+.env
+.httr-oauth
 inst/doc
 models/
 docs/obsidian_files/
@@ -24,7 +27,6 @@ inst/examples/SelfOrga_Results_Class/Results/NeuralNet_SelfOrga_Test_Rep4_T150.R
 inst/extdata/landscape_class_metrics.csv
 
 # Ignore result files from Cluster
-inst/HPC/results_ecotones/*
 inst/HPC/results_ecotones/*
 inst/analyses/data/systematic_tests/*/*/*.rds
 **/.quarto/
