@@ -25,21 +25,23 @@ test_that("create_landscapes validates inputs", {
 
 test_that("create_landscapes returns correct number of landscapes", {
   set.seed(123)
-  # TODO: I removed spots and gaps for now because I get an error for them that
-  # I cannot fix
   landscapes <- create_landscapes(
     n = 10,
     patterns = c(
       "random",
+      "bare",
+      "dense",
+      "clustered",
+      "spots",
+      "gaps",
       "sharp",
       "diffuse",
       "fingers",
-      "clustered",
       "bands",
       "labyrinth"
     ),
-    width = 20,
-    height = 20
+    width = 50,
+    height = 50
   )
 
   expect_equal(length(landscapes), 10)
@@ -188,7 +190,6 @@ test_that("create_landscapes handles rotation correctly", {
 
 test_that("create_landscapes respects width and height", {
   set.seed(123)
-  # TODO: I removed spots and gaps for now because I get an error for them that
   landscapes <- create_landscapes(
     patterns = c(
       "random",
