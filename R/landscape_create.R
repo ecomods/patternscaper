@@ -6,9 +6,9 @@
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param pattern Character. pattern of landscape to generate: "random", "sharp", "diffuse",
-#'        "fingers", "bands", "clusters", "spots", "gaps",
-#'        "labyrinth"
+#' @param pattern Character. pattern of landscape to generate: "random", "bare",
+#'        "dense", "sharp", "diffuse", "fingers", "bands", "clustered",
+#'        "spots", "gaps", "labyrinth"
 #' @param name Character. Optional name for the landscape (default: NULL).
 #' @param custom_pattern Character. Optional pattern for the landscape (default: NULL uses the default
 #'     pattern of the corresponding function).
