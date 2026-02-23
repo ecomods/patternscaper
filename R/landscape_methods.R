@@ -29,6 +29,7 @@
 #' # Or explicitly
 #' print(l)
 #'
+#' @family landscape objects
 #' @importFrom terra res ext values
 #' @export
 print.landscape <- function(x, ...) {
@@ -117,6 +118,7 @@ print.landscape <- function(x, ...) {
 #' p + ggplot2::ggtitle("My custom title") +
 #'     ggplot2::theme_dark()
 #'
+#' @family landscape objects
 #' @importFrom terra as.data.frame
 #' @importFrom ggplot2 ggplot aes geom_raster coord_equal theme_minimal element_blank
 #' @export
