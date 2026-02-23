@@ -1,3 +1,42 @@
+#' spatPatClassifyR: Classify Spatial Landscape Patterns Using Neural Networks
+#'
+#' @description
+#' Classification of spatial landscape patterns using neural networks.
+#' The package provides tools for generating artificial landscapes with
+#' different spatial patterns, calculating landscape metrics, and training
+#' neural network classifiers.
+#'
+#' Two classification approaches are supported:
+#' \itemize{
+#'   \item **Pixel-based classification** using convolutional neural networks
+#'     via \code{\link[keras3]{keras3}} (see \code{\link{train_nn_pixels}})
+#'   \item **Metrics-based classification** using landscape metrics computed
+#'     with \code{\link[landscapemetrics]{landscapemetrics}} as input features
+#'     for a neural network (see \code{\link{train_nn_metrics}})
+#' }
+#'
+#' @section Typical workflow:
+#' \enumerate{
+#'   \item Generate training landscapes with \code{\link{create_landscapes}}
+#'   \item Optionally calculate and evaluate landscape metrics with
+#'     \code{\link{calculate_landscape_metrics}} and
+#'     \code{\link{evaluate_landscape_metrics}}
+#'   \item Train a classifier with \code{\link{train_nn_pixels}} or
+#'     \code{\link{train_nn_metrics}}
+#'   \item Apply the trained model to new landscapes with
+#'     \code{\link{apply_nn_pixels}} or \code{\link{apply_nn_metrics}}
+#'   \item Visualize results with \code{\link{plot_classified_landscapes}}
+#' }
+#'
+#' @references
+#' Baldauf, S., Tietjen, B., & Berger, U. (2025). spatPatClassifyR: An R
+#' package for classifying spatial landscape patterns using neural networks.
+#' *Methods in Ecology and Evolution*. In review.
+#'
+#' @docType package
+#' @name spatPatClassifyR
+"_PACKAGE"
+
 utils::globalVariables(c(
   "level",
   "pattern",
@@ -17,7 +56,7 @@ utils::globalVariables(c(
   "metric_name",
   "layer",
   "actual_class",
-  "precicted_class",
+  "predicted_class",
   "var",
   "id",
   "var_value",
@@ -26,6 +65,5 @@ utils::globalVariables(c(
   "fisher_score",
   "data",
   "kruskal_effsize",
-  "predicted_class",
   "mean_all"
 ))
