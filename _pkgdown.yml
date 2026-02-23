@@ -3,6 +3,58 @@ template:
   bootstrap: 5
   light-switch: true
 
+reference:
+- title: Landscape creation
+  desc: Functions for generating artificial landscapes with different spatial patterns
+  contents:
+  - create_landscape
+  - create_landscapes
+  - create_landscape_bands
+  - create_landscape_bare
+  - create_landscape_clustered
+  - create_landscape_dense
+  - create_landscape_diffuse
+  - create_landscape_fingers
+  - create_landscape_gaps
+  - create_landscape_labyrinth
+  - create_landscape_random
+  - create_landscape_sharp
+  - create_landscape_spots
+
+- title: Landscape objects
+  desc: Functions for creating and manipulating landscape objects
+  contents:
+  - landscape
+  - set_landscape_name
+  - set_landscape_pattern
+
+- title: Landscape metrics
+  desc: Calculate and evaluate landscape metrics
+  contents:
+  - calculate_landscape_metrics
+  - evaluate_landscape_metrics
+
+- title: Neural network training
+  desc: Train neural network classifiers
+  contents:
+  - train_nn_metrics
+  - train_nn_pixels
+  - set_random_seed
+
+- title: Neural network application
+  desc: Apply trained classifiers to new landscapes
+  contents:
+  - apply_nn_metrics
+  - apply_nn_pixels
+
+- title: Visualization
+  desc: Plot landscapes, metrics, and classification results
+  contents:
+  - plot_landscape
+  - plot_landscape_list
+  - plot_classified_landscapes
+  - plot_metrics
+
 navbar:
   components:
     articles:
