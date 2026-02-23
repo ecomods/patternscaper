@@ -19,6 +19,8 @@ BugReports: https://github.com/ecomods/spatPatClassifyR/issues
 Encoding: UTF-8
 LazyData: true
 License: GPL (>= 3)
+SystemRequirements: Python (>= 3.9) and TensorFlow (for keras3-based
+    classification only)
 RoxygenNote: 7.3.3
 Depends: R(>= 4.1.0)
 Imports: 
