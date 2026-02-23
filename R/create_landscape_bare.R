@@ -12,7 +12,6 @@
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string "bare"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
-#' @seealso \code{\link{create_landscape_random}}, \code{\link{create_landscape_dense}}
 #'
 #' @family landscape creation
 #' @export

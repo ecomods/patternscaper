@@ -13,8 +13,6 @@
 #'   \item{pattern}{Character string "dense"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @seealso \code{\link{create_landscape_random}}, \code{\link{create_landscape_bare}}
-#'
 #' @family landscape creation
 #' @examples
 #' # Create default dense landscape (90% vegetation)
