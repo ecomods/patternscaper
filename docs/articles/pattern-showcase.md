@@ -1,6 +1,7 @@
 # pattern-showcase
 
 ``` r
+
 library(spatPatClassifyR)
 ```
 
@@ -20,6 +21,7 @@ Represent transitions between two classes (e.g., forest and non-forest)
 along boundaries:
 
 ``` r
+
 boundary_patterns <- c(
   "sharp",
   "diffuse",
@@ -47,6 +49,7 @@ plot_landscape_list(boundary_showcase, title = "name", show_legend = FALSE)
 Complex spatial arrangements and textures without clear boundaries:
 
 ``` r
+
 spatial_patterns <- c("labyrinth", "spots", "gaps")
 
 spatial_showcase <- spatial_patterns |>
@@ -66,6 +69,7 @@ plot_landscape_list(spatial_showcase, title = "name", show_legend = FALSE)
 Uniform random distribution with controllable density:
 
 ``` r
+
 # Show random with different densities
 random_patterns <- c("bare", "random", "dense")
 

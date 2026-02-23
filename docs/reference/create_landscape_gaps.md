@@ -1,7 +1,7 @@
 # Create a Landscape with Gaps Pattern
 
-Generates a binary landscape with circular gaps (vegetation patches in
-bare ground). This is a convenience wrapper around
+Generates a binary landscape with circular gaps (bare patches in
+vegetated ground). This is a convenience wrapper around
 [`create_landscape_spots`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_spots.md)
 with `invert_landscape = TRUE` by default, making "gaps" and "spots"
 semantically distinct pattern names for the same underlying algorithm.
@@ -16,9 +16,7 @@ create_landscape_gaps(
   spot_radius = 5,
   spot_radius_sd = 0,
   radius_noise_fraction = 0,
-  invert_landscape = TRUE,
-  regular_spots = FALSE,
-  rotation = 0
+  regular_spots = FALSE
 )
 ```
 
@@ -45,9 +43,9 @@ create_landscape_gaps(
 
 - spot_radius_sd:
 
-  Numeric. Standard deviation for random variation in spot radius.
-  Default is 0 (no variation). Each spot's radius is sampled from
-  N(spot_radius, spot_radius_sd).
+  Numeric. Standard deviation for random variation in spot radius. Each
+  spot's radius is sampled from N(spot_radius, spot_radius_sd).
+  (default: 0 - no variation)
 
 - radius_noise_fraction:
 
@@ -58,53 +56,59 @@ create_landscape_gaps(
   (which varies the overall size, while this parameter affects edge
   sharpness).
 
-- invert_landscape:
-
-  Logical. If TRUE (default), creates vegetation patches in bare ground
-  (gaps pattern). If FALSE, creates bare spots in vegetation (equivalent
-  to spots pattern). This parameter is exposed to allow users to
-  override the default behavior if needed.
-
 - regular_spots:
 
   Logical. If TRUE, spots are arranged on a hexagonal grid using k-means
   clustering. If FALSE, spots are placed randomly (default: FALSE).
 
-- rotation:
-
-  Numeric. Rotation angle in degrees (unused, present for compatibility
-  with other landscape generators). Required by
-  [`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md).
-
 ## Value
 
-A landscape object with pattern "gaps" containing the generated
-landscape data and parameters.
+A landscape object with pattern "gaps" containing:
+
+- data:
+
+  SpatRaster with binary values (0 = bare ground, 1 = vegetation)
+
+- pattern:
+
+  Character string "gaps"
+
+- params:
+
+  List of all input parameters used to generate the landscape
 
 ## Details
 
 The distinction between "spots" and "gaps":
 
-- **spots**: Bare patches in vegetation matrix
-  (`invert_landscape = FALSE`)
+- **gaps**: Bare patches in vegetation matrix)
 
-- **gaps**: Vegetation patches in bare ground
-  (`invert_landscape = TRUE`)
+- **spots**: Vegetation patches in bare ground)
 
 Both patterns use the same algorithm; the pattern name primarily serves
 as a semantic label for training data organization.
 
 ## See also
 
-[`create_landscape_spots`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_spots.md)
-for the underlying implementation
+Other landscape creation:
+[`create_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md),
+[`create_landscape_bands()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bands.md),
+[`create_landscape_bare()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bare.md),
+[`create_landscape_clustered()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_clustered.md),
+[`create_landscape_dense()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_dense.md),
+[`create_landscape_diffuse()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse.md),
+[`create_landscape_fingers()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_fingers.md),
+[`create_landscape_labyrinth()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_labyrinth.md),
+[`create_landscape_random()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_random.md),
+[`create_landscape_sharp()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp.md),
+[`create_landscape_spots()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_spots.md),
+[`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
 
 ## Examples
 
 ``` r
 # Default gaps (vegetation patches in bare ground)
 gaps_default <- create_landscape_gaps()
-#> Error in create_landscape_gaps(): could not find function "create_landscape_gaps"
 
 # More gaps with size variation
 gaps_modified <- create_landscape_gaps(
@@ -112,5 +116,4 @@ gaps_modified <- create_landscape_gaps(
   spot_radius = 8,
   spot_radius_sd = 2
 )
-#> Error in create_landscape_gaps(n_spots = 15, spot_radius = 8, spot_radius_sd = 2): could not find function "create_landscape_gaps"
 ```

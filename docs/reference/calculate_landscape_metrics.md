@@ -30,8 +30,8 @@ calculate_landscape_metrics(landscapes, metrics = NULL, level = "landscape")
 
 - level:
 
-  Character. Level(s) of metrics to calculate: "patch", "class",
-  "landscape" (default: "landscape").
+  Character. Level(s) of metrics to calculate:"class", "landscape"
+  (default: "landscape").
 
 ## Value
 
@@ -55,16 +55,11 @@ A tibble with the following columns:
 
 - level:
 
-  Metric level: "patch", "class", or "landscape"
+  Metric level: "class", or "landscape"
 
 - class:
 
-  Class value (for class- and patch-level metrics, NA for
-  landscape-level)
-
-- id:
-
-  Patch ID (for patch-level metrics, NA otherwise)
+  Class value (for class-level metrics, NA for landscape-level)
 
 - metric:
 
@@ -78,21 +73,38 @@ A tibble with the following columns:
 
   Any warnings generated during calculation (NA if none)
 
+## References
+
+Hesselbarth, M.H.K., Sciaini, M., With, K.A., Wiegand, K., & Nowosad, J.
+(2019). landscapemetrics: an open-source R tool to calculate landscape
+metrics. \*Ecography\*, 42(10), 1648-1657.
+[doi:10.1111/ecog.04617](https://doi.org/10.1111/ecog.04617)
+
+## See also
+
+[`plot_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/plot_metrics.md)
+
+Other metrics:
+[`evaluate_landscape_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/evaluate_landscape_metrics.md)
+
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 # Calculate all landscape-level metrics for a single landscape
 landscape <- create_landscape(pattern = "labyrinth")
 metrics <- calculate_landscape_metrics(landscape)
 
 # Calculate specific metrics for multiple landscapes
 landscapes <- create_landscapes(n = 10, patterns = "spots")
+#> Warning: Regular spot placement requested 10 spots but only ~9 positions fit.
+#> ℹ  Adjusting to maximum feasible spots. Consider decreasing `spot_radius`.
+#> ✔ Successfully generated all 10 training landscapes
 metrics <- calculate_landscape_metrics(
   landscapes,
   metrics = c("ai", "lsi"),
   level = "landscape"
 )
 
-} # }
+# }
 ```

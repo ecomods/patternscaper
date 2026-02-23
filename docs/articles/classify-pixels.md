@@ -5,6 +5,7 @@ convolutional neural network (Keras backend) trained directly on
 landscape raster data.
 
 ``` r
+
 library(spatPatClassifyR)
 ```
 
@@ -34,6 +35,7 @@ To quickly test if your setup is working, you can run the following
 simple function from the `keras3` package:
 
 ``` r
+
 keras3::to_categorical(0)
 #>      [,1]
 #> [1,]    1
@@ -52,6 +54,7 @@ for R and for Keras RNG, you can use the
 function from `spatPatClassifyR`.
 
 ``` r
+
 set_random_seed(123456)
 ```
 
@@ -63,6 +66,7 @@ vignette](https://ecomods.github.io/spatPatClassifyR/articles/landscape-generati
 for details on landscape generation and available patterns and options.
 
 ``` r
+
 training_landscapes <- create_landscapes(
   n = 100,
   patterns = c("labyrinth", "random", "clustered")
@@ -76,18 +80,27 @@ The model can be trained with or without cross-validation. Valid methods
 for the cross-validation method `cv_method` are:
 
 - `"none"`: No cross-validation, train on all data.
-- `"kfold"`: k-fold cross-validation with `cv_folds` number of folds.
+- `"k-fold"`: k-fold cross-validation with `cv_folds` number of folds.
 - `"loo"`: leave-one-out cross-validation.
 
 For details and further options see the function help of
 [`train_nn_pixels()`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_pixels.md).
 
-Description of model architecture still missing.
+The underlying model uses a multiscale convolutional neural network
+(CNN) architecture that processes the landscapes as 2D pixel arrays. The
+model layers multiple convolutional layers with different kernel sizes
+(3 x 3 and 5 x 5) to capture both fine-scale details and broader spatial
+patterns. The architecture consists of paired convolutional layers,
+followed by pooling to reduce dimensionality and a final dense layer for
+the classification. The user can specify various parameters for training
+the model, such as the learning rate, the number of epochs and patience,
+but also for validating the model, such as the cross-validation method
+(k-fold or leave-one-out) and the proportion of validation data.
 
 Here, we train the model using 2-fold cross-validation to keep
 computational time low.
 
-> **Low fold accuaracy**
+> **Low fold accuracy**
 >
 > The function will print fold accuracies during training (see below).
 > If the accuracy is low, consider increasing the number of training
@@ -95,6 +108,7 @@ computational time low.
 > model performance.
 
 ``` r
+
 model <- train_nn_pixels(
   landscapes = training_landscapes,
   cv_method = "k-fold",
@@ -107,33 +121,36 @@ To check the model performance, we can look at the confusion matrix from
 cross-validation:
 
 ``` r
+
 # Confusion matrix from cross-validation
 model$performance$confusion_matrix
 #>            Actual
 #> Predicted   clustered labyrinth random
-#>   clustered        27        10      0
-#>   labyrinth         6        24      0
-#>   random            0         0     33
+#>   clustered        27         6      0
+#>   labyrinth         6        27      0
+#>   random            0         1     33
 ```
 
 You can also check other performance metrics like overall accuracy:
 
 ``` r
+
 # Overall accuracy
 model$performance$accuracy
-#> [1] 0.84
+#> [1] 0.87
 ```
 
 Or per class metrics like precision, recall, and F1-score:
 
 ``` r
+
 model$performance$per_class_metrics
 #> # A tibble: 3 × 5
 #>   class     count recall precision f1_score
 #>   <chr>     <int>  <dbl>     <dbl>    <dbl>
-#> 1 clustered    33   0.82      0.73     0.77
-#> 2 labyrinth    34   0.71      0.8      0.75
-#> 3 random       33   1         1        1
+#> 1 clustered    33   0.82      0.82     0.82
+#> 2 labyrinth    34   0.79      0.82     0.81
+#> 3 random       33   1         0.97     0.99
 ```
 
 ## Step 3: Classify New Landscapes
@@ -148,6 +165,7 @@ landscapes
 vignette](https://ecomods.github.io/spatPatClassifyR/articles/importing-landscapes.md).
 
 ``` r
+
 test_landscapes <- create_landscapes(
   n = 20,
   patterns = c("labyrinth", "random", "clustered")
@@ -168,6 +186,7 @@ classification performance.
 > (default).
 
 ``` r
+
 classification <- apply_nn_pixels(
   landscapes = test_landscapes,
   nn_model = model,
@@ -179,37 +198,39 @@ You can look at the predicted patterns for each test landscape
 individually and compare actual and predicted classes:
 
 ``` r
+
 # Predicted patterns
 classification$predictions
 #> # A tibble: 20 × 8
 #>    landscape_id landscape_name actual_class predicted_class confidence clustered
 #>           <int> <chr>          <chr>        <chr>                <dbl>     <dbl>
-#>  1            1 random_1       random       random               1.000 2.16 e- 7
-#>  2            2 labyrinth_2    labyrinth    labyrinth            0.996 3.70 e- 3
-#>  3            3 random_3       random       random               1.000 3.71 e- 5
-#>  4            4 random_4       random       random               1     2.87 e-11
-#>  5            5 random_5       random       random               1     5.76 e-12
-#>  6            6 random_6       random       random               1.000 4.54 e- 8
-#>  7            7 random_7       random       random               1.000 5.80 e- 8
-#>  8            8 clustered_8_r… clustered    clustered            0.902 9.02 e- 1
-#>  9            9 labyrinth_9    labyrinth    labyrinth            1.000 4.92 e- 5
-#> 10           10 clustered_10_… clustered    clustered            0.997 9.97 e- 1
+#>  1            1 random_1       random       random               1.000 1.17 e- 9
+#>  2            2 labyrinth_2    labyrinth    labyrinth            1.000 1.89 e- 5
+#>  3            3 random_3       random       random               1     6.91 e-13
+#>  4            4 random_4       random       random               1     8.03 e-19
+#>  5            5 random_5       random       random               1     5.63 e-18
+#>  6            6 random_6       random       random               1     1.86 e-16
+#>  7            7 random_7       random       random               1.000 9.30 e-11
+#>  8            8 clustered_8_r… clustered    clustered            0.993 9.93 e- 1
+#>  9            9 labyrinth_9    labyrinth    labyrinth            1.000 5.76 e- 6
+#> 10           10 clustered_10_… clustered    clustered            0.974 9.74 e- 1
 #> 11           11 clustered_11_… clustered    clustered            1.000 1.000e+ 0
-#> 12           12 labyrinth_12   labyrinth    labyrinth            1.000 8.50 e- 5
-#> 13           13 labyrinth_13   labyrinth    labyrinth            1.000 3.00 e- 4
-#> 14           14 labyrinth_14   labyrinth    labyrinth            1.000 8.62 e- 6
-#> 15           15 labyrinth_15   labyrinth    clustered            0.896 8.96 e- 1
-#> 16           16 labyrinth_16   labyrinth    labyrinth            1.000 2.86 e- 5
+#> 12           12 labyrinth_12   labyrinth    labyrinth            0.999 7.10 e- 4
+#> 13           13 labyrinth_13   labyrinth    labyrinth            1.000 5.52 e- 5
+#> 14           14 labyrinth_14   labyrinth    labyrinth            1.000 6.92 e- 7
+#> 15           15 labyrinth_15   labyrinth    clustered            0.926 9.26 e- 1
+#> 16           16 labyrinth_16   labyrinth    labyrinth            1.000 5.84 e- 7
 #> 17           17 clustered_17_… clustered    clustered            1.000 1.000e+ 0
 #> 18           18 clustered_18_… clustered    clustered            1.000 1.000e+ 0
 #> 19           19 clustered_19_… clustered    clustered            1.000 1.000e+ 0
-#> 20           20 random_20      random       random               1.000 3.88 e- 7
+#> 20           20 random_20      random       random               1     1.50 e-15
 #> # ℹ 2 more variables: labyrinth <dbl>, random <dbl>
 ```
 
 You can also look at performance summaries like confusion matrix:
 
 ``` r
+
 # Performance summary
 classification$performance$confusion_matrix
 #>            Actual
@@ -222,6 +243,7 @@ classification$performance$confusion_matrix
 And other metrics like accuracy, precision, recall, and F1-score:
 
 ``` r
+
 # Other performance metrics
 classification$performance$per_class_metrics
 #> # A tibble: 3 × 5
@@ -244,6 +266,7 @@ in red. To plot only misclassified landscapes, set
 > the plot will show the landscape and the predicted pattern only.
 
 ``` r
+
 # Visualize true and predicted patterns
 
 plot_classified_landscapes(

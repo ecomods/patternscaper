@@ -10,6 +10,8 @@ the 'pattern' parameter.
 create_landscape(
   pattern = c("random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
     "bands", "spots", "gaps", "labyrinth"),
+  width = 100,
+  height = 100,
   name = NULL,
   custom_pattern = NULL,
   ...
@@ -20,9 +22,17 @@ create_landscape(
 
 - pattern:
 
-  Character. pattern of landscape to generate: "random", "sharp",
-  "diffuse", "fingers", "bands", "clusters", "spots", "gaps",
-  "labyrinth"
+  Character. pattern of landscape to generate: "random", "bare",
+  "dense", "sharp", "diffuse", "fingers", "bands", "clustered", "spots",
+  "gaps", "labyrinth"
+
+- width:
+
+  Integer. Width of the landscape in pixels (default: 100).
+
+- height:
+
+  Integer. Height of the landscape in pixels (default: 100).
 
 - name:
 
@@ -41,8 +51,20 @@ create_landscape(
 
 ## Value
 
-A landscape object with pattern corresponding to the pattern pattern,
-containing the generated landscape data and parameters.
+A landscape object with pattern corresponding to the pattern,
+containing:
+
+- data:
+
+  SpatRaster with binary values (0 = bare ground, 1 = vegetation)
+
+- pattern:
+
+  Character string with the pattern type
+
+- params:
+
+  List of all input parameters used to generate the landscape
 
 ## See also
 
@@ -50,10 +72,10 @@ containing the generated landscape data and parameters.
 for "random" pattern parameters. "bare" and "dense" are aliases but are
 produced either with low or high tree probabilities
 
-[`create_landscape_sharp_treeline`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp_treeline.md)
+[`create_landscape_sharp`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp.md)
 for "sharp" pattern parameters
 
-[`create_landscape_diffuse_treeline`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse_treeline.md)
+[`create_landscape_diffuse`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse.md)
 for "diffuse" pattern parameters
 
 [`create_landscape_fingers`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_fingers.md)
@@ -74,6 +96,20 @@ for "gaps" pattern parameters
 [`create_landscape_labyrinth`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_labyrinth.md)
 for "labyrinth" pattern parameters
 
+Other landscape creation:
+[`create_landscape_bands()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bands.md),
+[`create_landscape_bare()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bare.md),
+[`create_landscape_clustered()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_clustered.md),
+[`create_landscape_dense()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_dense.md),
+[`create_landscape_diffuse()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse.md),
+[`create_landscape_fingers()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_fingers.md),
+[`create_landscape_gaps()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_gaps.md),
+[`create_landscape_labyrinth()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_labyrinth.md),
+[`create_landscape_random()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_random.md),
+[`create_landscape_sharp()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp.md),
+[`create_landscape_spots()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_spots.md),
+[`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
+
 ## Examples
 
 ``` r
@@ -86,13 +122,13 @@ clustered_default <- create_landscape("clustered")
 # Create a modified landscape with custom parameters
 random_modified <- create_landscape(
   "random",
-  tree_prop = 0.3
+  veg_prop = 0.3
 )
 
 # Create a modified landscape with custom parameters
 diffuse_modified <- create_landscape(
   "diffuse",
-  treeline_position = 0.3,
+  boundary_position = 0.3,
   steepness = 0.1
 )
 

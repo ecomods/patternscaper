@@ -3,7 +3,7 @@
 The workflow to classify landscapes directly from raster data using
 neural networks (see
 [vignette](https://ecomods.github.io/spatPatClassifyR/articles/classify-pixels.md))
-`keras3` and its correct configuration.
+requires `keras3` and its correct configuration.
 
 In our experience, it can be a bit tricky to set up correctly, therefore
 we provide this guide to help you with the installation.
@@ -17,6 +17,7 @@ Both packages are installed alongside the `spatPatClassifyR` package, so
 you only need to load them:
 
 ``` r
+
 library(keras3)
 library(reticulate)
 ```
@@ -25,6 +26,7 @@ First, you can check if you already have the keras and tensorflow
 modules installed using:
 
 ``` r
+
 reticulate::py_module_available("keras") &&
   reticulate::py_module_available("tensorflow")
 ```
@@ -55,6 +57,7 @@ Choose Python **3.10 or 3.11** (recommended for TensorFlow
 compatibility) and specify it:
 
 ``` r
+
 # Replace this path with your actual Python 3.10 or 3.11 installation
 reticulate::use_python(
   "C:/Users/YourName/AppData/Local/Programs/Python/Python310/python.exe",
@@ -70,7 +73,7 @@ This should display your Python installation details, not `NULL`.
 > **Warning**
 >
 > **Avoid Python 3.13+** as TensorFlow does not fully support these
-> newer versions yet.Use Python 3.10 or 3.11.
+> newer versions yet. Use Python 3.10 or 3.11.
 
 ## Install Keras and TensorFlow
 
@@ -79,6 +82,7 @@ Now install Keras using the
 function from the `keras3` package:
 
 ``` r
+
 install_keras()
 ```
 
@@ -88,6 +92,7 @@ components in a virtual environment.
 Now, check again if the installation was successful:
 
 ``` r
+
 reticulate::py_module_available("keras") &&
   reticulate::py_module_available("tensorflow")
 ```
@@ -104,6 +109,7 @@ function:
 > Subsequent runs will be fast.
 
 ``` r
+
 keras3::to_categorical(0)
 ```
 

@@ -1,7 +1,7 @@
 # Create a Landscape with Labyrinths as in Turing patterns
 
-Generates a landscape with banded and spotted vegetation (labyrinth),
-this mimics Turing patterns.
+Generates a landscape with a labyrinth-like vegetation pattern, this
+mimics Turing patterns.
 
 ## Usage
 
@@ -46,7 +46,7 @@ create_landscape_labyrinth(
   are sharp and fully deterministic. Small values (≈ 0.05–0.1) introduce
   slight, irregular boundary perturbations without changing the overall
   topology of the pattern. Larger values progressively erode vegetation
-  edges and can fragmet bands if set too high. This parameter affects
+  edges and can fragment bands if set too high. This parameter affects
   boundary geometry only and does not influence the global structure or
   connectivity of the labyrinth. (default: 0.08)
 
@@ -63,8 +63,19 @@ create_landscape_labyrinth(
 
 ## Value
 
-A landscape object with pattern "labyrinth" containing the generated
-landscape data and parameters.
+A landscape object with pattern "labyrinth" containing:
+
+- data:
+
+  SpatRaster with binary values (0 = bare ground, 1 = vegetation)
+
+- pattern:
+
+  Character string "labyrinth"
+
+- params:
+
+  List of all input parameters used to generate the landscape
 
 ## Details
 
@@ -84,12 +95,27 @@ pattern. Cells with noise \> threshold become vegetation.
 The combination of \`frequency\` and \`octaves\` controls pattern
 complexity, while \`veg_threshold\` determines vegetation proportion.
 
+## See also
+
+Other landscape creation:
+[`create_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md),
+[`create_landscape_bands()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bands.md),
+[`create_landscape_bare()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bare.md),
+[`create_landscape_clustered()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_clustered.md),
+[`create_landscape_dense()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_dense.md),
+[`create_landscape_diffuse()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse.md),
+[`create_landscape_fingers()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_fingers.md),
+[`create_landscape_gaps()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_gaps.md),
+[`create_landscape_random()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_random.md),
+[`create_landscape_sharp()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp.md),
+[`create_landscape_spots()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_spots.md),
+[`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
+
 ## Examples
 
 ``` r
 # Default labyrinth pattern
 labyrinth_default <- create_landscape_labyrinth()
-#> Error in create_landscape_labyrinth(): could not find function "create_landscape_labyrinth"
 
 # Modified labyrinth with higher frequency and multiple octaves
 labyrinth_modified <- create_landscape_labyrinth(
@@ -97,16 +123,13 @@ labyrinth_modified <- create_landscape_labyrinth(
   octaves = 3,
   band_fuzziness = 0.05
 )
-#> Error in create_landscape_labyrinth(frequency = 8, octaves = 3, band_fuzziness = 0.05): could not find function "create_landscape_labyrinth"
 
 # Adjust vegetation coverage
 labyrinth_sparse <- create_landscape_labyrinth(
   veg_threshold = 0.6  # Less vegetation
 )
-#> Error in create_landscape_labyrinth(veg_threshold = 0.6): could not find function "create_landscape_labyrinth"
 
 labyrinth_dense <- create_landscape_labyrinth(
   veg_threshold = 0.3  # More vegetation
 )
-#> Error in create_landscape_labyrinth(veg_threshold = 0.3): could not find function "create_landscape_labyrinth"
 ```

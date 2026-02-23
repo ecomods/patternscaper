@@ -11,7 +11,7 @@ create elliptical patterns.
 create_landscape_clustered(
   width = 100,
   height = 100,
-  treeline_position = 0.5,
+  boundary_position = 0.5,
   random_spots = c(0, 0),
   n_clusters = 10,
   cluster_radius = 5,
@@ -32,7 +32,7 @@ create_landscape_clustered(
 
   Integer. Height of the landscape in pixels (default: 100).
 
-- treeline_position:
+- boundary_position:
 
   Numeric. Relative position of treeline from top (0-1) (default: 0.5).
 
@@ -69,9 +69,7 @@ create_landscape_clustered(
 
 - rotation:
 
-  Numeric. Angle to rotate landscape in degrees, clockwise. The
-  landscape is expanded before rotation and cropped back to target size
-  to prevent edge clipping (default: 0).
+  Numeric. Angle to rotate landscape in degrees (default: 0).
 
 ## Value
 
@@ -89,23 +87,37 @@ A landscape object with pattern "clustered" containing:
 
   List of all input parameters used to generate the landscape
 
+## See also
+
+Other landscape creation:
+[`create_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md),
+[`create_landscape_bands()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bands.md),
+[`create_landscape_bare()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bare.md),
+[`create_landscape_dense()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_dense.md),
+[`create_landscape_diffuse()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse.md),
+[`create_landscape_fingers()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_fingers.md),
+[`create_landscape_gaps()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_gaps.md),
+[`create_landscape_labyrinth()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_labyrinth.md),
+[`create_landscape_random()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_random.md),
+[`create_landscape_sharp()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp.md),
+[`create_landscape_spots()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_spots.md),
+[`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
+
 ## Examples
 
 ``` r
 # Default clustered features
 clustered_default <- create_landscape_clustered()
-#> Error in create_landscape_clustered(): could not find function "create_landscape_clustered"
 
 # Modified clustered features with horizontally elongated clusters
 clustered_modified <- create_landscape_clustered(
-  treeline_position = 0.2,
+  boundary_position = 0.2,
   n_clusters = 8,
   cluster_radius = 7,
   scatter_zone_prop = 0.6,
   elongation_x = 2.5,
   elongation_y = 0.5
 )
-#> Error in create_landscape_clustered(treeline_position = 0.2, n_clusters = 8,     cluster_radius = 7, scatter_zone_prop = 0.6, elongation_x = 2.5,     elongation_y = 0.5): could not find function "create_landscape_clustered"
 
 # Rotated landscape with mixed parameters
 clustered_rotated <- create_landscape_clustered(
@@ -116,5 +128,4 @@ clustered_rotated <- create_landscape_clustered(
   elongation_y = 1.4,
   rotation = 45
 )
-#> Error in create_landscape_clustered(n_clusters = 20, cluster_radius = 2,     scatter_zone_prop = 0.5, elongation_x = 1.8, elongation_y = 1.4,     rotation = 45): could not find function "create_landscape_clustered"
 ```

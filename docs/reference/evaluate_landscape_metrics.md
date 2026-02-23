@@ -1,7 +1,12 @@
 # Evaluate Landscape Metrics
 
-Identifies the most informative metrics for discriminating between
-landscape_name types.
+Identifies the metrics most suitable for discriminating between
+different pattern types based on a specified selection method. The
+choice of method affects the ranking: parametric methods assume linear
+relationships and normally distributed residuals, while non-parametric
+methods are more robust to outliers and deviations from normality. This
+function is useful for selecting informative metrics to train the
+metric-based neural network.
 
 ## Usage
 
@@ -9,7 +14,7 @@ landscape_name types.
 evaluate_landscape_metrics(
   metrics,
   metrics_number = 10,
-  method = "coeffvar_all",
+  method = "kruskal_effsize",
   exclude_NA_metrics = TRUE,
   exclude_metrics = NULL,
   correlation_threshold = 0.7,
@@ -29,7 +34,7 @@ evaluate_landscape_metrics(
 
 - method:
 
-  Character. Selection method to use (default: "coeffvar_all"). See
+  Character. Selection method to use (default: "kruskal_effsize"). See
   'Ranking Methods' section below for details.
 
 - exclude_NA_metrics:
@@ -45,7 +50,7 @@ evaluate_landscape_metrics(
 - correlation_threshold:
 
   Numeric. Maximum allowed correlation between selected metrics
-  (default: 0.7). If you don't want to filter based on correlation, set
+  (default: 0.7). If you do not want to filter based on correlation, set
   to 1.
 
 - verbose:
@@ -55,7 +60,8 @@ evaluate_landscape_metrics(
 
 ## Value
 
-Character vector. Names of most sensitive metrics.
+Character vector. Names of metrics that best discriminate between
+pattern types.
 
 ## Ranking Methods
 
@@ -90,3 +96,40 @@ Character vector. Names of most sensitive metrics.
   Kruskal-Wallis H test effect sizes. Non-parametric test for
   differences between groups. Higher effect sizes indicate better
   discrimination between pattern types.
+
+## See also
+
+[`train_nn_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_metrics.md)
+
+Other metrics:
+[`calculate_landscape_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/calculate_landscape_metrics.md)
+
+## Examples
+
+``` r
+# Calculate most suitable metrics to discriminate between spots and random landscapes
+landscapes <- create_landscapes(n = 50, patterns = c("spots","random"))
+#> Warning: Regular spot placement requested 10 spots but only ~8 positions fit.
+#> ℹ  Adjusting to maximum feasible spots. Consider decreasing `spot_radius`.
+#> ✔ Successfully generated all 50 training landscapes
+metrics <- calculate_landscape_metrics(
+  landscapes,
+  level = "landscape"
+)
+#>  ■■■                                8% |  ETA: 13s
+#>  ■■■■■■■■■                         26% |  ETA: 12s
+#>  ■■■■■■■■■■■■                      36% |  ETA: 12s
+#>  ■■■■■■■■■■■■■■■                   45% |  ETA: 12s
+#>  ■■■■■■■■■■■■■■■■                  52% |  ETA: 13s
+#>  ■■■■■■■■■■■■■■■■■■■■              64% |  ETA:  9s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■        82% |  ETA:  4s
+metric_list <- evaluate_landscape_metrics(
+  metrics = metrics,
+  metrics_number = 5,
+  method = "coeffvar_all"
+)
+#> Warning: Excluded 300 rows containing 6 metrics with NA values. Metrics removed:
+#> "enn_cv", "enn_mn", "enn_sd", "iji", "pafrac", and "rpr" Use
+#> `exclude_NA_metrics = FALSE` to retain (not recommended for model training)
+#> Warning: Excluded 3 metrics with zero variance: "pr", "prd", and "ta"
+```

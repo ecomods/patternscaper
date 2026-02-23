@@ -5,6 +5,7 @@ network on landscape metrics and then use the trained network to
 classify new landscapes based on the same metrics.
 
 ``` r
+
 library(spatPatClassifyR)
 
 # Set seed for reproducibility
@@ -38,6 +39,7 @@ vignette](https://ecomods.github.io/spatPatClassifyR/articles/landscape-generati
 for details on landscape generation and available patterns and options.
 
 ``` r
+
 # Generate 100 training landscapes of 3 patterns
 landscapes <- create_landscapes(
   n = 100,
@@ -60,6 +62,7 @@ vignette](https://ecomods.github.io/spatPatClassifyR/articles/landscape-metrics.
 In this example, we calculate metrics on the landscape level.
 
 ``` r
+
 # Calculate landscape metrics on the landscape level
 landscape_metrics <- calculate_landscape_metrics(
   landscapes,
@@ -88,6 +91,7 @@ vignette](https://ecomods.github.io/spatPatClassifyR/articles/landscape-metrics.
 > however be informative and useful for other types of analyses.
 
 ``` r
+
 best_10 <- evaluate_landscape_metrics(
   metrics = landscape_metrics,
   method = "kruskal_effsize",
@@ -108,6 +112,7 @@ You can plot the differences between patterns for the selected metrics
 using the `plot_metrics` function.
 
 ``` r
+
 # Plot selected metrics
 plot_metrics(
   metrics = landscape_metrics,
@@ -135,6 +140,7 @@ For details and further options see the function help
 `?train_nn_metrics()`.
 
 ``` r
+
 # Train neural network with k-fold cross-validation (3 folds)
 model <- train_nn_metrics(
   metrics = landscape_metrics,
@@ -149,6 +155,7 @@ To check the model performance, you can look at the confusion matrix
 from cross-validation:
 
 ``` r
+
 # Confusion matrix from cross-validation
 model$performance$confusion_matrix
 #>            Actual
@@ -161,6 +168,7 @@ model$performance$confusion_matrix
 You can also check other performance metrics like overall accuracy:
 
 ``` r
+
 # Overall accuracy
 model$performance$accuracy
 #> [1] 0.93
@@ -169,6 +177,7 @@ model$performance$accuracy
 Or per class metrics like precision, recall, and F1-score:
 
 ``` r
+
 model$performance$per_class_metrics
 #> # A tibble: 3 × 5
 #>   class     count recall precision f1_score
@@ -190,6 +199,7 @@ own landscapes, see the [importing landscapes
 vignette](https://ecomods.github.io/spatPatClassifyR/articles/importing-landscapes.md).
 
 ``` r
+
 # Create 10 new test landscapes using the same patterns as for training
 test_landscapes <- create_landscapes(
   n = 10,
@@ -211,6 +221,7 @@ classification performance.
 > (default).
 
 ``` r
+
 # Classify test landscapes using the trained model
 classification <- apply_nn_metrics(
   landscapes = test_landscapes,
@@ -234,6 +245,7 @@ You can look at the predicted patterns for each test landscape
 individually and compare actual and predicted classes:
 
 ``` r
+
 # Predicted patterns
 classification$predictions
 #> # A tibble: 10 × 8
@@ -255,6 +267,7 @@ classification$predictions
 You can also look at performance summaries like confusion matrix:
 
 ``` r
+
 # Performance summary
 classification$performance$confusion_matrix
 #>            Actual
@@ -267,6 +280,7 @@ classification$performance$confusion_matrix
 And other metrics like accuracy, precision, recall, and F1-score:
 
 ``` r
+
 # Other performance metrics
 classification$performance$per_class_metrics
 #> # A tibble: 3 × 5
@@ -289,6 +303,7 @@ in red. To plot only misclassified landscapes, set
 > the plot will show the landscape and the predicted pattern only.
 
 ``` r
+
 # Visualize true and predicted patterns
 
 plot_classified_landscapes(

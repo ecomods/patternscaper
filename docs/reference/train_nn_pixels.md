@@ -1,8 +1,9 @@
-# Train a Convolutional Neural Network for Landscape Classification
+# Train a Convolutional Neural Network for Landscape Pattern Classification
 
-Trains a CNN model using the Keras framework to classify landscapes
-based on their spatial patterns. The function uses a multiscale CNN
-architecture optimized for distinguishing different landscape patterns.
+Trains a CNN model using the Keras framework via keras3 to classify
+landscapes based on their spatial patterns (pixel data). The function
+uses a multiscale CNN architecture optimized for distinguishing
+different landscape patterns.
 
 ## Usage
 
@@ -21,6 +22,7 @@ train_nn_pixels(
   loss = "categorical_crossentropy",
   optimizer = "adam",
   metrics = c("accuracy"),
+  validation_split = 0,
   callbacks = NULL,
   patience = 15,
   verbose = TRUE
@@ -31,8 +33,15 @@ train_nn_pixels(
 
 - landscapes:
 
-  List. List of landscape objects created by \`create_landscape()\` or
-  \`create_landscapes()\`.
+  List. List of landscape objects created by
+  [`create_landscape`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md)
+  or
+  [`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md).
+  \*\*Note\*\*: Input landscapes must contain categorical/discrete
+  habitat data (e.g., 0/1 for two habitat types, or 0/1/2 for three
+  types). Continuous data (e.g., elevation, gradients) is not supported.
+  All landscapes used for training are required to have the same spatial
+  extent.
 
 - cv_method:
 
@@ -43,7 +52,8 @@ train_nn_pixels(
     metrics
 
   - "none": Trains on ALL provided data without validation. Use
-    apply_nn_pixels() with a separate test set to evaluate performance.
+    [`apply_nn_pixels`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_pixels.md)
+    with a separate test set to evaluate performance.
 
 - cv_folds:
 
@@ -65,15 +75,21 @@ train_nn_pixels(
 
 - architecture:
 
-  Character. CNN architecture: "multiscale" (default).
+  Character. CNN architecture (default: "multiscale"). Currently only
+  "multiscale" is supported, which uses multiple kernel sizes (3x3 and
+  5x5) to capture patterns at different spatial scales.
 
 - dropout_rate:
 
-  Numeric. Dropout rate for regularization (default: 0.3).
+  Numeric. Dropout rate for regularization (0-1, default: 0.3). Higher
+  values reduce overfitting but may decrease model capacity. Applied
+  between convolutional and dense layers.
 
 - dense_units:
 
-  Integer. Units in dense layer (default: 128).
+  Integer. Number of units in the final dense layer before output
+  (default: 128). Controls model capacity for learning complex pattern
+  combinations.
 
 - model_path:
 
@@ -83,41 +99,63 @@ train_nn_pixels(
 - loss:
 
   Character. Loss function for training (default:
-  "categorical_crossentropy"). Common alternatives:
-  "sparse_categorical_crossentropy", "kullback_leibler_divergence".
+  "categorical_crossentropy"). Use "sparse_categorical_crossentropy" if
+  labels are integers rather than one-hot encoded. See
+  [`loss_categorical_crossentropy`](https://keras3.posit.co/reference/loss_categorical_crossentropy.html)
+  for details.
 
 - optimizer:
 
-  Character. Optimizer to use: "adam" (default), "sgd", "rmsprop". Note:
-  optimizer-specific parameters like momentum are currently not exposed.
+  Character. Optimizer algorithm: "adam" (default), "sgd", "rmsprop".
+  Adam is recommended for most cases. See
+  [`optimizer_adam`](https://keras3.posit.co/reference/optimizer_adam.html).
+  Note: Advanced optimizer parameters (e.g., momentum, beta values) are
+  not currently exposed.
 
 - metrics:
 
   Character vector. Metrics to track during training (default:
-  c("accuracy")). Common additions: "categorical_accuracy",
-  "top_k_categorical_accuracy".
+  c("accuracy")). Additional options: "categorical_accuracy",
+  "top_k_categorical_accuracy". Does not affect training, only
+  monitoring. See
+  [`compile`](https://generics.r-lib.org/reference/compile.html).
+
+- validation_split:
+
+  Numeric. Fraction of training data to use as validation set during
+  final model training and passed to
+  [`fit`](https://generics.r-lib.org/reference/fit.html)(0-1, default:
+  0). When \> 0, enables monitoring and early stopping on validation
+  loss. Particularly useful when cv_method="none" to prevent
+  overfitting. Ignored during CV fold training (which uses its own
+  validation splits).
 
 - callbacks:
 
   List. Optional keras callbacks for advanced training control (default:
   NULL). Examples: early stopping, learning rate scheduling, model
   checkpointing. Note: Only applies to final model training. CV folds
-  always use patience-based early stopping if patience is specified.
+  always use patience-based early stopping if patience is specified. For
+  an overview of available callbacks, see
+  [`callback_early_stopping`](https://keras3.posit.co/reference/callback_early_stopping.html)
+  (the callback used by default) and related \`callback\_\` functions.
 
 - patience:
 
   Integer. Number of epochs with no improvement before early stopping
   (default: 15). Applied to both CV fold training (monitors validation
-  loss) and final model training (monitors training loss). Only used
-  when callbacks=NULL. Set to NULL to train for full epoch count without
-  early stopping.
+  loss) and final model training (monitors validation loss if
+  \`validation_split\` \> 0). Only used when callbacks=NULL. Set to NULL
+  to train for full epoch count without early stopping. Is passed to
+  [`callback_early_stopping`](https://keras3.posit.co/reference/callback_early_stopping.html).
 
 - verbose:
 
   Logical. Show training progress and performance summaries (default:
-  TRUE). When TRUE, displays progress bar for final model training and
-  prints performance metrics. When FALSE, runs silently. CV fold
-  training always runs silently to reduce output clutter.
+  TRUE). When TRUE, displays epoch-by-epoch training/validation metrics
+  during final model training, plus CV fold accuracies and final
+  performance summaries. CV fold epoch details are not shown. When
+  FALSE, runs silently.
 
 ## Value
 
@@ -150,15 +188,24 @@ List containing:
   metrics, and overall accuracy. When cv_method = "none", contains
   training metadata only (see note field for evaluation instructions).
 
+## See also
+
+[`apply_nn_pixels`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_pixels.md)
+
+Other neural network training:
+[`set_random_seed()`](https://ecomods.github.io/spatPatClassifyR/reference/set_random_seed.md),
+[`train_nn_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_metrics.md)
+
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 # Create training data
 training_landscapes <- create_landscapes(
   n = 200,
   patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
 )
+#> ✔ Successfully generated all 200 training landscapes
 
 # Train with cross-validation
 model <- train_nn_pixels(
@@ -166,23 +213,218 @@ model <- train_nn_pixels(
   cv_method = "k-fold",
   cv_folds = 5
 )
+#> 
+#> ── Landscape type distribution: ──
+#> 
+#> training_labels
+#>     bands clustered   diffuse   fingers    random     sharp 
+#>        33        33        34        33        33        34 
+#> ── Cross-validation (k-fold, 5 folds) ──
+#> 
+#> ✔ Fold 1/5 accuracy: 0.6905
+#> ✔ Fold 2/5 accuracy: 0.8095
+#> ✔ Fold 3/5 accuracy: 0.8095
+#> ✔ Fold 4/5 accuracy: 0.8158
+#> ✔ Fold 5/5 accuracy: 0.8333
+#> 
+#> ── Cross-validation results ──
+#> 
+#> ℹ Method: 5-fold cross-validation
+#> ℹ Overall accuracy: 79%
+#> 
+#> ── Confusion matrix 
+#>            Actual
+#> Predicted   bands clustered diffuse fingers random sharp
+#>   bands        28         8       2       2      0     0
+#>   clustered     3        17       0       4      0     1
+#>   diffuse       0         0      30       0      0     0
+#>   fingers       2         6       0      19      0     2
+#>   random        0         0       2       0     33     0
+#>   sharp         0         2       0       8      0    31
+#> 
+#> ── Per-class performance 
+#> # A tibble: 6 × 5
+#>   class     count recall precision f1_score
+#>   <chr>     <int>  <dbl>     <dbl>    <dbl>
+#> 1 bands        33   0.85      0.7      0.77
+#> 2 clustered    33   0.52      0.68     0.59
+#> 3 diffuse      34   0.88      1        0.94
+#> 4 fingers      33   0.58      0.66     0.61
+#> 5 random       33   1         0.94     0.97
+#> 6 sharp        34   0.91      0.76     0.83
+#> 
+#> ── Accuracy and loss across folds ──
+#> 
+#> Mean accuracy: 0.7917 +- 0.0574
+#> Mean loss: 0.6482 +- 0.1932
+#> 
+#> 
+#> ── Training final model on all data (validation split: 0) ──
+#> 
+#> Epoch 1 - loss: 1.8609 - accuracy: 0.2050
+#> Epoch 2 - loss: 1.2809 - accuracy: 0.3900
+#> Epoch 3 - loss: 0.8640 - accuracy: 0.6100
+#> Epoch 4 - loss: 0.4127 - accuracy: 0.8450
+#> Epoch 5 - loss: 0.3200 - accuracy: 0.8950
+#> Epoch 6 - loss: 0.2226 - accuracy: 0.9400
+#> Epoch 7 - loss: 0.4241 - accuracy: 0.8300
+#> Epoch 8 - loss: 0.1519 - accuracy: 0.9500
+#> Epoch 9 - loss: 0.1065 - accuracy: 0.9600
+#> Epoch 10 - loss: 0.0377 - accuracy: 0.9850
+#> Epoch 11 - loss: 0.0115 - accuracy: 0.9950
+#> Epoch 12 - loss: 0.0036 - accuracy: 1.0000
+#> Epoch 13 - loss: 0.0010 - accuracy: 1.0000
+#> Epoch 14 - loss: 0.0004 - accuracy: 1.0000
+#> Epoch 15 - loss: 0.0004 - accuracy: 1.0000
+#> Epoch 16 - loss: 0.0003 - accuracy: 1.0000
+#> Epoch 17 - loss: 0.0003 - accuracy: 1.0000
+#> Epoch 18 - loss: 0.0002 - accuracy: 1.0000
+#> Epoch 19 - loss: 0.0003 - accuracy: 1.0000
+#> Epoch 20 - loss: 0.0002 - accuracy: 1.0000
+#> Epoch 21 - loss: 0.0002 - accuracy: 1.0000
+#> Epoch 22 - loss: 0.0002 - accuracy: 1.0000
+#> Epoch 23 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 24 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 25 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 26 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 27 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 28 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 29 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 30 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 31 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 32 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 33 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 34 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 35 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 36 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 37 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 38 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 39 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 40 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 41 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 42 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 43 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 44 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 45 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 46 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 47 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 48 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 49 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 50 - loss: 0.0000 - accuracy: 1.0000
 
-# Train on all data for final deployment model
+# Train without cross validation on all data
 final_model <- train_nn_pixels(
   landscapes = training_landscapes,
   cv_method = "none",
   epochs = 100
 )
-
-# Evaluate on separate test set
-test_landscapes <- create_landscapes(
-  n = 100,
-  patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
-)
-results <- apply_nn_pixels(
-  landscapes = test_landscapes,
-  nn_model = final_model,
-  return_performance = TRUE
-)
-} # }
+#> ── Landscape type distribution: ──
+#> 
+#> training_labels
+#>     bands clustered   diffuse   fingers    random     sharp 
+#>        33        33        34        33        33        34 
+#> ── Training final model on all data ──
+#> 
+#> ℹ Training on all data (validation split is 0)...
+#> Epoch 1 - loss: 1.9250 - accuracy: 0.1400
+#> Epoch 2 - loss: 1.6398 - accuracy: 0.3100
+#> Epoch 3 - loss: 1.1054 - accuracy: 0.5550
+#> Epoch 4 - loss: 0.4638 - accuracy: 0.8450
+#> Epoch 5 - loss: 0.4371 - accuracy: 0.8550
+#> Epoch 6 - loss: 0.1725 - accuracy: 0.9650
+#> Epoch 7 - loss: 0.0755 - accuracy: 0.9650
+#> Epoch 8 - loss: 0.0095 - accuracy: 1.0000
+#> Epoch 9 - loss: 0.0013 - accuracy: 1.0000
+#> Epoch 10 - loss: 0.0005 - accuracy: 1.0000
+#> Epoch 11 - loss: 0.0002 - accuracy: 1.0000
+#> Epoch 12 - loss: 0.0002 - accuracy: 1.0000
+#> Epoch 13 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 14 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 15 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 16 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 17 - loss: 0.0002 - accuracy: 1.0000
+#> Epoch 18 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 19 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 20 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 21 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 22 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 23 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 24 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 25 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 26 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 27 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 28 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 29 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 30 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 31 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 32 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 33 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 34 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 35 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 36 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 37 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 38 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 39 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 40 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 41 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 42 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 43 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 44 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 45 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 46 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 47 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 48 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 49 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 50 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 51 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 52 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 53 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 54 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 55 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 56 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 57 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 58 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 59 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 60 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 61 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 62 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 63 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 64 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 65 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 66 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 67 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 68 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 69 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 70 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 71 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 72 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 73 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 74 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 75 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 76 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 77 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 78 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 79 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 80 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 81 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 82 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 83 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 84 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 85 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 86 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 87 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 88 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 89 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 90 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 91 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 92 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 93 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 94 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 95 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 96 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 97 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 98 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 99 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 100 - loss: 0.0000 - accuracy: 1.0000
+# }
 ```

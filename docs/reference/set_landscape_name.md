@@ -22,6 +22,12 @@ set_landscape_name(x, name)
 
 The landscape object with updated name
 
+## See also
+
+Other landscape objects:
+[`landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/landscape.md),
+[`set_landscape_pattern()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_pattern.md)
+
 ## Examples
 
 ``` r

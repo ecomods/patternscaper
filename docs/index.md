@@ -19,14 +19,20 @@ input configurations. For the self-organized landscapes, we additionally
 demonstrate the application of neural networks trained with artificial
 landscapes on real-world photographs.
 
-![](reference/figures/workflow.png)
+![Diagram showing the spatPatClassifyR workflow in two phases: (1)
+Training phase where training landscapes are fed into a neural network
+using either landscape metrics or pixel information, and (2) Application
+phase where new artificial or real landscapes are classified by the
+trained neural network to predict the most likely landscape pattern
+class.](reference/figures/workflow.png)
 
 ## Installation
 
 You can install the development version of spatPatClassifyR from
-[GitHub](https://github.com/) with:
+[GitHub](https://github.com/ecomods/spatPatClassifyR) with:
 
 ``` r
+
 # install.packages("pak")
 pak::pak("ecomods/spatPatClassifyR")
 ```
@@ -35,13 +41,15 @@ pak::pak("ecomods/spatPatClassifyR")
 
 After successful installation, get started by following the detailed
 workflow description in: [Get
-started](https://ecomods.github.io/spatPatClassifyR/spatPatClassifyR.md)
+started](https://ecomods.github.io/spatPatClassifyR/articles/spatPatClassifyR.html)
 
 ## Citation
 
 To cite `spatPatClassifyR` in publications, please use:
 
-Tietjen et al. (2026). …
+Baldauf, S., Tietjen, B., & Berger, U. (2025). spatPatClassifyR: An R
+package for classifying spatial landscape patterns using neural
+networks. *Methods in Ecology and Evolution*. In review.
 
 To get a BibTex entry for citing, please use
 `citation("spatPatClassifyR")`.

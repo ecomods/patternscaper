@@ -12,16 +12,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/ecomods/spatPatClassifyR/blob/HEAD/DESCRIPTION)
+[`inst/CITATION`](https://github.com/ecomods/spatPatClassifyR/blob/HEAD/inst/CITATION)
 
-Baldauf S, Tietjen B, Berger U (2026). *spatPatClassifyR: Classify
-Spatial Landscape Patterns Using Neural Networks*. R package version
-0.1.0, <https://github.com/ecomods/spatPatClassifyR/>.
+Baldauf S, Tietjen B, Berger U (2025). “spatPatClassifyR: An R package
+for classifying spatial landscape patterns using neural networks.”
+*Methods in Ecology and Evolution*. In review.
 
-    @Manual{,
-      title = {spatPatClassifyR: Classify Spatial Landscape Patterns Using Neural Networks},
+    @Article{,
+      title = {spatPatClassifyR: An R package for classifying spatial landscape patterns using neural networks},
       author = {Selina Baldauf and Britta Tietjen and Uta Berger},
-      year = {2026},
-      note = {R package version 0.1.0},
-      url = {https://github.com/ecomods/spatPatClassifyR/},
+      journal = {Methods in Ecology and Evolution},
+      year = {2025},
+      note = {In review},
     }

@@ -42,20 +42,42 @@ number of patterns to maintain readability: - 1-3 patterns: up to 12
 metrics (3 rows x 4 columns) - 4-5 patterns: up to 8 metrics (2 rows x 4
 columns) - 6+ patterns: up to 6 metrics (2 rows x 3 columns)
 
+## See also
+
+[`calculate_landscape_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/calculate_landscape_metrics.md),
+[`evaluate_landscape_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/evaluate_landscape_metrics.md)
+
+Other visualization:
+[`plot_classified_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_classified_landscapes.md),
+[`plot_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape.md),
+[`plot_landscape_list()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape_list.md)
+
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 landscapes <- create_landscapes(n = 20, patterns = c("labyrinth", "spots"))
+#> ✔ Successfully generated all 20 training landscapes
 metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
+#>  ■■■■■■■                           21% |  ETA:  5s
+#>  ■■■■■■■■■■■■■■■■                  52% |  ETA:  4s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■       88% |  ETA:  1s
 plot_metrics(metrics, selected_metrics = c("ai", "lsi"))
+
 
 # With many patterns and metrics, automatic limiting applies
 many_metrics <- c("ai", "lsi", "ed", "np", "pd", "cohesion", "division",
                   "split", "mesh", "enn_mn", "area_mn", "core_mn")
 plot_metrics(metrics, selected_metrics = many_metrics)
+#> Warning: Removed 6 rows containing non-finite outside the scale range
+#> (`stat_boxplot()`).
+#> Warning: Removed 6 rows containing missing values or values outside the scale range
+#> (`geom_point()`).
+
 
 # Override limits if needed
 plot_metrics(metrics, selected_metrics = many_metrics, force = TRUE)
-} # }
+#> Warning: Removed 6 rows containing non-finite outside the scale range
+#> (`stat_boxplot()`).
+#> Warning: Removed 6 rows containing missing values or values outside the scale range
+#> (`geom_point()`).
 ```

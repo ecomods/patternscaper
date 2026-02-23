@@ -10,6 +10,7 @@ and
 vignettes.
 
 ``` r
+
 library(spatPatClassifyR)
 # Set seed for reproducibility
 set.seed(123456)
@@ -23,7 +24,8 @@ You can:
   [`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
 - Create individual landscapes with custom parameters using
   [`create_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md)
-- Visualize an individual landscape with \`plot_landscape()
+- Visualize an individual landscape with
+  [`plot_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape.md)
 - Visualize multiple landscapes in a grid with
   [`plot_landscape_list()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape_list.md)
 
@@ -72,6 +74,7 @@ The quickest way to generate training data is with
 It generates multiple landscapes balanced across all available patterns.
 
 ``` r
+
 # Create 20 landscapes balanced across all pattern types
 landscapes <- create_landscapes(n = 20)
 #> ✔ Successfully generated all 20 training landscapes
@@ -86,6 +89,7 @@ They can be visualized using the
 function:
 
 ``` r
+
 # Plot all landscapes
 plot_landscape_list(landscapes)
 ```
@@ -96,6 +100,7 @@ By default, landscapes are created in a balanced way, so that each
 pattern type is represented equally in the generated set.
 
 ``` r
+
 # Check how many landscapes of each type were generated
 table(purrr::map_chr(landscapes, ~ .x$pattern))
 #> 
@@ -112,6 +117,7 @@ using the `patterns` argument. For example, to create landscapes with
 only labyrinth, spots, and clustered patterns:
 
 ``` r
+
 # Generate only specific patterns
 landscapes <- create_landscapes(
   n = 12,
@@ -134,6 +140,7 @@ generated landscapes, use the `ncol` and `nrow` arguments. By default,
 landscapes are created with a size of 100x100 pixels.
 
 ``` r
+
 non_square <- create_landscapes(
   n = 3,
   width = 50,
@@ -153,23 +160,23 @@ By default, landscapes are rotated by angles randomly chosen between 0
 and 360 degrees. This ensures that classifiers trained on these
 landscapes are invariant to landscape orientation.
 
-You can disable random rotation by setting the `add_rotation` parameter
-to `FALSE`.
-
-You can also control used rotation angles directly using
-`rotation_angles`.
+You can disable random rotation by setting the `rotation` parameter to
+`0`. This parameter can also be used to directly control the range of
+selected rotation angles. For example, to select only angles between 0
+and 90 degrees:
 
 ``` r
+
 no_rotation <- create_landscapes(
   n = 3,
   patterns = c("clustered", "sharp", "bands"),
-  add_rotation = FALSE
+  rotation = 0
 )
 
 defined_angles <- create_landscapes(
   n = 3,
   patterns = "clustered",
-  rotation_angles = c(45, 90)
+  rotation = c(45, 90)
 )
 
 plot_landscape_list(c(no_rotation, defined_angles))
@@ -186,6 +193,7 @@ specific pattern by passing a list of parameter values to the
 spots of larger size:
 
 ``` r
+
 # Custom parameters for spot patterns
 pattern_params <- list(
   spots = list(
@@ -222,6 +230,7 @@ for a full list of available parameters for each pattern type.
 ### Spot Patterns
 
 ``` r
+
 # Default spots
 spots_default <- create_landscape("spots", name = "Default")
 
@@ -259,6 +268,7 @@ patches](landscape-generation_files/figure-html/spot-patterns-examples-1.png)
 ### Clustered Patterns
 
 ``` r
+
 # Few large clusters
 clustered_large <- create_landscape(
   "clustered",
@@ -305,6 +315,7 @@ numbers](landscape-generation_files/figure-html/clustered-patterns-examples-1.pn
 ### Labyrinth Patterns
 
 ``` r
+
 # Default labyrinth
 labyrinth_default <- create_landscape("labyrinth", name = "Default")
 
@@ -335,7 +346,7 @@ To learn how to transform your own raster data into this format, see
 [vignette on importing
 landscapes](https://ecomods.github.io/spatPatClassifyR/articles/importing-landscapes.md).
 
-Each landscapes is stored as a list with the following components:
+Each landscape is stored as a list with the following components:
 
 - data: The landscape object as a `SpatRaster` class
 - pattern: Pattern type (e.g., “spots”, “clustered”)
@@ -343,13 +354,14 @@ Each landscapes is stored as a list with the following components:
 - params: List of parameters used to generate the landscape
 
 ``` r
+
 landscape_example <- create_landscape("spots", name = "Example")
 str(landscape_example)
 #> List of 4
 #>  $ data   :S4 class 'SpatRaster' [package "terra"]
 #>  $ pattern: chr "spots"
 #>  $ name   : chr "Example"
-#>  $ params :List of 9
+#>  $ params :List of 8
 #>   ..$ width                : num 100
 #>   ..$ height               : num 100
 #>   ..$ invert_landscape     : logi FALSE
@@ -358,7 +370,6 @@ str(landscape_example)
 #>   ..$ spot_radius_sd       : num 0
 #>   ..$ radius_noise_fraction: num 0
 #>   ..$ regular_spots        : logi FALSE
-#>   ..$ rotation             : num 0
 #>  - attr(*, "class")= chr "landscape"
 ```
 
@@ -371,6 +382,7 @@ and
 For example, to change the pattern label or name of existing landscapes:
 
 ``` r
+
 landscapes_example <- set_landscape_name(
   landscape_example,
   "New Landscape Name"
@@ -386,7 +398,7 @@ landscapes_example
 #> Resolution: 1.0x1.0
 #> Extent    : xmin=0.0, xmax=100.0, ymin=0.0, ymax=100.0
 #> Values    : min=0.0, max=1.0
-#> Parameters: width = 100, height = 100, invert_landscape = FALSE, n_spots = 15, spot_radius = 5, spot_radius_sd = 0, radius_noise_fraction = 0, regular_spots = FALSE, rotation = 0
+#> Parameters: width = 100, height = 100, invert_landscape = FALSE, n_spots = 15, spot_radius = 5, spot_radius_sd = 0, radius_noise_fraction = 0, regular_spots = FALSE
 ```
 
 ## Next Steps
@@ -398,7 +410,7 @@ landscapes_example
 - See
   [`vignette("classify-metrics")`](https://ecomods.github.io/spatPatClassifyR/articles/classify-metrics.md)
   for training spatial pattern classifiers on the landscape metrics
-- see
+- See
   [`vignette("classify-pixels")`](https://ecomods.github.io/spatPatClassifyR/articles/classify-pixels.md)
   for training spatial pattern classifiers on the raw landscape data
-  using keras
+  using Keras

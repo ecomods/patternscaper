@@ -1,7 +1,7 @@
 # Plot a Landscape
 
-A wrapper function for the S3 method `plot.landscape` with additional
-customization options.
+Create a customizable plot of a landscape object with options for
+titles, legends, and display preferences.
 
 ## Usage
 
@@ -24,8 +24,8 @@ plot_landscape(
 
   Character. Controls the plot title: - "name": uses only the landscape
   name - "pattern": uses only the landscape pattern - "both": uses "name
-  (pattern)" format - "none": no title - Any other string: used as a
-  custom title Default: "pattern"
+  (pattern)" format - "none": no title - Any other string: used as-is as
+  a custom title Default: "pattern"
 
 - show_legend:
 
@@ -39,9 +39,17 @@ plot_landscape(
 
 ggplot object. Plot of the landscape.
 
+## See also
+
+Other visualization:
+[`plot_classified_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_classified_landscapes.md),
+[`plot_landscape_list()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape_list.md),
+[`plot_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_metrics.md)
+
 ## Examples
 
 ``` r
+
 # Create a basic landscape
 l <- create_landscape("sharp", width = 50, height = 50)
 

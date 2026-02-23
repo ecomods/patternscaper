@@ -1,6 +1,7 @@
-# landscape-metrics
+# Calculate and evaluate landscape metrics
 
 ``` r
+
 library(spatPatClassifyR)
 
 set.seed(123456)
@@ -30,6 +31,7 @@ can also specify a subset of metrics to calculate by providing a vector
 of metric names. To find available metric names, use:
 
 ``` r
+
 # Select either the landscape-level or class-level metrics
 landscapemetrics::list_lsm(level = "landscape")
 #> # A tibble: 66 × 5
@@ -53,27 +55,27 @@ entire landscape) or on the class level (one metric per land cover class
 in the landscape).
 
 ``` r
+
 # Calculate all landscape-level metrics for the sample landscapes
 landscape_metrics <- calculate_landscape_metrics(
   sample_landscapes,
   level = "landscape"
 )
-#>  ■■■■■■■                           20% |  ETA:  6s
-#>  ■■■■■■■■■■■■■■■■■                 53% |  ETA:  4s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      89% |  ETA:  1s
+#>  ■■■■■■■■■■■■■■■■■                 53% |  ETA:  3s
 ```
 
-To calculate selected metrics, provide a vector of valide metric names
-to the `metrics` argument. Find available metric names using
+To calculate selected metrics, provide a vector of valid metric names to
+the `metrics` argument. Find available metric names using
 [`landscapemetrics::list_lsm()`](https://r-spatialecology.github.io/landscapemetrics/reference/list_lsm.html)
 as shown above.
 
 ``` r
+
 # Calculate all class-level metrics for the sample landscapes
 class_metrics <- calculate_landscape_metrics(
   sample_landscapes,
   level = "class",
-  metrics = c("ai", "area_cv", "cai_cv") # Define a subset of metrics to calculates
+  metrics = c("ai", "area_cv", "cai_cv") # Define a subset of metrics to calculate
 )
 ```
 
@@ -100,6 +102,7 @@ By default, the function excludes metrics with high correlation (above
 0.7). This can be adjusted using the `correlation_threshold` argument.
 
 ``` r
+
 # Evaluate landscape metrics using Fisher Score
 metric_evaluation <- evaluate_landscape_metrics(
   landscape_metrics,
@@ -119,6 +122,7 @@ To visually compare the top 10 metrics, use the
 function:
 
 ``` r
+
 plot_metrics(
   landscape_metrics,
   selected_metrics = metric_evaluation

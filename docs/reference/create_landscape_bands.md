@@ -8,7 +8,7 @@ Generates a binary landscape with parallel sine-wave bands.
 create_landscape_bands(
   width = 100,
   height = 100,
-  treeline_position = 0.5,
+  boundary_position = 0.5,
   band_zone_prop = 0.2,
   band_thickness = 3,
   band_spacing = 10,
@@ -29,7 +29,7 @@ create_landscape_bands(
 
   Integer. Height of the landscape in pixels (default: 100).
 
-- treeline_position:
+- boundary_position:
 
   Numeric. Relative position of treeline from top (0-1) (default: 0.5).
 
@@ -66,19 +66,45 @@ create_landscape_bands(
 
 ## Value
 
-A landscape object with pattern "bands" containing the generated
-landscape data and parameters.
+A landscape object with pattern "bands" containing:
+
+- data:
+
+  SpatRaster with binary values (0 = bare ground, 1 = vegetation)
+
+- pattern:
+
+  Character string "bands"
+
+- params:
+
+  List of all input parameters used to generate the landscape
+
+## See also
+
+Other landscape creation:
+[`create_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md),
+[`create_landscape_bare()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bare.md),
+[`create_landscape_clustered()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_clustered.md),
+[`create_landscape_dense()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_dense.md),
+[`create_landscape_diffuse()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse.md),
+[`create_landscape_fingers()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_fingers.md),
+[`create_landscape_gaps()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_gaps.md),
+[`create_landscape_labyrinth()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_labyrinth.md),
+[`create_landscape_random()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_random.md),
+[`create_landscape_sharp()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp.md),
+[`create_landscape_spots()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_spots.md),
+[`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
 
 ## Examples
 
 ``` r
 # Default sine bands
 bands_default <- create_landscape_bands()
-#> Error in create_landscape_bands(): could not find function "create_landscape_bands"
 
 # Modified sine bands with thicker bands, wider spacing and noise
 bands_modified <- create_landscape_bands(
-  treeline_position = 0.3,
+  boundary_position = 0.3,
   band_zone_prop = 0.5,
   band_thickness = 5,
   band_spacing = 15,
@@ -86,7 +112,6 @@ bands_modified <- create_landscape_bands(
   amplitude = 8,
   noise_sd = 1.5
 )
-#> Error in create_landscape_bands(treeline_position = 0.3, band_zone_prop = 0.5,     band_thickness = 5, band_spacing = 15, frequency = 1, amplitude = 8,     noise_sd = 1.5): could not find function "create_landscape_bands"
 
 # With rotation
 bands_rotated <- create_landscape_bands(
@@ -96,5 +121,4 @@ bands_rotated <- create_landscape_bands(
   noise_sd = 2,
   rotation = 45
 )
-#> Error in create_landscape_bands(band_thickness = 4, band_spacing = 12,     amplitude = 6, noise_sd = 2, rotation = 45): could not find function "create_landscape_bands"
 ```

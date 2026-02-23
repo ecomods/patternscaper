@@ -31,11 +31,13 @@
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bare.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_clustered.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_dense.html</loc></url>
+<url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse_treeline.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_fingers.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_gaps.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_labyrinth.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_random.html</loc></url>
+<url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp_treeline.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_spots.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/create_multiscale_model.html</loc></url>
@@ -67,6 +69,7 @@
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_name.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_pattern.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/set_random_seed.html</loc></url>
+<url><loc>https://ecomods.github.io/spatPatClassifyR/reference/spatPatClassifyR.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/theme_landscape.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/train_nn_landscapes.html</loc></url>
 <url><loc>https://ecomods.github.io/spatPatClassifyR/reference/train_nn_metrics.html</loc></url>

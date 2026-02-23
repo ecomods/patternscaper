@@ -12,6 +12,7 @@ features (`R/nn_metrics.R`, `R/metrics.R`)
 **Landscape objects** are S3 classes with structure:
 
 ``` r
+
 list(
   data = SpatRaster,      # terra raster object
   pattern = character,    # e.g., 'sharp', 'diffuse', 'spots'
@@ -97,6 +98,7 @@ includes `landscape_id` to map predictions back to input order
 ## Development Workflow
 
 ``` r
+
 # Load functions for interactive testing
 devtools::load_all()
 

@@ -10,6 +10,7 @@ Please note that right now, we only support landscapes with categorical
 cover classes.
 
 ``` r
+
 library(spatPatClassifyR)
 ```
 
@@ -24,6 +25,7 @@ from the [`terra` R
 package](https://rspatial.github.io/terra/index.html)).
 
 ``` r
+
 # Create a sample matrix
 landscape_matrix <- matrix(
   data = sample(1:3, 100, replace = TRUE),
@@ -50,6 +52,7 @@ You can provide name and pattern when converting the landscape.
 > without known patterns, you can leave the pattern as `"unclassified"`.
 
 ``` r
+
 # Convert the matrix to a landscape object
 landscape_object_matrix <- landscape(
   landscape_matrix,
@@ -67,6 +70,7 @@ landscape_object_raster <- landscape(
 Printing a landscape object shows its properties:
 
 ``` r
+
 landscape_object_matrix
 #> Landscape: "Sample Matrix Landscape" [ pattern: custom ]
 #> -----------------------------------------
@@ -89,6 +93,7 @@ Below you find an example of bulk-converting multiple matrices to
 landscape objects and setting their names and patterns accordingly.
 
 ``` r
+
 library(purrr)
 # Create a list of sample matrices
 landscape_matrices <- list(
@@ -119,6 +124,7 @@ landscape object in `spatPatClassifyR`. You can for example use the
 plotting functions to visualize them:
 
 ``` r
+
 plot_landscape_list(landscape_objects)
 ```
 

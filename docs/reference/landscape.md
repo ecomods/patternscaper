@@ -38,6 +38,15 @@ landscape(data, pattern = NA_character_, name = NA_character_, params = NULL)
 
 A landscape object
 
+## See also
+
+[`create_landscape`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md),
+[`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
+
+Other landscape objects:
+[`set_landscape_name()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_name.md),
+[`set_landscape_pattern()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_pattern.md)
+
 ## Examples
 
 ``` r
@@ -53,7 +62,7 @@ l <- landscape(
   mat,
   pattern = "sharp",
   name = "alpine_treeline",
-  params = list(treeline_position = 0.5, rotation = 0)
+  params = list(boundary_position = 0.5, rotation = 0)
 )
 
 # Create from SpatRaster

@@ -12,6 +12,7 @@
   R](https://ecomods.github.io/spatPatClassifyR/articles/install-keras.md):
 - [Generate landscapes with different spatial
   patterns](https://ecomods.github.io/spatPatClassifyR/articles/landscape-generation.md):
-- [landscape-metrics](https://ecomods.github.io/spatPatClassifyR/articles/landscape-metrics.md):
+- [Calculate and evaluate landscape
+  metrics](https://ecomods.github.io/spatPatClassifyR/articles/landscape-metrics.md):
 - [Get started with
   spatPatClassifyR](https://ecomods.github.io/spatPatClassifyR/articles/spatPatClassifyR.md):

@@ -60,7 +60,14 @@ plot_landscape_list(
 
 ## Value
 
-A ggplot object combining all landscape plots.
+A ggplot object combining all landscape plots in a grid.
+
+## See also
+
+Other visualization:
+[`plot_classified_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_classified_landscapes.md),
+[`plot_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape.md),
+[`plot_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_metrics.md)
 
 ## Examples
 
@@ -90,6 +97,8 @@ plot_landscape_list(landscapes,
 
 # Create many landscapes and handle overflow
 many_landscapes <- create_landscapes(n = 50)
+#> Warning: Regular spot placement requested 10 spots but only ~8 positions fit.
+#> ℹ  Adjusting to maximum feasible spots. Consider decreasing `spot_radius`.
 #> Warning: Regular spot placement requested 10 spots but only ~8 positions fit.
 #> ℹ  Adjusting to maximum feasible spots. Consider decreasing `spot_radius`.
 #> ✔ Successfully generated all 50 training landscapes

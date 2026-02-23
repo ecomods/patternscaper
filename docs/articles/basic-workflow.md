@@ -1,6 +1,7 @@
 # Basic Workflow with spatPatClassifyR
 
 ``` r
+
 library(spatPatClassifyR)
 library(tidyverse)
 #> ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
@@ -59,6 +60,7 @@ landscapes of size 100x100 pixles, including all supported landscape
 patterns at an equal probability.
 
 ``` r
+
 # Generate training landscapes with different ecotone patterns
 ```
 
@@ -66,6 +68,7 @@ You can visualize a few or all of the generated landscapes to see the
 different patterns:
 
 ``` r
+
 # Visualize a few of the generated landscapes
 ```
 
@@ -95,6 +98,7 @@ metrics
 vignette](https://ecomods.github.io/spatPatClassifyR/articles/landscape-metrics.md).
 
 ``` r
+
 # Find the 10 best metrics
 ```
 
@@ -108,6 +112,7 @@ removing the ones that either contain NAs or are constant across all
 landscapes.
 
 ``` r
+
 # Find metrics with NA value
 ```
 
@@ -132,6 +137,7 @@ We can visualize the performance of our model using several different
 plots:
 
 ``` r
+
 
 # Or plot individual plots
 # Plot confusion matrix
