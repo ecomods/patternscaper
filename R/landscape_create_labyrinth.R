@@ -14,7 +14,7 @@
 #'    boundaries are sharp and fully deterministic. Small values (≈ 0.05–0.1)
 #'    introduce slight, irregular boundary perturbations without changing the
 #'    overall topology of the pattern. Larger values progressively erode vegetation
-#'    edges and can fragmet bands if set too high. This parameter affects boundary
+#'    edges and can fragment bands if set too high. This parameter affects boundary
 #'    geometry only and does not influence the global structure or connectivity
 #'    of the labyrinth. (default: 0.08)
 #' @param octaves Integer >= 1. Number of noise layers (octaves) combined to

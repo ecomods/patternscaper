@@ -12,7 +12,7 @@
 #'     Must be positive and smaller than landscape dimensions.
 #' @param spot_radius_sd Numeric. Standard deviation for random variation in spot radius.
 #'     Each spot's radius is sampled from N(spot_radius, spot_radius_sd).
-#'     (detault: 0 - no variation)
+#'     (default: 0 - no variation)
 #' @param radius_noise_fraction Numeric (0 to 1). Proportion of the spot radius
 #'     where gradual edge noise is applied. 0 creates sharp circular edges,
 #'     1 applies probabilistic cell inclusion across the entire radius.

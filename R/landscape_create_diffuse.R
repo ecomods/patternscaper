@@ -8,7 +8,7 @@
 #' @param steepness Numeric. Controls the transition gradient (0-1).
 #'   Lower values (e.g., 0.1) create sharper transitions.
 #'   Higher values (e.g., 0.9) create more gradual, diffuse transitions
-#'   where vegetation probability persists further below the vegeation boundary (default: 0.5).
+#'   where vegetation probability persists further below the vegetation boundary (default: 0.5).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
 #' @return A landscape object with pattern "diffuse" containing:
@@ -21,7 +21,7 @@
 #' @importFrom stats runif
 #'
 #' @examples
-#' # Default diffuse vegeation boundary
+#' # Default diffuse vegetation boundary
 #' diffuse_default <- create_landscape_diffuse()
 #'
 #' # Sharp transition (lower steepness)
@@ -81,8 +81,8 @@ create_landscape_diffuse <- function(
     relative_pos <- (i - transition_center) / (height_actual * 0.5)
 
     # Calculate probability for vegetation cover following a power curve:
-    # - Above vegeation boundary (relative_pos <= 0): prob = 1 (full vegetation cover)
-    # - Below vegeation boundary (relative_pos > 0): prob = 1 - (relative_pos)^steepness
+    # - Above vegetation boundary (relative_pos <= 0): prob = 1 (full vegetation cover)
+    # - Below vegetation boundary (relative_pos > 0): prob = 1 - (relative_pos)^steepness
     #   * Lower steepness (e.g., 0.1): Higher exponent effect = sharper drop-off
     #   * Higher steepness (e.g., 0.9): Lower exponent effect = gradual transition
     if (relative_pos <= 0) {
