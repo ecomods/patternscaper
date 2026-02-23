@@ -290,10 +290,10 @@ evaluate_cv_performance <- function(
 ) {
   # Validate inputs
   if (length(cv_predictions) != length(cv_actual)) {
-    stop("Length of cv_predictions and cv_actual must be the same")
+    cli::cli_abort("Length of cv_predictions and cv_actual must be the same")
   }
   if (length(cv_probabilities) != length(cv_actual)) {
-    stop("Length of cv_probabilities and cv_actual must be the same")
+    cli::cli_abort("Length of cv_probabilities and cv_actual must be the same")
   }
 
   # Add validation at the start of the function

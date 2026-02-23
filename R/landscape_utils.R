@@ -12,11 +12,11 @@ matrix_to_raster <- function(
   x
 ) {
   if (!is.matrix(x)) {
-    stop("Input must be a matrix")
+    cli::cli_abort("Input must be a matrix")
   }
 
   if (!is.numeric(x)) {
-    stop("Matrix must contain numeric values")
+    cli::cli_abort("Matrix must contain numeric values")
   }
 
   # Convert matrix to SpatRaster

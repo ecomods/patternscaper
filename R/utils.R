@@ -12,6 +12,6 @@ ensure_spatraster <- function(landscape) {
   } else if (class(landscape)[1] == "SpatRaster") {
     return(landscape)
   } else {
-    stop("Input must be either a matrix or SpatRaster object")
+    cli::cli_abort("Input must be either a matrix or SpatRaster object")
   }
 }

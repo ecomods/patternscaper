@@ -49,7 +49,7 @@ plot_metrics <- function(
 
   # Validate input data
   if (!is.data.frame(metrics)) {
-    stop(
+    cli::cli_abort(
       "metrics must be a data frame from calculate_landscape_metrics()"
     )
   }
@@ -58,15 +58,14 @@ plot_metrics <- function(
   required_cols <- c("level", "pattern", "metric", "value")
   missing_cols <- setdiff(required_cols, names(metrics))
   if (length(missing_cols) > 0) {
-    stop(paste(
-      "metrics is missing required columns:",
-      paste(missing_cols, collapse = ", ")
-    ))
+    cli::cli_abort(
+      "metrics is missing required columns: {paste(missing_cols, collapse = ', ')}"
+    )
   }
   # Validate selected_metrics
   if (!is.null(selected_metrics)) {
     if (!is.character(selected_metrics) || length(selected_metrics) == 0) {
-      stop(
+      cli::cli_abort(
         "selected_metrics must be a non-empty character vector of metric names"
       )
     }
@@ -90,31 +89,26 @@ plot_metrics <- function(
 
     # Check if any valid metrics remain
     if (length(selected_metrics) == 0) {
-      stop("No valid metrics remaining after filtering. Cannot create plot.")
+      cli::cli_abort("No valid metrics remaining after filtering. Cannot create plot.")
     }
   }
 
   # Extract and validate level
   level <- unique(metrics$level)
   if (length(level) != 1) {
-    stop(paste(
-      "metrics contains multiple levels:",
-      paste(level, collapse = ", "),
-      "\nPlease filter to a single level before plotting."
-    ))
+    cli::cli_abort(
+      "metrics contains multiple levels: {paste(level, collapse = ', ')}. Please filter to a single level before plotting."
+    )
   }
   if (!level %in% c("landscape", "class")) {
-    stop(
-      sprintf(
-        "Invalid level in metrics data. Must be 'landscape' or 'class' but is %s",
-        level
-      )
+    cli::cli_abort(
+      "Invalid level in metrics data. Must be 'landscape' or 'class' but is {level}"
     )
   }
 
   # For class-level metrics, check class column exists
   if (level == "class" && !"class" %in% names(metrics)) {
-    stop(
+    cli::cli_abort(
       "metrics must contain 'class' column for class-level metrics"
     )
   }

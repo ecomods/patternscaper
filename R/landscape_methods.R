@@ -123,7 +123,7 @@ print.landscape <- function(x, ...) {
 plot.landscape <- function(x, ...) {
   # Validate input
   if (!is_landscape(x)) {
-    stop("'x' must be a landscape object", call. = FALSE)
+    cli::cli_abort("'x' must be a landscape object")
   }
 
   # Convert raster to data frame for plotting

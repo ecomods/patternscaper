@@ -174,23 +174,21 @@ plot_landscape_list <- function(
 
   # First validate that input is a list
   if (!is.list(landscapes)) {
-    stop("landscapes must be a list", call. = FALSE)
+    cli::cli_abort("landscapes must be a list")
   }
 
   # Then check if list is empty
   if (length(landscapes) == 0) {
-    stop(
-      "landscapes must contain at least one landscape to plot",
-      call. = FALSE
+    cli::cli_abort(
+      "landscapes must contain at least one landscape to plot"
     )
   }
 
   if (any(!sapply(landscapes, is_landscape))) {
     # find out which element is not a landscape
     invalid_indices <- which(!sapply(landscapes, is_landscape))
-    stop(
-      "All elements must be landscape objects. Invalid element(s) at index(es): ",
-      paste(invalid_indices, collapse = ", ")
+    cli::cli_abort(
+      "All elements must be landscape objects. Invalid element(s) at index(es): {paste(invalid_indices, collapse = ', ')}"
     )
   }
 
@@ -201,13 +199,8 @@ plot_landscape_list <- function(
 
   # Check if enough titles are provided for the subset
   if (length(titles) > 1 && length(titles) != length(landscapes)) {
-    stop(
-      sprintf(
-        "If providing multiple titles, length must match number of landscapes (%d). Got %d titles instead.",
-        length(landscapes),
-        length(titles)
-      ),
-      call. = FALSE
+    cli::cli_abort(
+      "If providing multiple titles, length must match number of landscapes ({length(landscapes)}). Got {length(titles)} titles instead."
     )
   }
 

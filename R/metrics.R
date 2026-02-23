@@ -116,20 +116,17 @@ calculate_landscape_metrics <- function(
   if (any(!vapply(landscapes, is_landscape, logical(1)))) {
     # find out which element is not a landscape
     invalid_indices <- which(!vapply(landscapes, is_landscape, logical(1)))
-    stop(
-      "All elements must be landscape objects. Invalid element(s) at index(es): ",
-      paste(invalid_indices, collapse = ", ")
+    cli::cli_abort(
+      "All elements must be landscape objects. Invalid element(s) at index(es): {paste(invalid_indices, collapse = ', ')}"
     )
   }
 
   # Check if level parameter is valid
   valid_levels <- c("class", "landscape")
   if (!all(level %in% valid_levels) || length(level) != 1) {
-    stop(paste(
-      "Invalid level:",
-      paste(level, collapse = ", "),
-      "\nValid options are a single value of: 'class', or 'landscape'"
-    ))
+    cli::cli_abort(
+      "Invalid level: {paste(level, collapse = ', ')}. Valid options are a single value of: 'class', or 'landscape'"
+    )
   }
 
   # Check if metrics parameter is valid
@@ -152,7 +149,7 @@ calculate_landscape_metrics <- function(
     ]
 
     if (nrow(available_metrics) == 0) {
-      stop("No valid metrics selected for the specified level(s).")
+      cli::cli_abort("No valid metrics selected for the specified level(s).")
     }
   }
 
