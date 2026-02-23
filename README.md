@@ -47,7 +47,9 @@ workflow description in: [Get started](spatPatClassifyR.html)
 
 To cite `spatPatClassifyR` in publications, please use:
 
-WILL BE ADDED AFTER PEER REVIEW
+Baldauf, S., Tietjen, B., & Berger, U. (2025). spatPatClassifyR: An
+R package for classifying spatial landscape patterns using neural
+networks. *Methods in Ecology and Evolution*. In review.
 
 To get a BibTex entry for citing, please use
 `citation("spatPatClassifyR")`.
