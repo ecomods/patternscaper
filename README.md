@@ -41,14 +41,15 @@ pak::pak("ecomods/spatPatClassifyR")
 ## Get started
 
 After successful installation, get started by following the detailed
-workflow description in: [Get started](https://ecomods.github.io/spatPatClassifyR/articles/spatPatClassifyR.html)
+workflow description in: [Get
+started](https://ecomods.github.io/spatPatClassifyR/articles/spatPatClassifyR.html)
 
 ## Citation
 
 To cite `spatPatClassifyR` in publications, please use:
 
-Baldauf, S., Tietjen, B., & Berger, U. (2025). spatPatClassifyR: An
-R package for classifying spatial landscape patterns using neural
+Baldauf, S., Tietjen, B., & Berger, U. (2025). spatPatClassifyR: An R
+package for classifying spatial landscape patterns using neural
 networks. *Methods in Ecology and Evolution*. In review.
 
 To get a BibTex entry for citing, please use
