@@ -52,6 +52,8 @@
 #'   method = "coeffvar_all"
 #' )
 #'
+#' @seealso \code{\link{train_nn_metrics}}
+#' @family metrics
 #' @export
 evaluate_landscape_metrics <- function(
   metrics,

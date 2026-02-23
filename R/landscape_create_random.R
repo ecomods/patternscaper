@@ -21,6 +21,7 @@
 #' # Custom dimensions
 #' random_large <- create_landscape_random(width = 200, height = 150)
 #'
+#' @family landscape creation
 #' @export
 #' @importFrom stats rbinom
 create_landscape_random <- function(

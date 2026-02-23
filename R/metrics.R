@@ -80,6 +80,8 @@ calculate_single_metric <- function(landscapes, function_name) {
 #' (2019). landscapemetrics: an open-source R tool to calculate landscape
 #' metrics. *Ecography*, 42(10), 1648-1657. \doi{10.1111/ecog.04617}
 #'
+#' @seealso \code{\link{plot_metrics}}
+#' @family metrics
 #' @export
 #' @importFrom dplyr mutate relocate
 #' @importFrom purrr map_dfr

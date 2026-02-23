@@ -70,6 +70,8 @@
 #'       metrics, and overall accuracy. When cv_method = "none", contains training
 #'       metadata only (see note field for evaluation instructions).}
 #'   }
+#' @seealso \code{\link{apply_nn_pixels}}
+#' @family neural network training
 #' @export
 #' @importFrom utils flush.console
 #' @examples

@@ -28,6 +28,7 @@
 #'   \item{pattern}{Character string "clustered"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
+#' @family landscape creation
 #' @importFrom stats runif
 #' @importFrom terra as.matrix
 #' @importFrom cli cli_abort

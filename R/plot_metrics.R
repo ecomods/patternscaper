@@ -21,6 +21,8 @@
 #'
 #' @return A ggplot2 object showing boxplots of metric values by pattern type.
 #'
+#' @seealso \code{\link{calculate_landscape_metrics}}, \code{\link{evaluate_landscape_metrics}}
+#' @family visualization
 #' @export
 #' @importFrom dplyr filter mutate
 #' @importFrom ggplot2 ggplot aes geom_boxplot geom_jitter position_jitter facet_wrap coord_flip theme element_blank labs

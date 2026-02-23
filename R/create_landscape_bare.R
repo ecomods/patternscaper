@@ -14,6 +14,7 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #' @seealso \code{\link{create_landscape_random}}, \code{\link{create_landscape_dense}}
 #'
+#' @family landscape creation
 #' @export
 #' @examples
 #' # Create default bare landscape (10% vegetation)

@@ -70,6 +70,7 @@
 #'   rotation = 45
 #' )
 #'
+#' @family landscape creation
 #' @export
 create_landscape <- function(
   pattern = c(
@@ -204,6 +205,7 @@ create_landscape <- function(
 #'  params_list = pattern_params
 #' )
 #'
+#' @family landscape creation
 #' @export
 create_landscapes <- function(
   n = 50,

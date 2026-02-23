@@ -15,6 +15,7 @@
 #'
 #' @seealso \code{\link{create_landscape_random}}, \code{\link{create_landscape_bare}}
 #'
+#' @family landscape creation
 #' @examples
 #' # Create default dense landscape (90% vegetation)
 #' dense <- create_landscape_dense()

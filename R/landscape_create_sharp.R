@@ -12,6 +12,7 @@
 #'   \item{pattern}{Character string "sharp"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
+#' @family landscape creation
 #' @export
 #'
 #' @examples

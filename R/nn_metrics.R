@@ -67,6 +67,8 @@
 #'   model_path = "models/landscape_classifier.rds"
 #' )
 #' }
+#' @seealso \code{\link{apply_nn_metrics}}, \code{\link{evaluate_landscape_metrics}}
+#' @family neural network training
 #' @export
 #' @importFrom cli cli_abort cli_alert_warning
 #' @importFrom dplyr filter select any_of all_of

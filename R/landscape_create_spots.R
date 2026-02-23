@@ -68,6 +68,7 @@
 #'   invert_landscape = TRUE
 #' )
 #'
+#' @family landscape creation
 #' @importFrom stats kmeans rnorm runif
 #' @importFrom cli cli_alert_warning
 #' @export

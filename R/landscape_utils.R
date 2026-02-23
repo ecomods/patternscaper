@@ -47,6 +47,7 @@ matrix_to_raster <- function(
 #'
 #' # Multiple landscapes with base R
 #' landscapes <- mapply(set_landscape_name, landscapes, names_vec, SIMPLIFY = FALSE)
+#' @family landscape objects
 #' @export
 set_landscape_name <- function(x, name) {
   stopifnot(inherits(x, "landscape"))
@@ -78,6 +79,7 @@ set_landscape_name <- function(x, name) {
 #'
 #' # Multiple landscapes with base R
 #' landscapes <- mapply(set_landscape_pattern, landscapes, patterns_vec, SIMPLIFY = FALSE)
+#' @family landscape objects
 #' @export
 set_landscape_pattern <- function(x, pattern) {
   stopifnot(inherits(x, "landscape"))

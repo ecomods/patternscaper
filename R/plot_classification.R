@@ -38,6 +38,8 @@
 #'   ncol = 4
 #' )
 #' }
+#' @seealso \code{\link{train_nn_pixels}}, \code{\link{train_nn_metrics}}
+#' @family visualization
 #' @export
 plot_classified_landscapes <- function(
   classification,

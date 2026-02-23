@@ -58,6 +58,8 @@ new_landscape <- function(
 #' # Create from SpatRaster
 #' rast <- terra::rast(mat)
 #' l <- landscape(rast, name = "my_raster")
+#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
+#' @family landscape objects
 #' @export
 landscape <- function(
   data,

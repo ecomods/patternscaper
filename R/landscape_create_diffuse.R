@@ -16,6 +16,7 @@
 #'   \item{pattern}{Character string "diffuse"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
+#' @family landscape creation
 #' @export
 #' @importFrom cli cli_abort
 #' @importFrom stats runif

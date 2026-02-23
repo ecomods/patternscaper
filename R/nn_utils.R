@@ -16,6 +16,7 @@
 #'
 #' @return Invisibly returns `NULL`. Called for side effects.
 #'
+#' @family neural network training
 #' @export
 #' @examples
 #' \dontrun{

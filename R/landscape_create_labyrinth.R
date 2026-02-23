@@ -48,6 +48,7 @@
 #' The combination of `frequency` and `octaves` controls pattern complexity,
 #' while `veg_threshold` determines vegetation proportion.
 #'
+#' @family landscape creation
 #' @export
 #' @examples
 #' # Default labyrinth pattern

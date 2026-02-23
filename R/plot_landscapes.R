@@ -34,6 +34,7 @@
 #'               title = "My Sharp Treeline",
 #'               legend_title = "Vegetation",
 #'               show_legend = TRUE)
+#' @family visualization
 #' @export
 plot_landscape <- function(
   landscape,
@@ -159,6 +160,7 @@ plot_landscape <- function(
 #' plot_landscape_list(many_landscapes,
 #'                    max_landscapes = 9,  # Show first 9 only
 #'                    ncol = 3)            # In 3x3 grid
+#' @family visualization
 #' @export
 plot_landscape_list <- function(
   landscapes,
