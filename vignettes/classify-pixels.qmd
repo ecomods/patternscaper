@@ -186,8 +186,8 @@ show the landscape and the predicted pattern only.
 
 ```{r}
 #| label: plot-classified-landscapes
-#| fig.width: 8
-#| fig.height: 8
+#| fig-width: 8
+#| fig-height: 8
 # Visualize true and predicted patterns
 
 plot_classified_landscapes(

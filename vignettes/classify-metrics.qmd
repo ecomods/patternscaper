@@ -94,9 +94,9 @@ You can plot the differences between patterns for the selected metrics using the
 
 ```{r}
 #| label: plot-metrics
-#| fig.width: 8
-#| fig.height: 6
-#| fig.cap: "Boxplots show the distribution of the selected landscape metrics across different spatial patterns. Each point represents one training landscape and each panel is one of the selected metrics."
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: "Boxplots show the distribution of the selected landscape metrics across different spatial patterns. Each point represents one training landscape and each panel is one of the selected metrics."
 # Plot selected metrics
 plot_metrics(
   metrics = landscape_metrics,
@@ -220,8 +220,8 @@ show the landscape and the predicted pattern only.
 
 ```{r}
 #| label: plot-classified-landscapes
-#| fig.width: 8
-#| fig.height: 6
+#| fig-width: 8
+#| fig-height: 6
 # Visualize true and predicted patterns
 
 plot_classified_landscapes(

@@ -42,8 +42,8 @@ Currently, there are 11 different spatial patterns available:
 ```{r}
 #| label: control-patterns
 #| echo: false
-#| fig.width: 8
-#| fig.height: 3
+#| fig-width: 8
+#| fig-height: 3
 #| fig-alt: "Three landscapes showing control patterns: random, bare, and dense"
 
 random <- create_landscape("random", name = "Random")
@@ -123,8 +123,8 @@ They can be visualized using the `plot_landscape_list()` function:
 
 ```{r}
 #| label: plot-training-landscapes
-#| fig.width: 8
-#| fig.height: 6
+#| fig-width: 8
+#| fig-height: 6
 # Plot all landscapes
 plot_landscape_list(landscapes)
 ```
