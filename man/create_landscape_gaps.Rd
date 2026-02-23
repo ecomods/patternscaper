@@ -28,7 +28,7 @@ Must be positive and smaller than landscape dimensions.}
 
 \item{spot_radius_sd}{Numeric. Standard deviation for random variation in spot radius.
 Each spot's radius is sampled from N(spot_radius, spot_radius_sd).
-(detault: 0 - no variation)}
+(default: 0 - no variation)}
 
 \item{radius_noise_fraction}{Numeric (0 to 1). Proportion of the spot radius
 where gradual edge noise is applied. 0 creates sharp circular edges,
@@ -75,6 +75,18 @@ gaps_modified <- create_landscape_gaps(
 
 }
 \seealso{
-\code{\link{create_landscape_spots}} for the underlying implementation
+Other landscape creation: 
+\code{\link{create_landscape}()},
+\code{\link{create_landscape_bands}()},
+\code{\link{create_landscape_bare}()},
+\code{\link{create_landscape_clustered}()},
+\code{\link{create_landscape_dense}()},
+\code{\link{create_landscape_diffuse}()},
+\code{\link{create_landscape_fingers}()},
+\code{\link{create_landscape_labyrinth}()},
+\code{\link{create_landscape_random}()},
+\code{\link{create_landscape_sharp}()},
+\code{\link{create_landscape_spots}()},
+\code{\link{create_landscapes}()}
 }
-\keyword{internal}
+\concept{landscape creation}

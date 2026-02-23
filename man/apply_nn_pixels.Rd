@@ -49,7 +49,7 @@ spatial patterns. Automatically resizes input landscapes to match the
 model's expected dimensions.
 }
 \examples{
-\dontrun{
+\donttest{
 # Create training data
 training_landscapes <- create_landscapes(
   n = 200,
@@ -76,3 +76,10 @@ results <- apply_nn_pixels(
 )
 }
 }
+\seealso{
+\code{\link{train_nn_pixels}}, \code{\link{plot_classified_landscapes}}
+
+Other neural network application: 
+\code{\link{apply_nn_metrics}()}
+}
+\concept{neural network application}

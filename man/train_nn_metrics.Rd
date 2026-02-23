@@ -88,7 +88,7 @@ model <- train_nn_metrics(
 )
 }
 
-\dontrun{
+\donttest{
 # Save model to file
 model <- train_nn_metrics(
   metrics,
@@ -96,3 +96,11 @@ model <- train_nn_metrics(
 )
 }
 }
+\seealso{
+\code{\link{apply_nn_metrics}}, \code{\link{evaluate_landscape_metrics}}
+
+Other neural network training: 
+\code{\link{set_random_seed}()},
+\code{\link{train_nn_pixels}()}
+}
+\concept{neural network training}

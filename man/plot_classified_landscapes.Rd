@@ -36,7 +36,7 @@ correct and misclassified cases. Optionally, only misclassified landscapes
 can be shown.
 }
 \examples{
-\dontrun{
+\donttest{
 # Train model and get validation results
 model <- train_nn_metrics(landscapes, metrics)
 
@@ -56,3 +56,12 @@ plot_classified_landscapes(
 )
 }
 }
+\seealso{
+\code{\link{train_nn_pixels}}, \code{\link{train_nn_metrics}}
+
+Other visualization: 
+\code{\link{plot_landscape}()},
+\code{\link{plot_landscape_list}()},
+\code{\link{plot_metrics}()}
+}
+\concept{visualization}

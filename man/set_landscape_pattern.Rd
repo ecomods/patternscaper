@@ -33,3 +33,9 @@ landscapes <- purrr::map2(landscapes, patterns_vec, set_landscape_pattern)
 # Multiple landscapes with base R
 landscapes <- mapply(set_landscape_pattern, landscapes, patterns_vec, SIMPLIFY = FALSE)
 }
+\seealso{
+Other landscape objects: 
+\code{\link{landscape}()},
+\code{\link{set_landscape_name}()}
+}
+\concept{landscape objects}

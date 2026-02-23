@@ -81,3 +81,19 @@ clustered_rotated <- create_landscape_clustered(
   rotation = 45
 )
 }
+\seealso{
+Other landscape creation: 
+\code{\link{create_landscape}()},
+\code{\link{create_landscape_bands}()},
+\code{\link{create_landscape_bare}()},
+\code{\link{create_landscape_dense}()},
+\code{\link{create_landscape_diffuse}()},
+\code{\link{create_landscape_fingers}()},
+\code{\link{create_landscape_gaps}()},
+\code{\link{create_landscape_labyrinth}()},
+\code{\link{create_landscape_random}()},
+\code{\link{create_landscape_sharp}()},
+\code{\link{create_landscape_spots}()},
+\code{\link{create_landscapes}()}
+}
+\concept{landscape creation}

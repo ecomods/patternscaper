@@ -46,3 +46,11 @@ l <- landscape(
 rast <- terra::rast(mat)
 l <- landscape(rast, name = "my_raster")
 }
+\seealso{
+\code{\link{create_landscape}}, \code{\link{create_landscapes}}
+
+Other landscape objects: 
+\code{\link{set_landscape_name}()},
+\code{\link{set_landscape_pattern}()}
+}
+\concept{landscape objects}

@@ -26,9 +26,15 @@ Both must be seeded for reproducible results. Note that minor variations
 may still occur across different hardware/software configurations.
 }
 \examples{
-\dontrun{
+\donttest{
 # Ensure reproducible training
 set_random_seed(42)
 model <- train_nn_pixels(landscapes, cv_folds = 5)
 }
 }
+\seealso{
+Other neural network training: 
+\code{\link{train_nn_metrics}()},
+\code{\link{train_nn_pixels}()}
+}
+\concept{neural network training}

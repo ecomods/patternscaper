@@ -34,4 +34,19 @@ random_dense <- create_landscape_random(veg_prop = 0.7)
 random_large <- create_landscape_random(width = 200, height = 150)
 
 }
-\keyword{internal}
+\seealso{
+Other landscape creation: 
+\code{\link{create_landscape}()},
+\code{\link{create_landscape_bands}()},
+\code{\link{create_landscape_bare}()},
+\code{\link{create_landscape_clustered}()},
+\code{\link{create_landscape_dense}()},
+\code{\link{create_landscape_diffuse}()},
+\code{\link{create_landscape_fingers}()},
+\code{\link{create_landscape_gaps}()},
+\code{\link{create_landscape_labyrinth}()},
+\code{\link{create_landscape_sharp}()},
+\code{\link{create_landscape_spots}()},
+\code{\link{create_landscapes}()}
+}
+\concept{landscape creation}

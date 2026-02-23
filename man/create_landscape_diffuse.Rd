@@ -22,7 +22,7 @@ create_landscape_diffuse(
 \item{steepness}{Numeric. Controls the transition gradient (0-1).
 Lower values (e.g., 0.1) create sharper transitions.
 Higher values (e.g., 0.9) create more gradual, diffuse transitions
-where vegetation probability persists further below the vegeation boundary (default: 0.5).}
+where vegetation probability persists further below the vegetation boundary (default: 0.5).}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
@@ -36,7 +36,7 @@ A landscape object with pattern "diffuse" containing:
 Generates a binary landscape with a diffuse vegetation boundary where vegetation probability decreases with distance.
 }
 \examples{
-# Default diffuse vegeation boundary
+# Default diffuse vegetation boundary
 diffuse_default <- create_landscape_diffuse()
 
 # Sharp transition (lower steepness)
@@ -59,4 +59,19 @@ diffuse_rotated <- create_landscape_diffuse(
 )
 
 }
-\keyword{internal}
+\seealso{
+Other landscape creation: 
+\code{\link{create_landscape}()},
+\code{\link{create_landscape_bands}()},
+\code{\link{create_landscape_bare}()},
+\code{\link{create_landscape_clustered}()},
+\code{\link{create_landscape_dense}()},
+\code{\link{create_landscape_fingers}()},
+\code{\link{create_landscape_gaps}()},
+\code{\link{create_landscape_labyrinth}()},
+\code{\link{create_landscape_random}()},
+\code{\link{create_landscape_sharp}()},
+\code{\link{create_landscape_spots}()},
+\code{\link{create_landscapes}()}
+}
+\concept{landscape creation}

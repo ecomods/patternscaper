@@ -115,7 +115,7 @@ spatial patterns (pixel data). The function uses a multiscale CNN architecture o
 distinguishing different landscape patterns.
 }
 \examples{
-\dontrun{
+\donttest{
 # Create training data
 training_landscapes <- create_landscapes(
   n = 200,
@@ -137,3 +137,11 @@ final_model <- train_nn_pixels(
 )
 }
 }
+\seealso{
+\code{\link{apply_nn_pixels}}
+
+Other neural network training: 
+\code{\link{set_random_seed}()},
+\code{\link{train_nn_metrics}()}
+}
+\concept{neural network training}

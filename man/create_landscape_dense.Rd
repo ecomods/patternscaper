@@ -2,12 +2,12 @@
 % Please edit documentation in R/create_landscape_dense.R
 \name{create_landscape_dense}
 \alias{create_landscape_dense}
-\title{Create a bare landscape with very dense vegetation}
+\title{Create a landscape with very dense vegetation}
 \usage{
 create_landscape_dense(veg_prop = 0.9, width = 100, height = 100)
 }
 \arguments{
-\item{veg_prop}{Numeric. Proportion of cells with vegetation (0-1). Default: 0.1.}
+\item{veg_prop}{Numeric. Proportion of cells with vegetation (0-1). Default: 0.9.}
 
 \item{width}{Integer. Width of landscape in cells. Default: 100.}
 
@@ -32,5 +32,18 @@ dense <- create_landscape_dense()
 very_dense <- create_landscape_dense(veg_prop = 0.95)
 }
 \seealso{
-\code{\link{create_landscape_random}}, \code{\link{create_landscape_bare}}
+Other landscape creation: 
+\code{\link{create_landscape}()},
+\code{\link{create_landscape_bands}()},
+\code{\link{create_landscape_bare}()},
+\code{\link{create_landscape_clustered}()},
+\code{\link{create_landscape_diffuse}()},
+\code{\link{create_landscape_fingers}()},
+\code{\link{create_landscape_gaps}()},
+\code{\link{create_landscape_labyrinth}()},
+\code{\link{create_landscape_random}()},
+\code{\link{create_landscape_sharp}()},
+\code{\link{create_landscape_spots}()},
+\code{\link{create_landscapes}()}
 }
+\concept{landscape creation}

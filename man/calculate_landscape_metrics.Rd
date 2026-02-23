@@ -39,7 +39,7 @@ from the landscapemetrics package. Returns a standardized tibble with results
 including landscape identifiers, metric values, and any warnings.
 }
 \examples{
-\dontrun{
+\donttest{
 # Calculate all landscape-level metrics for a single landscape
 landscape <- create_landscape(pattern = "labyrinth")
 metrics <- calculate_landscape_metrics(landscape)
@@ -54,3 +54,15 @@ metrics <- calculate_landscape_metrics(
 
 }
 }
+\references{
+Hesselbarth, M.H.K., Sciaini, M., With, K.A., Wiegand, K., & Nowosad, J.
+(2019). landscapemetrics: an open-source R tool to calculate landscape
+metrics. *Ecography*, 42(10), 1648-1657. \doi{10.1111/ecog.04617}
+}
+\seealso{
+\code{\link{plot_metrics}}
+
+Other metrics: 
+\code{\link{evaluate_landscape_metrics}()}
+}
+\concept{metrics}

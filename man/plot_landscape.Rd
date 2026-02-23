@@ -50,3 +50,10 @@ plot_landscape(l,
               legend_title = "Vegetation",
               show_legend = TRUE)
 }
+\seealso{
+Other visualization: 
+\code{\link{plot_classified_landscapes}()},
+\code{\link{plot_landscape_list}()},
+\code{\link{plot_metrics}()}
+}
+\concept{visualization}

@@ -75,3 +75,10 @@ plot_landscape_list(many_landscapes,
                    max_landscapes = 9,  # Show first 9 only
                    ncol = 3)            # In 3x3 grid
 }
+\seealso{
+Other visualization: 
+\code{\link{plot_classified_landscapes}()},
+\code{\link{plot_landscape}()},
+\code{\link{plot_metrics}()}
+}
+\concept{visualization}
