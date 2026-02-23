@@ -14,9 +14,9 @@ neural network classifiers.
 Two classification approaches are supported:
 \itemize{
   \item **Pixel-based classification** using convolutional neural networks
-    via \code{\link[keras3]{keras3}} (see \code{\link{train_nn_pixels}})
+    via \pkg{keras3} (see \code{\link{train_nn_pixels}})
   \item **Metrics-based classification** using landscape metrics computed
-    with \code{\link[landscapemetrics]{landscapemetrics}} as input features
+    with \pkg{landscapemetrics} as input features
     for a neural network (see \code{\link{train_nn_metrics}})
 }
 }

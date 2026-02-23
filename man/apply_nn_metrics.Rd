@@ -62,7 +62,7 @@ results$predictions
 results$performance
 }
 
-\donttest{
+\dontrun{
 # Load a saved model
 model <- readr::read_rds("models/landscape_classifier.rds")
 predictions <- apply_nn_metrics(new_landscapes, model)

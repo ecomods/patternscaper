@@ -20,8 +20,17 @@
 #'
 #' @examples
 #' \donttest{
-#' # Train model and get validation results
-#' model <- train_nn_metrics(landscapes, metrics)
+#' # Generate training landscapes
+#' landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse"))
+#'
+#' # Calculate landscape metrics
+#' metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
+#'
+#' # Find the best 10 metrics for classification
+#' best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
+#'
+#' # Train model with cross-validation
+#' model <- train_nn_metrics(metrics, metrics_selected = best_10, cv_method = "k-fold")
 #'
 #' # Plot all classification results
 #' plot_classified_landscapes(

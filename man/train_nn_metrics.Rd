@@ -88,7 +88,7 @@ model <- train_nn_metrics(
 )
 }
 
-\donttest{
+\dontrun{
 # Save model to file
 model <- train_nn_metrics(
   metrics,
