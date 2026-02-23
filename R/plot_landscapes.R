@@ -18,6 +18,8 @@
 #' @importFrom ggplot2 ggplot aes geom_raster coord_equal labs theme_minimal theme
 #'             element_blank scale_fill_manual scale_fill_viridis_c
 #' @importFrom ggtext element_markdown
+#' @family visualization
+#' @seealso \code{\link{create_landscape}}
 #' @examples
 #'
 #' # Create a basic landscape
@@ -34,7 +36,6 @@
 #'               title = "My Sharp Treeline",
 #'               legend_title = "Vegetation",
 #'               show_legend = TRUE)
-#' @family visualization
 #' @export
 plot_landscape <- function(
   landscape,
@@ -133,6 +134,8 @@ plot_landscape <- function(
 #'     Can be used to plot specific landscapes or change plot order (default: NULL).
 #'
 #' @return A ggplot object combining all landscape plots in a grid.
+#' @family visualization
+#' @seealso \code{\link{create_landscapes}}
 #' @importFrom patchwork wrap_plots plot_layout
 #' @examples
 #' # Create a list of different landscapes
@@ -160,7 +163,6 @@ plot_landscape <- function(
 #' plot_landscape_list(many_landscapes,
 #'                    max_landscapes = 9,  # Show first 9 only
 #'                    ncol = 3)            # In 3x3 grid
-#' @family visualization
 #' @export
 plot_landscape_list <- function(
   landscapes,

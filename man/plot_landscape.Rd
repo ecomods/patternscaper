@@ -51,6 +51,8 @@ plot_landscape(l,
               show_legend = TRUE)
 }
 \seealso{
+\code{\link{create_landscape}}
+
 Other visualization: 
 \code{\link{plot_classified_landscapes}()},
 \code{\link{plot_landscape_list}()},

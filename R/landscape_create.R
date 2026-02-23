@@ -20,25 +20,8 @@
 #'   \item{pattern}{Character string with the  pattern type}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @seealso
-#' \code{\link{create_landscape_random}} for "random" pattern parameters. "bare" and "dense" are aliases but
-#'     are produced either with low or high tree probabilities
-#'
-#' \code{\link{create_landscape_sharp}} for "sharp" pattern parameters
-#'
-#' \code{\link{create_landscape_diffuse}} for "diffuse" pattern parameters
-#'
-#' \code{\link{create_landscape_fingers}} for "fingers" pattern parameters
-#'
-#' \code{\link{create_landscape_clustered}} for "clusters" pattern parameters
-#'
-#' \code{\link{create_landscape_bands}} for "bands" pattern parameters
-#'
-#' \code{\link{create_landscape_spots}} for "spots" pattern parameters
-#'
-#' \code{\link{create_landscape_gaps}} for "gaps" pattern parameters
-#'
-#' \code{\link{create_landscape_labyrinth}} for "labyrinth" pattern parameters
+#' @family landscape creation
+#' @seealso \code{\link{plot_landscape}}
 #'
 #' @examples
 #' # Create a default landscape of various patterns
@@ -70,7 +53,6 @@
 #'   rotation = 45
 #' )
 #'
-#' @family landscape creation
 #' @export
 create_landscape <- function(
   pattern = c(
@@ -174,6 +156,8 @@ create_landscape <- function(
 #' @param max_retries Integer. Maximum number of retries for failed landscape generations (default: 3).
 #'
 #' @return A named list of landscape objects. Names indicate the pattern and optional rotation.
+#' @family landscape creation
+#' @seealso \code{\link{plot_landscape_list}}
 #'
 #' @examples
 #' # Generate 20 landscapes
@@ -205,7 +189,6 @@ create_landscape <- function(
 #'  params_list = pattern_params
 #' )
 #'
-#' @family landscape creation
 #' @export
 create_landscapes <- function(
   n = 50,

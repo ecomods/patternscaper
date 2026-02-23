@@ -76,6 +76,8 @@ plot_landscape_list(many_landscapes,
                    ncol = 3)            # In 3x3 grid
 }
 \seealso{
+\code{\link{create_landscapes}}
+
 Other visualization: 
 \code{\link{plot_classified_landscapes}()},
 \code{\link{plot_landscape}()},

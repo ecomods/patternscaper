@@ -74,24 +74,7 @@ bands_rotated <- create_landscape(
 
 }
 \seealso{
-\code{\link{create_landscape_random}} for "random" pattern parameters. "bare" and "dense" are aliases but
-    are produced either with low or high tree probabilities
-
-\code{\link{create_landscape_sharp}} for "sharp" pattern parameters
-
-\code{\link{create_landscape_diffuse}} for "diffuse" pattern parameters
-
-\code{\link{create_landscape_fingers}} for "fingers" pattern parameters
-
-\code{\link{create_landscape_clustered}} for "clusters" pattern parameters
-
-\code{\link{create_landscape_bands}} for "bands" pattern parameters
-
-\code{\link{create_landscape_spots}} for "spots" pattern parameters
-
-\code{\link{create_landscape_gaps}} for "gaps" pattern parameters
-
-\code{\link{create_landscape_labyrinth}} for "labyrinth" pattern parameters
+\code{\link{plot_landscape}}
 
 Other landscape creation: 
 \code{\link{create_landscape_bands}()},
