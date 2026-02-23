@@ -10,10 +10,10 @@ Authors@R: c(
     person("Uta", "Berger", ,"uta.berger@tu-dresden.de", role = c("aut"),
     comment = c(ORCID = "0000-0001-6920-136X"))
   )
-Description: Classification of landscapes using a neural network. 
+Description: Classification of landscapes using a neural network.
     The neural network is either trained for two-dimensional landscapes
-    (using the keras package) or for landscapes metrics 
-    (using the landscapemetrics package). 
+    (using the 'keras3' package) or for landscape metrics
+    (using the 'landscapemetrics' package).
 URL: https://github.com/ecomods/spatPatClassifyR/
 BugReports: https://github.com/ecomods/spatPatClassifyR/issues
 Encoding: UTF-8
