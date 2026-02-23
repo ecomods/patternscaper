@@ -115,54 +115,54 @@ final_model <- train_nn_pixels(
 #> ── Training final model on all data ──
 #> 
 #> ℹ Training on all data (validation split is 0)...
-#> Epoch 1 - loss: 1.8526 - accuracy: 0.1450
-#> Epoch 2 - loss: 1.3382 - accuracy: 0.4100
-#> Epoch 3 - loss: 0.6121 - accuracy: 0.7750
-#> Epoch 4 - loss: 0.3211 - accuracy: 0.8900
-#> Epoch 5 - loss: 0.2020 - accuracy: 0.9500
-#> Epoch 6 - loss: 0.1387 - accuracy: 0.9500
-#> Epoch 7 - loss: 0.1628 - accuracy: 0.9350
-#> Epoch 8 - loss: 0.0612 - accuracy: 0.9900
-#> Epoch 9 - loss: 0.0639 - accuracy: 0.9750
-#> Epoch 10 - loss: 0.0273 - accuracy: 0.9900
-#> Epoch 11 - loss: 0.0109 - accuracy: 1.0000
-#> Epoch 12 - loss: 0.0044 - accuracy: 1.0000
-#> Epoch 13 - loss: 0.0034 - accuracy: 1.0000
-#> Epoch 14 - loss: 0.0013 - accuracy: 1.0000
-#> Epoch 15 - loss: 0.0010 - accuracy: 1.0000
-#> Epoch 16 - loss: 0.0006 - accuracy: 1.0000
-#> Epoch 17 - loss: 0.0007 - accuracy: 1.0000
-#> Epoch 18 - loss: 0.0005 - accuracy: 1.0000
-#> Epoch 19 - loss: 0.0004 - accuracy: 1.0000
-#> Epoch 20 - loss: 0.0004 - accuracy: 1.0000
-#> Epoch 21 - loss: 0.0004 - accuracy: 1.0000
-#> Epoch 22 - loss: 0.0003 - accuracy: 1.0000
-#> Epoch 23 - loss: 0.0003 - accuracy: 1.0000
-#> Epoch 24 - loss: 0.0003 - accuracy: 1.0000
-#> Epoch 25 - loss: 0.0002 - accuracy: 1.0000
-#> Epoch 26 - loss: 0.0002 - accuracy: 1.0000
-#> Epoch 27 - loss: 0.0002 - accuracy: 1.0000
-#> Epoch 28 - loss: 0.0002 - accuracy: 1.0000
-#> Epoch 29 - loss: 0.0002 - accuracy: 1.0000
+#> Epoch 1 - loss: 1.4320 - accuracy: 0.4100
+#> Epoch 2 - loss: 0.8432 - accuracy: 0.6400
+#> Epoch 3 - loss: 0.4490 - accuracy: 0.8300
+#> Epoch 4 - loss: 0.2185 - accuracy: 0.9300
+#> Epoch 5 - loss: 0.1319 - accuracy: 0.9450
+#> Epoch 6 - loss: 0.0550 - accuracy: 0.9950
+#> Epoch 7 - loss: 0.0299 - accuracy: 0.9900
+#> Epoch 8 - loss: 0.0180 - accuracy: 0.9950
+#> Epoch 9 - loss: 0.3721 - accuracy: 0.9000
+#> Epoch 10 - loss: 0.7220 - accuracy: 0.7950
+#> Epoch 11 - loss: 0.2506 - accuracy: 0.9350
+#> Epoch 12 - loss: 0.0599 - accuracy: 0.9800
+#> Epoch 13 - loss: 0.0106 - accuracy: 1.0000
+#> Epoch 14 - loss: 0.0036 - accuracy: 1.0000
+#> Epoch 15 - loss: 0.0013 - accuracy: 1.0000
+#> Epoch 16 - loss: 0.0007 - accuracy: 1.0000
+#> Epoch 17 - loss: 0.0005 - accuracy: 1.0000
+#> Epoch 18 - loss: 0.0003 - accuracy: 1.0000
+#> Epoch 19 - loss: 0.0003 - accuracy: 1.0000
+#> Epoch 20 - loss: 0.0002 - accuracy: 1.0000
+#> Epoch 21 - loss: 0.0002 - accuracy: 1.0000
+#> Epoch 22 - loss: 0.0002 - accuracy: 1.0000
+#> Epoch 23 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 24 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 25 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 26 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 27 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 28 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 29 - loss: 0.0001 - accuracy: 1.0000
 #> Epoch 30 - loss: 0.0001 - accuracy: 1.0000
 #> Epoch 31 - loss: 0.0001 - accuracy: 1.0000
 #> Epoch 32 - loss: 0.0001 - accuracy: 1.0000
 #> Epoch 33 - loss: 0.0001 - accuracy: 1.0000
-#> Epoch 34 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 34 - loss: 0.0000 - accuracy: 1.0000
 #> Epoch 35 - loss: 0.0001 - accuracy: 1.0000
-#> Epoch 36 - loss: 0.0001 - accuracy: 1.0000
-#> Epoch 37 - loss: 0.0001 - accuracy: 1.0000
-#> Epoch 38 - loss: 0.0001 - accuracy: 1.0000
-#> Epoch 39 - loss: 0.0001 - accuracy: 1.0000
-#> Epoch 40 - loss: 0.0001 - accuracy: 1.0000
-#> Epoch 41 - loss: 0.0001 - accuracy: 1.0000
-#> Epoch 42 - loss: 0.0001 - accuracy: 1.0000
-#> Epoch 43 - loss: 0.0001 - accuracy: 1.0000
-#> Epoch 44 - loss: 0.0001 - accuracy: 1.0000
-#> Epoch 45 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 36 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 37 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 38 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 39 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 40 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 41 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 42 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 43 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 44 - loss: 0.0000 - accuracy: 1.0000
+#> Epoch 45 - loss: 0.0000 - accuracy: 1.0000
 #> Epoch 46 - loss: 0.0000 - accuracy: 1.0000
 #> Epoch 47 - loss: 0.0000 - accuracy: 1.0000
-#> Epoch 48 - loss: 0.0001 - accuracy: 1.0000
+#> Epoch 48 - loss: 0.0000 - accuracy: 1.0000
 #> Epoch 49 - loss: 0.0000 - accuracy: 1.0000
 #> Epoch 50 - loss: 0.0000 - accuracy: 1.0000
 #> Epoch 51 - loss: 0.0000 - accuracy: 1.0000
@@ -231,14 +231,14 @@ results <- apply_nn_pixels(
 #> ── Cross-validation results ──
 #> 
 #> ℹ Method: 1-fold cross-validation
-#> ℹ Overall accuracy: 90%
+#> ℹ Overall accuracy: 100%
 #> 
 #> ── Confusion matrix 
 #>            Actual
 #> Predicted   bands clustered diffuse fingers random sharp
-#>   bands         1         0       1       0      0     0
+#>   bands         1         0       0       0      0     0
 #>   clustered     0         2       0       0      0     0
-#>   diffuse       0         0       1       0      0     0
+#>   diffuse       0         0       2       0      0     0
 #>   fingers       0         0       0       2      0     0
 #>   random        0         0       0       0      1     0
 #>   sharp         0         0       0       0      0     2
@@ -247,11 +247,11 @@ results <- apply_nn_pixels(
 #> # A tibble: 6 × 5
 #>   class     count recall precision f1_score
 #>   <chr>     <int>  <dbl>     <dbl>    <dbl>
-#> 1 bands         1    1         0.5     0.67
-#> 2 clustered     2    1         1       1   
-#> 3 diffuse       2    0.5       1       0.67
-#> 4 fingers       2    1         1       1   
-#> 5 random        1    1         1       1   
-#> 6 sharp         2    1         1       1   
+#> 1 bands         1      1         1        1
+#> 2 clustered     2      1         1        1
+#> 3 diffuse       2      1         1        1
+#> 4 fingers       2      1         1        1
+#> 5 random        1      1         1        1
+#> 6 sharp         2      1         1        1
 # }
 ```

@@ -64,6 +64,8 @@ A ggplot object combining all landscape plots in a grid.
 
 ## See also
 
+[`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
+
 Other visualization:
 [`plot_classified_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_classified_landscapes.md),
 [`plot_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape.md),

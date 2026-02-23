@@ -244,68 +244,68 @@ When FALSE, runs silently.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        33        33        34        33        33        34 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Cross-validation (k-fold, 5 folds)</span> ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fold 1/5 accuracy: 0.6905</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fold 2/5 accuracy: 0.8095</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fold 1/5 accuracy: 0.8333</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fold 2/5 accuracy: 0.8333</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fold 3/5 accuracy: 0.8095</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fold 4/5 accuracy: 0.8158</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fold 5/5 accuracy: 0.8333</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fold 4/5 accuracy: 0.7895</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fold 5/5 accuracy: 0.7222</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Cross-validation results</span> ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Method: 5-fold cross-validation</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Overall accuracy: 79%</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Overall accuracy: 80%</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Confusion matrix </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            Actual</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Predicted   bands clustered diffuse fingers random sharp</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   bands        28         8       2       2      0     0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   clustered     3        17       0       4      0     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   diffuse       0         0      30       0      0     0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   fingers       2         6       0      19      0     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   random        0         0       2       0     33     0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   sharp         0         2       0       8      0    31</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   bands        26         2       1       2      0     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   clustered     1        19       0       7      0     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   diffuse       4         0      32       0      0     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   fingers       2         9       0      20      0     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   random        0         0       1       0     33     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   sharp         0         3       0       4      0    30</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Per-class performance </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   class     count recall precision f1_score</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> bands        33   0.85      0.7      0.77</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> clustered    33   0.52      0.68     0.59</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> diffuse      34   0.88      1        0.94</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> fingers      33   0.58      0.66     0.61</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> random       33   1         0.94     0.97</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> sharp        34   0.91      0.76     0.83</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> bands        33   0.79      0.84     0.81</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> clustered    33   0.58      0.7      0.63</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> diffuse      34   0.94      0.89     0.91</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> fingers      33   0.61      0.57     0.59</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> random       33   1         0.97     0.99</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> sharp        34   0.88      0.81     0.85</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Accuracy and loss across folds</span> ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Mean accuracy: 0.7917 +- 0.0574</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Mean loss: 0.6482 +- 0.1932</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Mean accuracy: 0.7976 +- 0.0459</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Mean loss: 0.5956 +- 0.1579</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Training final model on all data (validation split: 0)</span> ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 1 - loss: 1.8609 - accuracy: 0.2050</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 2 - loss: 1.2809 - accuracy: 0.3900</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 3 - loss: 0.8640 - accuracy: 0.6100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 4 - loss: 0.4127 - accuracy: 0.8450</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 5 - loss: 0.3200 - accuracy: 0.8950</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 6 - loss: 0.2226 - accuracy: 0.9400</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 7 - loss: 0.4241 - accuracy: 0.8300</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 8 - loss: 0.1519 - accuracy: 0.9500</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 9 - loss: 0.1065 - accuracy: 0.9600</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 10 - loss: 0.0377 - accuracy: 0.9850</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 11 - loss: 0.0115 - accuracy: 0.9950</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 12 - loss: 0.0036 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 13 - loss: 0.0010 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 1 - loss: 1.9607 - accuracy: 0.1950</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 2 - loss: 1.3769 - accuracy: 0.4950</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 3 - loss: 0.5326 - accuracy: 0.8250</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 4 - loss: 0.2971 - accuracy: 0.8950</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 5 - loss: 0.1829 - accuracy: 0.9450</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 6 - loss: 0.1632 - accuracy: 0.9650</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 7 - loss: 0.1692 - accuracy: 0.9550</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 8 - loss: 0.0680 - accuracy: 0.9800</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 9 - loss: 0.0101 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 10 - loss: 0.0019 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 11 - loss: 0.0010 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 12 - loss: 0.0010 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 13 - loss: 0.0004 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 14 - loss: 0.0004 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 15 - loss: 0.0004 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 16 - loss: 0.0003 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 15 - loss: 0.0003 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 16 - loss: 0.0002 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 17 - loss: 0.0003 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 18 - loss: 0.0002 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 19 - loss: 0.0003 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 20 - loss: 0.0002 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 19 - loss: 0.0002 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 20 - loss: 0.0001 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 21 - loss: 0.0002 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 22 - loss: 0.0002 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 22 - loss: 0.0001 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 23 - loss: 0.0001 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 24 - loss: 0.0001 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 25 - loss: 0.0001 - accuracy: 1.0000</span>
@@ -313,8 +313,8 @@ When FALSE, runs silently.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 27 - loss: 0.0001 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 28 - loss: 0.0001 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 29 - loss: 0.0001 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 30 - loss: 0.0001 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 31 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 30 - loss: 0.0000 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 31 - loss: 0.0000 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 32 - loss: 0.0001 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 33 - loss: 0.0000 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 34 - loss: 0.0000 - accuracy: 1.0000</span>
@@ -349,45 +349,45 @@ When FALSE, runs silently.</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Training final model on all data</span> ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Training on all data (validation split is 0)...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 1 - loss: 1.9250 - accuracy: 0.1400</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 2 - loss: 1.6398 - accuracy: 0.3100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 3 - loss: 1.1054 - accuracy: 0.5550</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 4 - loss: 0.4638 - accuracy: 0.8450</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 5 - loss: 0.4371 - accuracy: 0.8550</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 6 - loss: 0.1725 - accuracy: 0.9650</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 7 - loss: 0.0755 - accuracy: 0.9650</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 8 - loss: 0.0095 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 9 - loss: 0.0013 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 10 - loss: 0.0005 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 11 - loss: 0.0002 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 12 - loss: 0.0002 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 13 - loss: 0.0001 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 14 - loss: 0.0001 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 15 - loss: 0.0001 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 16 - loss: 0.0001 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 17 - loss: 0.0002 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 18 - loss: 0.0001 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 19 - loss: 0.0001 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 20 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 21 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 22 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 23 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 24 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 25 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 26 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 27 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 28 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 29 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 30 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 31 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 32 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 33 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 34 - loss: 0.0000 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 1 - loss: 1.5645 - accuracy: 0.3450</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 2 - loss: 1.0592 - accuracy: 0.5200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 3 - loss: 0.6512 - accuracy: 0.7200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 4 - loss: 0.4895 - accuracy: 0.7850</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 5 - loss: 0.3321 - accuracy: 0.8700</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 6 - loss: 0.1418 - accuracy: 0.9650</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 7 - loss: 0.1040 - accuracy: 0.9600</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 8 - loss: 0.0261 - accuracy: 0.9850</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 9 - loss: 0.0285 - accuracy: 0.9950</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 10 - loss: 0.3093 - accuracy: 0.9500</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 11 - loss: 0.1795 - accuracy: 0.9350</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 12 - loss: 0.0480 - accuracy: 0.9900</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 13 - loss: 0.0136 - accuracy: 0.9950</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 14 - loss: 0.0083 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 15 - loss: 0.0014 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 16 - loss: 0.0004 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 17 - loss: 0.0004 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 18 - loss: 0.0002 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 19 - loss: 0.0003 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 20 - loss: 0.0002 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 21 - loss: 0.0002 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 22 - loss: 0.0002 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 23 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 24 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 25 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 26 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 27 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 28 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 29 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 30 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 31 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 32 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 33 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 34 - loss: 0.0001 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 35 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 36 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 37 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 38 - loss: 0.0000 - accuracy: 1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 39 - loss: 0.0000 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 36 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 37 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 38 - loss: 0.0001 - accuracy: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 39 - loss: 0.0001 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 40 - loss: 0.0000 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 41 - loss: 0.0000 - accuracy: 1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Epoch 42 - loss: 0.0000 - accuracy: 1.0000</span>

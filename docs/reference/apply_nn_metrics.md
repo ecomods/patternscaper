@@ -85,10 +85,10 @@ Other neural network application:
 train_landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse"))
 #> ✔ Successfully generated all 30 training landscapes
 metrics <- calculate_landscape_metrics(train_landscapes, level = "landscape")
-#>  ■■■■■■■■■■■                       32% |  ETA:  7s
-#>  ■■■■■■■■■■■■■■■■                  48% |  ETA:  7s
-#>  ■■■■■■■■■■■■■■■■■                 53% |  ETA:  8s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      89% |  ETA:  1s
+#>  ■■■■■■■■                          23% |  ETA:  7s
+#>  ■■■■■■■■■■■■■                     41% |  ETA:  7s
+#>  ■■■■■■■■■■■■■■■■                  52% |  ETA:  8s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■          76% |  ETA:  4s
 # find the best 10 metrics for classification
 best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
 #> Warning: Excluded 180 rows containing 6 metrics with NA values. Metrics removed:

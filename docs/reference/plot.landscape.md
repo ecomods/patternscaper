@@ -32,6 +32,14 @@ ggplot2 elements or by using the
 [`plot_landscape`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape.md)
 function for higher-level customization.
 
+## See also
+
+Other landscape objects:
+[`landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/landscape.md),
+[`print.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/print.landscape.md),
+[`set_landscape_name()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_name.md),
+[`set_landscape_pattern()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_pattern.md)
+
 ## Examples
 
 ``` r

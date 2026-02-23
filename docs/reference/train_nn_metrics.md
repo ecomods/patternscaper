@@ -122,10 +122,10 @@ landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse
 
 # Calculate landscape metrics
 metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
-#>  ■■■■■■■■■■                        30% |  ETA:  7s
-#>  ■■■■■■■■■■■■■■■                   45% |  ETA:  7s
-#>  ■■■■■■■■■■■■■■■■■                 53% |  ETA:  8s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■        82% |  ETA:  3s
+#>  ■■■■■■■■■■■                       32% |  ETA:  8s
+#>  ■■■■■■■■■■■■■■■                   47% |  ETA:  7s
+#>  ■■■■■■■■■■■■■■■■■■■               61% |  ETA:  6s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■     94% |  ETA:  1s
 
 # Find the best 10 metrics for classification
 best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
@@ -133,7 +133,7 @@ best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
 #> "enn_cv", "enn_mn", "enn_sd", "iji", "pafrac", and "rpr" Use
 #> `exclude_NA_metrics = FALSE` to retain (not recommended for model training)
 #> Warning: Excluded 3 metrics with zero variance: "pr", "prd", and "ta"
-#> ! Only 4 uncorrelated metrics found. Filling to 10 with correlated metrics.
+#> ! Only 5 uncorrelated metrics found. Filling to 10 with correlated metrics.
 
 # Train model with cross-validation
 model <- train_nn_metrics(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
@@ -142,21 +142,21 @@ model <- train_nn_metrics(metrics, metrics_selected = best_10, cv_method = "k-fo
 #> ── Cross-validation results ──
 #> 
 #> ℹ Method: 3-fold cross-validation
-#> ℹ Overall accuracy: 96.67%
+#> ℹ Overall accuracy: 90%
 #> 
 #> ── Confusion matrix 
 #>          Actual
 #> Predicted diffuse random sharp
-#>   diffuse       9      0     0
-#>   random        0     10     0
+#>   diffuse       8      1     0
+#>   random        1      9     0
 #>   sharp         1      0    10
 #> 
 #> ── Per-class performance 
 #> # A tibble: 3 × 5
 #>   class   count recall precision f1_score
 #>   <chr>   <int>  <dbl>     <dbl>    <dbl>
-#> 1 diffuse    10    0.9      1        0.95
-#> 2 random     10    1        1        1   
+#> 1 diffuse    10    0.8      0.89     0.84
+#> 2 random     10    0.9      0.9      0.9 
 #> 3 sharp      10    1        0.91     0.95
 
 # Train with specific metrics
@@ -171,22 +171,22 @@ model <- train_nn_metrics(
 #> ── Cross-validation results ──
 #> 
 #> ℹ Method: 3-fold cross-validation
-#> ℹ Overall accuracy: 100%
+#> ℹ Overall accuracy: 96.67%
 #> 
 #> ── Confusion matrix 
 #>          Actual
 #> Predicted diffuse random sharp
-#>   diffuse      10      0     0
-#>   random        0     10     0
+#>   diffuse      10      1     0
+#>   random        0      9     0
 #>   sharp         0      0    10
 #> 
 #> ── Per-class performance 
 #> # A tibble: 3 × 5
 #>   class   count recall precision f1_score
 #>   <chr>   <int>  <dbl>     <dbl>    <dbl>
-#> 1 diffuse    10      1         1        1
-#> 2 random     10      1         1        1
-#> 3 sharp      10      1         1        1
+#> 1 diffuse    10    1        0.91     0.95
+#> 2 random     10    0.9      1        0.95
+#> 3 sharp      10    1        1        1   
 # }
 
 if (FALSE) { # \dontrun{

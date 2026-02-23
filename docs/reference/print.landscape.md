@@ -39,6 +39,14 @@ The print method displays:
 
 - Parameters used to create the landscape (if available)
 
+## See also
+
+Other landscape objects:
+[`landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/landscape.md),
+[`plot.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot.landscape.md),
+[`set_landscape_name()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_name.md),
+[`set_landscape_pattern()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_pattern.md)
+
 ## Examples
 
 ``` r

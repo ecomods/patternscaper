@@ -116,13 +116,13 @@ metrics <- calculate_landscape_metrics(
   landscapes,
   level = "landscape"
 )
-#>  ■■■                                8% |  ETA: 13s
-#>  ■■■■■■■■■                         26% |  ETA: 12s
-#>  ■■■■■■■■■■■■                      36% |  ETA: 12s
-#>  ■■■■■■■■■■■■■■■                   45% |  ETA: 12s
-#>  ■■■■■■■■■■■■■■■■                  52% |  ETA: 13s
-#>  ■■■■■■■■■■■■■■■■■■■■              64% |  ETA:  9s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■        82% |  ETA:  4s
+#>  ■■■■■■                            17% |  ETA: 13s
+#>  ■■■■■■■■■■■                       32% |  ETA: 12s
+#>  ■■■■■■■■■■■■■                     41% |  ETA: 13s
+#>  ■■■■■■■■■■■■■■■■                  50% |  ETA: 13s
+#>  ■■■■■■■■■■■■■■■■■                 53% |  ETA: 14s
+#>  ■■■■■■■■■■■■■■■■■■■■■■            70% |  ETA:  8s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      89% |  ETA:  2s
 metric_list <- evaluate_landscape_metrics(
   metrics = metrics,
   metrics_number = 5,

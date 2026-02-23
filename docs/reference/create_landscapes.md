@@ -70,6 +70,8 @@ optional rotation.
 
 ## See also
 
+[`plot_landscape_list`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape_list.md)
+
 Other landscape creation:
 [`create_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md),
 [`create_landscape_bands()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bands.md),

@@ -26,6 +26,8 @@ The landscape object with updated name
 
 Other landscape objects:
 [`landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/landscape.md),
+[`plot.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot.landscape.md),
+[`print.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/print.landscape.md),
 [`set_landscape_pattern()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_pattern.md)
 
 ## Examples

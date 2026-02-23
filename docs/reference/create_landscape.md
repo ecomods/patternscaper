@@ -68,33 +68,7 @@ containing:
 
 ## See also
 
-[`create_landscape_random`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_random.md)
-for "random" pattern parameters. "bare" and "dense" are aliases but are
-produced either with low or high tree probabilities
-
-[`create_landscape_sharp`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp.md)
-for "sharp" pattern parameters
-
-[`create_landscape_diffuse`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse.md)
-for "diffuse" pattern parameters
-
-[`create_landscape_fingers`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_fingers.md)
-for "fingers" pattern parameters
-
-[`create_landscape_clustered`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_clustered.md)
-for "clusters" pattern parameters
-
-[`create_landscape_bands`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bands.md)
-for "bands" pattern parameters
-
-[`create_landscape_spots`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_spots.md)
-for "spots" pattern parameters
-
-[`create_landscape_gaps`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_gaps.md)
-for "gaps" pattern parameters
-
-[`create_landscape_labyrinth`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_labyrinth.md)
-for "labyrinth" pattern parameters
+[`plot_landscape`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape.md)
 
 Other landscape creation:
 [`create_landscape_bands()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bands.md),

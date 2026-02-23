@@ -44,6 +44,8 @@ A landscape object
 [`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
 
 Other landscape objects:
+[`plot.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot.landscape.md),
+[`print.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/print.landscape.md),
 [`set_landscape_name()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_name.md),
 [`set_landscape_pattern()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_pattern.md)
 

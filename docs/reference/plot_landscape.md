@@ -41,6 +41,8 @@ ggplot object. Plot of the landscape.
 
 ## See also
 
+[`create_landscape`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md)
+
 Other visualization:
 [`plot_classified_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_classified_landscapes.md),
 [`plot_landscape_list()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape_list.md),

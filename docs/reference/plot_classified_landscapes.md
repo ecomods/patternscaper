@@ -70,10 +70,10 @@ landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse
 
 # Calculate landscape metrics
 metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
-#>  ■■■■■■■■■■■                       33% |  ETA:  7s
-#>  ■■■■■■■■■■■■■■■■                  50% |  ETA:  7s
-#>  ■■■■■■■■■■■■■■■■■■■               61% |  ETA:  6s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      91% |  ETA:  1s
+#>  ■■■■■■■■                          23% |  ETA:  9s
+#>  ■■■■■■■■■■■■■                     41% |  ETA:  8s
+#>  ■■■■■■■■■■■■■■■■■                 53% |  ETA:  8s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■         80% |  ETA:  3s
 
 # Find the best 10 metrics for classification
 best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)

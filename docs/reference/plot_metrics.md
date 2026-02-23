@@ -58,9 +58,8 @@ Other visualization:
 landscapes <- create_landscapes(n = 20, patterns = c("labyrinth", "spots"))
 #> ✔ Successfully generated all 20 training landscapes
 metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
-#>  ■■■■■■■                           21% |  ETA:  5s
-#>  ■■■■■■■■■■■■■■■■                  52% |  ETA:  4s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■       88% |  ETA:  1s
+#>  ■■■■■■■■■■■■■■                    44% |  ETA:  4s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■           73% |  ETA:  2s
 plot_metrics(metrics, selected_metrics = c("ai", "lsi"))
 
 
