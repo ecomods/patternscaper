@@ -50,6 +50,8 @@ l <- landscape(rast, name = "my_raster")
 \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 
 Other landscape objects: 
+\code{\link{plot.landscape}()},
+\code{\link{print.landscape}()},
 \code{\link{set_landscape_name}()},
 \code{\link{set_landscape_pattern}()}
 }

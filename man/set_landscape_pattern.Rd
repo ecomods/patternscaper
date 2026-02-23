@@ -36,6 +36,8 @@ landscapes <- mapply(set_landscape_pattern, landscapes, patterns_vec, SIMPLIFY =
 \seealso{
 Other landscape objects: 
 \code{\link{landscape}()},
+\code{\link{plot.landscape}()},
+\code{\link{print.landscape}()},
 \code{\link{set_landscape_name}()}
 }
 \concept{landscape objects}

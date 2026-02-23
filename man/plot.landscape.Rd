@@ -35,3 +35,11 @@ p + ggplot2::ggtitle("My custom title") +
     ggplot2::theme_dark()
 
 }
+\seealso{
+Other landscape objects: 
+\code{\link{landscape}()},
+\code{\link{print.landscape}()},
+\code{\link{set_landscape_name}()},
+\code{\link{set_landscape_pattern}()}
+}
+\concept{landscape objects}
