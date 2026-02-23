@@ -7,16 +7,18 @@ Authors@R: c(
     comment = c(ORCID = "0000-0002-3393-725X")),
     person("Britta", "Tietjen", , "britta.tietjen@fu-berlin.de", role = c("aut"),
     comment = c(ORCID = "0000-0003-4767-6406")),
-    person("Uta", "Berger", ,"uta.berger@tu-dresden.de", role = c("aut"),
+    person("Uta", "Berger", , "uta.berger@tu-dresden.de", role = c("aut"),
     comment = c(ORCID = "0000-0001-6920-136X"))
   )
 Description: Classification of landscapes using a neural network.
     The neural network is either trained for two-dimensional landscapes
     (using the 'keras3' package) or for landscape metrics
     (using the 'landscapemetrics' package).
-URL: https://github.com/ecomods/spatPatClassifyR/
+URL: https://ecomods.github.io/spatPatClassifyR/,
+    https://github.com/ecomods/spatPatClassifyR/
 BugReports: https://github.com/ecomods/spatPatClassifyR/issues
 Encoding: UTF-8
+Language: en-US
 LazyData: true
 License: GPL (>= 3)
 SystemRequirements: Python (>= 3.9) and TensorFlow (for keras3-based
@@ -43,11 +45,12 @@ Imports:
     readr,
     tibble,
     rlang
-Suggests: 
+Suggests:
     knitr,
     quarto,
     rmarkdown,
-    testthat
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
 VignetteBuilder:
     knitr,
     quarto
