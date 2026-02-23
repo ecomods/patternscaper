@@ -4,7 +4,7 @@
 #' This is a specialized wrapper around \code{\link{create_landscape_random}}
 #' with high vegetation proportions.
 #'
-#' @param veg_prop Numeric. Proportion of cells with vegetation (0-1). Default: 0.1.
+#' @param veg_prop Numeric. Proportion of cells with vegetation (0-1). Default: 0.9.
 #' @param width Integer. Width of landscape in cells. Default: 100.
 #' @param height Integer. Height of landscape in cells. Default: 100.
 #'
