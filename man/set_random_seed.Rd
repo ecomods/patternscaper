@@ -29,7 +29,8 @@ may still occur across different hardware/software configurations.
 \donttest{
 # Ensure reproducible training
 set_random_seed(42)
-model <- train_nn_pixels(landscapes, cv_folds = 5)
+landscapes <- create_landscapes(n=5)
+model <- train_nn_pixels(landscapes, cv_method = "none", epochs = 10)
 }
 }
 \seealso{
