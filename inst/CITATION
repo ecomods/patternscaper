@@ -1,0 +1,12 @@
+bibentry(
+  bibtype  = "Article",
+  title    = "spatPatClassifyR: An R package for classifying spatial landscape patterns using neural networks",
+  author   = c(
+    person("Selina", "Baldauf"),
+    person("Britta", "Tietjen"),
+    person("Uta", "Berger")
+  ),
+  journal  = "Methods in Ecology and Evolution",
+  year     = "2025",
+  note     = "In review"
+)
