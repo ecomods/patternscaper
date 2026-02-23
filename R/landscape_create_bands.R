@@ -45,7 +45,6 @@
 #'   rotation = 45
 #' )
 #'
-#' @keywords internal
 #' @importFrom stats rnorm
 create_landscape_bands <- function(
   width = 100,

@@ -69,7 +69,6 @@
 #'   veg_threshold = 0.3  # More vegetation
 #' )
 #'
-#' @keywords internal
 #' @importFrom ambient long_grid gen_perlin
 create_landscape_labyrinth <- function(
   width = 100,

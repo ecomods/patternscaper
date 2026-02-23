@@ -11,8 +11,6 @@
 #'   \item{pattern}{Character string "random"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @keywords internal
-#'
 #' @examples
 #' # Default randomly distributed trees
 #' random_default <- create_landscape_random()

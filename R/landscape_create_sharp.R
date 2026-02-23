@@ -12,8 +12,6 @@
 #'   \item{pattern}{Character string "sharp"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @keywords internal
-#'
 #' @export
 #'
 #' @examples

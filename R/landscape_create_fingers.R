@@ -18,8 +18,6 @@
 #'   \item{pattern}{Character string "fingers"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @keywords internal
-#'
 #' @export
 #' @importFrom cli cli_warn cli_abort
 #'

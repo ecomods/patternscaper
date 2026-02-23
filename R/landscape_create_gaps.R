@@ -35,7 +35,6 @@
 #'   spot_radius_sd = 2
 #' )
 #'
-#' @keywords internal
 create_landscape_gaps <- function(
   width = 100,
   height = 100,
