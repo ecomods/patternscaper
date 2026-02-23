@@ -4,6 +4,10 @@ template:
   light-switch: true
 
 reference:
+- title: Package overview
+  contents:
+  - spatPatClassifyR
+
 - title: Landscape creation
   desc: Functions for generating artificial landscapes with different spatial patterns
   contents:
@@ -25,6 +29,8 @@ reference:
   desc: Functions for creating and manipulating landscape objects
   contents:
   - landscape
+  - plot.landscape
+  - print.landscape
   - set_landscape_name
   - set_landscape_pattern
 
