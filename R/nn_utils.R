@@ -494,3 +494,47 @@ remove_incomplete_landscapes <- function(metrics_wide, predictor_cols) {
 
   return(metrics_wide)
 }
+
+#' Fit a neural network with a helpful error on training failure
+#'
+#' Wraps \code{neuralnet::neuralnet()} and converts its cryptic "the error
+#' derivative contains a NA" failure into an actionable error. That failure
+#' typically means the network is over-parameterized for the data (e.g. far
+#' more metrics than landscapes), so the message points the user at metric
+#' selection. Any other error is re-raised unchanged.
+#'
+#' @param data Data frame with predictor columns and a \code{pattern} factor.
+#' @param hidden Numeric vector. Hidden layer sizes.
+#' @param threshold Numeric. Passed to \code{neuralnet::neuralnet()}.
+#' @param stepmax Numeric. Passed to \code{neuralnet::neuralnet()}.
+#'
+#' @return A trained \code{nn} object.
+#'
+#' @keywords internal
+#' @importFrom cli cli_abort
+fit_nn_model <- function(data, hidden, threshold, stepmax) {
+  tryCatch(
+    neuralnet::neuralnet(
+      formula = pattern ~ .,
+      data = data,
+      hidden = hidden,
+      threshold = threshold,
+      stepmax = stepmax
+    ),
+    error = function(e) {
+      if (grepl("error derivative contains a NA", conditionMessage(e), fixed = TRUE)) {
+        cli::cli_abort(
+          c(
+            "Neural network training failed to converge.",
+            "x" = "The error derivative became NA, usually because there are too many metrics relative to the number of landscapes.",
+            "i" = "Select fewer metrics with {.fn evaluate_landscape_metrics} and pass them via {.arg metrics_selected}.",
+            "i" = "Or train on more landscapes (increase {.arg n} in {.fn create_landscapes})."
+          ),
+          parent = e
+        )
+      }
+      # Re-raise any other error unchanged
+      stop(e)
+    }
+  )
+}

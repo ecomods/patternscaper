@@ -237,12 +237,11 @@ train_nn_metrics <- function(
       val_data <- training_data[val_indices, ]
 
       # Train model on training data
-      fold_model <- neuralnet::neuralnet(
-        formula = pattern ~ .,
+      fold_model <- fit_nn_model(
         data = train_data,
+        hidden = hidden_layers,
         threshold = threshold,
-        stepmax = stepmax,
-        hidden = hidden_layers
+        stepmax = stepmax
       )
 
       # Predict on validation data
@@ -286,8 +285,7 @@ train_nn_metrics <- function(
   }
 
   # Train final model on all data
-  final_model <- neuralnet::neuralnet(
-    formula = pattern ~ .,
+  final_model <- fit_nn_model(
     data = training_data,
     hidden = hidden_layers,
     threshold = threshold,
