@@ -424,9 +424,12 @@ evaluate_cv_performance <- function(
 
 #' Remove landscapes with incomplete metrics
 #'
-#' Checks for and removes landscapes that have NA values in any predictor
-#' columns. Issues a warning listing removed landscapes and aborts if no
-#' landscapes remain after removal.
+#' First drops any predictor columns that are NA for every landscape (metrics
+#' that are undefined for the given landscapes carry no information and would
+#' otherwise remove the entire dataset). Then removes landscapes that still
+#' have NA values in any remaining predictor column. Issues warnings listing
+#' dropped metrics and removed landscapes, and aborts if no usable predictors
+#' or landscapes remain.
 #'
 #' @param metrics_wide Data frame in wide format. Output from metrics_to_wide().
 #' @param predictor_cols Character vector. Names of predictor columns to check for NAs.
@@ -436,8 +439,38 @@ evaluate_cv_performance <- function(
 #' @keywords internal
 #' @importFrom cli cli_warn cli_abort
 remove_incomplete_landscapes <- function(metrics_wide, predictor_cols) {
-  # Check for rows with any NA values in predictor columns
-  na_rows <- rowSums(is.na(metrics_wide[, predictor_cols])) > 0
+  # Drop predictor columns that are NA for every landscape. These metrics are
+  # undefined for the given landscapes (e.g. iji or rpr for two-class
+  # landscapes) and carry no information. If left in place they would flag
+  # every landscape as incomplete and remove the entire dataset.
+  all_na_cols <- predictor_cols[vapply(
+    predictor_cols,
+    function(col) all(is.na(metrics_wide[[col]])),
+    logical(1)
+  )]
+
+  if (length(all_na_cols) > 0) {
+    cli::cli_warn(c(
+      "Dropped {length(all_na_cols)} metric{?s} that {?is/are} NA for all landscapes",
+      "i" = "Dropped: {.val {all_na_cols}}"
+    ))
+    metrics_wide <- metrics_wide[,
+      setdiff(colnames(metrics_wide), all_na_cols),
+      drop = FALSE
+    ]
+    predictor_cols <- setdiff(predictor_cols, all_na_cols)
+  }
+
+  # If no predictor columns remain there is nothing to train or predict on.
+  if (length(predictor_cols) == 0) {
+    cli::cli_abort(c(
+      "No landscapes remaining after removing those with incomplete metrics",
+      "i" = "All required features were NA for every landscape"
+    ))
+  }
+
+  # Check for rows with any NA values in the remaining predictor columns
+  na_rows <- rowSums(is.na(metrics_wide[, predictor_cols, drop = FALSE])) > 0
 
   if (any(na_rows)) {
     n_removed <- sum(na_rows)

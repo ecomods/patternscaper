@@ -15,8 +15,11 @@ remove_incomplete_landscapes(metrics_wide, predictor_cols)
 Data frame with incomplete landscapes removed.
 }
 \description{
-Checks for and removes landscapes that have NA values in any predictor
-columns. Issues a warning listing removed landscapes and aborts if no
-landscapes remain after removal.
+First drops any predictor columns that are NA for every landscape (metrics
+that are undefined for the given landscapes carry no information and would
+otherwise remove the entire dataset). Then removes landscapes that still
+have NA values in any remaining predictor column. Issues warnings listing
+dropped metrics and removed landscapes, and aborts if no usable predictors
+or landscapes remain.
 }
 \keyword{internal}
