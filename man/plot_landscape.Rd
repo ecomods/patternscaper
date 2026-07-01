@@ -55,7 +55,7 @@ plot_landscape(l,
 
 Other visualization: 
 \code{\link{plot_classified_landscapes}()},
-\code{\link{plot_landscape_list}()},
+\code{\link{plot_landscapes}()},
 \code{\link{plot_metrics}()}
 }
 \concept{visualization}

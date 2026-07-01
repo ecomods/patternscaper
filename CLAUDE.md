@@ -46,7 +46,7 @@ local source via its own `dev/use_local_package.R`).
   assesses / selects them. Files: `metrics.R`, `metrics_evaluation.R`.
 - **Neural networks** — metrics-based in `nn_metrics.R`, pixel-based in `nn_keras.R`, shared helpers
   in `nn_utils.R`.
-- **Plotting** — `plot_landscape()`, `plot_landscape_list()`, `plot_classified_landscapes()`,
+- **Plotting** — `plot_landscape()`, `plot_landscapes()`, `plot_classified_landscapes()`,
   `plot_metrics()`; shared theme/palette in `plot_themes.R`. Files: `plot_*.R`.
 - **Misc** — `utils.R`; package-level docs in `spatPatClassifyR.R`.
 

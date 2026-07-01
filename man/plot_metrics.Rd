@@ -52,6 +52,6 @@ plot_metrics(metrics, selected_metrics = many_metrics, force = TRUE)
 Other visualization: 
 \code{\link{plot_classified_landscapes}()},
 \code{\link{plot_landscape}()},
-\code{\link{plot_landscape_list}()}
+\code{\link{plot_landscapes}()}
 }
 \concept{visualization}

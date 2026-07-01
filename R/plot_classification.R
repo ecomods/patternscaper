@@ -12,7 +12,7 @@
 #'   The easiest way to ensure this is to use the same list of landscapes for both training and plotting.
 #' @param only_misclassified Logical; if \code{TRUE}, only misclassified
 #'   landscapes are plotted. Default is \code{FALSE}.
-#' @param ... Additional arguments passed to \code{\link{plot_landscape_list}},
+#' @param ... Additional arguments passed to \code{\link{plot_landscapes}},
 #'   such as \code{show_legend}, \code{legend_title}, \code{ncol}, \code{max_landscapes},
 #'   \code{force}, or \code{subset_index}.
 #'
@@ -168,7 +168,7 @@ plot_classified_landscapes <- function(
   landscapes_to_plot <- landscapes[classification$landscape_id]
 
   # Create plots for each landscape
-  plots <- plot_landscape_list(
+  plots <- plot_landscapes(
     landscapes = landscapes_to_plot,
     titles = classification$title,
     ...

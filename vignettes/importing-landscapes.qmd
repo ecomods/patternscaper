@@ -113,5 +113,5 @@ You can for example use the plotting functions to visualize them:
 #| label: plot-landscapes
 #| fig-width: 8
 #| fig-height: 3
-plot_landscape_list(landscape_objects)
+plot_landscapes(landscape_objects)
 ```

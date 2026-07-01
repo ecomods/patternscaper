@@ -146,25 +146,25 @@ plot_landscape <- function(
 #' )
 #'
 #' # Default plot (3x1 grid)
-#' plot_landscape_list(landscapes)
+#' plot_landscapes(landscapes)
 #'
 #' # 2-column grid with custom titles
-#' plot_landscape_list(landscapes,
+#' plot_landscapes(landscapes,
 #'                    titles = c("Sharp", "Random", "Diffuse"),
 #'                    ncol = 2)
 #'
 #' # Plot only first two landscapes
-#' plot_landscape_list(landscapes,
+#' plot_landscapes(landscapes,
 #'                    subset_index = 1:2,
 #'                    legend_title = "Vegetation")
 #'
 #' # Create many landscapes and handle overflow
 #' many_landscapes <- create_landscapes(n = 50)
-#' plot_landscape_list(many_landscapes,
+#' plot_landscapes(many_landscapes,
 #'                    max_landscapes = 9,  # Show first 9 only
 #'                    ncol = 3)            # In 3x3 grid
 #' @export
-plot_landscape_list <- function(
+plot_landscapes <- function(
   landscapes,
   titles = "pattern",
   show_legend = TRUE,

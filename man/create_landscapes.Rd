@@ -76,7 +76,7 @@ landscapes_custom <- create_landscapes(
 
 }
 \seealso{
-\code{\link{plot_landscape_list}}
+\code{\link{plot_landscapes}}
 
 Other landscape creation: 
 \code{\link{create_landscape}()},

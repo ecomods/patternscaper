@@ -157,7 +157,7 @@ create_landscape <- function(
 #'
 #' @return A named list of landscape objects. Names indicate the pattern and optional rotation.
 #' @family landscape creation
-#' @seealso \code{\link{plot_landscape_list}}
+#' @seealso \code{\link{plot_landscapes}}
 #'
 #' @examples
 #' # Generate 20 landscapes

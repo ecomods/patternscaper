@@ -27,7 +27,7 @@ You can:
 - Generate batches of training landscapes with `create_landscapes()`
 - Create individual landscapes with custom parameters using `create_landscape()`
 - Visualize an individual landscape with `plot_landscape()`
-- Visualize multiple landscapes in a grid with `plot_landscape_list()`
+- Visualize multiple landscapes in a grid with `plot_landscapes()`
 
 ### Available patterns
 
@@ -50,7 +50,7 @@ random <- create_landscape("random", name = "Random")
 bare <- create_landscape("bare", name = "Bare")
 dense <- create_landscape("dense", name = "Dense")
 
-plot_landscape_list(list(random, bare, dense), show_legend = FALSE)
+plot_landscapes(list(random, bare, dense), show_legend = FALSE)
 ```
 
 #### Ecotone patterns
@@ -73,7 +73,7 @@ diffuse <- create_landscape("diffuse", name = "Diffuse treeline")
 fingers <- create_landscape("fingers", name = "Fingers")
 clustered <- create_landscape("clustered", name = "Clustered")
 bands <- create_landscape("bands", name = "Bands")
-plot_landscape_list(
+plot_landscapes(
   list(sharp, diffuse, fingers, clustered, bands),
   show_legend = FALSE,
   ncol = 3
@@ -96,7 +96,7 @@ plot_landscape_list(
 spots <- create_landscape("spots", name = "Spots")
 gaps <- create_landscape("gaps", name = "Gaps")
 labyrinth <- create_landscape("labyrinth", name = "Labyrinth")
-plot_landscape_list(list(spots, gaps, labyrinth), show_legend = FALSE)
+plot_landscapes(list(spots, gaps, labyrinth), show_legend = FALSE)
 ```
 
 For detailed parameter descriptions and examples of each pattern type, see `?create_landscape`.
@@ -119,14 +119,14 @@ landscapes <- create_landscapes(n = 20)
 
 The `landscapes` are returned as a list of `landscape` objects (see [below](landscape-generation.qmd#landscape-object-structure) for more info on the data structure).
 
-They can be visualized using the `plot_landscape_list()` function:
+They can be visualized using the `plot_landscapes()` function:
 
 ```{r}
 #| label: plot-training-landscapes
 #| fig-width: 8
 #| fig-height: 6
 # Plot all landscapes
-plot_landscape_list(landscapes)
+plot_landscapes(landscapes)
 ```
 
 By default, landscapes are created in a balanced way, so that each pattern type is represented equally in the generated set.
@@ -154,7 +154,7 @@ landscapes <- create_landscapes(
   patterns = c("labyrinth", "spots", "clustered")
 )
 
-plot_landscape_list(landscapes)
+plot_landscapes(landscapes)
 ```
 
 ### Control landscape parameters
@@ -174,7 +174,7 @@ non_square <- create_landscapes(
   height = 20
 )
 # Plot landscapes with custom size
-plot_landscape_list(non_square)
+plot_landscapes(non_square)
 ```
 
 #### Landscape rotation
@@ -204,7 +204,7 @@ defined_angles <- create_landscapes(
   rotation = c(45, 90)
 )
 
-plot_landscape_list(c(no_rotation, defined_angles))
+plot_landscapes(c(no_rotation, defined_angles))
 ```
 
 #### Pattern-specific parameters
@@ -232,7 +232,7 @@ bigger_spots <- create_landscapes(
   params_list = pattern_params
 )
 
-plot_landscape_list(bigger_spots)
+plot_landscapes(bigger_spots)
 ```
 
 To check parameter names and default values for each pattern type, see the function help `create_landscape()`.
@@ -271,7 +271,7 @@ spots_regular <- create_landscape(
   regular_spots = TRUE
 )
 
-plot_landscape_list(
+plot_landscapes(
   list(spots_default, spots_many, spots_regular),
   titles = "name"
 )
@@ -314,7 +314,7 @@ clustered_horizontal <- create_landscape(
   scatter_zone_prop = 0.4
 )
 
-plot_landscape_list(
+plot_landscapes(
   list(
     clustered_large,
     clustered_small,
@@ -344,7 +344,7 @@ labyrinth_complex <- create_landscape(
   band_fuzziness = 0.05
 )
 
-plot_landscape_list(list(labyrinth_default, labyrinth_complex), titles = "name")
+plot_landscapes(list(labyrinth_default, labyrinth_complex), titles = "name")
 ```
 
 ## The landscape Object

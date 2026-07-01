@@ -23,7 +23,7 @@ The easiest way to ensure this is to use the same list of landscapes for both tr
 \item{only_misclassified}{Logical; if \code{TRUE}, only misclassified
 landscapes are plotted. Default is \code{FALSE}.}
 
-\item{...}{Additional arguments passed to \code{\link{plot_landscape_list}},
+\item{...}{Additional arguments passed to \code{\link{plot_landscapes}},
 such as \code{show_legend}, \code{legend_title}, \code{ncol}, \code{max_landscapes},
 \code{force}, or \code{subset_index}.}
 }
@@ -70,7 +70,7 @@ plot_classified_landscapes(
 
 Other visualization: 
 \code{\link{plot_landscape}()},
-\code{\link{plot_landscape_list}()},
+\code{\link{plot_landscapes}()},
 \code{\link{plot_metrics}()}
 }
 \concept{visualization}

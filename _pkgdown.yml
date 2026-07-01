@@ -57,7 +57,7 @@ reference:
   desc: Plot landscapes, metrics, and classification results
   contents:
   - plot_landscape
-  - plot_landscape_list
+  - plot_landscapes
   - plot_classified_landscapes
   - plot_metrics
 
