@@ -13,7 +13,7 @@
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #'   \itemize{
 #'     \item "k-fold" or "loo": Performs cross-validation and returns performance metrics
-#'     \item "none": Trains on ALL provided data without validation. Use \code{\link{apply_pixels_model}}
+#'     \item "none": Trains on ALL provided data without validation. Use \code{\link{apply_pixel_model}}
 #'           with a separate test set to evaluate performance.
 #'   }
 #' @param cv_folds Integer. Number of cross-validation folds when cv_method="k-fold" (default: 5).
@@ -70,7 +70,7 @@
 #'       metrics, and overall accuracy. When cv_method = "none", contains training
 #'       metadata only (see note field for evaluation instructions).}
 #'   }
-#' @seealso \code{\link{apply_pixels_model}}
+#' @seealso \code{\link{apply_pixel_model}}
 #' @family neural network training
 #' @export
 #' @importFrom utils flush.console
@@ -83,20 +83,20 @@
 #' )
 #'
 #' # Train with cross-validation
-#' model <- train_pixels_model(
+#' model <- train_pixel_model(
 #'   landscapes = training_landscapes,
 #'   cv_method = "k-fold",
 #'   cv_folds = 5
 #' )
 #'
 #' # Train without cross validation on all data
-#' final_model <- train_pixels_model(
+#' final_model <- train_pixel_model(
 #'   landscapes = training_landscapes,
 #'   cv_method = "none",
 #'   epochs = 100
 #' )
 #' }
-train_pixels_model <- function(
+train_pixel_model <- function(
   landscapes,
   cv_method = "k-fold",
   cv_folds = 5,
@@ -464,7 +464,7 @@ train_pixels_model <- function(
       n_training_samples = nrow(x_data),
       n_classes = n_classes,
       class_distribution = table(training_labels),
-      note = "Model trained on all data. Use apply_pixels_model() to evaluate on test set."
+      note = "Model trained on all data. Use apply_pixel_model() to evaluate on test set."
     )
   }
 
@@ -505,7 +505,7 @@ train_pixels_model <- function(
 #'   **Note**: Input landscapes must contain categorical/discrete habitat data (e.g., 0/1 for
 #'   two habitat types, or 0/1/2 for three types). Continuous data (e.g., elevation,
 #'   gradients) is not supported.
-#' @param nn_model List. CNN model object from \code{\link{train_pixels_model}}.
+#' @param nn_model List. CNN model object from \code{\link{train_pixel_model}}.
 #' @param return_performance Logical. Whether to return performance metrics when actual classes are available (default: FALSE).
 #' @param verbose Logical. Show informational messages and performance summaries (default: TRUE).
 #'   When TRUE, displays resize operations and performance evaluation results.
@@ -535,7 +535,7 @@ train_pixels_model <- function(
 #'
 #'
 #' # Train on all data for final deployment model
-#' final_model <- train_pixels_model(
+#' final_model <- train_pixel_model(
 #'   landscapes = training_landscapes,
 #'   cv_method = "none",
 #'   epochs = 100
@@ -546,16 +546,16 @@ train_pixels_model <- function(
 #'   n = 10,
 #'   patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
 #' )
-#' results <- apply_pixels_model(
+#' results <- apply_pixel_model(
 #'   landscapes = test_landscapes,
 #'   nn_model = final_model,
 #'   return_performance = TRUE
 #' )
 #' }
-#' @seealso \code{\link{train_pixels_model}}, \code{\link{plot_classified_landscapes}}
+#' @seealso \code{\link{train_pixel_model}}, \code{\link{plot_classified_landscapes}}
 #' @family neural network application
 #' @export
-apply_pixels_model <- function(
+apply_pixel_model <- function(
   landscapes,
   nn_model,
   return_performance = FALSE,
@@ -567,7 +567,7 @@ apply_pixels_model <- function(
       !all(c("model", "classes", "input_shape") %in% names(nn_model))
   ) {
     cli::cli_abort(
-      "'nn_model' must be a trained model from train_pixels_model()"
+      "'nn_model' must be a trained model from train_pixel_model()"
     )
   }
 

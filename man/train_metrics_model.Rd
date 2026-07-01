@@ -101,6 +101,6 @@ model <- train_metrics_model(
 
 Other neural network training: 
 \code{\link{set_random_seed}()},
-\code{\link{train_pixels_model}()}
+\code{\link{train_pixel_model}()}
 }
 \concept{neural network training}

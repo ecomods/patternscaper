@@ -12,7 +12,7 @@ companion to a paper (Baldauf, Tietjen & Berger).
 **Two classification approaches run in parallel throughout the package** — keep this symmetry when
 adding code:
 
-- **Pixel-based** — convolutional net via `keras3`: `train_pixels_model()` / `apply_pixels_model()`.
+- **Pixel-based** — convolutional net via `keras3`: `train_pixel_model()` / `apply_pixel_model()`.
 - **Metrics-based** — landscape metrics (`landscapemetrics`) fed to a `neuralnet`:
   `train_metrics_model()` / `apply_metrics_model()`.
 

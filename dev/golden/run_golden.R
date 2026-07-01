@@ -46,14 +46,14 @@ run_golden <- function() {
   # Pixel-based workflow -- keras is reproducible across sessions on the same
   # machine (verified), so its results are compared EXACTLY too -----------------
   set_random_seed(4231)
-  model_pix <- train_pixels_model(
+  model_pix <- train_pixel_model(
     landscapes = train,
     cv_method  = "k-fold",
     cv_folds   = 2,
     epochs     = 3,
     verbose    = FALSE
   )
-  validation_pix <- apply_pixels_model(
+  validation_pix <- apply_pixel_model(
     landscapes         = test,
     nn_model           = model_pix,
     return_performance = TRUE,

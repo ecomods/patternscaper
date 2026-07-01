@@ -20,8 +20,8 @@ library(spatPatClassifyR)
 The workflow consists of the following steps:
 
 1. Generate training landscapes with known patterns using the `create_landscapes()` function.
-2. Train a neural network on the landscape pixel data using the `train_pixels_model()` function.
-3. Classify new landscapes using the trained model with the `apply_pixels_model()` function.
+2. Train a neural network on the landscape pixel data using the `train_pixel_model()` function.
+3. Classify new landscapes using the trained model with the `apply_pixel_model()` function.
 
 ## Setup Keras
 
@@ -70,7 +70,7 @@ the cross-validation method `cv_method` are:
 - `"k-fold"`: k-fold cross-validation with `cv_folds` number of folds.
 - `"loo"`: leave-one-out cross-validation.
 
-For details and further options see the function help of `train_pixels_model()`.
+For details and further options see the function help of `train_pixel_model()`.
 
 The underlying model uses a multiscale convolutional neural network (CNN) architecture that processes the landscapes as 2D pixel arrays. The model layers multiple convolutional layers with different kernel sizes (3 x 3 and 5 x 5) to capture both fine-scale details and broader spatial patterns. The architecture consists of paired convolutional layers, followed by pooling to reduce dimensionality and a final dense layer for the classification. The user can specify various parameters for training the model, such as the learning rate, the number of epochs and patience, but also for validating the model, such as the cross-validation method (k-fold or leave-one-out) and the proportion of validation data.
 
@@ -88,7 +88,7 @@ consider increasing the number of training landscapes or check the function help
 #| label: train-model
 #| message: false
 #| output: false
-model <- train_pixels_model(
+model <- train_pixel_model(
   landscapes = training_landscapes,
   cv_method = "k-fold",
   cv_folds = 2,
@@ -144,7 +144,7 @@ To get additional performance metrics, set `return_performance = TRUE` when appl
 ```{r}
 #| label: apply-model
 #| output: false
-classification <- apply_pixels_model(
+classification <- apply_pixel_model(
   landscapes = test_landscapes,
   nn_model = model,
   return_performance = TRUE

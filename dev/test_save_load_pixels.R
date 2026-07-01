@@ -8,7 +8,7 @@ train_landscapes <- create_landscapes(
   patterns = c("random", "sharp", "diffuse")
 )
 
-model <- train_pixels_model(
+model <- train_pixel_model(
   landscapes = train_landscapes,
   cv_method = "none",
   epochs = 5,
@@ -29,7 +29,7 @@ test_landscapes <- create_landscapes(
   patterns = c("random", "sharp", "diffuse")
 )
 
-results <- apply_pixels_model(
+results <- apply_pixel_model(
   landscapes = test_landscapes,
   nn_model = reloaded,
   return_performance = TRUE
