@@ -7,6 +7,10 @@
 .httr-oauth
 inst/doc
 models/
+# Heavy binary artifacts from dev/ scratch scripts (keep the .R scripts, not the model outputs)
+dev/*.keras
+dev/*.h5
+dev/*.hdf5
 docs/obsidian_files/
 tests/testthat/*.pdf
 inst/examples/Ecotone_Results_Landscape/Figs/plot_acc_worst_class.jpg
