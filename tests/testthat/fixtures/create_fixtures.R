@@ -28,7 +28,7 @@ minimal_metrics_all <- calculate_metrics(
 )
 
 # Select top 10 valid metrics (no NAs)
-minimal_best_metrics <- evaluate_landscape_metrics(
+minimal_best_metrics <- evaluate_metrics(
   minimal_metrics_all,
   method = "coeffvar_all",
   metrics_number = 10,
@@ -72,7 +72,7 @@ small_metrics_class_all <- calculate_metrics(
 )
 
 # Select top 15 valid metrics for landscape level
-small_best_landscape <- evaluate_landscape_metrics(
+small_best_landscape <- evaluate_metrics(
   small_metrics_landscape_all,
   method = "coeffvar_all",
   metrics_number = 15,
@@ -80,7 +80,7 @@ small_best_landscape <- evaluate_landscape_metrics(
 )
 
 # Select top 15 valid metrics for class level
-small_best_class <- evaluate_landscape_metrics(
+small_best_class <- evaluate_metrics(
   small_metrics_class_all,
   method = "coeffvar_all",
   metrics_number = 15,
@@ -123,7 +123,7 @@ balanced_metrics_all <- calculate_metrics(
 )
 
 # Select top 15 valid metrics
-balanced_best <- evaluate_landscape_metrics(
+balanced_best <- evaluate_metrics(
   balanced_metrics_all,
   method = "coeffvar_all",
   metrics_number = 15,

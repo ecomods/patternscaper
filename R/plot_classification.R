@@ -27,7 +27,7 @@
 #' metrics <- calculate_metrics(landscapes, level = "landscape")
 #'
 #' # Find the best 10 metrics for classification
-#' best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
+#' best_10 <- evaluate_metrics(metrics, metrics_number = 10)
 #'
 #' # Train model with cross-validation
 #' model <- train_metrics_model(metrics, metrics_selected = best_10, cv_method = "k-fold")

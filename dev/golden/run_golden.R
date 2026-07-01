@@ -27,7 +27,7 @@ run_golden <- function() {
 
   # Metrics-based workflow -- deterministic, so compared EXACTLY ----------------
   metrics  <- calculate_metrics(landscapes = train, level = "landscape")
-  selected <- evaluate_landscape_metrics(metrics = metrics, metrics_number = 5)
+  selected <- evaluate_metrics(metrics = metrics, metrics_number = 5)
 
   model <- train_metrics_model(
     metrics          = metrics,

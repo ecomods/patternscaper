@@ -46,7 +46,7 @@
 #' metrics <- calculate_metrics(landscapes, level = "landscape")
 #'
 #' # Find the best 10 metrics for classification
-#' best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
+#' best_10 <- evaluate_metrics(metrics, metrics_number = 10)
 #'
 #' # Train model with cross-validation
 #' model <- train_metrics_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
@@ -67,7 +67,7 @@
 #'   model_path = "models/landscape_classifier.rds"
 #' )
 #' }
-#' @seealso \code{\link{apply_metrics_model}}, \code{\link{evaluate_landscape_metrics}}
+#' @seealso \code{\link{apply_metrics_model}}, \code{\link{evaluate_metrics}}
 #' @family neural network training
 #' @export
 #' @importFrom cli cli_abort cli_alert_warning
@@ -349,7 +349,7 @@ train_metrics_model <- function(
 #' train_landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse"))
 #' metrics <- calculate_metrics(train_landscapes, level = "landscape")
 #' # find the best 10 metrics for classification
-#' best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
+#' best_10 <- evaluate_metrics(metrics, metrics_number = 10)
 #' model <- train_metrics_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
 #'
 #' # Apply to new landscapes

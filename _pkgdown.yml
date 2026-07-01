@@ -38,7 +38,7 @@ reference:
   desc: Calculate and evaluate landscape metrics
   contents:
   - calculate_metrics
-  - evaluate_landscape_metrics
+  - evaluate_metrics
 
 - title: Neural network training
   desc: Train neural network classifiers

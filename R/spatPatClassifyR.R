@@ -20,7 +20,7 @@
 #'   \item Generate training landscapes with \code{\link{create_landscapes}}
 #'   \item Optionally calculate and evaluate landscape metrics with
 #'     \code{\link{calculate_metrics}} and
-#'     \code{\link{evaluate_landscape_metrics}}
+#'     \code{\link{evaluate_metrics}}
 #'   \item Train a classifier with \code{\link{train_pixel_model}} or
 #'     \code{\link{train_metrics_model}}
 #'   \item Apply the trained model to new landscapes with

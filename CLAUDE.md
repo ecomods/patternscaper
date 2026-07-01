@@ -42,7 +42,7 @@ local source via its own `dev/use_local_package.R`).
 - **`landscape` S3 class** — constructor `landscape()`, `print`/`plot` methods, setters
   `set_landscape_name()` / `set_landscape_pattern()`, and `set_random_seed()`. Files:
   `landscape_class.R`, `landscape_methods.R`, `landscape_utils.R`, `landscape_parameter_validation.R`.
-- **Metrics** — `calculate_metrics()` computes features; `evaluate_landscape_metrics()`
+- **Metrics** — `calculate_metrics()` computes features; `evaluate_metrics()`
   assesses / selects them. Files: `metrics.R`, `metrics_evaluation.R`.
 - **Neural networks** — metrics-based in `nn_metrics.R`, pixel-based in `nn_keras.R`, shared helpers
   in `nn_utils.R`.

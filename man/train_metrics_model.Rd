@@ -74,7 +74,7 @@ landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse
 metrics <- calculate_metrics(landscapes, level = "landscape")
 
 # Find the best 10 metrics for classification
-best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
+best_10 <- evaluate_metrics(metrics, metrics_number = 10)
 
 # Train model with cross-validation
 model <- train_metrics_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
@@ -97,7 +97,7 @@ model <- train_metrics_model(
 }
 }
 \seealso{
-\code{\link{apply_metrics_model}}, \code{\link{evaluate_landscape_metrics}}
+\code{\link{apply_metrics_model}}, \code{\link{evaluate_metrics}}
 
 Other neural network training: 
 \code{\link{set_random_seed}()},

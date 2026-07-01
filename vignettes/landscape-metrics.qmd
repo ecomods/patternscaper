@@ -59,7 +59,7 @@ class_metrics <- calculate_metrics(
 
 ## Finding Informative Metrics
 
-The package includes different methods to evaluate the calculated landscape metrics and find those that are most informative for distinguishing different spatial patterns. The general function to evaluate landscape metrics is `evaluate_landscape_metrics()`. It supports different methods for metric evaluation:
+The package includes different methods to evaluate the calculated landscape metrics and find those that are most informative for distinguishing different spatial patterns. The general function to evaluate landscape metrics is `evaluate_metrics()`. It supports different methods for metric evaluation:
 
 - `coeffvar_all`: Coefficient of Variation (CV = SD/mean). Ranks metrics by their relative variability across landscapes.
 - `lin_mod_r2`: Fits value ~ pattern for each metric and ranks by R².
@@ -71,7 +71,7 @@ By default, the function excludes metrics with high correlation (above 0.7). Thi
 
 ```{r}
 # Evaluate landscape metrics using Fisher Score
-metric_evaluation <- evaluate_landscape_metrics(
+metric_evaluation <- evaluate_metrics(
   landscape_metrics,
   method = "fisher_score",
   metrics_number = 10, # Select top 10 informative metrics

@@ -46,7 +46,7 @@
 #'   landscapes,
 #'   level = "landscape"
 #' )
-#' metric_list <- evaluate_landscape_metrics(
+#' metric_list <- evaluate_metrics(
 #'   metrics = metrics,
 #'   metrics_number = 5,
 #'   method = "coeffvar_all"
@@ -55,7 +55,7 @@
 #' @seealso \code{\link{train_metrics_model}}
 #' @family metrics
 #' @export
-evaluate_landscape_metrics <- function(
+evaluate_metrics <- function(
   metrics,
   metrics_number = 10,
   method = "kruskal_effsize",

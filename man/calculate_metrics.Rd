@@ -63,6 +63,6 @@ metrics. *Ecography*, 42(10), 1648-1657. \doi{10.1111/ecog.04617}
 \code{\link{plot_metrics}}
 
 Other metrics: 
-\code{\link{evaluate_landscape_metrics}()}
+\code{\link{evaluate_metrics}()}
 }
 \concept{metrics}

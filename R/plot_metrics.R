@@ -21,7 +21,7 @@
 #'
 #' @return A ggplot2 object showing boxplots of metric values by pattern type.
 #'
-#' @seealso \code{\link{calculate_metrics}}, \code{\link{evaluate_landscape_metrics}}
+#' @seealso \code{\link{calculate_metrics}}, \code{\link{evaluate_metrics}}
 #' @family visualization
 #' @export
 #' @importFrom dplyr filter mutate

@@ -527,7 +527,7 @@ fit_nn_model <- function(data, hidden, threshold, stepmax) {
           c(
             "Neural network training failed to converge.",
             "x" = "The error derivative became NA, usually because there are too many metrics relative to the number of landscapes.",
-            "i" = "Select fewer metrics with {.fn evaluate_landscape_metrics} and pass them via {.arg metrics_selected}.",
+            "i" = "Select fewer metrics with {.fn evaluate_metrics} and pass them via {.arg metrics_selected}.",
             "i" = "Or train on more landscapes (increase {.arg n} in {.fn create_landscapes})."
           ),
           parent = e
