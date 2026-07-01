@@ -80,7 +80,7 @@ metric_list <- evaluate_landscape_metrics(
 
 }
 \seealso{
-\code{\link{train_nn_metrics}}
+\code{\link{train_metrics_model}}
 
 Other metrics: 
 \code{\link{calculate_landscape_metrics}()}

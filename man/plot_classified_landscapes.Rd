@@ -14,8 +14,8 @@ plot_classified_landscapes(
 \arguments{
 \item{classification}{A data frame with columns: \code{landscape_id},
 \code{actual_class}, \code{predicted_class}, and \code{confidence}. Can be
-obtained from the CV-fold results of \code{\link{train_nn_metrics}}/\code{\link{train_nn_pixels}} or
-the output of \code{\link{apply_nn_metrics}}/\code{\link{apply_nn_pixels}}.}
+obtained from the CV-fold results of \code{\link{train_metrics_model}}/\code{\link{train_pixels_model}} or
+the output of \code{\link{apply_metrics_model}}/\code{\link{apply_pixels_model}}.}
 
 \item{landscapes}{A list of landscape objects corresponding one-to-one and in the same order as the rows in `classification`.
 The easiest way to ensure this is to use the same list of landscapes for both training and plotting.}
@@ -47,7 +47,7 @@ metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
 best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
 
 # Train model with cross-validation
-model <- train_nn_metrics(metrics, metrics_selected = best_10, cv_method = "k-fold")
+model <- train_metrics_model(metrics, metrics_selected = best_10, cv_method = "k-fold")
 
 # Plot all classification results
 plot_classified_landscapes(
@@ -66,7 +66,7 @@ plot_classified_landscapes(
 }
 }
 \seealso{
-\code{\link{train_nn_pixels}}, \code{\link{train_nn_metrics}}
+\code{\link{train_pixels_model}}, \code{\link{train_metrics_model}}
 
 Other visualization: 
 \code{\link{plot_landscape}()},

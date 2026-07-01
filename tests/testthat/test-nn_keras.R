@@ -9,61 +9,61 @@ helper_create_tiny_training_set <- function(n_per_class = 3) {
   )
 }
 
-test_that("train_nn_pixels validates cv_method parameter", {
+test_that("train_pixels_model validates cv_method parameter", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 
   expect_error(
-    train_nn_pixels(landscapes, cv_method = "invalid"),
+    train_pixels_model(landscapes, cv_method = "invalid"),
     'cv_method must be one of: "none", "k-fold", or "loo"'
   )
 })
 
-test_that("train_nn_pixels validates numeric parameters", {
+test_that("train_pixels_model validates numeric parameters", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 
   expect_error(
-    train_nn_pixels(landscapes, epochs = 0),
+    train_pixels_model(landscapes, epochs = 0),
     "epochs must be a positive integer"
   )
 
   expect_error(
-    train_nn_pixels(landscapes, batch_size = -1),
+    train_pixels_model(landscapes, batch_size = -1),
     "batch_size must be a positive integer"
   )
 
   expect_error(
-    train_nn_pixels(landscapes, learning_rate = 1.5),
+    train_pixels_model(landscapes, learning_rate = 1.5),
     "learning_rate must be between 0 and 1"
   )
 })
 
-test_that("train_nn_pixels rejects empty or invalid landscapes", {
+test_that("train_pixels_model rejects empty or invalid landscapes", {
   expect_error(
-    train_nn_pixels(list()),
+    train_pixels_model(list()),
     "landscapes must contain at least one landscape object"
   )
 
   expect_error(
-    train_nn_pixels(list("not_a_landscape")),
+    train_pixels_model(list("not_a_landscape")),
     "All elements must be landscape objects"
   )
 })
 
-test_that("train_nn_pixels rejects unclassified landscapes", {
+test_that("train_pixels_model rejects unclassified landscapes", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
   landscapes[[1]]$pattern <- NA
 
   expect_error(
-    train_nn_pixels(landscapes, cv_method = "none"),
+    train_pixels_model(landscapes, cv_method = "none"),
     "All training labels must be classified"
   )
 })
 
-test_that("train_nn_pixels handles model_path validation", {
+test_that("train_pixels_model handles model_path validation", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 
   expect_error(
-    train_nn_pixels(
+    train_pixels_model(
       landscapes,
       cv_method = "none",
       model_path = "/nonexistent/path/model.keras"
@@ -72,12 +72,12 @@ test_that("train_nn_pixels handles model_path validation", {
   )
 })
 
-test_that("train_nn_pixels works with cv_method='none'", {
+test_that("train_pixels_model works with cv_method='none'", {
   skip_if_not_installed("keras3")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
 
-  model <- train_nn_pixels(
+  model <- train_pixels_model(
     landscapes,
     cv_method = "none",
     epochs = 2,
@@ -103,12 +103,12 @@ test_that("train_nn_pixels works with cv_method='none'", {
   expect_equal(model$performance$cv_method, "none")
 })
 
-test_that("train_nn_pixels works with cv_method='k-fold'", {
+test_that("train_pixels_model works with cv_method='k-fold'", {
   skip_if_not_installed("keras3")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 4)
 
-  model <- train_nn_pixels(
+  model <- train_pixels_model(
     landscapes,
     cv_method = "k-fold",
     cv_folds = 3,
@@ -124,13 +124,13 @@ test_that("train_nn_pixels works with cv_method='k-fold'", {
 })
 
 
-test_that("train_nn_pixels accepts different optimizers", {
+test_that("train_pixels_model accepts different optimizers", {
   skip_if_not_installed("keras3")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
 
   expect_no_error(
-    train_nn_pixels(
+    train_pixels_model(
       landscapes,
       cv_method = "none",
       epochs = 1,
@@ -140,13 +140,13 @@ test_that("train_nn_pixels accepts different optimizers", {
   )
 })
 
-test_that("train_nn_pixels respects patience parameter", {
+test_that("train_pixels_model respects patience parameter", {
   skip_if_not_installed("keras3")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
 
   # With patience=NULL should run full epochs
-  model <- train_nn_pixels(
+  model <- train_pixels_model(
     landscapes,
     cv_method = "none",
     epochs = 5,
@@ -157,23 +157,23 @@ test_that("train_nn_pixels respects patience parameter", {
   expect_equal(length(model$history$metrics$loss), 5)
 })
 
-# apply_nn_pixels test -------------------------------------------------
+# apply_pixels_model test -------------------------------------------------
 
-test_that("apply_nn_pixels validates model structure", {
+test_that("apply_pixels_model validates model structure", {
   expect_error(
-    apply_nn_pixels(
+    apply_pixels_model(
       landscapes = list(),
       nn_model = list(wrong = "structure")
     ),
-    "must be a trained model from train_nn_pixels"
+    "must be a trained model from train_pixels_model"
   )
 })
 
-test_that("apply_nn_pixels validates landscapes input", {
+test_that("apply_pixels_model validates landscapes input", {
   skip_if_not_installed("keras3")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
-  model <- train_nn_pixels(
+  model <- train_pixels_model(
     landscapes,
     cv_method = "none",
     epochs = 2,
@@ -181,7 +181,7 @@ test_that("apply_nn_pixels validates landscapes input", {
   )
 
   expect_error(
-    apply_nn_pixels(
+    apply_pixels_model(
       landscapes = "not_a_landscape",
       nn_model = model
     ),
@@ -189,7 +189,7 @@ test_that("apply_nn_pixels validates landscapes input", {
   )
 
   expect_error(
-    apply_nn_pixels(
+    apply_pixels_model(
       landscapes = list("not", "landscapes"),
       nn_model = model
     ),
@@ -197,11 +197,11 @@ test_that("apply_nn_pixels validates landscapes input", {
   )
 })
 
-test_that("apply_nn_pixels returns predictions for single landscape", {
+test_that("apply_pixels_model returns predictions for single landscape", {
   skip_if_not_installed("keras3")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
-  model <- train_nn_pixels(
+  model <- train_pixels_model(
     landscapes,
     cv_method = "none",
     epochs = 2,
@@ -209,7 +209,7 @@ test_that("apply_nn_pixels returns predictions for single landscape", {
   )
 
   # Single landscape
-  result <- apply_nn_pixels(
+  result <- apply_pixels_model(
     landscapes = landscapes[[1]],
     nn_model = model
   )
@@ -231,18 +231,18 @@ test_that("apply_nn_pixels returns predictions for single landscape", {
   )
 })
 
-test_that("apply_nn_pixels returns predictions for multiple landscapes", {
+test_that("apply_pixels_model returns predictions for multiple landscapes", {
   skip_if_not_installed("keras3")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
-  model <- train_nn_pixels(
+  model <- train_pixels_model(
     landscapes,
     cv_method = "none",
     epochs = 2,
     verbose = FALSE
   )
 
-  result <- apply_nn_pixels(
+  result <- apply_pixels_model(
     landscapes = landscapes[1:5],
     nn_model = model
   )
@@ -252,18 +252,18 @@ test_that("apply_nn_pixels returns predictions for multiple landscapes", {
   expect_true(all(result$confidence >= 0 & result$confidence <= 1))
 })
 
-test_that("apply_nn_pixels returns performance when requested", {
+test_that("apply_pixels_model returns performance when requested", {
   skip_if_not_installed("keras3")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
-  model <- train_nn_pixels(
+  model <- train_pixels_model(
     landscapes,
     cv_method = "none",
     epochs = 2,
     verbose = FALSE
   )
 
-  result <- apply_nn_pixels(
+  result <- apply_pixels_model(
     landscapes = landscapes,
     nn_model = model,
     return_performance = TRUE,
@@ -277,11 +277,11 @@ test_that("apply_nn_pixels returns performance when requested", {
   expect_s3_class(result$performance$confusion_matrix, "table")
 })
 
-test_that("apply_nn_pixels handles mixed valid/NA classes", {
+test_that("apply_pixels_model handles mixed valid/NA classes", {
   skip_if_not_installed("keras3")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
-  model <- train_nn_pixels(
+  model <- train_pixels_model(
     landscapes,
     cv_method = "none",
     epochs = 2,
@@ -293,7 +293,7 @@ test_that("apply_nn_pixels handles mixed valid/NA classes", {
   test_landscapes[[2]]$pattern <- NA
   test_landscapes[[4]]$pattern <- "unclassified"
 
-  result <- apply_nn_pixels(
+  result <- apply_pixels_model(
     landscapes = test_landscapes,
     nn_model = model,
     return_performance = TRUE,
@@ -309,11 +309,11 @@ test_that("apply_nn_pixels handles mixed valid/NA classes", {
   }
 })
 
-test_that("apply_nn_pixels returns NULL performance for all invalid classes", {
+test_that("apply_pixels_model returns NULL performance for all invalid classes", {
   skip_if_not_installed("keras3")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
-  model <- train_nn_pixels(
+  model <- train_pixels_model(
     landscapes,
     cv_method = "none",
     epochs = 2,
@@ -327,7 +327,7 @@ test_that("apply_nn_pixels returns NULL performance for all invalid classes", {
   }
 
   expect_warning(
-    result <- apply_nn_pixels(
+    result <- apply_pixels_model(
       landscapes = test_landscapes,
       nn_model = model,
       return_performance = TRUE
@@ -340,11 +340,11 @@ test_that("apply_nn_pixels returns NULL performance for all invalid classes", {
   expect_equal(nrow(result$predictions), 3)
 })
 
-test_that("apply_nn_pixels warns about unknown classes", {
+test_that("apply_pixels_model warns about unknown classes", {
   skip_if_not_installed("keras3")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
-  model <- train_nn_pixels(
+  model <- train_pixels_model(
     landscapes,
     cv_method = "none",
     epochs = 2,
@@ -356,7 +356,7 @@ test_that("apply_nn_pixels warns about unknown classes", {
   test_landscapes[[2]]$pattern <- "unknown_pattern"
 
   expect_warning(
-    result <- apply_nn_pixels(
+    result <- apply_pixels_model(
       landscapes = test_landscapes,
       nn_model = model,
       return_performance = TRUE
@@ -368,11 +368,11 @@ test_that("apply_nn_pixels warns about unknown classes", {
   expect_null(result$performance)
 })
 
-test_that("apply_nn_pixels handles resizing correctly", {
+test_that("apply_pixels_model handles resizing correctly", {
   skip_if_not_installed("keras3")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
-  model <- train_nn_pixels(
+  model <- train_pixels_model(
     landscapes,
     cv_method = "none",
     epochs = 2,
@@ -386,7 +386,7 @@ test_that("apply_nn_pixels handles resizing correctly", {
     height = 25
   )
 
-  result <- apply_nn_pixels(
+  result <- apply_pixels_model(
     landscapes = small_landscape,
     nn_model = model,
     verbose = FALSE

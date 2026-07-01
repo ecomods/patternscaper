@@ -12,9 +12,9 @@ companion to a paper (Baldauf, Tietjen & Berger).
 **Two classification approaches run in parallel throughout the package** — keep this symmetry when
 adding code:
 
-- **Pixel-based** — convolutional net via `keras3`: `train_nn_pixels()` / `apply_nn_pixels()`.
+- **Pixel-based** — convolutional net via `keras3`: `train_pixels_model()` / `apply_pixels_model()`.
 - **Metrics-based** — landscape metrics (`landscapemetrics`) fed to a `neuralnet`:
-  `train_nn_metrics()` / `apply_nn_metrics()`.
+  `train_metrics_model()` / `apply_metrics_model()`.
 
 **Sibling analysis repo.** `../spatPatClassifyRAnalysis` reproduces the paper's figures/tables and
 depends on this package's exported API. **Renaming or changing the signature of an export can

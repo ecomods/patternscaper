@@ -43,15 +43,15 @@ reference:
 - title: Neural network training
   desc: Train neural network classifiers
   contents:
-  - train_nn_metrics
-  - train_nn_pixels
+  - train_metrics_model
+  - train_pixels_model
   - set_random_seed
 
 - title: Neural network application
   desc: Apply trained classifiers to new landscapes
   contents:
-  - apply_nn_metrics
-  - apply_nn_pixels
+  - apply_metrics_model
+  - apply_pixels_model
 
 - title: Visualization
   desc: Plot landscapes, metrics, and classification results

@@ -30,12 +30,12 @@ may still occur across different hardware/software configurations.
 # Ensure reproducible training
 set_random_seed(42)
 landscapes <- create_landscapes(n=5)
-model <- train_nn_pixels(landscapes, cv_method = "none", epochs = 10)
+model <- train_pixels_model(landscapes, cv_method = "none", epochs = 10)
 }
 }
 \seealso{
 Other neural network training: 
-\code{\link{train_nn_metrics}()},
-\code{\link{train_nn_pixels}()}
+\code{\link{train_metrics_model}()},
+\code{\link{train_pixels_model}()}
 }
 \concept{neural network training}

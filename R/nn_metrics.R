@@ -49,11 +49,11 @@
 #' best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
 #'
 #' # Train model with cross-validation
-#' model <- train_nn_metrics(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
+#' model <- train_metrics_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
 #'
 #' # Train with specific metrics
 #' selected <- c("ai", "lsi", "ed", "np")
-#' model <- train_nn_metrics(
+#' model <- train_metrics_model(
 #'   metrics,
 #'   metrics_selected = selected,
 #'   hidden_layers = c(8, 4)
@@ -62,12 +62,12 @@
 #'
 #' \dontrun{
 #' # Save model to file
-#' model <- train_nn_metrics(
+#' model <- train_metrics_model(
 #'   metrics,
 #'   model_path = "models/landscape_classifier.rds"
 #' )
 #' }
-#' @seealso \code{\link{apply_nn_metrics}}, \code{\link{evaluate_landscape_metrics}}
+#' @seealso \code{\link{apply_metrics_model}}, \code{\link{evaluate_landscape_metrics}}
 #' @family neural network training
 #' @export
 #' @importFrom cli cli_abort cli_alert_warning
@@ -76,7 +76,7 @@
 #' @importFrom neuralnet neuralnet
 #' @importFrom readr write_rds
 #' @importFrom stats predict
-train_nn_metrics <- function(
+train_metrics_model <- function(
   metrics,
   metrics_selected = NULL,
   cv_method = "k-fold",
@@ -319,7 +319,7 @@ train_nn_metrics <- function(
 #'
 #' @param landscapes Landscape object (single) or list of landscape objects to classify.
 #'   Landscapes must have valid raster data that can be analyzed by landscapemetrics.
-#' @param nn_model List. Trained model object returned from train_nn_metrics().
+#' @param nn_model List. Trained model object returned from train_metrics_model().
 #'   Must contain elements: model, scaling, classes, features, and features_level.
 #' @param return_performance Logical. If TRUE and landscapes contain known classes
 #'   (pattern attribute), calculate and return performance metrics. If FALSE or
@@ -350,15 +350,15 @@ train_nn_metrics <- function(
 #' metrics <- calculate_landscape_metrics(train_landscapes, level = "landscape")
 #' # find the best 10 metrics for classification
 #' best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
-#' model <- train_nn_metrics(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
+#' model <- train_metrics_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
 #'
 #' # Apply to new landscapes
 #' new_landscapes <- create_landscapes(n = 5, patterns = c("random", "sharp"))
-#' predictions <- apply_nn_metrics(new_landscapes, model)
+#' predictions <- apply_metrics_model(new_landscapes, model)
 #' predictions
 #'
 #' # Evaluate performance on labeled data
-#' results <- apply_nn_metrics(new_landscapes, model, return_performance = TRUE)
+#' results <- apply_metrics_model(new_landscapes, model, return_performance = TRUE)
 #' results$predictions
 #' results$performance
 #' }
@@ -366,9 +366,9 @@ train_nn_metrics <- function(
 #' \dontrun{
 #' # Load a saved model
 #' model <- readr::read_rds("models/landscape_classifier.rds")
-#' predictions <- apply_nn_metrics(new_landscapes, model)
+#' predictions <- apply_metrics_model(new_landscapes, model)
 #' }
-#' @seealso \code{\link{train_nn_metrics}}, \code{\link{plot_classified_landscapes}}
+#' @seealso \code{\link{train_metrics_model}}, \code{\link{plot_classified_landscapes}}
 #' @family neural network application
 #' @export
 #' @importFrom cli cli_abort cli_alert_warning cli_warn
@@ -376,7 +376,7 @@ train_nn_metrics <- function(
 #' @importFrom purrr pmap_lgl
 #' @importFrom tibble as_tibble
 #' @importFrom stats predict
-apply_nn_metrics <- function(
+apply_metrics_model <- function(
   landscapes,
   nn_model,
   return_performance = FALSE
@@ -393,7 +393,7 @@ apply_nn_metrics <- function(
           names(nn_model)
       )
   ) {
-    cli::cli_abort("'nn_model' must be a trained model from train_nn_metrics()")
+    cli::cli_abort("'nn_model' must be a trained model from train_metrics_model()")
   }
 
   # Validate landscapes structure

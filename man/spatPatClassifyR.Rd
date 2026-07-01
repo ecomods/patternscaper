@@ -14,10 +14,10 @@ neural network classifiers.
 Two classification approaches are supported:
 \itemize{
   \item **Pixel-based classification** using convolutional neural networks
-    via \pkg{keras3} (see \code{\link{train_nn_pixels}})
+    via \pkg{keras3} (see \code{\link{train_pixels_model}})
   \item **Metrics-based classification** using landscape metrics computed
     with \pkg{landscapemetrics} as input features
-    for a neural network (see \code{\link{train_nn_metrics}})
+    for a neural network (see \code{\link{train_metrics_model}})
 }
 }
 \section{Typical workflow}{
@@ -27,10 +27,10 @@ Two classification approaches are supported:
   \item Optionally calculate and evaluate landscape metrics with
     \code{\link{calculate_landscape_metrics}} and
     \code{\link{evaluate_landscape_metrics}}
-  \item Train a classifier with \code{\link{train_nn_pixels}} or
-    \code{\link{train_nn_metrics}}
+  \item Train a classifier with \code{\link{train_pixels_model}} or
+    \code{\link{train_metrics_model}}
   \item Apply the trained model to new landscapes with
-    \code{\link{apply_nn_pixels}} or \code{\link{apply_nn_metrics}}
+    \code{\link{apply_pixels_model}} or \code{\link{apply_metrics_model}}
   \item Visualize results with \code{\link{plot_classified_landscapes}}
 }
 }

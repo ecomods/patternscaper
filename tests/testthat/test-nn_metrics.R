@@ -1,69 +1,69 @@
-# Tests for train_nn_metrics() and apply_nn_metrics()
+# Tests for train_metrics_model() and apply_metrics_model()
 
 # Load fixtures once for all tests
 fixtures <- load_metrics_fixtures()
 
 # Input validation tests -------------------------------------------------------
 
-test_that("train_nn_metrics validates verbose parameter", {
+test_that("train_metrics_model validates verbose parameter", {
   expect_error(
-    train_nn_metrics(fixtures$minimal_metrics, verbose = "yes"),
+    train_metrics_model(fixtures$minimal_metrics, verbose = "yes"),
     "verbose must be a single logical value"
   )
   expect_error(
-    train_nn_metrics(fixtures$minimal_metrics, verbose = c(TRUE, FALSE)),
+    train_metrics_model(fixtures$minimal_metrics, verbose = c(TRUE, FALSE)),
     "verbose must be a single logical value"
   )
 })
 
-test_that("train_nn_metrics validates hidden_layers parameter", {
+test_that("train_metrics_model validates hidden_layers parameter", {
   expect_error(
-    train_nn_metrics(fixtures$minimal_metrics, hidden_layers = -1),
+    train_metrics_model(fixtures$minimal_metrics, hidden_layers = -1),
     "hidden_layers must be positive integer"
   )
   expect_error(
-    train_nn_metrics(fixtures$minimal_metrics, hidden_layers = 1.5),
+    train_metrics_model(fixtures$minimal_metrics, hidden_layers = 1.5),
     "hidden_layers must be positive integer"
   )
   expect_error(
-    train_nn_metrics(fixtures$minimal_metrics, hidden_layers = c(5, -1)),
+    train_metrics_model(fixtures$minimal_metrics, hidden_layers = c(5, -1)),
     "hidden_layers must be positive integer"
   )
 })
 
-test_that("train_nn_metrics validates threshold parameter", {
+test_that("train_metrics_model validates threshold parameter", {
   expect_error(
-    train_nn_metrics(fixtures$minimal_metrics, threshold = -0.01),
+    train_metrics_model(fixtures$minimal_metrics, threshold = -0.01),
     "threshold must be a single positive numeric"
   )
   expect_error(
-    train_nn_metrics(fixtures$minimal_metrics, threshold = c(0.01, 0.02)),
+    train_metrics_model(fixtures$minimal_metrics, threshold = c(0.01, 0.02)),
     "threshold must be a single positive numeric"
   )
   expect_error(
-    train_nn_metrics(fixtures$minimal_metrics, threshold = 0),
+    train_metrics_model(fixtures$minimal_metrics, threshold = 0),
     "threshold must be a single positive numeric"
   )
 })
 
-test_that("train_nn_metrics validates stepmax parameter", {
+test_that("train_metrics_model validates stepmax parameter", {
   expect_error(
-    train_nn_metrics(fixtures$minimal_metrics, stepmax = -100),
+    train_metrics_model(fixtures$minimal_metrics, stepmax = -100),
     "stepmax must be a single positive integer"
   )
   expect_error(
-    train_nn_metrics(fixtures$minimal_metrics, stepmax = 1.5),
+    train_metrics_model(fixtures$minimal_metrics, stepmax = 1.5),
     "stepmax must be a single positive integer"
   )
 })
 
-test_that("train_nn_metrics validates model_path parameter", {
+test_that("train_metrics_model validates model_path parameter", {
   expect_error(
-    train_nn_metrics(fixtures$minimal_metrics, model_path = "model.txt"),
+    train_metrics_model(fixtures$minimal_metrics, model_path = "model.txt"),
     "model_path must end with .rds"
   )
   expect_error(
-    train_nn_metrics(
+    train_metrics_model(
       fixtures$minimal_metrics,
       model_path = c("a.rds", "b.rds")
     ),
@@ -71,26 +71,26 @@ test_that("train_nn_metrics validates model_path parameter", {
   )
 })
 
-test_that("train_nn_metrics validates cv_method parameter", {
+test_that("train_metrics_model validates cv_method parameter", {
   expect_error(
-    train_nn_metrics(fixtures$minimal_metrics, cv_method = "invalid"),
+    train_metrics_model(fixtures$minimal_metrics, cv_method = "invalid"),
     'cv_method must be one of: "none", "k-fold", or "loo"'
   )
 })
 
-test_that("train_nn_metrics validates metrics data structure", {
+test_that("train_metrics_model validates metrics data structure", {
   bad_metrics <- fixtures$minimal_metrics |>
     dplyr::select(-pattern)
 
   expect_error(
-    train_nn_metrics(bad_metrics),
+    train_metrics_model(bad_metrics),
     "Metrics data is missing required columns"
   )
 })
 
-test_that("train_nn_metrics validates metrics_selected exists in data", {
+test_that("train_metrics_model validates metrics_selected exists in data", {
   expect_error(
-    train_nn_metrics(
+    train_metrics_model(
       fixtures$minimal_metrics,
       metrics_selected = c("nonexistent_metric", "another_fake")
     ),
@@ -100,8 +100,8 @@ test_that("train_nn_metrics validates metrics_selected exists in data", {
 
 # Core functionality tests -----------------------------------------------------
 
-test_that("train_nn_metrics trains model without CV", {
-  result <- train_nn_metrics(
+test_that("train_metrics_model trains model without CV", {
+  result <- train_metrics_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -142,8 +142,8 @@ test_that("train_nn_metrics trains model without CV", {
   expect_null(result$performance)
 })
 
-test_that("train_nn_metrics trains with k-fold CV", {
-  result <- train_nn_metrics(
+test_that("train_metrics_model trains with k-fold CV", {
+  result <- train_metrics_model(
     fixtures$small_metrics_landscape,
     cv_method = "k-fold",
     cv_folds = 3,
@@ -188,8 +188,8 @@ test_that("train_nn_metrics trains with k-fold CV", {
   ))
 })
 
-test_that("train_nn_metrics trains with LOO CV", {
-  result <- train_nn_metrics(
+test_that("train_metrics_model trains with LOO CV", {
+  result <- train_metrics_model(
     fixtures$minimal_metrics,
     cv_method = "loo",
     verbose = FALSE
@@ -204,12 +204,12 @@ test_that("train_nn_metrics trains with LOO CV", {
   expect_equal(result$performance$cv_folds, n_samples)
 })
 
-test_that("train_nn_metrics respects metrics_selected parameter", {
+test_that("train_metrics_model respects metrics_selected parameter", {
   # Get first 5 unique metrics
   available_metrics <- unique(fixtures$small_metrics_landscape$metric)
   selected_metrics <- available_metrics[1:5]
 
-  result <- train_nn_metrics(
+  result <- train_metrics_model(
     fixtures$small_metrics_landscape,
     metrics_selected = selected_metrics,
     cv_method = "none",
@@ -221,8 +221,8 @@ test_that("train_nn_metrics respects metrics_selected parameter", {
   expect_true(all(result$features %in% selected_metrics))
 })
 
-test_that("train_nn_metrics works with landscape level metrics", {
-  result <- train_nn_metrics(
+test_that("train_metrics_model works with landscape level metrics", {
+  result <- train_metrics_model(
     fixtures$small_metrics_landscape,
     cv_method = "none",
     verbose = FALSE
@@ -231,12 +231,12 @@ test_that("train_nn_metrics works with landscape level metrics", {
   expect_equal(result$features_level, "landscape")
 })
 
-test_that("train_nn_metrics works with class level metrics", {
+test_that("train_metrics_model works with class level metrics", {
   # Filter to single class for consistency
   metrics_class_filtered <- fixtures$small_metrics_class |>
     dplyr::filter(class == 0)
 
-  result <- train_nn_metrics(
+  result <- train_metrics_model(
     metrics_class_filtered,
     cv_method = "none",
     verbose = FALSE
@@ -245,9 +245,9 @@ test_that("train_nn_metrics works with class level metrics", {
   expect_equal(result$features_level, "class")
 })
 
-test_that("train_nn_metrics handles custom hidden_layers configuration", {
+test_that("train_metrics_model handles custom hidden_layers configuration", {
   # Single layer with 10 neurons
-  result_single <- train_nn_metrics(
+  result_single <- train_metrics_model(
     fixtures$minimal_metrics,
     hidden_layers = 10,
     cv_method = "none",
@@ -256,7 +256,7 @@ test_that("train_nn_metrics handles custom hidden_layers configuration", {
   expect_s3_class(result_single$model, "nn")
 
   # Multiple layers
-  result_multi <- train_nn_metrics(
+  result_multi <- train_metrics_model(
     fixtures$minimal_metrics,
     hidden_layers = c(8, 4),
     cv_method = "none",
@@ -265,10 +265,10 @@ test_that("train_nn_metrics handles custom hidden_layers configuration", {
   expect_s3_class(result_multi$model, "nn")
 })
 
-test_that("train_nn_metrics saves model when model_path provided", {
+test_that("train_metrics_model saves model when model_path provided", {
   temp_file <- tempfile(fileext = ".rds")
 
-  result <- train_nn_metrics(
+  result <- train_metrics_model(
     fixtures$minimal_metrics,
     model_path = temp_file,
     cv_method = "none",
@@ -288,7 +288,7 @@ test_that("train_nn_metrics saves model when model_path provided", {
 
 # NA handling tests ------------------------------------------------------------
 
-test_that("train_nn_metrics handles NA values correctly", {
+test_that("train_metrics_model handles NA values correctly", {
   # Add NA to ALL metrics for first 5 landscapes (make them truly incomplete)
   metrics_with_na <- fixtures$small_metrics_landscape
 
@@ -301,7 +301,7 @@ test_that("train_nn_metrics handles NA values correctly", {
   ] <- NA
 
   expect_warning(
-    result <- train_nn_metrics(
+    result <- train_metrics_model(
       metrics_with_na,
       cv_method = "none",
       verbose = FALSE
@@ -313,22 +313,22 @@ test_that("train_nn_metrics handles NA values correctly", {
   expect_s3_class(result$model, "nn")
 })
 
-test_that("train_nn_metrics errors when all landscapes have NAs", {
+test_that("train_metrics_model errors when all landscapes have NAs", {
   # Add NA to all metrics
   metrics_all_na <- fixtures$minimal_metrics
   metrics_all_na$value <- NA
 
   expect_error(
-    train_nn_metrics(metrics_all_na, cv_method = "none", verbose = FALSE),
+    train_metrics_model(metrics_all_na, cv_method = "none", verbose = FALSE),
     "No landscapes remaining after removing those with incomplete metrics"
   )
 })
 
-# apply_nn_metrics tests ---------------------------------------------------
+# apply_metrics_model tests ---------------------------------------------------
 
-test_that("apply_nn_metrics validates return_performance parameter", {
+test_that("apply_metrics_model validates return_performance parameter", {
   # Train a simple model first
-  model <- train_nn_metrics(
+  model <- train_metrics_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -338,7 +338,7 @@ test_that("apply_nn_metrics validates return_performance parameter", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   expect_error(
-    apply_nn_metrics(
+    apply_metrics_model(
       minimal_landscapes,
       model,
       return_performance = "yes"
@@ -347,7 +347,7 @@ test_that("apply_nn_metrics validates return_performance parameter", {
   )
 
   expect_error(
-    apply_nn_metrics(
+    apply_metrics_model(
       minimal_landscapes,
       model,
       return_performance = c(TRUE, FALSE)
@@ -356,36 +356,36 @@ test_that("apply_nn_metrics validates return_performance parameter", {
   )
 })
 
-test_that("apply_nn_metrics validates nn_model structure", {
+test_that("apply_metrics_model validates nn_model structure", {
   # Create landscapes on-demand
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   expect_error(
-    apply_nn_metrics(
+    apply_metrics_model(
       minimal_landscapes,
       list(model = "not a model")
     ),
-    "'nn_model' must be a trained model from train_nn_metrics()"
+    "'nn_model' must be a trained model from train_metrics_model()"
   )
 
   expect_error(
-    apply_nn_metrics(
+    apply_metrics_model(
       minimal_landscapes,
       "not a list"
     ),
-    "'nn_model' must be a trained model from train_nn_metrics()"
+    "'nn_model' must be a trained model from train_metrics_model()"
   )
 })
 
-test_that("apply_nn_metrics validates landscapes parameter", {
-  model <- train_nn_metrics(
+test_that("apply_metrics_model validates landscapes parameter", {
+  model <- train_metrics_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
   )
 
   expect_error(
-    apply_nn_metrics(
+    apply_metrics_model(
       "not a landscape",
       model
     ),
@@ -393,7 +393,7 @@ test_that("apply_nn_metrics validates landscapes parameter", {
   )
 
   expect_error(
-    apply_nn_metrics(
+    apply_metrics_model(
       data.frame(x = 1),
       model
     ),
@@ -401,9 +401,9 @@ test_that("apply_nn_metrics validates landscapes parameter", {
   )
 })
 
-test_that("apply_nn_metrics works with single landscape", {
+test_that("apply_metrics_model works with single landscape", {
   # Train model
-  model <- train_nn_metrics(
+  model <- train_metrics_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -413,7 +413,7 @@ test_that("apply_nn_metrics works with single landscape", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   # Apply to single landscape
-  result <- apply_nn_metrics(
+  result <- apply_metrics_model(
     minimal_landscapes[[1]],
     model,
     return_performance = FALSE
@@ -435,9 +435,9 @@ test_that("apply_nn_metrics works with single landscape", {
   expect_true(all(model$classes %in% names(result)))
 })
 
-test_that("apply_nn_metrics works with list of landscapes", {
+test_that("apply_metrics_model works with list of landscapes", {
   # Train model
-  model <- train_nn_metrics(
+  model <- train_metrics_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -447,7 +447,7 @@ test_that("apply_nn_metrics works with list of landscapes", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   # Apply to list of landscapes
-  result <- apply_nn_metrics(
+  result <- apply_metrics_model(
     minimal_landscapes,
     model,
     return_performance = FALSE
@@ -461,9 +461,9 @@ test_that("apply_nn_metrics works with list of landscapes", {
   expect_true(all(result$predicted_class %in% model$classes))
 })
 
-test_that("apply_nn_metrics returns performance when requested", {
+test_that("apply_metrics_model returns performance when requested", {
   # Train model
-  model <- train_nn_metrics(
+  model <- train_metrics_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -473,7 +473,7 @@ test_that("apply_nn_metrics returns performance when requested", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   # Apply with performance evaluation
-  result <- apply_nn_metrics(
+  result <- apply_metrics_model(
     minimal_landscapes,
     model,
     return_performance = TRUE
@@ -499,9 +499,9 @@ test_that("apply_nn_metrics returns performance when requested", {
   expect_lte(result$performance$accuracy, 1)
 })
 
-test_that("apply_nn_metrics returns only predictions when classes unknown", {
+test_that("apply_metrics_model returns only predictions when classes unknown", {
   # Train model
-  model <- train_nn_metrics(
+  model <- train_metrics_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -516,7 +516,7 @@ test_that("apply_nn_metrics returns only predictions when classes unknown", {
   }
 
   # Apply with return_performance = TRUE (should still return only predictions)
-  result <- apply_nn_metrics(
+  result <- apply_metrics_model(
     minimal_landscapes,
     model,
     return_performance = TRUE
@@ -526,14 +526,14 @@ test_that("apply_nn_metrics returns only predictions when classes unknown", {
   expect_s3_class(result, "tbl_df")
 })
 
-test_that("apply_nn_metrics warns about unknown classes", {
+test_that("apply_metrics_model warns about unknown classes", {
   # Use balanced fixture which has more classes
   if (length(unique(fixtures$balanced_metrics$pattern)) > 2) {
     # Train on subset of classes
     metrics_subset <- fixtures$balanced_metrics |>
       dplyr::filter(pattern %in% c("spots", "labyrinth"))
 
-    model_subset <- train_nn_metrics(
+    model_subset <- train_metrics_model(
       metrics_subset,
       cv_method = "none",
       verbose = FALSE
@@ -554,7 +554,7 @@ test_that("apply_nn_metrics warns about unknown classes", {
 
     # Should warn about unknown class
     expect_warning(
-      result <- apply_nn_metrics(
+      result <- apply_metrics_model(
         landscapes_other,
         model_subset,
         return_performance = TRUE
@@ -567,13 +567,13 @@ test_that("apply_nn_metrics warns about unknown classes", {
   }
 })
 
-test_that("apply_nn_metrics works with class-level metrics", {
+test_that("apply_metrics_model works with class-level metrics", {
   # Filter to single class
   metrics_class <- fixtures$small_metrics_class |>
     dplyr::filter(class == 0)
 
   # Train model
-  model <- train_nn_metrics(
+  model <- train_metrics_model(
     metrics_class,
     cv_method = "none",
     verbose = FALSE
@@ -583,7 +583,7 @@ test_that("apply_nn_metrics works with class-level metrics", {
   small_landscapes <- create_fixture_landscapes("small")
 
   # Apply model
-  result <- apply_nn_metrics(
+  result <- apply_metrics_model(
     small_landscapes[1:3],
     model,
     return_performance = FALSE
@@ -595,9 +595,9 @@ test_that("apply_nn_metrics works with class-level metrics", {
   expect_equal(model$features_level, "class")
 })
 
-test_that("apply_nn_metrics errors when metrics cannot be calculated", {
+test_that("apply_metrics_model errors when metrics cannot be calculated", {
   # Train model
-  model <- train_nn_metrics(
+  model <- train_metrics_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -612,7 +612,7 @@ test_that("apply_nn_metrics errors when metrics cannot be calculated", {
 
   # Should error when trying to calculate metrics
   expect_error(
-    apply_nn_metrics(
+    apply_metrics_model(
       invalid_landscape,
       model,
       return_performance = FALSE
@@ -620,9 +620,9 @@ test_that("apply_nn_metrics errors when metrics cannot be calculated", {
   )
 })
 
-test_that("apply_nn_metrics includes landscape_name when available", {
+test_that("apply_metrics_model includes landscape_name when available", {
   # Train model
-  model <- train_nn_metrics(
+  model <- train_metrics_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -632,7 +632,7 @@ test_that("apply_nn_metrics includes landscape_name when available", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   # Apply model
-  result <- apply_nn_metrics(
+  result <- apply_metrics_model(
     minimal_landscapes,
     model,
     return_performance = FALSE
@@ -644,9 +644,9 @@ test_that("apply_nn_metrics includes landscape_name when available", {
   }
 })
 
-test_that("apply_nn_metrics maintains landscape order", {
+test_that("apply_metrics_model maintains landscape order", {
   # Train model
-  model <- train_nn_metrics(
+  model <- train_metrics_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -656,7 +656,7 @@ test_that("apply_nn_metrics maintains landscape order", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   # Apply model
-  result <- apply_nn_metrics(
+  result <- apply_metrics_model(
     minimal_landscapes,
     model,
     return_performance = FALSE

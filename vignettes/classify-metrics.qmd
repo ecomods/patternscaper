@@ -26,8 +26,8 @@ The workflow consists of the following steps:
 1. Generate training landscapes with known patterns using the `create_landscapes()` function.
 2. Calculate landscape metrics for the training landscapes using the `calculate_landscape_metrics()` function.
 3. Select most informative metrics (i.e. metrics that differ the most between landscapes) using the `evaluate_landscape_metrics()` function.
-4. Train a neural network using the selected metrics with the `train_nn_metrics()` function.
-5. Classify new landscapes using the trained neural network with the `apply_nn_metrics()` function.
+4. Train a neural network using the selected metrics with the `train_metrics_model()` function.
+5. Classify new landscapes using the trained neural network with the `apply_metrics_model()` function.
 
 
 ## Step 1: Generate Training Landscapes
@@ -114,12 +114,12 @@ Valid options for the cross-validation method `cv_method` are:
 - `"k-fold"`: k-fold cross-validation with `cv_folds` number of folds
 - `"loo"`: leave-one-out cross-validation
 
-For details and further options see the function help `?train_nn_metrics()`.
+For details and further options see the function help `?train_metrics_model()`.
 
 ```{r}
 #| label: train-model
 # Train neural network with k-fold cross-validation (3 folds)
-model <- train_nn_metrics(
+model <- train_metrics_model(
   metrics = landscape_metrics,
   metrics_selected = best_10,
   cv_method = "k-fold",
@@ -178,7 +178,7 @@ To get additional performance metrics, set `return_performance = TRUE` when appl
 #| message: false
 #| warning: false
 # Classify test landscapes using the trained model
-classification <- apply_nn_metrics(
+classification <- apply_metrics_model(
   landscapes = test_landscapes,
   nn_model = model,
   return_performance = TRUE

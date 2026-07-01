@@ -29,7 +29,7 @@ run_golden <- function() {
   metrics  <- calculate_landscape_metrics(landscapes = train, level = "landscape")
   selected <- evaluate_landscape_metrics(metrics = metrics, metrics_number = 5)
 
-  model <- train_nn_metrics(
+  model <- train_metrics_model(
     metrics          = metrics,
     metrics_selected = selected,
     hidden_layers    = c(6),
@@ -37,7 +37,7 @@ run_golden <- function() {
     cv_folds         = 2,
     verbose          = FALSE
   )
-  validation <- apply_nn_metrics(
+  validation <- apply_metrics_model(
     landscapes         = test,
     nn_model           = model,
     return_performance = TRUE
@@ -46,14 +46,14 @@ run_golden <- function() {
   # Pixel-based workflow -- keras is reproducible across sessions on the same
   # machine (verified), so its results are compared EXACTLY too -----------------
   set_random_seed(4231)
-  model_pix <- train_nn_pixels(
+  model_pix <- train_pixels_model(
     landscapes = train,
     cv_method  = "k-fold",
     cv_folds   = 2,
     epochs     = 3,
     verbose    = FALSE
   )
-  validation_pix <- apply_nn_pixels(
+  validation_pix <- apply_pixels_model(
     landscapes         = test,
     nn_model           = model_pix,
     return_performance = TRUE,
