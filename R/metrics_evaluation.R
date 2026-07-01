@@ -7,7 +7,7 @@
 #' This function is useful for selecting informative metrics to train the
 #' metric-based neural network.
 #'
-#' @param metrics tibble. Metrics from calculate_landscape_metrics().
+#' @param metrics tibble. Metrics from calculate_metrics().
 #' @param metrics_number Integer. Number of top metrics to return (default: 10).
 #' @param method Character. Selection method to use (default: "kruskal_effsize").
 #'     See 'Ranking Methods' section below for details.
@@ -42,7 +42,7 @@
 #' @examples
 #' # Calculate most suitable metrics to discriminate between spots and random landscapes
 #' landscapes <- create_landscapes(n = 50, patterns = c("spots","random"))
-#' metrics <- calculate_landscape_metrics(
+#' metrics <- calculate_metrics(
 #'   landscapes,
 #'   level = "landscape"
 #' )

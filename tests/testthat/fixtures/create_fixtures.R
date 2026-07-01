@@ -22,7 +22,7 @@ minimal_landscapes <- create_landscapes(
   patterns = c("spots", "labyrinth")
 )
 
-minimal_metrics_all <- calculate_landscape_metrics(
+minimal_metrics_all <- calculate_metrics(
   minimal_landscapes,
   level = "landscape"
 )
@@ -61,12 +61,12 @@ small_landscapes <- create_landscapes(
   patterns = c("spots", "labyrinth", "gaps")
 )
 
-small_metrics_landscape_all <- calculate_landscape_metrics(
+small_metrics_landscape_all <- calculate_metrics(
   small_landscapes,
   level = "landscape"
 )
 
-small_metrics_class_all <- calculate_landscape_metrics(
+small_metrics_class_all <- calculate_metrics(
   small_landscapes,
   level = "class"
 )
@@ -117,7 +117,7 @@ balanced_landscapes <- create_landscapes(
   patterns = c("spots", "labyrinth", "gaps", "sharp")
 )
 
-balanced_metrics_all <- calculate_landscape_metrics(
+balanced_metrics_all <- calculate_metrics(
   balanced_landscapes,
   level = "landscape"
 )

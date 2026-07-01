@@ -7,12 +7,12 @@ test_landscapes <- create_landscapes(
 )
 
 # Pre-calculate metrics to speed up tests
-test_metrics_landscape <- calculate_landscape_metrics(
+test_metrics_landscape <- calculate_metrics(
   test_landscapes,
   level = "landscape"
 )
 
-test_metrics_class <- calculate_landscape_metrics(
+test_metrics_class <- calculate_metrics(
   test_landscapes,
   level = "class"
 )
@@ -53,7 +53,7 @@ test_that("plot_metrics stops on multiple levels in data", {
 test_that("plot_metrics limits metrics based on pattern count", {
   # Test with 2 patterns (should allow 12 metrics)
   landscapes_2 <- test_landscapes[1:2]
-  metrics_2 <- calculate_landscape_metrics(landscapes_2, level = "landscape")
+  metrics_2 <- calculate_metrics(landscapes_2, level = "landscape")
 
   all_metrics <- unique(metrics_2$metric)
   many_metrics <- all_metrics[1:min(15, length(all_metrics))]

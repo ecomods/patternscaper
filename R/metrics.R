@@ -90,18 +90,18 @@ calculate_single_metric <- function(landscapes, function_name) {
 #' \donttest{
 #' # Calculate all landscape-level metrics for a single landscape
 #' landscape <- create_landscape(pattern = "labyrinth")
-#' metrics <- calculate_landscape_metrics(landscape)
+#' metrics <- calculate_metrics(landscape)
 #'
 #' # Calculate specific metrics for multiple landscapes
 #' landscapes <- create_landscapes(n = 10, patterns = "spots")
-#' metrics <- calculate_landscape_metrics(
+#' metrics <- calculate_metrics(
 #'   landscapes,
 #'   metrics = c("ai", "lsi"),
 #'   level = "landscape"
 #' )
 #'
 #' }
-calculate_landscape_metrics <- function(
+calculate_metrics <- function(
   landscapes,
   metrics = NULL,
   level = "landscape"

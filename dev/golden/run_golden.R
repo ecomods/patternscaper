@@ -26,7 +26,7 @@ run_golden <- function() {
   test  <- create_landscapes(n = n, patterns = patterns, width = size, height = size)
 
   # Metrics-based workflow -- deterministic, so compared EXACTLY ----------------
-  metrics  <- calculate_landscape_metrics(landscapes = train, level = "landscape")
+  metrics  <- calculate_metrics(landscapes = train, level = "landscape")
   selected <- evaluate_landscape_metrics(metrics = metrics, metrics_number = 5)
 
   model <- train_metrics_model(

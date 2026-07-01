@@ -7,7 +7,7 @@
 plot_metrics(metrics, selected_metrics = NULL, force = FALSE)
 }
 \arguments{
-\item{metrics}{Data frame from \code{\link{calculate_landscape_metrics}}.
+\item{metrics}{Data frame from \code{\link{calculate_metrics}}.
 Must contain columns: "level", "pattern", "metric", and "value".
 For class-level metrics, must also contain "class".}
 
@@ -35,7 +35,7 @@ patterns to maintain readability:
 }
 \examples{
 landscapes <- create_landscapes(n = 20, patterns = c("labyrinth", "spots"))
-metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
+metrics <- calculate_metrics(landscapes, level = "landscape")
 plot_metrics(metrics, selected_metrics = c("ai", "lsi"))
 
 # With many patterns and metrics, automatic limiting applies
@@ -47,7 +47,7 @@ plot_metrics(metrics, selected_metrics = many_metrics)
 plot_metrics(metrics, selected_metrics = many_metrics, force = TRUE)
 }
 \seealso{
-\code{\link{calculate_landscape_metrics}}, \code{\link{evaluate_landscape_metrics}}
+\code{\link{calculate_metrics}}, \code{\link{evaluate_landscape_metrics}}
 
 Other visualization: 
 \code{\link{plot_classified_landscapes}()},

@@ -9,7 +9,7 @@
 #' - 4-5 patterns: up to 8 metrics (2 rows x 4 columns)
 #' - 6+ patterns: up to 6 metrics (2 rows x 3 columns)
 #'
-#' @param metrics Data frame from \code{\link{calculate_landscape_metrics}}.
+#' @param metrics Data frame from \code{\link{calculate_metrics}}.
 #'   Must contain columns: "level", "pattern", "metric", and "value".
 #'   For class-level metrics, must also contain "class".
 #' @param selected_metrics Character vector of metric names to visualize.
@@ -21,7 +21,7 @@
 #'
 #' @return A ggplot2 object showing boxplots of metric values by pattern type.
 #'
-#' @seealso \code{\link{calculate_landscape_metrics}}, \code{\link{evaluate_landscape_metrics}}
+#' @seealso \code{\link{calculate_metrics}}, \code{\link{evaluate_landscape_metrics}}
 #' @family visualization
 #' @export
 #' @importFrom dplyr filter mutate
@@ -29,7 +29,7 @@
 #'
 #' @examples
 #' landscapes <- create_landscapes(n = 20, patterns = c("labyrinth", "spots"))
-#' metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
+#' metrics <- calculate_metrics(landscapes, level = "landscape")
 #' plot_metrics(metrics, selected_metrics = c("ai", "lsi"))
 #'
 #' # With many patterns and metrics, automatic limiting applies
@@ -52,7 +52,7 @@ plot_metrics <- function(
   # Validate input data
   if (!is.data.frame(metrics)) {
     cli::cli_abort(
-      "metrics must be a data frame from calculate_landscape_metrics()"
+      "metrics must be a data frame from calculate_metrics()"
     )
   }
 

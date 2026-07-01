@@ -32,7 +32,7 @@ create_real_test_metrics <- function(
     rotation = 0
   )
 
-  calculate_landscape_metrics(
+  calculate_metrics(
     landscapes,
     level = "landscape"
   )

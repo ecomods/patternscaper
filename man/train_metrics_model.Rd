@@ -17,7 +17,7 @@ train_metrics_model(
 )
 }
 \arguments{
-\item{metrics}{Tibble or data frame. Output from calculate_landscape_metrics()
+\item{metrics}{Tibble or data frame. Output from calculate_metrics()
 containing landscape metrics in long format with required columns:
 landscape_id, landscape_name, pattern, level, class, metric, value.}
 
@@ -71,7 +71,7 @@ output layer represents the pattern classes.
 landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse"))
 
 # Calculate landscape metrics
-metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
+metrics <- calculate_metrics(landscapes, level = "landscape")
 
 # Find the best 10 metrics for classification
 best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)

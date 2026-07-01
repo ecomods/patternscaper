@@ -37,7 +37,7 @@ reference:
 - title: Landscape metrics
   desc: Calculate and evaluate landscape metrics
   contents:
-  - calculate_landscape_metrics
+  - calculate_metrics
   - evaluate_landscape_metrics
 
 - title: Neural network training

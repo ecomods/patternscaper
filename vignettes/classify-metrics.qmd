@@ -24,7 +24,7 @@ set.seed(123456)
 The workflow consists of the following steps:
 
 1. Generate training landscapes with known patterns using the `create_landscapes()` function.
-2. Calculate landscape metrics for the training landscapes using the `calculate_landscape_metrics()` function.
+2. Calculate landscape metrics for the training landscapes using the `calculate_metrics()` function.
 3. Select most informative metrics (i.e. metrics that differ the most between landscapes) using the `evaluate_landscape_metrics()` function.
 4. Train a neural network using the selected metrics with the `train_metrics_model()` function.
 5. Classify new landscapes using the trained neural network with the `apply_metrics_model()` function.
@@ -58,7 +58,7 @@ In this example, we calculate metrics on the landscape level.
 #| label: calculate-metrics
 #| message: false
 # Calculate landscape metrics on the landscape level
-landscape_metrics <- calculate_landscape_metrics(
+landscape_metrics <- calculate_metrics(
   landscapes,
   level = "landscape"
 )

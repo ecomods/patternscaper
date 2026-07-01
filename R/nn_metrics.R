@@ -5,7 +5,7 @@
 #' The network's input layer has one neuron per metric, and the
 #' output layer represents the pattern classes.
 #'
-#' @param metrics Tibble or data frame. Output from calculate_landscape_metrics()
+#' @param metrics Tibble or data frame. Output from calculate_metrics()
 #'   containing landscape metrics in long format with required columns:
 #'   landscape_id, landscape_name, pattern, level, class, metric, value.
 #' @param metrics_selected Character vector of metric names to use as features,
@@ -43,7 +43,7 @@
 #' landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse"))
 #'
 #' # Calculate landscape metrics
-#' metrics <- calculate_landscape_metrics(landscapes, level = "landscape")
+#' metrics <- calculate_metrics(landscapes, level = "landscape")
 #'
 #' # Find the best 10 metrics for classification
 #' best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
@@ -137,7 +137,7 @@ train_metrics_model <- function(
     cli::cli_abort(c(
       "Metrics data is missing required columns",
       "x" = "Missing: {.val {missing_cols}}",
-      "i" = "Make sure metrics is calculated by {.fn calculate_landscape_metrics}"
+      "i" = "Make sure metrics is calculated by {.fn calculate_metrics}"
     ))
   }
 
@@ -347,7 +347,7 @@ train_metrics_model <- function(
 #' \donttest{
 #' # Train a model on reference landscapes
 #' train_landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse"))
-#' metrics <- calculate_landscape_metrics(train_landscapes, level = "landscape")
+#' metrics <- calculate_metrics(train_landscapes, level = "landscape")
 #' # find the best 10 metrics for classification
 #' best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
 #' model <- train_metrics_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
@@ -422,7 +422,7 @@ apply_metrics_model <- function(
   }
 
   # Calculate the necessary metrics for the input landscape(s)
-  metrics <- calculate_landscape_metrics(
+  metrics <- calculate_metrics(
     landscapes = landscapes,
     metrics = metrics_to_calculate,
     level = level

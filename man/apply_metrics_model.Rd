@@ -46,7 +46,7 @@ metrics needed by the model and scales them appropriately.
 \donttest{
 # Train a model on reference landscapes
 train_landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse"))
-metrics <- calculate_landscape_metrics(train_landscapes, level = "landscape")
+metrics <- calculate_metrics(train_landscapes, level = "landscape")
 # find the best 10 metrics for classification
 best_10 <- evaluate_landscape_metrics(metrics, metrics_number = 10)
 model <- train_metrics_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)

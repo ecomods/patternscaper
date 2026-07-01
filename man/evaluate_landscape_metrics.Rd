@@ -15,7 +15,7 @@ evaluate_landscape_metrics(
 )
 }
 \arguments{
-\item{metrics}{tibble. Metrics from calculate_landscape_metrics().}
+\item{metrics}{tibble. Metrics from calculate_metrics().}
 
 \item{metrics_number}{Integer. Number of top metrics to return (default: 10).}
 
@@ -68,7 +68,7 @@ metric-based neural network.
 \examples{
 # Calculate most suitable metrics to discriminate between spots and random landscapes
 landscapes <- create_landscapes(n = 50, patterns = c("spots","random"))
-metrics <- calculate_landscape_metrics(
+metrics <- calculate_metrics(
   landscapes,
   level = "landscape"
 )
@@ -83,6 +83,6 @@ metric_list <- evaluate_landscape_metrics(
 \code{\link{train_metrics_model}}
 
 Other metrics: 
-\code{\link{calculate_landscape_metrics}()}
+\code{\link{calculate_metrics}()}
 }
 \concept{metrics}
