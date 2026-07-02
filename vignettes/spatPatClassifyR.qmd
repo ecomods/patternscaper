@@ -8,6 +8,7 @@ knitr:
   opts_chunk:
     collapse: true
     comment: '#>'
+    cache: true
 ---
 
 There are two main workflows to classify landscape patterns using the `spatPatClassifyR` package: Either using landscape metrics as features for classification (metrics-based approach), or using convolutional neural networks (CNNs) to classify patterns directly from the pixel information of landscape images (pixel-based approach).

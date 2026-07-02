@@ -8,6 +8,7 @@ knitr:
   opts_chunk:
     collapse: true
     comment: '#>'
+    cache: true
 ---
 
 ```{r}

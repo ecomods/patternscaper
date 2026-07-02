@@ -8,6 +8,7 @@ knitr:
   opts_chunk:
     collapse: true
     comment: '#>'
+    cache: true
 ---
 
 This vignette provides an overview of the workflow to train a neural network on landscape metrics and then use the trained network to classify new landscapes based on the same metrics.

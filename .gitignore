@@ -35,4 +35,7 @@ inst/HPC/results_ecotones/*
 inst/analyses/data/systematic_tests/*/*/*.rds
 **/.quarto/
 
+# Cached vignette chunk results (knitr cache)
+vignettes/*_cache/
+
 /.quarto/

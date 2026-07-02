@@ -10,6 +10,7 @@
 ^CODE_OF_CONDUCT\.md$
 ^vignettes/\.quarto$
 ^vignettes/.*_files$
+^vignettes/.*_cache$
 ^vignettes/articles/\.quarto$
 ^vignettes/articles/.*_files$
 ^README\.Rmd$
