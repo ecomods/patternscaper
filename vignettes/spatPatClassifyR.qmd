@@ -10,7 +10,7 @@ knitr:
     comment: '#>'
 ---
 
-There are two main workflows to classify landscape patterns using the `spatPatClassifyR` package: Either using landscape metrics as features for classification, or using convolutional neural networks (CNNs) to classify patterns directly from the pixel information of landscape images.
+There are two main workflows to classify landscape patterns using the `spatPatClassifyR` package: Either using landscape metrics as features for classification (metrics-based approach), or using convolutional neural networks (CNNs) to classify patterns directly from the pixel information of landscape images (pixel-based approach).
 
 ## The classification workflow
 
@@ -23,13 +23,8 @@ The general workflow consists of the following steps:
 5. **Train a classifier** on the selected metrics with `train_metrics_model()`, or directly on the landscape pixels with `train_pixel_model()`. At this step the user can also validate the model using cross-validation methods.
 6. **Classify new landscapes** with `apply_metrics_model()` or `apply_pixel_model()`, and inspect the results with `plot_classified_landscapes()`.
 
-:::{.callout-note}
-
-The supplementary info of our paper povides additional info and guidance (link to paper/suppl).
-- parameter choice
-- training landscapes
-
-:::
+For additional information and guidance on how to choose parameters and configure the 
+workflow, please also refer to the [supplementary information of the paper]().
 
 The diagram below summarizes these steps and how the two workflows relate.
 
@@ -70,12 +65,52 @@ Use the pixel-based workflow if
 
 When computationally feasible, we recommend applying both workflows, as agreement between the two approaches increases confidence in the classification, whereas discrepancies may provide insights into the strengths and limitations of the selected representation. 
 
-Detailed guides for each workflow are provided in the corresponding vignettes:
+## Quick example
 
-- [Classify landscapes using landscape metrics](classify-metrics.html)
-- [Classify landscapes using Keras on landscape rasters](classify-pixels.html)
+The metric-based workflow in its shortest form (see the [full guide](classify-metrics.html) for metric selection details, cross-validation, and plotting):
 
-There are also more detailed vignettes on specific landscape-related topics:
+```{r}
+#| label: quick-example
+#| message: false
+#| warning: false
+library(spatPatClassifyR)
+set.seed(1)
 
-- [Importing user-defined landscapes](importing-landscapes.html)
-- [Landscape generation](landscape-generation.html)
+# 1. Create training landscapes with known patterns
+training <- create_landscapes(
+  n = 100,
+  patterns = c("labyrinth", "random", "clustered")
+)
+
+# 2. Calculate landscape metrics and keep the most informative ones
+metrics <- calculate_metrics(training)
+selected <- evaluate_metrics(metrics, metrics_number = 10)
+
+# 3. Train a classifier on the selected metrics
+model <- train_metrics_model(
+  metrics,
+  metrics_selected = selected,
+  verbose = FALSE
+)
+
+# 4. Classify new landscapes
+new_landscapes <- create_landscapes(
+  n = 10,
+  patterns = c("labyrinth", "random", "clustered")
+)
+apply_metrics_model(new_landscapes, model)
+```
+
+## Next steps
+
+Full walkthroughs of each workflow:
+
+- [Classify with landscape metrics](classify-metrics.html) shows the complete metric-based workflow
+- [Classify with pixels (CNN)](classify-pixels.html) shows the pixel-based workflow
+
+Detailed how-to guides for specific topics:
+
+- [Generate landscapes](landscape-generation.html)
+- [Calculate landscape metrics](landscape-metrics.html)
+- [Import your own landscapes](importing-landscapes.html)
+- [Install Keras](install-keras.html): guide to help with the keras installation that is required for the pixel-based workflow
