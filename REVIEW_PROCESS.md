@@ -154,11 +154,6 @@ disagree (see M9, L10).
 - **Fix:** a single canonical spec (types, bounds, sampling defaults) that all three derive
   from — prevents this whole class of drift.
 
-### M14. `DESCRIPTION` `Description:` is thin and understates the package  — [Claude] *(§4.1)*
-`DESCRIPTION:13-16` reads "Classification of landscapes using a neural network." For an
-MEE/CRAN-facing package this should be a proper paragraph (what it does, the two approaches,
-intended use). Low effort, visible payoff.
-
 ### M15. `ensure_spatraster()` is dead code and off-convention  — [Claude] [Fable] *(§5.1)*
 `R/utils.R:8` defines `ensure_spatraster()`; nothing calls it (Fable confirmed no callers in
 `R/`). It also uses `message()` and `class(x)[1] == "SpatRaster"` instead of the package's
@@ -378,3 +373,9 @@ actual_class both are `NA` and every title fell through to `"no title"`. Added a
 plus a test asserting the rendered titles in `tests/testthat/test-plot_classification.R`.
 `devtools::test()` green. (Note: `only_misclassified = TRUE` on unlabeled data still aborts with "No
 misclassified landscapes found" — reasonable, since misclassification is undefined without labels.)
+
+### M14. `DESCRIPTION` `Description:` is thin and understates the package  — [Claude] *(§4.1)*
+*Fixed 2026-07-06.* Replaced the one-sentence `Description:` with a proper paragraph covering what the
+package does, both classification approaches (pixel-based CNN via `keras3`, metrics-based via
+`landscapemetrics` + `neuralnet`), and the full generation → metrics → training → application workflow.
+Software names single-quoted per CRAN convention; `read.dcf()` parses cleanly.

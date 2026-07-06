@@ -10,10 +10,17 @@ Authors@R: c(
     person("Uta", "Berger", , "uta.berger@tu-dresden.de", role = c("aut"),
     comment = c(ORCID = "0000-0001-6920-136X"))
   )
-Description: Classification of landscapes using a neural network.
-    The neural network is either trained for two-dimensional landscapes
-    (using the 'keras3' package) or for landscape metrics
-    (using the 'landscapemetrics' package).
+Description: Generates artificial binary landscapes with defined spatial
+    patterns and classifies landscapes by their pattern using neural
+    networks. Two complementary approaches are provided: a pixel-based
+    convolutional neural network that is trained on the raster directly
+    (via the 'keras3' package), and a metrics-based classifier that first
+    summarises each landscape with landscape metrics (via the
+    'landscapemetrics' package) and uses these metrics to train a neural network (via the 'neuralnet' package). The package covers the
+    full workflow from landscape generation and metric calculation through
+    model training, cross-validation, and application to new landscapes,
+    with plotting utilities for landscapes, metrics, and classification
+    results.
 URL: https://ecomods.github.io/spatPatClassifyR/,
     https://github.com/ecomods/spatPatClassifyR/
 BugReports: https://github.com/ecomods/spatPatClassifyR/issues
