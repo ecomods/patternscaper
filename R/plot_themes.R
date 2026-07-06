@@ -10,29 +10,28 @@
 #'
 #' @return A ggplot2 theme object
 #' @keywords internal
-#' @importFrom ggplot2 theme_minimal theme element_blank rel
+#' @importFrom ggplot2 theme_minimal theme element_blank rel %+replace%
 #' @importFrom ggtext element_markdown
 theme_landscape <- function(base_size = 9, base_family = "", ...) {
   ggplot2::theme_minimal(
     base_size = base_size,
     base_family = base_family
-  )
-  ggplot2::`%+replace%`
-  ggplot2::theme(
-    # Text elements
-    plot.title = ggtext::element_markdown(size = ggplot2::rel(1.2)),
-    plot.subtitle = ggtext::element_markdown(size = ggplot2::rel(0.9)),
+  ) %+replace%
+    ggplot2::theme(
+      # Text elements
+      plot.title = ggtext::element_markdown(size = ggplot2::rel(1.2)),
+      plot.subtitle = ggtext::element_markdown(size = ggplot2::rel(0.9)),
 
-    # Axis elements
-    axis.title = ggplot2::element_blank(),
-    axis.text = ggplot2::element_blank(),
-    axis.ticks = ggplot2::element_blank(),
+      # Axis elements
+      axis.title = ggplot2::element_blank(),
+      axis.text = ggplot2::element_blank(),
+      axis.ticks = ggplot2::element_blank(),
 
-    # Grid elements
-    panel.grid.minor = ggplot2::element_blank(),
-    panel.grid.major = ggplot2::element_blank(),
+      # Grid elements
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major = ggplot2::element_blank(),
 
-    # Include any additional theme elements
-    ...
-  )
+      # Include any additional theme elements
+      ...
+    )
 }
