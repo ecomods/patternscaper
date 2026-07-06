@@ -80,11 +80,17 @@ evaluate_metrics <- function(
     )
   }
 
-  # Check if the level is landscape. If not abort and tell the user that
-  # currently only the landscape level is supported
-  if (!unique(metrics$level) %in% c("landscape", "class")) {
+  # Only single-level metrics are supported (landscape or class)
+  level <- unique(metrics$level)
+  if (length(level) != 1) {
+    cli::cli_abort(c(
+      "{.arg metrics} must contain a single {.field level}.",
+      "x" = "Found {length(level)} levels: {.val {level}}."
+    ))
+  }
+  if (!level %in% c("landscape", "class")) {
     cli::cli_abort(
-      "Currently only metrics calculated at the landscape or class level are supported. Please calculate metrics at the landscape level."
+      "Currently only metrics at the {.val landscape} or {.val class} level are supported, not {.val {level}}."
     )
   }
 

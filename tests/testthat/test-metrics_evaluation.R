@@ -73,6 +73,27 @@ test_that("evaluate_metrics validates input correctly", {
   )
 })
 
+test_that("evaluate_metrics validates the metrics level", {
+  # A single unsupported level aborts, naming the offending level
+  wrong_level <- create_test_metrics()
+  wrong_level$level <- "patch"
+  expect_error(
+    evaluate_metrics(wrong_level),
+    "Currently only metrics at the"
+  )
+
+  # Multiple levels abort cleanly, not with R's condition-length error (M4)
+  mixed_level <- create_test_metrics()
+  mixed_level$level <- rep(
+    c("landscape", "class"),
+    length.out = nrow(mixed_level)
+  )
+  expect_error(
+    evaluate_metrics(mixed_level),
+    "must contain a single"
+  )
+})
+
 test_that("evaluate_metrics requires at least 2 patterns", {
   metrics_one_pattern <- create_test_metrics(n_patterns = 1)
 

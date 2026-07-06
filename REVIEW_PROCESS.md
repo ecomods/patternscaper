@@ -56,14 +56,6 @@ only trailing failures are misreported.
   decision. (Fable rated this 🟡 given retries make failures rare; kept 🟠 per Claude because
   the wrong success message is user-facing.)
 
-### M4. `evaluate_metrics()` level check errors on multi-level input & has a misleading message  — [Claude] [Fable] *(§1.5)*
-`R/metrics_evaluation.R:85-89`. `if (!unique(metrics$level) %in% c("landscape","class"))` is a
-length-`>1` condition when `metrics$level` has more than one level (an error in R ≥ 4.2), and
-the abort text ("calculate metrics at the landscape level") contradicts the check, which also
-allows `"class"`. Fable confirmed.
-- **Fix:** guard with `length(unique(level)) == 1 && level %in% c(...)` and correct the message
-  to mention both supported levels.
-
 ### M5. [Fable] Multi-class pixel input fed to the CNN as ordinal integers (no one-hot / no normalization)  — [Fable] *(F2)*
 `R/nn_keras.R:187-208`. `train_pixel_model()`/`apply_pixel_model()` build the model input as
 the raw raster array (`terra::as.array` → `abind::abind`, `:207`). The docstring
@@ -356,3 +348,17 @@ called (grep confirmed no callers in `R/`; `matrix_to_raster()` lives in `landsc
 deleting the file orphaned nothing). Removed the whole `R/utils.R` file and dropped its mention from
 the `CLAUDE.md` code map. No `man/` page (it was `@noRd`) and `NAMESPACE` unaffected (not exported).
 `devtools::load_all()` clean; full `devtools::test()` green (0 failures, 1387 pass). No result change.
+
+### M4. `evaluate_metrics()` level check errors on multi-level input & has a misleading message  — [Claude] [Fable] *(§1.5)*
+*Fixed 2026-07-06.* The guard at `R/metrics_evaluation.R:85` was
+`if (!unique(metrics$level) %in% c("landscape", "class"))` — a length->1 condition when the tibble
+carried more than one level (a hard error in R ≥ 4.2), and the abort text mentioned only the
+landscape level, contradicting a check that also accepts `"class"`. Split into two guards computed on
+`level <- unique(metrics$level)`: `length(level) != 1` aborts cleanly (no R condition-length error)
+naming the offending count, and `!level %in% c("landscape", "class")` aborts naming the unsupported
+level. Valid single-level input (all the package's own pipeline produces) behaves identically, so no
+result change — only error paths differ. Regression test added in
+`tests/testthat/test-metrics_evaluation.R` covering both a single unsupported level and a multi-level
+tibble. (Note: a *separate* pre-existing flaky test, `verbose parameter controls messaging` at
+`:320`, occasionally fails via an unseeded-`rnorm` + `expect_silent()` combo — unrelated to this fix;
+flagged for follow-up.)
