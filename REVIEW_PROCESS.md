@@ -16,25 +16,7 @@ traceability.
 
 ## 🔴 High — likely wrong behaviour or a user-facing error; fix before release
 
-### H3. `plot_classified_landscapes()` mishandles unlabeled predictions, despite docs saying it works  — [ChatGPT] [Fable] *(ChatGPT §B)*
-`R/plot_classification.R`. The vignette promises plotting still works when true classes are
-unknown (`vignettes/classify-metrics.qmd:217-220`).
-- **[ChatGPT] original diagnosis:** the column guard (`plot_classification.R:61-65`) requires
-  `actual_class`, so unlabeled prediction outputs cannot be passed at all.
-- **[Fable] correction — the mechanism is different and milder.** Both `apply_*` functions
-  **always** emit `actual_class`: `apply_pixel_model()` unconditionally sets
-  `predictions$actual_class <- landscape_pattern` (`nn_keras.R:708`), and
-  `apply_metrics_model()` renames the always-present `pattern` column to `actual_class`
-  (`nn_metrics.R:529-532`); `pattern` defaults to `NA_character_` (`landscape_class.R:12`). So
-  the input guard **does not fire** — the call is accepted. The real defect is in the title
-  logic: the `case_when()` (`plot_classification.R:141-163`) has only `predicted == actual`
-  and `predicted != actual` branches. For unlabeled input `predicted == NA` is `NA`, both
-  branches miss, and every title falls through to `.default = "no title"` (and if `pattern`
-  is the literal `"unclassified"`, the red "misclassified" branch fires: `Actual:
-  unclassified`).
-- **Fix:** add an `is.na(actual_class) | actual_class == "unclassified"` branch to the
-  `case_when` that renders a predicted-only title; add a test for unlabeled plotting. (Do
-  **not** just relax the column guard — that isn't the blocker.)
+*All resolved — see **Completed** at the bottom (H1, H2, H3).*
 
 ---
 
@@ -386,3 +368,13 @@ asserting the composed theme is complete. `devtools::test()` green.
 the real `evaluate_metrics()` argument is `exclude_NA_metrics` (`R/metrics_evaluation.R:62`), so
 copying the callout raised an "unused argument" error. Corrected the name in the vignette. (L8 still
 open: consider renaming the argument itself to snake_case `exclude_na_metrics`.)
+
+### H3. `plot_classified_landscapes()` mishandles unlabeled predictions  — [ChatGPT] [Fable] *(ChatGPT §B)*
+*Fixed 2026-07-06.* Both `apply_*` always emit `actual_class` (NA or the `"unclassified"` sentinel
+for unlabeled input), so the column guard never fired; the real defect was the title `case_when()`
+(`R/plot_classification.R`), which had only `predicted == actual` / `!=` branches — for `NA`
+actual_class both are `NA` and every title fell through to `"no title"`. Added a leading
+`is.na(actual_class) | actual_class == "unclassified"` branch that renders a predicted-only title,
+plus a test asserting the rendered titles in `tests/testthat/test-plot_classification.R`.
+`devtools::test()` green. (Note: `only_misclassified = TRUE` on unlabeled data still aborts with "No
+misclassified landscapes found" — reasonable, since misclassification is undefined without labels.)

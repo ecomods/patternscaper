@@ -328,6 +328,38 @@ test_that("plot_classified_landscapes filters to misclassified only", {
   # Should only include 1 landscape (the misclassified one)
 })
 
+test_that("plot_classified_landscapes renders predicted-only titles for unlabeled input (H3)", {
+  landscapes <- list(
+    create_landscape("sharp", width = 20, height = 20),
+    create_landscape("diffuse", width = 20, height = 20)
+  )
+
+  # Unlabeled predictions: apply_*() always emit actual_class, which is NA (or
+  # the "unclassified" sentinel) when the true class is unknown. Previously the
+  # case_when() had no branch for this, so every title fell through to
+  # "no title".
+  classification <- data.frame(
+    landscape_id = 1:2,
+    actual_class = c(NA_character_, "unclassified"),
+    predicted_class = c("sharp", "bands"),
+    confidence = c(0.91, 0.55)
+  )
+
+  result <- plot_classified_landscapes(classification, landscapes)
+  expect_s3_class(result, "patchwork")
+
+  titles <- vapply(
+    seq_along(landscapes),
+    function(i) result[[i]]$labels$title,
+    character(1)
+  )
+  # Predicted class is shown, with no "Actual:" line and no fallthrough title.
+  expect_match(titles[1], "sharp")
+  expect_match(titles[2], "bands")
+  expect_false(any(grepl("no title", titles)))
+  expect_false(any(grepl("Actual:", titles)))
+})
+
 test_that("plot_classified_landscapes errors when no misclassifications", {
   landscapes <- list(
     create_landscape("sharp", width = 20, height = 20),

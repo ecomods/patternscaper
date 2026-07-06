@@ -139,6 +139,15 @@ plot_classified_landscapes <- function(
   classification <- classification |>
     dplyr::mutate(
       title = dplyr::case_when(
+        # Unlabeled input (true class unknown, i.e. NA or "unclassified"):
+        # show a predicted-only title.
+        is.na(actual_class) | actual_class == "unclassified" ~
+          paste0(
+            predicted_class,
+            " (",
+            round(confidence, 2),
+            ")"
+          ),
         predicted_class == actual_class ~
           paste0(
             "<span style='color: #228B22;'>",
