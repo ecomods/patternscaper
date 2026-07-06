@@ -10,8 +10,8 @@
 #' @details
 #' The distinction between "spots" and "gaps":
 #' \itemize{
-#'   \item \strong{gaps}: Bare patches in vegetation matrix)
-#'   \item \strong{spots}: Vegetation patches in bare ground)
+#'   \item \strong{gaps}: Bare patches in vegetation matrix
+#'   \item \strong{spots}: Vegetation patches in bare ground
 #' }
 #'
 #' Both patterns use the same algorithm; the pattern name primarily serves as a semantic
@@ -25,7 +25,7 @@
 #' @family landscape creation
 #' @export
 #' @examples
-#' # Default gaps (vegetation patches in bare ground)
+#' # Default gaps (bare patches in vegetation)
 #' gaps_default <- create_landscape_gaps()
 #'
 #' # More gaps with size variation

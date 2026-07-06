@@ -146,7 +146,7 @@ create_landscape <- function(
 #' @param patterns Character vector. patterns of landscapes to sample from (default: all patterns).
 #' @param width Integer. Width of all landscapes in pixels (default: 100).
 #' @param height Integer. Height of all landscapes in pixels (default: 100).
-#' @param rotation Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).
+#' @param rotation Numeric vector. Rotation angles in degrees (default: 0:360).
 #' @param params_list List. List of parameter ranges or single values for the parameters of each landscape pattern (default: NULL).
 #'     The names and default parameter ranges for the different patterns can be found
 #'     in the documentation of \code{\link{create_landscape}}.

@@ -33,7 +33,6 @@
 #' package for classifying spatial landscape patterns using neural networks.
 #' *Methods in Ecology and Evolution*. In review.
 #'
-#' @docType package
 #' @name spatPatClassifyR
 "_PACKAGE"
 

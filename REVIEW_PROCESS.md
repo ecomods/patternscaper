@@ -174,11 +174,6 @@ Specifically: (H1) `theme_landscape()` applies a minimal base (panel background 
 `neuralnet::predict.nn` has no `type` arg — silently absorbed by `...`. The CV loop (`:248-253`)
 omits it. Fable confirmed. Drop `type = "raw"` for clarity.
 
-### L2. `create_landscape_gaps()` doc contradicts itself  — [Claude] *(§1.7)*
-`R/landscape_create_gaps.R`. `@details` say gaps = "Bare patches in vegetation" but the example
-comment says "vegetation patches in bare ground" (that's *spots*). Stray `)` characters in the
-two `@details` bullets. Tidy the copy.
-
 ### L3. [Fable] Metrics classifier is least-squares regression to one-hot targets; `confidence` is uncalibrated post-hoc softmax  — [Fable] *(F6)*
 `R/nn_utils.R:515-523`, `R/nn_metrics.R:255-259,495-499`. `fit_nn_model()` calls `neuralnet()`
 with **no** `linear.output`/`err.fct`/`act.fct` (a repo-wide grep confirms none), so it runs
@@ -248,22 +243,6 @@ prevent this.
 Only `c("sharp","diffuse","fingers","clustered","bands")` (`R/landscape_create.R:392-398`) honour
 `rotation`; for the others it's silently dropped. Document in `create_landscapes()` (and ideally
 warn if a non-zero rotation is set for a pattern that ignores it).
-
-### L11. `create_landscapes()` documents the wrong default for `rotation`  — [ChatGPT] [Fable] *(ChatGPT §C)*
-`R/landscape_create.R:149` roxygen says the default is `c(0, 45, 90, 135)`, but the actual
-default (`:210`) is `0:360`. Fable confirmed. Small user-facing doc fix.
-
-### L12. `landscape()` `@param params` links the wrong function twice  — [Claude] *(§4.2)*
-`R/landscape_class.R:38-39` says "by the `create_landscapes` or the `create_landscapes`
-function" — one should be `create_landscape`.
-
-### L13. Placeholder/typo content in the getting-started vignette  — [Claude] *(§4.3)*
-`vignettes/spatPatClassifyR.qmd`: empty link `[supplementary information of the paper]()`
-(line ~28) and typo "guidancen" (line ~22). Fill/fix before publication.
-
-### L14. `@docType package` is deprecated with the `"_PACKAGE"` sentinel  — [Claude] *(§4.4)*
-`R/spatPatClassifyR.R:36-38`. roxygen2 ≥ 7.0 warns on `@docType package` when `"_PACKAGE"` is
-present; drop the `@docType` line.
 
 ### L15. `reticulate` described as bundled but not a declared dependency  — [Claude] [ChatGPT] *(§4.5)*
 `vignettes/install-keras.qmd` says reticulate "is installed alongside" the package, but it's
@@ -379,3 +358,17 @@ Software names single-quoted per CRAN convention; `read.dcf()` parses cleanly.
 ### M16. `LazyData: true` with no `data/` directory  — [Claude] *(§6.1)*
 *Fixed 2026-07-06.* Removed the `LazyData: true` field from `DESCRIPTION`; with no `data/` folder it
 produced an `R CMD check` NOTE.
+
+### Documentation batch (L2, L11, L12, L13, L14)  — [Claude] [ChatGPT] [Fable]
+*Fixed 2026-07-06.* Pure doc/typo fixes, verified with a clean `devtools::document()`:
+- **L14** (`R/spatPatClassifyR.R`): dropped the deprecated `@docType package` tag (roxygen2 ≥ 7.0
+  warns on it alongside `"_PACKAGE"`); the warning is now gone.
+- **L11** (`R/landscape_create.R`): corrected the documented `rotation` default to `0:360` (was
+  `c(0, 45, 90, 135)`).
+- **L12** (`R/landscape_class.R`): fixed the `@param params` roxygen — the first `\link` now points to
+  `create_landscape` (was `create_landscapes` twice).
+- **L2** (`R/landscape_create_gaps.R`): removed the stray `)` in the two `@details` bullets and
+  corrected the example comment (gaps = bare patches in vegetation, not the spots description).
+- **L13** (`vignettes/spatPatClassifyR.qmd`): fixed the "guidancen" typo and converted the broken empty
+  supplementary link to plain text. Restoring the real URL before publication is tracked under
+  "Before publication" in `../spatPatClassifyR_paper/REVISIONS.md`.

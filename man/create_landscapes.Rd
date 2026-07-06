@@ -25,7 +25,7 @@ create_landscapes(
 
 \item{height}{Integer. Height of all landscapes in pixels (default: 100).}
 
-\item{rotation}{Numeric vector. Rotation angles in degrees (default: c(0, 45, 90, 135)).}
+\item{rotation}{Numeric vector. Rotation angles in degrees (default: 0:360).}
 
 \item{params_list}{List. List of parameter ranges or single values for the parameters of each landscape pattern (default: NULL).
 The names and default parameter ranges for the different patterns can be found
