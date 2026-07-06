@@ -16,21 +16,6 @@ traceability.
 
 ## 🔴 High — likely wrong behaviour or a user-facing error; fix before release
 
-### H1. `theme_landscape()` never composes the base theme  — [Claude] [ChatGPT] [Fable] *(§1.1)*
-`R/plot_themes.R:15-38`. The body evaluates `theme_minimal(...)` and
-`ggplot2::\`%+replace%\`` as bare statements and **discards** them; only the final
-`ggplot2::theme(...)` is returned, so the intended `theme_minimal(...) %+replace% theme(...)`
-composition never happens.
-- **Effect:** landscapes via `plot.landscape()` / `plot_landscape()` sit on ggplot's default
-  grey `theme_grey` background instead of the clean minimal look. (Axis text/ticks/grid are
-  still blanked because those overrides live in the returned `theme()`, which is why it hasn't
-  been obvious.)
-- **Fix:** return `theme_minimal(base_size, base_family) %+replace% theme(...)` as a single
-  expression. Add a snapshot/regression test (panel background ≠ grey default) so it can't
-  silently regress.
-- **Verification:** Fable confirmed — `plot_themes.R:16-20` evaluate the base theme and
-  `%+replace%` as discarded bare statements.
-
 ### H2. Vignette documents a parameter that doesn't exist (`exclude_na`)  — [Claude] *(§1.2)*
 `vignettes/classify-metrics.qmd` (metric-selection callout) tells users "It is not
 recommended to set `exclude_na = FALSE`", but the actual argument of `evaluate_metrics()` is
@@ -392,3 +377,14 @@ Checked against current source; correct as-is, no action needed:
   not an RNG one.)
 - **`abind` memory** (`nn_keras.R:207`): stacking `n` H×W×1 arrays is O(n·H·W) (~80 MB at
   n=1000, 100×100) — acceptable at the package's stated scales.
+
+---
+
+## Completed
+
+### H1. `theme_landscape()` never composes the base theme  — [Claude] [ChatGPT] [Fable] *(§1.1)*
+*Fixed 2026-07-06.* `R/plot_themes.R` evaluated `theme_minimal(...)` and `%+replace%` as discarded
+bare statements and returned only the `theme()` overrides, so landscapes sat on ggplot's grey
+`theme_grey` default. Now composed into a single `theme_minimal(...) %+replace% theme(...)`
+expression (with `%+replace%` imported); regression test added in `tests/testthat/test-plot_themes.R`
+asserting the composed theme is complete. `devtools::test()` green.
