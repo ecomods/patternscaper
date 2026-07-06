@@ -233,8 +233,20 @@ train_metrics_model <- function(
       train_indices <- fold_indices != fold
       val_indices <- fold_indices == fold
 
-      train_data <- training_data[train_indices, ]
-      val_data <- training_data[val_indices, ]
+      # Scale within the fold: fit center/scale on the training rows only and
+      # apply them to the validation rows (avoids validation->training leakage)
+      fold_scaled <- scale_fold(
+        predictors[train_indices, , drop = FALSE],
+        predictors[val_indices, , drop = FALSE]
+      )
+      train_data <- data.frame(
+        fold_scaled$train,
+        pattern = training_data$pattern[train_indices]
+      )
+      val_data <- data.frame(
+        fold_scaled$val,
+        pattern = training_data$pattern[val_indices]
+      )
 
       # Train model on training data
       fold_model <- fit_nn_model(
@@ -390,7 +402,9 @@ apply_metrics_model <- function(
           names(nn_model)
       )
   ) {
-    cli::cli_abort("'nn_model' must be a trained model from train_metrics_model()")
+    cli::cli_abort(
+      "'nn_model' must be a trained model from train_metrics_model()"
+    )
   }
 
   # Validate landscapes structure

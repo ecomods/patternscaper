@@ -22,18 +22,6 @@ traceability.
 
 ## 🟠 Medium — real inconsistency, latent bug, methodological issue, or maintainability risk
 
-### M1. [Fable] Feature scaling is fit on the full dataset before CV → optimistic leakage  — [Fable] *(F1)*
-`R/nn_metrics.R:182`. `train_metrics_model()` scales predictors **once, on all landscapes**
-(`predictors_scaled <- scale(predictors)`), builds `training_data` from it (`:195`), then runs
-the CV loop over the already-scaled data (`:231`). Each fold's validation rows contributed to
-the `center`/`scale` used on them — textbook validation→training leakage, biasing the reported
-CV accuracy/F1 upward. Effect is modest for large `n` but grows for small `n` / LOO — exactly
-the small-sample regime the package targets. The pixel model does not scale, so it's unaffected.
-- **Fix:** scale **inside** each fold — fit `scale()` on the training predictors only, apply
-  the stored center/scale to the validation rows. Keep full-data scaling only for the final
-  deployment model (that part is correct). Confidence: High (leakage unambiguous; magnitude
-  data-dependent).
-
 ### M2. `frequency` is sampled as an integer, collapsing its range  — [Claude] [ChatGPT] [Fable] *(§1.3 / F4)*
 `R/landscape_create.R:344-356` lists `"frequency"` in `integer_params`, and
 `sample_landscape_params()` samples integer params via `seq(from, to, by = 1)` (`:508-511`).
@@ -312,6 +300,20 @@ actual_class both are `NA` and every title fell through to `"no title"`. Added a
 plus a test asserting the rendered titles in `tests/testthat/test-plot_classification.R`.
 `devtools::test()` green. (Note: `only_misclassified = TRUE` on unlabeled data still aborts with "No
 misclassified landscapes found" — reasonable, since misclassification is undefined without labels.)
+
+### M1. [Fable] Feature scaling is fit on the full dataset before CV → optimistic leakage  — [Fable] *(F1)*
+*Fixed 2026-07-06.* `train_metrics_model()` scaled predictors once on all landscapes
+(`R/nn_metrics.R`) and cross-validated over the already-scaled data, so each fold's validation rows
+contributed to the `center`/`scale` applied to them (validation→training leakage biasing CV
+accuracy/F1). The CV loop now slices the unscaled `predictors` directly and scaling is fit **inside
+each fold** on the training rows only, via a new internal `scale_fold()` helper (`R/nn_utils.R`) that applies the
+training center/scale to the validation rows and guards columns constant within a fold (`sd = 0` →
+`scale = 1`, no `NaN`). The final deployment model keeps full-data scaling, so `scaling_params`, the
+final model, and all `apply_metrics_model()` output are unchanged; only the reported CV performance
+moves. Verified with the golden harness (only `train_confusion` changed; every `apply_*`/pixel value
+identical) and re-captured as the new reference. `scale_fold()` unit tests added in
+`tests/testthat/test-nn_utils.R`; `dev/leakage_check.R` demonstrates the before/after on a small LOO
+run. Full `devtools::test()` green. (Pixel model unaffected — it does not scale.)
 
 ### M14. `DESCRIPTION` `Description:` is thin and understates the package  — [Claude] *(§4.1)*
 *Fixed 2026-07-06.* Replaced the one-sentence `Description:` with a proper paragraph covering what the

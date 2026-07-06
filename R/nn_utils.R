@@ -108,6 +108,38 @@ softmax_rows <- function(x) {
   }))
 }
 
+#' Scale a validation fold using only the training fold's statistics
+#'
+#' Fits centering/scaling on the training-fold predictors alone and applies the
+#' same statistics to both the training and validation predictors. This keeps
+#' the validation rows from contributing to the `center`/`scale` used on them,
+#' avoiding the optimistic leakage that arises when the whole dataset is scaled
+#' before cross-validation. Columns that are constant within the training fold
+#' (`sd == 0`, or `NA` for a single-row fold) are given `scale = 1` so they
+#' become all-zero after centering instead of `NaN`.
+#'
+#' @param train_predictors Data frame or matrix of training-fold predictors.
+#' @param val_predictors Data frame or matrix of validation-fold predictors.
+#'
+#' @return List with `train` and `val`: numeric matrices scaled with the
+#'   training-fold center/scale.
+#' @keywords internal
+#' @importFrom stats sd
+scale_fold <- function(train_predictors, val_predictors) {
+  train_predictors <- as.matrix(train_predictors)
+  val_predictors <- as.matrix(val_predictors)
+
+  center <- colMeans(train_predictors)
+  scale_sd <- apply(train_predictors, 2, stats::sd)
+  # Guard columns that are constant within the training fold to avoid /0 -> NaN
+  scale_sd[is.na(scale_sd) | scale_sd == 0] <- 1
+
+  list(
+    train = scale(train_predictors, center = center, scale = scale_sd),
+    val = scale(val_predictors, center = center, scale = scale_sd)
+  )
+}
+
 #' Validate and adjust cross-validation parameters
 #'
 #' Checks if the dataset is suitable for the requested cross-validation method

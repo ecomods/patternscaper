@@ -525,3 +525,55 @@ test_that("set_random_seed with different seeds gives different results", {
 
   expect_false(all(x1 == x2))
 })
+
+# scale_fold ------------------------------------------------------------------
+# Guards against the CV feature-scaling leakage fixed in M1: the validation fold
+# must be scaled using the training fold's center/scale only, never its own.
+
+test_that("scale_fold scales the validation fold with training-fold statistics only", {
+  train <- data.frame(a = c(1, 2, 3, 4), b = c(10, 20, 30, 40))
+  val <- data.frame(a = c(5, 6), b = c(50, 60))
+
+  res <- scale_fold(train, val)
+
+  center <- colMeans(train)
+  scale_sd <- vapply(train, stats::sd, numeric(1))
+
+  # Validation is transformed by TRAINING stats, not recomputed on itself
+  expect_equal(
+    as.numeric(res$val[, "a"]),
+    (val$a - center[["a"]]) / scale_sd[["a"]]
+  )
+  expect_equal(
+    as.numeric(res$val[, "b"]),
+    (val$b - center[["b"]]) / scale_sd[["b"]]
+  )
+
+  # Training fold is standardised: column means ~0, sds ~1
+  expect_equal(colMeans(res$train), c(a = 0, b = 0), ignore_attr = TRUE)
+  expect_equal(apply(res$train, 2, stats::sd), c(a = 1, b = 1), ignore_attr = TRUE)
+})
+
+test_that("scale_fold guards columns constant within the training fold (no NaN)", {
+  # 'const' has zero variance in the training fold -> scale = 1, not a /0 -> NaN
+  train <- data.frame(a = c(1, 2, 3), const = c(5, 5, 5))
+  val <- data.frame(a = c(4), const = c(9))
+
+  res <- scale_fold(train, val)
+
+  expect_false(any(is.nan(res$train)))
+  expect_false(any(is.nan(res$val)))
+  # centered by the training mean (5), scaled by the guarded sd (1)
+  expect_equal(as.numeric(res$val[, "const"]), 4)
+  expect_equal(as.numeric(res$train[, "const"]), c(0, 0, 0))
+})
+
+test_that("scale_fold handles a single-row validation fold (LOO)", {
+  train <- data.frame(a = c(1, 2, 3, 4), b = c(2, 4, 6, 8))
+  val <- data.frame(a = 5, b = 10)
+
+  res <- scale_fold(train, val)
+
+  expect_equal(dim(res$val), c(1L, 2L))
+  expect_false(any(is.nan(res$val)))
+})
