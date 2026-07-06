@@ -16,14 +16,6 @@ traceability.
 
 ## 🔴 High — likely wrong behaviour or a user-facing error; fix before release
 
-### H2. Vignette documents a parameter that doesn't exist (`exclude_na`)  — [Claude] *(§1.2)*
-`vignettes/classify-metrics.qmd` (metric-selection callout) tells users "It is not
-recommended to set `exclude_na = FALSE`", but the actual argument of `evaluate_metrics()` is
-**`exclude_NA_metrics`** (`R/metrics_evaluation.R:62`). A user copying the vignette hits an
-"unused argument" error.
-- **Fix:** rename in the vignette to `exclude_NA_metrics` (and see L8 — consider renaming the
-  argument itself to snake_case, which resolves this cleanly).
-
 ### H3. `plot_classified_landscapes()` mishandles unlabeled predictions, despite docs saying it works  — [ChatGPT] [Fable] *(ChatGPT §B)*
 `R/plot_classification.R`. The vignette promises plotting still works when true classes are
 unknown (`vignettes/classify-metrics.qmd:217-220`).
@@ -388,3 +380,9 @@ bare statements and returned only the `theme()` overrides, so landscapes sat on 
 `theme_grey` default. Now composed into a single `theme_minimal(...) %+replace% theme(...)`
 expression (with `%+replace%` imported); regression test added in `tests/testthat/test-plot_themes.R`
 asserting the composed theme is complete. `devtools::test()` green.
+
+### H2. Vignette documents a parameter that doesn't exist (`exclude_na`)  — [Claude] *(§1.2)*
+*Fixed 2026-07-06.* `vignettes/classify-metrics.qmd` told users not to set `exclude_na = FALSE`, but
+the real `evaluate_metrics()` argument is `exclude_NA_metrics` (`R/metrics_evaluation.R:62`), so
+copying the callout raised an "unused argument" error. Corrected the name in the vignette. (L8 still
+open: consider renaming the argument itself to snake_case `exclude_na_metrics`.)

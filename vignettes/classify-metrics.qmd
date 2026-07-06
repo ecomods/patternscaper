@@ -75,7 +75,7 @@ have the same value for each landscape (zero variance between the values). By de
 metrics are removed before evaluation and the user gets warned about the 
 metrics that are removed.
 
-It is not recommended to set `exclude_na = FALSE`, as metrics with `NA` values cannot be used for training the neural network. They may however be informative and useful for other types of analyses.
+It is not recommended to set `exclude_NA_metrics = FALSE`, as metrics with `NA` values cannot be used for training the neural network. They may however be informative and useful for other types of analyses.
 :::
 
 
