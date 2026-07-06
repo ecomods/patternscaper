@@ -53,12 +53,11 @@ set_random_seed <- function(seed) {
 #'   also the the identification columns in output (default: FALSE).
 #'
 #' @return A data frame in wide format where each metric becomes a column and each
-#'   row is a landscape. Metric names are modified to include class IDs
-#'   when applicable (format: `metric_class_id`).
+#'   row is a landscape. Metric names already include class IDs when applicable
+#'   (format: `metric_class_id`); that folding is done upstream in
+#'   \code{\link{calculate_metrics}}, not here.
 #' @keywords internal
 #' @importFrom dplyr mutate select
-#' @importFrom rlang sym
-#' @importFrom stringr str_remove
 #' @importFrom tidyr pivot_wider
 metrics_to_wide <- function(metrics, return_only_metrics = FALSE) {
   # Determine which ID column to use (prefer landscape_id over landscape_name)
@@ -91,6 +90,22 @@ metrics_to_wide <- function(metrics, return_only_metrics = FALSE) {
       dplyr::select(-any_of(c("landscape_id", "landscape_name", "pattern")))
   }
   metrics_wide
+}
+
+#' Row-wise softmax
+#'
+#' Converts a matrix of raw (unbounded) row scores into per-row probabilities
+#' using a numerically stable softmax (each row's maximum is subtracted before
+#' exponentiating).
+#'
+#' @param x Numeric matrix; each row is a set of raw scores.
+#' @return A matrix the same shape as `x` whose rows each sum to 1.
+#' @keywords internal
+softmax_rows <- function(x) {
+  t(apply(x, 1, function(row) {
+    exp_row <- exp(row - max(row))
+    exp_row / sum(exp_row)
+  }))
 }
 
 #' Validate and adjust cross-validation parameters

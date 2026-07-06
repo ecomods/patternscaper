@@ -16,8 +16,9 @@ also the the identification columns in output (default: FALSE).}
 }
 \value{
 A data frame in wide format where each metric becomes a column and each
-  row is a landscape. Metric names are modified to include class IDs
-  when applicable (format: `metric_class_id`).
+  row is a landscape. Metric names already include class IDs when applicable
+  (format: `metric_class_id`); that folding is done upstream in
+  \code{\link{calculate_metrics}}, not here.
 }
 \description{
 This function transforms landscape metrics from a long format to a wide

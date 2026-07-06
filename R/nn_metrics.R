@@ -253,10 +253,7 @@ train_metrics_model <- function(
       )
 
       # Convert raw outputs to probabilities using softmax
-      probs <- t(apply(probs_raw, 1, function(x) {
-        exp_x <- exp(x - max(x))
-        exp_x / sum(exp_x)
-      }))
+      probs <- softmax_rows(probs_raw)
 
       # Add class names as column names
       colnames(probs) <- class_names
@@ -488,15 +485,11 @@ apply_metrics_model <- function(
   # Make predictions ---------------------------------------------------------
   pred_raw <- predict(
     model,
-    newdata = predictors_scaled,
-    type = "raw"
+    newdata = predictors_scaled
   )
 
   # Convert raw outputs to probabilities using softmax
-  pred <- t(apply(pred_raw, 1, function(x) {
-    exp_x <- exp(x - max(x))
-    exp_x / sum(exp_x)
-  }))
+  pred <- softmax_rows(pred_raw)
 
   # Add class names as column names
   colnames(pred) <- class_names
