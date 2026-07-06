@@ -210,14 +210,8 @@ plot_landscapes <- function(
 
   # If number of landscapes exceeds max_landscapes, limit it (only if force is FALSE)
   if (length(landscapes) > max_landscapes && !force) {
-    warning(
-      sprintf(
-        "Number of landscapes (%d) exceeds maximum (%d). Showing first %d. Use force=TRUE to override or subset_index to select a subset of landscapes to plot.",
-        length(landscapes),
-        max_landscapes,
-        max_landscapes
-      ),
-      call. = FALSE
+    cli::cli_warn(
+      "Number of landscapes ({length(landscapes)}) exceeds maximum ({max_landscapes}). Showing first {max_landscapes}. Use {.code force = TRUE} to override or {.arg subset_index} to select a subset of landscapes to plot."
     )
     landscapes <- landscapes[1:max_landscapes]
   }

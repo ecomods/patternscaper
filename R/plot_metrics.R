@@ -79,12 +79,8 @@ plot_metrics <- function(
   available_metrics <- unique(metrics$metric)
   invalid_metrics <- setdiff(selected_metrics, available_metrics)
   if (length(invalid_metrics) > 0) {
-    warning(
-      paste(
-        "The following metrics are not in the data and will be ignored:",
-        paste(invalid_metrics, collapse = ", ")
-      ),
-      call. = FALSE
+    cli::cli_warn(
+      "The following metrics are not in the data and will be ignored: {.val {invalid_metrics}}"
     )
     # Remove invalid metrics from selected_metrics
     selected_metrics <- setdiff(selected_metrics, invalid_metrics)
@@ -130,31 +126,19 @@ plot_metrics <- function(
 
   # Apply metric limit unless force is TRUE
   if (length(selected_metrics) > max_metrics && !force) {
-    warning(
-      sprintf(
-        "With %d pattern%s, limiting to %d of %d requested metrics for readability.\nShowing: %s\nUse force = TRUE to show all metrics.",
-        n_patterns,
-        if (n_patterns == 1) "" else "s",
-        max_metrics,
-        length(selected_metrics),
-        paste(selected_metrics[1:max_metrics], collapse = ", ")
-      ),
-      call. = FALSE
-    )
+    cli::cli_warn(c(
+      "With {n_patterns} pattern{?s}, limiting to {max_metrics} of {length(selected_metrics)} requested metrics for readability.",
+      "i" = "Showing: {.val {selected_metrics[1:max_metrics]}}",
+      "i" = "Use {.code force = TRUE} to show all metrics."
+    ))
     selected_metrics <- selected_metrics[1:max_metrics]
   }
 
   # Warn if we still have many facets even with force
   total_facets <- length(selected_metrics)
   if (force && total_facets > 30) {
-    warning(
-      sprintf(
-        "Creating %d facets (%d metrics x %d patterns). Plot may be difficult to read.",
-        total_facets,
-        length(selected_metrics),
-        n_patterns
-      ),
-      call. = FALSE
+    cli::cli_warn(
+      "Creating {total_facets} facets ({length(selected_metrics)} metrics x {n_patterns} patterns). Plot may be difficult to read."
     )
   }
 

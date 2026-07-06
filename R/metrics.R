@@ -139,10 +139,9 @@ calculate_metrics <- function(
     # Check if all requested metrics exist
     invalid_metrics <- metrics[!metrics %in% available_metrics$metric]
     if (length(invalid_metrics) > 0) {
-      warning(paste(
-        "The following metrics were not found and will be ignored:",
-        paste(invalid_metrics, collapse = ", ")
-      ))
+      cli::cli_warn(
+        "The following metrics were not found and will be ignored: {.val {invalid_metrics}}"
+      )
     }
 
     # Filter available metrics to only those requested
