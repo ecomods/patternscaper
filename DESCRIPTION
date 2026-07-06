@@ -26,7 +26,6 @@ URL: https://ecomods.github.io/spatPatClassifyR/,
 BugReports: https://github.com/ecomods/spatPatClassifyR/issues
 Encoding: UTF-8
 Language: en-US
-LazyData: true
 License: GPL (>= 3)
 SystemRequirements: Python (>= 3.9) and TensorFlow (for keras3-based
     classification only)

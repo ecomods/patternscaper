@@ -160,10 +160,6 @@ disagree (see M9, L10).
 `cli::` + `inherits()` idiom.
 - **Fix:** remove it (or wire it in and modernise).
 
-### M16. `LazyData: true` with no `data/` directory  — [Claude] *(§6.1)*
-`DESCRIPTION:22`. No `data/` folder, so `LazyData: true` produces an `R CMD check` NOTE.
-- **Fix:** remove the field (easy pre-submission win).
-
 ### M17. Add regression tests for the correctness bugs above  — [Claude] *(§7.1)*
 Specifically: (H1) `theme_landscape()` applies a minimal base (panel background ≠ grey);
 (M2) `frequency` varies across a batch of generated bands/labyrinth landscapes;
@@ -379,3 +375,7 @@ misclassified landscapes found" — reasonable, since misclassification is undef
 package does, both classification approaches (pixel-based CNN via `keras3`, metrics-based via
 `landscapemetrics` + `neuralnet`), and the full generation → metrics → training → application workflow.
 Software names single-quoted per CRAN convention; `read.dcf()` parses cleanly.
+
+### M16. `LazyData: true` with no `data/` directory  — [Claude] *(§6.1)*
+*Fixed 2026-07-06.* Removed the `LazyData: true` field from `DESCRIPTION`; with no `data/` folder it
+produced an `R CMD check` NOTE.
