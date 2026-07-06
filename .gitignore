@@ -13,6 +13,8 @@ dev/*.h5
 dev/*.hdf5
 docs/obsidian_files/
 tests/testthat/*.pdf
+# testthat failing-test repro artifacts (auto-generated, transient)
+tests/testthat/_problems/
 inst/examples/Ecotone_Results_Landscape/Figs/plot_acc_worst_class.jpg
 inst/examples/Ecotone_Results_Landscape/Figs/plot_mean_accuracy.jpg
 inst/examples/Ecotone_Results_Landscape/Figs/plot_successful_runs.jpg

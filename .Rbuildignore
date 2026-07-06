@@ -15,3 +15,4 @@
 ^vignettes/articles/.*_files$
 ^README\.Rmd$
 \.drawio$
+^tests/testthat/_problems$

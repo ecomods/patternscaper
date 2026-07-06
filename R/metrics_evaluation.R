@@ -538,7 +538,7 @@ select_metrics_correlation <- function(
 
   # Fill up with remaining metrics if needed
   if (length(top_metrics) < metrics_number) {
-    cli::cli_alert_warning(
+    cli::cli_warn(
       "Only {length(top_metrics)} uncorrelated metric{?s} found. Filling to {metrics_number} with correlated metrics."
     )
 
