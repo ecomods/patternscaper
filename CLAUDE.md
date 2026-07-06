@@ -48,7 +48,7 @@ local source via its own `dev/use_local_package.R`).
   in `nn_utils.R`.
 - **Plotting** — `plot_landscape()`, `plot_landscapes()`, `plot_classified_landscapes()`,
   `plot_metrics()`; shared theme/palette in `plot_themes.R`. Files: `plot_*.R`.
-- **Misc** — `utils.R`; package-level docs in `spatPatClassifyR.R`.
+- **Misc** — package-level docs in `spatPatClassifyR.R`.
 
 **Two pattern sets** recur across the analyses:
 - *Ecotones:* `sharp`, `diffuse`, `clustered`, `fingers`, `bands`, `random`

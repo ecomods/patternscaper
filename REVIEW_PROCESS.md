@@ -142,12 +142,6 @@ disagree (see M9, L10).
 - **Fix:** a single canonical spec (types, bounds, sampling defaults) that all three derive
   from — prevents this whole class of drift.
 
-### M15. `ensure_spatraster()` is dead code and off-convention  — [Claude] [Fable] *(§5.1)*
-`R/utils.R:8` defines `ensure_spatraster()`; nothing calls it (Fable confirmed no callers in
-`R/`). It also uses `message()` and `class(x)[1] == "SpatRaster"` instead of the package's
-`cli::` + `inherits()` idiom.
-- **Fix:** remove it (or wire it in and modernise).
-
 ### M17. Add regression tests for the correctness bugs above  — [Claude] *(§7.1)*
 Specifically: (H1) `theme_landscape()` applies a minimal base (panel background ≠ grey);
 (M2) `frequency` varies across a batch of generated bands/labyrinth landscapes;
@@ -355,3 +349,10 @@ produced an `R CMD check` NOTE.
   installed directly with `spatPatClassifyR`.
 - **L20**: already resolved — `.gitignore` contains `tests/testthat/*.pdf` and `Rplots.pdf` is not
   tracked; no change needed.
+
+### M15. `ensure_spatraster()` is dead code and off-convention  — [Claude] [Fable] *(§5.1)*
+*Fixed 2026-07-06.* `R/utils.R` defined a single `@noRd` helper `ensure_spatraster()` that nothing
+called (grep confirmed no callers in `R/`; `matrix_to_raster()` lives in `landscape_utils.R`, so
+deleting the file orphaned nothing). Removed the whole `R/utils.R` file and dropped its mention from
+the `CLAUDE.md` code map. No `man/` page (it was `@noRd`) and `NAMESPACE` unaffected (not exported).
+`devtools::load_all()` clean; full `devtools::test()` green (0 failures, 1387 pass). No result change.
