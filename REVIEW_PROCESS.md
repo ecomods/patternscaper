@@ -169,11 +169,6 @@ Specifically: (H1) `theme_landscape()` applies a minimal base (panel background 
 
 ## 🟡 Low — polish, docs, style, small consistency wins
 
-### L1. `apply_metrics_model()` passes a `type` argument `predict.nn` ignores  — [Claude] [Fable] *(§1.6)*
-`R/nn_metrics.R:489-493` calls `predict(model, newdata = ..., type = "raw")`, but
-`neuralnet::predict.nn` has no `type` arg — silently absorbed by `...`. The CV loop (`:248-253`)
-omits it. Fable confirmed. Drop `type = "raw"` for clarity.
-
 ### L3. [Fable] Metrics classifier is least-squares regression to one-hot targets; `confidence` is uncalibrated post-hoc softmax  — [Fable] *(F6)*
 `R/nn_utils.R:515-523`, `R/nn_metrics.R:255-259,495-499`. `fit_nn_model()` calls `neuralnet()`
 with **no** `linear.output`/`err.fct`/`act.fct` (a repo-wide grep confirms none), so it runs
@@ -213,16 +208,6 @@ pipeline, but `evaluate_metrics()` accepts arbitrary user metrics.
   `sd` term or coerce `NA` sd to 0), and/or wrap the per-metric computation in `tryCatch` like
   the sibling methods.
 
-### L6. [Fable] `metrics_to_wide()` docstring claims a renaming it doesn't do + two unused imports  — [Fable] *(F9)*
-`R/nn_utils.R:59-94`. The roxygen states metric names are modified to include class IDs
-(`metric_class_id`) and imports `@importFrom rlang sym` / `@importFrom stringr str_remove`
-(`:60-61`), but the body does none of that — the `class`→name folding happens upstream in
-`calculate_metrics()` (`R/metrics.R:169-177`). Misleads a maintainer about where the
-class-suffix contract lives (which matters: `apply_metrics_model()` at `nn_metrics.R:417`
-depends on that suffix via `gsub("_[^_]+$", "", ...)`).
-- **Fix:** correct the docstring to say IDs are already embedded by `calculate_metrics()`, and
-  drop the two unused `@importFrom`s.
-
 ### L7. Single-landscape handling differs between the two `apply_*`  — [Claude] *(§2.3)*
 `apply_pixel_model()` explicitly wraps a lone `landscape` into a list (`R/nn_keras.R:591-593`);
 `apply_metrics_model()` leans on `calculate_metrics()`. Make both do the same explicit wrap
@@ -244,36 +229,15 @@ Only `c("sharp","diffuse","fingers","clustered","bands")` (`R/landscape_create.R
 `rotation`; for the others it's silently dropped. Document in `create_landscapes()` (and ideally
 warn if a non-zero rotation is set for a pattern that ignores it).
 
-### L15. `reticulate` described as bundled but not a declared dependency  — [Claude] [ChatGPT] *(§4.5)*
-`vignettes/install-keras.qmd` says reticulate "is installed alongside" the package, but it's
-only a transitive dependency of `keras3`. **[ChatGPT]:** rewording the vignette (e.g. "installed
-with keras3") is likely sufficient; adding to `Suggests` is only needed if you want to guarantee
-examples that directly `library(reticulate)`.
-
-### L16. Mixed `warning()` vs `cli::cli_warn()`  — [Claude] [Fable] *(§5.2)*
-`CLAUDE.md` states `cli::` is used throughout, but base `warning()` remains in
-`calculate_metrics()` (`R/metrics.R:142`), `plot_metrics()` (3×, `:82,133,150`) and
-`plot_landscapes()` (`R/plot_landscapes.R:213`). Fable confirmed. Standardise on
-`cli::cli_warn()`.
-
 ### L17. `sapply()` where `vapply()` is safer  — [Claude] [ChatGPT] *(§5.3)*
 `R/nn_keras.R` (several), `R/nn_utils.R`, `R/plot_*`. `sapply()` can silently return a list or
 matrix; `vapply()` with a template is the package-dev norm. **[ChatGPT]:** low priority — don't
 prioritize ahead of concrete user-facing bugs.
 
-### L18. Softmax-on-raw-outputs is duplicated  — [Claude] *(§5.4)*
-The `t(apply(x, 1, \(r) { e <- exp(r - max(r)); e/sum(e) }))` block appears in
-`train_metrics_model()` (`R/nn_metrics.R:256-259`) and `apply_metrics_model()` (`:496-499`).
-Extract a `softmax_rows()` helper in `nn_utils.R`. (Related to L3.)
-
 ### L19. Inconsistent source-file naming  — [Claude] *(§5.5)*
 `create_landscape_bare.R` / `create_landscape_dense.R` vs the rest `landscape_create_*.R`, with
 dispatcher `landscape_create.R`. Pick one convention (e.g. `create_landscape_*.R`) and rename
 for discoverability.
-
-### L20. Test artifact committed to the repo  — [Claude] *(§6.2)*
-`tests/testthat/Rplots.pdf` is a plot-test by-product. Add to `.gitignore` (and ideally direct
-device output to a temp file in tests to prevent creation).
 
 ### L21. Empty README badge block  — [Claude] *(§6.3)*
 `README.Rmd:18-19` / `README.md:6-8`. Consider lifecycle / R-CMD-check / test-coverage /
@@ -372,3 +336,20 @@ produced an `R CMD check` NOTE.
 - **L13** (`vignettes/spatPatClassifyR.qmd`): fixed the "guidancen" typo and converted the broken empty
   supplementary link to plain text. Restoring the real URL before publication is tracked under
   "Before publication" in `../spatPatClassifyR_paper/REVISIONS.md`.
+
+### Cleanup batch (L1, L6, L15, L16, L18, L20)  — [Claude] [ChatGPT] [Fable]
+*Fixed 2026-07-06.* Light code/doc cleanups; `devtools::test()` green (1377 pass):
+- **L1** (`R/nn_metrics.R`): dropped the `type = "raw"` argument from the `apply_metrics_model()`
+  prediction call — `neuralnet::predict.nn` has no such argument (silently absorbed by `...`).
+- **L18** (`R/nn_utils.R`, `R/nn_metrics.R`): extracted the duplicated numerically-stable row-wise
+  softmax into a `softmax_rows()` helper, used by both `train_metrics_model()` and
+  `apply_metrics_model()`.
+- **L16** (`R/metrics.R`, `R/plot_metrics.R` ×3, `R/plot_landscapes.R`): replaced base `warning()` with
+  `cli::cli_warn()`; message text preserved so the existing warning-matching tests still pass.
+- **L6** (`R/nn_utils.R`): corrected the `metrics_to_wide()` docstring (class IDs are embedded upstream
+  by `calculate_metrics()`, not here) and dropped two unused `@importFrom`s (`rlang::sym`,
+  `stringr::str_remove`).
+- **L15** (`vignettes/install-keras.qmd`): reworded — `reticulate` is a dependency of `keras3`, not
+  installed directly with `spatPatClassifyR`.
+- **L20**: already resolved — `.gitignore` contains `tests/testthat/*.pdf` and `Rplots.pdf` is not
+  tracked; no change needed.
