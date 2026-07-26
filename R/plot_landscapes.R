@@ -79,14 +79,12 @@ plot_landscape <- function(
     standard_palette <- c(
       "#E5E59F",
       "#005C29",
-      "#8DA0CB",
-      "#E78AC3",
-      "#A6D854",
-      "#FFD92F",
-      "#E5C494",
-      "#B3B3B3",
-      "#7570B3",
-      "#D95F02"
+      "#56B4E9",
+      "#D55E00",
+      "#0072B2",
+      "#CC79A7",
+      "#E69F00",
+      "#009E73"
     )
 
     p <- p +
