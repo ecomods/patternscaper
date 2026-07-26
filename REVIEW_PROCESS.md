@@ -167,11 +167,6 @@ pipeline, but `evaluate_metrics()` accepts arbitrary user metrics.
 `apply_metrics_model()` leans on `calculate_metrics()`. Make both do the same explicit wrap
 *(verify both accept a single `landscape` identically)*.
 
-### L8. `exclude_NA_metrics` breaks the snake_case convention  — [Claude] *(§2.4)*
-`R/metrics_evaluation.R:62`. Everything else is lowercase snake_case; this embeds `NA`.
-Consider `exclude_na_metrics` (with a deprecation shim if callers exist). Fixing this also
-resolves H2 cleanly.
-
 ### L9. Default parameters drift between single generators and the batch wrapper  — [Claude] *(§2.5)*
 E.g. gaps `n_spots = 15` in `create_landscape_gaps()` vs `c(5, 10)` in `create_landscapes()`;
 `invert_landscape` in the spots default list but not gaps; `radius_noise_fraction` a generator
@@ -264,9 +259,9 @@ asserting the composed theme is complete. `devtools::test()` green.
 
 ### H2. Vignette documents a parameter that doesn't exist (`exclude_na`)  — [Claude] *(§1.2)*
 *Fixed 2026-07-06.* `vignettes/classify-metrics.qmd` told users not to set `exclude_na = FALSE`, but
-the real `evaluate_metrics()` argument is `exclude_NA_metrics` (`R/metrics_evaluation.R:62`), so
-copying the callout raised an "unused argument" error. Corrected the name in the vignette. (L8 still
-open: consider renaming the argument itself to snake_case `exclude_na_metrics`.)
+the real `evaluate_metrics()` argument was `exclude_NA_metrics` (`R/metrics_evaluation.R:62`), so
+copying the callout raised an "unused argument" error. Corrected the name in the vignette. (The
+argument itself was later renamed to `exclude_incomplete_metrics` — see L8.)
 
 ### H3. `plot_classified_landscapes()` mishandles unlabeled predictions  — [ChatGPT] [Fable] *(ChatGPT §B)*
 *Fixed 2026-07-06.* Both `apply_*` always emit `actual_class` (NA or the `"unclassified"` sentinel
@@ -372,3 +367,13 @@ frequency patterns). Verified end-to-end with a same-machine before/after of the
 cases: only the `bands`/`labyrinth` workflows moved (ecotone-metrics 0.99→1.00, ecotone-pixels
 0.79→0.73, selforg-landscape 0.63→0.62, selforg-class 0.94→0.95), all well-formed. Surfaced a
 follow-up (L24): `plot_classified_landscapes(only_misclassified = TRUE)` aborts at 100% accuracy.
+
+### L8. `exclude_NA_metrics` breaks the snake_case convention  — [Claude] *(§2.4)*
+*Fixed 2026-07-26.* Renamed to `exclude_incomplete_metrics`, which fixes both the naming
+convention and an accuracy problem introduced alongside it: the argument now also excludes metrics
+that are missing for some landscapes entirely, not just metrics holding `NA` values, so a name
+built around `NA` had become misleading. "Incomplete" matches the vocabulary already used by
+`remove_incomplete_landscapes()`. Renamed with no deprecation shim — the package is unreleased
+(`0.1.0`, no NEWS, no release tags) and nothing outside `R/`, `tests/` and the vignette passed the
+argument (the analysis repo never sets it). Updated `vignettes/classify-metrics.qmd` and
+regenerated `man/`. Full `devtools::test()` green; golden check identical.

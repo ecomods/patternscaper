@@ -11,9 +11,12 @@
 #' @param metrics_number Integer. Number of top metrics to return (default: 10).
 #' @param method Character. Selection method to use (default: "kruskal_effsize").
 #'     See 'Ranking Methods' section below for details.
-#' @param exclude_NA_metrics Logical. Whether to exclude metrics with NA values (default: TRUE).
-#'     This is recommended if data is later used for model training as this does not
-#'     accept missing values.
+#' @param exclude_incomplete_metrics Logical. Whether to exclude metrics with missing values
+#'     (default: TRUE). This covers both metrics that are calculated as NA and metrics
+#'     that are not available for every landscape. For example, at the class level a metric cannot
+#'     be calculated for a class that is absent from a landscape. Keep this enabled if
+#'     the data is later used for model training, which requires a complete predictor
+#'     matrix.
 #' @param exclude_metrics Character vector. Metrics to exclude (default: NULL).
 #' @param correlation_threshold Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
 #'     If you do not want to filter based on correlation, set to 1.
@@ -59,7 +62,7 @@ evaluate_metrics <- function(
   metrics,
   metrics_number = 10,
   method = "kruskal_effsize",
-  exclude_NA_metrics = TRUE,
+  exclude_incomplete_metrics = TRUE,
   exclude_metrics = NULL,
   correlation_threshold = 0.7,
   verbose = FALSE
@@ -131,25 +134,63 @@ evaluate_metrics <- function(
     }
   }
 
-  # Exclude metrics with NA values if the user requests it
-  # as they can't be used for model training
-  if (exclude_NA_metrics) {
+  # Exclude metrics that cannot be used for model training, which requires a
+  # complete predictor matrix. There are two ways a metric can be missing:
+  #   - the metric is calculated but undefined, giving an NA value (e.g. iji on
+  #     two-class landscapes)
+  #   - the metric is missing entirely for some landscapes. At the class level
+  #     landscapemetrics returns no row at all for a class that is absent from a
+  #     landscape.
+  if (exclude_incomplete_metrics) {
+    # find metris names with NA values
     na_metrics <- metrics |>
       dplyr::filter(is.na(value)) |>
       dplyr::pull(metric) |>
       unique()
+
+    # find metrics that are not available for all landscapes
+    n_landscapes <- dplyr::n_distinct(metrics$landscape_name)
+    incomplete_metrics <- metrics |>
+      dplyr::summarize(
+        n_present = dplyr::n_distinct(landscape_name),
+        .by = metric
+      ) |>
+      dplyr::filter(n_present < n_landscapes) |>
+      dplyr::pull(metric) |>
+      setdiff(na_metrics)
+
+    excluded_metrics <- c(na_metrics, incomplete_metrics)
     nrow_before <- nrow(metrics)
-    metrics <- metrics[!metrics$metric %in% na_metrics, ]
+    metrics <- metrics[!metrics$metric %in% excluded_metrics, ]
     nrow_after <- nrow(metrics)
 
     if (nrow_after == 0) {
-      cli::cli_abort("No metrics left after excluding those with NA values")
+      cli::cli_abort(
+        "No metrics left after excluding those with missing values"
+      )
     }
 
-    if (length(na_metrics) > 0) {
-      cli::cli_warn(
-        "Excluded {nrow_before - nrow_after} rows containing {length(na_metrics)} metrics with NA values. Metrics removed: {.val {na_metrics}} \nUse {.code exclude_NA_metrics = FALSE} to retain (not recommended for model training) "
+    if (length(excluded_metrics) > 0) {
+      excluded_message <- c(
+        "Excluded {length(excluded_metrics)} metric{?s} with missing values ({nrow_before - nrow_after} row{?s} removed)."
       )
+      if (length(na_metrics) > 0) {
+        excluded_message <- c(
+          excluded_message,
+          "x" = "NA value for at least one landscape: {.val {na_metrics}}"
+        )
+      }
+      if (length(incomplete_metrics) > 0) {
+        excluded_message <- c(
+          excluded_message,
+          "x" = "Not available for all landscapes: {.val {incomplete_metrics}}",
+          "i" = "At the class level this happens when a class is absent from a landscape."
+        )
+      }
+      cli::cli_warn(c(
+        excluded_message,
+        "i" = "Use {.code exclude_incomplete_metrics = FALSE} to retain them (not recommended for model training)."
+      ))
     }
   }
 
