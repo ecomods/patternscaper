@@ -30,13 +30,23 @@ Run from the **package root**, in a session where keras/TensorFlow works.
 
 ## What is compared
 
-Both workflows are compared **exactly** (metrics table, selected metrics,
-accuracies, confusion matrices, and full prediction tables). Keras is reproducible
-across sessions on the same machine — verified — so its predictions are compared
-exactly too, not just structurally.
+The two workflows are compared differently, because only one of them is
+bit-reproducible:
+
+- **Metrics workflow** — compared **exactly** (metrics table, selected metrics,
+  accuracies, confusion matrices, prediction tables). `neuralnet` and
+  `landscapemetrics` are deterministic and portable across machines, so any
+  difference here is a real change.
+- **Pixel workflow** — compared with a **tolerance of `1e-5`** on numeric values.
+  Keras predictions drift by ~1e-7 between TensorFlow installations, so an exact
+  comparison fails on every machine switch. Predicted class labels and confusion
+  matrices are still compared exactly, since the tolerance applies only to
+  numbers — a class flip is still caught.
 
 ## Caveats
 
-- Capture and check on the **same machine** — exact values (neuralnet *and* keras)
-  can differ across machines/BLAS/TensorFlow versions. Re-run `capture.R` when you
-  switch machines.
+- Switching machines does **not** require a re-capture. Re-run `capture.R` only
+  when you intentionally change results.
+- The `1e-5` tolerance hides genuine pixel-side changes smaller than that. Any
+  real regression in the CNN moves predictions far more, but keep it in mind when
+  a change is expected to be numerically tiny.

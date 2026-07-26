@@ -1,8 +1,10 @@
 # Freeze the current results as the golden reference.
 #
 # Run this ONCE on the known-good baseline (git tag `revision-baseline`), and
-# re-run it whenever you INTENTIONALLY change results, or when you switch to a
-# different machine (the exact metrics/neuralnet values can differ per machine).
+# re-run it only when you INTENTIONALLY change results. Switching machines does
+# NOT require a re-capture: the metrics workflow is portable, and check.R
+# compares the pixel workflow with a tolerance that absorbs TensorFlow
+# installation differences.
 #
 # Run from the PACKAGE ROOT:  source("dev/golden/capture.R")
 
