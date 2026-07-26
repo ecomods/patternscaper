@@ -471,10 +471,13 @@ evaluate_cv_performance <- function(
 
 #' Remove landscapes with incomplete metrics
 #'
+#' Removes missing data in three steps, from least to most consequential.
 #' First drops any predictor columns that are NA for every landscape (metrics
 #' that are undefined for the given landscapes carry no information and would
-#' otherwise remove the entire dataset). Then removes landscapes that still
-#' have NA values in any remaining predictor column. Issues warnings listing
+#' otherwise remove the entire dataset). Then drops the row-wise counterpart:
+#' landscapes that are NA for every remaining predictor, which carry no
+#' information either. Only then removes landscapes that still have NA values in
+#' some — but not all — remaining predictor columns. Issues warnings listing
 #' dropped metrics and removed landscapes, and aborts if no usable predictors
 #' or landscapes remain.
 #'
@@ -514,6 +517,31 @@ remove_incomplete_landscapes <- function(metrics_wide, predictor_cols) {
       "No landscapes remaining after removing those with incomplete metrics",
       "i" = "All required features were NA for every landscape"
     ))
+  }
+
+  # Drop landscapes that are NA for every remaining predictor: a landscape without a
+  # single usable metric carries no information. Removing them here keeps
+  # a degenerate landscape from deciding what to drop when only some values are
+  # missing..
+  all_na_rows <- rowSums(is.na(metrics_wide[, predictor_cols, drop = FALSE])) ==
+    length(predictor_cols)
+
+  if (any(all_na_rows)) {
+    removed_names <- metrics_wide$landscape_name[all_na_rows]
+
+    cli::cli_warn(c(
+      "Removed {sum(all_na_rows)} landscape{?s} where every required metric was NA",
+      "i" = "Removed: {.val {removed_names}}"
+    ))
+
+    metrics_wide <- metrics_wide[!all_na_rows, ]
+
+    if (nrow(metrics_wide) == 0) {
+      cli::cli_abort(c(
+        "No landscapes remaining after removing those with incomplete metrics",
+        "i" = "Every landscape was NA for all required metrics"
+      ))
+    }
   }
 
   # Check for rows with any NA values in the remaining predictor columns
@@ -569,7 +597,13 @@ fit_nn_model <- function(data, hidden, threshold, stepmax) {
       stepmax = stepmax
     ),
     error = function(e) {
-      if (grepl("error derivative contains a NA", conditionMessage(e), fixed = TRUE)) {
+      if (
+        grepl(
+          "error derivative contains a NA",
+          conditionMessage(e),
+          fixed = TRUE
+        )
+      ) {
         cli::cli_abort(
           c(
             "Neural network training failed to converge.",

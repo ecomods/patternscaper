@@ -306,11 +306,33 @@ test_that("train_metrics_model handles NA values correctly", {
       cv_method = "none",
       verbose = FALSE
     ),
-    "Removed.*landscape.*with incomplete metrics"
+    "Removed.*landscape.*where every required metric was NA"
   )
 
   # Should still return valid model if landscapes remain (25 out of 30)
   expect_s3_class(result$model, "nn")
+})
+
+test_that("train_metrics_model separates unusable from partly incomplete landscapes", {
+  metrics <- fixtures$small_metrics_landscape
+  landscape_ids <- unique(metrics$landscape_id)
+  first_metric <- unique(metrics$metric)[1]
+
+  # One landscape has no usable metric at all
+  metrics$value[metrics$landscape_id == landscape_ids[1]] <- NA
+  # Another is missing a single metric only
+  metrics$value[
+    metrics$landscape_id == landscape_ids[2] &
+      metrics$metric == first_metric
+  ] <- NA
+
+  warnings <- capture_warnings(
+    train_metrics_model(metrics, cv_method = "none", verbose = FALSE)
+  )
+
+  # The two cases are reported separately, since the remedy differs
+  expect_match(warnings, "where every required metric was NA", all = FALSE)
+  expect_match(warnings, "with incomplete metrics", all = FALSE)
 })
 
 test_that("train_metrics_model errors when all landscapes have NAs", {
