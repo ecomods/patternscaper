@@ -350,7 +350,6 @@ create_landscapes <- function(
     "spot_radius",
     "nhills",
     "nbands",
-    "frequency",
     "octaves",
     "amplitude"
   )
@@ -505,10 +504,13 @@ sample_landscape_params <- function(
     } else if (length(param_range) == 1) {
       sampled_params[[param_name]] <- param_range
     } else if (param_name %in% integer_params) {
-      sampled_params[[param_name]] <- sample(
-        seq(from = param_range[1], to = param_range[2], by = 1),
-        size = 1
-      )
+      # Draw an integer step within the range. Index the candidate vector
+      # explicitly so a collapsed range (single value) is not reinterpreted by
+      # sample()'s "sample(n) means sample.int(n)" rule.
+      int_values <- seq(from = param_range[1], to = param_range[2], by = 1)
+      sampled_params[[param_name]] <- int_values[
+        sample.int(length(int_values), size = 1)
+      ]
     } else {
       sampled_params[[param_name]] <- runif(
         1,

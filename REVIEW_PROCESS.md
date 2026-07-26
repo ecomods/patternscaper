@@ -22,26 +22,6 @@ traceability.
 
 ## 🟠 Medium — real inconsistency, latent bug, methodological issue, or maintainability risk
 
-### M2. `frequency` is sampled as an integer, collapsing its range  — [Claude] [ChatGPT] [Fable] *(§1.3 / F4)*
-`R/landscape_create.R:344-356` lists `"frequency"` in `integer_params`, and
-`sample_landscape_params()` samples integer params via `seq(from, to, by = 1)` (`:508-511`).
-- `bands` default `frequency = c(0.1, 0.3)` (`:284`) → `seq(0.1, 0.3, by = 1)` is **`0.1`
-  only**; every `bands` landscape uses `frequency = 0.1`, so the intended wave-frequency
-  variation in `amplitude * sin(frequency * x)` (`landscape_create_bands.R:123`) never happens.
-- `labyrinth` default `frequency = c(2.5, 3.5)` (`:302`) → `seq(2.5, 3.5, by = 1)` yields only
-  `{2.5, 3.5}`; interior values never appear.
-- **[Fable] extra:** `get_valid_param_specs()` (`:187`) declares labyrinth `frequency` as
-  `integer`, contradicting the fractional default — a user passing `frequency = c(2.5, 3.5)`
-  via `params_list` would be *rejected* by `validate_integer_param()` while the internal
-  default sails through unvalidated.
-- **[Claude] latent trap:** `sample(x, 1)` where `seq()` returns a single numeric `>= 1`
-  triggers R's "`sample(n)` means `sample.int(n)`" behaviour and returns a wrong value.
-- **Effect:** generated training set is less diverse than the declared ranges imply, biasing
-  what classifiers learn as "bands"/"labyrinth". Silent — no error/warning.
-- **Fix:** remove `frequency` from `integer_params` (it's continuous), reconcile
-  `labyrinth`/`bands` `frequency` in `get_valid_param_specs()` to `numeric`, and use `runif()`
-  for reals / `sample(seq.int(...))` for genuine integer counts (guarding the single-value case).
-
 ### M3. `create_landscapes()` failure bookkeeping is fragile (trailing failures misreported as full success)  — [Claude] [Fable] *(§1.4 / F5)*
 `R/landscape_create.R:452-474`. On failure the code does `all_landscapes[[i]] <- NULL`, which
 **removes** the element rather than reserving a slot. For a **trailing** failure the list
@@ -227,6 +207,17 @@ No tests seen for: `theme_landscape()` composition (H1); plotting classification
 classes / missing `actual_class` (H3); the `gaps + invert_landscape` batch failure (M7); the
 `frequency` sampling for bands (M2). Extends M17.
 
+### L24. `plot_classified_landscapes(only_misclassified = TRUE)` aborts when nothing is misclassified  — [Fable]
+`R/plot_classification.R`. When a model classifies every landscape correctly (e.g. the ecotone
+metrics use case now reaches 100% accuracy after M2), the misclassified-only branch has an empty set
+and the function aborts with *"No misclassified landscapes found."* A zero-misclassification result
+is a legitimate (good) outcome, not an error — but it breaks a clean `source()` of
+`classify_ecotones_metrics.R` / `make.R` in the analysis repo. Surfaced while re-running the use
+cases after M2.
+- **Fix:** handle the empty case internally — emit an informative `cli` message (e.g. "All
+  landscapes classified correctly — nothing to plot") and return gracefully (invisible `NULL` or an
+  empty plot) instead of aborting.
+
 ---
 
 ## Suggested first batch (highest value, lowest risk)
@@ -362,3 +353,22 @@ result change — only error paths differ. Regression test added in
 tibble. (Note: a *separate* pre-existing flaky test, `verbose parameter controls messaging` at
 `:320`, occasionally fails via an unseeded-`rnorm` + `expect_silent()` combo — unrelated to this fix;
 flagged for follow-up.)
+
+### M2. `frequency` sampled as an integer, collapsing its declared range  — [Claude] [ChatGPT] [Fable] *(§1.3 / F4)*
+*Fixed 2026-07-07.* `"frequency"` was listed in `integer_params` in `create_landscapes()`, so
+`sample_landscape_params()` drew it via `seq(from, to, by = 1)`: `bands` (`c(0.1, 0.3)`) collapsed to
+a constant `0.1`, and `labyrinth` (`c(2.5, 3.5)`) only ever hit its two endpoints — silently
+under-diversifying the training set for both patterns. Three fixes: (1) removed `"frequency"` from
+`integer_params` so it is sampled continuously with `runif()`; (2) reconciled the labyrinth
+`frequency` spec in `get_valid_param_specs()` from `integer` to `numeric` (bands was already numeric),
+so user-supplied fractional frequencies validate consistently with the internal default; (3) hardened
+the integer-sampling branch against R's `sample(n)`-means-`sample.int(n)` trap by indexing the
+candidate vector explicitly (`int_values[sample.int(length(int_values), 1)]`), so a collapsed integer
+range returns its single value instead of a random draw. Regression tests added in
+`tests/testthat/test-create-training-landscapes.R` (frequency varies continuously within range for
+bands and labyrinth; a collapsed integer range returns the fixed value) — covers the `frequency`
+clause of M17. Full `devtools::test()` green (1395 pass); golden check identical (the harness uses no
+frequency patterns). Verified end-to-end with a same-machine before/after of the analysis-repo use
+cases: only the `bands`/`labyrinth` workflows moved (ecotone-metrics 0.99→1.00, ecotone-pixels
+0.79→0.73, selforg-landscape 0.63→0.62, selforg-class 0.94→0.95), all well-formed. Surfaced a
+follow-up (L24): `plot_classified_landscapes(only_misclassified = TRUE)` aborts at 100% accuracy.

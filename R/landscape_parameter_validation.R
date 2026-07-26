@@ -184,7 +184,7 @@ get_valid_param_specs <- function() {
       invert_landscape = list(type = "logical")
     ),
     labyrinth = list(
-      frequency = list(type = "integer", min = 1, max = Inf),
+      frequency = list(type = "numeric", min = 0, max = Inf),
       veg_threshold = list(type = "numeric", min = 0, max = 1),
       band_fuzziness = list(type = "numeric", min = 0, max = Inf),
       octaves = list(type = "integer", min = 1, max = Inf)
