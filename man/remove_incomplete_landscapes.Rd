@@ -4,12 +4,21 @@
 \alias{remove_incomplete_landscapes}
 \title{Remove landscapes with incomplete metrics}
 \usage{
-remove_incomplete_landscapes(metrics_wide, predictor_cols)
+remove_incomplete_landscapes(
+  metrics_wide,
+  predictor_cols,
+  na_action = "drop_landscapes"
+)
 }
 \arguments{
 \item{metrics_wide}{Data frame in wide format. Output from metrics_to_wide().}
 
 \item{predictor_cols}{Character vector. Names of predictor columns to check for NAs.}
+
+\item{na_action}{Character. How to resolve values that are missing for some but
+not all landscapes: \code{"drop_landscapes"} (default) removes the affected
+landscapes and keeps every metric, \code{"drop_metrics"} removes the affected
+metrics and keeps every landscape.}
 }
 \value{
 Data frame with incomplete landscapes removed.

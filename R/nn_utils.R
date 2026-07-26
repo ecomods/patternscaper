@@ -483,12 +483,21 @@ evaluate_cv_performance <- function(
 #'
 #' @param metrics_wide Data frame in wide format. Output from metrics_to_wide().
 #' @param predictor_cols Character vector. Names of predictor columns to check for NAs.
+#' @param na_action Character. How to resolve values that are missing for some but
+#'   not all landscapes: \code{"drop_landscapes"} (default) removes the affected
+#'   landscapes and keeps every metric, \code{"drop_metrics"} removes the affected
+#'   metrics and keeps every landscape.
 #'
 #' @return Data frame with incomplete landscapes removed.
 #'
 #' @keywords internal
 #' @importFrom cli cli_warn cli_abort
-remove_incomplete_landscapes <- function(metrics_wide, predictor_cols) {
+remove_incomplete_landscapes <- function(
+  metrics_wide,
+  predictor_cols,
+  na_action = "drop_landscapes"
+) {
+
   # Drop predictor columns that are NA for every landscape. These metrics are
   # undefined for the given landscapes (e.g. iji or rpr for two-class
   # landscapes) and carry no information. If left in place they would flag
@@ -544,26 +553,58 @@ remove_incomplete_landscapes <- function(metrics_wide, predictor_cols) {
     }
   }
 
-  # Check for rows with any NA values in the remaining predictor columns
+  # What remains are values missing for some but not all landscapes.
+  # The user decides how to proceed in this case: dropping the metric costs one
+  # predictor, dropping the landscapes costs training samples. Report both costs
+  # and let na_action decide.
   na_rows <- rowSums(is.na(metrics_wide[, predictor_cols, drop = FALSE])) > 0
+  incomplete_cols <- predictor_cols[vapply(
+    predictor_cols,
+    function(col) any(is.na(metrics_wide[[col]])),
+    logical(1)
+  )]
 
   if (any(na_rows)) {
-    n_removed <- sum(na_rows)
-    removed_names <- metrics_wide$landscape_name[na_rows]
+    n_landscapes <- sum(na_rows)
+    n_metrics <- length(incomplete_cols)
 
-    cli::cli_warn(c(
-      "Removed {n_removed} landscape{?s} with incomplete metrics",
-      "i" = "Removed: {.val {removed_names}}"
-    ))
+    if (na_action == "drop_metrics") {
+      if (length(setdiff(predictor_cols, incomplete_cols)) == 0) {
+        cli::cli_abort(c(
+          "No metrics remaining after dropping those with missing values",
+          "i" = "All {n_metrics} remaining metric{?s} had an NA for at least one landscape",
+          "i" = "Use {.code na_action = \"drop_landscapes\"} to drop the {n_landscapes} affected landscape{?s} instead"
+        ))
+      }
 
-    metrics_wide <- metrics_wide[!na_rows, ]
-
-    # Check if we have any landscapes left
-    if (nrow(metrics_wide) == 0) {
-      cli::cli_abort(c(
-        "No landscapes remaining after removing those with incomplete metrics",
-        "i" = "All {n_removed} landscape{?s} had NA values in required features"
+      cli::cli_warn(c(
+        "Dropped {n_metrics} metric{?s} that {?is/are} missing for some landscapes",
+        "i" = "Dropped: {.val {incomplete_cols}}",
+        "i" = "Use {.code na_action = \"drop_landscapes\"} to keep them and drop {n_landscapes} landscape{?s} instead"
       ))
+
+      metrics_wide <- metrics_wide[,
+        setdiff(colnames(metrics_wide), incomplete_cols),
+        drop = FALSE
+      ]
+    } else {
+      removed_names <- metrics_wide$landscape_name[na_rows]
+
+      cli::cli_warn(c(
+        "Removed {n_landscapes} landscape{?s} with incomplete metrics",
+        "i" = "Removed: {.val {removed_names}}",
+        "i" = "Use {.code na_action = \"drop_metrics\"} to keep them and drop {n_metrics} metric{?s} instead"
+      ))
+
+      metrics_wide <- metrics_wide[!na_rows, ]
+
+      # Check if we have any landscapes left
+      if (nrow(metrics_wide) == 0) {
+        cli::cli_abort(c(
+          "No landscapes remaining after removing those with incomplete metrics",
+          "i" = "All {n_landscapes} landscape{?s} had NA values in required features"
+        ))
+      }
     }
   }
 

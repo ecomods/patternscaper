@@ -24,6 +24,13 @@
 #' @param stepmax Integer. Maximum number of training steps passed to \code{\link[neuralnet]{neuralnet}}. Default: 1e+05.
 #' @param model_path Character. Optional file path (must end in .rds) to save
 #'   the trained model. Default: NULL (no saving).
+#' @param na_action Character. How to obtain the complete predictor matrix the
+#'   network requires when a metric is missing for some but not all landscapes.
+#'   \code{"drop_metrics"} (default) drops the affected metrics and keeps every
+#'   landscape; \code{"drop_landscapes"} keeps every metric and drops the affected
+#'   landscapes. Either way the cost of both options is reported. Metrics that are
+#'   NA for every landscape, and landscapes that are
+#'   NA for every metric, are always removed first as they do not carry any information.
 #' @param verbose Logical. Print training details and cross-validation results.
 #'   Default: TRUE.
 #'
@@ -85,6 +92,7 @@ train_metrics_model <- function(
   threshold = 0.01,
   stepmax = 1e+05,
   model_path = NULL,
+  na_action = "drop_metrics",
   verbose = TRUE
 ) {
   # Validate input parameters -------------------------------------------------
@@ -147,6 +155,13 @@ train_metrics_model <- function(
     cli::cli_abort('cv_method must be one of: "none", "k-fold", or "loo"')
   }
 
+  # Validate na_action parameter
+  if (!na_action %in% c("drop_metrics", "drop_landscapes")) {
+    cli::cli_abort(
+      'na_action must be one of: "drop_metrics" or "drop_landscapes"'
+    )
+  }
+
   # Subset selected metrics if provided
   if (!is.null(metrics_selected)) {
     missing_metrics <- setdiff(metrics_selected, unique(metrics$metric))
@@ -168,7 +183,23 @@ train_metrics_model <- function(
     c("landscape_id", "landscape_name", "pattern")
   )
 
-  metrics_wide <- remove_incomplete_landscapes(metrics_wide, predictor_cols)
+  patterns_before <- unique(metrics_wide$pattern)
+  metrics_wide <- remove_incomplete_landscapes(
+    metrics_wide,
+    predictor_cols,
+    na_action = na_action
+  )
+
+  # Losing a whole pattern leaves the network with nothing to learn that class
+  # from. Stop here if this happens.
+  patterns_lost <- setdiff(patterns_before, unique(metrics_wide$pattern))
+  if (length(patterns_lost) > 0) {
+    cli::cli_abort(c(
+      "Removing landscapes with incomplete metrics eliminated {length(patterns_lost)} pattern{?s} entirely",
+      "x" = "No landscapes left for: {.val {patterns_lost}}",
+      "i" = "Use {.code na_action = \"drop_metrics\"} to drop the affected metrics instead, or supply more landscapes for them"
+    ))
+  }
 
   # Normalize the predictor variables (remove landscape columns)
   predictors <- metrics_wide |>
