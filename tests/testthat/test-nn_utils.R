@@ -577,3 +577,60 @@ test_that("scale_fold handles a single-row validation fold (LOO)", {
   expect_equal(dim(res$val), c(1L, 2L))
   expect_false(any(is.nan(res$val)))
 })
+
+test_that("is_constant_sd catches floating-point noise, not real variation", {
+  # Exactly constant, and constant up to floating-point summation error
+  expect_true(is_constant_sd(0, 1))
+  expect_true(is_constant_sd(1.17e-17, 1))
+  # NA arises for a single observation - no usable variation either
+  expect_true(is_constant_sd(NA_real_, 1))
+
+  # Real variation is kept, on small and large scales alike
+  expect_false(is_constant_sd(0.1, 1))
+  expect_false(is_constant_sd(1e-6, 1e-6))
+
+  # Tolerance is relative, so a large mean does not swallow real variation
+  expect_false(is_constant_sd(5, 87.7))
+  expect_true(is_constant_sd(1e-12, 1e4))
+
+  expect_equal(
+    is_constant_sd(c(0, 0.5), c(1, 1)),
+    c(TRUE, FALSE)
+  )
+})
+
+test_that("scaling_stats guards near-constant columns", {
+  # 'noisy_const' is 1 everywhere but with floating-point wobble, which is
+  # exactly what total area looks like across equally sized landscapes
+  predictors <- data.frame(
+    a = c(1, 2, 3, 4),
+    noisy_const = c(1, 1, 1, 1 + 2e-16)
+  )
+
+  stats <- scaling_stats(predictors)
+
+  expect_equal(stats$scale[["noisy_const"]], 1)
+  expect_gt(stats$scale[["a"]], 1)
+
+  scaled <- scale(predictors, center = stats$center, scale = stats$scale)
+  expect_false(any(is.nan(scaled)))
+  # Without the guard these would be z-scores of order 1e16
+  expect_true(all(abs(scaled[, "noisy_const"]) < 1e-10))
+})
+
+test_that("fit_nn_model aborts when neuralnet fails to converge", {
+  data <- data.frame(
+    a = c(-1, 0, 1, 2, -2, 0.5),
+    b = c(1, 0, -1, -2, 2, -0.5),
+    pattern = factor(c("x", "y", "x", "y", "x", "y"))
+  )
+
+  # stepmax = 1 cannot converge; neuralnet only warns and returns an object
+  # without weights, which must not be handed back as a usable model
+  expect_error(
+    suppressWarnings(
+      fit_nn_model(data, hidden = 6, threshold = 0.01, stepmax = 1)
+    ),
+    "did not converge"
+  )
+})

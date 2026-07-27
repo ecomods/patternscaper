@@ -161,6 +161,36 @@ test_that("evaluate_metrics handles NA values correctly", {
   expect_type(result_with_na, "character")
 })
 
+test_that("evaluate_metrics drops metrics that are constant across landscapes", {
+  metrics <- create_test_metrics(n_metrics = 6)
+  metrics$value[metrics$metric == "metric_1"] <- 1
+
+  expect_warning(
+    result <- evaluate_metrics(metrics, metrics_number = 5),
+    "no variation across landscapes"
+  )
+  expect_false("metric_1" %in% result)
+})
+
+test_that("evaluate_metrics drops metrics that are constant only up to rounding", {
+  # Total area behaves like this across equally sized landscapes: constant in
+  # every meaningful sense, but floating-point summation leaves a variance
+  # around 1e-34, which an exact `== 0` test does not catch. Left in, such a
+  # metric is scaled by a near-zero sd and swamps every real predictor.
+  metrics <- create_test_metrics(n_metrics = 6)
+  constant_rows <- metrics$metric == "metric_1"
+  metrics$value[constant_rows] <- 1
+  metrics$value[which(constant_rows)[1]] <- 1 + 2e-16
+
+  expect_gt(stats::var(metrics$value[constant_rows]), 0)
+
+  expect_warning(
+    result <- evaluate_metrics(metrics, metrics_number = 5),
+    "no variation across landscapes"
+  )
+  expect_false("metric_1" %in% result)
+})
+
 # 4. METRIC EXCLUSION TESTS ----
 test_that("evaluate_metrics excludes specified metrics", {
   metrics <- create_test_metrics(n_metrics = 10)

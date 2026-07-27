@@ -169,17 +169,25 @@ evaluate_metrics <- function(
     )
   }
 
-  # Remove metrics with zero variance as they cannot be used to distinguish
-  # landscapes
+  # Remove metrics without usable variation as they cannot be used to
+  # distinguish landscapes. The comparison is against a relative tolerance, not
+  # against zero: a metric that is constant in practice (e.g. total area across
+  # equally sized landscapes) can still have a very small variance like
+  # 1e-34 due to floating-point summation. Such small variance should not
+  # be considered and the metric should be excluded.
   zero_var_metrics <- metrics |>
-    dplyr::summarize(var_value = var(value, na.rm = TRUE), .by = metric) |>
-    dplyr::filter(var_value == 0) |>
+    dplyr::summarize(
+      sd_value = sd(value, na.rm = TRUE),
+      mean_value = mean(value, na.rm = TRUE),
+      .by = metric
+    ) |>
+    dplyr::filter(is_constant_sd(sd_value, mean_value)) |>
     dplyr::pull(metric)
 
   if (length(zero_var_metrics) > 0) {
     metrics <- metrics[!metrics$metric %in% zero_var_metrics, ]
     cli::cli_warn(
-      "Excluded {length(zero_var_metrics)} metrics with zero variance: {.val {zero_var_metrics}}"
+      "Excluded {length(zero_var_metrics)} metric{?s} with no variation across landscapes: {.val {zero_var_metrics}}"
     )
   }
 

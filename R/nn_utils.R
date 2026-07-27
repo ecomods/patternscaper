@@ -108,6 +108,49 @@ softmax_rows <- function(x) {
   }))
 }
 
+#' Detect if the standard deviation is just random noise
+#'
+#' When comparing the sd of a metric to 0, it could happen that due to floating
+#' point summation, there is a small tolerance. E.g. total area across equally sized
+#' landscapes: `sd` is `1e-17` rather than exactly `0`.
+#' Comparing against zero then fails to catch it and the metric survives the
+#' "metric is constant" check. To avoid this, we calculuate the tolerance
+#' relative to the magnitude of the values so that it works for metrics measured
+#' on very different scales.
+#'
+#' @param sd_value Numeric vector of standard deviations.
+#' @param center Numeric vector of the corresponding means.
+#'
+#' @return Logical vector; `TRUE` if standard deviation is `NA` or too
+#'   small to be meaningful.
+#' @keywords internal
+is_constant_sd <- function(sd_value, center) {
+  tolerance <- sqrt(.Machine$double.eps) * pmax(abs(center), 1)
+  is.na(sd_value) | sd_value <= tolerance
+}
+
+#' Centring and scaling statistics for a set of predictors
+#'
+#' Computes the `center`/`scale` used to standardise predictors, guarding
+#' columns that carry no variation (see \code{\link{is_constant_sd}}) by giving them
+#' `scale = 1`. Those columns become all-zero after centring instead of `NaN`
+#' or an enormous z-score.
+#'
+#' @param predictors Data frame or matrix of predictors.
+#'
+#' @return List with `center` and `scale`, both named numeric vectors.
+#' @keywords internal
+#' @importFrom stats sd
+scaling_stats <- function(predictors) {
+  predictors <- as.matrix(predictors)
+
+  center <- colMeans(predictors)
+  scale_sd <- apply(predictors, 2, stats::sd)
+  scale_sd[is_constant_sd(scale_sd, center)] <- 1
+
+  list(center = center, scale = scale_sd)
+}
+
 #' Scale a validation fold using only the training fold's statistics
 #'
 #' Fits centering/scaling on the training-fold predictors alone and applies the
@@ -115,8 +158,8 @@ softmax_rows <- function(x) {
 #' the validation rows from contributing to the `center`/`scale` used on them,
 #' avoiding the optimistic leakage that arises when the whole dataset is scaled
 #' before cross-validation. Columns that are constant within the training fold
-#' (`sd == 0`, or `NA` for a single-row fold) are given `scale = 1` so they
-#' become all-zero after centering instead of `NaN`.
+#' are given `scale = 1` so they become all-zero after centering instead of
+#' `NaN` (see \code{\link{scaling_stats}}).
 #'
 #' @param train_predictors Data frame or matrix of training-fold predictors.
 #' @param val_predictors Data frame or matrix of validation-fold predictors.
@@ -124,19 +167,20 @@ softmax_rows <- function(x) {
 #' @return List with `train` and `val`: numeric matrices scaled with the
 #'   training-fold center/scale.
 #' @keywords internal
-#' @importFrom stats sd
 scale_fold <- function(train_predictors, val_predictors) {
-  train_predictors <- as.matrix(train_predictors)
-  val_predictors <- as.matrix(val_predictors)
-
-  center <- colMeans(train_predictors)
-  scale_sd <- apply(train_predictors, 2, stats::sd)
-  # Guard columns that are constant within the training fold to avoid /0 -> NaN
-  scale_sd[is.na(scale_sd) | scale_sd == 0] <- 1
+  stats <- scaling_stats(train_predictors)
 
   list(
-    train = scale(train_predictors, center = center, scale = scale_sd),
-    val = scale(val_predictors, center = center, scale = scale_sd)
+    train = scale(
+      as.matrix(train_predictors),
+      center = stats$center,
+      scale = stats$scale
+    ),
+    val = scale(
+      as.matrix(val_predictors),
+      center = stats$center,
+      scale = stats$scale
+    )
   )
 }
 
@@ -560,7 +604,7 @@ remove_incomplete_landscapes <- function(metrics_wide, predictor_cols) {
 #' @keywords internal
 #' @importFrom cli cli_abort
 fit_nn_model <- function(data, hidden, threshold, stepmax) {
-  tryCatch(
+  model <- tryCatch(
     neuralnet::neuralnet(
       formula = pattern ~ .,
       data = data,
@@ -569,7 +613,13 @@ fit_nn_model <- function(data, hidden, threshold, stepmax) {
       stepmax = stepmax
     ),
     error = function(e) {
-      if (grepl("error derivative contains a NA", conditionMessage(e), fixed = TRUE)) {
+      if (
+        grepl(
+          "error derivative contains a NA",
+          conditionMessage(e),
+          fixed = TRUE
+        )
+      ) {
         cli::cli_abort(
           c(
             "Neural network training failed to converge.",
@@ -584,4 +634,19 @@ fit_nn_model <- function(data, hidden, threshold, stepmax) {
       stop(e)
     }
   )
+
+  # Failure to converge is only a warning in neuralnet, and the object it
+  # returns has no weights. Left alone it looks like a trained model and only
+  # fails much later, inside predict(), with a message about non-numeric
+  # arguments to a matrix product. We want to give a more meaningful error here.
+  if (is.null(model$weights)) {
+    cli::cli_abort(c(
+      "Neural network training did not converge.",
+      "x" = "{.pkg neuralnet} stopped after {stepmax} steps without reaching the error threshold of {threshold}.",
+      "i" = "Increase {.arg stepmax} or relax {.arg threshold} in {.fn train_metrics_model}.",
+      "i" = "Or select fewer metrics with {.fn evaluate_metrics} and pass them via {.arg metrics_selected} as many correlated predictors could prevent convergence."
+    ))
+  }
+
+  model
 }

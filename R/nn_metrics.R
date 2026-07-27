@@ -179,13 +179,16 @@ train_metrics_model <- function(
         "pattern"
       ))
     )
-  predictors_scaled <- scale(predictors)
-
   # Store scaling parameters for future use
-  # This will be used to scale new data before prediction
-  scaling_params <- list(
-    center = attr(predictors_scaled, "scaled:center"),
-    scale = attr(predictors_scaled, "scaled:scale")
+  # This will be used to scale new data before prediction. Predictors without
+  # usable variation are guarded here so they cannot produce NaN or enormous
+  # z-scores (see scaling_stats()).
+  scaling_params <- scaling_stats(predictors)
+
+  predictors_scaled <- scale(
+    predictors,
+    center = scaling_params$center,
+    scale = scaling_params$scale
   )
 
   # Combine the scaled predictors with the target variable
@@ -333,6 +336,9 @@ train_metrics_model <- function(
 #' @param return_performance Logical. If TRUE and landscapes contain known classes
 #'   (pattern attribute), calculate and return performance metrics. If FALSE or
 #'   classes unknown, only return predictions. Default: FALSE.
+#' @param verbose Logical. Show performance summaries when `return_performance = TRUE`
+#'   (default: TRUE). When FALSE, runs silently. Warnings about unknown classes or
+#'   incomplete metrics always appear.
 #'
 #' @return When return_performance = FALSE or actual classes unavailable:
 #'   Tibble with columns:
@@ -388,11 +394,16 @@ train_metrics_model <- function(
 apply_metrics_model <- function(
   landscapes,
   nn_model,
-  return_performance = FALSE
+  return_performance = FALSE,
+  verbose = TRUE
 ) {
   # Input validation ---------------------------------------------------------
   if (!is.logical(return_performance) || length(return_performance) != 1) {
     cli::cli_abort("return_performance must be a single logical value")
+  }
+
+  if (!is.logical(verbose) || length(verbose) != 1) {
+    cli::cli_abort("verbose must be a single logical value")
   }
 
   if (
@@ -576,7 +587,7 @@ apply_metrics_model <- function(
       class_names = class_names,
       cv_method = "none",
       cv_folds = 1,
-      verbose = TRUE,
+      verbose = verbose,
       return_predictions = FALSE
     )
 

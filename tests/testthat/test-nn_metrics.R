@@ -326,6 +326,42 @@ test_that("train_metrics_model errors when all landscapes have NAs", {
 
 # apply_metrics_model tests ---------------------------------------------------
 
+test_that("apply_metrics_model can be silenced with verbose = FALSE", {
+  model <- train_metrics_model(
+    fixtures$minimal_metrics,
+    cv_method = "none",
+    verbose = FALSE
+  )
+  minimal_landscapes <- create_fixture_landscapes("minimal")
+
+  expect_error(
+    apply_metrics_model(minimal_landscapes, model, verbose = "yes"),
+    "verbose must be a single logical value"
+  )
+
+  expect_silent(
+    suppressWarnings(
+      apply_metrics_model(
+        minimal_landscapes,
+        model,
+        return_performance = TRUE,
+        verbose = FALSE
+      )
+    )
+  )
+
+  # The performance summary is still printed by default
+  expect_output(
+    suppressWarnings(
+      apply_metrics_model(
+        minimal_landscapes,
+        model,
+        return_performance = TRUE
+      )
+    )
+  )
+})
+
 test_that("apply_metrics_model validates return_performance parameter", {
   # Train a simple model first
   model <- train_metrics_model(
