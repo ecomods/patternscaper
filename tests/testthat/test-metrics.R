@@ -48,7 +48,7 @@ test_that("calculate_metrics produces correct output structure", {
   expect_equal(nrow(result), 6) # 3 landscapes × 2 metrics
   expect_equal(unique(result$landscape_id), 1:3)
 
-  # Test column structure
+  # Test column structure (metric columns, then per-landscape geometry columns)
   expected_cols <- c(
     "landscape_id",
     "landscape_name",
@@ -59,7 +59,12 @@ test_that("calculate_metrics produces correct output structure", {
     "metric_name",
     "metric",
     "value",
-    "warnings"
+    "warnings",
+    "n_row",
+    "n_col",
+    "cell_size_x",
+    "cell_size_y",
+    "n_na"
   )
   expect_equal(names(result), expected_cols)
 
@@ -86,6 +91,48 @@ test_that("calculate_metrics produces correct output structure", {
       USE.NAMES = FALSE
     ))
   )
+})
+
+test_that("calculate_metrics attaches per-landscape geometry that survives write_csv", {
+  m1 <- matrix(rbinom(10 * 20, 1, 0.5), nrow = 10, ncol = 20)
+  m2 <- matrix(rbinom(15 * 15, 1, 0.5), nrow = 15, ncol = 15)
+  m2[1, 1] <- NA
+  geom_landscapes <- list(
+    landscape(m1, pattern = "a", name = "a1"),
+    landscape(m2, pattern = "b", name = "b1")
+  )
+
+  result <- calculate_metrics(geom_landscapes, metrics = "ai", level = "landscape")
+
+  # One geometry record per landscape, with correct values
+  geom <- dplyr::distinct(
+    result,
+    landscape_id,
+    n_row,
+    n_col,
+    cell_size_x,
+    cell_size_y,
+    n_na
+  )
+  expect_equal(geom$n_row, c(10, 15))
+  expect_equal(geom$n_col, c(20, 15))
+  expect_equal(geom$cell_size_x, c(1, 1))
+  expect_equal(geom$cell_size_y, c(1, 1))
+  expect_equal(geom$n_na, c(0, 1))
+
+  # Geometry must survive a CSV round-trip -- the reason it is columns, not an
+  # attribute (attributes are lost by write_csv and by dplyr verbs).
+  path <- tempfile(fileext = ".csv")
+  on.exit(unlink(path), add = TRUE)
+  readr::write_csv(result, path)
+  restored <- readr::read_csv(path, show_col_types = FALSE)
+
+  expect_true(all(
+    c("n_row", "n_col", "cell_size_x", "cell_size_y", "n_na") %in%
+      names(restored)
+  ))
+  expect_true(all(restored$n_row == result$n_row))
+  expect_true(all(restored$n_col == result$n_col))
 })
 
 test_that("calculate_metrics handles single landscape", {

@@ -31,7 +31,13 @@ A tibble with the following columns:
     \item{metric}{Name of the calculated metric}
     \item{value}{Calculated metric value}
     \item{warnings}{Any warnings generated during calculation (NA if none)}
+    \item{n_row, n_col}{Cell dimensions of the landscape the row was computed from}
+    \item{cell_size_x, cell_size_y}{Cell resolution (from \code{terra::res()})}
+    \item{n_na}{Number of NA cells in the landscape}
   }
+  The last five columns record each landscape's geometry so it stays attached to
+  the metrics (e.g. through \code{write_csv()}); they are used for geometry-mismatch
+  checks and are never used as model predictors.
 }
 \description{
 Calculates selected landscape metrics for one or more landscapes using functions
