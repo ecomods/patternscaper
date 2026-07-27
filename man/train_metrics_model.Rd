@@ -66,6 +66,9 @@ List containing:
     \item{classes}{Character vector of class names in alphabetical order}
     \item{performance}{List from evaluate_cv_performance() with confusion matrix,
       accuracy, per-class metrics, and validation results. NULL if cv_method = "none".}
+    \item{training_geometry}{One-row tibble summarising the geometry of the training
+      landscapes, used by \code{\link{apply_metrics_model}} to warn on geometry
+      mismatch. NULL if the metrics table carries no geometry columns.}
   }
 }
 \description{
