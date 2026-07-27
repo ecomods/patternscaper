@@ -13,6 +13,7 @@ train_metrics_model(
   threshold = 0.01,
   stepmax = 1e+05,
   model_path = NULL,
+  na_action = "drop_metrics",
   verbose = TRUE
 )
 }
@@ -43,6 +44,14 @@ Smaller values = more training iterations. Default: 0.01.}
 
 \item{model_path}{Character. Optional file path (must end in .rds) to save
 the trained model. Default: NULL (no saving).}
+
+\item{na_action}{Character. How to obtain the complete predictor matrix the
+network requires when a metric is missing for some but not all landscapes.
+\code{"drop_metrics"} (default) drops the affected metrics and keeps every
+landscape; \code{"drop_landscapes"} keeps every metric and drops the affected
+landscapes. Either way the cost of both options is reported. Metrics that are
+NA for every landscape, and landscapes that are
+NA for every metric, are always removed first as they do not carry any information.}
 
 \item{verbose}{Logical. Print training details and cross-validation results.
 Default: TRUE.}

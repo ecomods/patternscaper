@@ -19,11 +19,12 @@ classes unknown, only return predictions. Default: FALSE.}
 }
 \value{
 When return_performance = FALSE or actual classes unavailable:
-  Tibble with columns:
+  Tibble with one row per input landscape and columns:
   \describe{
     \item{landscape_id}{Numeric landscape identifier}
     \item{landscape_name}{Character landscape name (if available)}
-    \item{predicted_class}{Predicted landscape pattern}
+    \item{predicted_class}{Predicted landscape pattern, or NA if the landscape
+          could not be classified}
     \item{confidence}{Prediction confidence (maximum probability across classes)}
     \item{<class_name>}{Probability for each class the model was trained on.
           Probabilities are derived from raw neural network outputs using softmax transformation.}
@@ -42,6 +43,17 @@ Applies a trained neural network model to classify new landscapes according to t
 spatial pattern type. The function automatically calculates the required landscape
 metrics needed by the model and scales them appropriately.
 }
+\section{Landscapes that cannot be classified}{
+
+The network requires a complete set of its features for every landscape. If a
+required metric cannot be calculated for a landscape — at the class level this
+happens when a class is absent from it — that landscape cannot be scored. It is
+still returned, with \code{NA} for \code{predicted_class}, \code{confidence} and
+every class probability, and a warning names the affected landscapes. The output
+therefore always has one row per input landscape. Performance metrics, when
+requested, are calculated from the classified landscapes only.
+}
+
 \examples{
 \donttest{
 # Train a model on reference landscapes

@@ -126,7 +126,9 @@ plot_classified_landscapes <- function(
   # If only_misclassified is TRUE, filter to only misclassified landscapes
   if (only_misclassified) {
     classification <- classification |>
-      dplyr::filter(predicted_class != actual_class)
+      # Unclassified landscapes are not misclassifications, so they are excluded
+      # here.
+      dplyr::filter(!is.na(predicted_class) & predicted_class != actual_class)
     if (nrow(classification) == 0) {
       cli::cli_abort(
         "No misclassified landscapes found. To plot all classified
@@ -139,6 +141,14 @@ plot_classified_landscapes <- function(
   classification <- classification |>
     dplyr::mutate(
       title = dplyr::case_when(
+        # Landscape could not be classified: apply_metrics_model() returns NA
+        # when a required metric was unavailable for it. Must be matched before
+        # the equality branches, which would both give NA and fall through.
+        is.na(predicted_class) ~ dplyr::if_else(
+          is.na(actual_class) | actual_class == "unclassified",
+          "Unclassified",
+          paste0("Unclassified<br>Actual: ", actual_class)
+        ),
         # Unlabeled input (true class unknown, i.e. NA or "unclassified"):
         # show a predicted-only title.
         is.na(actual_class) | actual_class == "unclassified" ~

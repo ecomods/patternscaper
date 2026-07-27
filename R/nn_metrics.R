@@ -24,6 +24,13 @@
 #' @param stepmax Integer. Maximum number of training steps passed to \code{\link[neuralnet]{neuralnet}}. Default: 1e+05.
 #' @param model_path Character. Optional file path (must end in .rds) to save
 #'   the trained model. Default: NULL (no saving).
+#' @param na_action Character. How to obtain the complete predictor matrix the
+#'   network requires when a metric is missing for some but not all landscapes.
+#'   \code{"drop_metrics"} (default) drops the affected metrics and keeps every
+#'   landscape; \code{"drop_landscapes"} keeps every metric and drops the affected
+#'   landscapes. Either way the cost of both options is reported. Metrics that are
+#'   NA for every landscape, and landscapes that are
+#'   NA for every metric, are always removed first as they do not carry any information.
 #' @param verbose Logical. Print training details and cross-validation results.
 #'   Default: TRUE.
 #'
@@ -85,6 +92,7 @@ train_metrics_model <- function(
   threshold = 0.01,
   stepmax = 1e+05,
   model_path = NULL,
+  na_action = "drop_metrics",
   verbose = TRUE
 ) {
   # Validate input parameters -------------------------------------------------
@@ -147,6 +155,13 @@ train_metrics_model <- function(
     cli::cli_abort('cv_method must be one of: "none", "k-fold", or "loo"')
   }
 
+  # Validate na_action parameter
+  if (!na_action %in% c("drop_metrics", "drop_landscapes")) {
+    cli::cli_abort(
+      'na_action must be one of: "drop_metrics" or "drop_landscapes"'
+    )
+  }
+
   # Subset selected metrics if provided
   if (!is.null(metrics_selected)) {
     missing_metrics <- setdiff(metrics_selected, unique(metrics$metric))
@@ -168,7 +183,23 @@ train_metrics_model <- function(
     c("landscape_id", "landscape_name", "pattern")
   )
 
-  metrics_wide <- remove_incomplete_landscapes(metrics_wide, predictor_cols)
+  patterns_before <- unique(metrics_wide$pattern)
+  metrics_wide <- remove_incomplete_landscapes(
+    metrics_wide,
+    predictor_cols,
+    na_action = na_action
+  )
+
+  # Losing a whole pattern leaves the network with nothing to learn that class
+  # from. Stop here if this happens.
+  patterns_lost <- setdiff(patterns_before, unique(metrics_wide$pattern))
+  if (length(patterns_lost) > 0) {
+    cli::cli_abort(c(
+      "Removing landscapes with incomplete metrics eliminated {length(patterns_lost)} pattern{?s} entirely",
+      "x" = "No landscapes left for: {.val {patterns_lost}}",
+      "i" = "Use {.code na_action = \"drop_metrics\"} to drop the affected metrics instead, or supply more landscapes for them"
+    ))
+  }
 
   # Normalize the predictor variables (remove landscape columns)
   predictors <- metrics_wide |>
@@ -341,11 +372,12 @@ train_metrics_model <- function(
 #'   incomplete metrics always appear.
 #'
 #' @return When return_performance = FALSE or actual classes unavailable:
-#'   Tibble with columns:
+#'   Tibble with one row per input landscape and columns:
 #'   \describe{
 #'     \item{landscape_id}{Numeric landscape identifier}
 #'     \item{landscape_name}{Character landscape name (if available)}
-#'     \item{predicted_class}{Predicted landscape pattern}
+#'     \item{predicted_class}{Predicted landscape pattern, or NA if the landscape
+#'           could not be classified}
 #'     \item{confidence}{Prediction confidence (maximum probability across classes)}
 #'     \item{<class_name>}{Probability for each class the model was trained on.
 #'           Probabilities are derived from raw neural network outputs using softmax transformation.}
@@ -358,6 +390,16 @@ train_metrics_model <- function(
 #'     \item{performance}{Performance metrics from evaluate_cv_performance():
 #'       confusion matrix, accuracy, and per-class recall/precision/F1}
 #'   }
+#'
+#' @section Landscapes that cannot be classified:
+#' The neural network requires a complete set of its features for every landscape. If a
+#' required metric cannot be calculated for a landscape, that landscape cannot be
+#' classified. This could happen for example when a class is absent from a landscape
+#' that was used as a basis for one of the training metrics. The result is
+#' still returned, with \code{NA} for \code{predicted_class}, \code{confidence} and
+#' every class probability, and a warning names the affected landscapes. The output
+#' therefore always has one row per input landscape. Performance metrics, when
+#' requested, are calculated from the classified landscapes only.
 #' @examples
 #' \donttest{
 #' # Train a model on reference landscapes
@@ -456,26 +498,13 @@ apply_metrics_model <- function(
   # Convert metrics to wide format with 1 row per landscape
   metrics_wide <- metrics_to_wide(metrics)
 
-  # Deal with NA values -------------------------------------------------------
-  predictor_cols <- setdiff(
+  # Prepare predictors -------------------------------------------------------
+  predictor_names <- setdiff(
     colnames(metrics_wide),
     c("landscape_id", "landscape_name", "pattern")
   )
 
-  metrics_wide <- remove_incomplete_landscapes(metrics_wide, predictor_cols)
-
-  # Prepare predictors -------------------------------------------------------
-  predictors <- metrics_wide |>
-    dplyr::select(
-      -dplyr::any_of(c(
-        "landscape_id",
-        "landscape_name",
-        "pattern"
-      ))
-    )
-
   # Validate we have all required features
-  predictor_names <- colnames(predictors)
   missing_features <- setdiff(nn_model$features, predictor_names)
 
   if (length(missing_features) > 0) {
@@ -497,12 +526,34 @@ apply_metrics_model <- function(
   }
 
   # Select only model features in correct order
-  predictors <- predictors |>
+  predictors <- metrics_wide |>
     dplyr::select(dplyr::all_of(nn_model$features))
+
+  # Deal with NA values -------------------------------------------------------
+  # Unlike training, no landscape is be dropped here:
+  # Landscapes whose required metrics could not all be calculated are
+  # kept and returned unclassified instead. Dropping the metric is not an option,
+  # since the network needs exactly the feature set it was trained on.
+  incomplete <- rowSums(is.na(predictors)) > 0
+
+  if (all(incomplete)) {
+    cli::cli_abort(c(
+      "No input landscape has all the metrics the model requires",
+      "i" = "Model requires: {.val {nn_model$features}}"
+    ))
+  }
+
+  if (any(incomplete)) {
+    cli::cli_warn(c(
+      "Could not classify {sum(incomplete)} landscape{?s}, returned with NA predictions",
+      "i" = "Affected: {.val {metrics_wide$landscape_name[incomplete]}}",
+      "i" = "At the class level a metric cannot be calculated for a class that is absent from a landscape."
+    ))
+  }
 
   # Scale the metrics using the same parameters as during training
   predictors_scaled <- scale(
-    predictors,
+    predictors[!incomplete, , drop = FALSE],
     center = scaling_params$center,
     scale = scaling_params$scale
   )
@@ -514,20 +565,31 @@ apply_metrics_model <- function(
   )
 
   # Convert raw outputs to probabilities using softmax
-  pred <- softmax_rows(pred_raw)
+  pred_complete <- softmax_rows(pred_raw)
 
-  # Add class names as column names
-  colnames(pred) <- class_names
+  # Expand back to one row per input landscape, leaving unclassified rows NA
+  pred <- matrix(
+    NA_real_,
+    nrow = nrow(metrics_wide),
+    ncol = length(class_names),
+    dimnames = list(NULL, class_names)
+  )
+  pred[!incomplete, ] <- pred_complete
 
-  # Turn into a tibble and add columns for predicted class and confidence
+  # Turn into a tibble and add columns for predicted class and confidence.
   predictions <- tibble::as_tibble(pred)
 
-  # Find the confidence (the probability for the predicted class)
-  predictions$confidence <- apply(pred, 1, max)
+  confidence <- rep(NA_real_, nrow(pred))
+  predicted_class <- rep(NA_character_, nrow(pred))
 
-  # Find the class with the highest probability (this is the predicted class)
-  max_col <- apply(pred, 1, which.max)
-  predicted_class <- colnames(pred)[max_col]
+  # Find the confidence (the probability for the predicted class) and the class
+  # with the highest probability (this is the predicted class)
+  confidence[!incomplete] <- apply(pred_complete, 1, max)
+  predicted_class[!incomplete] <- class_names[
+    apply(pred_complete, 1, which.max)
+  ]
+
+  predictions$confidence <- confidence
   predictions$predicted_class <- predicted_class
 
   # Reorder the columns
@@ -568,15 +630,25 @@ apply_metrics_model <- function(
       return(predictions)
     }
 
-    # All classes are valid - proceed with performance evaluation
+    # All classes are valid - proceed with performance evaluation.
+    # Unclassified landscapes have no predicted class to score, so they are
+    # excluded here; they remain in the returned predictions table though.
+    scored <- !is.na(predictions$predicted_class)
+
+    if (any(!scored)) {
+      cli::cli_warn(
+        "Performance is based on the {sum(scored)} classified landscape{?s}, excluding {sum(!scored)} that could not be classified"
+      )
+    }
+
     # Create single-fold structure for evaluate_cv_performance
-    cv_predictions <- list(predictions$predicted_class)
+    cv_predictions <- list(predictions$predicted_class[scored])
     cv_probabilities <- list(as.matrix(
-      predictions |>
+      predictions[scored, ] |>
         dplyr::select(dplyr::all_of(class_names))
     ))
-    cv_actual <- list(predictions$actual_class)
-    cv_landscape_ids <- list(predictions$landscape_id)
+    cv_actual <- list(predictions$actual_class[scored])
+    cv_landscape_ids <- list(predictions$landscape_id[scored])
 
     # Evaluate performance using same function as training
     performance <- evaluate_cv_performance(

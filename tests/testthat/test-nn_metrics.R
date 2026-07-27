@@ -306,11 +306,122 @@ test_that("train_metrics_model handles NA values correctly", {
       cv_method = "none",
       verbose = FALSE
     ),
-    "Removed.*landscape.*with incomplete metrics"
+    "Removed.*landscape.*where every required metric was NA"
   )
 
   # Should still return valid model if landscapes remain (25 out of 30)
   expect_s3_class(result$model, "nn")
+})
+
+test_that("train_metrics_model separates unusable from partly incomplete landscapes", {
+  metrics <- fixtures$small_metrics_landscape
+  landscape_ids <- unique(metrics$landscape_id)
+  first_metric <- unique(metrics$metric)[1]
+
+  # One landscape has no usable metric at all
+  metrics$value[metrics$landscape_id == landscape_ids[1]] <- NA
+  # Another is missing a single metric only
+  metrics$value[
+    metrics$landscape_id == landscape_ids[2] &
+      metrics$metric == first_metric
+  ] <- NA
+
+  warnings <- capture_warnings(
+    train_metrics_model(metrics, cv_method = "none", verbose = FALSE)
+  )
+
+  # The two cases are reported separately, since the remedy differs. The
+  # no-information landscape always goes; the partly incomplete one costs a
+  # metric under the default na_action.
+  expect_match(warnings, "where every required metric was NA", all = FALSE)
+  expect_match(warnings, "missing for some landscapes", all = FALSE)
+})
+
+test_that("train_metrics_model validates na_action parameter", {
+  expect_error(
+    train_metrics_model(
+      fixtures$small_metrics_landscape,
+      cv_method = "none",
+      na_action = "drop_everything",
+      verbose = FALSE
+    ),
+    "na_action must be one of"
+  )
+})
+
+test_that("train_metrics_model na_action chooses which side to sacrifice", {
+  metrics <- fixtures$small_metrics_landscape
+  landscape_ids <- unique(metrics$landscape_id)
+  first_metric <- unique(metrics$metric)[1]
+
+  # A single landscape is missing a single metric
+  metrics$value[
+    metrics$landscape_id == landscape_ids[1] &
+      metrics$metric == first_metric
+  ] <- NA
+
+  n_landscapes <- length(landscape_ids)
+  n_metrics <- length(unique(metrics$metric))
+
+  # Default drops the metric and keeps every landscape
+  expect_warning(
+    dropped_metric <- train_metrics_model(
+      metrics,
+      cv_method = "none",
+      verbose = FALSE
+    ),
+    "missing for some landscapes"
+  )
+  expect_false(first_metric %in% dropped_metric$features)
+  expect_equal(length(dropped_metric$features), n_metrics - 1)
+
+  # Opting out keeps every metric and drops the landscape instead
+  expect_warning(
+    dropped_landscape <- train_metrics_model(
+      metrics,
+      cv_method = "none",
+      na_action = "drop_landscapes",
+      verbose = FALSE
+    ),
+    "with incomplete metrics"
+  )
+  expect_true(first_metric %in% dropped_landscape$features)
+  expect_equal(length(dropped_landscape$features), n_metrics)
+
+  # Both warnings state the cost of the alternative
+  metric_warning <- capture_warnings(
+    train_metrics_model(metrics, cv_method = "none", verbose = FALSE)
+  )
+  expect_match(metric_warning, "drop_landscapes", all = FALSE)
+})
+
+test_that("train_metrics_model aborts when a pattern is lost entirely", {
+  metrics <- fixtures$small_metrics_landscape
+  first_metric <- unique(metrics$metric)[1]
+  lost_pattern <- unique(metrics$pattern)[1]
+
+  # Every landscape of one pattern is missing the same single metric, so
+  # dropping landscapes would remove that pattern from the training set
+  metrics$value[
+    metrics$pattern == lost_pattern & metrics$metric == first_metric
+  ] <- NA
+
+  expect_error(
+    suppressWarnings(train_metrics_model(
+      metrics,
+      cv_method = "none",
+      na_action = "drop_landscapes",
+      verbose = FALSE
+    )),
+    "eliminated 1 pattern entirely"
+  )
+
+  # The default resolves the same data without losing the pattern
+  expect_warning(
+    result <- train_metrics_model(metrics, cv_method = "none", verbose = FALSE),
+    "missing for some landscapes"
+  )
+  expect_true(lost_pattern %in% result$classes)
 })
 
 test_that("train_metrics_model errors when all landscapes have NAs", {
@@ -629,6 +740,57 @@ test_that("apply_metrics_model works with class-level metrics", {
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 3)
   expect_equal(model$features_level, "class")
+})
+
+test_that("apply_metrics_model returns unclassifiable landscapes as NA", {
+  skip_if_not_installed("landscapemetrics")
+
+  set.seed(7)
+  size <- 20
+  make_mixed <- function(pattern, i) {
+    landscape(
+      matrix(rbinom(size^2, 1, if (pattern == "sparse") 0.3 else 0.7), size, size),
+      pattern = pattern,
+      name = paste0(pattern, "_", i)
+    )
+  }
+
+  # Train on landscapes that all contain both classes
+  train_landscapes <- c(
+    lapply(1:6, \(i) make_mixed("sparse", i)),
+    lapply(1:6, \(i) make_mixed("dense", i))
+  )
+  metrics <- calculate_metrics(
+    train_landscapes,
+    metrics = c("ai", "pland"),
+    level = "class"
+  )
+  model <- train_metrics_model(metrics, cv_method = "none", verbose = FALSE)
+
+  # One new landscape is fully vegetated, so class 0 is absent from it
+  new_landscapes <- c(
+    lapply(1:3, \(i) make_mixed("sparse", paste0("new", i))),
+    list(landscape(matrix(1L, size, size), name = "new_full"))
+  )
+
+  expect_warning(
+    result <- apply_metrics_model(new_landscapes, model),
+    "Could not classify 1 landscape"
+  )
+
+  # Every input landscape is present, not just the classifiable ones
+  expect_equal(nrow(result), 4)
+  expect_true("new_full" %in% result$landscape_name)
+
+  unclassified <- result[result$landscape_name == "new_full", ]
+  expect_true(is.na(unclassified$predicted_class))
+  expect_true(is.na(unclassified$confidence))
+  expect_true(all(is.na(unclassified[, model$classes])))
+
+  # The other landscapes are classified normally
+  classified <- result[result$landscape_name != "new_full", ]
+  expect_false(any(is.na(classified$predicted_class)))
+  expect_false(any(is.na(classified$confidence)))
 })
 
 test_that("apply_metrics_model errors when metrics cannot be calculated", {

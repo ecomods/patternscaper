@@ -728,6 +728,55 @@ test_that("sample_landscape_params handles fixed single values", {
   expect_true(length(unique(cluster_vals)) > 1)
 })
 
+# Continuous frequency sampling (M2) --------------------------------------
+
+test_that("sample_landscape_params draws frequency continuously across its range", {
+  set.seed(2026)
+
+  # bands default range: continuous, entirely below 1 (regressed to 0.1 before)
+  bands_samples <- replicate(
+    100,
+    sample_landscape_params(
+      list(frequency = c(0.1, 0.3)),
+      integer_params = character(0),
+      width = 100,
+      height = 100
+    )$frequency
+  )
+  expect_true(all(bands_samples >= 0.1 & bands_samples <= 0.3))
+  expect_true(length(unique(bands_samples)) > 1)
+
+  # labyrinth default range: fractional (only endpoints appeared before)
+  laby_samples <- replicate(
+    100,
+    sample_landscape_params(
+      list(frequency = c(2.5, 3.5)),
+      integer_params = character(0),
+      width = 100,
+      height = 100
+    )$frequency
+  )
+  expect_true(all(laby_samples >= 2.5 & laby_samples <= 3.5))
+  expect_true(length(unique(laby_samples)) > 1)
+  # Interior values, not just the two endpoints, are reachable
+  expect_true(any(laby_samples > 2.5 & laby_samples < 3.5))
+})
+
+test_that("sample_landscape_params returns the fixed value for a collapsed integer range", {
+  # seq() collapses c(3, 3) to a single value >= 1; sample() must not
+  # reinterpret it as sample.int(3).
+  samples <- replicate(
+    50,
+    sample_landscape_params(
+      list(octaves = c(3, 3)),
+      integer_params = c("octaves"),
+      width = 100,
+      height = 100
+    )$octaves
+  )
+  expect_true(all(samples == 3))
+})
+
 # Retry message tests -----------------------------------------------------
 
 test_that("create_landscapes shows appropriate retry messages", {

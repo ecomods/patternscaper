@@ -70,12 +70,14 @@ landscape_metrics <- calculate_metrics(
 You can use the `evaluate_metrics` function to select the n (e.g. n=10) most informative metrics for classification based on different methods. Here, we use the effect size of a Kruskal-Wallis H test (for more details and other options see [landscape metrics vignette](landscape-metrics.html)).
 
 :::{.callout-note}
-Note, that some metrics may return `NA` for some landscapes. Also, some metrics may
+Note, that some metrics may return `NA` for some landscapes, and some metrics may not be
+available for all landscapes at all. For example, at the class level, a metric cannot be calculated for a
+class that is absent from a landscape. Also, some metrics may
 have the same value for each landscape (zero variance between the values). By default, these
-metrics are removed before evaluation and the user gets warned about the 
+metrics are removed before evaluation and the user gets warned about the
 metrics that are removed.
 
-It is not recommended to set `exclude_NA_metrics = FALSE`, as metrics with `NA` values cannot be used for training the neural network. They may however be informative and useful for other types of analyses.
+It is not recommended to set `exclude_incomplete_metrics = FALSE`, as metrics that are missing for some landscapes cannot be used for training the neural network. They may however be informative and useful for other types of analyses.
 :::
 
 

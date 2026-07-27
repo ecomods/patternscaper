@@ -148,7 +148,7 @@ test_that("evaluate_metrics handles NA values correctly", {
   # Should exclude NA metrics by default
   expect_warning(
     result <- evaluate_metrics(metrics, metrics_number = 5),
-    "Excluded.*metrics with NA values"
+    "NA value for at least one landscape"
   )
   expect_true(!any(c("metric_1", "metric_2") %in% result))
 
@@ -156,7 +156,7 @@ test_that("evaluate_metrics handles NA values correctly", {
   result_with_na <- evaluate_metrics(
     metrics,
     metrics_number = 5,
-    exclude_NA_metrics = FALSE
+    exclude_incomplete_metrics = FALSE
   )
   expect_type(result_with_na, "character")
 })
@@ -189,6 +189,77 @@ test_that("evaluate_metrics drops metrics that are constant only up to rounding"
     "no variation across landscapes"
   )
   expect_false("metric_1" %in% result)
+})
+
+test_that("evaluate_metrics excludes metrics missing for some landscapes", {
+  metrics <- create_test_metrics(n_metrics = 6)
+  # A metric that cannot be calculated for a landscape has no row at all, rather
+  # than a row holding an NA value
+  metrics <- metrics[
+    !(metrics$metric == "metric_1" & metrics$landscape_name == "landscape_1"),
+  ]
+
+  expect_warning(
+    result <- evaluate_metrics(
+      metrics,
+      metrics_number = 5,
+      correlation_threshold = 1
+    ),
+    "Not available for all landscapes"
+  )
+  expect_false("metric_1" %in% result)
+
+  # Should keep incomplete metrics if specified
+  result_incomplete <- evaluate_metrics(
+    metrics,
+    metrics_number = 6,
+    correlation_threshold = 1,
+    exclude_incomplete_metrics = FALSE
+  )
+  expect_true("metric_1" %in% result_incomplete)
+})
+
+test_that("evaluate_metrics excludes class-level metrics of an absent class", {
+  skip_if_not_installed("landscapemetrics")
+
+  set.seed(1)
+  size <- 20
+  landscapes <- c(
+    lapply(1:4, \(i) {
+      landscape(
+        matrix(rbinom(size^2, 1, 0.4), size, size),
+        pattern = "mixed",
+        name = paste0("mixed_", i)
+      )
+    }),
+    lapply(1:4, \(i) {
+      landscape(
+        matrix(1L, size, size),
+        pattern = "vegetated",
+        name = paste0("vegetated_", i)
+      )
+    })
+  )
+
+  metrics <- calculate_metrics(
+    landscapes,
+    metrics = c("ai", "pland"),
+    level = "class"
+  )
+
+  # Class 0 is absent from the vegetated landscapes, so landscapemetrics returns
+  # no row for its metrics instead of an NA value
+  expect_equal(sum(is.na(metrics$value)), 0)
+
+  expect_warning(
+    result <- evaluate_metrics(
+      metrics,
+      metrics_number = 2,
+      correlation_threshold = 1
+    ),
+    "Not available for all landscapes"
+  )
+  expect_false(any(c("ai_0", "pland_0") %in% result))
 })
 
 # 4. METRIC EXCLUSION TESTS ----
@@ -379,7 +450,7 @@ test_that("evaluate_metrics handles real metric NA patterns", {
   result <- evaluate_metrics(
     real_metrics,
     metrics_number = 10,
-    exclude_NA_metrics = TRUE
+    exclude_incomplete_metrics = TRUE
   )
 
   expect_type(result, "character")

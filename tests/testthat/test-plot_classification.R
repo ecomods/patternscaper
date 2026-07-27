@@ -186,6 +186,38 @@ test_that("plot_classified_landscapes rejects invalid landscape objects", {
   )
 })
 
+test_that("plot_classified_landscapes titles unclassified landscapes", {
+  landscapes <- create_fixture_landscapes("minimal")[1:2]
+
+  classification <- tibble::tibble(
+    landscape_id = 1:2,
+    actual_class = c("spots", "labyrinth"),
+    # apply_metrics_model() returns NA when a landscape could not be classified
+    predicted_class = c("spots", NA_character_),
+    confidence = c(0.9, NA_real_)
+  )
+
+  result <- plot_classified_landscapes(
+    classification = classification,
+    landscapes = landscapes,
+    only_misclassified = FALSE
+  )
+  expect_s3_class(result, "patchwork")
+
+  titles <- vapply(
+    seq_along(landscapes),
+    function(i) result[[i]]$labels$title,
+    character(1)
+  )
+
+  # The classified landscape keeps its normal title, the unclassified one is
+  # labelled as such instead of falling through to "no title"
+  expect_match(titles[1], "spots")
+  expect_match(titles[2], "Unclassified")
+  expect_match(titles[2], "Actual: labyrinth")
+  expect_false(any(grepl("no title", titles)))
+})
+
 test_that("plot_classified_landscapes rejects length mismatch", {
   # More landscapes than classification rows
   landscapes_more <- list(

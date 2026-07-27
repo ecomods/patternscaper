@@ -8,7 +8,7 @@ evaluate_metrics(
   metrics,
   metrics_number = 10,
   method = "kruskal_effsize",
-  exclude_NA_metrics = TRUE,
+  exclude_incomplete_metrics = TRUE,
   exclude_metrics = NULL,
   correlation_threshold = 0.7,
   verbose = FALSE
@@ -22,9 +22,12 @@ evaluate_metrics(
 \item{method}{Character. Selection method to use (default: "kruskal_effsize").
 See 'Ranking Methods' section below for details.}
 
-\item{exclude_NA_metrics}{Logical. Whether to exclude metrics with NA values (default: TRUE).
-This is recommended if data is later used for model training as this does not
-accept missing values.}
+\item{exclude_incomplete_metrics}{Logical. Whether to exclude metrics with missing values
+(default: TRUE). This covers both metrics that are calculated as NA and metrics
+that are not available for every landscape. For example, at the class level a metric cannot
+be calculated for a class that is absent from a landscape. Keep this enabled if
+the data is later used for model training, which requires a complete predictor
+matrix.}
 
 \item{exclude_metrics}{Character vector. Metrics to exclude (default: NULL).}
 
