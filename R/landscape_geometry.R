@@ -45,3 +45,32 @@ landscape_geometry <- function(landscape) {
 landscapes_geometry <- function(landscapes) {
   purrr::map_dfr(landscapes, landscape_geometry)
 }
+
+#' Compact geometry summary of a training set
+#'
+#' Internal helper condensing the geometry of the training landscapes into a
+#' one-row record stored in a trained model. It records the representative cell
+#' dimensions and resolution (the median, which equals the common value when the
+#' landscapes are all the same size) plus whether the set is homogeneous, so that
+#' [apply_metrics_model()] and [apply_pixel_model()] can warn when application
+#' landscapes differ from the data the model was trained on.
+#'
+#' @param landscapes A list of landscape objects.
+#'
+#' @return A one-row tibble with columns `n_landscapes`, `n_row`, `n_col`,
+#'   `cell_size_x`, `cell_size_y` and `homogeneous`.
+#'
+#' @keywords internal
+#' @importFrom tibble tibble
+summarise_training_geometry <- function(landscapes) {
+  geometry <- landscapes_geometry(landscapes)
+
+  tibble::tibble(
+    n_landscapes = nrow(geometry),
+    n_row = stats::median(geometry$n_row),
+    n_col = stats::median(geometry$n_col),
+    cell_size_x = stats::median(geometry$cell_size_x),
+    cell_size_y = stats::median(geometry$cell_size_y),
+    homogeneous = nrow(unique(geometry[, c("n_row", "n_col")])) == 1
+  )
+}

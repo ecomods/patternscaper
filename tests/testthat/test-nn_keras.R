@@ -94,13 +94,20 @@ test_that("train_pixel_model works with cv_method='none'", {
       "classes",
       "input_shape",
       "architecture",
-      "performance"
+      "performance",
+      "training_geometry"
     )
   )
   expect_equal(model$classes, c("diffuse", "random", "sharp"))
   expect_equal(model$input_shape, c(50, 50, 1))
   expect_equal(model$architecture, "multiscale")
   expect_equal(model$performance$cv_method, "none")
+
+  # Training geometry summary reflects the 50x50 training landscapes
+  expect_equal(model$training_geometry$n_row, 50)
+  expect_equal(model$training_geometry$n_col, 50)
+  expect_equal(model$training_geometry$cell_size_x, 1)
+  expect_true(model$training_geometry$homogeneous)
 })
 
 test_that("train_pixel_model works with cv_method='k-fold'", {

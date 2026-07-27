@@ -11,10 +11,10 @@ landscapes_geometry(landscapes)
 }
 \value{
 A tibble with one row per landscape (columns as in
-  [landscape_geometry()]).
+  \code{\link{landscape_geometry}}).
 }
 \description{
-Internal helper mapping [landscape_geometry()] over a list of landscapes and
+Internal helper mapping \code{\link{landscape_geometry}} over a list of landscapes and
 row-binding the results, one row per landscape.
 }
 \keyword{internal}

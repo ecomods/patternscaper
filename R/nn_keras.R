@@ -69,6 +69,9 @@
 #'       results from evaluate_cv_performance() including confusion matrix, per-class
 #'       metrics, and overall accuracy. When cv_method = "none", contains training
 #'       metadata only (see note field for evaluation instructions).}
+#'     \item{training_geometry}{One-row tibble summarising the geometry of the
+#'       training landscapes (cell dimensions and resolution), used by
+#'       \code{\link{apply_pixel_model}} to warn on geometry mismatch.}
 #'   }
 #' @seealso \code{\link{apply_pixel_model}}
 #' @family neural network training
@@ -476,7 +479,8 @@ train_pixel_model <- function(
     classes = class_names,
     input_shape = input_shape,
     architecture = architecture,
-    performance = performance
+    performance = performance,
+    training_geometry = summarise_training_geometry(landscapes)
   )
 
   # Save model if requested

@@ -40,3 +40,26 @@ test_that("landscapes_geometry returns one row per landscape", {
   expect_equal(g$n_col, c(10, 12, 20))
   expect_equal(g$aspect_ratio, c(1, 1.5, 1))
 })
+
+test_that("summarise_training_geometry condenses a homogeneous set", {
+  landscapes <- rep(list(landscape(matrix(1, nrow = 40, ncol = 40))), 5)
+  s <- summarise_training_geometry(landscapes)
+
+  expect_equal(nrow(s), 1)
+  expect_equal(s$n_landscapes, 5)
+  expect_equal(s$n_row, 40)
+  expect_equal(s$n_col, 40)
+  expect_equal(s$cell_size_x, 1)
+  expect_true(s$homogeneous)
+})
+
+test_that("summarise_training_geometry flags a heterogeneous set", {
+  landscapes <- list(
+    landscape(matrix(1, nrow = 40, ncol = 40)),
+    landscape(matrix(1, nrow = 60, ncol = 60))
+  )
+  s <- summarise_training_geometry(landscapes)
+
+  expect_false(s$homogeneous)
+  expect_equal(s$n_landscapes, 2)
+})
