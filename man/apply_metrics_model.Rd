@@ -4,7 +4,12 @@
 \alias{apply_metrics_model}
 \title{Apply Neural Network for Landscape Pattern Classification Based on their Landscape Metrics}
 \usage{
-apply_metrics_model(landscapes, nn_model, return_performance = FALSE)
+apply_metrics_model(
+  landscapes,
+  nn_model,
+  return_performance = FALSE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{landscapes}{Landscape object (single) or list of landscape objects to classify.
@@ -16,6 +21,10 @@ Must contain elements: model, scaling, classes, features, and features_level.}
 \item{return_performance}{Logical. If TRUE and landscapes contain known classes
 (pattern attribute), calculate and return performance metrics. If FALSE or
 classes unknown, only return predictions. Default: FALSE.}
+
+\item{verbose}{Logical. Show performance summaries when `return_performance = TRUE`
+(default: TRUE). When FALSE, runs silently. Warnings about unknown classes or
+incomplete metrics always appear.}
 }
 \value{
 When return_performance = FALSE or actual classes unavailable:
@@ -45,9 +54,10 @@ metrics needed by the model and scales them appropriately.
 }
 \section{Landscapes that cannot be classified}{
 
-The network requires a complete set of its features for every landscape. If a
-required metric cannot be calculated for a landscape — at the class level this
-happens when a class is absent from it — that landscape cannot be scored. It is
+The neural network requires a complete set of its features for every landscape. If a
+required metric cannot be calculated for a landscape, that landscape cannot be
+classified. This could happen for example when a class is absent from a landscape
+that was used as a basis for one of the training metrics. The result is
 still returned, with \code{NA} for \code{predicted_class}, \code{confidence} and
 every class probability, and a warning names the affected landscapes. The output
 therefore always has one row per input landscape. Performance metrics, when

@@ -21,7 +21,7 @@ same statistics to both the training and validation predictors. This keeps
 the validation rows from contributing to the `center`/`scale` used on them,
 avoiding the optimistic leakage that arises when the whole dataset is scaled
 before cross-validation. Columns that are constant within the training fold
-(`sd == 0`, or `NA` for a single-row fold) are given `scale = 1` so they
-become all-zero after centering instead of `NaN`.
+are given `scale = 1` so they become all-zero after centering instead of
+`NaN` (see \code{\link{scaling_stats}}).
 }
 \keyword{internal}

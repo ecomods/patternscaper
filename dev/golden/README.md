@@ -30,23 +30,25 @@ Run from the **package root**, in a session where keras/TensorFlow works.
 
 ## What is compared
 
-The two workflows are compared differently, because only one of them is
-bit-reproducible:
+Neither workflow is bit-reproducible, so both numeric comparisons use a
+tolerance — but at very different magnitudes, and the categorical parts stay
+effectively exact in both:
 
-- **Metrics workflow** — compared **exactly** (metrics table, selected metrics,
-  accuracies, confusion matrices, prediction tables). `neuralnet` and
-  `landscapemetrics` are deterministic and portable across machines, so any
-  difference here is a real change.
-- **Pixel workflow** — compared with a **tolerance of `1e-5`** on numeric values.
-  Keras predictions drift by ~1e-7 between TensorFlow installations, so an exact
-  comparison fails on every machine switch. Predicted class labels and confusion
-  matrices are still compared exactly, since the tolerance applies only to
-  numbers — a class flip is still caught.
+- **Metrics workflow** — compared with a **tight tolerance of `1e-8`**.
+  `neuralnet` and `landscapemetrics` are structurally deterministic, but the
+  matrix maths runs through (often multithreaded) BLAS, so confidence values can
+  differ by ~1e-16 (one ULP) even between two runs on the same machine. The tight
+  tolerance absorbs that; selected metric names, class labels and confusion
+  counts are categorical/integer, so a real change there is still caught.
+- **Pixel workflow** — compared with a looser **tolerance of `1e-5`** on numeric
+  values. Keras predictions drift by ~1e-7 between TensorFlow installations, so a
+  tighter comparison fails on every machine switch. Predicted class labels and
+  confusion matrices are still effectively exact.
 
 ## Caveats
 
 - Switching machines does **not** require a re-capture. Re-run `capture.R` only
   when you intentionally change results.
-- The `1e-5` tolerance hides genuine pixel-side changes smaller than that. Any
-  real regression in the CNN moves predictions far more, but keep it in mind when
-  a change is expected to be numerically tiny.
+- Both tolerances hide genuine changes smaller than themselves. A real regression
+  moves predictions far more, but keep it in mind when a change is expected to be
+  numerically tiny (below `1e-8` for metrics, `1e-5` for pixels).

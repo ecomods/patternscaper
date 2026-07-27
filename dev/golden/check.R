@@ -3,13 +3,11 @@
 # Run from the PACKAGE ROOT:
 #   source("dev/golden/check.R")
 #
-# The two workflows are compared differently on purpose. The metrics workflow is
-# deterministic and portable across machines, so it is compared exactly. The
-# pixel workflow drifts in the last decimals between TensorFlow installations,
-# so it is compared with a tolerance -- without it the check fails on every
-# machine switch and the harness stops being a usable gate. Class labels and
-# confusion matrices are still compared exactly, because the tolerance only
-# applies to numeric values.
+# Both workflows are compared with a tolerance, just at different magnitudes,
+# because neither is bit-reproducible. What IS stable in both -- selected metric
+# names, predicted class labels, confusion-matrix counts -- is categorical or
+# integer, so it is effectively exact regardless of the tolerance (a real change
+# there differs by a whole label or count, not by a fraction).
 
 source("dev/golden/run_golden.R")
 
@@ -18,6 +16,13 @@ pixel_values <- c("pix_accuracy", "pix_confusion", "pix_predictions")
 # Absorbs TensorFlow installation differences (~1e-7 observed across machines)
 # while staying far below any shift a real code regression would produce.
 pixel_tolerance <- 1e-5
+
+# The metrics workflow is structurally deterministic, but neuralnet's matrix
+# maths runs through (often multithreaded) BLAS, so confidence values can differ
+# by ~1e-16 (one ULP) even between two runs on the same machine. This tight
+# tolerance absorbs that ordering noise; a genuine change moves values far more,
+# and metric selection / class labels / counts are compared categorically anyway.
+metrics_tolerance <- 1e-8
 
 reference <- readRDS("dev/golden/reference.rds")
 current <- run_golden()
@@ -29,7 +34,8 @@ diff_metrics <- waldo::compare(
   reference[metrics_values],
   current[metrics_values],
   x_arg = "reference",
-  y_arg = "current"
+  y_arg = "current",
+  tolerance = metrics_tolerance
 )
 
 diff_pixel <- waldo::compare(
@@ -42,7 +48,9 @@ diff_pixel <- waldo::compare(
 
 # Report ----------------------------------------------------------------------
 if (length(diff_metrics) == 0) {
-  cli::cli_alert_success("Metrics workflow: identical to the reference.")
+  cli::cli_alert_success(
+    "Metrics workflow: matches the reference within tolerance {metrics_tolerance}."
+  )
 } else {
   cli::cli_alert_danger(
     "Metrics workflow: {length(diff_metrics)} difference{?s} from the reference."
