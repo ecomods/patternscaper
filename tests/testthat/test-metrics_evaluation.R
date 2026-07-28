@@ -290,14 +290,16 @@ test_that("evaluate_metrics fails when all metrics excluded", {
 
 # 5. CORRELATION FILTERING TESTS ----
 test_that("correlation filtering reduces to uncorrelated metrics if threshold not 1", {
-  # Create a table with 4 metrics for 10 landscapes where 2 metrics are exactly the same
+  # Create a table with 4 metrics for 10 landscapes where 2 metrics are exactly the same.
+  # Values are positive so that they are on a ratio scale, which "coeffvar_all"
+  # requires. Shifting the mean does not change the correlations under test.
   correlated_metrics <- tibble::tibble(
     landscape_name = paste0("landscape_", 1:10),
     pattern = rep(c("A", "B"), each = 5),
     level = "landscape",
-    metric_A = rnorm(10),
-    metric_B = rnorm(10),
-    metric_C = rnorm(10),
+    metric_A = rnorm(10, mean = 10, sd = 2),
+    metric_B = rnorm(10, mean = 10, sd = 2),
+    metric_C = rnorm(10, mean = 10, sd = 2),
     metric_D = metric_A
   )
   # Bring to long format which is expected by the function

@@ -238,6 +238,16 @@ evaluate_metrics <- function(
     method = method
   )
 
+  # A ranking method can discard metrics it cannot score, so it may return
+  # nothing at all. Fail here rather than further down with a message about
+  # internals the user never called.
+  if (length(ranked_metrics) == 0) {
+    cli::cli_abort(c(
+      "No metrics could be ranked with {.arg method} = {.val {method}}.",
+      "i" = "Try a different ranking {.arg method}."
+    ))
+  }
+
   # Verbose output
   if (verbose) {
     cli::cli_alert_info("Ranked metrics ({method}): {.val {ranked_metrics}}")
@@ -287,20 +297,45 @@ rank_metrics_by_method <- function(metrics, method) {
 #' Ranks metrics by their coefficient of variation (CV = SD/mean).
 #' Higher CV indicates greater relative variability across landscapes.
 #'
+#' The coefficient of variation is only interpretable on a ratio scale, that is
+#' for metrics that are non-negative and have a meaningful zero. Metrics that can
+#' take negative values break it: their mean sits near zero, so `sd / mean`
+#' either explodes or flips sign, and the metric then dominates the ranking for
+#' purely numerical reasons. This happens with `clumpy` (range -1 to 1) and with
+#' `pafrac`, whose underlying log-log regression can return values far outside
+#' its nominal range of 1 to 2. Such metrics are dropped from this ranking
+#' instead of being allowed to outrank everything else.
+#'
 #' @param metrics tibble. Metrics data with columns 'metric' and 'value'.
 #'
 #' @return Character vector. Metrics ranked by CV (highest first).
-#' @importFrom dplyr group_by summarize filter arrange pull
+#' @importFrom dplyr summarize filter arrange pull
 #' @noRd
 rank_by_coefficient_variation <- function(metrics) {
-  metrics |>
-    dplyr::group_by(metric) |>
+  metric_stats <- metrics |>
+    dplyr::filter(!is.na(value)) |>
     dplyr::summarize(
-      cv = sd(value, na.rm = TRUE) / mean(value, na.rm = TRUE),
-      .groups = "drop"
-    ) |>
-    dplyr::filter(is.finite(cv)) |>
-    dplyr::arrange(desc(cv)) |>
+      cv = sd(value) / mean(value),
+      min_value = min(value),
+      mean_value = mean(value),
+      .by = metric
+    )
+
+  not_ratio_scale <- metric_stats |>
+    dplyr::filter(min_value < 0 | mean_value <= 0) |>
+    dplyr::pull(metric)
+
+  if (length(not_ratio_scale) > 0) {
+    cli::cli_warn(c(
+      "Excluded {length(not_ratio_scale)} metric{?s} from the {.val coeffvar_all} ranking: {.val {not_ratio_scale}}",
+      "x" = "The coefficient of variation needs a ratio scale, but {cli::qty(length(not_ratio_scale))}{?this metric takes/these metrics take} negative values.",
+      "i" = "Rank {cli::qty(length(not_ratio_scale))}{?it/them} with a different {.arg method}."
+    ))
+  }
+
+  metric_stats |>
+    dplyr::filter(!metric %in% not_ratio_scale, is.finite(cv)) |>
+    dplyr::arrange(dplyr::desc(cv)) |>
     dplyr::pull(metric)
 }
 
