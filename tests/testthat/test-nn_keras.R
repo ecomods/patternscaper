@@ -204,6 +204,24 @@ test_that("apply_pixel_model validates landscapes input", {
   )
 })
 
+test_that("apply_pixel_model aborts on landscapes with NA cells", {
+  # A stub model is enough here: the NA guard fires before the CNN is touched,
+  # so no keras training is needed.
+  stub_model <- list(
+    model = NULL,
+    classes = c("a", "b"),
+    input_shape = c(10, 10, 1)
+  )
+  m <- matrix(1, nrow = 10, ncol = 10)
+  m[1, 1] <- NA
+  masked <- landscape(m, pattern = "a", name = "masked")
+
+  expect_error(
+    apply_pixel_model(masked, stub_model),
+    "NA cells"
+  )
+})
+
 test_that("apply_pixel_model returns predictions for single landscape", {
   skip_if_not_installed("keras3")
 

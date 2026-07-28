@@ -508,7 +508,8 @@ train_pixel_model <- function(
 #'   nearest neighbor interpolation, which preserves categorical cell values.
 #'   **Note**: Input landscapes must contain categorical/discrete habitat data (e.g., 0/1 for
 #'   two habitat types, or 0/1/2 for three types). Continuous data (e.g., elevation,
-#'   gradients) is not supported.
+#'   gradients) is not supported. Landscapes must also be free of NA cells as they would
+#'   produce meaningless predictions, so it raises an error instead.
 #' @param nn_model List. CNN model object from \code{\link{train_pixel_model}}.
 #' @param return_performance Logical. Whether to return performance metrics when actual classes are available (default: FALSE).
 #' @param verbose Logical. Show informational messages and performance summaries (default: TRUE).
@@ -610,6 +611,30 @@ apply_pixel_model <- function(
   landscape_names <- sapply(landscapes, function(l) {
     if (!is.null(l$name)) l$name else NA_character_
   })
+
+  # Guard against NA cells. NAs would reach the CNN as NaN which produces confident
+  # but meaningless predictions. Therefore we abort, naming the offending landscapes
+  # if this case happens.
+  na_counts <- vapply(
+    landscapes,
+    function(l) sum(is.na(terra::values(l$data))),
+    numeric(1)
+  )
+  if (any(na_counts > 0)) {
+    bad <- which(na_counts > 0)
+    labels <- ifelse(
+      is.na(landscape_names[bad]),
+      paste0("landscape ", bad),
+      landscape_names[bad]
+    )
+    detail <- paste0(labels, " (", na_counts[bad], " NA)")
+    cli::cli_abort(c(
+      "Cannot classify landscapes that contain NA cells.",
+      "x" = "Affected: {.val {detail}}",
+      "i" = "NA cells reach the CNN as NaN and yield meaningless predictions.",
+      "i" = "Crop to a rectangular region without NA. Do not fill NA with 0, which fabricates bare ground."
+    ))
+  }
 
   # Convert all landscapes to arrays, resizing if needed
   # First, check which ones need resizing
