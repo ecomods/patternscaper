@@ -64,6 +64,16 @@ therefore always has one row per input landscape. Performance metrics, when
 requested, are calculated from the classified landscapes only.
 }
 
+\section{Geometry checks}{
+
+If the model stores the geometry of its training landscapes (see
+\code{\link{train_metrics_model}}), the application landscapes are compared
+against it and a warning is issued when they differ substantially in extent,
+resolution or aspect ratio, since scale-dependent metrics are then unreliable.
+If the model has no stored training geometry, the checks are skipped with an
+informative note (suppressed when \code{verbose = FALSE}).
+}
+
 \examples{
 \donttest{
 # Train a model on reference landscapes

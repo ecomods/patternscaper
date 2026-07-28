@@ -173,6 +173,38 @@ test_that("train_metrics_model stores a training_geometry summary", {
   expect_true(model$training_geometry$homogeneous)
 })
 
+test_that("apply_metrics_model warns when application geometry differs from training", {
+  set.seed(1)
+  train <- create_landscapes(
+    n = 12,
+    patterns = c("random", "sharp", "diffuse"),
+    width = 40,
+    height = 40
+  )
+  train_metrics <- calculate_metrics(
+    train,
+    metrics = c("ai", "lsi", "ed"),
+    level = "landscape"
+  )
+  model <- suppressWarnings(train_metrics_model(
+    train_metrics,
+    metrics_selected = c("ai", "lsi", "ed"),
+    cv_method = "none",
+    stepmax = 1e6,
+    verbose = FALSE
+  ))
+
+  # Apply to 80x80 landscapes: 2x the training extent -> extent warning
+  bigger <- create_landscapes(
+    n = 4,
+    patterns = c("random", "sharp"),
+    width = 80,
+    height = 80
+  )
+  w <- capture_warnings(apply_metrics_model(bigger, model, verbose = FALSE))
+  expect_true(any(grepl("training extent", w)))
+})
+
 test_that("train_metrics_model warns when training landscapes differ in geometry", {
   set.seed(1)
   mixed <- c(

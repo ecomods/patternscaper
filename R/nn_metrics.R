@@ -418,6 +418,14 @@ train_metrics_model <- function(
 #' every class probability, and a warning names the affected landscapes. The output
 #' therefore always has one row per input landscape. Performance metrics, when
 #' requested, are calculated from the classified landscapes only.
+#'
+#' @section Geometry checks:
+#' If the model stores the geometry of its training landscapes (see
+#' \code{\link{train_metrics_model}}), the application landscapes are compared
+#' against it and a warning is issued when they differ substantially in extent,
+#' resolution or aspect ratio, since scale-dependent metrics are then unreliable.
+#' If the model has no stored training geometry, the checks are skipped with an
+#' informative note (suppressed when \code{verbose = FALSE}).
 #' @examples
 #' \donttest{
 #' # Train a model on reference landscapes
@@ -508,6 +516,22 @@ apply_metrics_model <- function(
     landscapes = landscapes,
     metrics = metrics_to_calculate,
     level = level
+  )
+
+  # Warn if the application landscapes differ in geometry from the training data
+  # (extent, resolution or aspect ratio). Skipped when the model stores no
+  # training geometry, e.g. one trained before geometry was recorded.
+  check_geometry(
+    dplyr::distinct(
+      metrics,
+      landscape_id,
+      n_row,
+      n_col,
+      cell_size_x,
+      cell_size_y
+    ),
+    nn_model$training_geometry,
+    verbose = verbose
   )
 
   # Filter to only features needed by the model

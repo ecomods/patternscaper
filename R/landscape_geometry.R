@@ -129,3 +129,103 @@ training_geometry_from_metrics <- function(metrics) {
   )
   summarise_geometry(geometry)
 }
+
+#' Warn when application landscapes differ in geometry from training
+#'
+#' Internal helper comparing the geometry of the landscapes a model is being
+#' applied to against the geometry summary stored at training time, and issuing a
+#' warning for each substantial difference. It compares
+#' **physical extent** (cells times resolution, so a change in either cell count
+#' or cell size is caught), cell resolution, and aspect ratio. When the training
+#' resolution is 1 (dimensionless, as for landscapes built from matrices) a
+#' resolution difference is reported as not assessable rather than as a calibrated
+#' ratio. When `training` is `NULL` (a model trained before geometry was recorded,
+#' or from a metrics table without geometry columns) it notes -- when `verbose` --
+#' that the checks are skipped, and does nothing else. Used by
+#' \code{\link{apply_metrics_model}}.
+#'
+#' @param application A per-landscape geometry tibble for the application
+#'   landscapes (columns `n_row`, `n_col`, `cell_size_x`, `cell_size_y`; see
+#'   \code{\link{landscapes_geometry}}).
+#' @param training A one-row training-geometry summary (see
+#'   \code{\link{summarise_geometry}}), or `NULL`.
+#' @param tolerance Numeric. Relative difference in extent or aspect ratio beyond
+#'   which a landscape is flagged (default 0.25, i.e. 25%).
+#' @param verbose Logical. Whether to emit an informative note when the checks are
+#'   skipped because the model has no stored training geometry (default TRUE).
+#'
+#' @return Invisibly `NULL`; called for the warnings it emits.
+#'
+#' @keywords internal
+#' @importFrom cli cli_warn cli_inform
+check_geometry <- function(
+  application,
+  training,
+  tolerance = 0.25,
+  verbose = TRUE
+) {
+  if (is.null(training)) {
+    if (verbose) {
+      cli::cli_inform(c(
+        "i" = "The model has no stored training geometry; geometry checks skipped.",
+        "i" = "Train on a metrics table from {.fn calculate_metrics} (which records geometry) to enable extent and resolution checks."
+      ))
+    }
+    return(invisible())
+  }
+
+  n <- nrow(application)
+
+  # Physical extent = cells x resolution, per axis.
+  extent_ratio_x <- (application$n_col * application$cell_size_x) /
+    (training$n_col * training$cell_size_x)
+  extent_ratio_y <- (application$n_row * application$cell_size_y) /
+    (training$n_row * training$cell_size_y)
+  extent_off <- extent_ratio_x < (1 - tolerance) |
+    extent_ratio_x > (1 + tolerance) |
+    extent_ratio_y < (1 - tolerance) |
+    extent_ratio_y > (1 + tolerance)
+  n_extent <- sum(extent_off)
+  if (n_extent > 0) {
+    cli::cli_warn(c(
+      "{n_extent}/{n} application landscape{?s} differ from the training extent by more than {round(tolerance * 100)}%.",
+      "i" = "Scale-dependent metrics (area, edge, patch counts) change with extent, so predictions for these landscapes may be unreliable."
+    ))
+  }
+
+  # Cell resolution.
+  cell_off <- abs(application$cell_size_x - training$cell_size_x) /
+    training$cell_size_x >
+    0.01 |
+    abs(application$cell_size_y - training$cell_size_y) /
+      training$cell_size_y >
+      0.01
+  n_cell <- sum(cell_off)
+  if (n_cell > 0) {
+    if (training$cell_size_x == 1 && training$cell_size_y == 1) {
+      cli::cli_warn(c(
+        "{n_cell}/{n} application landscape{?s} have a different cell resolution than the training data.",
+        "i" = "Training used resolution 1 (dimensionless); comparability with georeferenced data cannot be assessed automatically. Ensure the application landscapes are at the same spatial grain."
+      ))
+    } else {
+      cli::cli_warn(c(
+        "{n_cell}/{n} application landscape{?s} have a different cell resolution than the training data ({training$cell_size_x}).",
+        "i" = "Scale-dependent metrics depend on cell size; predictions may be unreliable."
+      ))
+    }
+  }
+
+  # Aspect ratio (secondary).
+  aspect_ratio <- (application$n_col / application$n_row) /
+    (training$n_col / training$n_row)
+  aspect_off <- abs(log(aspect_ratio)) > log(1 + tolerance)
+  n_aspect <- sum(aspect_off)
+  if (n_aspect > 0) {
+    cli::cli_warn(c(
+      "{n_aspect}/{n} application landscape{?s} have a different aspect ratio than the training data.",
+      "i" = "Shape-sensitive metrics may differ from training."
+    ))
+  }
+
+  invisible()
+}
