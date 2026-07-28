@@ -59,6 +59,18 @@ test_that("train_pixel_model rejects unclassified landscapes", {
   )
 })
 
+test_that("train_pixel_model aborts on heterogeneous training dimensions", {
+  # Aborts before any keras call, so no training happens.
+  mixed <- list(
+    create_landscape("random", width = 30, height = 30, name = "r1"),
+    create_landscape("sharp", width = 40, height = 40, name = "s1")
+  )
+  expect_error(
+    train_pixel_model(mixed, cv_method = "none", epochs = 1, verbose = FALSE),
+    "same dimensions"
+  )
+})
+
 test_that("train_pixel_model handles model_path validation", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 

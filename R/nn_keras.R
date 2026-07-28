@@ -9,7 +9,8 @@
 #' **Note**: Input landscapes must contain categorical/discrete habitat data
 #' (e.g., 0/1 for two habitat types, or 0/1/2 for three types).
 #' Continuous data (e.g., elevation, gradients) is not supported.
-#' All landscapes used for training are required to have the same spatial extent.
+#' All training landscapes must have the same cell dimensions (width and height in
+#' cells).
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #'   \itemize{
 #'     \item "k-fold" or "loo": Performs cross-validation and returns performance metrics
@@ -169,6 +170,27 @@ train_pixel_model <- function(
     cli::cli_abort(c(
       "All elements must be landscape objects.",
       "x" = "Invalid element(s) at index(es): {paste(invalid_indices, collapse = ', ')}"
+    ))
+  }
+
+  # Require identical cell dimensions across training landscapes. The CNN input
+  # layer is fixed to one size, so arrays of differing size cannot be stacked;
+  # abort clearly here rather than letting abind() fail later with a cryptic
+  # "arg 'X2' has dims=..." message.
+  dims <- lapply(landscapes, function(l) {
+    c(terra::nrow(l$data), terra::ncol(l$data))
+  })
+  unique_dims <- unique(dims)
+  if (length(unique_dims) > 1) {
+    dim_labels <- vapply(
+      unique_dims,
+      function(d) paste0(d[1], "x", d[2]),
+      character(1)
+    )
+    cli::cli_abort(c(
+      "All training landscapes must have the same dimensions.",
+      "x" = "Found {length(unique_dims)} different sizes: {.val {dim_labels}}",
+      "i" = "The CNN input layer is fixed to one size. Create the training landscapes at a common width and height, or resize them before training."
     ))
   }
 

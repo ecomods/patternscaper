@@ -30,7 +30,8 @@ train_pixel_model(
 **Note**: Input landscapes must contain categorical/discrete habitat data
 (e.g., 0/1 for two habitat types, or 0/1/2 for three types).
 Continuous data (e.g., elevation, gradients) is not supported.
-All landscapes used for training are required to have the same spatial extent.}
+All training landscapes must have the same cell dimensions (width and height in
+cells); this is enforced with an error.}
 
 \item{cv_method}{Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 \itemize{
