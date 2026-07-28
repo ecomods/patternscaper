@@ -59,6 +59,18 @@ test_that("train_pixel_model rejects unclassified landscapes", {
   )
 })
 
+test_that("train_pixel_model aborts on heterogeneous training dimensions", {
+  # Aborts before any keras call, so no training happens.
+  mixed <- list(
+    create_landscape("random", width = 30, height = 30, name = "r1"),
+    create_landscape("sharp", width = 40, height = 40, name = "s1")
+  )
+  expect_error(
+    train_pixel_model(mixed, cv_method = "none", epochs = 1, verbose = FALSE),
+    "same dimensions"
+  )
+})
+
 test_that("train_pixel_model handles model_path validation", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 
@@ -202,6 +214,43 @@ test_that("apply_pixel_model validates landscapes input", {
     ),
     "All elements must be landscape objects"
   )
+})
+
+test_that("apply_pixel_model aborts on landscapes with NA cells", {
+  # A stub model is enough here: the NA guard fires before the CNN is touched,
+  # so no keras training is needed.
+  stub_model <- list(
+    model = NULL,
+    classes = c("a", "b"),
+    input_shape = c(10, 10, 1)
+  )
+  m <- matrix(1, nrow = 10, ncol = 10)
+  m[1, 1] <- NA
+  masked <- landscape(m, pattern = "a", name = "masked")
+
+  expect_error(
+    apply_pixel_model(masked, stub_model),
+    "NA cells"
+  )
+})
+
+test_that("apply_pixel_model warns on aspect-ratio distortion", {
+  # Stub model + try(): the aspect warning fires before the CNN is used, and the
+  # subsequent predict() on the stub errors, which try() swallows.
+  stub_model <- list(model = NULL, classes = c("a", "b"), input_shape = c(20, 20, 1))
+  wide <- landscape(matrix(1, nrow = 20, ncol = 40), pattern = "a", name = "wide")
+
+  w <- capture_warnings(try(apply_pixel_model(wide, stub_model), silent = TRUE))
+  expect_true(any(grepl("distorted", w)))
+})
+
+test_that("apply_pixel_model does not warn when aspect ratio matches", {
+  # Larger but same aspect (40x40 -> 20x20 is isotropic): no distortion warning.
+  stub_model <- list(model = NULL, classes = c("a", "b"), input_shape = c(20, 20, 1))
+  square <- landscape(matrix(1, nrow = 40, ncol = 40), pattern = "a", name = "sq")
+
+  w <- capture_warnings(try(apply_pixel_model(square, stub_model), silent = TRUE))
+  expect_false(any(grepl("distorted", w)))
 })
 
 test_that("apply_pixel_model returns predictions for single landscape", {

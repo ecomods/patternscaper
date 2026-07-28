@@ -73,7 +73,13 @@ calculate_single_metric <- function(landscapes, function_name) {
 #'     \item{metric}{Name of the calculated metric}
 #'     \item{value}{Calculated metric value}
 #'     \item{warnings}{Any warnings generated during calculation (NA if none)}
+#'     \item{n_row, n_col}{Cell dimensions of the landscape the row was computed from}
+#'     \item{cell_size_x, cell_size_y}{Cell resolution (from \code{\link[terra]{res}})}
+#'     \item{n_na}{Number of NA cells in the landscape}
 #'   }
+#'   The last five columns record each landscape's geometry so it stays attached to
+#'   the metrics (e.g. through \code{\link[readr]{write_csv}}); they are used for
+#'   geometry-mismatch checks and are never used as model predictors.
 #'
 #' @references
 #' Hesselbarth, M.H.K., Sciaini, M., With, K.A., Wiegand, K., & Nowosad, J.
@@ -194,6 +200,25 @@ calculate_metrics <- function(
       value,
       warnings
     )
+
+  # Attach per-landscape geometry (dimensions, resolution, NA count) so it travels
+  # with the metrics. It survives a write_csv()/read_csv() round-trip, unlike an
+  # attribute, so a user who caches the metrics can still get geometry-mismatch
+  # checks at model training and application. metrics_to_wide() selects an explicit
+  # column set, so these never enter the model predictors.
+  geometry <- landscapes_geometry(landscapes) |>
+    dplyr::mutate(landscape_id = dplyr::row_number()) |>
+    dplyr::select(
+      landscape_id,
+      n_row,
+      n_col,
+      cell_size_x,
+      cell_size_y,
+      n_na
+    )
+
+  all_results <- all_results |>
+    dplyr::left_join(geometry, by = "landscape_id")
 
   return(all_results)
 }

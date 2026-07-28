@@ -43,6 +43,9 @@
 #'     \item{classes}{Character vector of class names in alphabetical order}
 #'     \item{performance}{List from evaluate_cv_performance() with confusion matrix,
 #'       accuracy, per-class metrics, and validation results. NULL if cv_method = "none".}
+#'     \item{training_geometry}{One-row tibble summarising the geometry of the training
+#'       landscapes, used by \code{\link{apply_metrics_model}} to warn on geometry
+#'       mismatch. NULL if the metrics table carries no geometry columns.}
 #'   }
 #' @examples
 #' \donttest{
@@ -146,6 +149,20 @@ train_metrics_model <- function(
       "Metrics data is missing required columns",
       "x" = "Missing: {.val {missing_cols}}",
       "i" = "Make sure metrics is calculated by {.fn calculate_metrics}"
+    ))
+  }
+
+  # Summarise the training geometry from the columns calculate_metrics attaches
+  # (NULL if the metrics table predates geometry recording). Warn
+  # if the training landscapes differ in extent or resolution:
+  # scale-dependent metrics (e.g. area, edge, patch counts) then
+  # conflate pattern with landscape size.
+  training_geometry <- training_geometry_from_metrics(metrics)
+  if (!is.null(training_geometry) && !training_geometry$homogeneous) {
+    cli::cli_warn(c(
+      "Training landscapes differ in extent or resolution.",
+      "i" = "Scale-dependent metrics (e.g. area, edge, patch counts) conflate pattern with landscape size when training geometry is not uniform.",
+      "i" = "Use landscapes of equal size and resolution, or restrict to scale-invariant metrics."
     ))
   }
 
@@ -342,7 +359,8 @@ train_metrics_model <- function(
     features_level = unique(metrics$level),
     scaling = scaling_params,
     classes = class_names,
-    performance = if (cv_method != "none") performance else NULL
+    performance = if (cv_method != "none") performance else NULL,
+    training_geometry = training_geometry
   )
 
   # Save model if requested
@@ -400,6 +418,14 @@ train_metrics_model <- function(
 #' every class probability, and a warning names the affected landscapes. The output
 #' therefore always has one row per input landscape. Performance metrics, when
 #' requested, are calculated from the classified landscapes only.
+#'
+#' @section Geometry checks:
+#' If the model stores the geometry of its training landscapes (see
+#' \code{\link{train_metrics_model}}), the application landscapes are compared
+#' against it and a warning is issued when they differ substantially in extent,
+#' resolution or aspect ratio, since scale-dependent metrics are then unreliable.
+#' If the model has no stored training geometry, the checks are skipped with an
+#' informative note (suppressed when \code{verbose = FALSE}).
 #' @examples
 #' \donttest{
 #' # Train a model on reference landscapes
@@ -490,6 +516,22 @@ apply_metrics_model <- function(
     landscapes = landscapes,
     metrics = metrics_to_calculate,
     level = level
+  )
+
+  # Warn if the application landscapes differ in geometry from the training data
+  # (extent, resolution or aspect ratio). Skipped when the model stores no
+  # training geometry, e.g. one trained before geometry was recorded.
+  check_geometry(
+    dplyr::distinct(
+      metrics,
+      landscape_id,
+      n_row,
+      n_col,
+      cell_size_x,
+      cell_size_y
+    ),
+    nn_model$training_geometry,
+    verbose = verbose
   )
 
   # Filter to only features needed by the model

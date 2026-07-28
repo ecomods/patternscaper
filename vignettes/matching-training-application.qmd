@@ -1,0 +1,180 @@
+---
+title: "Matching training and application data"
+vignette: >
+  %\VignetteIndexEntry{matching-training-application}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: '#>'
+---
+
+A classifier is trained on landscapes of a particular geometry and then applied to
+new ones. When the application landscapes differ from the training data, the two
+workflows behave differently, and some differences quietly degrade predictions.
+This article explains what can differ, how each workflow responds, and how to
+prepare application data so results stay trustworthy.
+
+```{r}
+#| label: setup
+library(spatPatClassifyR)
+```
+
+## Four ways data can differ
+
+"Different" is not one thing. Training and application landscapes can disagree on
+four independent axes, and they matter to different degrees:
+
+| Axis | Meaning | Example |
+|---|---|---|
+| **Extent** | size of the area, in cells | train 100 × 100, apply 200 × 200 |
+| **Resolution (grain)** | ground size of one cell | train on 1 m cells, apply to 30 m imagery |
+| **Aspect ratio** | shape of the rectangle | train 100 × 100, apply 200 × 80 |
+| **Shape** | rectangular vs. irregular outline | apply to a clipped, non-rectangular map section |
+
+The package generates landscapes as rectangular rasters, so an *irregular* study
+area (a catchment, a park boundary) arrives as a rectangle with `NA` cells outside
+its outline.
+
+## How each workflow responds
+
+The two workflows react to these axes in almost opposite ways, so the package
+guards each accordingly.
+
+| | metric-based | pixel-based |
+|---|---|---|
+| Extent / resolution | metrics computed as-is; **warns** on a substantial mismatch | landscape **resized** onto the training grid; robust |
+| Aspect ratio | reflected in the metrics; **warns** on a large change | anisotropic resize distorts the pattern; **warns** |
+| Irregular shape (`NA`) | `NA` treated as outside the landscape; works | `NA` reaches the CNN as `NaN`; **error** |
+| Training set itself | **warns** if training landscapes are not uniform | **requires** identical training dimensions (error otherwise) |
+
+### Metric-based workflow
+
+`calculate_metrics()` records each landscape's geometry, and `train_metrics_model()`
+stores a summary of the training geometry in the model. When you later call
+`apply_metrics_model()`, it compares the application landscapes against that summary
+and warns if they differ substantially in extent, resolution, or aspect ratio:
+
+```
+! 3/6 application landscapes differ from the training extent by more than 25%.
+i Scale-dependent metrics (area, edge, patch counts) change with extent, so
+  predictions for these landscapes may be unreliable.
+```
+
+Whether a mismatch actually hurts depends on **which metrics the model uses**.
+Area-, edge-, and count-based metrics (total area, patch density, edge density,
+mean patch area) scale strongly with extent; normalised configuration metrics
+(aggregation index, contagion, cohesion, Shannon diversity) are largely
+scale-invariant. A model built on scale-invariant metrics tolerates size
+differences well; one built on scale-dependent metrics does not.
+
+::: {.callout-tip}
+If you expect your application landscapes to differ in size from the training
+landscapes, prefer scale-invariant metrics when selecting features with
+`evaluate_metrics()`.
+:::
+
+The same logic applies to the *training* set: if your training landscapes are not
+all the same size, `train_metrics_model()` warns, because scale-dependent metrics
+then conflate the pattern with the landscape's size.
+
+### Pixel-based workflow
+
+The CNN has a fixed input size, so `apply_pixel_model()` **resizes** every
+application landscape onto the training grid. This makes it robust to differences
+in extent and resolution — it effectively discards absolute scale. Two cautions
+remain:
+
+- **Aspect ratio.** Resizing a non-square landscape onto a (square) training grid
+  stretches it anisotropically, distorting the pattern. `apply_pixel_model()` warns
+  when this happens.
+- **`NA` cells.** They survive resizing and reach the network as `NaN`, which yields
+  confident but meaningless predictions. Rather than fail silently,
+  `apply_pixel_model()` raises an error.
+
+```
+x Cannot classify landscapes that contain NA cells.
+```
+
+The training side is stricter still: all training landscapes must have the same
+cell dimensions, since their arrays are stacked into one tensor.
+`train_pixel_model()` checks this and aborts with a clear message rather than
+letting the stacking fail cryptically.
+
+## Preparing application data
+
+### Keep the training set uniform
+
+Generate training landscapes at a single width and height. `create_landscapes()`
+does this by default; if you assemble training data yourself, make the dimensions
+consistent.
+
+### Different size, same shape
+
+No action needed. The pixel workflow resizes automatically, and the metric
+workflow is fine as long as the selected metrics are scale-invariant (see above).
+
+### Different resolution (grain)
+
+A model trained on synthetic 1 m landscapes is not directly comparable to 30 m
+imagery: a "patch" means something different at each grain. Resample the
+application data to the training grain, or retrain on data at the target grain,
+before classifying.
+
+### Irregular (non-rectangular) study areas
+
+An irregular area arrives as a rectangle with `NA` outside its boundary. The metric
+workflow handles this directly. The pixel workflow cannot (it errors on `NA`), so
+reshape the data first. Two options:
+
+1. **Crop** to the largest rectangle that fits inside the study area.
+2. **Tile** the area into complete, training-sized windows and classify each,
+   giving a spatial map of pattern types.
+
+::: {.callout-warning}
+Do **not** fill `NA` with `0` to make the raster complete. Zero is bare ground, so
+this fabricates habitat that was never there and changes the very pattern you are
+trying to classify.
+:::
+
+A simple crop to the largest centred square, so a later resize is not distorting:
+
+```{r}
+#| label: crop-to-square
+#| fig-width: 8
+#| fig-height: 4
+# A non-square landscape (e.g. a wide map section)
+wide <- create_landscape("sharp", width = 150, height = 90, name = "original")
+
+# Crop to the largest centred square
+raster <- wide$data
+side <- min(terra::nrow(raster), terra::ncol(raster))
+col_off <- floor((terra::ncol(raster) - side) / 2)
+row_off <- floor((terra::nrow(raster) - side) / 2)
+cropped <- terra::crop(
+  raster,
+  terra::ext(col_off, col_off + side, row_off, row_off + side)
+)
+
+square <- landscape(
+  terra::as.matrix(cropped, wide = TRUE),
+  name = "cropped",
+  pattern = wide$pattern
+)
+
+plot_landscapes(list(wide, square), show_legend = FALSE)
+```
+
+The cropped landscape now matches the training aspect ratio, so
+`apply_pixel_model()` resizes it without distortion.
+
+## In short
+
+- The metric workflow is sensitive to **extent and resolution** (via scale-dependent
+  metrics) but handles **irregular shapes**; it warns on geometry mismatch.
+- The pixel workflow is robust to **extent and resolution** (it resizes) but needs
+  **rectangular, `NA`-free, same-aspect** data; it errors or warns otherwise.
+- Keep training landscapes uniform, choose scale-appropriate metrics, and crop or
+  tile irregular areas — never fill `NA` with `0`.
+```

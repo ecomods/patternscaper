@@ -17,7 +17,10 @@ Landscapes will be automatically resized to match the model's input dimensions u
 nearest neighbor interpolation, which preserves categorical cell values.
 **Note**: Input landscapes must contain categorical/discrete habitat data (e.g., 0/1 for
 two habitat types, or 0/1/2 for three types). Continuous data (e.g., elevation,
-gradients) is not supported.}
+gradients) is not supported. Landscapes must also be free of NA cells as they would
+produce meaningless predictions, so it raises an error instead. A landscape whose
+aspect ratio differs from the training grid is resized anisotropically (stretched),
+which raises a warning.}
 
 \item{nn_model}{List. CNN model object from \code{\link{train_pixel_model}}.}
 

@@ -9,7 +9,8 @@
 #' **Note**: Input landscapes must contain categorical/discrete habitat data
 #' (e.g., 0/1 for two habitat types, or 0/1/2 for three types).
 #' Continuous data (e.g., elevation, gradients) is not supported.
-#' All landscapes used for training are required to have the same spatial extent.
+#' All training landscapes must have the same cell dimensions (width and height in
+#' cells).
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #'   \itemize{
 #'     \item "k-fold" or "loo": Performs cross-validation and returns performance metrics
@@ -169,6 +170,27 @@ train_pixel_model <- function(
     cli::cli_abort(c(
       "All elements must be landscape objects.",
       "x" = "Invalid element(s) at index(es): {paste(invalid_indices, collapse = ', ')}"
+    ))
+  }
+
+  # Require identical cell dimensions across training landscapes. The CNN input
+  # layer is fixed to one size, so arrays of differing size cannot be stacked;
+  # abort clearly here rather than letting abind() fail later with a cryptic
+  # "arg 'X2' has dims=..." message.
+  dims <- lapply(landscapes, function(l) {
+    c(terra::nrow(l$data), terra::ncol(l$data))
+  })
+  unique_dims <- unique(dims)
+  if (length(unique_dims) > 1) {
+    dim_labels <- vapply(
+      unique_dims,
+      function(d) paste0(d[1], "x", d[2]),
+      character(1)
+    )
+    cli::cli_abort(c(
+      "All training landscapes must have the same dimensions.",
+      "x" = "Found {length(unique_dims)} different sizes: {.val {dim_labels}}",
+      "i" = "The CNN input layer is fixed to one size. Create the training landscapes at a common width and height, or resize them before training."
     ))
   }
 
@@ -508,7 +530,10 @@ train_pixel_model <- function(
 #'   nearest neighbor interpolation, which preserves categorical cell values.
 #'   **Note**: Input landscapes must contain categorical/discrete habitat data (e.g., 0/1 for
 #'   two habitat types, or 0/1/2 for three types). Continuous data (e.g., elevation,
-#'   gradients) is not supported.
+#'   gradients) is not supported. Landscapes must also be free of NA cells as they would
+#'   produce meaningless predictions, so it raises an error instead. A landscape whose
+#'   aspect ratio differs from the training grid is resized anisotropically (stretched),
+#'   which raises a warning.
 #' @param nn_model List. CNN model object from \code{\link{train_pixel_model}}.
 #' @param return_performance Logical. Whether to return performance metrics when actual classes are available (default: FALSE).
 #' @param verbose Logical. Show informational messages and performance summaries (default: TRUE).
@@ -610,6 +635,50 @@ apply_pixel_model <- function(
   landscape_names <- sapply(landscapes, function(l) {
     if (!is.null(l$name)) l$name else NA_character_
   })
+
+  # Guard against NA cells. NAs would reach the CNN as NaN which produces confident
+  # but meaningless predictions. Therefore we abort, naming the offending landscapes
+  # if this case happens.
+  na_counts <- vapply(
+    landscapes,
+    function(l) sum(is.na(terra::values(l$data))),
+    numeric(1)
+  )
+  if (any(na_counts > 0)) {
+    bad <- which(na_counts > 0)
+    labels <- ifelse(
+      is.na(landscape_names[bad]),
+      paste0("landscape ", bad),
+      landscape_names[bad]
+    )
+    detail <- paste0(labels, " (", na_counts[bad], " NA)")
+    cli::cli_abort(c(
+      "Cannot classify landscapes that contain NA cells.",
+      "x" = "Affected: {.val {detail}}",
+      "i" = "NA cells reach the CNN as NaN and yield meaningless predictions.",
+      "i" = "Crop to a rectangular region without NA. Do not fill NA with 0, which fabricates bare ground."
+    ))
+  }
+
+  # Warn on aspect-ratio distortion. Resizing a landscape whose aspect ratio
+  # differs from the training grid stretches it anisotropically which is a
+  # geometric distortion of the pattern. (Extent differences alone are fine: the
+  # resize handles them isotropically when the aspect ratio matches.)
+  target_aspect <- expected_width / expected_height
+  app_aspect <- vapply(
+    landscapes,
+    function(l) terra::ncol(l$data) / terra::nrow(l$data),
+    numeric(1)
+  )
+  aspect_off <- abs(log(app_aspect / target_aspect)) > log(1.1)
+  if (any(aspect_off)) {
+    n_off <- sum(aspect_off)
+    cli::cli_warn(c(
+      "{n_off}/{length(landscapes)} landscape{?s} will be distorted by resizing to {expected_width}x{expected_height}.",
+      "i" = "Their aspect ratio differs from the training grid, so resizing stretches them anisotropically.",
+      "i" = "Crop to the training aspect ratio before classifying, so the resize is isotropic and the pattern is not distorted."
+    ))
+  }
 
   # Convert all landscapes to arrays, resizing if needed
   # First, check which ones need resizing

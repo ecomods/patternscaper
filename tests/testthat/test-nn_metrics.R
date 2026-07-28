@@ -117,7 +117,8 @@ test_that("train_metrics_model trains model without CV", {
       "features_level",
       "scaling",
       "classes",
-      "performance"
+      "performance",
+      "training_geometry"
     )
   )
 
@@ -140,6 +141,91 @@ test_that("train_metrics_model trains model without CV", {
 
   # No performance when cv_method = "none"
   expect_null(result$performance)
+
+  # Fixture predates geometry columns -> training_geometry is NULL, not an error
+  expect_null(result$training_geometry)
+})
+
+test_that("train_metrics_model stores a training_geometry summary", {
+  set.seed(1)
+  landscapes <- create_landscapes(
+    n = 12,
+    patterns = c("random", "sharp", "diffuse"),
+    width = 40,
+    height = 40
+  )
+  metrics <- calculate_metrics(
+    landscapes,
+    metrics = c("ai", "lsi", "ed", "contag"),
+    level = "landscape"
+  )
+  model <- suppressWarnings(train_metrics_model(
+    metrics,
+    metrics_selected = c("ai", "lsi", "ed"),
+    cv_method = "none",
+    stepmax = 1e6,
+    verbose = FALSE
+  ))
+
+  expect_s3_class(model$training_geometry, "tbl_df")
+  expect_equal(model$training_geometry$n_row, 40)
+  expect_equal(model$training_geometry$n_col, 40)
+  expect_true(model$training_geometry$homogeneous)
+})
+
+test_that("apply_metrics_model warns when application geometry differs from training", {
+  set.seed(1)
+  train <- create_landscapes(
+    n = 12,
+    patterns = c("random", "sharp", "diffuse"),
+    width = 40,
+    height = 40
+  )
+  train_metrics <- calculate_metrics(
+    train,
+    metrics = c("ai", "lsi", "ed"),
+    level = "landscape"
+  )
+  model <- suppressWarnings(train_metrics_model(
+    train_metrics,
+    metrics_selected = c("ai", "lsi", "ed"),
+    cv_method = "none",
+    stepmax = 1e6,
+    verbose = FALSE
+  ))
+
+  # Apply to 80x80 landscapes: 2x the training extent -> extent warning
+  bigger <- create_landscapes(
+    n = 4,
+    patterns = c("random", "sharp"),
+    width = 80,
+    height = 80
+  )
+  w <- capture_warnings(apply_metrics_model(bigger, model, verbose = FALSE))
+  expect_true(any(grepl("training extent", w)))
+})
+
+test_that("train_metrics_model warns when training landscapes differ in geometry", {
+  set.seed(1)
+  mixed <- c(
+    create_landscapes(n = 6, patterns = c("random", "sharp"), width = 30, height = 30),
+    create_landscapes(n = 6, patterns = c("random", "sharp"), width = 40, height = 40)
+  )
+  metrics <- calculate_metrics(
+    mixed,
+    metrics = c("ai", "lsi", "ed"),
+    level = "landscape"
+  )
+  expect_warning(
+    train_metrics_model(
+      metrics,
+      metrics_selected = c("ai", "lsi", "ed"),
+      cv_method = "none",
+      stepmax = 1e6,
+      verbose = FALSE
+    ),
+    "differ in extent or resolution"
+  )
 })
 
 test_that("train_metrics_model trains with k-fold CV", {

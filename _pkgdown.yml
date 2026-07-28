@@ -74,6 +74,8 @@ navbar:
         href: articles/classify-pixels.html
       - text: "User-defined landscapes"
         href: articles/importing-landscapes.html
+      - text: "Matching training and application data"
+        href: articles/matching-training-application.html
       - text: "Calculate Landscape metrics"
         href: articles/landscape-metrics.html
       - text: "Installing Keras"

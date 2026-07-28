@@ -63,3 +63,114 @@ test_that("summarise_training_geometry flags a heterogeneous set", {
   expect_false(s$homogeneous)
   expect_equal(s$n_landscapes, 2)
 })
+
+test_that("training_geometry_from_metrics summarises the geometry columns", {
+  metrics <- tibble::tibble(
+    landscape_id = c(1, 1, 2, 2),
+    n_row = c(40, 40, 40, 40),
+    n_col = c(40, 40, 40, 40),
+    cell_size_x = 1,
+    cell_size_y = 1,
+    n_na = 0,
+    metric = c("ai", "lsi", "ai", "lsi"),
+    value = 1:4
+  )
+  s <- training_geometry_from_metrics(metrics)
+
+  expect_equal(s$n_landscapes, 2)
+  expect_equal(s$n_row, 40)
+  expect_true(s$homogeneous)
+})
+
+test_that("training_geometry_from_metrics flags differing resolution", {
+  metrics <- tibble::tibble(
+    landscape_id = c(1, 2),
+    n_row = c(40, 40),
+    n_col = c(40, 40),
+    cell_size_x = c(1, 30), # same dimensions, different resolution
+    cell_size_y = c(1, 30),
+    n_na = 0,
+    metric = "ai",
+    value = 1:2
+  )
+  expect_false(training_geometry_from_metrics(metrics)$homogeneous)
+})
+
+test_that("training_geometry_from_metrics returns NULL without geometry columns", {
+  metrics <- tibble::tibble(
+    landscape_id = c(1, 2),
+    metric = "ai",
+    value = 1:2
+  )
+  expect_null(training_geometry_from_metrics(metrics))
+})
+
+# check_geometry ---------------------------------------------------------------
+
+# Training reference: two 40x40 landscapes at resolution 1
+training_ref <- summarise_geometry(tibble::tibble(
+  n_row = c(40, 40),
+  n_col = c(40, 40),
+  cell_size_x = 1,
+  cell_size_y = 1
+))
+
+test_that("check_geometry is silent when geometry matches", {
+  application <- tibble::tibble(
+    n_row = c(40, 40),
+    n_col = c(40, 40),
+    cell_size_x = 1,
+    cell_size_y = 1
+  )
+  expect_no_warning(check_geometry(application, training_ref))
+})
+
+test_that("check_geometry notes skipped checks when training geometry is NULL", {
+  application <- tibble::tibble(
+    n_row = 999,
+    n_col = 999,
+    cell_size_x = 1,
+    cell_size_y = 1
+  )
+  # Informative note by default, quiet when verbose = FALSE, never a warning
+  expect_message(check_geometry(application, NULL), "checks skipped")
+  expect_no_message(check_geometry(application, NULL, verbose = FALSE))
+  expect_no_warning(check_geometry(application, NULL, verbose = FALSE))
+})
+
+test_that("check_geometry warns on extent mismatch", {
+  application <- tibble::tibble(
+    n_row = 80, # double the training extent
+    n_col = 80,
+    cell_size_x = 1,
+    cell_size_y = 1
+  )
+  w <- capture_warnings(check_geometry(application, training_ref))
+  expect_true(any(grepl("training extent", w)))
+})
+
+test_that("check_geometry flags a resolution mismatch with the dimensionless caveat", {
+  # Same cell counts but georeferenced resolution -> physical extent and
+  # resolution both differ, so both warnings fire; assert the resolution one.
+  application <- tibble::tibble(
+    n_row = 40,
+    n_col = 40,
+    cell_size_x = 30,
+    cell_size_y = 30
+  )
+  w <- capture_warnings(check_geometry(application, training_ref))
+  expect_true(any(grepl("dimensionless", w)))
+})
+
+test_that("check_geometry warns on aspect-ratio mismatch", {
+  # 32x48 keeps both axis extents within tolerance of 40 but changes the aspect
+  # ratio to 1.5, isolating the aspect warning.
+  application <- tibble::tibble(
+    n_row = 32,
+    n_col = 48,
+    cell_size_x = 1,
+    cell_size_y = 1
+  )
+  w <- capture_warnings(check_geometry(application, training_ref))
+  expect_true(any(grepl("aspect ratio", w)))
+})
