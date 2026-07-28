@@ -234,6 +234,25 @@ test_that("apply_pixel_model aborts on landscapes with NA cells", {
   )
 })
 
+test_that("apply_pixel_model warns on aspect-ratio distortion", {
+  # Stub model + try(): the aspect warning fires before the CNN is used, and the
+  # subsequent predict() on the stub errors, which try() swallows.
+  stub_model <- list(model = NULL, classes = c("a", "b"), input_shape = c(20, 20, 1))
+  wide <- landscape(matrix(1, nrow = 20, ncol = 40), pattern = "a", name = "wide")
+
+  w <- capture_warnings(try(apply_pixel_model(wide, stub_model), silent = TRUE))
+  expect_true(any(grepl("distorted", w)))
+})
+
+test_that("apply_pixel_model does not warn when aspect ratio matches", {
+  # Larger but same aspect (40x40 -> 20x20 is isotropic): no distortion warning.
+  stub_model <- list(model = NULL, classes = c("a", "b"), input_shape = c(20, 20, 1))
+  square <- landscape(matrix(1, nrow = 40, ncol = 40), pattern = "a", name = "sq")
+
+  w <- capture_warnings(try(apply_pixel_model(square, stub_model), silent = TRUE))
+  expect_false(any(grepl("distorted", w)))
+})
+
 test_that("apply_pixel_model returns predictions for single landscape", {
   skip_if_not_installed("keras3")
 

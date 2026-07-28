@@ -531,7 +531,9 @@ train_pixel_model <- function(
 #'   **Note**: Input landscapes must contain categorical/discrete habitat data (e.g., 0/1 for
 #'   two habitat types, or 0/1/2 for three types). Continuous data (e.g., elevation,
 #'   gradients) is not supported. Landscapes must also be free of NA cells as they would
-#'   produce meaningless predictions, so it raises an error instead.
+#'   produce meaningless predictions, so it raises an error instead. A landscape whose
+#'   aspect ratio differs from the training grid is resized anisotropically (stretched),
+#'   which raises a warning.
 #' @param nn_model List. CNN model object from \code{\link{train_pixel_model}}.
 #' @param return_performance Logical. Whether to return performance metrics when actual classes are available (default: FALSE).
 #' @param verbose Logical. Show informational messages and performance summaries (default: TRUE).
@@ -655,6 +657,26 @@ apply_pixel_model <- function(
       "x" = "Affected: {.val {detail}}",
       "i" = "NA cells reach the CNN as NaN and yield meaningless predictions.",
       "i" = "Crop to a rectangular region without NA. Do not fill NA with 0, which fabricates bare ground."
+    ))
+  }
+
+  # Warn on aspect-ratio distortion. Resizing a landscape whose aspect ratio
+  # differs from the training grid stretches it anisotropically which is a
+  # geometric distortion of the pattern. (Extent differences alone are fine: the
+  # resize handles them isotropically when the aspect ratio matches.)
+  target_aspect <- expected_width / expected_height
+  app_aspect <- vapply(
+    landscapes,
+    function(l) terra::ncol(l$data) / terra::nrow(l$data),
+    numeric(1)
+  )
+  aspect_off <- abs(log(app_aspect / target_aspect)) > log(1.1)
+  if (any(aspect_off)) {
+    n_off <- sum(aspect_off)
+    cli::cli_warn(c(
+      "{n_off}/{length(landscapes)} landscape{?s} will be distorted by resizing to {expected_width}x{expected_height}.",
+      "i" = "Their aspect ratio differs from the training grid, so resizing stretches them anisotropically.",
+      "i" = "Crop to the training aspect ratio before classifying, so the resize is isotropic and the pattern is not distorted."
     ))
   }
 

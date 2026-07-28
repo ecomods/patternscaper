@@ -31,7 +31,7 @@ train_pixel_model(
 (e.g., 0/1 for two habitat types, or 0/1/2 for three types).
 Continuous data (e.g., elevation, gradients) is not supported.
 All training landscapes must have the same cell dimensions (width and height in
-cells); this is enforced with an error.}
+cells).}
 
 \item{cv_method}{Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 \itemize{
