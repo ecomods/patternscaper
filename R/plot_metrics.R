@@ -65,6 +65,7 @@ plot_metrics <- function(
     )
   }
   # Validate selected_metrics
+  selected_metrics <- selected_metric_names(selected_metrics)
   if (!is.null(selected_metrics)) {
     if (!is.character(selected_metrics) || length(selected_metrics) == 0) {
       cli::cli_abort(

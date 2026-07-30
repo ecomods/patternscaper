@@ -180,6 +180,7 @@ train_metrics_model <- function(
   }
 
   # Subset selected metrics if provided
+  metrics_selected <- selected_metric_names(metrics_selected)
   if (!is.null(metrics_selected)) {
     missing_metrics <- setdiff(metrics_selected, unique(metrics$metric))
     if (length(missing_metrics) > 0) {

@@ -283,6 +283,26 @@ evaluate_metrics <- function(
   return(top_metrics)
 }
 
+#' Resolve Selected Metric Names
+#'
+#' Internal helper letting functions that need metric names accept either a
+#' plain character vector or the object returned by
+#' \code{\link{evaluate_metrics}}. Without it, passing that object straight on
+#' would fail with a type error about package internals the caller never
+#' touched.
+#'
+#' @param x Character vector, a `metrics_evaluation` object, or NULL.
+#'
+#' @return Character vector, or NULL if `x` was NULL.
+#' @noRd
+selected_metric_names <- function(x) {
+  if (inherits(x, "metrics_evaluation")) {
+    return(x$selected)
+  }
+
+  x
+}
+
 #' Rank Metrics by Method
 #'
 #' Internal function that ranks metrics according to different methods.
