@@ -232,11 +232,13 @@ evaluate_metrics <- function(
     )
   }
 
-  # Get ranked metrics
-  ranked_metrics <- rank_metrics_by_method(
+  # Get ranked metrics. The ranking method returns the scores alongside the
+  # metric names; only the names are used for now.
+  ranking_result <- rank_metrics_by_method(
     metrics = metrics,
     method = method
   )
+  ranked_metrics <- ranking_result$ranking$metric
 
   # A ranking method can discard metrics it cannot score, so it may return
   # nothing at all. Fail here rather than further down with a message about
@@ -278,7 +280,9 @@ evaluate_metrics <- function(
 #' @param metrics tibble. Metrics data.
 #' @param method Character. Selection method to use.
 #'
-#' @return Character vector. Metrics ranked from best to worst according to method.
+#' @return List with `ranking` (tibble of `metric` and `score`, best first) and,
+#'   for methods that can fail to score a metric, `excluded` (tibble of `metric`
+#'   and `outcome`). Currently only `coeffvar_all` sets `excluded`.
 #' @noRd
 rank_metrics_by_method <- function(metrics, method) {
   switch(
@@ -308,14 +312,15 @@ rank_metrics_by_method <- function(metrics, method) {
 #'
 #' @param metrics tibble. Metrics data with columns 'metric' and 'value'.
 #'
-#' @return Character vector. Metrics ranked by CV (highest first).
+#' @return List with `ranking` (metrics by CV, highest first) and `excluded`
+#'   (metrics this method could not score).
 #' @importFrom dplyr summarize filter arrange pull
 #' @noRd
 rank_by_coefficient_variation <- function(metrics) {
   metric_stats <- metrics |>
     dplyr::filter(!is.na(value)) |>
     dplyr::summarize(
-      cv = sd(value) / mean(value),
+      score = sd(value) / mean(value),
       min_value = min(value),
       mean_value = mean(value),
       .by = metric
@@ -333,10 +338,31 @@ rank_by_coefficient_variation <- function(metrics) {
     ))
   }
 
-  metric_stats |>
-    dplyr::filter(!metric %in% not_ratio_scale, is.finite(cv)) |>
-    dplyr::arrange(dplyr::desc(cv)) |>
+  # Metrics whose CV is not finite are dropped from the ranking, exactly as
+  # before. Naming the set rather than filtering it away inline lets a later
+  # step report why they disappeared.
+  non_finite <- metric_stats |>
+    dplyr::filter(!metric %in% not_ratio_scale, !is.finite(score)) |>
     dplyr::pull(metric)
+
+  ranking <- metric_stats |>
+    dplyr::filter(!metric %in% c(not_ratio_scale, non_finite)) |>
+    dplyr::arrange(dplyr::desc(score)) |>
+    dplyr::select(metric, score)
+
+  list(
+    ranking = ranking,
+    excluded = dplyr::bind_rows(
+      tibble::tibble(
+        metric = not_ratio_scale,
+        outcome = "excluded_not_ratio_scale"
+      ),
+      tibble::tibble(
+        metric = non_finite,
+        outcome = "excluded_non_finite_score"
+      )
+    )
+  )
 }
 
 #' Rank by Linear Model R-squared
@@ -346,7 +372,7 @@ rank_by_coefficient_variation <- function(metrics) {
 #'
 #' @param metrics tibble. Metrics data with columns 'metric', 'pattern', and 'value'.
 #'
-#' @return Character vector. Metrics ranked by R² (highest first).
+#' @return List with `ranking` (metrics by R², highest first).
 #' @importFrom dplyr group_by arrange desc mutate
 #' @importFrom tidyr nest
 #' @importFrom purrr map_dbl
@@ -356,11 +382,10 @@ rank_by_linear_model <- function(
   metrics
 ) {
   # Create a nested dataframe with data for each metric
-  metric_models <- metrics |>
-    dplyr::group_by(metric) |>
-    tidyr::nest() |>
+  ranking <- metrics |>
+    tidyr::nest(.by = metric) |>
     dplyr::mutate(
-      r2 = purrr::map_dbl(data, \(df) {
+      score = purrr::map_dbl(data, \(df) {
         tryCatch(
           {
             model <- lm(value ~ pattern, data = df)
@@ -369,13 +394,11 @@ rank_by_linear_model <- function(
           error = \(e) NA_real_
         )
       })
-    )
+    ) |>
+    dplyr::arrange(dplyr::desc(score)) |> # Largest R² first
+    dplyr::select(metric, score)
 
-  # Sort by R2-value
-  metric_models <- metric_models |>
-    dplyr::arrange(dplyr::desc(r2)) # Largest R² first
-
-  return(metric_models$metric)
+  list(ranking = ranking)
 }
 
 #' Rank by Mean Differences
@@ -385,7 +408,7 @@ rank_by_linear_model <- function(
 #'
 #' @param metrics tibble. Metrics data with columns 'metric', 'pattern', and 'value'.
 #'
-#' @return Character vector. Metrics ranked by importance score (highest first).
+#' @return List with `ranking` (metrics by importance score, highest first).
 #' @noRd
 rank_by_mean_differences <- function(metrics) {
   # Calculate overall mean for each metric
@@ -396,7 +419,7 @@ rank_by_mean_differences <- function(metrics) {
     )
 
   # Calculate pattern-specific means and importance scores
-  scores <- metrics |>
+  ranking <- metrics |>
     dplyr::summarize(
       mean_type = mean(value, na.rm = TRUE),
       .by = c(metric, pattern)
@@ -411,12 +434,12 @@ rank_by_mean_differences <- function(metrics) {
       )
     ) |>
     dplyr::summarize(
-      importance_score = sum(rel_mean_diff, na.rm = TRUE),
+      score = sum(rel_mean_diff, na.rm = TRUE),
       .by = metric
     ) |>
-    dplyr::arrange(desc(importance_score))
+    dplyr::arrange(dplyr::desc(score))
 
-  return(scores$metric)
+  list(ranking = ranking)
 }
 
 #' Rank by Fisher Score
@@ -426,14 +449,13 @@ rank_by_mean_differences <- function(metrics) {
 #'
 #' @param metrics tibble. Metrics data with columns 'metric', 'pattern', and 'value'.
 #'
-#' @return Character vector. Metrics ranked by Fisher score (highest first).
+#' @return List with `ranking` (metrics by Fisher score, highest first).
 #' @noRd
 rank_by_fisher_score <- function(metrics) {
-  fisher_results <- metrics |>
-    dplyr::group_by(metric) |>
-    tidyr::nest() |>
+  ranking <- metrics |>
+    tidyr::nest(.by = metric) |>
     dplyr::mutate(
-      fisher_score = purrr::map_dbl(data, \(df) {
+      score = purrr::map_dbl(data, \(df) {
         df <- df[!is.na(df$value), ]
         # Check if at least two patterns exist for this metric
         if (length(unique(df$pattern)) < 2) {
@@ -464,9 +486,10 @@ rank_by_fisher_score <- function(metrics) {
         return(between_var / within_var)
       })
     ) |>
-    dplyr::arrange(dplyr::desc(fisher_score))
+    dplyr::arrange(dplyr::desc(score)) |>
+    dplyr::select(metric, score)
 
-  return(fisher_results$metric)
+  list(ranking = ranking)
 }
 
 #' Rank by Kruskal-Wallis H test
@@ -477,14 +500,13 @@ rank_by_fisher_score <- function(metrics) {
 #'
 #' @param metrics tibble. Metrics data with columns 'metric', 'pattern', and 'value'.
 #'
-#' @return Character vector. Metrics ranked by effect size (largest first).
+#' @return List with `ranking` (metrics by effect size, largest first).
 #' @noRd
 rank_by_kruskal <- function(metrics) {
-  kruskal_results <- metrics |>
-    dplyr::group_by(metric) |>
-    tidyr::nest() |>
+  ranking <- metrics |>
+    tidyr::nest(.by = metric) |>
     dplyr::mutate(
-      kruskal_effsize = purrr::map_dbl(data, \(df) {
+      score = purrr::map_dbl(data, \(df) {
         df <- df[!is.na(df$value), ]
         if (length(unique(df$pattern)) < 2) {
           return(NA_real_)
@@ -495,9 +517,10 @@ rank_by_kruskal <- function(metrics) {
         )
       })
     ) |>
-    dplyr::arrange(dplyr::desc(kruskal_effsize))
+    dplyr::arrange(dplyr::desc(score)) |>
+    dplyr::select(metric, score)
 
-  return(kruskal_results$metric)
+  list(ranking = ranking)
 }
 
 #' Calculate Kruskal-Wallis Effect Size (Epsilon-Squared)
