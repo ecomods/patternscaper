@@ -78,7 +78,50 @@ metric_evaluation <- evaluate_metrics(
   metrics_number = 10, # Select top 10 informative metrics
   correlation_threshold = 0.7
 )
+
+metric_evaluation
 ```
+
+The selected metric names are in `$selected`, ready to pass on to
+`plot_metrics()` or `train_metrics_model()`. You can also pass the whole object
+to either function.
+
+```{r}
+metric_evaluation$selected
+```
+
+### Inspecting the ranking
+
+Selection discards a lot of detail: which metrics scored well but lost out to a
+correlated partner, which never made it into the ranking at all, and how large
+the differences between the top metrics actually were. `$ranking` keeps all of
+it, with one row for every metric you passed in:
+
+```{r}
+metric_evaluation$ranking
+```
+
+The `outcome` column records what happened to each candidate. Metrics with an
+`excluded_` outcome never reached the ranking, so they have no score or rank:
+
+```{r}
+dplyr::count(metric_evaluation$ranking, outcome)
+```
+
+This is what to look at when a selection surprises you. For example, to see the
+metrics that were dropped for being too similar to an already selected one, and
+what they clashed with:
+
+```{r}
+metric_evaluation$ranking |>
+  dplyr::filter(outcome == "dropped_correlated") |>
+  dplyr::select(metric, score, correlated_with)
+```
+
+If fewer uncorrelated metrics exist than you asked for, the remaining slots are
+filled with correlated ones. Those are marked `selected_correlation_fill` and
+appear at the end of `$selected`, so you can always tell which of your selected
+metrics are redundant.
 
 To visually compare the top 10 metrics, use the `plot_metrics()` function:
 

@@ -89,7 +89,15 @@ best_10 <- evaluate_metrics(
   metrics_number = 10,
   verbose = FALSE
 )
+
+best_10
 ```
+
+`evaluate_metrics()` returns the selected names in `$selected` together with the
+full ranking in `$ranking`, which records the score of every metric and what
+happened to the ones that were not selected — see the
+[landscape metrics vignette](landscape-metrics.html) for how to read it. The
+functions below accept either the object itself or `best_10$selected`.
 
 Alternatively, you can manually select the metrics you want to use for further evaluation. For this, just provide a list of the metric names you are interested in. 
 

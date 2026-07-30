@@ -1,7 +1,7 @@
 Package: spatPatClassifyR
 Type: Package
 Title: Classify Spatial Landscape Patterns Using Neural Networks
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: c(
     person("Selina", "Baldauf", , "selina.baldauf@fu-berlin.de", role = c("aut", "cre"),
     comment = c(ORCID = "0000-0002-3393-725X")),
