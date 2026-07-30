@@ -104,7 +104,7 @@ print.landscape <- function(x, ...) {
 #' @details
 #' This function creates a minimal ggplot2 visualization of the landscape raster data.
 #' The returned plot can be further customized by adding ggplot2 elements or by using
-#' the \code{\link{plot_landscape}} function for higher-level customization.
+#' the \code{\link{plot_landscapes}} function for higher-level customization.
 #'
 #' @examples
 #' # Create a landscape

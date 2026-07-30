@@ -21,7 +21,7 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @family landscape creation
-#' @seealso \code{\link{plot_landscape}}
+#' @seealso \code{\link{plot_landscapes}}
 #'
 #' @examples
 #' # Create a default landscape of various patterns

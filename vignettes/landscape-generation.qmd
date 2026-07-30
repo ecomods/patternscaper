@@ -26,8 +26,7 @@ You can:
 
 - Generate batches of training landscapes with `create_landscapes()`
 - Create individual landscapes with custom parameters using `create_landscape()`
-- Visualize an individual landscape with `plot_landscape()`
-- Visualize multiple landscapes in a grid with `plot_landscapes()`
+- Visualize one or more landscapes with `plot_landscapes()`
 
 ### Available patterns
 

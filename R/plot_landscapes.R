@@ -1,43 +1,26 @@
-#' Plot a Landscape
-#'
-#' Create a customizable plot of a landscape object with options for titles,
-#' legends, and display preferences.
-#'
-#' @param landscape A landscape object to plot.
-#' @param title Character. Controls the plot title:
-#'        - "name": uses only the landscape name
-#'        - "pattern": uses only the landscape pattern
-#'        - "both": uses "name (pattern)" format
-#'        - "none": no title
-#'        - Any other string: used as-is as a custom title
-#'        Default: "pattern"
-#' @param show_legend Logical. Whether to show legend (default: TRUE).
-#' @param legend_title Character. Title for the legend (default: "Value").
-#'
-#' @return ggplot object. Plot of the landscape.
-#' @importFrom ggplot2 ggplot aes geom_raster coord_equal labs theme_minimal theme
-#'             element_blank scale_fill_manual scale_fill_viridis_c
-#' @importFrom ggtext element_markdown
-#' @family visualization
-#' @seealso \code{\link{create_landscape}}
-#' @examples
-#'
-#' # Create a basic landscape
-#' l <- create_landscape("sharp", width = 50, height = 50)
-#'
-#' # Default plot (shows both name and pattern)
-#' plot_landscape(l)
-#'
-#' # Show only pattern name
-#' plot_landscape(l, title = "pattern")
-#'
-#' # Custom title and legend
-#' plot_landscape(l,
-#'               title = "My Sharp Treeline",
-#'               legend_title = "Vegetation",
-#'               show_legend = TRUE)
-#' @export
-plot_landscape <- function(
+# Plot a Single Landscape (internal)
+#
+# Create a customizable plot of a single landscape object with options for
+# titles, legends, and display preferences. Used internally by
+# \code{\link{plot_landscapes}} to render each landscape in the grid; not
+# exported since \code{plot_landscapes()} also accepts a single landscape
+# directly.
+#
+# @param landscape A landscape object to plot.
+# @param title Character. Controls the plot title:
+#        - "name": uses only the landscape name
+#        - "pattern": uses only the landscape pattern
+#        - "both": uses "name (pattern)" format
+#        - "none": no title
+#        - Any other string: used as-is as a custom title
+#        Default: "pattern"
+# @param show_legend Logical. Whether to show legend (default: TRUE).
+# @param legend_title Character. Title for the legend (default: "Value").
+#
+# @return ggplot object. Plot of the landscape.
+# @keywords internal
+# @noRd
+plot_single_landscape <- function(
   landscape,
   title = "pattern",
   show_legend = TRUE,
@@ -108,11 +91,13 @@ plot_landscape <- function(
   return(p)
 }
 
-#' Plot Multiple Landscapes
+#' Plot One or More Landscapes
 #'
-#' Creates a grid of multiple landscape plots.
+#' Creates a plot of a single landscape, or a grid of multiple landscape
+#' plots.
 #'
-#' @param landscapes List. List of landscape objects to plot. E.g. created by
+#' @param landscapes A single landscape object, or a list of landscape
+#'     objects to plot. E.g. created by \code{\link{create_landscape}} or
 #'     \code{\link{create_landscapes}}.
 #' @param titles Character. Controls the plot titles:
 #'        - "name": uses only the landscape name
@@ -131,11 +116,31 @@ plot_landscape <- function(
 #' @param subset_index Integer vector. Indices of landscapes to plot.
 #'     Can be used to plot specific landscapes or change plot order (default: NULL).
 #'
-#' @return A ggplot object combining all landscape plots in a grid.
+#' @return A patchwork object combining one or more landscape plots.
+#' @details
+#' To add \pkg{ggplot2} elements (themes, scales, etc.) to every panel of the
+#' result, use \code{&} rather than \code{+} (e.g.
+#' \code{plot_landscapes(landscapes) & ggplot2::theme_dark()}): with more than
+#' one landscape, \code{+} only modifies the last panel, while \code{&}
+#' applies to all of them. For a single landscape the two operators happen to
+#' give the same result, but using \code{&} consistently avoids surprises if
+#' more landscapes are added later.
 #' @family visualization
-#' @seealso \code{\link{create_landscapes}}
+#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 #' @importFrom patchwork wrap_plots plot_layout
 #' @examples
+#' # Plot a single landscape
+#' l <- create_landscape("sharp", width = 50, height = 50)
+#' plot_landscapes(l)
+#'
+#' # Custom title and legend for a single landscape
+#' plot_landscapes(l,
+#'                    titles = "My Sharp Treeline",
+#'                    legend_title = "Vegetation")
+#'
+#' # Use & (not +) to add ggplot2 elements to every panel
+#' plot_landscapes(l) & ggplot2::theme_dark()
+#'
 #' # Create a list of different landscapes
 #' landscapes <- list(
 #'   create_landscape("sharp", width = 50, height = 50),
@@ -145,6 +150,9 @@ plot_landscape <- function(
 #'
 #' # Default plot (3x1 grid)
 #' plot_landscapes(landscapes)
+#'
+#' # & applies to all three panels; + would only affect the last one
+#' plot_landscapes(landscapes) & ggplot2::theme_dark()
 #'
 #' # 2-column grid with custom titles
 #' plot_landscapes(landscapes,
@@ -172,11 +180,19 @@ plot_landscapes <- function(
   force = FALSE,
   subset_index = NULL
 ) {
+  # Allow a single landscape object to be passed directly, without wrapping
+  # it in a list
+  if (is_landscape(landscapes)) {
+    landscapes <- list(landscapes)
+  }
+
   # Validate inputs
 
   # First validate that input is a list
   if (!is.list(landscapes)) {
-    cli::cli_abort("landscapes must be a list")
+    cli::cli_abort(
+      "landscapes must be a landscape object or a list of landscape objects"
+    )
   }
 
   # Then check if list is empty
@@ -214,10 +230,13 @@ plot_landscapes <- function(
     landscapes <- landscapes[1:max_landscapes]
   }
 
-  # Generate title strings to pass to plot_landscape for each landscape
+  # Generate title strings to pass to plot_single_landscape for each landscape
   if (length(titles) == 1) {
     # check that titles is one of the special keywords
-    if (!titles %in% c("name", "pattern", "both", "none")) {
+    if (
+      length(landscapes) > 1 &&
+        !titles %in% c("name", "pattern", "both", "none")
+    ) {
       cli::cli_alert_warning(
         "Using a single custom title for multiple landscapes. All plots will have the same title."
       )
@@ -228,8 +247,8 @@ plot_landscapes <- function(
   # Create a list of plots
   plot_list <- list()
   for (i in seq_along(landscapes)) {
-    # Pass all plotting decisions to plot_landscape
-    plot_list[[i]] <- plot_landscape(
+    # Pass all plotting decisions to plot_single_landscape
+    plot_list[[i]] <- plot_single_landscape(
       landscape = landscapes[[i]],
       title = titles[i],
       show_legend = show_legend,

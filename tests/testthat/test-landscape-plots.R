@@ -1,52 +1,52 @@
-test_that("plot_landscape validates input", {
+test_that("plot_landscapes validates a single landscape input", {
   # Not a landscape object
   expect_error(
-    plot_landscape(matrix(1:9, 3, 3)),
-    "'landscape' must be a landscape object"
+    plot_landscapes(matrix(1:9, 3, 3)),
+    "landscapes must be a landscape object or a list of landscape objects"
   )
 })
 
-test_that("plot_landscape creates correct title", {
+test_that("plot_landscapes creates correct title for a single landscape", {
   l <- create_landscape("sharp", width = 10, height = 10)
 
   # Test different title options
-  p1 <- plot_landscape(l, title = "name")
+  p1 <- plot_landscapes(l, titles = "name")
   expect_equal(p1$labels$title, "Unnamed landscape")
 
-  p2 <- plot_landscape(l, title = "pattern")
+  p2 <- plot_landscapes(l, titles = "pattern")
   expect_equal(p2$labels$title, "sharp")
 
-  p3 <- plot_landscape(l, title = "both")
+  p3 <- plot_landscapes(l, titles = "both")
   expect_equal(p3$labels$title, "Unnamed landscape (sharp)")
 
-  p4 <- plot_landscape(l, title = "Custom Title")
+  p4 <- plot_landscapes(l, titles = "Custom Title")
   expect_equal(p4$labels$title, "Custom Title")
 
   # Test with named landscape
   l$name <- "Test Landscape"
-  p5 <- plot_landscape(l, title = "both")
+  p5 <- plot_landscapes(l, titles = "both")
   expect_equal(p5$labels$title, "Test Landscape (sharp)")
 })
 
-test_that("plot_landscape handles legend options", {
+test_that("plot_landscapes handles legend options for a single landscape", {
   l <- create_landscape("sharp", width = 10, height = 10)
 
   # Test legend visibility
-  p1 <- plot_landscape(l, show_legend = FALSE)
+  p1 <- plot_landscapes(l, show_legend = FALSE)
   expect_equal(p1$theme$legend.position, "none")
 
-  p2 <- plot_landscape(l, show_legend = TRUE)
+  p2 <- plot_landscapes(l, show_legend = TRUE)
   expect_equal(p2$theme$legend.position, "right")
 
   # Test legend title
-  p3 <- plot_landscape(l, legend_title = "Custom Legend")
+  p3 <- plot_landscapes(l, legend_title = "Custom Legend")
   expect_equal(p3$labels$fill, "Custom Legend")
 })
 
-test_that("plot_landscape uses correct color scales", {
+test_that("plot_landscapes uses correct color scales for a single landscape", {
   # For discrete data (e.g., binary landscape)
   l_discrete <- create_landscape("sharp", width = 10, height = 10)
-  p1 <- plot_landscape(l_discrete)
+  p1 <- plot_landscapes(l_discrete)
 
   # Get the fill scale
   fill_scale <- p1$scales$get_scales("fill")
@@ -56,16 +56,49 @@ test_that("plot_landscape uses correct color scales", {
   expect_equal(fill_scale$name, "Value")
 })
 
-test_that("plot_landscape returns a ggplot object", {
+test_that("plot_landscapes returns a patchwork object for a single landscape", {
   l <- create_landscape("sharp", width = 10, height = 10)
-  p <- plot_landscape(l)
+  p <- plot_landscapes(l)
 
+  expect_s3_class(p, "patchwork")
+  # patchwork objects inherit from ggplot, so single-landscape plots can
+  # still be extended like a regular ggplot object
   expect_s3_class(p, "ggplot")
 })
 
-test_that("plot_landscape preserves landscape dimensions", {
+test_that("& applies ggplot2 elements to every panel, unlike +", {
+  landscapes <- list(
+    create_landscape("sharp", width = 10, height = 10),
+    create_landscape("random", width = 10, height = 10)
+  )
+  p <- plot_landscapes(landscapes)
+
+  # `+` on a multi-panel patchwork only modifies the last panel
+  p_plus <- p + ggplot2::theme_dark()
+  expect_false(identical(
+    p_plus$patches$plots[[1]]$theme$panel.background,
+    ggplot2::theme_dark()$panel.background
+  ))
+  expect_identical(
+    p_plus$theme$panel.background,
+    ggplot2::theme_dark()$panel.background
+  )
+
+  # `&` applies to every panel
+  p_and <- p & ggplot2::theme_dark()
+  expect_identical(
+    p_and$patches$plots[[1]]$theme$panel.background,
+    ggplot2::theme_dark()$panel.background
+  )
+  expect_identical(
+    p_and$theme$panel.background,
+    ggplot2::theme_dark()$panel.background
+  )
+})
+
+test_that("plot_landscapes preserves landscape dimensions for a single landscape", {
   l <- create_landscape("sharp", width = 15, height = 10)
-  p <- plot_landscape(l)
+  p <- plot_landscapes(l)
 
   # Extract data from plot
   plot_data <- ggplot2::layer_data(p, 1)
@@ -75,9 +108,9 @@ test_that("plot_landscape preserves landscape dimensions", {
   expect_equal(length(unique(plot_data$y)), 10) # height
 })
 
-# Test plot_landscapes function --------------------------------------------
+# Test plot_landscapes with multiple landscapes --------------------------
 
-test_that("plot_landscapes validates input", {
+test_that("plot_landscapes validates list input", {
   # Empty list
   expect_error(
     plot_landscapes(list()),
@@ -87,7 +120,7 @@ test_that("plot_landscapes validates input", {
   # Not a list
   expect_error(
     plot_landscapes(matrix(1:9, 3, 3)),
-    "landscapes must be a list"
+    "landscapes must be a landscape object or a list of landscape objects"
   )
 
   # List with non-landscape objects
