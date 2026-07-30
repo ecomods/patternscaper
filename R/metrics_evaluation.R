@@ -126,8 +126,17 @@ evaluate_metrics <- function(
     )
   }
 
+  # Every metric that goes in should be accounted for at the end, so keep the
+  # full input set and a record of what leaves the pipeline at each step. The
+  # exclusion vectors are initialised here and filled in later
+  all_metrics <- unique(metrics$metric)
+  excluded_user <- character(0)
+  excluded_incomplete <- character(0)
+
   # Exclude metrics if specified
   if (!is.null(exclude_metrics)) {
+    # Only names actually present count as excluded
+    excluded_user <- intersect(exclude_metrics, all_metrics)
     metrics <- metrics[!metrics$metric %in% exclude_metrics, ]
     if (nrow(metrics) == 0) {
       cli::cli_abort("No metrics left after exclusion")
@@ -159,9 +168,9 @@ evaluate_metrics <- function(
       dplyr::pull(metric) |>
       setdiff(na_metrics)
 
-    excluded_metrics <- c(na_metrics, incomplete_metrics)
+    excluded_incomplete <- c(na_metrics, incomplete_metrics)
     nrow_before <- nrow(metrics)
-    metrics <- metrics[!metrics$metric %in% excluded_metrics, ]
+    metrics <- metrics[!metrics$metric %in% excluded_incomplete, ]
     nrow_after <- nrow(metrics)
 
     if (nrow_after == 0) {
@@ -170,9 +179,9 @@ evaluate_metrics <- function(
       )
     }
 
-    if (length(excluded_metrics) > 0) {
+    if (length(excluded_incomplete) > 0) {
       excluded_message <- c(
-        "Excluded {length(excluded_metrics)} metric{?s} with missing values ({nrow_before - nrow_after} row{?s} removed)."
+        "Excluded {length(excluded_incomplete)} metric{?s} with missing values ({nrow_before - nrow_after} row{?s} removed)."
       )
       if (length(na_metrics) > 0) {
         excluded_message <- c(
@@ -216,7 +225,7 @@ evaluate_metrics <- function(
   # equally sized landscapes) can still have a very small variance like
   # 1e-34 due to floating-point summation. Such small variance should not
   # be considered and the metric should be excluded.
-  zero_var_metrics <- metrics |>
+  excluded_zero_variance <- metrics |>
     dplyr::summarize(
       sd_value = sd(value, na.rm = TRUE),
       mean_value = mean(value, na.rm = TRUE),
@@ -225,10 +234,10 @@ evaluate_metrics <- function(
     dplyr::filter(is_constant_sd(sd_value, mean_value)) |>
     dplyr::pull(metric)
 
-  if (length(zero_var_metrics) > 0) {
-    metrics <- metrics[!metrics$metric %in% zero_var_metrics, ]
+  if (length(excluded_zero_variance) > 0) {
+    metrics <- metrics[!metrics$metric %in% excluded_zero_variance, ]
     cli::cli_warn(
-      "Excluded {length(zero_var_metrics)} metric{?s} with no variation across landscapes: {.val {zero_var_metrics}}"
+      "Excluded {length(excluded_zero_variance)} metric{?s} with no variation across landscapes: {.val {excluded_zero_variance}}"
     )
   }
 
