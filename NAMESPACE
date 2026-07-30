@@ -2,6 +2,7 @@
 
 S3method(plot,landscape)
 S3method(print,landscape)
+S3method(print,metrics_evaluation)
 export(apply_metrics_model)
 export(apply_pixel_model)
 export(calculate_metrics)

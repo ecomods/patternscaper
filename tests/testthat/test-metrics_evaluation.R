@@ -668,6 +668,37 @@ test_that("evaluate_metrics is deterministic under row reordering", {
   expect_identical(result$ranking$metric, shuffled$ranking$metric)
 })
 
+test_that("print.metrics_evaluation summarises to stdout", {
+  metrics <- create_test_metrics(n_metrics = 6)
+  result <- evaluate_metrics(metrics, metrics_number = 3)
+
+  # expect_output captures stdout, so this also pins that the method does not
+  # print via cli, which would go to the message stream instead
+  expect_output(print(result), "Metrics evaluation: kruskal_effsize")
+  expect_output(print(result), "Selected \\(3\\)")
+  expect_output(print(result), "Outcomes:")
+  expect_output(print(result), "Use \\$ranking")
+  expect_invisible(print(result))
+})
+
+test_that("print shows a summary, not the ranking table", {
+  metrics <- create_test_metrics(n_metrics = 15)
+  result <- evaluate_metrics(
+    metrics,
+    metrics_number = 14,
+    correlation_threshold = 1
+  )
+
+  printed <- capture.output(print(result))
+
+  # The whole point is not to dump one line per metric
+  expect_false(any(grepl("# A tibble", printed, fixed = TRUE)))
+  expect_lt(length(printed), nrow(result$ranking))
+
+  # Long selections are truncated rather than filling the console
+  expect_true(any(grepl("and 4 more", printed, fixed = TRUE)))
+})
+
 test_that("downstream functions accept the object or a name vector", {
   metrics <- create_test_metrics(n_metrics = 6)
   result <- evaluate_metrics(metrics, metrics_number = 3)

@@ -101,6 +101,57 @@ new_metrics_evaluation <- function(
   )
 }
 
+#' Print a metrics evaluation
+#'
+#' Summarises which metrics were selected and what happened to the rest. Prints
+#' a summary rather than the ranking table itself, which has one row per metric
+#' passed in and is usually too long to read in the console; use `x$ranking` to
+#' see it.
+#'
+#' @param x A `metrics_evaluation` object from \code{\link{evaluate_metrics}}.
+#' @param ... Ignored, for compatibility with the generic.
+#'
+#' @return `x`, invisibly.
+#' @examples
+#' landscapes <- create_landscapes(n = 20, patterns = c("spots", "random"))
+#' metrics <- calculate_metrics(landscapes, level = "landscape")
+#' evaluate_metrics(metrics, metrics_number = 5)
+#' @family metrics
+#' @export
+print.metrics_evaluation <- function(x, ...) {
+  # cat() rather than cli::, so the summary goes to stdout like the package's
+  # other print methods; cli writes to the message stream.
+  cat(sprintf(
+    "Metrics evaluation: %s [%d candidate metrics]\n",
+    x$method,
+    nrow(x$ranking)
+  ))
+  cat("-----------------------------------------\n")
+
+  n_selected <- length(x$selected)
+  shown <- x$selected[seq_len(min(10, n_selected))]
+  cat(sprintf(
+    "Selected (%d): %s\n",
+    n_selected,
+    paste(shown, collapse = ", ")
+  ))
+  if (n_selected > length(shown)) {
+    cat(sprintf("  ... and %d more\n", n_selected - length(shown)))
+  }
+
+  outcome_counts <- table(x$ranking$outcome)
+  outcome_counts <- outcome_counts[outcome_counts > 0]
+  cat("\nOutcomes:\n")
+  cat(
+    sprintf("  %-26s %d\n", names(outcome_counts), as.integer(outcome_counts)),
+    sep = ""
+  )
+
+  cat("\nUse $ranking for scores and per-metric outcomes.\n")
+
+  invisible(x)
+}
+
 #' Evaluate Landscape Metrics
 #'
 #' Identifies the metrics most suitable for discriminating between different pattern types
