@@ -54,6 +54,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Selina Baldauf \email{selina.baldauf@fu-berlin.de} (\href{https://orcid.org/0000-0002-3393-725X}{ORCID})
   \item Britta Tietjen \email{britta.tietjen@fu-berlin.de} (\href{https://orcid.org/0000-0003-4767-6406}{ORCID})
   \item Uta Berger \email{uta.berger@tu-dresden.de} (\href{https://orcid.org/0000-0001-6920-136X}{ORCID})
 }

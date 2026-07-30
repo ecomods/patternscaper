@@ -26,8 +26,8 @@ metrics <- calculate_metrics(landscapes, level = "landscape")
 evaluate_metrics(metrics, metrics_number = 5)
 }
 \seealso{
-Other metrics: 
-\code{\link{calculate_metrics}()},
-\code{\link{evaluate_metrics}()}
+Other metrics:
+\code{\link[=calculate_metrics]{calculate_metrics()}},
+\code{\link[=evaluate_metrics]{evaluate_metrics()}}
 }
 \concept{metrics}

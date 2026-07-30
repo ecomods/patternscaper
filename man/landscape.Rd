@@ -49,10 +49,10 @@ l <- landscape(rast, name = "my_raster")
 \seealso{
 \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 
-Other landscape objects: 
-\code{\link{plot.landscape}()},
-\code{\link{print.landscape}()},
-\code{\link{set_landscape_name}()},
-\code{\link{set_landscape_pattern}()}
+Other landscape objects:
+\code{\link[=plot.landscape]{plot.landscape()}},
+\code{\link[=print.landscape]{print.landscape()}},
+\code{\link[=set_landscape_name]{set_landscape_name()}},
+\code{\link[=set_landscape_pattern]{set_landscape_pattern()}}
 }
 \concept{landscape objects}

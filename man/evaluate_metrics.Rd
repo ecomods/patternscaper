@@ -131,8 +131,8 @@ dplyr::count(evaluation$ranking, outcome)
 \seealso{
 \code{\link{train_metrics_model}}
 
-Other metrics: 
-\code{\link{calculate_metrics}()},
-\code{\link{print.metrics_evaluation}()}
+Other metrics:
+\code{\link[=calculate_metrics]{calculate_metrics()}},
+\code{\link[=print.metrics_evaluation]{print.metrics_evaluation()}}
 }
 \concept{metrics}

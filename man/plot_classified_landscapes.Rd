@@ -68,9 +68,8 @@ plot_classified_landscapes(
 \seealso{
 \code{\link{train_pixel_model}}, \code{\link{train_metrics_model}}
 
-Other visualization: 
-\code{\link{plot_landscape}()},
-\code{\link{plot_landscapes}()},
-\code{\link{plot_metrics}()}
+Other visualization:
+\code{\link[=plot_landscapes]{plot_landscapes()}},
+\code{\link[=plot_metrics]{plot_metrics()}}
 }
 \concept{visualization}

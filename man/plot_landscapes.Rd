@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_landscapes.R
 \name{plot_landscapes}
 \alias{plot_landscapes}
-\title{Plot Multiple Landscapes}
+\title{Plot One or More Landscapes}
 \usage{
 plot_landscapes(
   landscapes,
@@ -16,7 +16,8 @@ plot_landscapes(
 )
 }
 \arguments{
-\item{landscapes}{List. List of landscape objects to plot. E.g. created by
+\item{landscapes}{A single landscape object, or a list of landscape
+objects to plot. E.g. created by \code{\link{create_landscape}} or
 \code{\link{create_landscapes}}.}
 
 \item{titles}{Character. Controls the plot titles:
@@ -43,12 +44,34 @@ Plotting more than 36 landscapes (6x6 grid) is not recommended.}
 Can be used to plot specific landscapes or change plot order (default: NULL).}
 }
 \value{
-A ggplot object combining all landscape plots in a grid.
+A patchwork object combining one or more landscape plots.
 }
 \description{
-Creates a grid of multiple landscape plots.
+Creates a plot of a single landscape, or a grid of multiple landscape
+plots.
+}
+\details{
+To add \pkg{ggplot2} elements (themes, scales, etc.) to every panel of the
+result, use \code{&} rather than \code{+} (e.g.
+\code{plot_landscapes(landscapes) & ggplot2::theme_dark()}): with more than
+one landscape, \code{+} only modifies the last panel, while \code{&}
+applies to all of them. For a single landscape the two operators happen to
+give the same result, but using \code{&} consistently avoids surprises if
+more landscapes are added later.
 }
 \examples{
+# Plot a single landscape
+l <- create_landscape("sharp", width = 50, height = 50)
+plot_landscapes(l)
+
+# Custom title and legend for a single landscape
+plot_landscapes(l,
+                   titles = "My Sharp Treeline",
+                   legend_title = "Vegetation")
+
+# Use & (not +) to add ggplot2 elements to every panel
+plot_landscapes(l) & ggplot2::theme_dark()
+
 # Create a list of different landscapes
 landscapes <- list(
   create_landscape("sharp", width = 50, height = 50),
@@ -58,6 +81,9 @@ landscapes <- list(
 
 # Default plot (3x1 grid)
 plot_landscapes(landscapes)
+
+# & applies to all three panels; + would only affect the last one
+plot_landscapes(landscapes) & ggplot2::theme_dark()
 
 # 2-column grid with custom titles
 plot_landscapes(landscapes,
@@ -76,11 +102,10 @@ plot_landscapes(many_landscapes,
                    ncol = 3)            # In 3x3 grid
 }
 \seealso{
-\code{\link{create_landscapes}}
+\code{\link{create_landscape}}, \code{\link{create_landscapes}}
 
-Other visualization: 
-\code{\link{plot_classified_landscapes}()},
-\code{\link{plot_landscape}()},
-\code{\link{plot_metrics}()}
+Other visualization:
+\code{\link[=plot_classified_landscapes]{plot_classified_landscapes()}},
+\code{\link[=plot_metrics]{plot_metrics()}}
 }
 \concept{visualization}

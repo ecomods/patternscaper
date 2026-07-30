@@ -49,9 +49,8 @@ plot_metrics(metrics, selected_metrics = many_metrics, force = TRUE)
 \seealso{
 \code{\link{calculate_metrics}}, \code{\link{evaluate_metrics}}
 
-Other visualization: 
-\code{\link{plot_classified_landscapes}()},
-\code{\link{plot_landscape}()},
-\code{\link{plot_landscapes}()}
+Other visualization:
+\code{\link[=plot_classified_landscapes]{plot_classified_landscapes()}},
+\code{\link[=plot_landscapes]{plot_landscapes()}}
 }
 \concept{visualization}

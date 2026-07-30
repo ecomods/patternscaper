@@ -41,10 +41,10 @@ print(l)
 
 }
 \seealso{
-Other landscape objects: 
-\code{\link{landscape}()},
-\code{\link{plot.landscape}()},
-\code{\link{set_landscape_name}()},
-\code{\link{set_landscape_pattern}()}
+Other landscape objects:
+\code{\link[=landscape]{landscape()}},
+\code{\link[=plot.landscape]{plot.landscape()}},
+\code{\link[=set_landscape_name]{set_landscape_name()}},
+\code{\link[=set_landscape_pattern]{set_landscape_pattern()}}
 }
 \concept{landscape objects}

@@ -34,10 +34,10 @@ landscapes <- purrr::map2(landscapes, patterns_vec, set_landscape_pattern)
 landscapes <- mapply(set_landscape_pattern, landscapes, patterns_vec, SIMPLIFY = FALSE)
 }
 \seealso{
-Other landscape objects: 
-\code{\link{landscape}()},
-\code{\link{plot.landscape}()},
-\code{\link{print.landscape}()},
-\code{\link{set_landscape_name}()}
+Other landscape objects:
+\code{\link[=landscape]{landscape()}},
+\code{\link[=plot.landscape]{plot.landscape()}},
+\code{\link[=print.landscape]{print.landscape()}},
+\code{\link[=set_landscape_name]{set_landscape_name()}}
 }
 \concept{landscape objects}

@@ -20,7 +20,7 @@ Creates a basic ggplot2 visualization of a landscape object.
 \details{
 This function creates a minimal ggplot2 visualization of the landscape raster data.
 The returned plot can be further customized by adding ggplot2 elements or by using
-the \code{\link{plot_landscape}} function for higher-level customization.
+the \code{\link{plot_landscapes}} function for higher-level customization.
 }
 \examples{
 # Create a landscape
@@ -36,10 +36,10 @@ p + ggplot2::ggtitle("My custom title") +
 
 }
 \seealso{
-Other landscape objects: 
-\code{\link{landscape}()},
-\code{\link{print.landscape}()},
-\code{\link{set_landscape_name}()},
-\code{\link{set_landscape_pattern}()}
+Other landscape objects:
+\code{\link[=landscape]{landscape()}},
+\code{\link[=print.landscape]{print.landscape()}},
+\code{\link[=set_landscape_name]{set_landscape_name()}},
+\code{\link[=set_landscape_pattern]{set_landscape_pattern()}}
 }
 \concept{landscape objects}

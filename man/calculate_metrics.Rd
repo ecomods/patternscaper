@@ -68,8 +68,8 @@ metrics. *Ecography*, 42(10), 1648-1657. \doi{10.1111/ecog.04617}
 \seealso{
 \code{\link{plot_metrics}}
 
-Other metrics: 
-\code{\link{evaluate_metrics}()},
-\code{\link{print.metrics_evaluation}()}
+Other metrics:
+\code{\link[=evaluate_metrics]{evaluate_metrics()}},
+\code{\link[=print.metrics_evaluation]{print.metrics_evaluation()}}
 }
 \concept{metrics}

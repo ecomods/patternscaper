@@ -103,7 +103,7 @@ predictions <- apply_metrics_model(new_landscapes, model)
 \seealso{
 \code{\link{train_metrics_model}}, \code{\link{plot_classified_landscapes}}
 
-Other neural network application: 
-\code{\link{apply_pixel_model}()}
+Other neural network application:
+\code{\link[=apply_pixel_model]{apply_pixel_model()}}
 }
 \concept{neural network application}
