@@ -33,7 +33,7 @@ test_larger <- create_landscapes(n = 120, patterns = patterns, width = 100, heig
 
 train_metrics <- calculate_metrics(train, metrics = metric_pool, level = "landscape")
 auto_selected <- evaluate_metrics(train_metrics, metrics_number = 5, verbose = FALSE)
-cat("\nautomatically selected:", auto_selected, "\n")
+cat("\nautomatically selected:", auto_selected$selected, "\n")
 
 fit_model <- function(metrics_selected) {
   train_metrics_model(

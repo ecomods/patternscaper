@@ -64,7 +64,7 @@ run_golden <- function() {
   list(
     # Metrics workflow: exact values
     metrics_table    = metrics,
-    metrics_selected = selected,
+    metrics_selected = selected$selected,
     train_accuracy   = model$performance$accuracy,
     train_confusion  = model$performance$confusion_matrix,
     test_accuracy    = validation$performance$accuracy,

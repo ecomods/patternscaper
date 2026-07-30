@@ -38,7 +38,18 @@ If you do not want to filter based on correlation, set to 1.}
 or just a summary (default: FALSE).}
 }
 \value{
-Character vector. Names of metrics that best discriminate between pattern types.
+An object of class `metrics_evaluation`, a list with elements:
+  \describe{
+    \item{\code{selected}}{Character vector. Names of metrics that best
+      discriminate between pattern types. Metrics added to fill a correlation
+      gap come last rather than at their rank position.}
+    \item{\code{ranking}}{tibble. One row per metric passed in, with its score
+      and outcome. See 'The ranking table' below.}
+    \item{\code{method}}{Character. The ranking method used.}
+    \item{\code{params}}{List. The arguments that affect the result.}
+  }
+  \code{\link{train_metrics_model}} and \code{\link{plot_metrics}} accept
+  this object directly, so it can be passed straight on.
 }
 \description{
 Identifies the metrics most suitable for discriminating between different pattern types
@@ -68,6 +79,34 @@ metric-based neural network.
 }
 }
 
+\section{The ranking table}{
+
+`ranking` gives an overview of all metrics ranked: one row per metric,
+whatever happened to it. Columns:
+\describe{
+  \item{\code{metric}}{Metric name.}
+  \item{\code{score}}{Score from the ranking `method`, or `NA` for metrics
+    that were excluded before ranking.}
+  \item{\code{rank}}{Position in the full ranking, best first, or `NA` for
+    metrics that were excluded before ranking.}
+  \item{\code{selected}}{Whether the metric is in `selected`.}
+  \item{\code{outcome}}{Factor recording what happened to the metric, with
+    levels ordered by pipeline stage: `selected`,
+    `selected_correlation_fill` (added despite correlation because too few
+    uncorrelated metrics existed), `dropped_correlated`,
+    `dropped_below_cutoff` (scored, but ranked below `metrics_number`),
+    `excluded_user` (via `exclude_metrics`), `excluded_incomplete` (`NA`
+    values, or absent for some landscapes), `excluded_zero_variance`,
+    `excluded_not_ratio_scale` and `excluded_non_finite_score` (both
+    `coeffvar_all` only).}
+  \item{\code{correlated_with}}{For the two correlation outcomes, the already
+    selected metrics the metric clashed with. `NA` otherwise.}
+}
+
+Ties in `score` are broken by metric name, so the ranking is deterministic
+for given data regardless of its row order.
+}
+
 \examples{
 # Calculate most suitable metrics to discriminate between spots and random landscapes
 landscapes <- create_landscapes(n = 50, patterns = c("spots","random"))
@@ -75,11 +114,18 @@ metrics <- calculate_metrics(
   landscapes,
   level = "landscape"
 )
-metric_list <- evaluate_metrics(
+evaluation <- evaluate_metrics(
   metrics = metrics,
   metrics_number = 5,
   method = "coeffvar_all"
 )
+
+# The selected metric names, to pass on to a model or a plot
+evaluation$selected
+
+# What happened to every candidate metric
+evaluation$ranking
+dplyr::count(evaluation$ranking, outcome)
 
 }
 \seealso{

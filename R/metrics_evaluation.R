@@ -1,3 +1,106 @@
+#' Outcome levels of a metrics evaluation
+#'
+#' The vocabulary of the `outcome` column of a `metrics_evaluation` ranking
+#' table, ordered by the pipeline stage at which a metric leaves the selection.
+#' `selected_*` and `dropped_*` metrics were scored by the ranking method;
+#' `excluded_*` metrics never reached it and have no score or rank.
+#'
+#' @noRd
+metrics_evaluation_outcomes <- c(
+  "selected",
+  "selected_correlation_fill",
+  "dropped_correlated",
+  "dropped_below_cutoff",
+  "excluded_user",
+  "excluded_incomplete",
+  "excluded_zero_variance",
+  "excluded_not_ratio_scale",
+  "excluded_non_finite_score"
+)
+
+#' Construct a metrics_evaluation object
+#'
+#' Internal constructor. Builds the ranking table by starting from the complete
+#' set of input metrics and joining what is known about each one, so a metric
+#' cannot be lost: `left_join()` from `all_metrics` keeps every row whatever the
+#' joined tables contain.
+#'
+#' @param all_metrics Character vector. Every metric passed to
+#'     \code{\link{evaluate_metrics}}, before any filtering.
+#' @param ranked tibble. Scored metrics (`metric`, `score`) in rank order.
+#' @param outcomes tibble. Selection outcome per scored metric (`metric`,
+#'     `outcome`, `correlated_with`).
+#' @param excluded tibble. Metrics dropped before ranking (`metric`, `outcome`).
+#' @param selected_metrics Character vector. The selected names, in selection
+#'     order.
+#' @param method Character. Ranking method used.
+#' @param params List. Arguments that affect the result.
+#'
+#' @return A `metrics_evaluation` object.
+#' @noRd
+new_metrics_evaluation <- function(
+  all_metrics,
+  ranked,
+  outcomes,
+  excluded,
+  selected_metrics,
+  method,
+  params
+) {
+  # Each metric leaves the pipeline exactly once, so the outcome sources must be
+  # disjoint. Overlapping keys would duplicate rows in the join below.
+  all_outcomes <- dplyr::bind_rows(excluded, outcomes)
+  if (anyDuplicated(all_outcomes$metric) > 0) {
+    duplicated_metrics <- unique(
+      all_outcomes$metric[duplicated(all_outcomes$metric)]
+    )
+    cli::cli_abort(c(
+      "Internal error: more than one outcome recorded for {length(duplicated_metrics)} metric{?s}.",
+      "x" = "{.val {duplicated_metrics}}"
+    ))
+  }
+
+  ranking <- tibble::tibble(metric = all_metrics) |>
+    dplyr::left_join(all_outcomes, by = "metric") |>
+    dplyr::left_join(
+      dplyr::mutate(ranked, rank = dplyr::row_number()),
+      by = "metric"
+    ) |>
+    dplyr::mutate(
+      outcome = factor(outcome, levels = metrics_evaluation_outcomes),
+      selected = metric %in% selected_metrics
+    ) |>
+    dplyr::select(
+      metric,
+      score,
+      rank,
+      selected,
+      outcome,
+      correlated_with
+    ) |>
+    dplyr::arrange(rank, outcome, metric)
+
+  # A metric with no outcome means a pipeline step dropped it without recording
+  # why, which would make the census silently incomplete.
+  if (anyNA(ranking$outcome)) {
+    unrecorded <- ranking$metric[is.na(ranking$outcome)]
+    cli::cli_abort(c(
+      "Internal error: no outcome recorded for {length(unrecorded)} metric{?s}.",
+      "x" = "{.val {unrecorded}}"
+    ))
+  }
+
+  structure(
+    list(
+      selected = selected_metrics,
+      ranking = ranking,
+      method = method,
+      params = params
+    ),
+    class = "metrics_evaluation"
+  )
+}
+
 #' Evaluate Landscape Metrics
 #'
 #' Identifies the metrics most suitable for discriminating between different pattern types
@@ -41,7 +144,44 @@
 #'     between groups. Higher effect sizes indicate better discrimination between pattern types.}
 #' }
 #'
-#' @return Character vector. Names of metrics that best discriminate between pattern types.
+#' @section The ranking table:
+#' `ranking` gives an overview of all metrics ranked: one row per metric,
+#' whatever happened to it. Columns:
+#' \describe{
+#'   \item{\code{metric}}{Metric name.}
+#'   \item{\code{score}}{Score from the ranking `method`, or `NA` for metrics
+#'     that were excluded before ranking.}
+#'   \item{\code{rank}}{Position in the full ranking, best first, or `NA` for
+#'     metrics that were excluded before ranking.}
+#'   \item{\code{selected}}{Whether the metric is in `selected`.}
+#'   \item{\code{outcome}}{Factor recording what happened to the metric, with
+#'     levels ordered by pipeline stage: `selected`,
+#'     `selected_correlation_fill` (added despite correlation because too few
+#'     uncorrelated metrics existed), `dropped_correlated`,
+#'     `dropped_below_cutoff` (scored, but ranked below `metrics_number`),
+#'     `excluded_user` (via `exclude_metrics`), `excluded_incomplete` (`NA`
+#'     values, or absent for some landscapes), `excluded_zero_variance`,
+#'     `excluded_not_ratio_scale` and `excluded_non_finite_score` (both
+#'     `coeffvar_all` only).}
+#'   \item{\code{correlated_with}}{For the two correlation outcomes, the already
+#'     selected metrics the metric clashed with. `NA` otherwise.}
+#' }
+#'
+#' Ties in `score` are broken by metric name, so the ranking is deterministic
+#' for given data regardless of its row order.
+#'
+#' @return An object of class `metrics_evaluation`, a list with elements:
+#'   \describe{
+#'     \item{\code{selected}}{Character vector. Names of metrics that best
+#'       discriminate between pattern types. Metrics added to fill a correlation
+#'       gap come last rather than at their rank position.}
+#'     \item{\code{ranking}}{tibble. One row per metric passed in, with its score
+#'       and outcome. See 'The ranking table' below.}
+#'     \item{\code{method}}{Character. The ranking method used.}
+#'     \item{\code{params}}{List. The arguments that affect the result.}
+#'   }
+#'   \code{\link{train_metrics_model}} and \code{\link{plot_metrics}} accept
+#'   this object directly, so it can be passed straight on.
 #' @examples
 #' # Calculate most suitable metrics to discriminate between spots and random landscapes
 #' landscapes <- create_landscapes(n = 50, patterns = c("spots","random"))
@@ -49,11 +189,18 @@
 #'   landscapes,
 #'   level = "landscape"
 #' )
-#' metric_list <- evaluate_metrics(
+#' evaluation <- evaluate_metrics(
 #'   metrics = metrics,
 #'   metrics_number = 5,
 #'   method = "coeffvar_all"
 #' )
+#'
+#' # The selected metric names, to pass on to a model or a plot
+#' evaluation$selected
+#'
+#' # What happened to every candidate metric
+#' evaluation$ranking
+#' dplyr::count(evaluation$ranking, outcome)
 #'
 #' @seealso \code{\link{train_metrics_model}}
 #' @family metrics
@@ -132,6 +279,16 @@ evaluate_metrics <- function(
   all_metrics <- unique(metrics$metric)
   excluded_user <- character(0)
   excluded_incomplete <- character(0)
+
+  # Recorded before `metrics_number` is capped below, so the object reports what
+  # was asked for rather than what was achievable
+  params <- list(
+    metrics_number = metrics_number,
+    correlation_threshold = correlation_threshold,
+    exclude_incomplete_metrics = exclude_incomplete_metrics,
+    exclude_metrics = exclude_metrics,
+    level = level
+  )
 
   # Exclude metrics if specified
   if (!is.null(exclude_metrics)) {
@@ -264,23 +421,59 @@ evaluate_metrics <- function(
     cli::cli_alert_info("Ranked metrics ({method}): {.val {ranked_metrics}}")
   }
 
-  # Return early if no correlation filtering needed
   if (correlation_threshold >= 1) {
+    # No correlation filtering: the top of the ranking is the selection. The
+    # outcomes still have to be recorded, or the census would be half empty on
+    # this path.
     available_count <- min(length(ranked_metrics), metrics_number)
-    return(ranked_metrics[seq_len(available_count)])
+    top_metrics <- ranked_metrics[seq_len(available_count)]
+    outcomes <- tibble::tibble(
+      metric = ranked_metrics,
+      outcome = dplyr::if_else(
+        seq_along(ranked_metrics) <= available_count,
+        "selected",
+        "dropped_below_cutoff"
+      ),
+      correlated_with = NA_character_
+    )
+  } else {
+    # Select metrics with low correlation - messages handled inside function
+    correlation_result <- select_metrics_correlation(
+      metric_ranking = ranked_metrics,
+      metrics = metrics,
+      metrics_number = metrics_number,
+      correlation_threshold = correlation_threshold,
+      verbose = verbose
+    )
+    top_metrics <- correlation_result$selected
+    outcomes <- correlation_result$outcomes
   }
 
-  # Select metrics with low correlation - messages handled inside function
-  correlation_result <- select_metrics_correlation(
-    metric_ranking = ranked_metrics,
-    metrics = metrics,
-    metrics_number = metrics_number,
-    correlation_threshold = correlation_threshold,
-    verbose = verbose
+  # Collect what left the pipeline before ranking. The ranker contributes only
+  # for methods that can fail to score a metric; the others return no
+  # `excluded` element at all, which bind_rows() ignores.
+  excluded <- dplyr::bind_rows(
+    tibble::tibble(metric = excluded_user, outcome = "excluded_user"),
+    tibble::tibble(
+      metric = excluded_incomplete,
+      outcome = "excluded_incomplete"
+    ),
+    tibble::tibble(
+      metric = excluded_zero_variance,
+      outcome = "excluded_zero_variance"
+    ),
+    ranking_result$excluded
   )
-  top_metrics <- correlation_result$selected
 
-  return(top_metrics)
+  new_metrics_evaluation(
+    all_metrics = all_metrics,
+    ranked = ranking_result$ranking,
+    outcomes = outcomes,
+    excluded = excluded,
+    selected_metrics = top_metrics,
+    method = method,
+    params = params
+  )
 }
 
 #' Resolve Selected Metric Names
@@ -374,12 +567,19 @@ rank_by_coefficient_variation <- function(metrics) {
     ))
   }
 
-  # Metrics whose CV is not finite are dropped from the ranking, exactly as
-  # before. Naming the set rather than filtering it away inline lets a later
-  # step report why they disappeared.
+  # A CV can come out non-finite even for a metric on a ratio scale. These used
+  # to be filtered away inline with no message at all.
   non_finite <- metric_stats |>
     dplyr::filter(!metric %in% not_ratio_scale, !is.finite(score)) |>
     dplyr::pull(metric)
+
+  if (length(non_finite) > 0) {
+    cli::cli_warn(c(
+      "Excluded {length(non_finite)} metric{?s} from the {.val coeffvar_all} ranking: {.val {non_finite}}",
+      "x" = "The coefficient of variation was not finite.",
+      "i" = "Rank {cli::qty(length(non_finite))}{?it/them} with a different {.arg method}."
+    ))
+  }
 
   ranking <- metric_stats |>
     dplyr::filter(!metric %in% c(not_ratio_scale, non_finite)) |>
@@ -695,9 +895,8 @@ select_metrics_correlation <- function(
 
   # Fill up with remaining metrics if needed
   if (length(top_metrics) < metrics_number) {
-    cli::cli_warn(
-      "Only {length(top_metrics)} uncorrelated metric{?s} found. Filling to {metrics_number} with correlated metrics."
-    )
+    # Captured before the fill, since top_metrics grows below
+    n_uncorrelated <- length(top_metrics)
 
     additional_metrics <- setdiff(metric_ranking, top_metrics)
     needed_count <- min(
@@ -711,6 +910,11 @@ select_metrics_correlation <- function(
     # than at their position in the ranking. `selected` therefore preserves the
     # order callers have always seen, which is not the ranking order.
     top_metrics <- c(top_metrics, filled)
+
+    cli::cli_warn(c(
+      "Only {n_uncorrelated} uncorrelated metric{?s} found. Filling to {metrics_number} with correlated metrics.",
+      "i" = "Added: {.val {filled}}"
+    ))
   }
 
   list(

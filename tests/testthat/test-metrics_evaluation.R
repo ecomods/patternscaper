@@ -38,6 +38,15 @@ create_real_test_metrics <- function(
   )
 }
 
+# Look up what the ranking table recorded for one metric. Asserting on this
+# rather than on absence from `selected` is what actually pins down *why* a
+# metric was dropped -- absence alone would also hold if it were silently lost.
+outcome_of <- function(evaluation, metric_name) {
+  as.character(
+    evaluation$ranking$outcome[evaluation$ranking$metric == metric_name]
+  )
+}
+
 # 1. INPUT VALIDATION TESTS ----
 test_that("evaluate_metrics validates input correctly", {
   valid_metrics <- create_test_metrics()
@@ -109,9 +118,11 @@ test_that("evaluate_metrics returns expected output format", {
 
   result <- evaluate_metrics(metrics, metrics_number = 5)
 
-  expect_type(result, "character")
-  expect_length(result, 5)
-  expect_true(all(result %in% unique(metrics$metric)))
+  expect_s3_class(result, "metrics_evaluation")
+  expect_type(result$selected, "character")
+  expect_length(result$selected, 5)
+  expect_true(all(result$selected %in% unique(metrics$metric)))
+  expect_equal(result$method, "kruskal_effsize")
 })
 
 test_that("evaluate_metrics works with all ranking methods", {
@@ -133,8 +144,12 @@ test_that("evaluate_metrics works with all ranking methods", {
       correlation_threshold = 1 # Disable correlation filtering
     )
 
-    expect_type(result, "character")
-    expect_length(result, 5)
+    expect_s3_class(result, "metrics_evaluation")
+    expect_length(result$selected, 5)
+    expect_equal(result$method, method)
+    # The census holds under every method, not just the default
+    expect_setequal(result$ranking$metric, unique(metrics$metric))
+    expect_false(anyNA(result$ranking$outcome))
   }
 })
 
@@ -150,7 +165,9 @@ test_that("evaluate_metrics handles NA values correctly", {
     result <- evaluate_metrics(metrics, metrics_number = 5),
     "NA value for at least one landscape"
   )
-  expect_true(!any(c("metric_1", "metric_2") %in% result))
+  expect_equal(outcome_of(result, "metric_1"), "excluded_incomplete")
+  expect_equal(outcome_of(result, "metric_2"), "excluded_incomplete")
+  expect_false(any(c("metric_1", "metric_2") %in% result$selected))
 
   # Should keep NA metrics if specified
   result_with_na <- evaluate_metrics(
@@ -158,7 +175,7 @@ test_that("evaluate_metrics handles NA values correctly", {
     metrics_number = 5,
     exclude_incomplete_metrics = FALSE
   )
-  expect_type(result_with_na, "character")
+  expect_type(result_with_na$selected, "character")
 })
 
 test_that("evaluate_metrics drops metrics that are constant across landscapes", {
@@ -169,7 +186,8 @@ test_that("evaluate_metrics drops metrics that are constant across landscapes", 
     result <- evaluate_metrics(metrics, metrics_number = 5),
     "no variation across landscapes"
   )
-  expect_false("metric_1" %in% result)
+  expect_equal(outcome_of(result, "metric_1"), "excluded_zero_variance")
+  expect_false("metric_1" %in% result$selected)
 })
 
 test_that("evaluate_metrics drops metrics that are constant only up to rounding", {
@@ -188,7 +206,8 @@ test_that("evaluate_metrics drops metrics that are constant only up to rounding"
     result <- evaluate_metrics(metrics, metrics_number = 5),
     "no variation across landscapes"
   )
-  expect_false("metric_1" %in% result)
+  expect_equal(outcome_of(result, "metric_1"), "excluded_zero_variance")
+  expect_false("metric_1" %in% result$selected)
 })
 
 test_that("evaluate_metrics excludes metrics missing for some landscapes", {
@@ -207,7 +226,8 @@ test_that("evaluate_metrics excludes metrics missing for some landscapes", {
     ),
     "Not available for all landscapes"
   )
-  expect_false("metric_1" %in% result)
+  expect_equal(outcome_of(result, "metric_1"), "excluded_incomplete")
+  expect_false("metric_1" %in% result$selected)
 
   # Should keep incomplete metrics if specified
   result_incomplete <- evaluate_metrics(
@@ -216,7 +236,7 @@ test_that("evaluate_metrics excludes metrics missing for some landscapes", {
     correlation_threshold = 1,
     exclude_incomplete_metrics = FALSE
   )
-  expect_true("metric_1" %in% result_incomplete)
+  expect_true("metric_1" %in% result_incomplete$selected)
 })
 
 test_that("evaluate_metrics excludes class-level metrics of an absent class", {
@@ -259,7 +279,9 @@ test_that("evaluate_metrics excludes class-level metrics of an absent class", {
     ),
     "Not available for all landscapes"
   )
-  expect_false(any(c("ai_0", "pland_0") %in% result))
+  expect_equal(outcome_of(result, "ai_0"), "excluded_incomplete")
+  expect_equal(outcome_of(result, "pland_0"), "excluded_incomplete")
+  expect_false(any(c("ai_0", "pland_0") %in% result$selected))
 })
 
 # 4. METRIC EXCLUSION TESTS ----
@@ -273,7 +295,9 @@ test_that("evaluate_metrics excludes specified metrics", {
     correlation_threshold = 1
   )
 
-  expect_true(!any(c("metric_1", "metric_2") %in% result))
+  expect_equal(outcome_of(result, "metric_1"), "excluded_user")
+  expect_equal(outcome_of(result, "metric_2"), "excluded_user")
+  expect_false(any(c("metric_1", "metric_2") %in% result$selected))
 })
 
 test_that("evaluate_metrics fails when all metrics excluded", {
@@ -318,8 +342,18 @@ test_that("correlation filtering reduces to uncorrelated metrics if threshold no
   )
 
   # Should filter out highly correlated metrics
-  expect_type(result, "character")
-  expect_true(length(result) <= 4)
+  expect_s3_class(result, "metrics_evaluation")
+  expect_true(length(result$selected) <= 4)
+
+  # metric_D duplicates metric_A, so one of the pair must be recorded as
+  # correlated and must name the metric it clashed with
+  pair <- result$ranking[result$ranking$metric %in% c("metric_A", "metric_D"), ]
+  clashing <- pair[
+    as.character(pair$outcome) %in%
+      c("dropped_correlated", "selected_correlation_fill"),
+  ]
+  expect_equal(nrow(clashing), 1)
+  expect_false(is.na(clashing$correlated_with))
 
   # If function is run with correlation_threshold = 1, all metrics should be kept
   result_no_filter <- evaluate_metrics(
@@ -328,7 +362,12 @@ test_that("correlation filtering reduces to uncorrelated metrics if threshold no
     correlation_threshold = 1,
     method = "coeffvar_all"
   )
-  expect_length(result_no_filter, 4)
+  expect_length(result_no_filter$selected, 4)
+  # No correlation filtering ran, so no correlation outcome is recorded
+  expect_false(any(
+    as.character(result_no_filter$ranking$outcome) %in%
+      c("dropped_correlated", "selected_correlation_fill")
+  ))
 })
 
 test_that("gap-filled metrics are appended to the end of the selection", {
@@ -369,7 +408,14 @@ test_that("gap-filled metrics are appended to the end of the selection", {
   # uncorrelated candidates, so it is returned last rather than in rank order.
   # Callers have always seen this order; changing it would silently reorder
   # plot_metrics() facets and the stored golden selection.
-  expect_identical(result, c("metric_a", "metric_c", "metric_b"))
+  expect_identical(result$selected, c("metric_a", "metric_c", "metric_b"))
+
+  # ...and the ranking records why it was added, and what it clashed with
+  expect_equal(outcome_of(result, "metric_b"), "selected_correlation_fill")
+  expect_equal(
+    result$ranking$correlated_with[result$ranking$metric == "metric_b"],
+    "metric_a"
+  )
 })
 
 # 6. EDGE CASES ----
@@ -381,7 +427,7 @@ test_that("evaluate_metrics handles fewer metrics than requested", {
     "Only 3 metric.*available"
   )
 
-  expect_length(result, 3)
+  expect_length(result$selected, 3)
 })
 
 test_that("evaluate_metrics handles single metric", {
@@ -392,7 +438,7 @@ test_that("evaluate_metrics handles single metric", {
     "Only 1 metric available"
   )
 
-  expect_length(result, 1)
+  expect_length(result$selected, 1)
 })
 
 # 7. RANKING METHOD SPECIFIC TESTS ----
@@ -420,7 +466,9 @@ test_that("coefficient of variation ranks high-variance metrics first", {
     correlation_threshold = 1
   )
 
-  expect_equal(result[1], "high_var")
+  expect_equal(result$selected[1], "high_var")
+  # The score itself is now visible, not just the ordering
+  expect_gt(result$ranking$score[result$ranking$metric == "high_var"], 0)
 })
 
 test_that("linear model R² ranks discriminative metrics first", {
@@ -447,7 +495,12 @@ test_that("linear model R² ranks discriminative metrics first", {
     correlation_threshold = 1
   )
 
-  expect_equal(result[1], "discriminative")
+  expect_equal(result$selected[1], "discriminative")
+  # A perfectly separating metric has R2 = 1
+  expect_equal(
+    result$ranking$score[result$ranking$metric == "discriminative"],
+    1
+  )
 })
 
 # 8. VERBOSE OUTPUT TEST ----
@@ -466,6 +519,169 @@ test_that("verbose parameter controls messaging", {
   )
 })
 
+# 9. THE RETURNED OBJECT ----
+test_that("the ranking table is a complete census of the input metrics", {
+  metrics <- create_test_metrics(n_metrics = 8)
+  metrics$value[metrics$metric == "metric_1"] <- NA
+  metrics$value[metrics$metric == "metric_2"] <- 1
+
+  suppressWarnings(
+    result <- evaluate_metrics(
+      metrics,
+      metrics_number = 3,
+      exclude_metrics = "metric_3"
+    )
+  )
+
+  # Every metric that went in comes back out, exactly once, with an outcome
+  expect_setequal(result$ranking$metric, unique(metrics$metric))
+  expect_equal(nrow(result$ranking), dplyr::n_distinct(metrics$metric))
+  expect_false(anyNA(result$ranking$outcome))
+
+  # The three pre-ranking exclusion routes stay distinguishable
+  expect_equal(outcome_of(result, "metric_1"), "excluded_incomplete")
+  expect_equal(outcome_of(result, "metric_2"), "excluded_zero_variance")
+  expect_equal(outcome_of(result, "metric_3"), "excluded_user")
+})
+
+test_that("the ranking table holds its invariants", {
+  metrics <- create_test_metrics(n_metrics = 8)
+  metrics$value[metrics$metric == "metric_1"] <- NA
+
+  suppressWarnings(
+    result <- evaluate_metrics(metrics, metrics_number = 3)
+  )
+
+  ranking <- result$ranking
+  outcomes <- as.character(ranking$outcome)
+
+  # the selected flag agrees with $selected
+  expect_setequal(ranking$metric[ranking$selected], result$selected)
+
+  # metrics excluded before ranking have no rank; everything else has one
+  expect_identical(is.na(ranking$rank), grepl("^excluded_", outcomes))
+
+  # correlated_with is populated for exactly the two correlation outcomes
+  expect_identical(
+    !is.na(ranking$correlated_with),
+    outcomes %in% c("dropped_correlated", "selected_correlation_fill")
+  )
+
+  # the selection is capped by the pool that actually got scored
+  expect_equal(
+    length(result$selected),
+    min(3, sum(!is.na(ranking$rank)))
+  )
+})
+
+test_that("both correlation paths produce a complete census", {
+  metrics <- create_test_metrics(n_metrics = 8)
+
+  filtered <- evaluate_metrics(metrics, metrics_number = 3)
+  unfiltered <- evaluate_metrics(
+    metrics,
+    metrics_number = 3,
+    correlation_threshold = 1
+  )
+
+  # The threshold >= 1 path skips the correlation filter entirely, so it has to
+  # record its own outcomes rather than inheriting them
+  expect_setequal(filtered$ranking$metric, unique(metrics$metric))
+  expect_setequal(unfiltered$ranking$metric, unique(metrics$metric))
+  expect_false(anyNA(unfiltered$ranking$outcome))
+  expect_setequal(
+    as.character(unfiltered$ranking$outcome),
+    c("selected", "dropped_below_cutoff")
+  )
+})
+
+test_that("evaluate_metrics records the parameters that shaped the result", {
+  metrics <- create_test_metrics(n_metrics = 6)
+
+  result <- evaluate_metrics(
+    metrics,
+    metrics_number = 3,
+    method = "fisher_score",
+    correlation_threshold = 0.9
+  )
+
+  expect_equal(result$method, "fisher_score")
+  expect_equal(result$params$metrics_number, 3)
+  expect_equal(result$params$correlation_threshold, 0.9)
+  expect_equal(result$params$level, "landscape")
+})
+
+test_that("params records the requested metrics_number, not the achieved one", {
+  # Only 3 metrics exist, so the selection is capped at 3 -- but the object
+  # should still report that 10 were asked for
+  metrics <- create_test_metrics(n_metrics = 3)
+
+  expect_warning(
+    result <- evaluate_metrics(metrics, metrics_number = 10),
+    "Only 3 metric.*available"
+  )
+
+  expect_equal(result$params$metrics_number, 10)
+  expect_length(result$selected, 3)
+})
+
+test_that("coeffvar_all records ratio-scale exclusions rather than hiding them", {
+  # `negative` spans zero, so its CV is meaningless and it must not be ranked
+  metrics <- tibble::tibble(
+    landscape_name = paste0("landscape_", 1:10),
+    pattern = rep(c("A", "B"), each = 5),
+    level = "landscape",
+    positive = seq(1, 20, length.out = 10),
+    negative = seq(-5, 5, length.out = 10)
+  ) |>
+    tidyr::pivot_longer(
+      cols = c(positive, negative),
+      names_to = "metric",
+      values_to = "value"
+    )
+
+  expect_warning(
+    result <- evaluate_metrics(
+      metrics,
+      metrics_number = 1,
+      method = "coeffvar_all",
+      correlation_threshold = 1
+    ),
+    "needs a ratio scale"
+  )
+
+  expect_equal(outcome_of(result, "negative"), "excluded_not_ratio_scale")
+  expect_true(is.na(result$ranking$score[result$ranking$metric == "negative"]))
+  expect_equal(result$selected, "positive")
+})
+
+test_that("evaluate_metrics is deterministic under row reordering", {
+  metrics <- create_test_metrics(n_metrics = 8)
+
+  result <- evaluate_metrics(metrics, metrics_number = 4)
+  shuffled <- evaluate_metrics(
+    metrics[sample(nrow(metrics)), ],
+    metrics_number = 4
+  )
+
+  expect_identical(result$selected, shuffled$selected)
+  expect_identical(result$ranking$metric, shuffled$ranking$metric)
+})
+
+test_that("downstream functions accept the object or a name vector", {
+  metrics <- create_test_metrics(n_metrics = 6)
+  result <- evaluate_metrics(metrics, metrics_number = 3)
+
+  expect_s3_class(
+    plot_metrics(metrics, selected_metrics = result),
+    "ggplot"
+  )
+  expect_s3_class(
+    plot_metrics(metrics, selected_metrics = result$selected),
+    "ggplot"
+  )
+})
+
 # Integration tests with real data
 test_that("evaluate_metrics works with real landscape data", {
   skip_if_not_installed("landscapemetrics")
@@ -479,9 +695,10 @@ test_that("evaluate_metrics works with real landscape data", {
     method = "coeffvar_all"
   )
 
-  expect_type(result, "character")
-  expect_length(result, 5)
-  expect_true(all(result %in% unique(real_metrics$metric)))
+  expect_type(result$selected, "character")
+  expect_length(result$selected, 5)
+  expect_true(all(result$selected %in% unique(real_metrics$metric)))
+  expect_setequal(result$ranking$metric, unique(real_metrics$metric))
 })
 
 test_that("evaluate_metrics handles real metric NA patterns", {
@@ -496,5 +713,6 @@ test_that("evaluate_metrics handles real metric NA patterns", {
     exclude_incomplete_metrics = TRUE
   )
 
-  expect_type(result, "character")
+  expect_type(result$selected, "character")
+  expect_setequal(result$ranking$metric, unique(real_metrics$metric))
 })

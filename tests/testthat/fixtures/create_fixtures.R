@@ -37,7 +37,7 @@ minimal_best_metrics <- evaluate_metrics(
 
 # Keep only selected metrics
 minimal_metrics <- minimal_metrics_all |>
-  dplyr::filter(metric %in% minimal_best_metrics)
+  dplyr::filter(metric %in% minimal_best_metrics$selected)
 
 # Save metrics (not landscapes - terra objects can't be serialized)
 saveRDS(minimal_metrics, "tests/testthat/fixtures/minimal_metrics.rds")
@@ -88,10 +88,10 @@ small_best_class <- evaluate_metrics(
 )
 
 small_metrics_landscape <- small_metrics_landscape_all |>
-  dplyr::filter(metric %in% small_best_landscape)
+  dplyr::filter(metric %in% small_best_landscape$selected)
 
 small_metrics_class <- small_metrics_class_all |>
-  dplyr::filter(metric %in% small_best_class)
+  dplyr::filter(metric %in% small_best_class$selected)
 
 saveRDS(
   small_metrics_landscape,
@@ -131,7 +131,7 @@ balanced_best <- evaluate_metrics(
 )
 
 balanced_metrics <- balanced_metrics_all |>
-  dplyr::filter(metric %in% balanced_best)
+  dplyr::filter(metric %in% balanced_best$selected)
 
 saveRDS(balanced_metrics, "tests/testthat/fixtures/balanced_metrics.rds")
 
