@@ -331,6 +331,47 @@ test_that("correlation filtering reduces to uncorrelated metrics if threshold no
   expect_length(result_no_filter, 4)
 })
 
+test_that("gap-filled metrics are appended to the end of the selection", {
+  # Two correlated pairs: metric_b duplicates metric_a (shifted, so the
+  # correlation is 1 but the CV differs), and metric_d duplicates metric_c.
+  # Only two metrics can be mutually uncorrelated, so asking for three forces
+  # the fill path.
+  set.seed(20260730)
+  base_a <- rnorm(12, mean = 10, sd = 3)
+  base_c <- rnorm(12, mean = 100, sd = 10)
+
+  pairs <- tibble::tibble(
+    landscape_name = paste0("landscape_", 1:12),
+    pattern = rep(c("A", "B"), each = 6),
+    level = "landscape",
+    metric_a = base_a,
+    metric_b = base_a + 10, # cor 1 with metric_a, lower CV
+    metric_c = base_c,
+    metric_d = base_c + 100 # cor 1 with metric_c, lower CV
+  ) |>
+    tidyr::pivot_longer(
+      cols = starts_with("metric_"),
+      names_to = "metric",
+      values_to = "value"
+    )
+
+  expect_warning(
+    result <- evaluate_metrics(
+      pairs,
+      metrics_number = 3,
+      method = "coeffvar_all",
+      correlation_threshold = 0.7
+    ),
+    "Filling to 3 with correlated metrics"
+  )
+
+  # metric_b ranks second but is only added once the filter runs out of
+  # uncorrelated candidates, so it is returned last rather than in rank order.
+  # Callers have always seen this order; changing it would silently reorder
+  # plot_metrics() facets and the stored golden selection.
+  expect_identical(result, c("metric_a", "metric_c", "metric_b"))
+})
+
 # 6. EDGE CASES ----
 test_that("evaluate_metrics handles fewer metrics than requested", {
   metrics <- create_test_metrics(n_metrics = 3)

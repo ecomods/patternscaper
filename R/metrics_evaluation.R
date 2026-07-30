@@ -271,13 +271,14 @@ evaluate_metrics <- function(
   }
 
   # Select metrics with low correlation - messages handled inside function
-  top_metrics <- select_metrics_correlation(
+  correlation_result <- select_metrics_correlation(
     metric_ranking = ranked_metrics,
     metrics = metrics,
     metrics_number = metrics_number,
     correlation_threshold = correlation_threshold,
     verbose = verbose
   )
+  top_metrics <- correlation_result$selected
 
   return(top_metrics)
 }
@@ -573,7 +574,9 @@ kruskal_effsize <- function(data, formula) {
 #' @param correlation_threshold Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
 #' @param verbose Logical. Whether to print progress messages (default: FALSE).
 #'
-#' @return Character vector. Names of selected uncorrelated metrics.
+#' @return List with `selected` (character vector of selected metric names, in
+#'   selection order) and `outcomes` (tibble with one row per ranked metric,
+#'   columns `metric`, `outcome` and `correlated_with`).
 #' @noRd
 select_metrics_correlation <- function(
   metric_ranking,
@@ -603,8 +606,14 @@ select_metrics_correlation <- function(
     dplyr::select(-landscape_name) |>
     stats::cor(use = "pairwise.complete.obs")
 
-  # Initialize results
+  # Initialize results. Every ranked metric ends up with an outcome. Metrics the
+  # loop never reaches keep the default, as do metrics missing from the
+  # correlation matrix, which cannot happen for data coming from the ranker.
   top_metrics <- character(0)
+  outcome <- rep("dropped_below_cutoff", length(metric_ranking))
+  clashes <- rep(NA_character_, length(metric_ranking))
+  names(outcome) <- metric_ranking
+  names(clashes) <- metric_ranking
 
   # Select metrics with low correlation
   for (current_metric in metric_ranking) {
@@ -640,6 +649,11 @@ select_metrics_correlation <- function(
       # Check if any correlation exceeds threshold
       if (any(cor_values > correlation_threshold, na.rm = TRUE)) {
         high_correlations <- which(cor_values > correlation_threshold)
+        outcome[current_metric] <- "dropped_correlated"
+        clashes[current_metric] <- paste(
+          top_metrics[high_correlations],
+          collapse = ", "
+        )
 
         if (verbose) {
           cli::cli_alert_warning(
@@ -652,6 +666,7 @@ select_metrics_correlation <- function(
 
     # Add metric to selected list
     top_metrics <- c(top_metrics, current_metric)
+    outcome[current_metric] <- "selected"
 
     if (verbose) {
       cli::cli_alert_info("Selected metrics so far: {.val {top_metrics}}")
@@ -669,9 +684,21 @@ select_metrics_correlation <- function(
       length(additional_metrics),
       metrics_number - length(top_metrics)
     )
+    filled <- additional_metrics[seq_len(needed_count)]
+    outcome[filled] <- "selected_correlation_fill"
 
-    top_metrics <- c(top_metrics, additional_metrics[seq_len(needed_count)])
+    # Appended, so gap-filled metrics land at the end of the selection rather
+    # than at their position in the ranking. `selected` therefore preserves the
+    # order callers have always seen, which is not the ranking order.
+    top_metrics <- c(top_metrics, filled)
   }
 
-  return(top_metrics)
+  list(
+    selected = top_metrics,
+    outcomes = tibble::tibble(
+      metric = metric_ranking,
+      outcome = unname(outcome),
+      correlated_with = unname(clashes)
+    )
+  )
 }
