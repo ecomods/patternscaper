@@ -280,6 +280,12 @@ evaluate_metrics <- function(
 #' @param metrics tibble. Metrics data.
 #' @param method Character. Selection method to use.
 #'
+#' Every method breaks ties in `score` by metric name. Metrics can be exactly
+#' tied and `arrange()` is stable, so without a second key the winner
+#' of a tie would be decided by the row order of `metrics`. That order is not
+#' stable, which would make
+#' the selected metrics change for the same data.
+#'
 #' @return List with `ranking` (tibble of `metric` and `score`, best first) and,
 #'   for methods that can fail to score a metric, `excluded` (tibble of `metric`
 #'   and `outcome`). Currently only `coeffvar_all` sets `excluded`.
@@ -347,7 +353,7 @@ rank_by_coefficient_variation <- function(metrics) {
 
   ranking <- metric_stats |>
     dplyr::filter(!metric %in% c(not_ratio_scale, non_finite)) |>
-    dplyr::arrange(dplyr::desc(score)) |>
+    dplyr::arrange(dplyr::desc(score), metric) |>
     dplyr::select(metric, score)
 
   list(
@@ -395,7 +401,7 @@ rank_by_linear_model <- function(
         )
       })
     ) |>
-    dplyr::arrange(dplyr::desc(score)) |> # Largest R² first
+    dplyr::arrange(dplyr::desc(score), metric) |> # Largest R² first
     dplyr::select(metric, score)
 
   list(ranking = ranking)
@@ -437,7 +443,7 @@ rank_by_mean_differences <- function(metrics) {
       score = sum(rel_mean_diff, na.rm = TRUE),
       .by = metric
     ) |>
-    dplyr::arrange(dplyr::desc(score))
+    dplyr::arrange(dplyr::desc(score), metric)
 
   list(ranking = ranking)
 }
@@ -486,7 +492,7 @@ rank_by_fisher_score <- function(metrics) {
         return(between_var / within_var)
       })
     ) |>
-    dplyr::arrange(dplyr::desc(score)) |>
+    dplyr::arrange(dplyr::desc(score), metric) |>
     dplyr::select(metric, score)
 
   list(ranking = ranking)
@@ -517,7 +523,7 @@ rank_by_kruskal <- function(metrics) {
         )
       })
     ) |>
-    dplyr::arrange(dplyr::desc(score)) |>
+    dplyr::arrange(dplyr::desc(score), metric) |>
     dplyr::select(metric, score)
 
   list(ranking = ranking)
