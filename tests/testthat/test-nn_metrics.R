@@ -268,7 +268,7 @@ test_that("train_metrics_model trains with k-fold CV", {
       "fold",
       "actual_class",
       "predicted_class",
-      "confidence"
+      "score"
     ) %in%
       names(result$performance$validation_results)
   ))
@@ -656,13 +656,13 @@ test_that("apply_metrics_model works with single landscape", {
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 1)
   expect_true(all(
-    c("landscape_id", "predicted_class", "confidence") %in% names(result)
+    c("landscape_id", "predicted_class", "score") %in% names(result)
   ))
 
   # Check predictions
   expect_true(result$predicted_class %in% model$classes)
-  expect_gte(result$confidence, 0)
-  expect_lte(result$confidence, 1)
+  expect_gte(result$score, 0)
+  expect_lte(result$score, 1)
 
   # Should have probability columns for each class
   expect_true(all(model$classes %in% names(result)))
@@ -718,7 +718,7 @@ test_that("apply_metrics_model reports the class that has the highest score", {
   highest_scoring <- model$classes[max.col(scores, ties.method = "first")]
 
   expect_equal(result$predicted_class, highest_scoring)
-  expect_equal(result$confidence, apply(scores, 1, max))
+  expect_equal(result$score, apply(scores, 1, max))
   expect_equal(rowSums(scores), rep(1, nrow(scores)), tolerance = 1e-10)
 })
 
@@ -898,13 +898,13 @@ test_that("apply_metrics_model returns unclassifiable landscapes as NA", {
 
   unclassified <- result[result$landscape_name == "new_full", ]
   expect_true(is.na(unclassified$predicted_class))
-  expect_true(is.na(unclassified$confidence))
+  expect_true(is.na(unclassified$score))
   expect_true(all(is.na(unclassified[, model$classes])))
 
   # The other landscapes are classified normally
   classified <- result[result$landscape_name != "new_full", ]
   expect_false(any(is.na(classified$predicted_class)))
-  expect_false(any(is.na(classified$confidence)))
+  expect_false(any(is.na(classified$score)))
 })
 
 test_that("apply_metrics_model errors when metrics cannot be calculated", {

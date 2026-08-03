@@ -14,7 +14,7 @@ plot_classified_landscapes(
 }
 \arguments{
 \item{classification}{A data frame with columns: \code{landscape_id},
-\code{actual_class}, \code{predicted_class}, and \code{confidence}. Can be
+\code{actual_class}, \code{predicted_class}, and \code{score}. Can be
 obtained from the CV-fold results of \code{\link{train_metrics_model}}/\code{\link{train_pixel_model}} or
 the output of \code{\link{apply_metrics_model}}/\code{\link{apply_pixel_model}}.}
 

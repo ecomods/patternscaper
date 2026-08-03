@@ -10,7 +10,7 @@ test_that("plot_classified_landscapes accepts valid inputs", {
     landscape_id = 1:2,
     actual_class = c("sharp", "diffuse"),
     predicted_class = c("sharp", "sharp"),
-    confidence = c(0.95, 0.65)
+    score = c(0.95, 0.65)
   )
 
   result <- plot_classified_landscapes(classification, landscapes)
@@ -50,7 +50,7 @@ test_that("plot_classified_landscapes rejects classification with missing column
       data.frame(
         actual_class = c("sharp", "diffuse"),
         predicted_class = c("sharp", "sharp"),
-        confidence = c(0.95, 0.65)
+        score = c(0.95, 0.65)
       ),
       landscapes
     ),
@@ -63,7 +63,7 @@ test_that("plot_classified_landscapes rejects classification with missing column
       data.frame(
         landscape_id = 1:2,
         predicted_class = c("sharp", "sharp"),
-        confidence = c(0.95, 0.65)
+        score = c(0.95, 0.65)
       ),
       landscapes
     ),
@@ -76,14 +76,14 @@ test_that("plot_classified_landscapes rejects classification with missing column
       data.frame(
         landscape_id = 1:2,
         actual_class = c("sharp", "diffuse"),
-        confidence = c(0.95, 0.65)
+        score = c(0.95, 0.65)
       ),
       landscapes
     ),
     "Invalid classification results"
   )
 
-  # Missing confidence
+  # Missing score
   expect_error(
     plot_classified_landscapes(
       data.frame(
@@ -108,7 +108,7 @@ test_that("plot_classified_landscapes rejects non-list landscapes", {
     landscape_id = 1:2,
     actual_class = c("sharp", "diffuse"),
     predicted_class = c("sharp", "sharp"),
-    confidence = c(0.95, 0.65)
+    score = c(0.95, 0.65)
   )
 
   expect_error(
@@ -135,7 +135,7 @@ test_that("plot_classified_landscapes rejects empty landscapes list", {
     landscape_id = 1:2,
     actual_class = c("sharp", "diffuse"),
     predicted_class = c("sharp", "sharp"),
-    confidence = c(0.95, 0.65)
+    score = c(0.95, 0.65)
   )
 
   expect_error(
@@ -149,7 +149,7 @@ test_that("plot_classified_landscapes rejects invalid landscape objects", {
     landscape_id = 1:3,
     actual_class = c("sharp", "diffuse", "random"),
     predicted_class = c("sharp", "sharp", "random"),
-    confidence = c(0.95, 0.65, 0.80)
+    score = c(0.95, 0.65, 0.80)
   )
 
   # Single invalid element at position 2
@@ -194,7 +194,7 @@ test_that("plot_classified_landscapes titles unclassified landscapes", {
     actual_class = c("spots", "labyrinth"),
     # apply_metrics_model() returns NA when a landscape could not be classified
     predicted_class = c("spots", NA_character_),
-    confidence = c(0.9, NA_real_)
+    score = c(0.9, NA_real_)
   )
 
   result <- plot_classified_landscapes(
@@ -230,7 +230,7 @@ test_that("plot_classified_landscapes rejects length mismatch", {
     landscape_id = 1:2,
     actual_class = c("sharp", "diffuse"),
     predicted_class = c("sharp", "sharp"),
-    confidence = c(0.95, 0.65)
+    score = c(0.95, 0.65)
   )
 
   expect_warning(
@@ -247,7 +247,7 @@ test_that("plot_classified_landscapes rejects length mismatch", {
     landscape_id = 1:2,
     actual_class = c("sharp", "diffuse"),
     predicted_class = c("sharp", "sharp"),
-    confidence = c(0.95, 0.65)
+    score = c(0.95, 0.65)
   )
 
   expect_error(
@@ -268,7 +268,7 @@ test_that("plot_classified_landscapes rejects invalid landscape_id values", {
     landscape_id = c(0, 1, 2),
     actual_class = c("sharp", "diffuse", "random"),
     predicted_class = c("sharp", "sharp", "random"),
-    confidence = c(0.95, 0.65, 0.80)
+    score = c(0.95, 0.65, 0.80)
   )
 
   expect_error(
@@ -281,7 +281,7 @@ test_that("plot_classified_landscapes rejects invalid landscape_id values", {
     landscape_id = c(1, 2, 4),
     actual_class = c("sharp", "diffuse", "random"),
     predicted_class = c("sharp", "sharp", "random"),
-    confidence = c(0.95, 0.65, 0.80)
+    score = c(0.95, 0.65, 0.80)
   )
 
   expect_error(
@@ -294,7 +294,7 @@ test_that("plot_classified_landscapes rejects invalid landscape_id values", {
     landscape_id = c(0, 2, 5),
     actual_class = c("sharp", "diffuse", "random"),
     predicted_class = c("sharp", "sharp", "random"),
-    confidence = c(0.95, 0.65, 0.80)
+    score = c(0.95, 0.65, 0.80)
   )
 
   expect_error(
@@ -307,7 +307,7 @@ test_that("plot_classified_landscapes rejects invalid landscape_id values", {
     landscape_id = c(-1, 2, 3),
     actual_class = c("sharp", "diffuse", "random"),
     predicted_class = c("sharp", "sharp", "random"),
-    confidence = c(0.95, 0.65, 0.80)
+    score = c(0.95, 0.65, 0.80)
   )
 
   expect_error(
@@ -329,7 +329,7 @@ test_that("plot_classified_landscapes includes all landscapes by default", {
     landscape_id = 1:3,
     actual_class = c("sharp", "diffuse", "random"),
     predicted_class = c("sharp", "sharp", "random"), # One misclassified
-    confidence = c(0.95, 0.65, 0.88)
+    score = c(0.95, 0.65, 0.88)
   )
 
   result <- plot_classified_landscapes(classification, landscapes)
@@ -348,7 +348,7 @@ test_that("plot_classified_landscapes filters to misclassified only", {
     landscape_id = 1:3,
     actual_class = c("sharp", "diffuse", "random"),
     predicted_class = c("sharp", "sharp", "random"), # Only 2nd wrong
-    confidence = c(0.95, 0.65, 0.88)
+    score = c(0.95, 0.65, 0.88)
   )
 
   result <- plot_classified_landscapes(
@@ -374,7 +374,7 @@ test_that("plot_classified_landscapes renders predicted-only titles for unlabele
     landscape_id = 1:2,
     actual_class = c(NA_character_, "unclassified"),
     predicted_class = c("sharp", "bands"),
-    confidence = c(0.91, 0.55)
+    score = c(0.91, 0.55)
   )
 
   result <- plot_classified_landscapes(classification, landscapes)
@@ -403,7 +403,7 @@ test_that("plot_classified_landscapes errors when no misclassifications", {
     landscape_id = 1:2,
     actual_class = c("sharp", "diffuse"),
     predicted_class = c("sharp", "diffuse"),
-    confidence = c(0.95, 0.88)
+    score = c(0.95, 0.88)
   )
 
   expect_error(

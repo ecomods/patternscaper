@@ -5,7 +5,7 @@
 #' can be shown.
 #'
 #' @param classification A data frame with columns: \code{landscape_id},
-#'   \code{actual_class}, \code{predicted_class}, and \code{confidence}. Can be
+#'   \code{actual_class}, \code{predicted_class}, and \code{score}. Can be
 #'   obtained from the CV-fold results of \code{\link{train_metrics_model}}/\code{\link{train_pixel_model}} or
 #'   the output of \code{\link{apply_metrics_model}}/\code{\link{apply_pixel_model}}.
 #' @param landscapes A list of landscape objects corresponding one-to-one and in the same order as the rows in `classification`.
@@ -70,13 +70,13 @@ plot_classified_landscapes <- function(
   if (
     !is.data.frame(classification) ||
       !all(
-        c("landscape_id", "actual_class", "predicted_class", "confidence") %in%
+        c("landscape_id", "actual_class", "predicted_class", "score") %in%
           names(classification)
       )
   ) {
     cli::cli_abort(c(
       "Invalid classification results.",
-      "x" = "Must be a data frame with columns: landscape_id, actual_class, predicted_class, confidence",
+      "x" = "Must be a data frame with columns: landscape_id, actual_class, predicted_class, score",
       "i" = "Instead got: {.cls {class(classification)}}"
     ))
   }
@@ -165,7 +165,7 @@ plot_classified_landscapes <- function(
           paste0(
             predicted_class,
             " (",
-            round(confidence, 2),
+            round(score, 2),
             ")"
           ),
         predicted_class == actual_class ~
@@ -173,7 +173,7 @@ plot_classified_landscapes <- function(
             "<span style='color: #228B22;'>",
             predicted_class,
             "</span> (",
-            round(confidence, 2),
+            round(score, 2),
             ")<br>",
             "Actual: ",
             actual_class
@@ -183,7 +183,7 @@ plot_classified_landscapes <- function(
             "<span style='color: #FF6347;'>",
             predicted_class,
             "</span> (",
-            round(confidence, 2),
+            round(score, 2),
             ")<br>",
             "Actual: ",
             actual_class

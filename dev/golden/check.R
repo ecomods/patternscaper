@@ -18,7 +18,7 @@ pixel_values <- c("pix_accuracy", "pix_confusion", "pix_predictions")
 pixel_tolerance <- 1e-5
 
 # The metrics workflow is structurally deterministic, but neuralnet's matrix
-# maths runs through (often multithreaded) BLAS, so confidence values can differ
+# maths runs through (often multithreaded) BLAS, so the class scores can differ
 # by ~1e-16 (one ULP) even between two runs on the same machine. This tight
 # tolerance absorbs that ordering noise; a genuine change moves values far more,
 # and metric selection / class labels / counts are compared categorically anyway.

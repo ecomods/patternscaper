@@ -36,7 +36,7 @@ effectively exact in both:
 
 - **Metrics workflow** — compared with a **tight tolerance of `1e-8`**.
   `neuralnet` and `landscapemetrics` are structurally deterministic, but the
-  matrix maths runs through (often multithreaded) BLAS, so confidence values can
+  matrix maths runs through (often multithreaded) BLAS, so the class scores can
   differ by ~1e-16 (one ULP) even between two runs on the same machine. The tight
   tolerance absorbs that; selected metric names, class labels and confusion
   counts are categorical/integer, so a real change there is still caught.

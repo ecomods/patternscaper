@@ -279,7 +279,7 @@ test_that("apply_pixel_model returns predictions for single landscape", {
       "landscape_name",
       "actual_class",
       "predicted_class",
-      "confidence",
+      "score",
       "diffuse",
       "random",
       "sharp"
@@ -305,7 +305,7 @@ test_that("apply_pixel_model returns predictions for multiple landscapes", {
 
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 5)
-  expect_true(all(result$confidence >= 0 & result$confidence <= 1))
+  expect_true(all(result$score >= 0 & result$score <= 1))
 })
 
 test_that("apply_pixel_model returns performance when requested", {

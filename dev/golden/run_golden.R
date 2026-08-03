@@ -69,7 +69,7 @@ run_golden <- function() {
     train_confusion  = model$performance$confusion_matrix,
     test_accuracy    = validation$performance$accuracy,
     test_confusion   = validation$performance$confusion_matrix,
-    test_predictions = validation$predictions[, c("predicted_class", "confidence")],
+    test_predictions = validation$predictions[, c("predicted_class", "score")],
 
     # Pixel workflow: exact values (keras reproducible on the same machine)
     pix_accuracy    = validation_pix$performance$accuracy,

@@ -545,7 +545,7 @@ train_pixel_model <- function(
 #'     \item{landscape_id}{Numeric landscape identifier}
 #'     \item{landscape_name}{Character landscape name (if available)}
 #'     \item{predicted_class}{Predicted landscape pattern}
-#'     \item{confidence}{Score of the predicted class, i.e. the largest of the
+#'     \item{score}{Score of the predicted class, i.e. the largest of the
 #'           class scores below (not a calibrated probability). See
 #'           \code{\link{apply_metrics_model}}, section "Interpreting the class
 #'           scores", which applies to both workflows.}
@@ -758,13 +758,13 @@ apply_pixel_model <- function(
   # Add classes as column names
   colnames(pred) <- class_names
 
-  # Turn into a tibble and add columns for predicted class and confidence
+  # Turn into a tibble and add columns for predicted class and its score
   predictions <- tibble::as_tibble(pred)
 
-  # Find the confidence (the probability for the predicted class)
-  predictions$confidence <- apply(pred, 1, max)
+  # The reported score is the score of the predicted class, i.e. the row maximum
+  predictions$score <- apply(pred, 1, max)
 
-  # Find the class with the highest probability (this is the predicted class)
+  # Find the class with the highest score (this is the predicted class)
   max_col <- apply(pred, 1, which.max)
   predicted_class <- colnames(pred)[max_col]
   predictions$predicted_class <- predicted_class
@@ -806,7 +806,7 @@ apply_pixel_model <- function(
       landscape_id,
       dplyr::any_of(c("landscape_name", "actual_class")),
       predicted_class,
-      confidence
+      score
     ))
 
   # Evaluate performance if actual classes are available and requested----------

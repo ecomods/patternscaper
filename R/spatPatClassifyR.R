@@ -43,7 +43,7 @@ utils::globalVariables(c(
   "value",
   "class",
   "landscape_id",
-  "confidence",
+  "score",
   "fold",
   "y",
   "x",

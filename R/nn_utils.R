@@ -534,14 +534,14 @@ evaluate_cv_performance <- function(
       landscape_id = unlist(cv_landscape_ids),
       actual_class = unlist(cv_actual),
       predicted_class = unlist(cv_predictions),
-      confidence = apply(dplyr::across(dplyr::all_of(class_names)), 1, max)
+      score = apply(dplyr::across(dplyr::all_of(class_names)), 1, max)
     ) |>
     dplyr::relocate(c(
       landscape_id,
       fold,
       actual_class,
       predicted_class,
-      confidence
+      score
     ))
 
   if (verbose) {

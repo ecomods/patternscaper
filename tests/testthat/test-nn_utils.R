@@ -106,7 +106,7 @@ test_that("project_simplex_rows keeps shape and dimnames", {
   expect_equal(max.col(p, ties.method = "first"), max.col(x, ties.method = "first"))
 })
 
-test_that("project_simplex_rows does not compress confidence the way softmax did", {
+test_that("project_simplex_rows does not compress the scores the way softmax did", {
   # Regression test for the bug this replaced: softmax on outputs that already
   # sit near 0/1 capped the maximum at e / (e + k - 1) = 0.35 for six classes,
   # even for a perfect prediction.
@@ -243,14 +243,14 @@ test_that("evaluate_cv_performance calculates correct metrics", {
       "fold",
       "actual_class",
       "predicted_class",
-      "confidence"
+      "score"
     ) %in%
       names(result$validation_results)
   ))
 
-  # Check confidence values are probabilities
-  expect_true(all(result$validation_results$confidence >= 0))
-  expect_true(all(result$validation_results$confidence <= 1))
+  # Check scores lie in [0, 1] (a valid distribution, not a calibrated one)
+  expect_true(all(result$validation_results$score >= 0))
+  expect_true(all(result$validation_results$score <= 1))
 
   # Check fold assignments are correct
   expect_equal(result$validation_results$fold, c(1, 1, 1, 2, 2, 2))

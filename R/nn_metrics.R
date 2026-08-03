@@ -399,9 +399,9 @@ train_metrics_model <- function(
 #'     \item{landscape_name}{Character landscape name (if available)}
 #'     \item{predicted_class}{Predicted landscape pattern, or NA if the landscape
 #'           could not be classified}
-#'     \item{confidence}{Score of the predicted class, i.e. the largest of the
+#'     \item{score}{Score of the predicted class, i.e. the largest of the
 #'           class scores below (not a calibrated probability).
-#'           See the "Interpreting the class scores" section.
+#'           See the "Interpreting the class scores" section.}
 #'     \item{<class_name>}{Score for each class the model was trained on. The raw
 #'           network outputs are projected onto the probability simplex, so each
 #'           row is non-negative and sums to 1.}
@@ -420,7 +420,7 @@ train_metrics_model <- function(
 #' it never depends on how those outputs are turned into the scores below.
 #'
 #' The class scores are non-negative and sum to 1, but they are **not calibrated
-#' probabilities**: a confidence of 0.8 does not mean the prediction is correct
+#' probabilities**: a score of 0.8 does not mean the prediction is correct
 #' 80\% of the time. Calibration would require a separate step fitted on held-out
 #' data, which this package does not do (the same caveat applies to
 #' \code{\link{apply_pixel_model}}). What the scores do support:
@@ -431,7 +431,7 @@ train_metrics_model <- function(
 #'     near-tie means the network was torn between them; a wide gap means it was
 #'     decisive. The projection shifts every class in a row by the same amount,
 #'     so gaps between classes that keep a non-zero score are unchanged.
-#'   \item **Ranking landscapes by \code{confidence}** to decide which ones to
+#'   \item **Ranking landscapes by \code{score}** to decide which ones to
 #'     inspect visually. This is a heuristic ordering, not a probability of
 #'     being correct.
 #' }
@@ -451,7 +451,7 @@ train_metrics_model <- function(
 #' required metric cannot be calculated for a landscape, that landscape cannot be
 #' classified. This could happen for example when a class is absent from a landscape
 #' that was used as a basis for one of the training metrics. The result is
-#' still returned, with \code{NA} for \code{predicted_class}, \code{confidence} and
+#' still returned, with \code{NA} for \code{predicted_class}, \code{score} and
 #' every class probability, and a warning names the affected landscapes. The output
 #' therefore always has one row per input landscape. Performance metrics, when
 #' requested, are calculated from the classified landscapes only.
@@ -659,24 +659,24 @@ apply_metrics_model <- function(
   )
   pred[!incomplete, ] <- pred_complete
 
-  # Turn into a tibble and add columns for predicted class and confidence.
+  # Turn into a tibble and add columns for predicted class and its score.
   predictions <- tibble::as_tibble(pred)
 
-  confidence <- rep(NA_real_, nrow(pred))
+  score <- rep(NA_real_, nrow(pred))
   predicted_class <- rep(NA_character_, nrow(pred))
 
-  # Confidence is the score of the predicted class, i.e. the row maximum.
-  confidence[!incomplete] <- apply(pred_complete, 1, max)
+  # The reported score is the score of the predicted class, i.e. the row maximum.
+  score[!incomplete] <- apply(pred_complete, 1, max)
   predicted_class[!incomplete] <- predicted_complete
 
-  predictions$confidence <- confidence
+  predictions$score <- score
   predictions$predicted_class <- predicted_class
 
   # Reorder the columns
   predictions <- predictions |>
     dplyr::relocate(c(
       predicted_class,
-      confidence
+      score
     ))
 
   # Add all landscape information available to the output

@@ -36,8 +36,8 @@ When actual classes unavailable or return_performance=FALSE: tibble with columns
     \item{landscape_id}{Numeric landscape identifier}
     \item{landscape_name}{Character landscape name (if available)}
     \item{predicted_class}{Predicted landscape pattern}
-    \item{confidence}{Score of the predicted class, i.e. the largest of the
-          class scores below. Not a calibrated probability -- see
+    \item{score}{Score of the predicted class, i.e. the largest of the
+          class scores below (not a calibrated probability). See
           \code{\link{apply_metrics_model}}, section "Interpreting the class
           scores", which applies to both workflows.}
     \item{<class_name>}{Score for each trained class, straight from the

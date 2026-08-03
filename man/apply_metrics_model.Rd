@@ -27,7 +27,28 @@ classes unknown, only return predictions. Default: FALSE.}
 incomplete metrics always appear.}
 }
 \value{
+When return_performance = FALSE or actual classes unavailable:
+  Tibble with one row per input landscape and columns:
+  \describe{
+    \item{landscape_id}{Numeric landscape identifier}
+    \item{landscape_name}{Character landscape name (if available)}
+    \item{predicted_class}{Predicted landscape pattern, or NA if the landscape
+          could not be classified}
+    \item{score}{Score of the predicted class, i.e. the largest of the
+          class scores below (not a calibrated probability).
+          See the "Interpreting the class scores" section.}
+    \item{<class_name>}{Score for each class the model was trained on. The raw
+          network outputs are projected onto the probability simplex, so each
+          row is non-negative and sums to 1.}
+  }
 
+  When return_performance = TRUE and actual classes available:
+  List containing:
+  \describe{
+    \item{predictions}{Tibble as above, plus actual_class column}
+    \item{performance}{Performance metrics from evaluate_cv_performance():
+      confusion matrix, accuracy, and per-class recall/precision/F1}
+  }
 }
 \description{
 Applies a trained neural network model to classify new landscapes according to their
@@ -40,7 +61,7 @@ metrics needed by the model and scales them appropriately.
 it never depends on how those outputs are turned into the scores below.
 
 The class scores are non-negative and sum to 1, but they are **not calibrated
-probabilities**: a confidence of 0.8 does not mean the prediction is correct
+probabilities**: a score of 0.8 does not mean the prediction is correct
 80\% of the time. Calibration would require a separate step fitted on held-out
 data, which this package does not do (the same caveat applies to
 \code{\link{apply_pixel_model}}). What the scores do support:
@@ -51,7 +72,7 @@ data, which this package does not do (the same caveat applies to
     near-tie means the network was torn between them; a wide gap means it was
     decisive. The projection shifts every class in a row by the same amount,
     so gaps between classes that keep a non-zero score are unchanged.
-  \item **Ranking landscapes by \code{confidence}** to decide which ones to
+  \item **Ranking landscapes by \code{score}** to decide which ones to
     inspect visually. This is a heuristic ordering, not a probability of
     being correct.
 }
@@ -69,7 +90,7 @@ The neural network requires a complete set of its features for every landscape. 
 required metric cannot be calculated for a landscape, that landscape cannot be
 classified. This could happen for example when a class is absent from a landscape
 that was used as a basis for one of the training metrics. The result is
-still returned, with \code{NA} for \code{predicted_class}, \code{confidence} and
+still returned, with \code{NA} for \code{predicted_class}, \code{score} and
 every class probability, and a warning names the affected landscapes. The output
 therefore always has one row per input landscape. Performance metrics, when
 requested, are calculated from the classified landscapes only.
