@@ -155,6 +155,21 @@ test_that("plot_metrics uses full metric names for landscape level", {
   expect_equal(labels$metric, c("Aggregation index", "Landscape shape index"))
 })
 
+test_that("plot_metrics distinguishes the cv/mn/sd triple in facet labels", {
+  selected <- c("area_cv", "area_mn", "area_sd")
+  p <- plot_metrics(
+    test_metrics_landscape,
+    selected_metrics = selected,
+    metric_labels = "name"
+  )
+
+  labels <- p$facet$params$labeller(data.frame(metric = selected))$metric
+  expect_equal(
+    labels,
+    c("Patch area (CV)", "Patch area (mean)", "Patch area (SD)")
+  )
+})
+
 test_that("plot_metrics uses full metric names with class disambiguation", {
   p <- plot_metrics(
     test_metrics_class,

@@ -90,10 +90,12 @@ whatever happened to it. Columns:
   \item{\code{metric}}{Metric abbreviation, e.g. "ai". For class-level
     metrics the class is appended, e.g. "ai_1".}
   \item{\code{name}}{Full metric name from
-    \code{\link[landscapemetrics]{list_lsm}}, e.g. "Aggregation index", with
-    the class appended for class-level metrics ("Aggregation index
-    (class 1)"). Falls back to the abbreviation for metrics
-    `landscapemetrics` does not document.}
+    \code{\link[landscapemetrics]{list_lsm}}, e.g. "Aggregation index".
+    Metrics that summarise per-patch values get the statistic in brackets,
+    because `list_lsm()` gives the `_cv`/`_mn`/`_sd` triple a single name:
+    `area_mn` is "Patch area (mean)". For class-level metrics the class is
+    added too, e.g. "Patch area (mean, class 1)". Falls back to the
+    abbreviation for metrics `landscapemetrics` does not document.}
   \item{\code{score}}{Score from the ranking `method`, or `NA` for metrics
     that were excluded before ranking.}
   \item{\code{rank}}{Position in the full ranking, best first, or `NA` for

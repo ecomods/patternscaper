@@ -102,8 +102,11 @@ metric_evaluation$ranking
 ```
 
 The `name` column spells out what each abbreviation stands for, so you do not
-have to look them up separately. For class-level metrics the class is appended,
-for example `Aggregation index (class 1)`.
+have to look them up separately. Many metrics summarise a value across all
+patches and come as a `_cv`/`_mn`/`_sd` triple that `landscapemetrics` gives a
+single name, so the statistic is added in brackets to keep them apart:
+`area_mn` is `Patch area (mean)`. For class-level metrics the class is added
+too, for example `Patch area (mean, class 1)`.
 
 The `outcome` column records what happened to each candidate. Metrics with an
 `excluded_` outcome never reached the ranking, so they have no score or rank:

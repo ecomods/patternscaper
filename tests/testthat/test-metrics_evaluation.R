@@ -588,6 +588,15 @@ test_that("the ranking table reports full metric names", {
   # Names come from list_lsm(), sentence-cased
   expect_equal(ranking$name[ranking$metric == "ai"], "Aggregation index")
   expect_equal(ranking$name[ranking$metric == "lsi"], "Landscape shape index")
+
+  # list_lsm() gives the _cv/_mn/_sd triple one shared name, so the statistic
+  # has to be added or half the ranking would be ambiguous
+  expect_equal(ranking$name[ranking$metric == "area_mn"], "Patch area (mean)")
+  expect_equal(ranking$name[ranking$metric == "area_sd"], "Patch area (SD)")
+  expect_equal(ranking$name[ranking$metric == "area_cv"], "Patch area (CV)")
+
+  # No two metrics may share a label
+  expect_equal(length(unique(ranking$name)), nrow(ranking))
 })
 
 test_that("the ranking table disambiguates class-level names by class", {
@@ -614,6 +623,33 @@ test_that("the ranking table disambiguates class-level names by class", {
   expect_equal(
     ranking$name[ranking$metric == "ai_0"],
     "Aggregation index (class 0)"
+  )
+})
+
+test_that("the ranking table combines statistic and class in one bracket", {
+  landscapes <- create_landscapes(
+    n = 6,
+    patterns = c("spots", "labyrinth"),
+    rotation = 0
+  )
+  metrics <- calculate_metrics(
+    landscapes,
+    level = "class",
+    metrics = c("area_mn", "area_cv")
+  )
+
+  suppressWarnings(
+    result <- evaluate_metrics(metrics, metrics_number = 2)
+  )
+
+  ranking <- result$ranking
+  expect_equal(
+    ranking$name[ranking$metric == "area_mn_1"],
+    "Patch area (mean, class 1)"
+  )
+  expect_equal(
+    ranking$name[ranking$metric == "area_cv_0"],
+    "Patch area (CV, class 0)"
   )
 })
 

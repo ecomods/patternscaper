@@ -32,10 +32,13 @@ When TRUE, all selected metrics will be plotted regardless of readability.}
 in facet strips. One of "abbreviation" (default) to use the metric
 abbreviations as they appear in \code{metrics} (e.g. "ai"), or "name" to
 use the full metric names from \code{\link[landscapemetrics]{list_lsm}}
-(e.g. "Aggregation index"). For class-level metrics, the class is
-appended to the full name (e.g. "Aggregation index (class 1)") and the
-\code{metrics} data must also contain the \code{metric_name} column
-produced by \code{\link{calculate_metrics}}.}
+(e.g. "Aggregation index"). Metrics that summarise per-patch values get
+the statistic in brackets, since \code{list_lsm()} gives the
+\code{_cv}/\code{_mn}/\code{_sd} triple a single name: \code{area_mn}
+becomes "Patch area (mean)". For class-level metrics the class is added
+too (e.g. "Patch area (mean, class 1)"), and the \code{metrics} data must
+also contain the \code{metric_name} column produced by
+\code{\link{calculate_metrics}}.}
 
 \item{label_wrap_width}{Integer or NULL (default). Character width at which
 to wrap full metric names in facet strips. Only used when

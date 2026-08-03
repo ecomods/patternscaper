@@ -245,8 +245,18 @@ calculate_metrics <- function(
 #'
 #' The lookup is keyed on `base_metric` rather than `metric` because class-level
 #' metrics carry the class id as a suffix ("ai_1"), which `list_lsm()` does not
-#' know. Where the two differ, the trailing class id is appended to the full
-#' name so the classes stay distinguishable.
+#' know.
+#'
+#' Two things `list_lsm()` names do not distinguish are appended in brackets so
+#' the label identifies exactly one metric:
+#' \itemize{
+#'   \item The aggregation statistic. Metrics summarising per-patch values come
+#'     as a `_cv`/`_mn`/`_sd` triple that all share one name -- `area_cv`,
+#'     `area_mn` and `area_sd` are all "patch area". Half the landscape-level
+#'     metrics are in such a triple, so without this the label is ambiguous.
+#'   \item The class id, for class-level metrics.
+#' }
+#' Both go in a single bracket when both apply ("Patch area (mean, class 1)").
 #'
 #' Unknown abbreviations fall back to the abbreviation itself, so a metric that
 #' `landscapemetrics` does not document still labels sensibly. Whether that is
@@ -285,14 +295,29 @@ lookup_metric_names <- function(metric, base_metric, level, warn = TRUE) {
   name[!unmatched] <- stringr::str_to_sentence(name[!unmatched])
   name[unmatched] <- metric[unmatched]
 
+  # The aggregation statistic, from the abbreviation's trailing token. These
+  # three are the only ones landscapemetrics uses, and every metric carrying
+  # one shares its name with the other two of its triple.
+  statistic <- c(cv = "CV", mn = "mean", sd = "SD")[
+    sub("^.*_", "", base_metric)
+  ]
+
   # Whatever follows the base abbreviation is the class id. Empty at the
   # landscape level, where metric and base_metric are identical.
   class_id <- substring(metric, nchar(base_metric) + 2)
-  has_class <- !unmatched & nzchar(class_id)
-  name[has_class] <- paste0(
-    name[has_class],
-    " (class ",
-    class_id[has_class],
+
+  qualifier <- mapply(
+    function(stat, cls) paste(stats::na.omit(c(stat, cls)), collapse = ", "),
+    statistic,
+    ifelse(nzchar(class_id), paste0("class ", class_id), NA_character_)
+  )
+
+  # Unmatched names are bare abbreviations, which already carry both
+  has_qualifier <- !unmatched & nzchar(qualifier)
+  name[has_qualifier] <- paste0(
+    name[has_qualifier],
+    " (",
+    qualifier[has_qualifier],
     ")"
   )
 
