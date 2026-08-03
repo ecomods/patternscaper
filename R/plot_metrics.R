@@ -18,14 +18,29 @@
 #'   number of patterns.
 #' @param force Logical. Override automatic metric limits (default: FALSE).
 #'   When TRUE, all selected metrics will be plotted regardless of readability.
+#' @param metric_labels Character string controlling how metrics are labelled
+#'   in facet strips. One of "abbreviation" (default) to use the metric
+#'   abbreviations as they appear in \code{metrics} (e.g. "ai"), or "name" to
+#'   use the full metric names from \code{\link[landscapemetrics]{list_lsm}}
+#'   (e.g. "Aggregation index"). For class-level metrics, the class is
+#'   appended to the full name (e.g. "Aggregation index (class 1)") and the
+#'   \code{metrics} data must also contain the \code{metric_name} column
+#'   produced by \code{\link{calculate_metrics}}.
+#' @param label_wrap_width Integer or NULL (default). Character width at which
+#'   to wrap full metric names in facet strips. Only used when
+#'   \code{metric_labels = "name"}. If NULL, a width is chosen automatically from the number
+#'   of facet columns. The choice wraps by character count rather than rendered text width, so
+#'   set it explicitly if your font, figure size, or metric selection needs
+#'   something different.
 #'
 #' @return A ggplot2 object showing boxplots of metric values by pattern type.
 #'
 #' @seealso \code{\link{calculate_metrics}}, \code{\link{evaluate_metrics}}
 #' @family visualization
 #' @export
-#' @importFrom dplyr filter mutate
-#' @importFrom ggplot2 ggplot aes geom_boxplot geom_jitter position_jitter facet_wrap coord_flip theme element_blank labs
+#' @importFrom dplyr filter mutate distinct left_join across any_of
+#' @importFrom ggplot2 ggplot aes geom_boxplot geom_jitter position_jitter facet_wrap coord_flip theme element_blank labs as_labeller label_wrap_gen label_value
+#' @importFrom grDevices n2mfrow
 #'
 #' @examples
 #' landscapes <- create_landscapes(n = 20, patterns = c("labyrinth", "spots"))
@@ -39,15 +54,51 @@
 #'
 #' # Override limits if needed
 #' plot_metrics(metrics, selected_metrics = many_metrics, force = TRUE)
+#'
+#' # Use full metric names instead of abbreviations in facet labels
+#' plot_metrics(metrics, selected_metrics = c("ai", "lsi"), metric_labels = "name")
+#'
+#' # Override the automatic wrap width for full metric names
+#' plot_metrics(
+#'   metrics,
+#'   selected_metrics = c("ai", "lsi"),
+#'   metric_labels = "name",
+#'   label_wrap_width = 15
+#' )
 plot_metrics <- function(
   metrics,
   selected_metrics = NULL,
-  force = FALSE
+  force = FALSE,
+  metric_labels = "abbreviation",
+  label_wrap_width = NULL
 ) {
   # Visual parameters (internal only, adjust during development)
   jitter_width <- 0.1
   point_size <- 1
   point_alpha <- 0.7
+
+  # Validate metric_labels
+  if (
+    !is.character(metric_labels) ||
+      length(metric_labels) != 1 ||
+      !metric_labels %in% c("abbreviation", "name")
+  ) {
+    cli::cli_abort(
+      'metric_labels must be one of: "abbreviation" or "name"'
+    )
+  }
+
+  # Validate label_wrap_width
+  if (
+    !is.null(label_wrap_width) &&
+      (!is.numeric(label_wrap_width) ||
+        length(label_wrap_width) != 1 ||
+        label_wrap_width <= 0)
+  ) {
+    cli::cli_abort(
+      "label_wrap_width must be NULL or a single positive number"
+    )
+  }
 
   # Validate input data
   if (!is.data.frame(metrics)) {
@@ -88,7 +139,9 @@ plot_metrics <- function(
 
     # Check if any valid metrics remain
     if (length(selected_metrics) == 0) {
-      cli::cli_abort("No valid metrics remaining after filtering. Cannot create plot.")
+      cli::cli_abort(
+        "No valid metrics remaining after filtering. Cannot create plot."
+      )
     }
   }
 
@@ -110,6 +163,19 @@ plot_metrics <- function(
     cli::cli_abort(
       "metrics must contain 'class' column for class-level metrics"
     )
+  }
+
+  # Full names are looked up from the unsuffixed abbreviation, which only the
+  # metric_name column carries (metric itself is suffixed with the class id)
+  if (
+    metric_labels == "name" &&
+      level == "class" &&
+      !"metric_name" %in% names(metrics)
+  ) {
+    cli::cli_abort(c(
+      "metrics must contain a {.field metric_name} column to label class-level metrics by name.",
+      "i" = "Use the metrics as returned by {.fn calculate_metrics}, or set {.code metric_labels = \"abbreviation\"}."
+    ))
   }
 
   # Count patterns in the data
@@ -163,6 +229,28 @@ plot_metrics <- function(
     )
   }
 
+  # Determine facet labeller based on metric_labels. Full metric names can be
+  # considerably longer than abbreviations, so (unless the user supplies
+  # label_wrap_width explicitly) wrap width is approximated from the number
+  # of columns facet_wrap() will actually use (more columns -> less
+  # horizontal room per panel -> narrower wrap width). This is only a rough
+  # approximation since it wraps by character count, not rendered text width.
+  # The constants were chosen so the package's default metric selection
+  # (10 metrics, i.e. a 4-column grid) wraps to at most 2 lines.
+  facet_labeller <- if (metric_labels == "name") {
+    wrap_width <- label_wrap_width
+    if (is.null(wrap_width)) {
+      # ggplot2:::wrap_dims() takes the *first* element of n2mfrow() as the
+      # column count (it swaps them relative to n2mfrow's own nr/nc naming),
+      # so [1] is deliberate here and matches what facet_wrap() will draw.
+      ncol <- grDevices::n2mfrow(length(selected_metrics))[1]
+      wrap_width <- max(15, round(90 / ncol))
+    }
+    metric_name_labeller(plot_data, level, wrap_width = wrap_width)
+  } else {
+    ggplot2::label_value
+  }
+
   # Build complete plot
   p <- p +
     ggplot2::geom_boxplot() +
@@ -171,7 +259,7 @@ plot_metrics <- function(
       size = point_size,
       alpha = point_alpha
     ) +
-    ggplot2::facet_wrap(~metric, scales = "free_x") +
+    ggplot2::facet_wrap(~metric, scales = "free_x", labeller = facet_labeller) +
     ggplot2::coord_flip() +
     ggplot2::theme(
       panel.grid.minor = ggplot2::element_blank()
@@ -186,4 +274,78 @@ plot_metrics <- function(
   p <- p + ggplot2::theme_bw()
 
   return(p)
+}
+
+#' Build a facet labeller mapping metric abbreviations to full names
+#'
+#' Looks up full metric names from \code{\link[landscapemetrics]{list_lsm}}
+#' for the metrics present in \code{plot_data$metric} and returns a
+#' \code{ggplot2} labeller function suitable for \code{facet_wrap(labeller = )}.
+#' For class-level metrics (where \code{metric} is the abbreviation with the
+#' class id appended, e.g. "ai_1"), the class id is appended to the full name
+#' for disambiguation (e.g. "Aggregation index (class 1)").
+#'
+#' @param plot_data Data frame used to build the plot. Must contain a
+#'   \code{metric} column, and for class-level metrics a \code{metric_name}
+#'   column with the base (unsuffixed) metric abbreviation and a \code{class}
+#'   column.
+#' @param level Either "landscape" or "class".
+#' @param wrap_width Integer. Character width at which to wrap long labels
+#'   (passed to \code{\link[ggplot2]{label_wrap_gen}}). Should be chosen
+#'   based on the number of facet columns; narrower grids need a smaller
+#'   width.
+#'
+#' @return A function created by \code{\link[ggplot2]{as_labeller}}.
+#' @noRd
+#' @importFrom stats setNames
+metric_name_labeller <- function(plot_data, level, wrap_width = 25) {
+  lsm_lookup <- landscapemetrics::list_lsm(level = level)[, c("metric", "name")]
+
+  base_metric <- if (level == "class") {
+    plot_data$metric_name
+  } else {
+    as.character(plot_data$metric)
+  }
+
+  label_lookup <- plot_data |>
+    dplyr::mutate(.base_metric = base_metric) |>
+    dplyr::distinct(
+      metric,
+      .base_metric,
+      dplyr::across(dplyr::any_of("class"))
+    ) |>
+    dplyr::left_join(lsm_lookup, by = c(".base_metric" = "metric"))
+
+  unmatched <- is.na(label_lookup$name)
+  if (any(unmatched)) {
+    cli::cli_warn(
+      "Could not find full name(s) for metric(s) {.val {unique(as.character(label_lookup$metric[unmatched]))}}; showing abbreviation instead."
+    )
+  }
+
+  # Capitalize first letter of matched full names for a cleaner facet strip;
+  # leave unmatched abbreviations untouched.
+  label_lookup$name[!unmatched] <- stringr::str_to_sentence(
+    label_lookup$name[!unmatched]
+  )
+  label_lookup$name[unmatched] <- as.character(label_lookup$metric[unmatched])
+
+  # Disambiguate class-level metrics with their class id
+  if (level == "class" && "class" %in% names(label_lookup)) {
+    label_lookup$name <- paste0(
+      label_lookup$name,
+      " (class ",
+      label_lookup$class,
+      ")"
+    )
+  }
+
+  label_vec <- stats::setNames(
+    label_lookup$name,
+    as.character(label_lookup$metric)
+  )
+  ggplot2::as_labeller(
+    label_vec,
+    default = ggplot2::label_wrap_gen(width = wrap_width)
+  )
 }

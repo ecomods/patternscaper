@@ -135,3 +135,37 @@ plot_metrics(
   selected_metrics = metric_evaluation
 )
 ```
+
+The panel labels are the metric abbreviations, which are compact but not very
+readable unless you already know them. Set `metric_labels = "name"` to label the
+panels with the full metric names from `landscapemetrics::list_lsm()` instead:
+
+```{r}
+#| fig-alt: "The same boxplots, with panels labelled by full metric names instead of abbreviations"
+#| fig-cap: "The same metrics, labelled with their full names. Useful for plots that go into a talk or a paper, where the abbreviations would need explaining."
+#| fig-width: 8
+#| fig-height: 6
+plot_metrics(
+  landscape_metrics,
+  selected_metrics = metric_evaluation,
+  metric_labels = "name"
+)
+```
+
+Long names are wrapped over several lines. The width is chosen from the number
+of panel columns, which works for most selections, but it counts characters
+rather than measuring the rendered text — so if your labels look cramped or too
+sparse at your figure size, set `label_wrap_width` yourself:
+
+```{r}
+#| eval: false
+plot_metrics(
+  landscape_metrics,
+  selected_metrics = metric_evaluation,
+  metric_labels = "name",
+  label_wrap_width = 15
+)
+```
+
+For class-level metrics the class is appended to the name, for example
+`Aggregation index (class 1)`, so the two classes stay distinguishable.

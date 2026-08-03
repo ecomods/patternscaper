@@ -4,7 +4,13 @@
 \alias{plot_metrics}
 \title{Plot Landscape Metrics}
 \usage{
-plot_metrics(metrics, selected_metrics = NULL, force = FALSE)
+plot_metrics(
+  metrics,
+  selected_metrics = NULL,
+  force = FALSE,
+  metric_labels = "abbreviation",
+  label_wrap_width = NULL
+)
 }
 \arguments{
 \item{metrics}{Data frame from \code{\link{calculate_metrics}}.
@@ -18,6 +24,22 @@ number of patterns.}
 
 \item{force}{Logical. Override automatic metric limits (default: FALSE).
 When TRUE, all selected metrics will be plotted regardless of readability.}
+
+\item{metric_labels}{Character string controlling how metrics are labelled
+in facet strips. One of "abbreviation" (default) to use the metric
+abbreviations as they appear in \code{metrics} (e.g. "ai"), or "name" to
+use the full metric names from \code{\link[landscapemetrics]{list_lsm}}
+(e.g. "Aggregation index"). For class-level metrics, the class is
+appended to the full name (e.g. "Aggregation index (class 1)") and the
+\code{metrics} data must also contain the \code{metric_name} column
+produced by \code{\link{calculate_metrics}}.}
+
+\item{label_wrap_width}{Integer or NULL (default). Character width at which
+to wrap full metric names in facet strips. Only used when
+\code{metric_labels = "name"}. If NULL, a width is chosen automatically from the number
+of facet columns. The choice wraps by character count rather than rendered text width, so
+set it explicitly if your font, figure size, or metric selection needs
+something different.}
 }
 \value{
 A ggplot2 object showing boxplots of metric values by pattern type.
@@ -45,6 +67,17 @@ plot_metrics(metrics, selected_metrics = many_metrics)
 
 # Override limits if needed
 plot_metrics(metrics, selected_metrics = many_metrics, force = TRUE)
+
+# Use full metric names instead of abbreviations in facet labels
+plot_metrics(metrics, selected_metrics = c("ai", "lsi"), metric_labels = "name")
+
+# Override the automatic wrap width for full metric names
+plot_metrics(
+  metrics,
+  selected_metrics = c("ai", "lsi"),
+  metric_labels = "name",
+  label_wrap_width = 15
+)
 }
 \seealso{
 \code{\link{calculate_metrics}}, \code{\link{evaluate_metrics}}
