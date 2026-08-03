@@ -27,31 +27,42 @@ classes unknown, only return predictions. Default: FALSE.}
 incomplete metrics always appear.}
 }
 \value{
-When return_performance = FALSE or actual classes unavailable:
-  Tibble with one row per input landscape and columns:
-  \describe{
-    \item{landscape_id}{Numeric landscape identifier}
-    \item{landscape_name}{Character landscape name (if available)}
-    \item{predicted_class}{Predicted landscape pattern, or NA if the landscape
-          could not be classified}
-    \item{confidence}{Prediction confidence (maximum probability across classes)}
-    \item{<class_name>}{Probability for each class the model was trained on.
-          Probabilities are derived from raw neural network outputs using softmax transformation.}
-  }
 
-  When return_performance = TRUE and actual classes available:
-  List containing:
-  \describe{
-    \item{predictions}{Tibble as above, plus actual_class column}
-    \item{performance}{Performance metrics from evaluate_cv_performance():
-      confusion matrix, accuracy, and per-class recall/precision/F1}
-  }
 }
 \description{
 Applies a trained neural network model to classify new landscapes according to their
 spatial pattern type. The function automatically calculates the required landscape
 metrics needed by the model and scales them appropriately.
 }
+\section{Interpreting the class scores}{
+
+\code{predicted_class} is the class with the largest *raw* network output, so
+it never depends on how those outputs are turned into the scores below.
+
+The class scores are non-negative and sum to 1, but they are **not calibrated
+probabilities**: a confidence of 0.8 does not mean the prediction is correct
+80\% of the time. Calibration would require a separate step fitted on held-out
+data, which this package does not do (the same caveat applies to
+\code{\link{apply_pixel_model}}). What the scores do support:
+\itemize{
+  \item **Ranking classes within a landscape.** A higher score means the
+    network supported that class more.
+  \item **The gap between the leading classes within a landscape.** A
+    near-tie means the network was torn between them; a wide gap means it was
+    decisive. The projection shifts every class in a row by the same amount,
+    so gaps between classes that keep a non-zero score are unchanged.
+  \item **Ranking landscapes by \code{confidence}** to decide which ones to
+    inspect visually. This is a heuristic ordering, not a probability of
+    being correct.
+}
+What they do not support: reading a score as a percentage, or comparing
+*ratios* of scores ("twice as likely"). The shared shift preserves differences
+but not ratios, and it differs from landscape to landscape. Gaps involving a
+class that was pushed to exactly 0 are not meaningful either: several
+weakly-supported classes collapse onto 0 together, and the projection discards
+how far below the others they were.
+}
+
 \section{Landscapes that cannot be classified}{
 
 The neural network requires a complete set of its features for every landscape. If a
@@ -99,6 +110,11 @@ results$performance
 model <- readr::read_rds("models/landscape_classifier.rds")
 predictions <- apply_metrics_model(new_landscapes, model)
 }
+}
+\references{
+Wang, W., & Carreira-Perpinan, M. A. (2013). Projection onto the
+  probability simplex: an efficient algorithm with a simple proof, and an
+  application. arXiv:1309.1541.
 }
 \seealso{
 \code{\link{train_metrics_model}}, \code{\link{plot_classified_landscapes}}

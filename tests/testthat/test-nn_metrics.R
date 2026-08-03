@@ -694,6 +694,34 @@ test_that("apply_metrics_model works with list of landscapes", {
   expect_true(all(result$predicted_class %in% model$classes))
 })
 
+test_that("apply_metrics_model reports the class that has the highest score", {
+  # predicted_class is taken from the RAW network outputs so that the reporting
+  # transform can never move a class boundary, which is what keeps accuracy
+  # independent of how scores are presented. That leaves a gap: a future
+  # transform that is not order-preserving would make the reported class
+  # disagree with the reported scores without anything failing. This test closes
+  # it -- the two must always agree.
+  model <- train_metrics_model(
+    fixtures$minimal_metrics,
+    cv_method = "none",
+    verbose = FALSE
+  )
+  minimal_landscapes <- create_fixture_landscapes("minimal")
+
+  result <- apply_metrics_model(
+    minimal_landscapes,
+    model,
+    return_performance = FALSE
+  )
+
+  scores <- as.matrix(result[, model$classes])
+  highest_scoring <- model$classes[max.col(scores, ties.method = "first")]
+
+  expect_equal(result$predicted_class, highest_scoring)
+  expect_equal(result$confidence, apply(scores, 1, max))
+  expect_equal(rowSums(scores), rep(1, nrow(scores)), tolerance = 1e-10)
+})
+
 test_that("apply_metrics_model returns performance when requested", {
   # Train model
   model <- train_metrics_model(

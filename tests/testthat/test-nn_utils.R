@@ -1,3 +1,147 @@
+# project_simplex / project_simplex_rows -------------------------------------
+
+test_that("project_simplex returns a distribution for every kind of row", {
+  rows <- list(
+    ideal = c(1, 0, 0, 0, 0, 0),
+    ambiguous = c(0.5, 0.5, 0, 0, 0, 0),
+    mixed_sign = c(0.9, 0.3, -0.2, -0.4, 0.05, -0.1),
+    all_negative = c(-0.1, -0.5, -0.2, -0.8, -0.3, -0.4),
+    all_equal = rep(0.25, 6),
+    above_one = c(1.4, 0.2, -0.3, 0.1, 0.0, -0.6),
+    two_classes = c(0.8, 0.1)
+  )
+
+  for (label in names(rows)) {
+    p <- project_simplex(rows[[label]])
+    expect_equal(sum(p), 1, tolerance = 1e-12, info = label)
+    expect_true(all(p >= 0), info = label)
+    expect_length(p, length(rows[[label]]))
+  }
+})
+
+test_that("project_simplex leaves an existing distribution unchanged", {
+  v <- c(0.5, 0.2, 0.15, 0.1, 0.05, 0)
+  expect_equal(project_simplex(v), v)
+})
+
+test_that("project_simplex preserves the argmax", {
+  # The reporting transform must never move a class boundary, otherwise the
+  # reported accuracy would depend on it.
+  set.seed(42)
+  for (i in 1:200) {
+    v <- rnorm(6, mean = runif(1, -1, 1), sd = runif(1, 0.05, 2))
+    expect_equal(which.max(project_simplex(v)), which.max(v))
+  }
+})
+
+test_that("project_simplex preserves differences but not ratios", {
+  # Two rows with the same top-two gap but very different top-two ratios
+  # project to the same point: gaps carry information, ratios do not.
+  a <- project_simplex(c(0.4, 0.1, 0, 0, 0, 0))
+  b <- project_simplex(c(0.9, 0.6, 0.5, 0.5, 0.5, 0.5))
+
+  expect_equal(a, b)
+  expect_equal(a[1] - a[2], 0.3)
+})
+
+test_that("project_simplex handles a fully undecided row", {
+  p <- project_simplex(rep(0, 6))
+  expect_equal(p, rep(1 / 6, 6))
+})
+
+test_that("project_simplex propagates non-finite values rather than dropping them", {
+  # sort() silently drops NA, and an Inf makes the running total infinite and
+  # the threshold test NaN. Either would pick the wrong active set in silence.
+  expect_true(all(is.na(project_simplex(c(0.5, NA, 0.2)))))
+  expect_true(all(is.na(project_simplex(c(0.5, NaN, 0.2)))))
+  expect_true(all(is.na(project_simplex(c(0.5, Inf, 0.2)))))
+  expect_true(all(is.na(project_simplex(c(0.5, -Inf, 0.2)))))
+})
+
+test_that("project_simplex handles empty input", {
+  expect_equal(project_simplex(numeric(0)), numeric(0))
+})
+
+test_that("project_simplex only preserves gaps between classes that keep mass", {
+  # Gaps among the surviving classes are unchanged, because they all move by
+  # the same shift. A class pushed to exactly 0 loses that guarantee -- the
+  # projection discards how far below the others it was.
+  v <- c(0.6, 0.2, -0.8)
+  p <- project_simplex(v)
+
+  expect_equal(p[1] - p[2], v[1] - v[2]) # both keep mass: gap preserved
+  expect_equal(p[3], 0)
+  expect_false(isTRUE(all.equal(p[2] - p[3], v[2] - v[3]))) # clipped: not preserved
+})
+
+test_that("project_simplex is stable on near-boundary rows", {
+  # Rows engineered so a class sits essentially exactly on the activity
+  # threshold, where floating-point noise could drop it from the active set.
+  for (eps in c(0, 1e-16, -1e-16, 1e-12, -1e-12)) {
+    v <- c(0.5, 0.5, -1 / 3 + eps)
+    p <- project_simplex(v)
+    expect_equal(sum(p), 1, tolerance = 1e-10)
+    expect_true(all(p >= 0))
+  }
+})
+
+test_that("project_simplex_rows keeps shape and dimnames", {
+  x <- matrix(
+    c(
+      1, 0, 0,
+      -0.2, -0.5, -0.1,
+      0.4, 0.4, 0.2
+    ),
+    nrow = 3,
+    byrow = TRUE,
+    dimnames = list(NULL, c("bands", "random", "sharp"))
+  )
+
+  p <- project_simplex_rows(x)
+
+  expect_equal(dim(p), dim(x))
+  expect_equal(colnames(p), colnames(x))
+  expect_equal(rowSums(p), rep(1, 3), tolerance = 1e-12)
+  expect_true(all(p >= 0))
+  expect_equal(max.col(p, ties.method = "first"), max.col(x, ties.method = "first"))
+})
+
+test_that("project_simplex_rows does not compress confidence the way softmax did", {
+  # Regression test for the bug this replaced: softmax on outputs that already
+  # sit near 0/1 capped the maximum at e / (e + k - 1) = 0.35 for six classes,
+  # even for a perfect prediction.
+  perfect <- matrix(c(1, 0, 0, 0, 0, 0), nrow = 1)
+
+  expect_equal(max(project_simplex_rows(perfect)), 1)
+
+  softmax_max <- exp(1) / (exp(1) + 5)
+  expect_gt(max(project_simplex_rows(perfect)), softmax_max)
+})
+
+test_that("project_simplex_rows works for a single row and a single class", {
+  one_row <- project_simplex_rows(matrix(c(0.7, 0.2, -0.1), nrow = 1))
+  expect_equal(dim(one_row), c(1L, 3L))
+  expect_equal(sum(one_row), 1)
+
+  one_class <- project_simplex_rows(matrix(c(0.3, -2), ncol = 1))
+  expect_equal(dim(one_class), c(2L, 1L))
+  expect_equal(as.vector(one_class), c(1, 1))
+})
+
+test_that("project_simplex_rows handles a zero-row matrix", {
+  empty <- project_simplex_rows(matrix(numeric(0), nrow = 0, ncol = 3))
+  expect_equal(dim(empty), c(0L, 3L))
+})
+
+test_that("project_simplex_rows isolates a non-finite row", {
+  # One bad row must not contaminate the others
+  x <- matrix(c(1, 0, 0, Inf, 0, 0, 0.5, 0.3, 0.2), nrow = 3, byrow = TRUE)
+  p <- project_simplex_rows(x)
+
+  expect_true(all(is.na(p[2, ])))
+  expect_equal(rowSums(p[c(1, 3), ]), c(1, 1))
+})
+
 test_that("find_balanced_cv_folds creates stratified folds", {
   set.seed(123)
   patterns <- factor(c(rep("A", 10), rep("B", 10), rep("C", 10)))

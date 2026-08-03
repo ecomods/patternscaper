@@ -92,20 +92,88 @@ metrics_to_wide <- function(metrics, return_only_metrics = FALSE) {
   metrics_wide
 }
 
-#' Row-wise softmax
+#' Project a vector onto the probability simplex
 #'
-#' Converts a matrix of raw (unbounded) row scores into per-row probabilities
-#' using a numerically stable softmax (each row's maximum is subtracted before
-#' exponentiating).
+#' Returns the closest vector to `v`, in squared Euclidean distance, whose
+#' elements are non-negative and sum to 1. It subtracts one shared offset from
+#' every element and clips whatever is left below zero.
 #'
-#' @param x Numeric matrix; each row is a set of raw scores.
-#' @return A matrix the same shape as `x` whose rows each sum to 1.
+#' Because the offset is the same for every element, the projection keeps the
+#' input order: whichever class scored highest in `v` still scores highest
+#' afterwards. The offset also lifts an all-negative vector onto the simplex,
+#' which "clip at zero, then divide by the sum" cannot do.
+#'
+#' The result is a valid probability vector, but that is not evidence that the numbers are calibrated probabilities.
+#'
+#' @param v Numeric vector of raw scores.
+#' @return A numeric vector as long as `v`. For non-empty, finite input it is
+#'   non-negative and sums to 1 up to floating-point error. If any element of
+#'   `v` is `NA`, `NaN` or infinite, every element of the result is `NA_real_`;
+#'   empty input returns `numeric(0)`.
+#' @references Wang, W., & Carreira-Perpinan, M. A. (2013). Projection onto the
+#'   probability simplex: an efficient algorithm with a simple proof, and an
+#'   application. arXiv:1309.1541.
 #' @keywords internal
-softmax_rows <- function(x) {
-  t(apply(x, 1, function(row) {
-    exp_row <- exp(row - max(row))
-    exp_row / sum(exp_row)
-  }))
+project_simplex <- function(v) {
+  if (length(v) == 0) {
+    return(numeric(0))
+  }
+
+  # Covers NA and NaN, but also Inf: an infinite score makes `running_total`
+  # infinite and the threshold test below NaN, which would silently select the
+  # wrong active set rather than fail.
+  if (any(!is.finite(v))) {
+    return(rep(NA_real_, length(v)))
+  }
+
+  sorted <- sort(v, decreasing = TRUE)
+  running_total <- cumsum(sorted)
+
+  # Number of classes that keep positive mass. The j = 1 term is always
+  # positive, so this is never empty.
+  n_positive <- max(which(
+    sorted + (1 - running_total) / seq_along(v) > 0
+  ))
+  theta <- (running_total[n_positive] - 1) / n_positive
+
+  pmax(v - theta, 0)
+}
+
+#' Row-wise projection onto the probability simplex
+#'
+#' Applies \code{\link{project_simplex}} to each row of a matrix of raw network
+#' outputs, turning them into per-row distributions for reporting.
+#'
+#' The metric-based network has linear output units trained by squared error
+#' against 0/1 class indicators (see \code{\link{fit_nn_model}}), so its outputs
+#' already sit close to a probability vector but are unconstrained: they can
+#' fall below 0, rise above 1, and not sum to 1. Projection is the smallest
+#' correction that fixes that, measured the same way the training loss measures
+#' error.
+#'
+#' @param x Numeric matrix; each row is one landscape's raw class scores.
+#' @return A matrix with the same dimensions and dimnames as `x`. Rows of finite
+#'   values are non-negative and sum to 1 up to floating-point error; a row
+#'   holding any non-finite value comes back as all `NA_real_`.
+#' @keywords internal
+project_simplex_rows <- function(x) {
+  x <- as.matrix(x)
+
+  # Filling a pre-allocated matrix keeps the shape right for any number of rows
+  # or classes, including the degenerate ones, without depending on how apply()
+  # or vapply() simplify their result.
+  projected <- matrix(
+    NA_real_,
+    nrow = nrow(x),
+    ncol = ncol(x),
+    dimnames = dimnames(x)
+  )
+
+  for (i in seq_len(nrow(x))) {
+    projected[i, ] <- project_simplex(x[i, ])
+  }
+
+  projected
 }
 
 #' Detect if the standard deviation is just random noise
@@ -541,7 +609,6 @@ remove_incomplete_landscapes <- function(
   predictor_cols,
   na_action = "drop_landscapes"
 ) {
-
   # Drop predictor columns that are NA for every landscape. These metrics are
   # undefined for the given landscapes (e.g. iji or rpr for two-class
   # landscapes) and carry no information. If left in place they would flag

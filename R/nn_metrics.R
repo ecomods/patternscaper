@@ -316,14 +316,16 @@ train_metrics_model <- function(
         ]
       )
 
-      # Convert raw outputs to probabilities using softmax
-      probs <- softmax_rows(probs_raw)
+      # Add class names as column names. Output units follow the alphabetical
+      # order of the response levels, which is how class_names is built.
+      colnames(probs_raw) <- class_names
 
-      # Add class names as column names
-      colnames(probs) <- class_names
+      # The predicted class comes from the raw outputs, never from the reported
+      # scores below, so the reporting step cannot move a class boundary.
+      predictions <- class_names[max.col(probs_raw, ties.method = "first")]
 
-      # Get predicted class labels
-      predictions <- colnames(probs)[max.col(probs, ties.method = "first")]
+      # Map the raw outputs onto the probability simplex for reporting
+      probs <- project_simplex_rows(probs_raw)
 
       # Store results for this fold
       cv_predictions[[fold]] <- predictions
@@ -397,9 +399,12 @@ train_metrics_model <- function(
 #'     \item{landscape_name}{Character landscape name (if available)}
 #'     \item{predicted_class}{Predicted landscape pattern, or NA if the landscape
 #'           could not be classified}
-#'     \item{confidence}{Prediction confidence (maximum probability across classes)}
-#'     \item{<class_name>}{Probability for each class the model was trained on.
-#'           Probabilities are derived from raw neural network outputs using softmax transformation.}
+#'     \item{confidence}{Score of the predicted class, i.e. the largest of the
+#'           class scores below (not a calibrated probability).
+#'           See the "Interpreting the class scores" section.
+#'     \item{<class_name>}{Score for each class the model was trained on. The raw
+#'           network outputs are projected onto the probability simplex, so each
+#'           row is non-negative and sums to 1.}
 #'   }
 #'
 #'   When return_performance = TRUE and actual classes available:
@@ -409,6 +414,37 @@ train_metrics_model <- function(
 #'     \item{performance}{Performance metrics from evaluate_cv_performance():
 #'       confusion matrix, accuracy, and per-class recall/precision/F1}
 #'   }
+#'
+#' @section Interpreting the class scores:
+#' \code{predicted_class} is the class with the largest *raw* network output, so
+#' it never depends on how those outputs are turned into the scores below.
+#'
+#' The class scores are non-negative and sum to 1, but they are **not calibrated
+#' probabilities**: a confidence of 0.8 does not mean the prediction is correct
+#' 80\% of the time. Calibration would require a separate step fitted on held-out
+#' data, which this package does not do (the same caveat applies to
+#' \code{\link{apply_pixel_model}}). What the scores do support:
+#' \itemize{
+#'   \item **Ranking classes within a landscape.** A higher score means the
+#'     network supported that class more.
+#'   \item **The gap between the leading classes within a landscape.** A
+#'     near-tie means the network was torn between them; a wide gap means it was
+#'     decisive. The projection shifts every class in a row by the same amount,
+#'     so gaps between classes that keep a non-zero score are unchanged.
+#'   \item **Ranking landscapes by \code{confidence}** to decide which ones to
+#'     inspect visually. This is a heuristic ordering, not a probability of
+#'     being correct.
+#' }
+#' What they do not support: reading a score as a percentage, or comparing
+#' *ratios* of scores ("twice as likely"). The shared shift preserves differences
+#' but not ratios, and it differs from landscape to landscape. Gaps involving a
+#' class that was pushed to exactly 0 are not meaningful either: several
+#' weakly-supported classes collapse onto 0 together, and the projection discards
+#' how far below the others they were.
+#'
+#' @references Wang, W., & Carreira-Perpinan, M. A. (2013). Projection onto the
+#'   probability simplex: an efficient algorithm with a simple proof, and an
+#'   application. arXiv:1309.1541.
 #'
 #' @section Landscapes that cannot be classified:
 #' The neural network requires a complete set of its features for every landscape. If a
@@ -607,8 +643,12 @@ apply_metrics_model <- function(
     newdata = predictors_scaled
   )
 
-  # Convert raw outputs to probabilities using softmax
-  pred_complete <- softmax_rows(pred_raw)
+  # The predicted class comes from the raw outputs, never from the reported
+  # scores, so the reporting step cannot move a class boundary.
+  predicted_complete <- class_names[max.col(pred_raw, ties.method = "first")]
+
+  # Map the raw outputs onto the probability simplex for reporting
+  pred_complete <- project_simplex_rows(pred_raw)
 
   # Expand back to one row per input landscape, leaving unclassified rows NA
   pred <- matrix(
@@ -625,12 +665,9 @@ apply_metrics_model <- function(
   confidence <- rep(NA_real_, nrow(pred))
   predicted_class <- rep(NA_character_, nrow(pred))
 
-  # Find the confidence (the probability for the predicted class) and the class
-  # with the highest probability (this is the predicted class)
+  # Confidence is the score of the predicted class, i.e. the row maximum.
   confidence[!incomplete] <- apply(pred_complete, 1, max)
-  predicted_class[!incomplete] <- class_names[
-    apply(pred_complete, 1, which.max)
-  ]
+  predicted_class[!incomplete] <- predicted_complete
 
   predictions$confidence <- confidence
   predictions$predicted_class <- predicted_class
