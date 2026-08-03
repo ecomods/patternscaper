@@ -56,9 +56,10 @@ calculate_single_metric <- function(landscapes, function_name) {
 #'   or a list of landscape objects (e.g. created with \code{\link{create_landscapes}}).
 #'   Each landscape object should contain a \code{data}
 #'   element with a SpatRaster, plus \code{name} and \code{pattern} metadata.
-#' @param metrics Character vector. Names of metrics to calculate (default: NULL for all
-#'   available metrics at the specified level). Use \code{list_lsm()} from landscapemetrics
-#'   to see available metrics.
+#' @param metrics Character vector. Abbreviations of the metrics to calculate
+#'   (default: NULL for all available metrics at the specified level). Use
+#'   \code{\link[landscapemetrics]{list_lsm}} to look up the available
+#'   abbreviations and the full metric name each one stands for.
 #' @param level Character. Level(s) of metrics to calculate:"class", "landscape"
 #'   (default: "landscape").
 #'
@@ -70,13 +71,23 @@ calculate_single_metric <- function(landscapes, function_name) {
 #'     \item{layer}{Layer number (from landscapemetrics output)}
 #'     \item{level}{Metric level: "class", or "landscape"}
 #'     \item{class}{Class value (for class-level metrics, NA for landscape-level)}
-#'     \item{metric}{Name of the calculated metric}
+#'     \item{metric_name}{Metric abbreviation without the class suffix, e.g.
+#'       "ai". Identical to \code{metric} for landscape-level metrics.}
+#'     \item{metric}{Metric abbreviation identifying the row, e.g. "ai". For
+#'       class-level metrics the class is appended, e.g. "ai_1", so that each
+#'       class gets its own identifier.}
 #'     \item{value}{Calculated metric value}
 #'     \item{warnings}{Any warnings generated during calculation (NA if none)}
 #'     \item{n_row, n_col}{Cell dimensions of the landscape the row was computed from}
 #'     \item{cell_size_x, cell_size_y}{Cell resolution (from \code{\link[terra]{res}})}
 #'     \item{n_na}{Number of NA cells in the landscape}
 #'   }
+#'   Metrics are identified by their abbreviation throughout. To see what an
+#'   abbreviation stands for, look it up with
+#'   \code{\link[landscapemetrics]{list_lsm}}; \code{\link{evaluate_metrics}}
+#'   reports the full names in its ranking table, and \code{\link{plot_metrics}}
+#'   can use them as facet labels via \code{metric_labels = "name"}.
+#'
 #'   The last five columns record each landscape's geometry so it stays attached to
 #'   the metrics (e.g. through \code{\link[readr]{write_csv}}); they are used for
 #'   geometry-mismatch checks and are never used as model predictors.
@@ -86,7 +97,9 @@ calculate_single_metric <- function(landscapes, function_name) {
 #' (2019). landscapemetrics: an open-source R tool to calculate landscape
 #' metrics. *Ecography*, 42(10), 1648-1657. \doi{10.1111/ecog.04617}
 #'
-#' @seealso \code{\link{plot_metrics}}
+#' @seealso \code{\link{plot_metrics}},
+#'   \code{\link[landscapemetrics]{list_lsm}} for the available metrics and
+#'   their full names
 #' @family metrics
 #' @export
 #' @importFrom dplyr mutate relocate
@@ -221,4 +234,67 @@ calculate_metrics <- function(
     dplyr::left_join(geometry, by = "landscape_id")
 
   return(all_results)
+}
+
+#' Look Up Full Metric Names
+#'
+#' Internal helper translating metric abbreviations into the full names from
+#' \code{\link[landscapemetrics]{list_lsm}}, used wherever abbreviations are
+#' shown to users (facet strips in \code{\link{plot_metrics}}, the ranking table
+#' from \code{\link{evaluate_metrics}}).
+#'
+#' The lookup is keyed on `base_metric` rather than `metric` because class-level
+#' metrics carry the class id as a suffix ("ai_1"), which `list_lsm()` does not
+#' know. Where the two differ, the trailing class id is appended to the full
+#' name so the classes stay distinguishable.
+#'
+#' Unknown abbreviations fall back to the abbreviation itself, so a metric that
+#' `landscapemetrics` does not document still labels sensibly. Whether that is
+#' worth a warning depends on the caller: `plot_metrics(metric_labels = "name")`
+#' warns because the user explicitly asked for names and silently getting
+#' abbreviations would be confusing, while `evaluate_metrics()` does not,
+#' because its `name` column is supplied unasked and users may legitimately
+#' rank metrics that `landscapemetrics` never defined.
+#'
+#' @param metric Character vector of metric identifiers as they appear to the
+#'   user (class-level ones suffixed with the class id).
+#' @param base_metric Character vector, parallel to `metric`, holding the
+#'   unsuffixed abbreviation to look up. Identical to `metric` at the landscape
+#'   level.
+#' @param level Either "landscape" or "class".
+#' @param warn Logical. Warn about abbreviations that could not be resolved.
+#'
+#' @return Character vector of display names, the same length as `metric`.
+#' @noRd
+lookup_metric_names <- function(metric, base_metric, level, warn = TRUE) {
+  metric <- as.character(metric)
+  base_metric <- as.character(base_metric)
+
+  lsm_lookup <- landscapemetrics::list_lsm(level = level)
+  name <- lsm_lookup$name[match(base_metric, lsm_lookup$metric)]
+
+  unmatched <- is.na(name)
+  if (warn && any(unmatched)) {
+    cli::cli_warn(
+      "Could not find full name(s) for metric(s) {.val {unique(metric[unmatched])}}; showing abbreviation instead."
+    )
+  }
+
+  # list_lsm() names are all lowercase, so str_to_sentence() lowercasing the
+  # rest of the string changes nothing
+  name[!unmatched] <- stringr::str_to_sentence(name[!unmatched])
+  name[unmatched] <- metric[unmatched]
+
+  # Whatever follows the base abbreviation is the class id. Empty at the
+  # landscape level, where metric and base_metric are identical.
+  class_id <- substring(metric, nchar(base_metric) + 2)
+  has_class <- !unmatched & nzchar(class_id)
+  name[has_class] <- paste0(
+    name[has_class],
+    " (class ",
+    class_id[has_class],
+    ")"
+  )
+
+  name
 }

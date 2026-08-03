@@ -101,6 +101,10 @@ it, with one row for every metric you passed in:
 metric_evaluation$ranking
 ```
 
+The `name` column spells out what each abbreviation stands for, so you do not
+have to look them up separately. For class-level metrics the class is appended,
+for example `Aggregation index (class 1)`.
+
 The `outcome` column records what happened to each candidate. Metrics with an
 `excluded_` outcome never reached the ranking, so they have no score or rank:
 

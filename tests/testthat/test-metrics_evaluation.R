@@ -574,6 +574,60 @@ test_that("the ranking table holds its invariants", {
   )
 })
 
+test_that("the ranking table reports full metric names", {
+  metrics <- create_real_test_metrics(n_landscapes = 6)
+
+  suppressWarnings(
+    result <- evaluate_metrics(metrics, metrics_number = 3)
+  )
+
+  ranking <- result$ranking
+  expect_true("name" %in% names(ranking))
+  expect_false(anyNA(ranking$name))
+
+  # Names come from list_lsm(), sentence-cased
+  expect_equal(ranking$name[ranking$metric == "ai"], "Aggregation index")
+  expect_equal(ranking$name[ranking$metric == "lsi"], "Landscape shape index")
+})
+
+test_that("the ranking table disambiguates class-level names by class", {
+  landscapes <- create_landscapes(
+    n = 6,
+    patterns = c("spots", "labyrinth"),
+    rotation = 0
+  )
+  metrics <- calculate_metrics(
+    landscapes,
+    level = "class",
+    metrics = c("ai", "pland")
+  )
+
+  suppressWarnings(
+    result <- evaluate_metrics(metrics, metrics_number = 2)
+  )
+
+  ranking <- result$ranking
+  expect_equal(
+    ranking$name[ranking$metric == "ai_1"],
+    "Aggregation index (class 1)"
+  )
+  expect_equal(
+    ranking$name[ranking$metric == "ai_0"],
+    "Aggregation index (class 0)"
+  )
+})
+
+test_that("the ranking table falls back to the abbreviation without warning", {
+  # Synthetic metric names are not in list_lsm(); the name column is supplied
+  # unasked, so an unresolvable name must not warn
+  metrics <- create_test_metrics(n_metrics = 4)
+
+  expect_no_warning(
+    result <- evaluate_metrics(metrics, metrics_number = 2)
+  )
+  expect_identical(result$ranking$name, result$ranking$metric)
+})
+
 test_that("both correlation paths produce a complete census", {
   metrics <- create_test_metrics(n_metrics = 8)
 

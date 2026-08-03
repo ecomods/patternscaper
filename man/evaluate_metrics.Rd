@@ -29,7 +29,10 @@ be calculated for a class that is absent from a landscape. Keep this enabled if
 the data is later used for model training, which requires a complete predictor
 matrix.}
 
-\item{exclude_metrics}{Character vector. Metrics to exclude (default: NULL).}
+\item{exclude_metrics}{Character vector. Metric abbreviations to exclude, as
+they appear in the `metric` column (default: NULL). Use
+\code{\link[landscapemetrics]{list_lsm}} to look up what an abbreviation
+stands for.}
 
 \item{correlation_threshold}{Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
 If you do not want to filter based on correlation, set to 1.}
@@ -84,7 +87,13 @@ metric-based neural network.
 `ranking` gives an overview of all metrics ranked: one row per metric,
 whatever happened to it. Columns:
 \describe{
-  \item{\code{metric}}{Metric name.}
+  \item{\code{metric}}{Metric abbreviation, e.g. "ai". For class-level
+    metrics the class is appended, e.g. "ai_1".}
+  \item{\code{name}}{Full metric name from
+    \code{\link[landscapemetrics]{list_lsm}}, e.g. "Aggregation index", with
+    the class appended for class-level metrics ("Aggregation index
+    (class 1)"). Falls back to the abbreviation for metrics
+    `landscapemetrics` does not document.}
   \item{\code{score}}{Score from the ranking `method`, or `NA` for metrics
     that were excluded before ranking.}
   \item{\code{rank}}{Position in the full ranking, best first, or `NA` for
@@ -129,7 +138,9 @@ dplyr::count(evaluation$ranking, outcome)
 
 }
 \seealso{
-\code{\link{train_metrics_model}}
+\code{\link{train_metrics_model}},
+  \code{\link[landscapemetrics]{list_lsm}} for the available metrics and
+  their full names
 
 Other metrics:
 \code{\link[=calculate_metrics]{calculate_metrics()}},

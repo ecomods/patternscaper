@@ -17,10 +17,13 @@ plot_metrics(
 Must contain columns: "level", "pattern", "metric", and "value".
 For class-level metrics, must also contain "class".}
 
-\item{selected_metrics}{Character vector of metric names to visualize.
-Must be present in the metrics data. If NULL (default), all available metrics
-are plotted in alphabetical order, subject to automatic limits based on the
-number of patterns.}
+\item{selected_metrics}{Character vector of metric abbreviations to
+visualize, as they appear in the \code{metric} column, or the object
+returned by \code{\link{evaluate_metrics}}. Must be present in the metrics
+data. If NULL (default), all available metrics are plotted in alphabetical
+order, subject to automatic limits based on the number of patterns. Use
+\code{\link[landscapemetrics]{list_lsm}} to look up what an abbreviation
+stands for, or set \code{metric_labels = "name"} to show the full names.}
 
 \item{force}{Logical. Override automatic metric limits (default: FALSE).
 When TRUE, all selected metrics will be plotted regardless of readability.}
@@ -80,7 +83,9 @@ plot_metrics(
 )
 }
 \seealso{
-\code{\link{calculate_metrics}}, \code{\link{evaluate_metrics}}
+\code{\link{calculate_metrics}}, \code{\link{evaluate_metrics}},
+  \code{\link[landscapemetrics]{list_lsm}} for the available metrics and
+  their full names
 
 Other visualization:
 \code{\link[=plot_classified_landscapes]{plot_classified_landscapes()}},

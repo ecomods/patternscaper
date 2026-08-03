@@ -12,9 +12,10 @@ or a list of landscape objects (e.g. created with \code{\link{create_landscapes}
 Each landscape object should contain a \code{data}
 element with a SpatRaster, plus \code{name} and \code{pattern} metadata.}
 
-\item{metrics}{Character vector. Names of metrics to calculate (default: NULL for all
-available metrics at the specified level). Use \code{list_lsm()} from landscapemetrics
-to see available metrics.}
+\item{metrics}{Character vector. Abbreviations of the metrics to calculate
+(default: NULL for all available metrics at the specified level). Use
+\code{\link[landscapemetrics]{list_lsm}} to look up the available
+abbreviations and the full metric name each one stands for.}
 
 \item{level}{Character. Level(s) of metrics to calculate:"class", "landscape"
 (default: "landscape").}
@@ -28,13 +29,23 @@ A tibble with the following columns:
     \item{layer}{Layer number (from landscapemetrics output)}
     \item{level}{Metric level: "class", or "landscape"}
     \item{class}{Class value (for class-level metrics, NA for landscape-level)}
-    \item{metric}{Name of the calculated metric}
+    \item{metric_name}{Metric abbreviation without the class suffix, e.g.
+      "ai". Identical to \code{metric} for landscape-level metrics.}
+    \item{metric}{Metric abbreviation identifying the row, e.g. "ai". For
+      class-level metrics the class is appended, e.g. "ai_1", so that each
+      class gets its own identifier.}
     \item{value}{Calculated metric value}
     \item{warnings}{Any warnings generated during calculation (NA if none)}
     \item{n_row, n_col}{Cell dimensions of the landscape the row was computed from}
     \item{cell_size_x, cell_size_y}{Cell resolution (from \code{\link[terra]{res}})}
     \item{n_na}{Number of NA cells in the landscape}
   }
+  Metrics are identified by their abbreviation throughout. To see what an
+  abbreviation stands for, look it up with
+  \code{\link[landscapemetrics]{list_lsm}}; \code{\link{evaluate_metrics}}
+  reports the full names in its ranking table, and \code{\link{plot_metrics}}
+  can use them as facet labels via \code{metric_labels = "name"}.
+
   The last five columns record each landscape's geometry so it stays attached to
   the metrics (e.g. through \code{\link[readr]{write_csv}}); they are used for
   geometry-mismatch checks and are never used as model predictors.
@@ -66,7 +77,9 @@ Hesselbarth, M.H.K., Sciaini, M., With, K.A., Wiegand, K., & Nowosad, J.
 metrics. *Ecography*, 42(10), 1648-1657. \doi{10.1111/ecog.04617}
 }
 \seealso{
-\code{\link{plot_metrics}}
+\code{\link{plot_metrics}},
+  \code{\link[landscapemetrics]{list_lsm}} for the available metrics and
+  their full names
 
 Other metrics:
 \code{\link[=evaluate_metrics]{evaluate_metrics()}},

@@ -27,6 +27,8 @@ metrics_evaluation_outcomes <- c(
 #'
 #' @param all_metrics Character vector. Every metric passed to
 #'     \code{\link{evaluate_metrics}}, before any filtering.
+#' @param metric_bases Character vector, parallel to `all_metrics`. The
+#'     unsuffixed abbreviation for each metric, used to look up its full name.
 #' @param ranked tibble. Scored metrics (`metric`, `score`) in rank order.
 #' @param outcomes tibble. Selection outcome per scored metric (`metric`,
 #'     `outcome`, `correlated_with`).
@@ -40,6 +42,7 @@ metrics_evaluation_outcomes <- c(
 #' @noRd
 new_metrics_evaluation <- function(
   all_metrics,
+  metric_bases = all_metrics,
   ranked,
   outcomes,
   excluded,
@@ -60,7 +63,15 @@ new_metrics_evaluation <- function(
     ))
   }
 
-  ranking <- tibble::tibble(metric = all_metrics) |>
+  ranking <- tibble::tibble(
+    metric = all_metrics,
+    name = lookup_metric_names(
+      all_metrics,
+      metric_bases,
+      params$level,
+      warn = FALSE
+    )
+  ) |>
     dplyr::left_join(all_outcomes, by = "metric") |>
     dplyr::left_join(
       dplyr::mutate(ranked, rank = dplyr::row_number()),
@@ -72,6 +83,7 @@ new_metrics_evaluation <- function(
     ) |>
     dplyr::select(
       metric,
+      name,
       score,
       rank,
       selected,
@@ -171,7 +183,10 @@ print.metrics_evaluation <- function(x, ...) {
 #'     be calculated for a class that is absent from a landscape. Keep this enabled if
 #'     the data is later used for model training, which requires a complete predictor
 #'     matrix.
-#' @param exclude_metrics Character vector. Metrics to exclude (default: NULL).
+#' @param exclude_metrics Character vector. Metric abbreviations to exclude, as
+#'     they appear in the `metric` column (default: NULL). Use
+#'     \code{\link[landscapemetrics]{list_lsm}} to look up what an abbreviation
+#'     stands for.
 #' @param correlation_threshold Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
 #'     If you do not want to filter based on correlation, set to 1.
 #' @param verbose Logical. Whether to print detailed messages on excluded metrics
@@ -199,7 +214,13 @@ print.metrics_evaluation <- function(x, ...) {
 #' `ranking` gives an overview of all metrics ranked: one row per metric,
 #' whatever happened to it. Columns:
 #' \describe{
-#'   \item{\code{metric}}{Metric name.}
+#'   \item{\code{metric}}{Metric abbreviation, e.g. "ai". For class-level
+#'     metrics the class is appended, e.g. "ai_1".}
+#'   \item{\code{name}}{Full metric name from
+#'     \code{\link[landscapemetrics]{list_lsm}}, e.g. "Aggregation index", with
+#'     the class appended for class-level metrics ("Aggregation index
+#'     (class 1)"). Falls back to the abbreviation for metrics
+#'     `landscapemetrics` does not document.}
 #'   \item{\code{score}}{Score from the ranking `method`, or `NA` for metrics
 #'     that were excluded before ranking.}
 #'   \item{\code{rank}}{Position in the full ranking, best first, or `NA` for
@@ -253,7 +274,9 @@ print.metrics_evaluation <- function(x, ...) {
 #' evaluation$ranking
 #' dplyr::count(evaluation$ranking, outcome)
 #'
-#' @seealso \code{\link{train_metrics_model}}
+#' @seealso \code{\link{train_metrics_model}},
+#'   \code{\link[landscapemetrics]{list_lsm}} for the available metrics and
+#'   their full names
 #' @family metrics
 #' @export
 evaluate_metrics <- function(
@@ -330,6 +353,17 @@ evaluate_metrics <- function(
   all_metrics <- unique(metrics$metric)
   excluded_user <- character(0)
   excluded_incomplete <- character(0)
+
+  # The unsuffixed abbreviation behind each metric, so the ranking can report
+  # full names. At the class level `metric` carries the class id ("ai_1") and
+  # only `metric_name` holds the bare abbreviation; at the landscape level the
+  # two are identical. `metric_name` is not a required input column, so fall
+  # back to `metric` and let the name lookup warn if it cannot resolve them.
+  metric_bases <- if ("metric_name" %in% names(metrics)) {
+    as.character(metrics$metric_name[match(all_metrics, metrics$metric)])
+  } else {
+    all_metrics
+  }
 
   # Recorded before `metrics_number` is capped below, so the object reports what
   # was asked for rather than what was achievable
@@ -518,6 +552,7 @@ evaluate_metrics <- function(
 
   new_metrics_evaluation(
     all_metrics = all_metrics,
+    metric_bases = metric_bases,
     ranked = ranking_result$ranking,
     outcomes = outcomes,
     excluded = excluded,

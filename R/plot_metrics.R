@@ -12,10 +12,13 @@
 #' @param metrics Data frame from \code{\link{calculate_metrics}}.
 #'   Must contain columns: "level", "pattern", "metric", and "value".
 #'   For class-level metrics, must also contain "class".
-#' @param selected_metrics Character vector of metric names to visualize.
-#'   Must be present in the metrics data. If NULL (default), all available metrics
-#'   are plotted in alphabetical order, subject to automatic limits based on the
-#'   number of patterns.
+#' @param selected_metrics Character vector of metric abbreviations to
+#'   visualize, as they appear in the \code{metric} column, or the object
+#'   returned by \code{\link{evaluate_metrics}}. Must be present in the metrics
+#'   data. If NULL (default), all available metrics are plotted in alphabetical
+#'   order, subject to automatic limits based on the number of patterns. Use
+#'   \code{\link[landscapemetrics]{list_lsm}} to look up what an abbreviation
+#'   stands for, or set \code{metric_labels = "name"} to show the full names.
 #' @param force Logical. Override automatic metric limits (default: FALSE).
 #'   When TRUE, all selected metrics will be plotted regardless of readability.
 #' @param metric_labels Character string controlling how metrics are labelled
@@ -35,7 +38,9 @@
 #'
 #' @return A ggplot2 object showing boxplots of metric values by pattern type.
 #'
-#' @seealso \code{\link{calculate_metrics}}, \code{\link{evaluate_metrics}}
+#' @seealso \code{\link{calculate_metrics}}, \code{\link{evaluate_metrics}},
+#'   \code{\link[landscapemetrics]{list_lsm}} for the available metrics and
+#'   their full names
 #' @family visualization
 #' @export
 #' @importFrom dplyr filter mutate distinct left_join across any_of
@@ -278,17 +283,13 @@ plot_metrics <- function(
 
 #' Build a facet labeller mapping metric abbreviations to full names
 #'
-#' Looks up full metric names from \code{\link[landscapemetrics]{list_lsm}}
-#' for the metrics present in \code{plot_data$metric} and returns a
-#' \code{ggplot2} labeller function suitable for \code{facet_wrap(labeller = )}.
-#' For class-level metrics (where \code{metric} is the abbreviation with the
-#' class id appended, e.g. "ai_1"), the class id is appended to the full name
-#' for disambiguation (e.g. "Aggregation index (class 1)").
+#' Resolves the full names for the metrics present in \code{plot_data$metric}
+#' (see \code{lookup_metric_names()}) and wraps them in a \code{ggplot2}
+#' labeller suitable for \code{facet_wrap(labeller = )}.
 #'
 #' @param plot_data Data frame used to build the plot. Must contain a
 #'   \code{metric} column, and for class-level metrics a \code{metric_name}
-#'   column with the base (unsuffixed) metric abbreviation and a \code{class}
-#'   column.
+#'   column with the base (unsuffixed) metric abbreviation.
 #' @param level Either "landscape" or "class".
 #' @param wrap_width Integer. Character width at which to wrap long labels
 #'   (passed to \code{\link[ggplot2]{label_wrap_gen}}). Should be chosen
@@ -299,50 +300,21 @@ plot_metrics <- function(
 #' @noRd
 #' @importFrom stats setNames
 metric_name_labeller <- function(plot_data, level, wrap_width = 25) {
-  lsm_lookup <- landscapemetrics::list_lsm(level = level)[, c("metric", "name")]
-
+  metric <- as.character(plot_data$metric)
   base_metric <- if (level == "class") {
-    plot_data$metric_name
+    as.character(plot_data$metric_name)
   } else {
-    as.character(plot_data$metric)
+    metric
   }
 
-  label_lookup <- plot_data |>
-    dplyr::mutate(.base_metric = base_metric) |>
-    dplyr::distinct(
-      metric,
-      .base_metric,
-      dplyr::across(dplyr::any_of("class"))
-    ) |>
-    dplyr::left_join(lsm_lookup, by = c(".base_metric" = "metric"))
-
-  unmatched <- is.na(label_lookup$name)
-  if (any(unmatched)) {
-    cli::cli_warn(
-      "Could not find full name(s) for metric(s) {.val {unique(as.character(label_lookup$metric[unmatched]))}}; showing abbreviation instead."
-    )
-  }
-
-  # Capitalize first letter of matched full names for a cleaner facet strip;
-  # leave unmatched abbreviations untouched.
-  label_lookup$name[!unmatched] <- stringr::str_to_sentence(
-    label_lookup$name[!unmatched]
-  )
-  label_lookup$name[unmatched] <- as.character(label_lookup$metric[unmatched])
-
-  # Disambiguate class-level metrics with their class id
-  if (level == "class" && "class" %in% names(label_lookup)) {
-    label_lookup$name <- paste0(
-      label_lookup$name,
-      " (class ",
-      label_lookup$class,
-      ")"
-    )
-  }
+  # One label per facet, not per row of the plot data
+  first <- !duplicated(metric)
+  metric <- metric[first]
+  base_metric <- base_metric[first]
 
   label_vec <- stats::setNames(
-    label_lookup$name,
-    as.character(label_lookup$metric)
+    lookup_metric_names(metric, base_metric, level),
+    metric
   )
   ggplot2::as_labeller(
     label_vec,
