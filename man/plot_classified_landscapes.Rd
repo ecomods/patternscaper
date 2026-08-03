@@ -8,6 +8,7 @@ plot_classified_landscapes(
   classification,
   landscapes,
   only_misclassified = FALSE,
+  score_note = TRUE,
   ...
 )
 }
@@ -22,6 +23,11 @@ The easiest way to ensure this is to use the same list of landscapes for both tr
 
 \item{only_misclassified}{Logical; if \code{TRUE}, only misclassified
 landscapes are plotted. Default is \code{FALSE}.}
+
+\item{score_note}{Logical; if \code{TRUE} (default), a one-line caption is
+added under the whole figure stating that the bracketed number is the score
+of the predicted class and not a calibrated probability. Set to
+\code{FALSE} when the surrounding figure caption already says so.}
 
 \item{...}{Additional arguments passed to \code{\link{plot_landscapes}},
 such as \code{show_legend}, \code{legend_title}, \code{ncol}, \code{max_landscapes},

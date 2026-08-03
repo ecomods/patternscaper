@@ -12,6 +12,10 @@
 #'   The easiest way to ensure this is to use the same list of landscapes for both training and plotting.
 #' @param only_misclassified Logical; if \code{TRUE}, only misclassified
 #'   landscapes are plotted. Default is \code{FALSE}.
+#' @param score_note Logical; if \code{TRUE} (default), a one-line caption is
+#'   added under the whole figure stating that the bracketed number is the score
+#'   of the predicted class and not a calibrated probability. Set to
+#'   \code{FALSE} when the surrounding figure caption already says so.
 #' @param ... Additional arguments passed to \code{\link{plot_landscapes}},
 #'   such as \code{show_legend}, \code{legend_title}, \code{ncol}, \code{max_landscapes},
 #'   \code{force}, or \code{subset_index}.
@@ -50,12 +54,18 @@
 #' @seealso \code{\link{train_pixel_model}}, \code{\link{train_metrics_model}}
 #' @family visualization
 #' @export
+#' @importFrom patchwork plot_annotation
 plot_classified_landscapes <- function(
   classification,
   landscapes,
   only_misclassified = FALSE,
+  score_note = TRUE,
   ...
 ) {
+  if (!is.logical(score_note) || length(score_note) != 1) {
+    cli::cli_abort("{.arg score_note} must be a single logical value")
+  }
+
   # Check if classification has the required elements
   if (
     !is.data.frame(classification) ||
@@ -192,6 +202,17 @@ plot_classified_landscapes <- function(
     titles = classification$title,
     ...
   )
+
+  # One caption for the whole composite rather than a word in every panel
+  # title, which does not scale to a multi-panel figure. The bracketed number
+  # is easily misread as a calibrated probability; see the "Interpreting the
+  # class scores" section of `apply_metrics_model()`.
+  if (score_note) {
+    plots <- plots +
+      patchwork::plot_annotation(
+        caption = "Number in brackets: score of the predicted class (not a calibrated probability)"
+      )
+  }
 
   return(plots)
 }
