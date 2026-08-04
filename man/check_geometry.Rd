@@ -34,6 +34,6 @@ resolution difference is reported as not assessable rather than as a calibrated
 ratio. When `training` is `NULL` (a model trained before geometry was recorded,
 or from a metrics table without geometry columns) it notes -- when `verbose` --
 that the checks are skipped, and does nothing else. Used by
-\code{\link{apply_metrics_model}}.
+\code{\link{apply_metric_model}}.
 }
 \keyword{internal}

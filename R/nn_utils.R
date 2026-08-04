@@ -779,7 +779,7 @@ fit_nn_model <- function(data, hidden, threshold, stepmax) {
     cli::cli_abort(c(
       "Neural network training did not converge.",
       "x" = "{.pkg neuralnet} stopped after {stepmax} steps without reaching the error threshold of {threshold}.",
-      "i" = "Increase {.arg stepmax} or relax {.arg threshold} in {.fn train_metrics_model}.",
+      "i" = "Increase {.arg stepmax} or relax {.arg threshold} in {.fn train_metric_model}.",
       "i" = "Or select fewer metrics with {.fn evaluate_metrics} and pass them via {.arg metrics_selected} as many correlated predictors could prevent convergence."
     ))
   }

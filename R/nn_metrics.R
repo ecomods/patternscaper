@@ -44,7 +44,7 @@
 #'     \item{performance}{List from evaluate_cv_performance() with confusion matrix,
 #'       accuracy, per-class metrics, and validation results. NULL if cv_method = "none".}
 #'     \item{training_geometry}{One-row tibble summarising the geometry of the training
-#'       landscapes, used by \code{\link{apply_metrics_model}} to warn on geometry
+#'       landscapes, used by \code{\link{apply_metric_model}} to warn on geometry
 #'       mismatch. NULL if the metrics table carries no geometry columns.}
 #'   }
 #' @examples
@@ -59,11 +59,11 @@
 #' best_10 <- evaluate_metrics(metrics, metrics_number = 10)
 #'
 #' # Train model with cross-validation
-#' model <- train_metrics_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
+#' model <- train_metric_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
 #'
 #' # Train with specific metrics
 #' selected <- c("ai", "lsi", "ed", "np")
-#' model <- train_metrics_model(
+#' model <- train_metric_model(
 #'   metrics,
 #'   metrics_selected = selected,
 #'   hidden_layers = c(8, 4)
@@ -72,12 +72,12 @@
 #'
 #' \dontrun{
 #' # Save model to file
-#' model <- train_metrics_model(
+#' model <- train_metric_model(
 #'   metrics,
 #'   model_path = "models/landscape_classifier.rds"
 #' )
 #' }
-#' @seealso \code{\link{apply_metrics_model}}, \code{\link{evaluate_metrics}}
+#' @seealso \code{\link{apply_metric_model}}, \code{\link{evaluate_metrics}}
 #' @family neural network training
 #' @export
 #' @importFrom cli cli_abort cli_alert_warning
@@ -86,7 +86,7 @@
 #' @importFrom neuralnet neuralnet
 #' @importFrom readr write_rds
 #' @importFrom stats predict
-train_metrics_model <- function(
+train_metric_model <- function(
   metrics,
   metrics_selected = NULL,
   cv_method = "k-fold",
@@ -383,7 +383,7 @@ train_metrics_model <- function(
 #'
 #' @param landscapes Landscape object (single) or list of landscape objects to classify.
 #'   Landscapes must have valid raster data that can be analyzed by landscapemetrics.
-#' @param nn_model List. Trained model object returned from train_metrics_model().
+#' @param nn_model List. Trained model object returned from train_metric_model().
 #'   Must contain elements: model, scaling, classes, features, and features_level.
 #' @param return_performance Logical. If TRUE and landscapes contain known classes
 #'   (pattern attribute), calculate and return performance metrics. If FALSE or
@@ -458,7 +458,7 @@ train_metrics_model <- function(
 #'
 #' @section Geometry checks:
 #' If the model stores the geometry of its training landscapes (see
-#' \code{\link{train_metrics_model}}), the application landscapes are compared
+#' \code{\link{train_metric_model}}), the application landscapes are compared
 #' against it and a warning is issued when they differ substantially in extent,
 #' resolution or aspect ratio, since scale-dependent metrics are then unreliable.
 #' If the model has no stored training geometry, the checks are skipped with an
@@ -470,15 +470,15 @@ train_metrics_model <- function(
 #' metrics <- calculate_metrics(train_landscapes, level = "landscape")
 #' # find the best 10 metrics for classification
 #' best_10 <- evaluate_metrics(metrics, metrics_number = 10)
-#' model <- train_metrics_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
+#' model <- train_metric_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
 #'
 #' # Apply to new landscapes
 #' new_landscapes <- create_landscapes(n = 5, patterns = c("random", "sharp"))
-#' predictions <- apply_metrics_model(new_landscapes, model)
+#' predictions <- apply_metric_model(new_landscapes, model)
 #' predictions
 #'
 #' # Evaluate performance on labeled data
-#' results <- apply_metrics_model(new_landscapes, model, return_performance = TRUE)
+#' results <- apply_metric_model(new_landscapes, model, return_performance = TRUE)
 #' results$predictions
 #' results$performance
 #' }
@@ -486,9 +486,9 @@ train_metrics_model <- function(
 #' \dontrun{
 #' # Load a saved model
 #' model <- readr::read_rds("models/landscape_classifier.rds")
-#' predictions <- apply_metrics_model(new_landscapes, model)
+#' predictions <- apply_metric_model(new_landscapes, model)
 #' }
-#' @seealso \code{\link{train_metrics_model}}, \code{\link{plot_classified_landscapes}}
+#' @seealso \code{\link{train_metric_model}}, \code{\link{plot_classified_landscapes}}
 #' @family neural network application
 #' @export
 #' @importFrom cli cli_abort cli_alert_warning cli_warn
@@ -496,7 +496,7 @@ train_metrics_model <- function(
 #' @importFrom purrr pmap_lgl
 #' @importFrom tibble as_tibble
 #' @importFrom stats predict
-apply_metrics_model <- function(
+apply_metric_model <- function(
   landscapes,
   nn_model,
   return_performance = FALSE,
@@ -519,7 +519,7 @@ apply_metrics_model <- function(
       )
   ) {
     cli::cli_abort(
-      "'nn_model' must be a trained model from train_metrics_model()"
+      "'nn_model' must be a trained model from train_metric_model()"
     )
   }
 

@@ -6,8 +6,8 @@
 #'
 #' @param classification A data frame with columns: \code{landscape_id},
 #'   \code{actual_class}, \code{predicted_class}, and \code{score}. Can be
-#'   obtained from the CV-fold results of \code{\link{train_metrics_model}}/\code{\link{train_pixel_model}} or
-#'   the output of \code{\link{apply_metrics_model}}/\code{\link{apply_pixel_model}}.
+#'   obtained from the CV-fold results of \code{\link{train_metric_model}}/\code{\link{train_pixel_model}} or
+#'   the output of \code{\link{apply_metric_model}}/\code{\link{apply_pixel_model}}.
 #' @param landscapes A list of landscape objects corresponding one-to-one and in the same order as the rows in `classification`.
 #'   The easiest way to ensure this is to use the same list of landscapes for both training and plotting.
 #' @param only_misclassified Logical; if \code{TRUE}, only misclassified
@@ -34,7 +34,7 @@
 #' best_10 <- evaluate_metrics(metrics, metrics_number = 10)
 #'
 #' # Train model with cross-validation
-#' model <- train_metrics_model(metrics, metrics_selected = best_10, cv_method = "k-fold")
+#' model <- train_metric_model(metrics, metrics_selected = best_10, cv_method = "k-fold")
 #'
 #' # Plot all classification results
 #' plot_classified_landscapes(
@@ -51,7 +51,7 @@
 #'   ncol = 4
 #' )
 #' }
-#' @seealso \code{\link{train_pixel_model}}, \code{\link{train_metrics_model}}
+#' @seealso \code{\link{train_pixel_model}}, \code{\link{train_metric_model}}
 #' @family visualization
 #' @export
 #' @importFrom patchwork plot_annotation
@@ -151,7 +151,7 @@ plot_classified_landscapes <- function(
   classification <- classification |>
     dplyr::mutate(
       title = dplyr::case_when(
-        # Landscape could not be classified: apply_metrics_model() returns NA
+        # Landscape could not be classified: apply_metric_model() returns NA
         # when a required metric was unavailable for it. Must be matched before
         # the equality branches, which would both give NA and fall through.
         is.na(predicted_class) ~ dplyr::if_else(
@@ -206,7 +206,7 @@ plot_classified_landscapes <- function(
   # One caption for the whole composite rather than a word in every panel
   # title, which does not scale to a multi-panel figure. The bracketed number
   # is easily misread as a calibrated probability; see the "Interpreting the
-  # class scores" section of `apply_metrics_model()`.
+  # class scores" section of `apply_metric_model()`.
   if (score_note) {
     plots <- plots +
       patchwork::plot_annotation(

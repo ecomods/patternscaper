@@ -547,7 +547,7 @@ train_pixel_model <- function(
 #'     \item{predicted_class}{Predicted landscape pattern}
 #'     \item{score}{Score of the predicted class, i.e. the largest of the
 #'           class scores below (not a calibrated probability). See
-#'           \code{\link{apply_metrics_model}}, section "Interpreting the class
+#'           \code{\link{apply_metric_model}}, section "Interpreting the class
 #'           scores", which applies to both workflows.}
 #'     \item{<class_name>}{Score for each trained class, straight from the
 #'           network's softmax output layer, so each row sums to 1.}

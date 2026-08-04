@@ -36,7 +36,7 @@ auto_selected <- evaluate_metrics(train_metrics, metrics_number = 5, verbose = F
 cat("\nautomatically selected:", auto_selected$selected, "\n")
 
 fit_model <- function(metrics_selected) {
-  train_metrics_model(
+  train_metric_model(
     train_metrics,
     metrics_selected = metrics_selected,
     cv_method = "none",
@@ -51,7 +51,7 @@ models <- list(auto = fit_model(auto_selected), normalised = fit_model(normalise
 
 accuracy_of <- function(model, landscapes) {
   result <- suppressWarnings(
-    apply_metrics_model(landscapes, model, return_performance = TRUE)
+    apply_metric_model(landscapes, model, return_performance = TRUE)
   )
   if (is.null(result$performance)) return(NA_real_)
   round(result$performance$accuracy, 3)

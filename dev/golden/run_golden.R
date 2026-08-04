@@ -29,7 +29,7 @@ run_golden <- function() {
   metrics  <- calculate_metrics(landscapes = train, level = "landscape")
   selected <- evaluate_metrics(metrics = metrics, metrics_number = 5)
 
-  model <- train_metrics_model(
+  model <- train_metric_model(
     metrics          = metrics,
     metrics_selected = selected,
     hidden_layers    = c(6),
@@ -37,7 +37,7 @@ run_golden <- function() {
     cv_folds         = 2,
     verbose          = FALSE
   )
-  validation <- apply_metrics_model(
+  validation <- apply_metric_model(
     landscapes         = test,
     nn_model           = model,
     return_performance = TRUE

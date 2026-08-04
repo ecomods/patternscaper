@@ -14,7 +14,7 @@ adding code:
 
 - **Pixel-based** — convolutional net via `keras3`: `train_pixel_model()` / `apply_pixel_model()`.
 - **Metrics-based** — landscape metrics (`landscapemetrics`) fed to a `neuralnet`:
-  `train_metrics_model()` / `apply_metrics_model()`.
+  `train_metric_model()` / `apply_metric_model()`.
 
 **Sibling analysis repo.** `../spatPatClassifyRAnalysis` reproduces the paper's figures/tables and
 depends on this package's exported API. **Renaming or changing the signature of an export can

@@ -82,7 +82,7 @@ metric_evaluation
 ```
 
 The selected metric names are in `$selected`, ready to pass on to
-`plot_metrics()` or `train_metrics_model()`. You can also pass the whole object
+`plot_metrics()` or `train_metric_model()`. You can also pass the whole object
 to either function.
 
 ```{r}

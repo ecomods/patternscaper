@@ -192,7 +192,7 @@ test_that("plot_classified_landscapes titles unclassified landscapes", {
   classification <- tibble::tibble(
     landscape_id = 1:2,
     actual_class = c("spots", "labyrinth"),
-    # apply_metrics_model() returns NA when a landscape could not be classified
+    # apply_metric_model() returns NA when a landscape could not be classified
     predicted_class = c("spots", NA_character_),
     score = c(0.9, NA_real_)
   )

@@ -12,7 +12,7 @@
 #'     via \pkg{keras3} (see \code{\link{train_pixel_model}})
 #'   \item **Metrics-based classification** using landscape metrics computed
 #'     with \pkg{landscapemetrics} as input features
-#'     for a neural network (see \code{\link{train_metrics_model}})
+#'     for a neural network (see \code{\link{train_metric_model}})
 #' }
 #'
 #' @section Typical workflow:
@@ -22,9 +22,9 @@
 #'     \code{\link{calculate_metrics}} and
 #'     \code{\link{evaluate_metrics}}
 #'   \item Train a classifier with \code{\link{train_pixel_model}} or
-#'     \code{\link{train_metrics_model}}
+#'     \code{\link{train_metric_model}}
 #'   \item Apply the trained model to new landscapes with
-#'     \code{\link{apply_pixel_model}} or \code{\link{apply_metrics_model}}
+#'     \code{\link{apply_pixel_model}} or \code{\link{apply_metric_model}}
 #'   \item Visualize results with \code{\link{plot_classified_landscapes}}
 #' }
 #'

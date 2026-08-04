@@ -19,7 +19,7 @@ Internal core that condenses a per-landscape geometry table (columns `n_row`,
 trained model. It records the representative dimensions and resolution (the
 median, which equals the common value when all landscapes match) plus whether
 the set is homogeneous in dimensions *and* resolution, so that
-\code{\link{apply_metrics_model}} and \code{\link{apply_pixel_model}} can warn when application
+\code{\link{apply_metric_model}} and \code{\link{apply_pixel_model}} can warn when application
 landscapes differ from the data the model was trained on.
 }
 \keyword{internal}

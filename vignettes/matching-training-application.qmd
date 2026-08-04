@@ -51,9 +51,9 @@ guards each accordingly.
 
 ### Metric-based workflow
 
-`calculate_metrics()` records each landscape's geometry, and `train_metrics_model()`
+`calculate_metrics()` records each landscape's geometry, and `train_metric_model()`
 stores a summary of the training geometry in the model. When you later call
-`apply_metrics_model()`, it compares the application landscapes against that summary
+`apply_metric_model()`, it compares the application landscapes against that summary
 and warns if they differ substantially in extent, resolution, or aspect ratio:
 
 ```
@@ -76,7 +76,7 @@ landscapes, prefer scale-invariant metrics when selecting features with
 :::
 
 The same logic applies to the *training* set: if your training landscapes are not
-all the same size, `train_metrics_model()` warns, because scale-dependent metrics
+all the same size, `train_metric_model()` warns, because scale-dependent metrics
 then conflate the pattern with the landscape's size.
 
 ### Pixel-based workflow

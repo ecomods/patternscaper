@@ -53,7 +53,7 @@ landscapes_geometry <- function(landscapes) {
 #' trained model. It records the representative dimensions and resolution (the
 #' median, which equals the common value when all landscapes match) plus whether
 #' the set is homogeneous in dimensions *and* resolution, so that
-#' \code{\link{apply_metrics_model}} and \code{\link{apply_pixel_model}} can warn when application
+#' \code{\link{apply_metric_model}} and \code{\link{apply_pixel_model}} can warn when application
 #' landscapes differ from the data the model was trained on.
 #'
 #' @param geometry A per-landscape geometry tibble (see \code{\link{landscapes_geometry}}).
@@ -96,7 +96,7 @@ summarise_training_geometry <- function(landscapes) {
 #'
 #' Internal helper: extracts the per-landscape geometry columns that
 #' \code{\link{calculate_metrics}} attaches to its output and condenses them via
-#' \code{\link{summarise_geometry}}. Used by \code{\link{train_metrics_model}}, which receives the
+#' \code{\link{summarise_geometry}}. Used by \code{\link{train_metric_model}}, which receives the
 #' metrics tibble rather than the landscapes. Returns `NULL` when the geometry
 #' columns are absent (e.g. a metrics table cached before geometry was recorded,
 #' or built by hand), so callers can skip geometry checks gracefully.
@@ -142,7 +142,7 @@ training_geometry_from_metrics <- function(metrics) {
 #' ratio. When `training` is `NULL` (a model trained before geometry was recorded,
 #' or from a metrics table without geometry columns) it notes -- when `verbose` --
 #' that the checks are skipped, and does nothing else. Used by
-#' \code{\link{apply_metrics_model}}.
+#' \code{\link{apply_metric_model}}.
 #'
 #' @param application A per-landscape geometry tibble for the application
 #'   landscapes (columns `n_row`, `n_col`, `cell_size_x`, `cell_size_y`; see

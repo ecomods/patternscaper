@@ -32,15 +32,15 @@ train_metrics <- calculate_metrics(train_landscapes, level = "landscape")
 # A few uncorrelated metrics so the small network converges.
 selected <- evaluate_metrics(train_metrics, metrics_number = 5)
 
-metrics_model <- train_metrics_model(
+metrics_model <- train_metric_model(
   train_metrics,
   metrics_selected = selected,
   cv_method = "none",
   verbose = FALSE
 )
 
-# apply_metrics_model() takes landscapes and computes their metrics internally.
-metrics_pred <- apply_metrics_model(test_landscapes, metrics_model)
+# apply_metric_model() takes landscapes and computes their metrics internally.
+metrics_pred <- apply_metric_model(test_landscapes, metrics_model)
 metrics_pred
 
 # Pixel-based: one size for training, auto-resize on apply ---------------------

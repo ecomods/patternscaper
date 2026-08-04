@@ -251,7 +251,7 @@ print.metrics_evaluation <- function(x, ...) {
 #'     \item{\code{method}}{Character. The ranking method used.}
 #'     \item{\code{params}}{List. The arguments that affect the result.}
 #'   }
-#'   \code{\link{train_metrics_model}} and \code{\link{plot_metrics}} accept
+#'   \code{\link{train_metric_model}} and \code{\link{plot_metrics}} accept
 #'   this object directly, so it can be passed straight on.
 #' @examples
 #' # Calculate most suitable metrics to discriminate between spots and random landscapes
@@ -273,7 +273,7 @@ print.metrics_evaluation <- function(x, ...) {
 #' evaluation$ranking
 #' dplyr::count(evaluation$ranking, outcome)
 #'
-#' @seealso \code{\link{train_metrics_model}},
+#' @seealso \code{\link{train_metric_model}},
 #'   \code{\link[landscapemetrics]{list_lsm}} for the available metrics and
 #'   their full names
 #' @family metrics

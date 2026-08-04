@@ -1,69 +1,69 @@
-# Tests for train_metrics_model() and apply_metrics_model()
+# Tests for train_metric_model() and apply_metric_model()
 
 # Load fixtures once for all tests
 fixtures <- load_metrics_fixtures()
 
 # Input validation tests -------------------------------------------------------
 
-test_that("train_metrics_model validates verbose parameter", {
+test_that("train_metric_model validates verbose parameter", {
   expect_error(
-    train_metrics_model(fixtures$minimal_metrics, verbose = "yes"),
+    train_metric_model(fixtures$minimal_metrics, verbose = "yes"),
     "verbose must be a single logical value"
   )
   expect_error(
-    train_metrics_model(fixtures$minimal_metrics, verbose = c(TRUE, FALSE)),
+    train_metric_model(fixtures$minimal_metrics, verbose = c(TRUE, FALSE)),
     "verbose must be a single logical value"
   )
 })
 
-test_that("train_metrics_model validates hidden_layers parameter", {
+test_that("train_metric_model validates hidden_layers parameter", {
   expect_error(
-    train_metrics_model(fixtures$minimal_metrics, hidden_layers = -1),
+    train_metric_model(fixtures$minimal_metrics, hidden_layers = -1),
     "hidden_layers must be positive integer"
   )
   expect_error(
-    train_metrics_model(fixtures$minimal_metrics, hidden_layers = 1.5),
+    train_metric_model(fixtures$minimal_metrics, hidden_layers = 1.5),
     "hidden_layers must be positive integer"
   )
   expect_error(
-    train_metrics_model(fixtures$minimal_metrics, hidden_layers = c(5, -1)),
+    train_metric_model(fixtures$minimal_metrics, hidden_layers = c(5, -1)),
     "hidden_layers must be positive integer"
   )
 })
 
-test_that("train_metrics_model validates threshold parameter", {
+test_that("train_metric_model validates threshold parameter", {
   expect_error(
-    train_metrics_model(fixtures$minimal_metrics, threshold = -0.01),
+    train_metric_model(fixtures$minimal_metrics, threshold = -0.01),
     "threshold must be a single positive numeric"
   )
   expect_error(
-    train_metrics_model(fixtures$minimal_metrics, threshold = c(0.01, 0.02)),
+    train_metric_model(fixtures$minimal_metrics, threshold = c(0.01, 0.02)),
     "threshold must be a single positive numeric"
   )
   expect_error(
-    train_metrics_model(fixtures$minimal_metrics, threshold = 0),
+    train_metric_model(fixtures$minimal_metrics, threshold = 0),
     "threshold must be a single positive numeric"
   )
 })
 
-test_that("train_metrics_model validates stepmax parameter", {
+test_that("train_metric_model validates stepmax parameter", {
   expect_error(
-    train_metrics_model(fixtures$minimal_metrics, stepmax = -100),
+    train_metric_model(fixtures$minimal_metrics, stepmax = -100),
     "stepmax must be a single positive integer"
   )
   expect_error(
-    train_metrics_model(fixtures$minimal_metrics, stepmax = 1.5),
+    train_metric_model(fixtures$minimal_metrics, stepmax = 1.5),
     "stepmax must be a single positive integer"
   )
 })
 
-test_that("train_metrics_model validates model_path parameter", {
+test_that("train_metric_model validates model_path parameter", {
   expect_error(
-    train_metrics_model(fixtures$minimal_metrics, model_path = "model.txt"),
+    train_metric_model(fixtures$minimal_metrics, model_path = "model.txt"),
     "model_path must end with .rds"
   )
   expect_error(
-    train_metrics_model(
+    train_metric_model(
       fixtures$minimal_metrics,
       model_path = c("a.rds", "b.rds")
     ),
@@ -71,26 +71,26 @@ test_that("train_metrics_model validates model_path parameter", {
   )
 })
 
-test_that("train_metrics_model validates cv_method parameter", {
+test_that("train_metric_model validates cv_method parameter", {
   expect_error(
-    train_metrics_model(fixtures$minimal_metrics, cv_method = "invalid"),
+    train_metric_model(fixtures$minimal_metrics, cv_method = "invalid"),
     'cv_method must be one of: "none", "k-fold", or "loo"'
   )
 })
 
-test_that("train_metrics_model validates metrics data structure", {
+test_that("train_metric_model validates metrics data structure", {
   bad_metrics <- fixtures$minimal_metrics |>
     dplyr::select(-pattern)
 
   expect_error(
-    train_metrics_model(bad_metrics),
+    train_metric_model(bad_metrics),
     "Metrics data is missing required columns"
   )
 })
 
-test_that("train_metrics_model validates metrics_selected exists in data", {
+test_that("train_metric_model validates metrics_selected exists in data", {
   expect_error(
-    train_metrics_model(
+    train_metric_model(
       fixtures$minimal_metrics,
       metrics_selected = c("nonexistent_metric", "another_fake")
     ),
@@ -100,8 +100,8 @@ test_that("train_metrics_model validates metrics_selected exists in data", {
 
 # Core functionality tests -----------------------------------------------------
 
-test_that("train_metrics_model trains model without CV", {
-  result <- train_metrics_model(
+test_that("train_metric_model trains model without CV", {
+  result <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -146,7 +146,7 @@ test_that("train_metrics_model trains model without CV", {
   expect_null(result$training_geometry)
 })
 
-test_that("train_metrics_model stores a training_geometry summary", {
+test_that("train_metric_model stores a training_geometry summary", {
   set.seed(1)
   landscapes <- create_landscapes(
     n = 12,
@@ -159,7 +159,7 @@ test_that("train_metrics_model stores a training_geometry summary", {
     metrics = c("ai", "lsi", "ed", "contag"),
     level = "landscape"
   )
-  model <- suppressWarnings(train_metrics_model(
+  model <- suppressWarnings(train_metric_model(
     metrics,
     metrics_selected = c("ai", "lsi", "ed"),
     cv_method = "none",
@@ -173,7 +173,7 @@ test_that("train_metrics_model stores a training_geometry summary", {
   expect_true(model$training_geometry$homogeneous)
 })
 
-test_that("apply_metrics_model warns when application geometry differs from training", {
+test_that("apply_metric_model warns when application geometry differs from training", {
   set.seed(1)
   train <- create_landscapes(
     n = 12,
@@ -186,7 +186,7 @@ test_that("apply_metrics_model warns when application geometry differs from trai
     metrics = c("ai", "lsi", "ed"),
     level = "landscape"
   )
-  model <- suppressWarnings(train_metrics_model(
+  model <- suppressWarnings(train_metric_model(
     train_metrics,
     metrics_selected = c("ai", "lsi", "ed"),
     cv_method = "none",
@@ -201,11 +201,11 @@ test_that("apply_metrics_model warns when application geometry differs from trai
     width = 80,
     height = 80
   )
-  w <- capture_warnings(apply_metrics_model(bigger, model, verbose = FALSE))
+  w <- capture_warnings(apply_metric_model(bigger, model, verbose = FALSE))
   expect_true(any(grepl("training extent", w)))
 })
 
-test_that("train_metrics_model warns when training landscapes differ in geometry", {
+test_that("train_metric_model warns when training landscapes differ in geometry", {
   set.seed(1)
   mixed <- c(
     create_landscapes(n = 6, patterns = c("random", "sharp"), width = 30, height = 30),
@@ -217,7 +217,7 @@ test_that("train_metrics_model warns when training landscapes differ in geometry
     level = "landscape"
   )
   expect_warning(
-    train_metrics_model(
+    train_metric_model(
       metrics,
       metrics_selected = c("ai", "lsi", "ed"),
       cv_method = "none",
@@ -228,8 +228,8 @@ test_that("train_metrics_model warns when training landscapes differ in geometry
   )
 })
 
-test_that("train_metrics_model trains with k-fold CV", {
-  result <- train_metrics_model(
+test_that("train_metric_model trains with k-fold CV", {
+  result <- train_metric_model(
     fixtures$small_metrics_landscape,
     cv_method = "k-fold",
     cv_folds = 3,
@@ -274,8 +274,8 @@ test_that("train_metrics_model trains with k-fold CV", {
   ))
 })
 
-test_that("train_metrics_model trains with LOO CV", {
-  result <- train_metrics_model(
+test_that("train_metric_model trains with LOO CV", {
+  result <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "loo",
     verbose = FALSE
@@ -290,12 +290,12 @@ test_that("train_metrics_model trains with LOO CV", {
   expect_equal(result$performance$cv_folds, n_samples)
 })
 
-test_that("train_metrics_model respects metrics_selected parameter", {
+test_that("train_metric_model respects metrics_selected parameter", {
   # Get first 5 unique metrics
   available_metrics <- unique(fixtures$small_metrics_landscape$metric)
   selected_metrics <- available_metrics[1:5]
 
-  result <- train_metrics_model(
+  result <- train_metric_model(
     fixtures$small_metrics_landscape,
     metrics_selected = selected_metrics,
     cv_method = "none",
@@ -307,8 +307,8 @@ test_that("train_metrics_model respects metrics_selected parameter", {
   expect_true(all(result$features %in% selected_metrics))
 })
 
-test_that("train_metrics_model works with landscape level metrics", {
-  result <- train_metrics_model(
+test_that("train_metric_model works with landscape level metrics", {
+  result <- train_metric_model(
     fixtures$small_metrics_landscape,
     cv_method = "none",
     verbose = FALSE
@@ -317,12 +317,12 @@ test_that("train_metrics_model works with landscape level metrics", {
   expect_equal(result$features_level, "landscape")
 })
 
-test_that("train_metrics_model works with class level metrics", {
+test_that("train_metric_model works with class level metrics", {
   # Filter to single class for consistency
   metrics_class_filtered <- fixtures$small_metrics_class |>
     dplyr::filter(class == 0)
 
-  result <- train_metrics_model(
+  result <- train_metric_model(
     metrics_class_filtered,
     cv_method = "none",
     verbose = FALSE
@@ -331,9 +331,9 @@ test_that("train_metrics_model works with class level metrics", {
   expect_equal(result$features_level, "class")
 })
 
-test_that("train_metrics_model handles custom hidden_layers configuration", {
+test_that("train_metric_model handles custom hidden_layers configuration", {
   # Single layer with 10 neurons
-  result_single <- train_metrics_model(
+  result_single <- train_metric_model(
     fixtures$minimal_metrics,
     hidden_layers = 10,
     cv_method = "none",
@@ -342,7 +342,7 @@ test_that("train_metrics_model handles custom hidden_layers configuration", {
   expect_s3_class(result_single$model, "nn")
 
   # Multiple layers
-  result_multi <- train_metrics_model(
+  result_multi <- train_metric_model(
     fixtures$minimal_metrics,
     hidden_layers = c(8, 4),
     cv_method = "none",
@@ -351,10 +351,10 @@ test_that("train_metrics_model handles custom hidden_layers configuration", {
   expect_s3_class(result_multi$model, "nn")
 })
 
-test_that("train_metrics_model saves model when model_path provided", {
+test_that("train_metric_model saves model when model_path provided", {
   temp_file <- tempfile(fileext = ".rds")
 
-  result <- train_metrics_model(
+  result <- train_metric_model(
     fixtures$minimal_metrics,
     model_path = temp_file,
     cv_method = "none",
@@ -374,7 +374,7 @@ test_that("train_metrics_model saves model when model_path provided", {
 
 # NA handling tests ------------------------------------------------------------
 
-test_that("train_metrics_model handles NA values correctly", {
+test_that("train_metric_model handles NA values correctly", {
   # Add NA to ALL metrics for first 5 landscapes (make them truly incomplete)
   metrics_with_na <- fixtures$small_metrics_landscape
 
@@ -387,7 +387,7 @@ test_that("train_metrics_model handles NA values correctly", {
   ] <- NA
 
   expect_warning(
-    result <- train_metrics_model(
+    result <- train_metric_model(
       metrics_with_na,
       cv_method = "none",
       verbose = FALSE
@@ -399,7 +399,7 @@ test_that("train_metrics_model handles NA values correctly", {
   expect_s3_class(result$model, "nn")
 })
 
-test_that("train_metrics_model separates unusable from partly incomplete landscapes", {
+test_that("train_metric_model separates unusable from partly incomplete landscapes", {
   metrics <- fixtures$small_metrics_landscape
   landscape_ids <- unique(metrics$landscape_id)
   first_metric <- unique(metrics$metric)[1]
@@ -413,7 +413,7 @@ test_that("train_metrics_model separates unusable from partly incomplete landsca
   ] <- NA
 
   warnings <- capture_warnings(
-    train_metrics_model(metrics, cv_method = "none", verbose = FALSE)
+    train_metric_model(metrics, cv_method = "none", verbose = FALSE)
   )
 
   # The two cases are reported separately, since the remedy differs. The
@@ -423,9 +423,9 @@ test_that("train_metrics_model separates unusable from partly incomplete landsca
   expect_match(warnings, "missing for some landscapes", all = FALSE)
 })
 
-test_that("train_metrics_model validates na_action parameter", {
+test_that("train_metric_model validates na_action parameter", {
   expect_error(
-    train_metrics_model(
+    train_metric_model(
       fixtures$small_metrics_landscape,
       cv_method = "none",
       na_action = "drop_everything",
@@ -435,7 +435,7 @@ test_that("train_metrics_model validates na_action parameter", {
   )
 })
 
-test_that("train_metrics_model na_action chooses which side to sacrifice", {
+test_that("train_metric_model na_action chooses which side to sacrifice", {
   metrics <- fixtures$small_metrics_landscape
   landscape_ids <- unique(metrics$landscape_id)
   first_metric <- unique(metrics$metric)[1]
@@ -451,7 +451,7 @@ test_that("train_metrics_model na_action chooses which side to sacrifice", {
 
   # Default drops the metric and keeps every landscape
   expect_warning(
-    dropped_metric <- train_metrics_model(
+    dropped_metric <- train_metric_model(
       metrics,
       cv_method = "none",
       verbose = FALSE
@@ -463,7 +463,7 @@ test_that("train_metrics_model na_action chooses which side to sacrifice", {
 
   # Opting out keeps every metric and drops the landscape instead
   expect_warning(
-    dropped_landscape <- train_metrics_model(
+    dropped_landscape <- train_metric_model(
       metrics,
       cv_method = "none",
       na_action = "drop_landscapes",
@@ -476,12 +476,12 @@ test_that("train_metrics_model na_action chooses which side to sacrifice", {
 
   # Both warnings state the cost of the alternative
   metric_warning <- capture_warnings(
-    train_metrics_model(metrics, cv_method = "none", verbose = FALSE)
+    train_metric_model(metrics, cv_method = "none", verbose = FALSE)
   )
   expect_match(metric_warning, "drop_landscapes", all = FALSE)
 })
 
-test_that("train_metrics_model aborts when a pattern is lost entirely", {
+test_that("train_metric_model aborts when a pattern is lost entirely", {
   metrics <- fixtures$small_metrics_landscape
   first_metric <- unique(metrics$metric)[1]
   lost_pattern <- unique(metrics$pattern)[1]
@@ -493,7 +493,7 @@ test_that("train_metrics_model aborts when a pattern is lost entirely", {
   ] <- NA
 
   expect_error(
-    suppressWarnings(train_metrics_model(
+    suppressWarnings(train_metric_model(
       metrics,
       cv_method = "none",
       na_action = "drop_landscapes",
@@ -504,27 +504,27 @@ test_that("train_metrics_model aborts when a pattern is lost entirely", {
 
   # The default resolves the same data without losing the pattern
   expect_warning(
-    result <- train_metrics_model(metrics, cv_method = "none", verbose = FALSE),
+    result <- train_metric_model(metrics, cv_method = "none", verbose = FALSE),
     "missing for some landscapes"
   )
   expect_true(lost_pattern %in% result$classes)
 })
 
-test_that("train_metrics_model errors when all landscapes have NAs", {
+test_that("train_metric_model errors when all landscapes have NAs", {
   # Add NA to all metrics
   metrics_all_na <- fixtures$minimal_metrics
   metrics_all_na$value <- NA
 
   expect_error(
-    train_metrics_model(metrics_all_na, cv_method = "none", verbose = FALSE),
+    train_metric_model(metrics_all_na, cv_method = "none", verbose = FALSE),
     "No landscapes remaining after removing those with incomplete metrics"
   )
 })
 
-# apply_metrics_model tests ---------------------------------------------------
+# apply_metric_model tests ---------------------------------------------------
 
-test_that("apply_metrics_model can be silenced with verbose = FALSE", {
-  model <- train_metrics_model(
+test_that("apply_metric_model can be silenced with verbose = FALSE", {
+  model <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -532,13 +532,13 @@ test_that("apply_metrics_model can be silenced with verbose = FALSE", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   expect_error(
-    apply_metrics_model(minimal_landscapes, model, verbose = "yes"),
+    apply_metric_model(minimal_landscapes, model, verbose = "yes"),
     "verbose must be a single logical value"
   )
 
   expect_silent(
     suppressWarnings(
-      apply_metrics_model(
+      apply_metric_model(
         minimal_landscapes,
         model,
         return_performance = TRUE,
@@ -550,7 +550,7 @@ test_that("apply_metrics_model can be silenced with verbose = FALSE", {
   # The performance summary is still printed by default
   expect_output(
     suppressWarnings(
-      apply_metrics_model(
+      apply_metric_model(
         minimal_landscapes,
         model,
         return_performance = TRUE
@@ -559,9 +559,9 @@ test_that("apply_metrics_model can be silenced with verbose = FALSE", {
   )
 })
 
-test_that("apply_metrics_model validates return_performance parameter", {
+test_that("apply_metric_model validates return_performance parameter", {
   # Train a simple model first
-  model <- train_metrics_model(
+  model <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -571,7 +571,7 @@ test_that("apply_metrics_model validates return_performance parameter", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   expect_error(
-    apply_metrics_model(
+    apply_metric_model(
       minimal_landscapes,
       model,
       return_performance = "yes"
@@ -580,7 +580,7 @@ test_that("apply_metrics_model validates return_performance parameter", {
   )
 
   expect_error(
-    apply_metrics_model(
+    apply_metric_model(
       minimal_landscapes,
       model,
       return_performance = c(TRUE, FALSE)
@@ -589,36 +589,36 @@ test_that("apply_metrics_model validates return_performance parameter", {
   )
 })
 
-test_that("apply_metrics_model validates nn_model structure", {
+test_that("apply_metric_model validates nn_model structure", {
   # Create landscapes on-demand
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   expect_error(
-    apply_metrics_model(
+    apply_metric_model(
       minimal_landscapes,
       list(model = "not a model")
     ),
-    "'nn_model' must be a trained model from train_metrics_model()"
+    "'nn_model' must be a trained model from train_metric_model()"
   )
 
   expect_error(
-    apply_metrics_model(
+    apply_metric_model(
       minimal_landscapes,
       "not a list"
     ),
-    "'nn_model' must be a trained model from train_metrics_model()"
+    "'nn_model' must be a trained model from train_metric_model()"
   )
 })
 
-test_that("apply_metrics_model validates landscapes parameter", {
-  model <- train_metrics_model(
+test_that("apply_metric_model validates landscapes parameter", {
+  model <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
   )
 
   expect_error(
-    apply_metrics_model(
+    apply_metric_model(
       "not a landscape",
       model
     ),
@@ -626,7 +626,7 @@ test_that("apply_metrics_model validates landscapes parameter", {
   )
 
   expect_error(
-    apply_metrics_model(
+    apply_metric_model(
       data.frame(x = 1),
       model
     ),
@@ -634,9 +634,9 @@ test_that("apply_metrics_model validates landscapes parameter", {
   )
 })
 
-test_that("apply_metrics_model works with single landscape", {
+test_that("apply_metric_model works with single landscape", {
   # Train model
-  model <- train_metrics_model(
+  model <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -646,7 +646,7 @@ test_that("apply_metrics_model works with single landscape", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   # Apply to single landscape
-  result <- apply_metrics_model(
+  result <- apply_metric_model(
     minimal_landscapes[[1]],
     model,
     return_performance = FALSE
@@ -668,9 +668,9 @@ test_that("apply_metrics_model works with single landscape", {
   expect_true(all(model$classes %in% names(result)))
 })
 
-test_that("apply_metrics_model works with list of landscapes", {
+test_that("apply_metric_model works with list of landscapes", {
   # Train model
-  model <- train_metrics_model(
+  model <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -680,7 +680,7 @@ test_that("apply_metrics_model works with list of landscapes", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   # Apply to list of landscapes
-  result <- apply_metrics_model(
+  result <- apply_metric_model(
     minimal_landscapes,
     model,
     return_performance = FALSE
@@ -694,21 +694,21 @@ test_that("apply_metrics_model works with list of landscapes", {
   expect_true(all(result$predicted_class %in% model$classes))
 })
 
-test_that("apply_metrics_model reports the class that has the highest score", {
+test_that("apply_metric_model reports the class that has the highest score", {
   # predicted_class is taken from the RAW network outputs so that the reporting
   # transform can never move a class boundary, which is what keeps accuracy
   # independent of how scores are presented. That leaves a gap: a future
   # transform that is not order-preserving would make the reported class
   # disagree with the reported scores without anything failing. This test closes
   # it -- the two must always agree.
-  model <- train_metrics_model(
+  model <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
   )
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
-  result <- apply_metrics_model(
+  result <- apply_metric_model(
     minimal_landscapes,
     model,
     return_performance = FALSE
@@ -722,9 +722,9 @@ test_that("apply_metrics_model reports the class that has the highest score", {
   expect_equal(rowSums(scores), rep(1, nrow(scores)), tolerance = 1e-10)
 })
 
-test_that("apply_metrics_model returns performance when requested", {
+test_that("apply_metric_model returns performance when requested", {
   # Train model
-  model <- train_metrics_model(
+  model <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -734,7 +734,7 @@ test_that("apply_metrics_model returns performance when requested", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   # Apply with performance evaluation
-  result <- apply_metrics_model(
+  result <- apply_metric_model(
     minimal_landscapes,
     model,
     return_performance = TRUE
@@ -760,9 +760,9 @@ test_that("apply_metrics_model returns performance when requested", {
   expect_lte(result$performance$accuracy, 1)
 })
 
-test_that("apply_metrics_model returns only predictions when classes unknown", {
+test_that("apply_metric_model returns only predictions when classes unknown", {
   # Train model
-  model <- train_metrics_model(
+  model <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -777,7 +777,7 @@ test_that("apply_metrics_model returns only predictions when classes unknown", {
   }
 
   # Apply with return_performance = TRUE (should still return only predictions)
-  result <- apply_metrics_model(
+  result <- apply_metric_model(
     minimal_landscapes,
     model,
     return_performance = TRUE
@@ -787,14 +787,14 @@ test_that("apply_metrics_model returns only predictions when classes unknown", {
   expect_s3_class(result, "tbl_df")
 })
 
-test_that("apply_metrics_model warns about unknown classes", {
+test_that("apply_metric_model warns about unknown classes", {
   # Use balanced fixture which has more classes
   if (length(unique(fixtures$balanced_metrics$pattern)) > 2) {
     # Train on subset of classes
     metrics_subset <- fixtures$balanced_metrics |>
       dplyr::filter(pattern %in% c("spots", "labyrinth"))
 
-    model_subset <- train_metrics_model(
+    model_subset <- train_metric_model(
       metrics_subset,
       cv_method = "none",
       verbose = FALSE
@@ -815,7 +815,7 @@ test_that("apply_metrics_model warns about unknown classes", {
 
     # Should warn about unknown class
     expect_warning(
-      result <- apply_metrics_model(
+      result <- apply_metric_model(
         landscapes_other,
         model_subset,
         return_performance = TRUE
@@ -828,13 +828,13 @@ test_that("apply_metrics_model warns about unknown classes", {
   }
 })
 
-test_that("apply_metrics_model works with class-level metrics", {
+test_that("apply_metric_model works with class-level metrics", {
   # Filter to single class
   metrics_class <- fixtures$small_metrics_class |>
     dplyr::filter(class == 0)
 
   # Train model
-  model <- train_metrics_model(
+  model <- train_metric_model(
     metrics_class,
     cv_method = "none",
     verbose = FALSE
@@ -844,7 +844,7 @@ test_that("apply_metrics_model works with class-level metrics", {
   small_landscapes <- create_fixture_landscapes("small")
 
   # Apply model
-  result <- apply_metrics_model(
+  result <- apply_metric_model(
     small_landscapes[1:3],
     model,
     return_performance = FALSE
@@ -856,7 +856,7 @@ test_that("apply_metrics_model works with class-level metrics", {
   expect_equal(model$features_level, "class")
 })
 
-test_that("apply_metrics_model returns unclassifiable landscapes as NA", {
+test_that("apply_metric_model returns unclassifiable landscapes as NA", {
   skip_if_not_installed("landscapemetrics")
 
   set.seed(7)
@@ -879,7 +879,7 @@ test_that("apply_metrics_model returns unclassifiable landscapes as NA", {
     metrics = c("ai", "pland"),
     level = "class"
   )
-  model <- train_metrics_model(metrics, cv_method = "none", verbose = FALSE)
+  model <- train_metric_model(metrics, cv_method = "none", verbose = FALSE)
 
   # One new landscape is fully vegetated, so class 0 is absent from it
   new_landscapes <- c(
@@ -888,7 +888,7 @@ test_that("apply_metrics_model returns unclassifiable landscapes as NA", {
   )
 
   expect_warning(
-    result <- apply_metrics_model(new_landscapes, model),
+    result <- apply_metric_model(new_landscapes, model),
     "Could not classify 1 landscape"
   )
 
@@ -907,9 +907,9 @@ test_that("apply_metrics_model returns unclassifiable landscapes as NA", {
   expect_false(any(is.na(classified$score)))
 })
 
-test_that("apply_metrics_model errors when metrics cannot be calculated", {
+test_that("apply_metric_model errors when metrics cannot be calculated", {
   # Train model
-  model <- train_metrics_model(
+  model <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -924,7 +924,7 @@ test_that("apply_metrics_model errors when metrics cannot be calculated", {
 
   # Should error when trying to calculate metrics
   expect_error(
-    apply_metrics_model(
+    apply_metric_model(
       invalid_landscape,
       model,
       return_performance = FALSE
@@ -932,9 +932,9 @@ test_that("apply_metrics_model errors when metrics cannot be calculated", {
   )
 })
 
-test_that("apply_metrics_model includes landscape_name when available", {
+test_that("apply_metric_model includes landscape_name when available", {
   # Train model
-  model <- train_metrics_model(
+  model <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -944,7 +944,7 @@ test_that("apply_metrics_model includes landscape_name when available", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   # Apply model
-  result <- apply_metrics_model(
+  result <- apply_metric_model(
     minimal_landscapes,
     model,
     return_performance = FALSE
@@ -956,9 +956,9 @@ test_that("apply_metrics_model includes landscape_name when available", {
   }
 })
 
-test_that("apply_metrics_model maintains landscape order", {
+test_that("apply_metric_model maintains landscape order", {
   # Train model
-  model <- train_metrics_model(
+  model <- train_metric_model(
     fixtures$minimal_metrics,
     cv_method = "none",
     verbose = FALSE
@@ -968,7 +968,7 @@ test_that("apply_metrics_model maintains landscape order", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   # Apply model
-  result <- apply_metrics_model(
+  result <- apply_metric_model(
     minimal_landscapes,
     model,
     return_performance = FALSE

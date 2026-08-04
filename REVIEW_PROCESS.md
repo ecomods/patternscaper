@@ -85,15 +85,15 @@ Fable confirmed.
   treated as unknown input and removed during validation. (A concrete instance of the drift in
   L10 / M13 — worth fixing directly.)
 
-### M10. `apply_metrics_model()` has no `verbose`; `apply_pixel_model()` does  — [Claude] *(§2.1)*
+### M10. `apply_metric_model()` has no `verbose`; `apply_pixel_model()` does  — [Claude] *(§2.1)*
 `R/nn_metrics.R:379-383` has no `verbose` parameter and **hardcodes `verbose = TRUE`** when
 evaluating performance (`:572`), so it always prints a confusion matrix. `apply_pixel_model()`
 (`R/nn_keras.R:558-563`) exposes `verbose` and threads it through.
-- **Fix:** add `verbose` to `apply_metrics_model()` and pass it down, matching the sibling.
+- **Fix:** add `verbose` to `apply_metric_model()` and pass it down, matching the sibling.
 
 ### M11. Inconsistent return shape when `return_performance = TRUE`  — [Claude] [ChatGPT] *(§2.2)*
 `apply_pixel_model()` always returns `list(predictions, performance)` (performance may be
-`NULL`); `apply_metrics_model()` returns a **bare tibble** in some branches (unknown classes,
+`NULL`); `apply_metric_model()` returns a **bare tibble** in some branches (unknown classes,
 `R/nn_metrics.R:550`) and a **list** in others (`:576-579`). Downstream
 (`plot_classified_landscapes`, the analysis repo) can't rely on a stable shape.
 - **Fix:** pick one contract and apply it to both. **[ChatGPT] nuance:** the docs already say
@@ -164,7 +164,7 @@ pipeline, but `evaluate_metrics()` accepts arbitrary user metrics.
 
 ### L7. Single-landscape handling differs between the two `apply_*`  — [Claude] *(§2.3)*
 `apply_pixel_model()` explicitly wraps a lone `landscape` into a list (`R/nn_keras.R:591-593`);
-`apply_metrics_model()` leans on `calculate_metrics()`. Make both do the same explicit wrap
+`apply_metric_model()` leans on `calculate_metrics()`. Make both do the same explicit wrap
 *(verify both accept a single `landscape` identically)*.
 
 ### L9. Default parameters drift between single generators and the batch wrapper  — [Claude] *(§2.5)*
@@ -222,7 +222,7 @@ cases after M2.
 3. Remove `LazyData: true` — **M16** — and flesh out `Description:` — **M14** (pre-submission hygiene).
 4. Repair `frequency` integer sampling — **M2** (affects training-data quality).
 5. Fold-internal scaling — **M1** (removes CV leakage before any headline numbers are quoted).
-6. Add `verbose` to `apply_metrics_model()` + unify `apply_*` return shape — **M10 / M11**.
+6. Add `verbose` to `apply_metric_model()` + unify `apply_*` return shape — **M10 / M11**.
 
 ---
 
@@ -274,14 +274,14 @@ plus a test asserting the rendered titles in `tests/testthat/test-plot_classific
 misclassified landscapes found" — reasonable, since misclassification is undefined without labels.)
 
 ### M1. [Fable] Feature scaling is fit on the full dataset before CV → optimistic leakage  — [Fable] *(F1)*
-*Fixed 2026-07-06.* `train_metrics_model()` scaled predictors once on all landscapes
+*Fixed 2026-07-06.* `train_metric_model()` scaled predictors once on all landscapes
 (`R/nn_metrics.R`) and cross-validated over the already-scaled data, so each fold's validation rows
 contributed to the `center`/`scale` applied to them (validation→training leakage biasing CV
 accuracy/F1). The CV loop now slices the unscaled `predictors` directly and scaling is fit **inside
 each fold** on the training rows only, via a new internal `scale_fold()` helper (`R/nn_utils.R`) that applies the
 training center/scale to the validation rows and guards columns constant within a fold (`sd = 0` →
 `scale = 1`, no `NaN`). The final deployment model keeps full-data scaling, so `scaling_params`, the
-final model, and all `apply_metrics_model()` output are unchanged; only the reported CV performance
+final model, and all `apply_metric_model()` output are unchanged; only the reported CV performance
 moves. Verified with the golden harness (only `train_confusion` changed; every `apply_*`/pixel value
 identical) and re-captured as the new reference. `scale_fold()` unit tests added in
 `tests/testthat/test-nn_utils.R`; `dev/leakage_check.R` demonstrates the before/after on a small LOO
@@ -313,11 +313,11 @@ produced an `R CMD check` NOTE.
 
 ### Cleanup batch (L1, L6, L15, L16, L18, L20)  — [Claude] [ChatGPT] [Fable]
 *Fixed 2026-07-06.* Light code/doc cleanups; `devtools::test()` green (1377 pass):
-- **L1** (`R/nn_metrics.R`): dropped the `type = "raw"` argument from the `apply_metrics_model()`
+- **L1** (`R/nn_metrics.R`): dropped the `type = "raw"` argument from the `apply_metric_model()`
   prediction call — `neuralnet::predict.nn` has no such argument (silently absorbed by `...`).
 - **L18** (`R/nn_utils.R`, `R/nn_metrics.R`): extracted the duplicated numerically-stable row-wise
-  softmax into a `softmax_rows()` helper, used by both `train_metrics_model()` and
-  `apply_metrics_model()`.
+  softmax into a `softmax_rows()` helper, used by both `train_metric_model()` and
+  `apply_metric_model()`.
 - **L16** (`R/metrics.R`, `R/plot_metrics.R` ×3, `R/plot_landscapes.R`): replaced base `warning()` with
   `cli::cli_warn()`; message text preserved so the existing warning-matching tests still pass.
 - **L6** (`R/nn_utils.R`): corrected the `metrics_to_wide()` docstring (class IDs are embedded upstream

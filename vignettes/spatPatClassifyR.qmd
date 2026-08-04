@@ -21,8 +21,8 @@ The general workflow consists of the following steps:
 2. **Prepare training landscapes** with known patterns. These can either be artificial landscapes created with `create_landscapes()` / `create_landscape()`, or empirical landscapes wrapped into a landscape object with `landscape()`.
 3. **Choose a workflow**: the *metric-based* approach (interpretable and effective with relatively few training landscapes) or the *pixel-based* approach (uses the raw pixel information from the landscapes but typically needs more training data). For guidance on which workflow to choose, see [below](#choosing-a-classification-workflow).
 4. **Calculate and select landscape metrics** (metric-based workflow only) with `calculate_metrics()` and `evaluate_metrics()`.
-5. **Train a classifier** on the selected metrics with `train_metrics_model()`, or directly on the landscape pixels with `train_pixel_model()`. At this step the user can also validate the model using cross-validation methods.
-6. **Classify new landscapes** with `apply_metrics_model()` or `apply_pixel_model()`, and inspect the results with `plot_classified_landscapes()`.
+5. **Train a classifier** on the selected metrics with `train_metric_model()`, or directly on the landscape pixels with `train_pixel_model()`. At this step the user can also validate the model using cross-validation methods.
+6. **Classify new landscapes** with `apply_metric_model()` or `apply_pixel_model()`, and inspect the results with `plot_classified_landscapes()`.
 
 For additional information and guidance on how to choose parameters and configure the 
 workflow, please also refer to the supplementary information of the paper.
@@ -88,7 +88,7 @@ metrics <- calculate_metrics(training)
 selected <- evaluate_metrics(metrics, metrics_number = 10)
 
 # 3. Train a classifier on the selected metrics
-model <- train_metrics_model(
+model <- train_metric_model(
   metrics,
   metrics_selected = selected,
   verbose = FALSE
@@ -99,7 +99,7 @@ new_landscapes <- create_landscapes(
   n = 10,
   patterns = c("labyrinth", "random", "clustered")
 )
-apply_metrics_model(new_landscapes, model)
+apply_metric_model(new_landscapes, model)
 ```
 
 ## Next steps

@@ -60,13 +60,13 @@
         <mxCell id="dv_jw7yRudBVRWTTir6D-34" edge="1" parent="1" source="M3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeColor=#57534e;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=#3f3f46;labelBackgroundColor=#fcfcfb;endArrow=classic;" target="M4">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="M3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5efef;strokeColor=#008B8B;fontColor=#0b0b0b;" value="Train classifier&lt;br&gt;&lt;span style=&quot;font-family: monospace; font-size: 11px;&quot;&gt;train_metrics_model()&lt;/span&gt;" vertex="1">
+        <mxCell id="M3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5efef;strokeColor=#008B8B;fontColor=#0b0b0b;" value="Train classifier&lt;br&gt;&lt;span style=&quot;font-family: monospace; font-size: 11px;&quot;&gt;train_metric_model()&lt;/span&gt;" vertex="1">
           <mxGeometry height="60" width="200" x="500" y="675" as="geometry" />
         </mxCell>
         <mxCell id="dv_jw7yRudBVRWTTir6D-6" edge="1" parent="1" source="M4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeColor=#57534e;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=#3f3f46;labelBackgroundColor=#fcfcfb;endArrow=classic;strokeWidth=2;" target="dv_jw7yRudBVRWTTir6D-5">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="M4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5efef;strokeColor=#008B8B;fontColor=#0b0b0b;" value="Classify new landscapes&lt;br&gt;&lt;span style=&quot;font-family: monospace; font-size: 11px;&quot;&gt;apply_metrics_model()&lt;/span&gt;" vertex="1">
+        <mxCell id="M4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5efef;strokeColor=#008B8B;fontColor=#0b0b0b;" value="Classify new landscapes&lt;br&gt;&lt;span style=&quot;font-family: monospace; font-size: 11px;&quot;&gt;apply_metric_model()&lt;/span&gt;" vertex="1">
           <mxGeometry height="60" width="200" x="500" y="795" as="geometry" />
         </mxCell>
         <mxCell id="dv_jw7yRudBVRWTTir6D-25" edge="1" parent="1" source="P1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#57534e;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=#3f3f46;labelBackgroundColor=#fcfcfb;endArrow=classic;" target="P2" value="">

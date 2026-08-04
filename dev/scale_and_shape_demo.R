@@ -41,7 +41,7 @@ train <- create_landscapes(
 train_metrics <- calculate_metrics(train, metrics = metric_pool, level = "landscape")
 selected <- evaluate_metrics(train_metrics, metrics_number = 5, verbose = FALSE)
 
-metrics_model <- train_metrics_model(
+metrics_model <- train_metric_model(
   train_metrics,
   metrics_selected = selected,
   cv_method = "none",
@@ -124,7 +124,7 @@ report <- purrr::imap_dfr(scenarios, \(landscapes, label) {
     cell_size = terra::res(landscapes[[1]]$data)[1],
     n_na = sum(is.na(terra::values(landscapes[[1]]$data))),
     metrics = accuracy_or_error(
-      apply_metrics_model(landscapes, metrics_model, return_performance = TRUE)
+      apply_metric_model(landscapes, metrics_model, return_performance = TRUE)
     ),
     pixels = accuracy_or_error(
       apply_pixel_model(landscapes, pixel_model, return_performance = TRUE, verbose = FALSE)

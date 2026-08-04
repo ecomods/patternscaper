@@ -15,7 +15,7 @@ A one-row tibble (see \code{\link{summarise_geometry}}), or `NULL`.
 \description{
 Internal helper: extracts the per-landscape geometry columns that
 \code{\link{calculate_metrics}} attaches to its output and condenses them via
-\code{\link{summarise_geometry}}. Used by \code{\link{train_metrics_model}}, which receives the
+\code{\link{summarise_geometry}}. Used by \code{\link{train_metric_model}}, which receives the
 metrics tibble rather than the landscapes. Returns `NULL` when the geometry
 columns are absent (e.g. a metrics table cached before geometry was recorded,
 or built by hand), so callers can skip geometry checks gracefully.

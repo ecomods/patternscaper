@@ -35,7 +35,7 @@ model <- train_pixel_model(landscapes, cv_method = "none", epochs = 10)
 }
 \seealso{
 Other neural network training:
-\code{\link[=train_metrics_model]{train_metrics_model()}},
+\code{\link[=train_metric_model]{train_metric_model()}},
 \code{\link[=train_pixel_model]{train_pixel_model()}}
 }
 \concept{neural network training}

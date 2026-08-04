@@ -146,6 +146,6 @@ final_model <- train_pixel_model(
 
 Other neural network training:
 \code{\link[=set_random_seed]{set_random_seed()}},
-\code{\link[=train_metrics_model]{train_metrics_model()}}
+\code{\link[=train_metric_model]{train_metric_model()}}
 }
 \concept{neural network training}

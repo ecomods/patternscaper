@@ -51,7 +51,7 @@ An object of class `metrics_evaluation`, a list with elements:
     \item{\code{method}}{Character. The ranking method used.}
     \item{\code{params}}{List. The arguments that affect the result.}
   }
-  \code{\link{train_metrics_model}} and \code{\link{plot_metrics}} accept
+  \code{\link{train_metric_model}} and \code{\link{plot_metrics}} accept
   this object directly, so it can be passed straight on.
 }
 \description{
@@ -137,7 +137,7 @@ dplyr::count(evaluation$ranking, outcome)
 
 }
 \seealso{
-\code{\link{train_metrics_model}},
+\code{\link{train_metric_model}},
   \code{\link[landscapemetrics]{list_lsm}} for the available metrics and
   their full names
 
