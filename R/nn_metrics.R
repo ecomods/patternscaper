@@ -124,6 +124,15 @@ train_metric_model <- function(
     cli::cli_abort("stepmax must be a single positive integer")
   }
 
+  if (
+    !is.numeric(cv_folds) ||
+      length(cv_folds) != 1 ||
+      cv_folds < 2 ||
+      cv_folds != floor(cv_folds)
+  ) {
+    cli::cli_abort("cv_folds must be a single integer >= 2")
+  }
+
   if (!is.null(model_path)) {
     if (!is.character(model_path) || length(model_path) != 1) {
       cli::cli_abort("model_path must be a single character string")
@@ -312,7 +321,8 @@ train_metric_model <- function(
       probs_raw <- predict(
         fold_model,
         newdata = val_data[,
-          -which(names(val_data) == "pattern")
+          -which(names(val_data) == "pattern"),
+          drop = FALSE
         ]
       )
 

@@ -296,9 +296,9 @@ test_that("evaluate_cv_performance handles perfect classification", {
   expect_equal(result$accuracy, 1.0)
 
   # All metrics should be 1.0
-  expect_true(all(result$per_class_metrics$Recall == 1.0))
-  expect_true(all(result$per_class_metrics$Precision == 1.0))
-  expect_true(all(result$per_class_metrics$F1_Score == 1.0))
+  expect_true(all(result$per_class_metrics$recall == 1.0))
+  expect_true(all(result$per_class_metrics$precision == 1.0))
+  expect_true(all(result$per_class_metrics$f1_score == 1.0))
 })
 
 test_that("evaluate_cv_performance handles complete misclassification", {
@@ -336,7 +336,7 @@ test_that("evaluate_cv_performance handles complete misclassification", {
   # All metrics should be 0.0
   expect_true(all(result$per_class_metrics$recall == 0.0))
   expect_true(all(result$per_class_metrics$precision == 0.0))
-  expect_true(all(result$per_class_metrics$f1_Score == 0.0))
+  expect_true(all(result$per_class_metrics$f1_score == 0.0))
 })
 
 test_that("evaluate_cv_performance validates input lengths", {

@@ -78,6 +78,25 @@ test_that("train_metric_model validates cv_method parameter", {
   )
 })
 
+test_that("train_metric_model validates cv_folds parameter", {
+  expect_error(
+    train_metric_model(fixtures$minimal_metrics, cv_folds = 1),
+    "cv_folds must be a single integer >= 2"
+  )
+  expect_error(
+    train_metric_model(fixtures$minimal_metrics, cv_folds = -3),
+    "cv_folds must be a single integer >= 2"
+  )
+  expect_error(
+    train_metric_model(fixtures$minimal_metrics, cv_folds = 2.5),
+    "cv_folds must be a single integer >= 2"
+  )
+  expect_error(
+    train_metric_model(fixtures$minimal_metrics, cv_folds = "a"),
+    "cv_folds must be a single integer >= 2"
+  )
+})
+
 test_that("train_metric_model validates metrics data structure", {
   bad_metrics <- fixtures$minimal_metrics |>
     dplyr::select(-pattern)
@@ -288,6 +307,22 @@ test_that("train_metric_model trains with LOO CV", {
   # Number of folds should equal number of samples
   n_samples <- length(unique(fixtures$minimal_metrics$landscape_id))
   expect_equal(result$performance$cv_folds, n_samples)
+})
+
+test_that("train_metric_model runs k-fold CV with a single predictor metric", {
+  available_metrics <- unique(fixtures$small_metrics_landscape$metric)
+
+  result <- train_metric_model(
+    fixtures$small_metrics_landscape,
+    metrics_selected = available_metrics[1],
+    cv_method = "k-fold",
+    cv_folds = 3,
+    verbose = FALSE
+  )
+
+  expect_equal(result$features, available_metrics[1])
+  expect_gte(result$performance$accuracy, 0)
+  expect_lte(result$performance$accuracy, 1)
 })
 
 test_that("train_metric_model respects metrics_selected parameter", {
