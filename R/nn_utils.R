@@ -428,10 +428,13 @@ find_balanced_cv_folds <- function(patterns, cv_folds) {
 #'   \describe{
 #'     \item{confusion_matrix}{Confusion matrix table}
 #'     \item{accuracy}{Overall accuracy (numeric)}
-#'     \item{per_class_metrics}{Tibble with per-class recall, precision, and F1 scores}
+#'     \item{per_class_metrics}{Tibble with per-class recall, precision, and F1
+#'       scores. A class the model knows but that does not occur in the
+#'       evaluation data gets NA throughout its row.}
 #'     \item{cv_method}{CV method used (character)}
 #'     \item{cv_folds}{Number of folds used (integer)}
-#'     \item{class_counts}{Sample counts per class (integer vector)}
+#'     \item{class_counts}{Sample counts per class (integer vector). NA for a
+#'       class the model knows but that does not occur in the evaluation data.}
 #'     \item{validation_results}{Tibble with detailed predictions per landscape
 #'       (only included if return_predictions = TRUE)}
 #'   }
@@ -481,13 +484,33 @@ evaluate_cv_performance <- function(
     Actual = factor(unlist(cv_actual), levels = class_names)
   )
 
-  # Check for classes that were never correctly predicted
+  # Get class counts. A class the model knows but that never occurs in
+  # cv_actual is absent from this table, so indexing by class_names gives NA
+  # for it rather than a count of 0 landscapes actually seen.
+  class_counts <- table(unlist(cv_actual))
+  class_counts <- stats::setNames(
+    as.numeric(class_counts[class_names]),
+    class_names
+  )
+  absent_classes <- class_names[is.na(class_counts)]
+
+  # Check for known classes that were never correctly predicted. Classes
+  # absent from the evaluation data are reported separately below instead
   correctly_predicted <- diag(conf_matrix)
-  never_predicted_classes <- class_names[correctly_predicted == 0]
+  never_predicted_classes <- setdiff(
+    class_names[correctly_predicted == 0],
+    absent_classes
+  )
 
   if (length(never_predicted_classes) > 0) {
     cli::cli_warn(
       "Some classes were never correctly predicted during cross-validation: {.val {never_predicted_classes}}. Results for these classes are unreliable."
+    )
+  }
+
+  if (length(absent_classes) > 0) {
+    cli::cli_warn(
+      "Some classes known to the model do not occur in the evaluation data: {.val {absent_classes}}. Their count, recall, precision and F1 score are reported as NA (not evaluated, not a failure)."
     )
   }
 
@@ -498,7 +521,8 @@ evaluate_cv_performance <- function(
   class_recall <- diag(conf_matrix) / colSums(conf_matrix)
   class_precision <- diag(conf_matrix) / rowSums(conf_matrix)
 
-  # Handle divisions by zero
+  # Handle divisions by zero for classes that do occur in the evaluation data
+  # but that the model never guesses
   class_precision[is.na(class_precision)] <- 0
   class_recall[is.na(class_recall)] <- 0
 
@@ -509,13 +533,16 @@ evaluate_cv_performance <- function(
     (class_precision + class_recall)
   class_f1[is.na(class_f1)] <- 0
 
-  # Get class counts
-  class_counts <- table(unlist(cv_actual))
+  # Classes absent from the evaluation data were never evaluated: report NA
+  # instead of the 0 the divide-by-zero handling above assigned them
+  class_recall[absent_classes] <- NA
+  class_precision[absent_classes] <- NA
+  class_f1[absent_classes] <- NA
 
   # Combine into per-class metrics table
   per_class_metrics <- tibble::tibble(
     class = class_names,
-    count = as.vector(class_counts[class_names]),
+    count = as.vector(class_counts),
     recall = round(class_recall, 2),
     precision = round(class_precision, 2),
     f1_score = round(class_f1, 2)
@@ -572,7 +599,7 @@ evaluate_cv_performance <- function(
     per_class_metrics = per_class_metrics,
     cv_method = cv_method,
     cv_folds = cv_folds,
-    class_counts = as.vector(class_counts[class_names])
+    class_counts = as.vector(class_counts)
   )
   if (return_predictions) {
     result$validation_results <- validation_results

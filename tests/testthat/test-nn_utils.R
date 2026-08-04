@@ -339,6 +339,59 @@ test_that("evaluate_cv_performance handles complete misclassification", {
   expect_true(all(result$per_class_metrics$f1_score == 0.0))
 })
 
+test_that("evaluate_cv_performance reports a class absent from the evaluation data as NA, not 0", {
+  # Model knows "A", "B" and "C", but "C" never occurs in the evaluation data.
+  # "B" occurs but is always misclassified as "A" - a real failure, distinct
+  # from "C" which was never evaluated at all.
+  cv_predictions <- list(c("A", "A"))
+
+  cv_probabilities <- list(
+    matrix(
+      c(0.8, 0.1, 0.1, 0.7, 0.2, 0.1),
+      nrow = 2,
+      byrow = TRUE,
+      dimnames = list(NULL, c("A", "B", "C"))
+    )
+  )
+
+  # A plain character vector, as apply_metric_model() produces (not a factor
+  # with class_names as levels) - table() then has no zero-count entry for
+  # "C" at all, which is what makes indexing by class_names below yield NA.
+  cv_actual <- list(c("A", "B"))
+  cv_landscape_ids <- list(c(1, 2))
+
+  warnings <- capture_warnings(
+    result <- evaluate_cv_performance(
+      cv_predictions = cv_predictions,
+      cv_probabilities = cv_probabilities,
+      cv_actual = cv_actual,
+      cv_landscape_ids = cv_landscape_ids,
+      class_names = c("A", "B", "C"),
+      cv_method = "k-fold",
+      cv_folds = 1,
+      verbose = FALSE
+    )
+  )
+
+  # Warned about the genuinely-failed class and the absent class separately
+  expect_true(any(grepl("never correctly predicted.*\"B\"", warnings)))
+  expect_true(any(grepl("do not occur in the evaluation data.*\"C\"", warnings)))
+  # "C" is absent, not failed, so it must not appear in the failure warning
+  expect_false(any(grepl("never correctly predicted.*\"C\"", warnings)))
+
+  metrics_c <- dplyr::filter(result$per_class_metrics, class == "C")
+  expect_true(is.na(metrics_c$count))
+  expect_true(is.na(metrics_c$recall))
+  expect_true(is.na(metrics_c$precision))
+  expect_true(is.na(metrics_c$f1_score))
+  expect_true(is.na(result$class_counts[3]))
+
+  # "B" is present but always misclassified: a real 0, not NA
+  metrics_b <- dplyr::filter(result$per_class_metrics, class == "B")
+  expect_equal(metrics_b$count, 1)
+  expect_equal(unname(metrics_b$recall), 0)
+})
+
 test_that("evaluate_cv_performance validates input lengths", {
   cv_predictions <- list(c("A", "B"))
   cv_probabilities <- list(
