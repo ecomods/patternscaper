@@ -252,59 +252,7 @@ create_landscapes <- function(
   }
 
   # Create full default parameter list
-  default_params_list <- list(
-    random = list(veg_prop = c(0.1, 0.9)),
-    bare = list(veg_prop = c(0, 0.1)),
-    dense = list(veg_prop = c(0.8, 1)),
-    sharp = list(boundary_position = c(0.2, 0.8)),
-    diffuse = list(
-      steepness = c(0.1, 1),
-      boundary_position = c(0.1, 0.4)
-    ),
-    fingers = list(
-      boundary_position = c(0.3, 0.6),
-      sine_length_mean = c(0.2, 0.5) * width,
-      sine_length_sd = c(0.1, 0.5) * width,
-      sine_height_mean = c(0.05, 0.2) * height,
-      sine_height_sd = c(0.05, 0.25) * height
-    ),
-    clustered = list(
-      boundary_position = c(0.4, 0.6),
-      n_clusters = c(5, 12),
-      cluster_radius = c(5, 10),
-      scatter_zone_prop = c(0.2, 1),
-      elongation_x = c(0.5, 1.5),
-      elongation_y = c(0.5, 1.5)
-    ),
-    bands = list(
-      boundary_position = c(0.3, 0.5),
-      band_zone_prop = c(0.3, 0.6),
-      band_thickness = c(0.02, 0.04) * height,
-      band_spacing = c(0.1, 0.2) * height,
-      frequency = c(0.1, 0.3),
-      amplitude = c(0, 0.06) * height,
-      noise_sd = c(0, 0.01) * height
-    ),
-    spots = list(
-      n_spots = c(5, 10),
-      spot_radius = c(0.1, 0.2) * width,
-      spot_radius_sd = c(0, 0.02) * width,
-      regular_spots = c(TRUE, FALSE),
-      invert_landscape = c(FALSE)
-    ),
-    gaps = list(
-      n_spots = c(5, 10),
-      spot_radius = c(0.1, 0.2) * width,
-      spot_radius_sd = c(0, 0.02) * width,
-      regular_spots = c(TRUE, FALSE)
-    ),
-    labyrinth = list(
-      frequency = c(2.5, 3.5),
-      veg_threshold = c(0.45, 0.55),
-      band_fuzziness = c(0.06, 0.25),
-      octaves = c(2, 4)
-    )
-  )
+  default_params_list <- build_default_params_list(width, height)
 
   # If user provided params, validate and merge with defaults
   if (!is.null(params_list)) {

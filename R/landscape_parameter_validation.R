@@ -115,6 +115,260 @@ validate_random_spots <- function(random_spots) {
   invisible(NULL)
 }
 
+#' Canonical Landscape Parameter Specifications
+#'
+#' Single source of truth for per-pattern parameter type/bounds and default
+#' batch-sampling ranges. \code{\link{get_valid_param_specs}} (validation) and
+#' \code{\link{build_default_params_list}} (batch defaults for
+#' \code{\link{create_landscapes}}) both derive from this table instead of
+#' maintaining separate, independently-drifting copies.
+#'
+#' @return Named list, keyed by pattern, of named lists of parameter specs.
+#'     Each spec has \code{type} ("numeric", "integer", or "logical"),
+#'     \code{min}/\code{max} bounds (numeric/integer only), and
+#'     \code{batch_range} which is the default range \code{\link{create_landscapes}}
+#'     samples from. \code{batch_range} is a literal vector, a
+#'     \code{function(width, height)} for ranges that scale with landscape
+#'     size, or \code{NULL} if the parameter is validation-only (not part of
+#'     the default batch distribution).
+#'
+#' @keywords internal
+#' @noRd
+landscape_param_specs <- function() {
+  list(
+    random = list(
+      veg_prop = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = c(0.1, 0.9)
+      )
+    ),
+    bare = list(
+      veg_prop = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = c(0, 0.1)
+      )
+    ),
+    dense = list(
+      veg_prop = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = c(0.8, 1)
+      )
+    ),
+    sharp = list(
+      boundary_position = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = c(0.2, 0.8)
+      )
+    ),
+    diffuse = list(
+      steepness = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = c(0.1, 1)
+      ),
+      boundary_position = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = c(0.1, 0.4)
+      )
+    ),
+    fingers = list(
+      boundary_position = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = c(0.3, 0.6)
+      ),
+      sine_length_mean = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = function(width, height) c(0.2, 0.5) * width
+      ),
+      sine_length_sd = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = function(width, height) c(0.1, 0.5) * width
+      ),
+      sine_height_mean = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = function(width, height) c(0.05, 0.2) * height
+      ),
+      sine_height_sd = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = function(width, height) c(0.05, 0.25) * height
+      )
+    ),
+    clustered = list(
+      boundary_position = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = c(0.4, 0.6)
+      ),
+      n_clusters = list(
+        type = "integer",
+        min = 1,
+        max = Inf,
+        batch_range = c(5, 12)
+      ),
+      cluster_radius = list(
+        type = "integer",
+        min = 1,
+        max = Inf,
+        batch_range = c(5, 10)
+      ),
+      scatter_zone_prop = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = c(0.2, 1)
+      ),
+      elongation_x = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = c(0.5, 1.5)
+      ),
+      elongation_y = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = c(0.5, 1.5)
+      )
+    ),
+    bands = list(
+      boundary_position = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = c(0.3, 0.5)
+      ),
+      band_zone_prop = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = c(0.3, 0.6)
+      ),
+      band_thickness = list(
+        type = "integer",
+        min = 1,
+        max = Inf,
+        batch_range = function(width, height) c(0.02, 0.04) * height
+      ),
+      band_spacing = list(
+        type = "integer",
+        min = 1,
+        max = Inf,
+        batch_range = function(width, height) c(0.1, 0.2) * height
+      ),
+      frequency = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = c(0.1, 0.3)
+      ),
+      amplitude = list(
+        type = "integer",
+        min = 0,
+        max = Inf,
+        batch_range = function(width, height) c(0, 0.06) * height
+      ),
+      noise_sd = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = function(width, height) c(0, 0.01) * height
+      )
+    ),
+    spots = list(
+      n_spots = list(
+        type = "integer",
+        min = 1,
+        max = Inf,
+        batch_range = c(5, 10)
+      ),
+      spot_radius = list(
+        type = "integer",
+        min = 1,
+        max = Inf,
+        batch_range = function(width, height) c(0.1, 0.2) * width
+      ),
+      spot_radius_sd = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = function(width, height) c(0, 0.02) * width
+      ),
+      regular_spots = list(type = "logical", batch_range = c(TRUE, FALSE)),
+      invert_landscape = list(type = "logical", batch_range = c(FALSE))
+    ),
+    gaps = list(
+      n_spots = list(
+        type = "integer",
+        min = 1,
+        max = Inf,
+        batch_range = c(5, 10)
+      ),
+      spot_radius = list(
+        type = "integer",
+        min = 1,
+        max = Inf,
+        batch_range = function(width, height) c(0.1, 0.2) * width
+      ),
+      spot_radius_sd = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = function(width, height) c(0, 0.02) * width
+      ),
+      regular_spots = list(type = "logical", batch_range = c(TRUE, FALSE)),
+      invert_landscape = list(type = "logical", batch_range = NULL)
+    ),
+    labyrinth = list(
+      frequency = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = c(2.5, 3.5)
+      ),
+      veg_threshold = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = c(0.45, 0.55)
+      ),
+      band_fuzziness = list(
+        type = "numeric",
+        min = 0,
+        max = Inf,
+        batch_range = c(0.06, 0.25)
+      ),
+      octaves = list(
+        type = "integer",
+        min = 1,
+        max = Inf,
+        batch_range = c(2, 4)
+      )
+    )
+  )
+}
+
 #' Get Valid Parameter Specifications
 #'
 #' Returns specifications for all valid landscape pattern parameters.
@@ -128,68 +382,47 @@ validate_random_spots <- function(random_spots) {
 #' @keywords internal
 #' @noRd
 get_valid_param_specs <- function() {
-  list(
-    random = list(
-      veg_prop = list(type = "numeric", min = 0, max = 1)
-    ),
-    bare = list(
-      veg_prop = list(type = "numeric", min = 0, max = 1)
-    ),
-    dense = list(
-      veg_prop = list(type = "numeric", min = 0, max = 1)
-    ),
-    sharp = list(
-      boundary_position = list(type = "numeric", min = 0, max = 1)
-    ),
-    diffuse = list(
-      steepness = list(type = "numeric", min = 0, max = Inf),
-      boundary_position = list(type = "numeric", min = 0, max = 1)
-    ),
-    fingers = list(
-      boundary_position = list(type = "numeric", min = 0, max = 1),
-      sine_length_mean = list(type = "numeric", min = 0, max = Inf),
-      sine_length_sd = list(type = "numeric", min = 0, max = Inf),
-      sine_height_mean = list(type = "numeric", min = 0, max = Inf),
-      sine_height_sd = list(type = "numeric", min = 0, max = Inf)
-    ),
-    clustered = list(
-      boundary_position = list(type = "numeric", min = 0, max = 1),
-      n_clusters = list(type = "integer", min = 1, max = Inf),
-      cluster_radius = list(type = "integer", min = 1, max = Inf),
-      scatter_zone_prop = list(type = "numeric", min = 0, max = 1),
-      elongation_x = list(type = "numeric", min = 0, max = Inf),
-      elongation_y = list(type = "numeric", min = 0, max = Inf)
-    ),
-    bands = list(
-      boundary_position = list(type = "numeric", min = 0, max = 1),
-      band_zone_prop = list(type = "numeric", min = 0, max = 1),
-      band_thickness = list(type = "integer", min = 1, max = Inf),
-      band_spacing = list(type = "integer", min = 1, max = Inf),
-      frequency = list(type = "numeric", min = 0, max = Inf),
-      amplitude = list(type = "integer", min = 0, max = Inf),
-      noise_sd = list(type = "numeric", min = 0, max = Inf)
-    ),
-    spots = list(
-      n_spots = list(type = "integer", min = 1, max = Inf),
-      spot_radius = list(type = "integer", min = 1, max = Inf),
-      spot_radius_sd = list(type = "numeric", min = 0, max = Inf),
-      regular_spots = list(type = "logical"),
-      invert_landscape = list(type = "logical")
-    ),
-    gaps = list(
-      n_spots = list(type = "integer", min = 1, max = Inf),
-      spot_radius = list(type = "integer", min = 1, max = Inf),
-      spot_radius_sd = list(type = "numeric", min = 0, max = Inf),
-      regular_spots = list(type = "logical"),
-      invert_landscape = list(type = "logical")
-    ),
-    labyrinth = list(
-      frequency = list(type = "numeric", min = 0, max = Inf),
-      veg_threshold = list(type = "numeric", min = 0, max = 1),
-      band_fuzziness = list(type = "numeric", min = 0, max = Inf),
-      octaves = list(type = "integer", min = 1, max = Inf)
+  specs <- landscape_param_specs()
+
+  lapply(specs, function(pattern_specs) {
+    lapply(pattern_specs, function(spec) {
+      spec$batch_range <- NULL
+      spec
+    })
+  })
+}
+
+#' Build Default Batch-Sampling Parameter Ranges
+#'
+#' Derives \code{\link{create_landscapes}}'s default per-pattern parameter
+#' ranges from \code{\link{landscape_param_specs}}, resolving width/height-
+#' dependent ranges. Parameters with \code{batch_range = NULL} (validation-only)
+#' are excluded, matching \code{\link{create_landscapes}}'s defaults.
+#'
+#' @param width Integer. Landscape width.
+#' @param height Integer. Landscape height.
+#'
+#' @return Named list, keyed by pattern, of named lists of parameter ranges.
+#'
+#' @keywords internal
+#' @noRd
+build_default_params_list <- function(width, height) {
+  specs <- landscape_param_specs()
+
+  lapply(specs, function(pattern_specs) {
+    pattern_specs <- Filter(
+      function(spec) !is.null(spec$batch_range),
+      pattern_specs
     )
-  )
+
+    lapply(pattern_specs, function(spec) {
+      if (is.function(spec$batch_range)) {
+        spec$batch_range(width, height)
+      } else {
+        spec$batch_range
+      }
+    })
+  })
 }
 
 #' Validate Parameter List Structure
