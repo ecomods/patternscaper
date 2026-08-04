@@ -293,7 +293,6 @@ train_pixel_model <- function(
   # Update cv_method and cv_folds based on validation
   cv_method <- cv_params$cv_method
   cv_folds <- cv_params$cv_folds
-  class_counts <- cv_params$class_counts
 
   # Check cross-validation method and parameters -------------------------------
   # Run model with cross validation --------------------------------------------
@@ -387,9 +386,11 @@ train_pixel_model <- function(
       )
 
       # Conditional fold accuracy
-      cli::cli_alert_success(
-        "Fold {fold}/{cv_folds} accuracy: {round(evaluation[['accuracy']], 4)}"
-      )
+      if (verbose) {
+        cli::cli_alert_success(
+          "Fold {fold}/{cv_folds} accuracy: {round(evaluation[['accuracy']], 4)}"
+        )
+      }
     }
 
     # Evaluate cv performance -------------------------------------------------
