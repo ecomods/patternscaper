@@ -315,6 +315,12 @@ landscape_param_specs <- function() {
         max = Inf,
         batch_range = function(width, height) c(0, 0.02) * width
       ),
+      radius_noise_fraction = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = NULL
+      ),
       regular_spots = list(type = "logical", batch_range = c(TRUE, FALSE)),
       invert_landscape = list(type = "logical", batch_range = c(FALSE))
     ),
@@ -336,6 +342,12 @@ landscape_param_specs <- function() {
         min = 0,
         max = Inf,
         batch_range = function(width, height) c(0, 0.02) * width
+      ),
+      radius_noise_fraction = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = NULL
       ),
       regular_spots = list(type = "logical", batch_range = c(TRUE, FALSE)),
       invert_landscape = list(type = "logical", batch_range = NULL)

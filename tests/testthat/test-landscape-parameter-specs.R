@@ -112,3 +112,34 @@ test_that("get_valid_param_specs still matches build_default_params_list's key s
   expect_true("invert_landscape" %in% names(valid_specs$gaps))
   expect_false("invert_landscape" %in% names(defaults$gaps))
 })
+
+# radius_noise_fraction validation (Step 4 fix) -------------------------------
+
+test_that("radius_noise_fraction is no longer silently stripped for spots/gaps", {
+  landscapes_spots <- create_landscapes(
+    n = 1,
+    patterns = "spots",
+    params_list = list(spots = list(radius_noise_fraction = c(0.1, 0.3)))
+  )
+  expect_true(
+    landscapes_spots[[1]]$params$radius_noise_fraction >= 0.1 &&
+      landscapes_spots[[1]]$params$radius_noise_fraction <= 0.3
+  )
+
+  landscapes_gaps <- create_landscapes(
+    n = 1,
+    patterns = "gaps",
+    params_list = list(gaps = list(radius_noise_fraction = c(0.1, 0.3)))
+  )
+  expect_true(
+    landscapes_gaps[[1]]$params$radius_noise_fraction >= 0.1 &&
+      landscapes_gaps[[1]]$params$radius_noise_fraction <= 0.3
+  )
+})
+
+test_that("radius_noise_fraction stays out of default batch sampling for spots/gaps", {
+  result <- build_default_params_list(width = 100, height = 100)
+
+  expect_false("radius_noise_fraction" %in% names(result$spots))
+  expect_false("radius_noise_fraction" %in% names(result$gaps))
+})
