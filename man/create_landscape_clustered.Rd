@@ -58,6 +58,7 @@ the treeline. Clusters can be elongated in x or y directions to create
 elliptical patterns.
 }
 \examples{
+\dontrun{
 # Default clustered features
 clustered_default <- create_landscape_clustered()
 
@@ -81,6 +82,7 @@ clustered_rotated <- create_landscape_clustered(
   rotation = 45
 )
 }
+}
 \seealso{
 Other landscape creation:
 \code{\link[=create_landscape]{create_landscape()}},
@@ -97,3 +99,4 @@ Other landscape creation:
 \code{\link[=create_landscapes]{create_landscapes()}}
 }
 \concept{landscape creation}
+\keyword{internal}

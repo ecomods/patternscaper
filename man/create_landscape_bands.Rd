@@ -50,6 +50,7 @@ A landscape object with pattern "bands" containing:
 Generates a binary landscape with parallel sine-wave bands.
 }
 \examples{
+\dontrun{
 # Default sine bands
 bands_default <- create_landscape_bands()
 
@@ -72,6 +73,7 @@ bands_rotated <- create_landscape_bands(
   noise_sd = 2,
   rotation = 45
 )
+}
 
 }
 \seealso{
@@ -90,3 +92,4 @@ Other landscape creation:
 \code{\link[=create_landscapes]{create_landscapes()}}
 }
 \concept{landscape creation}
+\keyword{internal}

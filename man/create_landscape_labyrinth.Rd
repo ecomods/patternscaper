@@ -71,6 +71,7 @@ The combination of `frequency` and `octaves` controls pattern complexity,
 while `veg_threshold` determines vegetation proportion.
 }
 \examples{
+\dontrun{
 # Default labyrinth pattern
 labyrinth_default <- create_landscape_labyrinth()
 
@@ -89,6 +90,7 @@ labyrinth_sparse <- create_landscape_labyrinth(
 labyrinth_dense <- create_landscape_labyrinth(
   veg_threshold = 0.3  # More vegetation
 )
+}
 
 }
 \seealso{
@@ -107,3 +109,4 @@ Other landscape creation:
 \code{\link[=create_landscapes]{create_landscapes()}}
 }
 \concept{landscape creation}
+\keyword{internal}

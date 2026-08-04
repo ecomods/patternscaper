@@ -25,11 +25,13 @@ This is a specialized wrapper around \code{\link{create_landscape_random}}
 with high vegetation proportions.
 }
 \examples{
+\dontrun{
 # Create default dense landscape (90\% vegetation)
 dense <- create_landscape_dense()
 
 # Create very dense landscape
 very_dense <- create_landscape_dense(veg_prop = 0.95)
+}
 }
 \seealso{
 Other landscape creation:
@@ -47,3 +49,4 @@ Other landscape creation:
 \code{\link[=create_landscapes]{create_landscapes()}}
 }
 \concept{landscape creation}
+\keyword{internal}

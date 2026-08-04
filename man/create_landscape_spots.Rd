@@ -61,6 +61,7 @@ want bare patches in vegetated ground, which sets \code{invert_landscape = TRUE}
 and labels the pattern as "gaps".
 }
 \examples{
+\dontrun{
 # Default spots (random placement)
 spots_default <- create_landscape_spots()
 
@@ -91,6 +92,7 @@ spots_inverted <- create_landscape_spots(
   spot_radius = 8,
   invert_landscape = TRUE
 )
+}
 
 }
 \seealso{
@@ -109,3 +111,4 @@ Other landscape creation:
 \code{\link[=create_landscapes]{create_landscapes()}}
 }
 \concept{landscape creation}
+\keyword{internal}

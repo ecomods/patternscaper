@@ -21,8 +21,9 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @family landscape creation
-#' @export
+#' @keywords internal
 #' @examples
+#' \dontrun{
 #' # Default sine bands
 #' bands_default <- create_landscape_bands()
 #'
@@ -45,6 +46,7 @@
 #'   noise_sd = 2,
 #'   rotation = 45
 #' )
+#' }
 #'
 #' @importFrom stats rnorm
 create_landscape_bands <- function(

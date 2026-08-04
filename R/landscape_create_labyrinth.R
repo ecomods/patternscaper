@@ -49,8 +49,9 @@
 #' while `veg_threshold` determines vegetation proportion.
 #'
 #' @family landscape creation
-#' @export
+#' @keywords internal
 #' @examples
+#' \dontrun{
 #' # Default labyrinth pattern
 #' labyrinth_default <- create_landscape_labyrinth()
 #'
@@ -69,6 +70,7 @@
 #' labyrinth_dense <- create_landscape_labyrinth(
 #'   veg_threshold = 0.3  # More vegetation
 #' )
+#' }
 #'
 #' @importFrom ambient long_grid gen_perlin
 create_landscape_labyrinth <- function(

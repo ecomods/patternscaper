@@ -12,6 +12,7 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @examples
+#' \dontrun{
 #' # Default randomly distributed trees
 #' random_default <- create_landscape_random()
 #'
@@ -20,9 +21,10 @@
 #'
 #' # Custom dimensions
 #' random_large <- create_landscape_random(width = 200, height = 150)
+#' }
 #'
 #' @family landscape creation
-#' @export
+#' @keywords internal
 #' @importFrom stats rbinom
 create_landscape_random <- function(
   width = 100,

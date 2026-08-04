@@ -32,9 +32,10 @@
 #' @importFrom stats runif
 #' @importFrom terra as.matrix
 #' @importFrom cli cli_abort
-#' @export
+#' @keywords internal
 #'
 #' @examples
+#' \dontrun{
 #' # Default clustered features
 #' clustered_default <- create_landscape_clustered()
 #'
@@ -57,6 +58,7 @@
 #'   elongation_y = 1.4,
 #'   rotation = 45
 #' )
+#' }
 create_landscape_clustered <- function(
   width = 100,
   height = 100,

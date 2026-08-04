@@ -24,6 +24,7 @@ A landscape object with random pattern containing:
 Create a Binary Landscape with Randomly Distributed Vegetation
 }
 \examples{
+\dontrun{
 # Default randomly distributed trees
 random_default <- create_landscape_random()
 
@@ -32,6 +33,7 @@ random_dense <- create_landscape_random(veg_prop = 0.7)
 
 # Custom dimensions
 random_large <- create_landscape_random(width = 200, height = 150)
+}
 
 }
 \seealso{
@@ -50,3 +52,4 @@ Other landscape creation:
 \code{\link[=create_landscapes]{create_landscapes()}}
 }
 \concept{landscape creation}
+\keyword{internal}

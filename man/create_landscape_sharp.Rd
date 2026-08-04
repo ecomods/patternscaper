@@ -33,6 +33,7 @@ A landscape object with pattern "sharp" containing:
 Create a Landscape with a Sharp Vegetation Boundary
 }
 \examples{
+\dontrun{
 # Default sharp vegetation boundary
 sharp_default <- create_landscape_sharp()
 
@@ -47,6 +48,7 @@ sharp_rotated <- create_landscape_sharp(
   random_spots = c(0, 0.1),
   rotation = 45
 )
+}
 }
 \seealso{
 Other landscape creation:
@@ -64,3 +66,4 @@ Other landscape creation:
 \code{\link[=create_landscapes]{create_landscapes()}}
 }
 \concept{landscape creation}
+\keyword{internal}

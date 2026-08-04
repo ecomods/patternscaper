@@ -19,10 +19,11 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @family landscape creation
-#' @export
+#' @keywords internal
 #' @importFrom cli cli_warn cli_abort
 #'
 #' @examples
+#' \dontrun{
 #' # Default curvy fingers treeline
 #' fingers_default <- create_landscape_fingers()
 #'
@@ -38,6 +39,7 @@
 #' fingers_rotated <- create_landscape_fingers(
 #'   rotation = 45
 #' )
+#' }
 create_landscape_fingers <- function(
   width = 100,
   height = 100,

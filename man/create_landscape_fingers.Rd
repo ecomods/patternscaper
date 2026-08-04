@@ -46,6 +46,7 @@ Generates a binary landscape with a curvy finger treeline following a sine wave 
 with random length and amplitude for each wave segment.
 }
 \examples{
+\dontrun{
 # Default curvy fingers treeline
 fingers_default <- create_landscape_fingers()
 
@@ -61,6 +62,7 @@ fingers_modified <- create_landscape_fingers(
 fingers_rotated <- create_landscape_fingers(
   rotation = 45
 )
+}
 }
 \seealso{
 Other landscape creation:
@@ -78,3 +80,4 @@ Other landscape creation:
 \code{\link[=create_landscapes]{create_landscapes()}}
 }
 \concept{landscape creation}
+\keyword{internal}

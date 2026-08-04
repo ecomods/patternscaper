@@ -17,11 +17,12 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @family landscape creation
-#' @export
+#' @keywords internal
 #' @importFrom cli cli_abort
 #' @importFrom stats runif
 #'
 #' @examples
+#' \dontrun{
 #' # Default diffuse vegetation boundary
 #' diffuse_default <- create_landscape_diffuse()
 #'
@@ -43,6 +44,7 @@
 #'   steepness = 0.7,
 #'   rotation = 45
 #' )
+#' }
 #'
 create_landscape_diffuse <- function(
   width = 100,

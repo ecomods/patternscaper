@@ -13,6 +13,13 @@ reference:
   contents:
   - create_landscape
   - create_landscapes
+
+- title: Individual pattern generators
+  desc: >
+    Internal building blocks dispatched to by create_landscape()/create_landscapes().
+    Not part of the public API but documented here as a parameter reference for each landscape
+    pattern; use create_landscape(pattern = ...) to actually generate landscapes.
+  contents:
   - create_landscape_bands
   - create_landscape_bare
   - create_landscape_clustered

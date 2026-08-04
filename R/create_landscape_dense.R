@@ -15,12 +15,14 @@
 #'
 #' @family landscape creation
 #' @examples
+#' \dontrun{
 #' # Create default dense landscape (90% vegetation)
 #' dense <- create_landscape_dense()
 #'
 #' # Create very dense landscape
 #' very_dense <- create_landscape_dense(veg_prop = 0.95)
-#' @export
+#' }
+#' @keywords internal
 create_landscape_dense <- function(
   veg_prop = 0.9,
   width = 100,

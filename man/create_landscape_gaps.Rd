@@ -63,6 +63,7 @@ Both patterns use the same algorithm; the pattern name primarily serves as a sem
 label for training data organization.
 }
 \examples{
+\dontrun{
 # Default gaps (bare patches in vegetation)
 gaps_default <- create_landscape_gaps()
 
@@ -72,6 +73,7 @@ gaps_modified <- create_landscape_gaps(
   spot_radius = 8,
   spot_radius_sd = 2
 )
+}
 
 }
 \seealso{
@@ -90,3 +92,4 @@ Other landscape creation:
 \code{\link[=create_landscapes]{create_landscapes()}}
 }
 \concept{landscape creation}
+\keyword{internal}

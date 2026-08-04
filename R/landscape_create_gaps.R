@@ -23,8 +23,9 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @family landscape creation
-#' @export
+#' @keywords internal
 #' @examples
+#' \dontrun{
 #' # Default gaps (bare patches in vegetation)
 #' gaps_default <- create_landscape_gaps()
 #'
@@ -34,6 +35,7 @@
 #'   spot_radius = 8,
 #'   spot_radius_sd = 2
 #' )
+#' }
 #'
 create_landscape_gaps <- function(
   width = 100,

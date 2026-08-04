@@ -36,6 +36,7 @@ A landscape object with pattern "diffuse" containing:
 Generates a binary landscape with a diffuse vegetation boundary where vegetation probability decreases with distance.
 }
 \examples{
+\dontrun{
 # Default diffuse vegetation boundary
 diffuse_default <- create_landscape_diffuse()
 
@@ -57,6 +58,7 @@ diffuse_rotated <- create_landscape_diffuse(
   steepness = 0.7,
   rotation = 45
 )
+}
 
 }
 \seealso{
@@ -75,3 +77,4 @@ Other landscape creation:
 \code{\link[=create_landscapes]{create_landscapes()}}
 }
 \concept{landscape creation}
+\keyword{internal}

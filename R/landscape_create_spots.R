@@ -37,6 +37,7 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @examples
+#' \dontrun{
 #' # Default spots (random placement)
 #' spots_default <- create_landscape_spots()
 #'
@@ -67,11 +68,12 @@
 #'   spot_radius = 8,
 #'   invert_landscape = TRUE
 #' )
+#' }
 #'
 #' @family landscape creation
 #' @importFrom stats kmeans rnorm runif
 #' @importFrom cli cli_alert_warning
-#' @export
+#' @keywords internal
 create_landscape_spots <- function(
   width = 100,
   height = 100,

@@ -13,9 +13,10 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @family landscape creation
-#' @export
+#' @keywords internal
 #'
 #' @examples
+#' \dontrun{
 #' # Default sharp vegetation boundary
 #' sharp_default <- create_landscape_sharp()
 #'
@@ -30,6 +31,7 @@
 #'   random_spots = c(0, 0.1),
 #'   rotation = 45
 #' )
+#' }
 create_landscape_sharp <- function(
   width = 100,
   height = 100,
