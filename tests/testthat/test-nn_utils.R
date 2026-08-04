@@ -542,7 +542,7 @@ test_that("validate_cv_params reduces cv_folds when necessary", {
   # max_suitable_folds = floor(15/3) = 5
   patterns <- factor(c(rep("A", 15), rep("B", 15), rep("C", 15)))
 
-  expect_message(
+  expect_warning(
     result <- validate_cv_params(
       patterns = patterns,
       cv_method = "k-fold",
@@ -561,7 +561,7 @@ test_that("validate_cv_params switches k-fold to LOO when needed", {
   # max_suitable_folds = floor(5/3) = 1 < 2, so switch to LOO
   patterns <- factor(c(rep("A", 5), rep("B", 5), rep("C", 5)))
 
-  expect_message(
+  expect_warning(
     result <- validate_cv_params(
       patterns = patterns,
       cv_method = "k-fold",

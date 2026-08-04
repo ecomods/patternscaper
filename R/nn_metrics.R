@@ -32,7 +32,9 @@
 #'   NA for every landscape, and landscapes that are
 #'   NA for every metric, are always removed first as they do not carry any information.
 #' @param verbose Logical. Print training details and cross-validation results.
-#'   Default: TRUE.
+#'   Default: TRUE. When FALSE, most output is silenced, but warnings about the requested CV
+#'   configuration being adjusted (e.g. folds reduced, switched to LOO) are
+#'   always shown.
 #'
 #' @return List containing:
 #'   \describe{

@@ -323,14 +323,13 @@ validate_cv_params <- function(
 
     # If we can't maintain enough samples even with 2 folds
     if (max_suitable_folds < 2) {
-      cli::cli_alert_info(
+      cli::cli_warn(
         "Cannot maintain {min_samples_per_fold} samples per class per fold (smallest class: {min_class_count}). Switching to LOO CV."
       )
       cv_method <- "loo"
       cv_folds <- total_samples
     } else if (cv_folds > max_suitable_folds) {
-      # Reduce folds but keep k-fold CV
-      cli::cli_alert_info(
+      cli::cli_warn(
         "Reducing CV folds from {cv_folds} to {max_suitable_folds} to maintain {min_samples_per_fold} samples per class per fold."
       )
       cv_folds <- max_suitable_folds
