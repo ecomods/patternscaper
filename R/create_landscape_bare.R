@@ -14,13 +14,15 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @family landscape creation
-#' @export
+#' @keywords internal
 #' @examples
+#' \dontrun{
 #' # Create default bare landscape (10% vegetation)
 #' bare <- create_landscape_bare()
 #'
 #' # Create very sparse landscape
 #' very_bare <- create_landscape_bare(veg_prop = 0.05)
+#' }
 create_landscape_bare <- function(
   veg_prop = 0.1,
   width = 100,

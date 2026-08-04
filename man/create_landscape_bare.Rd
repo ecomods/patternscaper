@@ -25,11 +25,13 @@ This is a specialized wrapper around \code{\link{create_landscape_random}}
 with low vegetation proportions.
 }
 \examples{
+\dontrun{
 # Create default bare landscape (10\% vegetation)
 bare <- create_landscape_bare()
 
 # Create very sparse landscape
 very_bare <- create_landscape_bare(veg_prop = 0.05)
+}
 }
 \seealso{
 Other landscape creation:
@@ -47,3 +49,4 @@ Other landscape creation:
 \code{\link[=create_landscapes]{create_landscapes()}}
 }
 \concept{landscape creation}
+\keyword{internal}
