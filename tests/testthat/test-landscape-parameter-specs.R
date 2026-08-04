@@ -107,9 +107,10 @@ test_that("get_valid_param_specs still matches build_default_params_list's key s
     )
   }
 
-  # gaps$invert_landscape is the one documented exception: valid for
-  # validation, but not part of the default batch distribution.
-  expect_true("invert_landscape" %in% names(valid_specs$gaps))
+  # gaps has no invert_landscape entry anywhere: create_landscape_gaps() has
+  # no such formal (hardcoded TRUE internally), so it's neither a valid
+  # override nor part of the default batch distribution.
+  expect_false("invert_landscape" %in% names(valid_specs$gaps))
   expect_false("invert_landscape" %in% names(defaults$gaps))
 })
 
@@ -142,4 +143,45 @@ test_that("radius_noise_fraction stays out of default batch sampling for spots/g
 
   expect_false("radius_noise_fraction" %in% names(result$spots))
   expect_false("radius_noise_fraction" %in% names(result$gaps))
+})
+
+# gaps invert_landscape removal (Step 5 fix) -----------------------------------
+
+test_that("invert_landscape for gaps is rejected as unknown instead of silently crashing the generator", {
+  expect_message(
+    landscapes <- create_landscapes(
+      n = 1,
+      patterns = "gaps",
+      params_list = list(gaps = list(invert_landscape = FALSE))
+    ),
+    "Unknown parameter.*invert_landscape.*will be ignored"
+  )
+
+  # The pattern still generates successfully with the unknown param dropped,
+  # rather than failing silently inside create_landscape_gaps() and being
+  # swallowed by try_create_landscape()'s tryCatch.
+  expect_length(landscapes, 1)
+  expect_equal(landscapes[[1]]$pattern, "gaps")
+})
+
+# integer_params derivation (Step 6 fix) ---------------------------------------
+
+test_that("get_integer_param_names matches the former hardcoded set, minus the two dead entries", {
+  expect_equal(
+    sort(get_integer_param_names()),
+    sort(c(
+      "n_clusters",
+      "cluster_radius",
+      "band_thickness",
+      "band_spacing",
+      "n_spots",
+      "spot_radius",
+      "octaves",
+      "amplitude"
+    ))
+  )
+
+  # nhills/nbands were dead entries matching no current parameter
+  expect_false("nhills" %in% get_integer_param_names())
+  expect_false("nbands" %in% get_integer_param_names())
 })

@@ -349,8 +349,7 @@ landscape_param_specs <- function() {
         max = 1,
         batch_range = NULL
       ),
-      regular_spots = list(type = "logical", batch_range = c(TRUE, FALSE)),
-      invert_landscape = list(type = "logical", batch_range = NULL)
+      regular_spots = list(type = "logical", batch_range = c(TRUE, FALSE))
     ),
     labyrinth = list(
       frequency = list(
