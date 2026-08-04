@@ -163,20 +163,6 @@ train_metric_model <- function(
     ))
   }
 
-  # Summarise the training geometry from the columns calculate_metrics attaches
-  # (NULL if the metrics table predates geometry recording). Warn
-  # if the training landscapes differ in extent or resolution:
-  # scale-dependent metrics (e.g. area, edge, patch counts) then
-  # conflate pattern with landscape size.
-  training_geometry <- training_geometry_from_metrics(metrics)
-  if (!is.null(training_geometry) && !training_geometry$homogeneous) {
-    cli::cli_warn(c(
-      "Training landscapes differ in extent or resolution.",
-      "i" = "Scale-dependent metrics (e.g. area, edge, patch counts) conflate pattern with landscape size when training geometry is not uniform.",
-      "i" = "Use landscapes of equal size and resolution, or restrict to scale-invariant metrics."
-    ))
-  }
-
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold", "loo")) {
@@ -227,6 +213,26 @@ train_metric_model <- function(
       "Removing landscapes with incomplete metrics eliminated {length(patterns_lost)} pattern{?s} entirely",
       "x" = "No landscapes left for: {.val {patterns_lost}}",
       "i" = "Use {.code na_action = \"drop_metrics\"} to drop the affected metrics instead, or supply more landscapes for them"
+    ))
+  }
+
+  # Summarise the training geometry from the columns calculate_metrics
+  # attaches (NULL if the metrics table does not contain the geometry info),
+  # using only the landscapes that survived NA-dropping above.
+  # Warn if the training landscapes differ in extent or
+  # resolution: scale-dependent metrics (e.g. area, edge, patch counts) then
+  # conflate pattern with landscape size.
+  training_metrics <- if ("landscape_id" %in% colnames(metrics)) {
+    dplyr::filter(metrics, landscape_id %in% metrics_wide$landscape_id)
+  } else {
+    metrics
+  }
+  training_geometry <- training_geometry_from_metrics(training_metrics)
+  if (!is.null(training_geometry) && !training_geometry$homogeneous) {
+    cli::cli_warn(c(
+      "Training landscapes differ in extent or resolution.",
+      "i" = "Scale-dependent metrics (e.g. area, edge, patch counts) conflate pattern with landscape size when training geometry is not uniform.",
+      "i" = "Use landscapes of equal size and resolution, or restrict to scale-invariant metrics."
     ))
   }
 
