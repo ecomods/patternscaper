@@ -289,18 +289,7 @@ create_landscapes <- function(
 
   # Define which parameters should be integers so they are not treated
   # as numeric
-  integer_params <- c(
-    "n_clusters",
-    "cluster_radius",
-    "band_thickness",
-    "band_spacing",
-    "n_spots",
-    "spot_radius",
-    "nhills",
-    "nbands",
-    "octaves",
-    "amplitude"
-  )
+  integer_params <- get_integer_param_names()
 
   # Determine how to distribute landscape patterns
   if (is.null(pattern_probs)) {

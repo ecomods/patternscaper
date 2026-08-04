@@ -436,6 +436,27 @@ build_default_params_list <- function(width, height) {
   })
 }
 
+#' Get Integer Parameter Names
+#'
+#' Returns the names of all parameters typed \code{"integer"} across every
+#' pattern in \code{\link{landscape_param_specs}}, used by
+#' \code{\link{sample_landscape_params}} to sample whole numbers instead of
+#' continuous values.
+#'
+#' @return Character vector of unique parameter names.
+#'
+#' @keywords internal
+#' @noRd
+get_integer_param_names <- function() {
+  specs <- landscape_param_specs()
+
+  integer_names <- unlist(lapply(specs, function(pattern_specs) {
+    names(Filter(function(spec) spec$type == "integer", pattern_specs))
+  }))
+
+  unique(integer_names)
+}
+
 #' Validate Parameter List Structure
 #'
 #' Validates that params_list contains valid parameter ranges for each pattern.
