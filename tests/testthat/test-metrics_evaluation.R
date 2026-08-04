@@ -130,7 +130,6 @@ test_that("evaluate_metrics works with all ranking methods", {
 
   methods <- c(
     "coeffvar_all",
-    "lin_mod_r2",
     "mean_groups",
     "fisher_score",
     "kruskal_effsize"
@@ -469,38 +468,6 @@ test_that("coefficient of variation ranks high-variance metrics first", {
   expect_equal(result$selected[1], "high_var")
   # The score itself is now visible, not just the ordering
   expect_gt(result$ranking$score[result$ranking$metric == "high_var"], 0)
-})
-
-test_that("linear model R² ranks discriminative metrics first", {
-  # Create wide format with clear pattern separation
-  metrics_wide <- tibble::tibble(
-    landscape_name = paste0("landscape_", 1:20),
-    pattern = rep(c("A", "B"), each = 10),
-    level = "landscape",
-    discriminative = rep(c(10, 20), each = 10), # Clear pattern difference
-    non_discriminative = rnorm(20, mean = 15, sd = 5) # Random noise
-  )
-
-  metrics <- tidyr::pivot_longer(
-    metrics_wide,
-    cols = c(discriminative, non_discriminative),
-    names_to = "metric",
-    values_to = "value"
-  )
-
-  result <- evaluate_metrics(
-    metrics,
-    metrics_number = 1,
-    method = "lin_mod_r2",
-    correlation_threshold = 1
-  )
-
-  expect_equal(result$selected[1], "discriminative")
-  # A perfectly separating metric has R2 = 1
-  expect_equal(
-    result$ranking$score[result$ranking$metric == "discriminative"],
-    1
-  )
 })
 
 # 8. VERBOSE OUTPUT TEST ----

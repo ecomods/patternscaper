@@ -68,9 +68,6 @@ metric-based neural network.
   \item{\code{coeffvar_all}}{Coefficient of Variation (CV = SD/mean). Ranks metrics by
     their relative variability across landscapes. Higher CV indicates greater spread.
     Best for identifying metrics with high variability regardless of pattern type.}
-  \item{\code{lin_mod_r2}}{Linear Model R-squared. Fits \code{value ~ pattern} for each
-    metric and ranks by R². Higher values indicate better ability to predict pattern
-    types. Assumes linear relationships and normally distributed residuals.}
   \item{\code{mean_groups}}{Mean Differences. Calculates relative differences between
     pattern-specific means and overall mean, then sums across patterns. Higher scores
     indicate better discrimination between pattern types.}

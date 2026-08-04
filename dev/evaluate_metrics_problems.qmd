@@ -25,7 +25,6 @@ library(tidyverse)
 
 all_methods <- c(
   "coeffvar_all",
-  "lin_mod_r2",
   "mean_groups",
   "fisher_score",
   "kruskal_effsize"
@@ -94,10 +93,10 @@ metrics_real <- calculate_metrics(create_landscapes(n = 66))
 
 | # | Problem | Affects | Severity | Proposed action | Re-run SI? |
 |---|---------|---------|----------|-----------------|-----------|
-| 1 | Same criterion as `fisher_score` | `lin_mod_r2`, `fisher_score` | Medium | Document, or remove one | No |
+| 1 | Same criterion as `fisher_score` | `lin_mod_r2`, `fisher_score` | Medium | **Removed `lin_mod_r2` (2026-08-04)** | No |
 | 2 | Breaks on metrics crossing zero | `coeffvar_all` | High | **Code fix** | Yes |
 | 3 | Ignores within-group spread; explodes when mean ≈ 0 | `mean_groups` | High | **Code fix** | Yes |
-| 4 | One outlier flips the ranking | `lin_mod_r2`, `fisher_score`, `mean_groups` | Medium | Document — justifies the default | No |
+| 4 | One outlier flips the ranking | `fisher_score`, `mean_groups` | Medium | Document — justifies the default | No |
 | 5 | Ceiling effect | `kruskal_effsize` | Medium | Document | No |
 | 6 | Blind to magnitude of separation | `kruskal_effsize` | Medium | Document | No |
 | 7 | Correlation pooled across patterns | all | Medium | Document | No |
@@ -122,6 +121,10 @@ metrics_real <- calculate_metrics(create_landscapes(n = 66))
 **Proposal**
 
 - Remove one of them as they will always be the same for our case?
+
+**Resolved 2026-08-04:** `lin_mod_r2` removed from the package (`R/metrics_evaluation.R`);
+`fisher_score` kept as the sole criterion of the two. No published result depended on
+`lin_mod_r2` — every analysis uses `kruskal_effsize`.
 
 # `coeffvar_all`
 
@@ -346,7 +349,7 @@ landscapes rises (higher than `fisher_score`).
 
 **Problem**
 
-- `lin_mod_r2`, `fisher_score` and `mean_groups` are computed from means and SDs →
+- `fisher_score` and `mean_groups` are computed from means and SDs →
   sensitive to outliers, skew, heavy tails, within-group multimodality.
 - `kruskal_effsize` sees only ranks → unaffected.
 
@@ -367,7 +370,7 @@ enframe(rank_all_methods(metrics_outlier), name = "method", value = "ranking")
 ```
 
 - One value of 500 injected into the best metric demotes `tight` from **first to last**
-  under `lin_mod_r2` and `fisher_score`. `kruskal_effsize` is unchanged.
+  under `fisher_score`. `kruskal_effsize` is unchanged.
 
 **Consequence for the paper**
 
@@ -522,8 +525,8 @@ evaluate_metrics(metrics_correlated, metrics_number = 3)
 
 # Manuscript changes
 
-- "five methods" → **four distinct criteria**; note `lin_mod_r2` and `fisher_score` are the
-  same criterion expressed two ways.
+- "five methods" → **four methods**; `lin_mod_r2` is removed from the package (it was the
+  same criterion as `fisher_score` expressed two ways), so it should not appear at all.
 - Framing sentence: four rank by separability, `coeffvar_all` is a pattern-agnostic baseline.
 - Drop "Assumes linear relationships" and "Assumes normally distributed data within groups";
   replace with moment-based vs rank-based **robustness**.

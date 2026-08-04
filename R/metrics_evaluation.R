@@ -197,9 +197,6 @@ print.metrics_evaluation <- function(x, ...) {
 #'   \item{\code{coeffvar_all}}{Coefficient of Variation (CV = SD/mean). Ranks metrics by
 #'     their relative variability across landscapes. Higher CV indicates greater spread.
 #'     Best for identifying metrics with high variability regardless of pattern type.}
-#'   \item{\code{lin_mod_r2}}{Linear Model R-squared. Fits \code{value ~ pattern} for each
-#'     metric and ranks by R². Higher values indicate better ability to predict pattern
-#'     types. Assumes linear relationships and normally distributed residuals.}
 #'   \item{\code{mean_groups}}{Mean Differences. Calculates relative differences between
 #'     pattern-specific means and overall mean, then sums across patterns. Higher scores
 #'     indicate better discrimination between pattern types.}
@@ -327,7 +324,6 @@ evaluate_metrics <- function(
   # Validate method parameter
   valid_methods <- c(
     "coeffvar_all",
-    "lin_mod_r2",
     "mean_groups",
     "fisher_score",
     "kruskal_effsize"
@@ -605,7 +601,6 @@ rank_metrics_by_method <- function(metrics, method) {
   switch(
     method,
     coeffvar_all = rank_by_coefficient_variation(metrics),
-    lin_mod_r2 = rank_by_linear_model(metrics),
     mean_groups = rank_by_mean_differences(metrics),
     fisher_score = rank_by_fisher_score(metrics),
     kruskal_effsize = rank_by_kruskal(metrics),
@@ -687,42 +682,6 @@ rank_by_coefficient_variation <- function(metrics) {
       )
     )
   )
-}
-
-#' Rank by Linear Model R-squared
-#'
-#' Ranks metrics by R² from linear models fitting value ~ pattern.
-#' Higher R² indicates the metric better explains variance across landscape patterns.
-#'
-#' @param metrics tibble. Metrics data with columns 'metric', 'pattern', and 'value'.
-#'
-#' @return List with `ranking` (metrics by R², highest first).
-#' @importFrom dplyr group_by arrange desc mutate
-#' @importFrom tidyr nest
-#' @importFrom purrr map_dbl
-#' @importFrom stats lm
-#' @noRd
-rank_by_linear_model <- function(
-  metrics
-) {
-  # Create a nested dataframe with data for each metric
-  ranking <- metrics |>
-    tidyr::nest(.by = metric) |>
-    dplyr::mutate(
-      score = purrr::map_dbl(data, \(df) {
-        tryCatch(
-          {
-            model <- lm(value ~ pattern, data = df)
-            summary(model)$r.squared
-          },
-          error = \(e) NA_real_
-        )
-      })
-    ) |>
-    dplyr::arrange(dplyr::desc(score), metric) |> # Largest R² first
-    dplyr::select(metric, score)
-
-  list(ranking = ranking)
 }
 
 #' Rank by Mean Differences

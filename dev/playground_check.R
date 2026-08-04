@@ -1,8 +1,10 @@
 # Title: Problems of the ranking methods in evaluate_metrics()
 # Date: 2026-07-28
 # Author: Selina Baldauf
-# Purpose: Demonstrate the failure modes of the five ranking methods offered by
+# Purpose: Demonstrate the failure modes of the four ranking methods offered by
 #   evaluate_metrics(). Input for the manuscript revision and discussion.
+#   (lin_mod_r2 removed 2026-08-04: proved identical to fisher_score, see
+#   dev/evaluate_metrics_problems.qmd.)
 
 devtools::load_all()
 library(tidyverse)
@@ -11,7 +13,6 @@ library(tidyverse)
 
 all_methods <- c(
   "coeffvar_all",
-  "lin_mod_r2",
   "mean_groups",
   "fisher_score",
   "kruskal_effsize"
@@ -32,7 +33,7 @@ rank_metrics <- function(metrics, method, ...) {
   )
 }
 
-# Rankings of all five methods side by side
+# Rankings of all four methods side by side
 rank_all_methods <- function(metrics) {
   map(set_names(all_methods), \(method) rank_metrics(metrics, method))
 }
@@ -75,7 +76,6 @@ landscapes <- create_landscapes(n = 200)
 metrics <- calculate_metrics(landscapes)
 
 # Visual comparison of what the different methods select
-linmod <- evaluate_metrics(metrics, method = "lin_mod_r2", metrics_number = 20)
 fischer <- evaluate_metrics(
   metrics,
   method = "fisher_score",
@@ -87,8 +87,6 @@ coeffvar <- evaluate_metrics(
   metrics_number = 20
 )
 
-plot_metrics(metrics, linmod, force = TRUE) +
-  ggtitle("Metrics selected by linear model")
 plot_metrics(metrics, fischer, force = TRUE) +
   ggtitle("Metrics selected by Fisher score")
 plot_metrics(metrics, coeffvar, force = TRUE) +
@@ -182,8 +180,8 @@ metrics_spread |>
 
 # 5 a single outlier destroys the moment-based rankings ------------------------
 
-# One extreme value in the best metric. lin_mod_r2 and fisher_score demote it
-# from first to last; kruskal_effsize is unaffected because it only sees ranks.
+# One extreme value in the best metric. fisher_score demotes it from first to
+# last; kruskal_effsize is unaffected because it only sees ranks.
 
 metrics_outlier <- metrics_spread |>
   mutate(

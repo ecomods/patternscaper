@@ -63,7 +63,6 @@ class_metrics <- calculate_metrics(
 The package includes different methods to evaluate the calculated landscape metrics and find those that are most informative for distinguishing different spatial patterns. The general function to evaluate landscape metrics is `evaluate_metrics()`. It supports different methods for metric evaluation:
 
 - `coeffvar_all`: Coefficient of Variation (CV = SD/mean). Ranks metrics by their relative variability across landscapes.
-- `lin_mod_r2`: Fits value ~ pattern for each metric and ranks by R².
 - `mean_groups`: Calculates relative differences between pattern-specific means and overall mean, then sums across patterns.
 - `fisher_score`: Fisher Score (ratio of between-group to within-group variance). 
 - `kruskal_effsize`: Kruskal-Wallis H test effect sizes. Non-parametric test for differences between groups.
