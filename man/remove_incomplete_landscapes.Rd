@@ -16,8 +16,7 @@ remove_incomplete_landscapes(
 \item{predictor_cols}{Character vector. Names of predictor columns to check for NAs.}
 
 \item{na_action}{Character. How to resolve values that are missing for some but
-not all landscapes: \code{"drop_metrics"} (default, matching this
-function's only caller, \code{\link{train_metric_model}}) removes the
+not all landscapes: \code{"drop_metrics"} removes the
 affected metrics and keeps every landscape; \code{"drop_landscapes"}
 removes the affected landscapes and keeps every metric.}
 }
