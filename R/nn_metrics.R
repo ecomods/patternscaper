@@ -252,7 +252,9 @@ train_metric_model <- function(
   )
 
   # Combine the scaled predictors with the target variable
-  # Explicitly set factor levels in alphabetical order for consistency
+  # Explicitly set factor levels in alphabetical order for consistency. This
+  # order must match the neuralnet output columns, which follow the
+  # alphabetical order of model.matrix()'s columns
   class_names <- sort(unique(metrics_wide$pattern))
 
   training_data <- data.frame(
@@ -272,7 +274,6 @@ train_metric_model <- function(
   # Update cv_method and cv_folds based on validation
   cv_method <- cv_params$cv_method
   cv_folds <- cv_params$cv_folds
-  class_counts <- cv_params$class_counts
 
   # Run model with cross validation --------------------------------------------
   if (cv_method != "none") {
@@ -603,16 +604,6 @@ apply_metric_model <- function(
       "Input landscapes missing required metrics",
       "x" = "Missing: {.val {missing_features}}",
       "i" = "Model requires: {.val {nn_model$features}}"
-    ))
-  }
-
-  # Check for extra predictors (can happen with class-level metrics)
-  extra_predictors <- setdiff(predictor_names, nn_model$features)
-
-  if (length(extra_predictors) > 0) {
-    cli::cli_warn(c(
-      "Input landscapes contain additional metrics not used by the model",
-      "i" = "Ignored: {.val {extra_predictors}}"
     ))
   }
 

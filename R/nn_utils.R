@@ -622,9 +622,9 @@ evaluate_cv_performance <- function(
 #' @param metrics_wide Data frame in wide format. Output from metrics_to_wide().
 #' @param predictor_cols Character vector. Names of predictor columns to check for NAs.
 #' @param na_action Character. How to resolve values that are missing for some but
-#'   not all landscapes: \code{"drop_landscapes"} (default) removes the affected
-#'   landscapes and keeps every metric, \code{"drop_metrics"} removes the affected
-#'   metrics and keeps every landscape.
+#'   not all landscapes: \code{"drop_metrics"} removes the
+#'   affected metrics and keeps every landscape; \code{"drop_landscapes"}
+#'   removes the affected landscapes and keeps every metric.
 #'
 #' @return Data frame with incomplete landscapes removed.
 #'
@@ -633,7 +633,7 @@ evaluate_cv_performance <- function(
 remove_incomplete_landscapes <- function(
   metrics_wide,
   predictor_cols,
-  na_action = "drop_landscapes"
+  na_action = "drop_metrics"
 ) {
   # Drop predictor columns that are NA for every landscape. These metrics are
   # undefined for the given landscapes (e.g. iji or rpr for two-class

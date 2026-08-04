@@ -7,7 +7,7 @@
 remove_incomplete_landscapes(
   metrics_wide,
   predictor_cols,
-  na_action = "drop_landscapes"
+  na_action = "drop_metrics"
 )
 }
 \arguments{
@@ -16,9 +16,10 @@ remove_incomplete_landscapes(
 \item{predictor_cols}{Character vector. Names of predictor columns to check for NAs.}
 
 \item{na_action}{Character. How to resolve values that are missing for some but
-not all landscapes: \code{"drop_landscapes"} (default) removes the affected
-landscapes and keeps every metric, \code{"drop_metrics"} removes the affected
-metrics and keeps every landscape.}
+not all landscapes: \code{"drop_metrics"} (default, matching this
+function's only caller, \code{\link{train_metric_model}}) removes the
+affected metrics and keeps every landscape; \code{"drop_landscapes"}
+removes the affected landscapes and keeps every metric.}
 }
 \value{
 Data frame with incomplete landscapes removed.

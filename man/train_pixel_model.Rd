@@ -94,7 +94,9 @@ Is passed to \code{\link[keras3]{callback_early_stopping}}.}
 \item{verbose}{Logical. Show training progress and performance summaries (default: TRUE).
 When TRUE, displays epoch-by-epoch training/validation metrics during final model training,
 plus CV fold accuracies and final performance summaries. CV fold epoch details are not shown.
-When FALSE, runs silently.}
+When FALSE, most output is silenced, but warnings about the requested CV
+configuration being adjusted (e.g. folds reduced, switched to LOO) are
+always shown.}
 }
 \value{
 List containing:

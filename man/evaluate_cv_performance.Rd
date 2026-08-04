@@ -43,10 +43,13 @@ List with performance metrics:
   \describe{
     \item{confusion_matrix}{Confusion matrix table}
     \item{accuracy}{Overall accuracy (numeric)}
-    \item{per_class_metrics}{Tibble with per-class recall, precision, and F1 scores}
+    \item{per_class_metrics}{Tibble with per-class recall, precision, and F1
+      scores. A class the model knows but that does not occur in the
+      evaluation data gets NA throughout its row.}
     \item{cv_method}{CV method used (character)}
     \item{cv_folds}{Number of folds used (integer)}
-    \item{class_counts}{Sample counts per class (integer vector)}
+    \item{class_counts}{Sample counts per class (integer vector). NA for a
+      class the model knows but that does not occur in the evaluation data.}
     \item{validation_results}{Tibble with detailed predictions per landscape
       (only included if return_predictions = TRUE)}
   }
