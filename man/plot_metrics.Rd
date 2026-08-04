@@ -9,7 +9,8 @@ plot_metrics(
   selected_metrics = NULL,
   force = FALSE,
   metric_labels = "abbreviation",
-  label_wrap_width = NULL
+  label_wrap_width = NULL,
+  pattern_order = NULL
 )
 }
 \arguments{
@@ -46,6 +47,12 @@ to wrap full metric names in facet strips. Only used when
 of facet columns. The choice wraps by character count rather than rendered text width, so
 set it explicitly if your font, figure size, or metric selection needs
 something different.}
+
+\item{pattern_order}{Character vector giving the order in which patterns
+should appear along the y-axis, or NULL (default) for alphabetical order.
+Must contain exactly the patterns present in \code{metrics}, i.e. every
+pattern once and no others. The first element is drawn at the bottom of
+the axis.}
 }
 \value{
 A ggplot2 object showing boxplots of metric values by pattern type.
@@ -83,6 +90,13 @@ plot_metrics(
   selected_metrics = c("ai", "lsi"),
   metric_labels = "name",
   label_wrap_width = 15
+)
+
+# Control the order of patterns on the y-axis
+plot_metrics(
+  metrics,
+  selected_metrics = c("ai", "lsi"),
+  pattern_order = c("spots", "labyrinth")
 )
 }
 \seealso{

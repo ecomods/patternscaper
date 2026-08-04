@@ -288,3 +288,58 @@ test_that("plot_metrics respects a user-supplied label_wrap_width", {
   expect_true(grepl("\n", label_narrow))
   expect_false(grepl("\n", label_wide))
 })
+
+# pattern_order -------------------------------------------------------------
+
+test_that("plot_metrics defaults to alphabetical pattern order", {
+  p <- plot_metrics(test_metrics_landscape, selected_metrics = "ai")
+
+  expect_equal(
+    levels(p$data$pattern),
+    sort(unique(test_metrics_landscape$pattern))
+  )
+})
+
+test_that("plot_metrics respects a user-supplied pattern_order", {
+  custom_order <- c("labyrinth", "spots", "clustered")
+  p <- plot_metrics(
+    test_metrics_landscape,
+    selected_metrics = "ai",
+    pattern_order = custom_order
+  )
+
+  expect_equal(levels(p$data$pattern), custom_order)
+})
+
+test_that("plot_metrics stops on non-character pattern_order", {
+  expect_error(
+    plot_metrics(
+      test_metrics_landscape,
+      selected_metrics = "ai",
+      pattern_order = 1:3
+    ),
+    "pattern_order must be a character vector"
+  )
+})
+
+test_that("plot_metrics stops when pattern_order omits a pattern", {
+  expect_error(
+    plot_metrics(
+      test_metrics_landscape,
+      selected_metrics = "ai",
+      pattern_order = c("spots", "clustered")
+    ),
+    "pattern_order must contain exactly the patterns"
+  )
+})
+
+test_that("plot_metrics stops when pattern_order has an unknown pattern", {
+  expect_error(
+    plot_metrics(
+      test_metrics_landscape,
+      selected_metrics = "ai",
+      pattern_order = c("spots", "clustered", "labyrinth", "bands")
+    ),
+    "pattern_order must contain exactly the patterns"
+  )
+})

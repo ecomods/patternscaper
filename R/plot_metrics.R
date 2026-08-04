@@ -38,6 +38,11 @@
 #'   of facet columns. The choice wraps by character count rather than rendered text width, so
 #'   set it explicitly if your font, figure size, or metric selection needs
 #'   something different.
+#' @param pattern_order Character vector giving the order in which patterns
+#'   should appear along the y-axis, or NULL (default) for alphabetical order.
+#'   Must contain exactly the patterns present in \code{metrics}, i.e. every
+#'   pattern once and no others. The first element is drawn at the bottom of
+#'   the axis.
 #'
 #' @return A ggplot2 object showing boxplots of metric values by pattern type.
 #'
@@ -73,12 +78,20 @@
 #'   metric_labels = "name",
 #'   label_wrap_width = 15
 #' )
+#'
+#' # Control the order of patterns on the y-axis
+#' plot_metrics(
+#'   metrics,
+#'   selected_metrics = c("ai", "lsi"),
+#'   pattern_order = c("spots", "labyrinth")
+#' )
 plot_metrics <- function(
   metrics,
   selected_metrics = NULL,
   force = FALSE,
   metric_labels = "abbreviation",
-  label_wrap_width = NULL
+  label_wrap_width = NULL,
+  pattern_order = NULL
 ) {
   # Visual parameters (internal only, adjust during development)
   jitter_width <- 0.1
@@ -108,6 +121,13 @@ plot_metrics <- function(
     )
   }
 
+  # Validate pattern_order (type only; checked against the data further down)
+  if (!is.null(pattern_order) && !is.character(pattern_order)) {
+    cli::cli_abort(
+      "pattern_order must be a character vector of pattern names"
+    )
+  }
+
   # Validate input data
   if (!is.data.frame(metrics)) {
     cli::cli_abort(
@@ -123,6 +143,25 @@ plot_metrics <- function(
       "metrics is missing required columns: {paste(missing_cols, collapse = ', ')}"
     )
   }
+
+  # Validate pattern_order against the patterns actually present in the data
+  if (!is.null(pattern_order)) {
+    available_patterns <- unique(metrics$pattern)
+    missing_patterns <- setdiff(available_patterns, pattern_order)
+    extra_patterns <- setdiff(pattern_order, available_patterns)
+    if (length(missing_patterns) > 0 || length(extra_patterns) > 0) {
+      cli::cli_abort(c(
+        "pattern_order must contain exactly the patterns present in {.arg metrics}.",
+        "i" = if (length(missing_patterns) > 0) {
+          "Missing: {.val {missing_patterns}}"
+        },
+        "i" = if (length(extra_patterns) > 0) {
+          "Not in data: {.val {extra_patterns}}"
+        }
+      ))
+    }
+  }
+
   # Validate selected_metrics
   selected_metrics <- selected_metric_names(selected_metrics)
   if (!is.null(selected_metrics)) {
@@ -217,12 +256,19 @@ plot_metrics <- function(
     )
   }
 
-  # Prepare plot data
+  # Prepare plot data. Patterns are ordered alphabetically unless the caller
+  # supplies pattern_order; the first level is drawn at the bottom of the
+  # axis after coord_flip().
+  pattern_levels <- if (!is.null(pattern_order)) {
+    pattern_order
+  } else {
+    sort(unique(metrics$pattern))
+  }
   plot_data <- metrics |>
     dplyr::filter(metric %in% selected_metrics) |>
     dplyr::mutate(
       metric = factor(metric, levels = selected_metrics),
-      pattern = factor(pattern)
+      pattern = factor(pattern, levels = pattern_levels)
     )
 
   # Create base plot based on level
