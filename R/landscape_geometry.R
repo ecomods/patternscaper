@@ -150,7 +150,7 @@ training_geometry_from_metrics <- function(metrics) {
 #' @param training A one-row training-geometry summary (see
 #'   \code{\link{summarise_geometry}}), or `NULL`.
 #' @param tolerance Numeric. Relative difference in extent or aspect ratio beyond
-#'   which a landscape is flagged (default 0.25, i.e. 25%).
+#'   which a landscape is flagged (default 0.25, i.e. 25\%).
 #' @param verbose Logical. Whether to emit an informative note when the checks are
 #'   skipped because the model has no stored training geometry (default TRUE).
 #'

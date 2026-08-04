@@ -15,7 +15,7 @@ landscapes (columns `n_row`, `n_col`, `cell_size_x`, `cell_size_y`; see
 \code{\link{summarise_geometry}}), or `NULL`.}
 
 \item{tolerance}{Numeric. Relative difference in extent or aspect ratio beyond
-which a landscape is flagged (default 0.25, i.e. 25%).}
+which a landscape is flagged (default 0.25, i.e. 25\%).}
 
 \item{verbose}{Logical. Whether to emit an informative note when the checks are
 skipped because the model has no stored training geometry (default TRUE).}
