@@ -173,6 +173,36 @@ test_that("train_pixel_model handles model_path validation", {
   )
 })
 
+test_that("train_pixel_model saves model and overwrites an existing file", {
+  skip_if_not_installed("keras3")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+  temp_file <- tempfile(fileext = ".keras")
+  metadata_file <- sub("\\.keras$", "_metadata.rds", temp_file)
+
+  # Occupy the path first: keras3::save_model() defaults to overwrite = FALSE,
+  # which aborted after training had already finished
+  file.create(temp_file)
+
+  result <- train_pixel_model(
+    landscapes,
+    cv_method = "none",
+    epochs = 1,
+    model_path = temp_file,
+    verbose = FALSE
+  )
+
+  expect_true(file.exists(temp_file))
+  expect_true(file.exists(metadata_file))
+
+  # Metadata holds everything except the model itself
+  metadata <- readRDS(metadata_file)
+  expect_null(metadata$model)
+  expect_equal(metadata$classes, result$classes)
+
+  unlink(c(temp_file, metadata_file))
+})
+
 test_that("train_pixel_model works with cv_method='none'", {
   skip_if_not_installed("keras3")
 

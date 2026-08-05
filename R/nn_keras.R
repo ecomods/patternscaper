@@ -582,7 +582,10 @@ train_pixel_model <- function(
 
   # Save model if requested
   if (!is.null(model_path)) {
-    keras3::save_model(final_model, model_path)
+    # overwrite = TRUE because keras3 otherwise aborts on an existing file,
+    # which would discard the model that was just trained. Matches
+    # train_metric_model(), where write_rds() overwrites.
+    keras3::save_model(final_model, model_path, overwrite = TRUE)
 
     # Save metadata separately
     metadata_path <- gsub("\\.keras$", "_metadata.rds", model_path)
