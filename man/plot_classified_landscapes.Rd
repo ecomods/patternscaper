@@ -22,7 +22,11 @@ the output of \code{\link{apply_metric_model}}/\code{\link{apply_pixel_model}}.}
 The easiest way to ensure this is to use the same list of landscapes for both training and plotting.}
 
 \item{only_misclassified}{Logical; if \code{TRUE}, only misclassified
-landscapes are plotted. Default is \code{FALSE}.}
+landscapes are plotted. Default is \code{FALSE}. If every landscape was
+classified correctly there is nothing to plot: the function reports this
+with a message and returns an empty placeholder plot rather than raising
+an error, so scripts that always plot their misclassifications keep
+running.}
 
 \item{score_note}{Logical; if \code{TRUE} (default), a one-line caption is
 added under the whole figure stating that the bracketed number is the score
@@ -34,7 +38,9 @@ such as \code{show_legend}, \code{legend_title}, \code{ncol}, \code{max_landscap
 \code{force}, or \code{subset_index}.}
 }
 \value{
-A patchwork object combining landscape plots with classification annotations.
+A patchwork object combining landscape plots with classification
+  annotations. With \code{only_misclassified = TRUE} and no misclassified
+  landscape, an empty placeholder plot carrying that message.
 }
 \description{
 Plots landscapes with neural network classification results, highlighting

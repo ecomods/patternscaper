@@ -392,7 +392,7 @@ test_that("plot_classified_landscapes renders predicted-only titles for unlabele
   expect_false(any(grepl("Actual:", titles)))
 })
 
-test_that("plot_classified_landscapes errors when no misclassifications", {
+test_that("plot_classified_landscapes returns a placeholder when nothing is misclassified", {
   landscapes <- list(
     create_landscape("sharp", width = 20, height = 20),
     create_landscape("diffuse", width = 20, height = 20)
@@ -406,12 +406,18 @@ test_that("plot_classified_landscapes errors when no misclassifications", {
     score = c(0.95, 0.88)
   )
 
-  expect_error(
-    plot_classified_landscapes(
+  # 100% accuracy is a legitimate outcome, so this must not abort - scripts
+  # that always plot their misclassifications have to keep running.
+  expect_message(
+    result <- plot_classified_landscapes(
       classification,
       landscapes,
       only_misclassified = TRUE
     ),
-    "No misclassified landscapes found"
+    "All landscapes classified correctly"
   )
+
+  # Still a patchwork, so printing and ggsave() work on the result
+  expect_s3_class(result, "patchwork")
+  expect_no_error(ggplot2::ggplot_build(result))
 })

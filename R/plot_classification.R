@@ -11,7 +11,9 @@
 #' @param landscapes A list of landscape objects corresponding one-to-one and in the same order as the rows in `classification`.
 #'   The easiest way to ensure this is to use the same list of landscapes for both training and plotting.
 #' @param only_misclassified Logical; if \code{TRUE}, only misclassified
-#'   landscapes are plotted. Default is \code{FALSE}.
+#'   landscapes are plotted. Default is \code{FALSE}. If every landscape was
+#'   classified correctly there is nothing to plot: the function reports this
+#'   with a message and returns an empty placeholder plot.
 #' @param score_note Logical; if \code{TRUE} (default), a one-line caption is
 #'   added under the whole figure stating that the bracketed number is the score
 #'   of the predicted class and not a calibrated probability. Set to
@@ -20,7 +22,9 @@
 #'   such as \code{show_legend}, \code{legend_title}, \code{ncol}, \code{max_landscapes},
 #'   \code{force}, or \code{subset_index}.
 #'
-#' @return A patchwork object combining landscape plots with classification annotations.
+#' @return A patchwork object combining landscape plots with classification
+#'   annotations. With \code{only_misclassified = TRUE} and no misclassified
+#'   landscape, an empty placeholder plot carrying that message.
 #'
 #' @examples
 #' \donttest{
@@ -140,10 +144,26 @@ plot_classified_landscapes <- function(
       # here.
       dplyr::filter(!is.na(predicted_class) & predicted_class != actual_class)
     if (nrow(classification) == 0) {
-      cli::cli_abort(
-        "No misclassified landscapes found. To plot all classified
-       landscapes, set only_misclassified = FALSE."
-      )
+      # If there are no misclassified landscapes, return a placeholder
+      # and inform the user.
+      cli::cli_inform(c(
+        "i" = "All landscapes classified correctly - nothing to plot.",
+        "i" = "Set {.code only_misclassified = FALSE} to plot all landscapes."
+      ))
+
+      placeholder <- ggplot2::ggplot() +
+        ggplot2::annotate(
+          "text",
+          x = 0,
+          y = 0,
+          label = "All landscapes classified correctly"
+        ) +
+        ggplot2::theme_void()
+
+      # Wrapped so the return type is a patchwork object either way. Returns
+      # before the score_note caption, which would make no sense on an empty
+      # plot.
+      return(patchwork::wrap_plots(placeholder))
     }
   }
 
