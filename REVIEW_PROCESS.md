@@ -99,11 +99,38 @@ per-pattern parameter is documented — and both public functions point users at
 `spot_radius` / `spot_radius_sd` / `radius_noise_fraction` / `regular_spots`, what their bounds
 are, or what ranges the batch generator samples by default. The API got smaller (good) but the
 documentation did not follow it.
-- **Fix:** surface the parameter reference on the public pages. `landscape_param_specs()`
-  (`R/landscape_parameter_validation.R:137`) already holds type, `min`/`max` and `batch_range`
-  for every parameter of all 11 patterns — generating the reference from it (roxygen `@evalRd`,
-  or a dedicated `?landscape_parameters` topic) keeps it from drifting the way M13 did.
-  Decision needed: auto-generated table vs. hand-written prose (see M19).
+**Verified 2026-08-05** (against the installed package): `?create_landscape_bare` *does* resolve —
+`@keywords internal` affects indexing, not the help page — but 0 of the 11 topics appear in the
+installed `INDEX`, so `help(package = "spatPatClassifyR")` does not list them. Reachable by exact
+name, invisible when browsing. `_pkgdown.yml` already lists all 11 explicitly, so the *website*
+side is fine; the console side is not.
+
+**Approach (settled 2026-08-05 after a peer review by GPT-5.4 and Gemini — both independently
+rejected the first proposal, which was to keep the docs on the generator pages):**
+1. **Enrich `landscape_param_specs()` with a `desc` field** so names, types, bounds, batch ranges
+   *and* one-line descriptions all live in one object. Today the metadata is in the spec table and
+   the prose is in the generators' `@param` tags, with nothing keeping them in sync — both
+   reviewers called this split the real problem, not a footnote. *Do this first; every version of
+   the plan needs it.*
+2. **Add a generated `?landscape_patterns` overview topic** — a doc-only topic (roxygen `@name` +
+   `NULL`, no function attached, so no `\usage`), with the per-pattern table produced from the
+   spec via `@evalRd`. Drift-proof by construction. Link to it from the *top* of both public pages,
+   not from `@seealso` at the bottom.
+3. **Per-pattern deep-dive pages — on hold, see M21.** Do *not* build 11 doc-only topics until the
+   parameter-constructor decision is made; `?spots_params` pages would replace them.
+4. **`@noRd` the 11 generators** once their content has moved, removing the dead-end pages. ⚠️
+   `_pkgdown.yml` lists all 11 topics explicitly and pkgdown *errors* on an unresolvable
+   `contents:` entry — that section must be updated in the same commit.
+
+**Why not keep the docs on the generator pages:** the `\usage` section would show a signature the
+user cannot call, and `Usage` is the affordance users copy from; a "do not call directly" note does
+not fix that. Precedent for doc-only topics (verified locally): `?mgcv::smooth.terms` and
+`?mgcv::gam.models` are topics with no function of that name; `parsnip` uses `?details_*` per
+engine.
+
+**Backstop against drift:** add a test comparing the spec's parameter names per pattern against
+the corresponding `create_landscape_*()` formals (minus `width`/`height`), so a mismatch fails the
+suite instead of waiting to be noticed.
 
 ### M19. [new] `create_landscape()`/`create_landscapes()` docs don't describe what actually happens  — *(added 2026-08-05)*
 Beyond the missing parameter table (M18), the two public help pages leave the batch behaviour
@@ -126,6 +153,51 @@ longer matches the 2-function public API. It does *not* call the internal functi
 (checked — it goes through `create_landscape()`), so it is not broken, just mis-shaped.
 - **Fix:** restructure around `create_landscape()` / `create_landscapes()` once M18 lands, and
   link the parameter reference from it.
+- **Partly on hold (M21).** The *visual tour* half — one figure per pattern showing what it looks
+  like — is safe to write now and is arguably the vignette's main job (it answers "which pattern do
+  I want?" far better than a help page can). The *parameter-passing* sections are not: if M21 lands
+  they would need rewriting from `list(n_spots = 15)` to `spots_params(n_spots = 15)`.
+
+### M21. [new] Per-pattern parameter constructors (`spots_params()` …) — open API decision  — *(added 2026-08-05)*
+**Deferred deliberately — decide before investing in per-pattern documentation (M18/M19/M20).**
+
+Because `create_landscape()` dispatches through `...`, pattern parameters are invisible to
+autocomplete: typing `create_landscape("spots", ` will never suggest `n_spots`. Completion is
+driven by `formals()`, and `...` has nothing to offer. No documentation fixes this — only an API
+change does.
+
+**The idiom:** export one small parameter-constructor per pattern whose formals *are* that
+pattern's parameters, returning a validated plain list:
+
+    create_landscape("spots", params = spots_params(n_spots = 15, spot_radius = 10))
+    create_landscapes(n = 50, params_list = list(spots = spots_params(n_spots = c(5, 10))))
+
+Established R pattern for "one entry point, many type-specific parameter sets":
+`stats::glm(family = binomial(...))` and its `control = glm.control(...)`, `lme4::lmerControl()`,
+`ggplot2::element_text()`, `keras3::optimizer_adam()` (already a dependency).
+
+**What it would solve beyond autocomplete:**
+- The typo hazard disappears — `spots_params(n_spot = 5)` errors at the call site instead of
+  silently partial-matching (single path) or being warned-and-ignored (batch path).
+- **It resolves the M18 documentation problem outright.** `?spots_params` is a real exported
+  function with an honest `\usage`, runnable examples, and an entry in `help(package=)` — no
+  doc-only topics, no `\usage` lie, no dead-end pages on non-callable functions.
+- Validation moves to construction time, with the pattern known.
+
+**Costs:** public API goes 2 → 13 exports again, partially reversing the 2026-08-04 reduction
+(counter-argument: these are *parameter constructors*, not 11 ways to generate a landscape — the
+"one obvious way to generate" property is preserved). It is real code, not just docs. And the
+value depends on how much autocomplete matters for a companion package whose users mostly copy
+from vignettes.
+
+**Cheapness:** it can be **purely additive** — `spots_params()` returns a plain list, so
+`list(n_spots = 15)` keeps working unchanged. No deprecation, no result change. Verified
+2026-08-05: the analysis repo has **zero** `params_list` call sites, so the blast radius is nil.
+
+**Consequence for M18/M19/M20 — do not build 11 doc-only per-pattern topics until this is
+decided**, because `?spots_params` pages would replace them. Safe to build regardless: the
+`desc`-enriched spec table and the single `?landscape_patterns` overview (a cross-pattern
+comparison table, which constructors do not provide).
 
 ### M17. Add regression tests for the correctness bugs above  — [Claude] *(§7.1)*
 *Partially done.* (H1) `theme_landscape()` and (M2) `frequency` variation both have tests
@@ -238,12 +310,26 @@ The original "first batch" is fully done (H1, H2, M16, M14, M2, M1, M10) — see
 Remaining work, grouped by **whether it can change published results**, because that determines
 whether the analysis repo has to be re-run:
 
-**Group A — cannot change any result** (docs, messages, tests, file names). Safe to do in one go:
-1. **M18** — make landscape parameters discoverable from the public API *(the main gap)*.
-2. **M19** — document rotation applicability, `custom_pattern`, `params_list` semantics, `@return`.
-3. **M20** — restructure `landscape-generation.qmd` around the 2-function API.
+**Group A — cannot change any result** (docs, messages, tests, file names). *In progress.*
+**Constraint (2026-08-05): do only work that survives the M21 decision either way.** M21
+(per-pattern parameter constructors) would replace per-pattern doc topics with `?spots_params`
+pages, so anything built per-pattern now is at risk of being thrown away.
+
+*Safe regardless of M21 — do these:*
+1. **M18 step 1** — add a `desc` field to `landscape_param_specs()`. Needed by every version of
+   the plan (generates the overview; would also document/validate the M21 constructors).
+2. **M18 step 2** — the generated `?landscape_patterns` overview topic. A cross-pattern comparison
+   table is something constructors do *not* provide, so it survives either way.
+3. **M19** — document rotation applicability, `custom_pattern`, `params_list` semantics, `@return`.
 4. **L26** — one-line `_pkgdown.yml` fix so `build_reference()` stops erroring.
 5. **L19** — file renames; **L17** — `sapply()` → `vapply()`; **L21** — README badges.
+6. **M20**, visual-tour half only — one figure per pattern in the vignette.
+
+*On hold until M21 is decided — do NOT start:*
+- 11 per-pattern doc-only topics (M18 step 3).
+- Rewriting the generators' `@examples` to `create_landscape("bands", ...)` — under either
+  outcome those pages get `@noRd`'d, so the examples disappear. Skip entirely.
+- The parameter-passing sections of the vignette (M20).
 
 **Group B — changes only error/warning paths, not successful runs.** Existing golden checks
 should stay byte-identical; only failure behaviour moves:
@@ -251,6 +337,11 @@ should stay byte-identical; only failure behaviour moves:
    silently dropped invalid pattern names, swallowed error causes), plus the M17 test.
 7. **L24** — `plot_classified_landscapes(only_misclassified = TRUE)` at 100% accuracy.
 8. **L7** — single-landscape handling parity between the two `apply_*`.
+
+**Open decisions (not tasks — settle these before the work they gate):**
+- **M21** — per-pattern parameter constructors. Gates M18 step 3 and half of M20.
+- **L25** — `radius_noise_fraction` batch randomization. Gates a self-organized re-run.
+- **L9** — generator signature defaults vs. batch ranges.
 
 **Group C — will or may change results; needs the analysis re-run and a manuscript check:**
 9. **L25** — `radius_noise_fraction` batch randomization *(decision first, then re-run)*.
