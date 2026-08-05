@@ -257,7 +257,11 @@ test_that("train_pixel_model works with cv_method='none'", {
 test_that("train_pixel_model works with cv_method='k-fold'", {
   skip_if_not_installed("keras3")
 
-  landscapes <- helper_create_tiny_training_set(n_per_class = 4)
+  # 9 per class is the smallest set that keeps cv_folds = 3: validate_cv_params()
+  # requires floor(min_class_count / 3) >= cv_folds, and anything less silently
+  # downgrades the run to LOO, which satisfies the assertions below without ever
+  # exercising the k-fold branch
+  landscapes <- helper_create_tiny_training_set(n_per_class = 9)
 
   model <- train_pixel_model(
     landscapes,
@@ -272,6 +276,19 @@ test_that("train_pixel_model works with cv_method='k-fold'", {
   expect_s3_class(model$performance$confusion_matrix, "table")
   expect_type(model$performance$accuracy, "double")
   expect_s3_class(model$performance$per_class_metrics, "tbl_df")
+
+  expect_equal(model$performance$cv_method, "k-fold")
+  expect_equal(model$performance$cv_folds, 3)
+
+  # Every landscape is held out exactly once across the folds
+  validation <- model$performance$validation_results
+  expect_equal(nrow(validation), length(landscapes))
+  expect_setequal(validation$landscape_id, seq_along(landscapes))
+
+  # find_balanced_cv_folds() stratifies: 9 landscapes per class over 3 folds
+  # puts 3 of every class in every fold
+  fold_class_counts <- table(validation$fold, validation$actual_class)
+  expect_true(all(fold_class_counts == 3))
 })
 
 
@@ -369,8 +386,16 @@ test_that("apply_pixel_model aborts on landscapes with NA cells", {
 test_that("apply_pixel_model warns on aspect-ratio distortion", {
   # Stub model + try(): the aspect warning fires before the CNN is used, and the
   # subsequent predict() on the stub errors, which try() swallows.
-  stub_model <- list(model = NULL, classes = c("a", "b"), input_shape = c(20, 20, 1))
-  wide <- landscape(matrix(1, nrow = 20, ncol = 40), pattern = "a", name = "wide")
+  stub_model <- list(
+    model = NULL,
+    classes = c("a", "b"),
+    input_shape = c(20, 20, 1)
+  )
+  wide <- landscape(
+    matrix(1, nrow = 20, ncol = 40),
+    pattern = "a",
+    name = "wide"
+  )
 
   w <- capture_warnings(try(apply_pixel_model(wide, stub_model), silent = TRUE))
   expect_true(any(grepl("distorted", w)))
@@ -378,10 +403,21 @@ test_that("apply_pixel_model warns on aspect-ratio distortion", {
 
 test_that("apply_pixel_model does not warn when aspect ratio matches", {
   # Larger but same aspect (40x40 -> 20x20 is isotropic): no distortion warning.
-  stub_model <- list(model = NULL, classes = c("a", "b"), input_shape = c(20, 20, 1))
-  square <- landscape(matrix(1, nrow = 40, ncol = 40), pattern = "a", name = "sq")
+  stub_model <- list(
+    model = NULL,
+    classes = c("a", "b"),
+    input_shape = c(20, 20, 1)
+  )
+  square <- landscape(
+    matrix(1, nrow = 40, ncol = 40),
+    pattern = "a",
+    name = "sq"
+  )
 
-  w <- capture_warnings(try(apply_pixel_model(square, stub_model), silent = TRUE))
+  w <- capture_warnings(try(
+    apply_pixel_model(square, stub_model),
+    silent = TRUE
+  ))
   expect_false(any(grepl("distorted", w)))
 })
 
