@@ -186,7 +186,7 @@ test_that("plot_classified_landscapes rejects invalid landscape objects", {
   )
 })
 
-test_that("plot_classified_landscapes titles unclassified landscapes", {
+test_that("plot_classified_landscapes titles landscapes with no prediction", {
   landscapes <- create_fixture_landscapes("minimal")[1:2]
 
   classification <- tibble::tibble(
@@ -210,12 +210,14 @@ test_that("plot_classified_landscapes titles unclassified landscapes", {
     character(1)
   )
 
-  # The classified landscape keeps its normal title, the unclassified one is
-  # labelled as such instead of falling through to "no title"
+  # The classified landscape keeps its normal title; the one the model could
+  # not classify says so instead of falling through to "no title". Worded as a
+  # missing prediction, not "unclassified", which in actual_class means the
+  # true class is unknown.
   expect_match(titles[1], "spots")
-  expect_match(titles[2], "Unclassified")
+  expect_match(titles[2], "No prediction")
   expect_match(titles[2], "Actual: labyrinth")
-  expect_false(any(grepl("no title", titles)))
+  expect_false(any(grepl("no title|Unclassified", titles)))
 })
 
 test_that("plot_classified_landscapes rejects length mismatch", {
@@ -390,6 +392,59 @@ test_that("plot_classified_landscapes renders predicted-only titles for unlabele
   expect_match(titles[2], "bands")
   expect_false(any(grepl("no title", titles)))
   expect_false(any(grepl("Actual:", titles)))
+})
+
+test_that("plot_classified_landscapes excludes landscapes with unknown true class from misclassifications", {
+  landscapes <- list(
+    create_landscape("sharp", width = 20, height = 20),
+    create_landscape("diffuse", width = 20, height = 20),
+    create_landscape("random", width = 20, height = 20)
+  )
+
+  # Both sentinels mean "true class unknown", so neither row is a
+  # misclassification - only the third is. The "unclassified" string used to
+  # slip through the filter and be plotted as an error.
+  classification <- data.frame(
+    landscape_id = 1:3,
+    actual_class = c(NA_character_, "unclassified", "random"),
+    predicted_class = c("sharp", "diffuse", "bands"),
+    score = c(0.91, 0.72, 0.55)
+  )
+
+  result <- plot_classified_landscapes(
+    classification,
+    landscapes,
+    only_misclassified = TRUE
+  )
+
+  # patchwork carries the last panel on the object itself, so a single-panel
+  # result has an empty $patches$plots
+  expect_length(result$patches$plots, 0)
+  expect_match(result$labels$title, "bands")
+  expect_match(result$labels$title, "Actual: random")
+})
+
+test_that("plot_classified_landscapes reports nothing to plot when only the true class is unknown", {
+  landscapes <- list(
+    create_landscape("sharp", width = 20, height = 20),
+    create_landscape("diffuse", width = 20, height = 20)
+  )
+
+  classification <- data.frame(
+    landscape_id = 1:2,
+    actual_class = c(NA_character_, "unclassified"),
+    predicted_class = c("sharp", "diffuse"),
+    score = c(0.91, 0.72)
+  )
+
+  expect_message(
+    plot_classified_landscapes(
+      classification,
+      landscapes,
+      only_misclassified = TRUE
+    ),
+    "All landscapes classified correctly"
+  )
 })
 
 test_that("plot_classified_landscapes marks correct and misclassified titles", {

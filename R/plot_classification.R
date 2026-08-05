@@ -13,7 +13,8 @@
 #' @param only_misclassified Logical; if \code{TRUE}, only misclassified
 #'   landscapes are plotted. Default is \code{FALSE}. If every landscape was
 #'   classified correctly there is nothing to plot: the function reports this
-#'   with a message and returns an empty placeholder plot.
+#'   with a message and returns an empty placeholder plot. Landscapes whose
+#'   true class is unknown are not counted as misclassified.
 #' @param score_note Logical; if \code{TRUE} (default), a one-line caption is
 #'   added under the whole figure stating that the bracketed number is the score
 #'   of the predicted class and not a calibrated probability. Set to
@@ -140,9 +141,15 @@ plot_classified_landscapes <- function(
   # If only_misclassified is TRUE, filter to only misclassified landscapes
   if (only_misclassified) {
     classification <- classification |>
-      # Unclassified landscapes are not misclassifications, so they are excluded
-      # here.
-      dplyr::filter(!is.na(predicted_class) & predicted_class != actual_class)
+      # A landscape with no prediction is not a misclassification, and without a
+      # known true class one is undefined. Both forms of "true class unknown"
+      # are excluded, matching how apply_*() picks the rows it scores.
+      dplyr::filter(
+        !is.na(predicted_class) &
+          !is.na(actual_class) &
+          actual_class != "unclassified" &
+          predicted_class != actual_class
+      )
     if (nrow(classification) == 0) {
       # If there are no misclassified landscapes, return a placeholder
       # and inform the user.
@@ -174,10 +181,11 @@ plot_classified_landscapes <- function(
         # Landscape could not be classified: apply_metric_model() returns NA
         # when a required metric was unavailable for it. Must be matched before
         # the equality branches, which would both give NA and fall through.
+        # Worded as a missing prediction.
         is.na(predicted_class) ~ dplyr::if_else(
           is.na(actual_class) | actual_class == "unclassified",
-          "Unclassified",
-          paste0("Unclassified<br>Actual: ", actual_class)
+          "No prediction",
+          paste0("No prediction<br>Actual: ", actual_class)
         ),
         # Unlabeled input (true class unknown, i.e. NA or "unclassified"):
         # show a predicted-only title.
