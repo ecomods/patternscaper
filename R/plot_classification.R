@@ -19,9 +19,14 @@
 #'   added under the whole figure stating that the bracketed number is the score
 #'   of the predicted class and not a calibrated probability. Set to
 #'   \code{FALSE} when the surrounding figure caption already says so.
+#' @param subset_index Integer vector. Which of the plotted landscapes to show,
+#'   e.g. to keep a large figure readable. Indexes the rows of
+#'   \code{classification} that would otherwise be plotted, so with
+#'   \code{only_misclassified = TRUE} it selects among the misclassified ones.
+#'   Default \code{NULL} plots all of them.
 #' @param ... Additional arguments passed to \code{\link{plot_landscapes}},
-#'   such as \code{show_legend}, \code{legend_title}, \code{ncol}, \code{max_landscapes},
-#'   \code{force}, or \code{subset_index}.
+#'   such as \code{show_legend}, \code{legend_title}, \code{ncol},
+#'   \code{max_landscapes}, or \code{force}.
 #'
 #' @return A patchwork object combining landscape plots with classification
 #'   annotations. With \code{only_misclassified = TRUE} and no misclassified
@@ -65,6 +70,7 @@ plot_classified_landscapes <- function(
   landscapes,
   only_misclassified = FALSE,
   score_note = TRUE,
+  subset_index = NULL,
   ...
 ) {
   if (!is.logical(score_note) || length(score_note) != 1) {
@@ -172,6 +178,30 @@ plot_classified_landscapes <- function(
       # plot.
       return(patchwork::wrap_plots(placeholder))
     }
+  }
+
+  # Applied here, after the only_misclassified filter, so the index refers to
+  # the landscapes actually being plotted.
+  if (!is.null(subset_index)) {
+    if (!is.numeric(subset_index) || anyNA(subset_index)) {
+      cli::cli_abort(
+        "{.arg subset_index} must be a numeric vector without missing values"
+      )
+    }
+
+    invalid_index <- subset_index[
+      subset_index < 1 | subset_index > nrow(classification)
+    ]
+
+    if (length(invalid_index) > 0) {
+      cli::cli_abort(c(
+        "Invalid {.arg subset_index} values detected.",
+        "x" = "{.arg subset_index} must be between 1 and {nrow(classification)}",
+        "i" = "Found {length(invalid_index)} invalid value{?s}: {.val {unique(invalid_index)}}"
+      ))
+    }
+
+    classification <- classification[subset_index, , drop = FALSE]
   }
 
   # Add plot titles as a column to the validation results

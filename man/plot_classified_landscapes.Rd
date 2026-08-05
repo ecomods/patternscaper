@@ -9,6 +9,7 @@ plot_classified_landscapes(
   landscapes,
   only_misclassified = FALSE,
   score_note = TRUE,
+  subset_index = NULL,
   ...
 )
 }
@@ -25,16 +26,22 @@ The easiest way to ensure this is to use the same list of landscapes for both tr
 landscapes are plotted. Default is \code{FALSE}. If every landscape was
 classified correctly there is nothing to plot: the function reports this
 with a message and returns an empty placeholder plot. Landscapes whose
-true class is unknown are never counted as misclassified.}
+true class is unknown are not counted as misclassified.}
 
 \item{score_note}{Logical; if \code{TRUE} (default), a one-line caption is
 added under the whole figure stating that the bracketed number is the score
 of the predicted class and not a calibrated probability. Set to
 \code{FALSE} when the surrounding figure caption already says so.}
 
+\item{subset_index}{Integer vector. Which of the plotted landscapes to show,
+e.g. to keep a large figure readable. Indexes the rows of
+\code{classification} that would otherwise be plotted, so with
+\code{only_misclassified = TRUE} it selects among the misclassified ones.
+Default \code{NULL} plots all of them.}
+
 \item{...}{Additional arguments passed to \code{\link{plot_landscapes}},
-such as \code{show_legend}, \code{legend_title}, \code{ncol}, \code{max_landscapes},
-\code{force}, or \code{subset_index}.}
+such as \code{show_legend}, \code{legend_title}, \code{ncol},
+\code{max_landscapes}, or \code{force}.}
 }
 \value{
 A patchwork object combining landscape plots with classification

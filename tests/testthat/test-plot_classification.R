@@ -447,6 +447,78 @@ test_that("plot_classified_landscapes reports nothing to plot when only the true
   )
 })
 
+test_that("plot_classified_landscapes subsets the landscapes it plots", {
+  landscapes <- lapply(
+    1:4,
+    function(i) create_landscape("sharp", width = 20, height = 20)
+  )
+
+  classification <- data.frame(
+    landscape_id = 1:4,
+    actual_class = rep("sharp", 4),
+    predicted_class = c("sharp", "bands", "sharp", "diffuse"),
+    score = c(0.91, 0.72, 0.83, 0.55)
+  )
+
+  # Used to abort: subset_index was forwarded to plot_landscapes(), which
+  # subset the landscapes but not the internally generated titles.
+  result <- plot_classified_landscapes(
+    classification,
+    landscapes,
+    subset_index = 1:2
+  )
+  expect_s3_class(result, "patchwork")
+  expect_length(result$patches$plots, 1) # 2 panels: 1 patch + the plot itself
+
+  titles <- c(
+    result$patches$plots[[1]]$labels$title,
+    result$labels$title
+  )
+  expect_match(titles[1], "sharp")
+  expect_match(titles[2], "bands")
+
+  # Indexes the rows that survive the filter, not the original rows
+  misclassified <- plot_classified_landscapes(
+    classification,
+    landscapes,
+    only_misclassified = TRUE,
+    subset_index = 2
+  )
+  expect_length(misclassified$patches$plots, 0) # only the 2nd of 2 wrong ones
+  expect_match(misclassified$labels$title, "diffuse")
+})
+
+test_that("plot_classified_landscapes rejects invalid subset_index", {
+  landscapes <- lapply(
+    1:2,
+    function(i) create_landscape("sharp", width = 20, height = 20)
+  )
+
+  classification <- data.frame(
+    landscape_id = 1:2,
+    actual_class = c("sharp", "sharp"),
+    predicted_class = c("sharp", "bands"),
+    score = c(0.91, 0.72)
+  )
+
+  expect_error(
+    plot_classified_landscapes(classification, landscapes, subset_index = 3),
+    "Invalid `subset_index` values"
+  )
+  expect_error(
+    plot_classified_landscapes(classification, landscapes, subset_index = 0),
+    "Invalid `subset_index` values"
+  )
+  expect_error(
+    plot_classified_landscapes(classification, landscapes, subset_index = "1"),
+    "must be a numeric vector"
+  )
+  expect_error(
+    plot_classified_landscapes(classification, landscapes, subset_index = NA),
+    "must be a numeric vector"
+  )
+})
+
 test_that("plot_classified_landscapes marks correct and misclassified titles", {
   landscapes <- list(
     create_landscape("sharp", width = 20, height = 20),
