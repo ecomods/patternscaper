@@ -51,7 +51,16 @@ experiments, but the documented 3-class path is statistically unsound.
 - **Fix:** either (a) restrict/validate input to binary and drop the 3-class claim, or
   (b) one-hot categories into channels before `abind` (channels = n_classes).
 
-### M6. [Fable] Fold accuracy/loss read from hardcoded keys that break if `metrics` is customized  — [Fable] *(F3)*
+### M6. ~~Fold accuracy/loss read from hardcoded keys that break if `metrics` is customized~~ — **DONE 2026-08-05** (`cf69fb5`)
+**Resolved by removing the `metrics` parameter from `train_pixel_model()`**, rather than by making the
+key dynamic. It was the only argument that cannot affect the model (keras metrics are monitoring
+only), and neither documented alternative was a real choice: measured, `categorical_accuracy` returns
+the *identical* value to `"accuracy"` with one-hot targets, and `top_k_categorical_accuracy` at 6
+classes asks whether the true class is in the top 5 of 6. The three hardcoded keys are now correct by
+construction; `compile_keras_model()`'s own unused `metrics` argument went with it. Nothing in the
+package, tests, vignettes or the analysis repo passed it. Original finding below.
+
+
 `R/nn_keras.R:364,380-381`. The CV loop assumes the keras `evaluate()` result is keyed exactly
 `"accuracy"`/`"loss"`. But `metrics` is user-facing (`:112`, documented `:40-42` to accept
 `"categorical_accuracy"`, `"top_k_categorical_accuracy"`). If the user passes anything other
@@ -158,8 +167,12 @@ longer matches the 2-function public API. It does *not* call the internal functi
   I want?" far better than a help page can). The *parameter-passing* sections are not: if M21 lands
   they would need rewriting from `list(n_spots = 15)` to `spots_params(n_spots = 15)`.
 
-### M21. [new] Per-pattern parameter constructors (`spots_params()` …) — open API decision  — *(added 2026-08-05)*
-**Deferred deliberately — decide before investing in per-pattern documentation (M18/M19/M20).**
+### M21. [new] Per-pattern parameter constructors (`pattern_spots()` …)  — *(added 2026-08-05)*
+**DECIDED 2026-08-05: go ahead.** Step-by-step implementation plan, milestones and verification
+schedule live in `../spatPatClassifyR_paper/PATTERN_CONSTRUCTORS_PLAN.md` (temporary working
+document — delete when done). This supersedes M18 steps 3–4: the `pattern_*` help pages *are* the
+per-pattern documentation, so no doc-only topics are needed. Naming settled as `pattern_*` (not
+`*_params`) so `pattern_<TAB>` lists all 11.
 
 Because `create_landscape()` dispatches through `...`, pattern parameters are invisible to
 autocomplete: typing `create_landscape("spots", ` will never suggest `n_spots`. Completion is
@@ -208,7 +221,11 @@ comparison table, which constructors do not provide).
 
 ## 🟡 Low — polish, docs, style, small consistency wins
 
-### L4. [Fable] Pixel model's "k-fold" test silently runs LOO — the k-fold path is never exercised  — [Fable] *(F7)*
+### L4. ~~Pixel model's "k-fold" test silently runs LOO — the k-fold path is never exercised~~ — **DONE 2026-08-05** (`e39f716`)
+Fixture raised to 9 landscapes per class (the smallest set that keeps `cv_folds = 3`), and the branch
+pinned with assertions on `cv_method`/`cv_folds`, one hold-out per landscape across the folds, and
+stratified fold composition (3 of every class in every fold). Original finding below.
+
 `tests/testthat/test-nn_keras.R:125-137` (confirmed still open 2026-08-05).
 `test_that("train_pixel_model works with cv_method='k-fold'")` uses `n_per_class = 4` with
 `cv_folds = 3`, but
@@ -238,6 +255,11 @@ metric's Fisher score is `NA`. Low incidence in the balanced `create_landscapes(
 `apply_pixel_model()` explicitly wraps a lone `landscape` into a list (`R/nn_keras.R:591-593`);
 `apply_metric_model()` leans on `calculate_metrics()`. Make both do the same explicit wrap
 *(verify both accept a single `landscape` identically)*.
+
+*Note 2026-08-05:* still open, and it is about the two **`apply_*`** functions only. The related
+train-side problem — `train_pixel_model()` reporting a lone landscape's own fields as "Invalid
+element(s) at index(es): 1, 2, 3, 4" — was a separate finding, fixed in `a1ec361` by *aborting* with
+a clear message rather than wrapping, since training on one landscape is never valid.
 
 ### L9. Default parameters drift between single generators and the batch wrapper  — [Claude] *(§2.5)*
 *Mostly resolved 2026-08-04 by M13.* Two of the three sources are now derived from
@@ -340,7 +362,8 @@ should stay byte-identical; only failure behaviour moves:
 **Group C — will or may change results; needs the analysis re-run and a manuscript check:**
 9. **L25** — `radius_noise_fraction` batch randomization *(decision first, then re-run)*.
 10. **M11 / L22** — unify the `apply_*` return contract (touches the analysis repo's call sites).
-11. **M5 / M6** — pixel-model input encoding and the hardcoded `evaluate()` metric keys.
+11. **M5** — pixel-model input encoding (ordinal integers for 3+ classes). *(M6 was here too; done
+    2026-08-05 by removing the `metrics` parameter, and it changed no results.)*
 12. **L5** — `fisher_score` single-sample guard (changes metric ranking when it fires).
 13. **L9** — generator signature defaults vs. batch ranges *(decision first)*.
 
