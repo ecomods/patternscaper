@@ -64,8 +64,10 @@ convolutional and dense layers.}
 (default: NULL means model is not saved).}
 
 \item{loss}{Character. Loss function for training (default: "categorical_crossentropy").
-Use "sparse_categorical_crossentropy" if labels are integers rather than one-hot encoded.
-See \code{\link[keras3]{loss_categorical_crossentropy}} for details.}
+Labels are one-hot encoded internally, so the loss must accept one-hot targets --
+"sparse_categorical_crossentropy" expects integer labels and will not work.
+"categorical_focal_crossentropy" is a useful alternative when classes are
+strongly imbalanced. See \code{\link[keras3]{loss_categorical_crossentropy}} for details.}
 
 \item{optimizer}{Character. Optimizer algorithm: "adam" (default), "sgd", "rmsprop".
 Adam is recommended for most cases. See \code{\link[keras3]{optimizer_adam}}.

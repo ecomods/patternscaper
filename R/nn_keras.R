@@ -33,8 +33,9 @@
 #' @param dense_units Integer. Number of units in the final dense layer before output
 #'  (default: 128). Controls model capacity for learning complex pattern combinations.
 #' @param loss Character. Loss function for training (default: "categorical_crossentropy").
-#'   Use "sparse_categorical_crossentropy" if labels are integers rather than one-hot encoded.
-#'   See \code{\link[keras3]{loss_categorical_crossentropy}} for details.
+#'   Labels are one-hot encoded internally, so the loss must accept one-hot targets.
+#'   "categorical_focal_crossentropy" is a useful alternative when classes are
+#'   strongly imbalanced. See \code{\link[keras3]{loss_categorical_crossentropy}} for details.
 #' @param optimizer Character. Optimizer algorithm: "adam" (default), "sgd", "rmsprop".
 #'   Adam is recommended for most cases. See \code{\link[keras3]{optimizer_adam}}.
 #'   Note: Advanced optimizer parameters (e.g., momentum, beta values) are not currently exposed.
