@@ -18,6 +18,29 @@ test_that("train_pixel_model validates cv_method parameter", {
   )
 })
 
+test_that("train_pixel_model validates cv_folds", {
+  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+
+  # 1 leaves the single fold with no training data; 0 and negatives make
+  # `1:cv_folds` count downwards and silently run a different number of folds
+  expect_error(
+    train_pixel_model(landscapes, cv_folds = 1),
+    "cv_folds must be a single integer >= 2"
+  )
+  expect_error(
+    train_pixel_model(landscapes, cv_folds = -3),
+    "cv_folds must be a single integer >= 2"
+  )
+  expect_error(
+    train_pixel_model(landscapes, cv_folds = 2.5),
+    "cv_folds must be a single integer >= 2"
+  )
+  expect_error(
+    train_pixel_model(landscapes, cv_folds = "a"),
+    "cv_folds must be a single integer >= 2"
+  )
+})
+
 test_that("train_pixel_model validates numeric parameters", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 

@@ -127,6 +127,19 @@ train_pixel_model <- function(
     cli::cli_abort('cv_method must be one of: "none", "k-fold", or "loo"')
   }
 
+  # Validate cv_folds. Checked unconditionally, as in train_metric_model(): an
+  # unusable value must not pass silently just because cv_method happens to
+  # ignore it. Values below 2 leave a fold with no training data, and
+  # non-integers or character values are silently coerced further downstream.
+  if (
+    !is.numeric(cv_folds) ||
+      length(cv_folds) != 1 ||
+      cv_folds < 2 ||
+      cv_folds != floor(cv_folds)
+  ) {
+    cli::cli_abort("cv_folds must be a single integer >= 2")
+  }
+
   # Validate numeric parameters
   if (epochs < 1 || !is.numeric(epochs)) {
     cli::cli_abort("epochs must be a positive integer")
