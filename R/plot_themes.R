@@ -18,9 +18,15 @@ theme_landscape <- function(base_size = 9, base_family = "", ...) {
     base_family = base_family
   ) %+replace%
     ggplot2::theme(
-      # Text elements
-      plot.title = ggtext::element_markdown(size = ggplot2::rel(1.2)),
-      plot.subtitle = ggtext::element_markdown(size = ggplot2::rel(0.9)),
+      # Text elements. hjust is set explicitly because %+replace% discards the
+      # base theme's plot.title, and with it the hjust = 0 that theme_minimal()
+      # sets; without it the title would inherit 0.5 from the parent text
+      # element.
+      plot.title = ggtext::element_markdown(size = ggplot2::rel(1.2), hjust = 0),
+      plot.subtitle = ggtext::element_markdown(
+        size = ggplot2::rel(0.9),
+        hjust = 0
+      ),
 
       # Axis elements
       axis.title = ggplot2::element_blank(),

@@ -24,9 +24,7 @@ The easiest way to ensure this is to use the same list of landscapes for both tr
 \item{only_misclassified}{Logical; if \code{TRUE}, only misclassified
 landscapes are plotted. Default is \code{FALSE}. If every landscape was
 classified correctly there is nothing to plot: the function reports this
-with a message and returns an empty placeholder plot rather than raising
-an error, so scripts that always plot their misclassifications keep
-running.}
+with a message and returns an empty placeholder plot.}
 
 \item{score_note}{Logical; if \code{TRUE} (default), a one-line caption is
 added under the whole figure stating that the bracketed number is the score
