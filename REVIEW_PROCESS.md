@@ -212,6 +212,33 @@ decided**, because `?spots_params` pages would replace them. Safe to build regar
 `desc`-enriched spec table and the single `?landscape_patterns` overview (a cross-pattern
 comparison table, which constructors do not provide).
 
+### M22. [new] `random_spots` is silently stripped in batch generation — M9 all over again  — *(found 2026-08-05)*
+`random_spots` is a working formal of `create_landscape_sharp()`, `create_landscape_fingers()` and
+`create_landscape_clustered()`, and has its own validator (`validate_random_spots()`,
+`R/landscape_parameter_validation.R:102`) — but it is **not in `landscape_param_specs()`**, so
+`validate_params_list()` treats it as unknown and drops it. Verified 2026-08-05:
+
+    create_landscape("sharp", random_spots = c(0.3, 0.3))   # works, changes the landscape
+    create_landscapes(n = 2, patterns = "sharp",
+                      params_list = list(sharp = list(random_spots = c(0.3, 0.3))))
+    #> ! Unknown parameter "random_spots" for pattern "sharp" - will be ignored
+    #> params actually used: 0 0
+
+**Effect:** every batch-generated `sharp` / `fingers` / `clustered` landscape has
+`random_spots = c(0, 0)` — no cell-flipping noise — with no way to change it through
+`create_landscapes()`. These are the paper's **ecotone** patterns, i.e. the primary use case.
+Structurally identical to M9 (`radius_noise_fraction`), which the M13 consolidation fixed for
+spots/gaps; this one was missed because nothing compared the spec against the generator formals.
+Found by running M18's proposed consistency test while writing the implementation plan — which is
+the argument for that test existing.
+
+- **Fix, in two deliberately separate steps:**
+  1. Add `random_spots` to the spec with `batch_range = NULL` (validation-only) → makes it
+     settable, **changes no existing result**. Note it is a length-2 numeric (flip probabilities
+     `c(1→0, 0→1)`), so it does not fit the scalar `min`/`max` spec shape cleanly.
+  2. *Later, separately:* decide whether it deserves a default `batch_range`. **Results-changing**
+     — same open decision as L25, and on the paper's main patterns. See "Open decisions".
+
 ### M17. Add regression tests for the correctness bugs above  — [Claude] *(§7.1)*
 *Partially done.* (H1) `theme_landscape()` and (M2) `frequency` variation both have tests
 (`test-plot_themes.R`, `test-create-training-landscapes.R`). **Remaining:** (M3)
@@ -355,9 +382,12 @@ should stay byte-identical; only failure behaviour moves:
 8. **L7** — single-landscape handling parity between the two `apply_*`.
 
 **Open decisions (not tasks — settle these before the work they gate):**
-- **M21** — per-pattern parameter constructors. Gates M18 step 3 and half of M20.
 - **L25** — `radius_noise_fraction` batch randomization. Gates a self-organized re-run.
+- **M22 step 2** — `random_spots` batch randomization. Same question, on the *ecotone* patterns.
+  Worth deciding together with L25: they are the same decision about whether batch training sets
+  should vary edge/cell noise at all.
 - **L9** — generator signature defaults vs. batch ranges.
+- ~~**M21**~~ — decided 2026-08-05, go ahead; see `PATTERN_CONSTRUCTORS_PLAN.md`.
 
 **Group C — will or may change results; needs the analysis re-run and a manuscript check:**
 9. **L25** — `radius_noise_fraction` batch randomization *(decision first, then re-run)*.
