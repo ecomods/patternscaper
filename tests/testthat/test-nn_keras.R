@@ -58,6 +58,72 @@ test_that("train_pixel_model validates numeric parameters", {
     train_pixel_model(landscapes, learning_rate = 1.5),
     "learning_rate must be between 0 and 1"
   )
+
+  expect_error(
+    train_pixel_model(landscapes, validation_split = 1),
+    "validation_split must be between 0 and 1"
+  )
+
+  # Type and length are rejected with the same message as an out-of-range
+  # value, rather than a coercion error from the range comparison
+  expect_error(
+    train_pixel_model(landscapes, epochs = c(10, 20)),
+    "epochs must be a positive integer"
+  )
+  expect_error(
+    train_pixel_model(landscapes, epochs = 2.5),
+    "epochs must be a positive integer"
+  )
+  expect_error(
+    train_pixel_model(landscapes, batch_size = "16"),
+    "batch_size must be a positive integer"
+  )
+  expect_error(
+    train_pixel_model(landscapes, learning_rate = c(0.1, 0.2)),
+    "learning_rate must be between 0 and 1"
+  )
+})
+
+test_that("train_pixel_model validates architecture and early-stopping parameters", {
+  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+
+  expect_error(
+    train_pixel_model(landscapes, dropout_rate = 1),
+    "dropout_rate must be a single number between 0 and 1"
+  )
+  expect_error(
+    train_pixel_model(landscapes, dropout_rate = -0.1),
+    "dropout_rate must be a single number between 0 and 1"
+  )
+  expect_error(
+    train_pixel_model(landscapes, dense_units = 0),
+    "dense_units must be a single positive integer"
+  )
+  expect_error(
+    train_pixel_model(landscapes, dense_units = 12.5),
+    "dense_units must be a single positive integer"
+  )
+  expect_error(
+    train_pixel_model(landscapes, patience = -1),
+    "patience must be a single positive integer or NULL"
+  )
+  expect_error(
+    train_pixel_model(landscapes, patience = "many"),
+    "patience must be a single positive integer or NULL"
+  )
+})
+
+test_that("train_pixel_model validates verbose", {
+  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+
+  expect_error(
+    train_pixel_model(landscapes, verbose = "yes"),
+    "verbose must be a single logical value"
+  )
+  expect_error(
+    train_pixel_model(landscapes, verbose = c(TRUE, FALSE)),
+    "verbose must be a single logical value"
+  )
 })
 
 test_that("train_pixel_model rejects empty or invalid landscapes", {

@@ -121,6 +121,11 @@ train_pixel_model <- function(
   patience = 15,
   verbose = TRUE
 ) {
+  # Validate verbose parameter
+  if (!is.logical(verbose) || length(verbose) != 1) {
+    cli::cli_abort("verbose must be a single logical value (TRUE or FALSE)")
+  }
+
   # Validate cv_method parameter
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold", "loo")) {
@@ -140,19 +145,68 @@ train_pixel_model <- function(
     cli::cli_abort("cv_folds must be a single integer >= 2")
   }
 
-  # Validate numeric parameters
-  if (epochs < 1 || !is.numeric(epochs)) {
+  # Validate numeric parameters.
+  if (
+    !is.numeric(epochs) ||
+      length(epochs) != 1 ||
+      epochs < 1 ||
+      epochs != floor(epochs)
+  ) {
     cli::cli_abort("epochs must be a positive integer")
   }
-  if (batch_size < 1 || !is.numeric(batch_size)) {
+  if (
+    !is.numeric(batch_size) ||
+      length(batch_size) != 1 ||
+      batch_size < 1 ||
+      batch_size != floor(batch_size)
+  ) {
     cli::cli_abort("batch_size must be a positive integer")
   }
-  if (learning_rate <= 0 || learning_rate >= 1) {
+  if (
+    !is.numeric(learning_rate) ||
+      length(learning_rate) != 1 ||
+      learning_rate <= 0 ||
+      learning_rate >= 1
+  ) {
     cli::cli_abort("learning_rate must be between 0 and 1")
   }
   # validate validation_split
-  if (validation_split < 0 || validation_split >= 1) {
+  if (
+    !is.numeric(validation_split) ||
+      length(validation_split) != 1 ||
+      validation_split < 0 ||
+      validation_split >= 1
+  ) {
     cli::cli_abort("validation_split must be between 0 and 1")
+  }
+
+  # Validate the architecture and early-stopping parameters
+  if (
+    !is.numeric(dropout_rate) ||
+      length(dropout_rate) != 1 ||
+      dropout_rate < 0 ||
+      dropout_rate >= 1
+  ) {
+    cli::cli_abort("dropout_rate must be a single number between 0 and 1")
+  }
+  if (
+    !is.numeric(dense_units) ||
+      length(dense_units) != 1 ||
+      dense_units < 1 ||
+      dense_units != floor(dense_units)
+  ) {
+    cli::cli_abort("dense_units must be a single positive integer")
+  }
+  # NULL is documented as "train the full epoch count without early stopping",
+  # so it stays valid here
+  if (
+    !is.null(patience) &&
+      (!is.numeric(patience) ||
+        length(patience) != 1 ||
+        patience < 1 ||
+        patience != floor(patience))
+  ) {
+    cli::cli_abort("patience must be a single positive integer or NULL")
   }
 
   # Validate and normalize model_path if provided
