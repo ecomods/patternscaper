@@ -272,9 +272,12 @@ in `_pkgdown.yml`'s reference index, and pkgdown aborts on an unindexed topic. O
 worth doing before the website work (which M18/M20 will touch anyway).
 
 ### L17. `sapply()` where `vapply()` is safer  — [Claude] [ChatGPT] *(§5.3)*
-`R/nn_keras.R` (several), `R/nn_utils.R`, `R/plot_*`. `sapply()` can silently return a list or
-matrix; `vapply()` with a template is the package-dev norm. **[ChatGPT]:** low priority — don't
-prioritize ahead of concrete user-facing bugs.
+*Partially done 2026-08-05.* `sapply()` can silently return a list or matrix; `vapply()` with a
+template is the package-dev norm. **[ChatGPT]:** low priority — don't prioritize ahead of concrete
+user-facing bugs.
+- **Done:** `R/plot_classification.R` (`c93eac9`), where the same `sapply()` was also being
+  evaluated twice.
+- **Remaining:** `R/nn_keras.R` (several), `R/nn_utils.R`, and the other `R/plot_*` files.
 
 ### L19. Inconsistent source-file naming  — [Claude] *(§5.5)*
 `create_landscape_bare.R` / `create_landscape_dense.R` vs the other nine `landscape_create_*.R`,
@@ -290,17 +293,6 @@ behaviour change, no `man/` change.
 Once M11 is resolved, add tests asserting the return **shape** of both `apply_*` under
 `return_performance = TRUE/FALSE`, with and without known classes — the surface the sibling
 analysis repo depends on.
-
-### L24. `plot_classified_landscapes(only_misclassified = TRUE)` aborts when nothing is misclassified  — [Fable]
-`R/plot_classification.R`. When a model classifies every landscape correctly (e.g. the ecotone
-metrics use case now reaches 100% accuracy after M2), the misclassified-only branch has an empty set
-and the function aborts with *"No misclassified landscapes found."* A zero-misclassification result
-is a legitimate (good) outcome, not an error — but it breaks a clean `source()` of
-`classify_ecotones_metrics.R` / `make.R` in the analysis repo. Surfaced while re-running the use
-cases after M2.
-- **Fix:** handle the empty case internally — emit an informative `cli` message (e.g. "All
-  landscapes classified correctly — nothing to plot") and return gracefully (invisible `NULL` or an
-  empty plot) instead of aborting.
 
 ---
 
@@ -335,7 +327,9 @@ pages, so anything built per-pattern now is at risk of being thrown away.
 should stay byte-identical; only failure behaviour moves:
 6. **M3 / M8 / M12** — the `create_landscapes()` failure path (miscounted trailing failures,
    silently dropped invalid pattern names, swallowed error causes), plus the M17 test.
-7. **L24** — `plot_classified_landscapes(only_misclassified = TRUE)` at 100% accuracy.
+7. ~~**L24** — `plot_classified_landscapes(only_misclassified = TRUE)` at 100% accuracy.~~ *Done
+   2026-08-05, together with the rest of the `plot_classified_landscapes()` batch — see
+   **Completed**.*
 8. **L7** — single-landscape handling parity between the two `apply_*`.
 
 **Open decisions (not tasks — settle these before the work they gate):**
@@ -375,6 +369,38 @@ Checked against current source; correct as-is, no action needed:
 ---
 
 ## Completed
+
+### L24 + the `plot_classified_landscapes()` batch  — [Fable] [new]
+*Fixed 2026-08-05*, as six small independently-verified commits. **L24** was the entry point: with a
+model at 100% accuracy the `only_misclassified = TRUE` branch aborted with *"No misclassified
+landscapes found"*, breaking a clean `source()` of all six analysis scripts, which pass that
+argument. It now reports the outcome with a `cli` message and returns an empty placeholder plot —
+`invisible(NULL)` was rejected because every one of those scripts follows the call with
+`ggsave(plot = fig)`, so it would only have moved the crash one line down (`3774463`).
+
+Working through it surfaced four further defects in the same function, none of which came from the
+three original passes:
+- **Unlabeled landscapes counted as misclassified.** The filter dropped `actual_class = NA` but kept
+  the equivalent `"unclassified"` sentinel, so landscapes with no ground truth were plotted as
+  errors. `apply_*()` (`nn_keras.R:860,869,895`) already treats both forms identically when choosing
+  rows to score; this was the one place that missed the string form. The no-prediction title was
+  also renamed `"Unclassified"` → `"No prediction"`, since the same word in `actual_class` means the
+  opposite thing — an unknown *true* class (`cb965ac`).
+- **`subset_index` always errored.** Documented in `@param ...` as passable to `plot_landscapes()`,
+  but that function subsets the landscapes without subsetting the titles generated here, so every
+  subset failed its length check. Now a real formal argument applied to the classification rows
+  after the `only_misclassified` filter. Hand-subsetting `classification` was no workaround either —
+  it trips the length-mismatch warning by design (`73d8feb`).
+- **Titles and validation.** `only_misclassified` unvalidated while `score_note` beside it was;
+  `round(score, 2)` printing `1` next to `0.35` on adjacent panels; the score-note caption inheriting
+  ggplot2's right-aligned default. Also closes the `R/plot_classification.R` half of **L17** — the
+  doubled `sapply(landscapes, is_landscape)` is now one `vapply()` (`c93eac9`).
+
+The two `REVISIONS.md` "Plotting" items were done in the same batch: CVD-safe Okabe-Ito title
+colours with bold as the redundant cue (`b129f00`), and left-aligned panel titles (`7708508`) —
+the latter traced to `e37aa45`, the **H1** fix below, whose `%+replace%` discarded the `hjust = 0`
+both ggplot2 base themes set on `plot.title`. Full suite green after each commit (1993 pass / 0
+fail at the end). **Appearance-changing:** regenerate every landscape figure from `7708508` onward.
 
 ### M13 + M9 + M7. Parameter definitions duplicated in three places, and the two drifts it caused  — [Claude] [ChatGPT] [Fable] *(§3.2 / ChatGPT §E / ChatGPT §A)*
 *Fixed 2026-08-04*, as one consolidation with two follow-on fixes. Per-pattern parameter knowledge
