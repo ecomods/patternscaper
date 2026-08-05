@@ -138,6 +138,23 @@ test_that("train_pixel_model rejects empty or invalid landscapes", {
   )
 })
 
+test_that("train_pixel_model rejects a non-list landscapes argument clearly", {
+  # A lone landscape used to have its own fields walked and reported as
+  # "Invalid element(s) at index(es): 1, 2, 3, 4"
+  single <- create_landscape("random", width = 20, height = 20, name = "one")
+
+  expect_error(
+    train_pixel_model(single),
+    "A single landscape object was passed"
+  )
+
+  # Raw raster data instead of a landscape object
+  expect_error(
+    train_pixel_model(matrix(c(0, 1), nrow = 20, ncol = 20)),
+    "must be a list of landscape objects"
+  )
+})
+
 test_that("train_pixel_model rejects unclassified landscapes", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
   landscapes[[1]]$pattern <- NA

@@ -228,6 +228,23 @@ train_pixel_model <- function(
     }
   }
 
+  # Check the container before iterating it. sapply() over a lone landscape
+  # walks its fields, so the element check below would report its
+  # data/pattern/params/name as the invalid elements.
+  if (is_landscape(landscapes)) {
+    cli::cli_abort(c(
+      "{.arg landscapes} must be a list of landscape objects.",
+      "x" = "A single landscape object was passed.",
+      "i" = "Training needs several landscapes per pattern -- see {.fn create_landscapes}."
+    ))
+  }
+  if (!is.list(landscapes)) {
+    cli::cli_abort(c(
+      "{.arg landscapes} must be a list of landscape objects.",
+      "x" = "Got {.cls {class(landscapes)}}."
+    ))
+  }
+
   # Check if landscapes is empty
   if (length(landscapes) == 0) {
     cli::cli_abort("landscapes must contain at least one landscape object")
