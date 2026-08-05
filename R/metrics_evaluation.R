@@ -13,9 +13,7 @@ metrics_evaluation_outcomes <- c(
   "dropped_below_cutoff",
   "excluded_user",
   "excluded_incomplete",
-  "excluded_zero_variance",
-  "excluded_not_ratio_scale",
-  "excluded_non_finite_score"
+  "excluded_zero_variance"
 )
 
 #' Construct a metrics_evaluation object
@@ -194,9 +192,6 @@ print.metrics_evaluation <- function(x, ...) {
 #'
 #' @section Ranking Methods:
 #' \describe{
-#'   \item{\code{coeffvar_all}}{Coefficient of Variation (CV = SD/mean). Ranks metrics by
-#'     their relative variability across landscapes. Higher CV indicates greater spread.
-#'     Best for identifying metrics with high variability regardless of pattern type.}
 #'   \item{\code{mean_groups}}{Mean Differences. Calculates relative differences between
 #'     pattern-specific means and overall mean, then sums across patterns. Higher scores
 #'     indicate better discrimination between pattern types.}
@@ -231,9 +226,7 @@ print.metrics_evaluation <- function(x, ...) {
 #'     uncorrelated metrics existed), `dropped_correlated`,
 #'     `dropped_below_cutoff` (scored, but ranked below `metrics_number`),
 #'     `excluded_user` (via `exclude_metrics`), `excluded_incomplete` (`NA`
-#'     values, or absent for some landscapes), `excluded_zero_variance`,
-#'     `excluded_not_ratio_scale` and `excluded_non_finite_score` (both
-#'     `coeffvar_all` only).}
+#'     values, or absent for some landscapes), and `excluded_zero_variance`.}
 #'   \item{\code{correlated_with}}{For the two correlation outcomes, the already
 #'     selected metrics the metric clashed with. `NA` otherwise.}
 #' }
@@ -262,8 +255,7 @@ print.metrics_evaluation <- function(x, ...) {
 #' )
 #' evaluation <- evaluate_metrics(
 #'   metrics = metrics,
-#'   metrics_number = 5,
-#'   method = "coeffvar_all"
+#'   metrics_number = 5
 #' )
 #'
 #' # The selected metric names, to pass on to a model or a plot
@@ -323,7 +315,6 @@ evaluate_metrics <- function(
 
   # Validate method parameter
   valid_methods <- c(
-    "coeffvar_all",
     "mean_groups",
     "fisher_score",
     "kruskal_effsize"
@@ -594,93 +585,17 @@ selected_metric_names <- function(x) {
 #' the selected metrics change for the same data.
 #'
 #' @return List with `ranking` (tibble of `metric` and `score`, best first) and,
-#'   for methods that can fail to score a metric, `excluded` (tibble of `metric`
-#'   and `outcome`). Currently only `coeffvar_all` sets `excluded`.
+#'   for methods that can fail to score a metric before ranking, `excluded`
+#'   (tibble of `metric` and `outcome`). `bind_rows()` ignores the element for
+#'   methods that don't set it.
 #' @noRd
 rank_metrics_by_method <- function(metrics, method) {
   switch(
     method,
-    coeffvar_all = rank_by_coefficient_variation(metrics),
     mean_groups = rank_by_mean_differences(metrics),
     fisher_score = rank_by_fisher_score(metrics),
     kruskal_effsize = rank_by_kruskal(metrics),
     cli::cli_abort("Unknown ranking method: {.val {method}}")
-  )
-}
-
-#' Rank by Coefficient of Variation
-#'
-#' Ranks metrics by their coefficient of variation (CV = SD/mean).
-#' Higher CV indicates greater relative variability across landscapes.
-#'
-#' The coefficient of variation is only interpretable on a ratio scale, that is
-#' for metrics that are non-negative and have a meaningful zero. Metrics that can
-#' take negative values break it: their mean sits near zero, so `sd / mean`
-#' either explodes or flips sign, and the metric then dominates the ranking for
-#' purely numerical reasons. This happens with `clumpy` (range -1 to 1) and with
-#' `pafrac`, whose underlying log-log regression can return values far outside
-#' its nominal range of 1 to 2. Such metrics are dropped from this ranking
-#' instead of being allowed to outrank everything else.
-#'
-#' @param metrics tibble. Metrics data with columns 'metric' and 'value'.
-#'
-#' @return List with `ranking` (metrics by CV, highest first) and `excluded`
-#'   (metrics this method could not score).
-#' @importFrom dplyr summarize filter arrange pull
-#' @noRd
-rank_by_coefficient_variation <- function(metrics) {
-  metric_stats <- metrics |>
-    dplyr::filter(!is.na(value)) |>
-    dplyr::summarize(
-      score = sd(value) / mean(value),
-      min_value = min(value),
-      mean_value = mean(value),
-      .by = metric
-    )
-
-  not_ratio_scale <- metric_stats |>
-    dplyr::filter(min_value < 0 | mean_value <= 0) |>
-    dplyr::pull(metric)
-
-  if (length(not_ratio_scale) > 0) {
-    cli::cli_warn(c(
-      "Excluded {length(not_ratio_scale)} metric{?s} from the {.val coeffvar_all} ranking: {.val {not_ratio_scale}}",
-      "x" = "The coefficient of variation needs a ratio scale, but {cli::qty(length(not_ratio_scale))}{?this metric takes/these metrics take} negative values.",
-      "i" = "Rank {cli::qty(length(not_ratio_scale))}{?it/them} with a different {.arg method}."
-    ))
-  }
-
-  # A CV can come out non-finite even for a metric on a ratio scale. These used
-  # to be filtered away inline with no message at all.
-  non_finite <- metric_stats |>
-    dplyr::filter(!metric %in% not_ratio_scale, !is.finite(score)) |>
-    dplyr::pull(metric)
-
-  if (length(non_finite) > 0) {
-    cli::cli_warn(c(
-      "Excluded {length(non_finite)} metric{?s} from the {.val coeffvar_all} ranking: {.val {non_finite}}",
-      "x" = "The coefficient of variation was not finite.",
-      "i" = "Rank {cli::qty(length(non_finite))}{?it/them} with a different {.arg method}."
-    ))
-  }
-
-  ranking <- metric_stats |>
-    dplyr::filter(!metric %in% c(not_ratio_scale, non_finite)) |>
-    dplyr::arrange(dplyr::desc(score), metric) |>
-    dplyr::select(metric, score)
-
-  list(
-    ranking = ranking,
-    excluded = dplyr::bind_rows(
-      tibble::tibble(
-        metric = not_ratio_scale,
-        outcome = "excluded_not_ratio_scale"
-      ),
-      tibble::tibble(
-        metric = non_finite,
-        outcome = "excluded_non_finite_score"
-      )
-    )
   )
 }
 

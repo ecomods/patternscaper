@@ -24,7 +24,6 @@ devtools::load_all(if (file.exists("DESCRIPTION")) "." else "..")
 library(tidyverse)
 
 all_methods <- c(
-  "coeffvar_all",
   "mean_groups",
   "fisher_score",
   "kruskal_effsize"
@@ -88,13 +87,18 @@ metrics_real <- calculate_metrics(create_landscapes(n = 66))
 - All paper analyses use `kruskal_effsize` → **main results are unaffected by any fix below**.
 - The SI systematic tests compare **all five** methods → changing `coeffvar_all` or
   `mean_groups` means **re-running the systematic tests and updating the SI**.
+- **Deviation (2026-08-04):** `coeffvar_all` was removed from the package without
+  re-running or regenerating the SI. Raw HPC data for the existing 4-method comparison is
+  still local (`data-raw/systematic_tests/`), so a re-summarize was technically possible
+  without redoing the training — decided against it; the already-committed SI CSVs/figures
+  stand as the historical record of when `coeffvar_all` was still an option.
 
 ## Summary
 
 | # | Problem | Affects | Severity | Proposed action | Re-run SI? |
 |---|---------|---------|----------|-----------------|-----------|
 | 1 | Same criterion as `fisher_score` | `lin_mod_r2`, `fisher_score` | Medium | **Removed `lin_mod_r2` (2026-08-04)** | No |
-| 2 | Breaks on metrics crossing zero | `coeffvar_all` | High | **Code fix** | Yes |
+| 2 | Breaks on metrics crossing zero | `coeffvar_all` | High | **Removed `coeffvar_all` (2026-08-04)** | No — left as committed, see deviation note above |
 | 3 | Ignores within-group spread; explodes when mean ≈ 0 | `mean_groups` | High | **Code fix** | Yes |
 | 4 | One outlier flips the ranking | `fisher_score`, `mean_groups` | Medium | Document — justifies the default | No |
 | 5 | Ceiling effect | `kruskal_effsize` | Medium | Document | No |
@@ -128,6 +132,12 @@ metrics_real <- calculate_metrics(create_landscapes(n = 66))
 
 # `coeffvar_all`
 
+**Resolved 2026-08-04:** `coeffvar_all` removed from the package entirely (not just the
+ratio-scale guard below). The code chunks in this section call functions that no longer
+exist (`method = "coeffvar_all"`, `rank_by_coefficient_variation()`) and are kept
+non-evaluating (`eval: false`) so this document still renders as a historical record. See
+the analysis-repo side of this change for how the existing SI data/figures were handled.
+
 ### 2. It breaks on metrics that cross zero
 
 **Problem**
@@ -140,6 +150,7 @@ metrics_real <- calculate_metrics(create_landscapes(n = 66))
 **Evidence**
 
 ```{r}
+#| eval: false
 set.seed(9)
 landscapes_bands <- create_landscapes(
   n = 12,
@@ -207,6 +218,7 @@ rank_by_cv_fixed <- function(metrics) {
 **Check fix**
 
 ```{r}
+#| eval: false
 # evaluate_metrics() drops constant metrics before ranking, so both ranking
 # functions must be compared on that same preprocessed data
 metrics_preprocessed <- metrics_bands |>
@@ -525,9 +537,15 @@ evaluate_metrics(metrics_correlated, metrics_number = 3)
 
 # Manuscript changes
 
-- "five methods" → **four methods**; `lin_mod_r2` is removed from the package (it was the
-  same criterion as `fisher_score` expressed two ways), so it should not appear at all.
-- Framing sentence: four rank by separability, `coeffvar_all` is a pattern-agnostic baseline.
+- "five methods" → **three methods** (`mean_groups`, `fisher_score`, `kruskal_effsize`).
+  `lin_mod_r2` and `coeffvar_all` are both removed from the package (2026-08-04) — `lin_mod_r2`
+  was the same criterion as `fisher_score` expressed two ways; `coeffvar_all` is gone entirely,
+  not just patched. Neither should appear in the methods description going forward.
+- The existing SI systematic-test comparison (4 methods, incl. `coeffvar_all`/CV) was
+  **left as committed** — not regenerated — since the package change doesn't retroactively
+  invalidate already-collected HPC results. If the manuscript text discusses that comparison,
+  note `coeffvar_all` was retired from the package after the comparison was run.
+- Framing sentence: the three remaining methods rank by separability.
 - Drop "Assumes linear relationships" and "Assumes normally distributed data within groups";
   replace with moment-based vs rank-based **robustness**.
 - Name the effect size: **epsilon-squared**, $H / \frac{n^2-1}{n+1}$.

@@ -65,9 +65,6 @@ metric-based neural network.
 \section{Ranking Methods}{
 
 \describe{
-  \item{\code{coeffvar_all}}{Coefficient of Variation (CV = SD/mean). Ranks metrics by
-    their relative variability across landscapes. Higher CV indicates greater spread.
-    Best for identifying metrics with high variability regardless of pattern type.}
   \item{\code{mean_groups}}{Mean Differences. Calculates relative differences between
     pattern-specific means and overall mean, then sums across patterns. Higher scores
     indicate better discrimination between pattern types.}
@@ -104,9 +101,7 @@ whatever happened to it. Columns:
     uncorrelated metrics existed), `dropped_correlated`,
     `dropped_below_cutoff` (scored, but ranked below `metrics_number`),
     `excluded_user` (via `exclude_metrics`), `excluded_incomplete` (`NA`
-    values, or absent for some landscapes), `excluded_zero_variance`,
-    `excluded_not_ratio_scale` and `excluded_non_finite_score` (both
-    `coeffvar_all` only).}
+    values, or absent for some landscapes), and `excluded_zero_variance`.}
   \item{\code{correlated_with}}{For the two correlation outcomes, the already
     selected metrics the metric clashed with. `NA` otherwise.}
 }
@@ -124,8 +119,7 @@ metrics <- calculate_metrics(
 )
 evaluation <- evaluate_metrics(
   metrics = metrics,
-  metrics_number = 5,
-  method = "coeffvar_all"
+  metrics_number = 5
 )
 
 # The selected metric names, to pass on to a model or a plot

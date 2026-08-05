@@ -129,7 +129,6 @@ test_that("evaluate_metrics works with all ranking methods", {
   metrics <- create_test_metrics(n_metrics = 10)
 
   methods <- c(
-    "coeffvar_all",
     "mean_groups",
     "fisher_score",
     "kruskal_effsize"
@@ -314,8 +313,6 @@ test_that("evaluate_metrics fails when all metrics excluded", {
 # 5. CORRELATION FILTERING TESTS ----
 test_that("correlation filtering reduces to uncorrelated metrics if threshold not 1", {
   # Create a table with 4 metrics for 10 landscapes where 2 metrics are exactly the same.
-  # Values are positive so that they are on a ratio scale, which "coeffvar_all"
-  # requires. Shifting the mean does not change the correlations under test.
   correlated_metrics <- tibble::tibble(
     landscape_name = paste0("landscape_", 1:10),
     pattern = rep(c("A", "B"), each = 5),
@@ -337,7 +334,7 @@ test_that("correlation filtering reduces to uncorrelated metrics if threshold no
     correlated_metrics,
     metrics_number = 4,
     correlation_threshold = 0.5,
-    method = "coeffvar_all"
+    method = "fisher_score"
   )
 
   # Should filter out highly correlated metrics
@@ -359,7 +356,7 @@ test_that("correlation filtering reduces to uncorrelated metrics if threshold no
     correlated_metrics,
     metrics_number = 4,
     correlation_threshold = 1,
-    method = "coeffvar_all"
+    method = "fisher_score"
   )
   expect_length(result_no_filter$selected, 4)
   # No correlation filtering ran, so no correlation outcome is recorded
@@ -371,9 +368,9 @@ test_that("correlation filtering reduces to uncorrelated metrics if threshold no
 
 test_that("gap-filled metrics are appended to the end of the selection", {
   # Two correlated pairs: metric_b duplicates metric_a (shifted, so the
-  # correlation is 1 but the CV differs), and metric_d duplicates metric_c.
-  # Only two metrics can be mutually uncorrelated, so asking for three forces
-  # the fill path.
+  # correlation is 1 but mean_groups differs, since it divides by the group
+  # mean), and metric_d duplicates metric_c. Only two metrics can be mutually
+  # uncorrelated, so asking for three forces the fill path.
   set.seed(20260730)
   base_a <- rnorm(12, mean = 10, sd = 3)
   base_c <- rnorm(12, mean = 100, sd = 10)
@@ -383,9 +380,9 @@ test_that("gap-filled metrics are appended to the end of the selection", {
     pattern = rep(c("A", "B"), each = 6),
     level = "landscape",
     metric_a = base_a,
-    metric_b = base_a + 10, # cor 1 with metric_a, lower CV
+    metric_b = base_a + 10, # cor 1 with metric_a, lower score
     metric_c = base_c,
-    metric_d = base_c + 100 # cor 1 with metric_c, lower CV
+    metric_d = base_c + 100 # cor 1 with metric_c, lower score
   ) |>
     tidyr::pivot_longer(
       cols = starts_with("metric_"),
@@ -397,23 +394,23 @@ test_that("gap-filled metrics are appended to the end of the selection", {
     result <- evaluate_metrics(
       pairs,
       metrics_number = 3,
-      method = "coeffvar_all",
+      method = "mean_groups",
       correlation_threshold = 0.7
     ),
     "Filling to 3 with correlated metrics"
   )
 
-  # metric_b ranks second but is only added once the filter runs out of
-  # uncorrelated candidates, so it is returned last rather than in rank order.
-  # Callers have always seen this order; changing it would silently reorder
-  # plot_metrics() facets and the stored golden selection.
-  expect_identical(result$selected, c("metric_a", "metric_c", "metric_b"))
+  # metric_d ranks second overall but is only added once the filter runs out
+  # of uncorrelated candidates, so it is returned last rather than in rank
+  # order. Callers have always seen this order; changing it would silently
+  # reorder plot_metrics() facets and the stored golden selection.
+  expect_identical(result$selected, c("metric_c", "metric_a", "metric_d"))
 
   # ...and the ranking records why it was added, and what it clashed with
-  expect_equal(outcome_of(result, "metric_b"), "selected_correlation_fill")
+  expect_equal(outcome_of(result, "metric_d"), "selected_correlation_fill")
   expect_equal(
-    result$ranking$correlated_with[result$ranking$metric == "metric_b"],
-    "metric_a"
+    result$ranking$correlated_with[result$ranking$metric == "metric_d"],
+    "metric_c"
   )
 })
 
@@ -438,36 +435,6 @@ test_that("evaluate_metrics handles single metric", {
   )
 
   expect_length(result$selected, 1)
-})
-
-# 7. RANKING METHOD SPECIFIC TESTS ----
-test_that("coefficient of variation ranks high-variance metrics first", {
-  # Create wide format first, then pivot
-  metrics_wide <- tibble::tibble(
-    landscape_name = paste0("landscape_", 1:10),
-    pattern = rep(c("A", "B"), each = 5),
-    level = "landscape",
-    low_var = rep(10, 10), # Very stable
-    high_var = seq(1, 20, length.out = 10) # Wide range
-  )
-
-  metrics <- tidyr::pivot_longer(
-    metrics_wide,
-    cols = c(low_var, high_var),
-    names_to = "metric",
-    values_to = "value"
-  )
-
-  result <- evaluate_metrics(
-    metrics,
-    metrics_number = 1,
-    method = "coeffvar_all",
-    correlation_threshold = 1
-  )
-
-  expect_equal(result$selected[1], "high_var")
-  # The score itself is now visible, not just the ordering
-  expect_gt(result$ranking$score[result$ranking$metric == "high_var"], 0)
 })
 
 # 8. VERBOSE OUTPUT TEST ----
@@ -682,36 +649,6 @@ test_that("params records the requested metrics_number, not the achieved one", {
   expect_length(result$selected, 3)
 })
 
-test_that("coeffvar_all records ratio-scale exclusions rather than hiding them", {
-  # `negative` spans zero, so its CV is meaningless and it must not be ranked
-  metrics <- tibble::tibble(
-    landscape_name = paste0("landscape_", 1:10),
-    pattern = rep(c("A", "B"), each = 5),
-    level = "landscape",
-    positive = seq(1, 20, length.out = 10),
-    negative = seq(-5, 5, length.out = 10)
-  ) |>
-    tidyr::pivot_longer(
-      cols = c(positive, negative),
-      names_to = "metric",
-      values_to = "value"
-    )
-
-  expect_warning(
-    result <- evaluate_metrics(
-      metrics,
-      metrics_number = 1,
-      method = "coeffvar_all",
-      correlation_threshold = 1
-    ),
-    "needs a ratio scale"
-  )
-
-  expect_equal(outcome_of(result, "negative"), "excluded_not_ratio_scale")
-  expect_true(is.na(result$ranking$score[result$ranking$metric == "negative"]))
-  expect_equal(result$selected, "positive")
-})
-
 test_that("evaluate_metrics is deterministic under row reordering", {
   metrics <- create_test_metrics(n_metrics = 8)
 
@@ -780,7 +717,7 @@ test_that("evaluate_metrics works with real landscape data", {
   result <- evaluate_metrics(
     real_metrics,
     metrics_number = 5,
-    method = "coeffvar_all"
+    method = "fisher_score"
   )
 
   expect_type(result$selected, "character")

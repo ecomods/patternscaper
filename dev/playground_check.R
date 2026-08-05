@@ -1,9 +1,10 @@
 # Title: Problems of the ranking methods in evaluate_metrics()
 # Date: 2026-07-28
 # Author: Selina Baldauf
-# Purpose: Demonstrate the failure modes of the four ranking methods offered by
+# Purpose: Demonstrate the failure modes of the three ranking methods offered by
 #   evaluate_metrics(). Input for the manuscript revision and discussion.
-#   (lin_mod_r2 removed 2026-08-04: proved identical to fisher_score, see
+#   (lin_mod_r2 removed 2026-08-04: proved identical to fisher_score.
+#   coeffvar_all removed 2026-08-04 along with its ratio-scale guard; see
 #   dev/evaluate_metrics_problems.qmd.)
 
 devtools::load_all()
@@ -12,7 +13,6 @@ library(tidyverse)
 # Helpers ---------------------------------------------------------------------
 
 all_methods <- c(
-  "coeffvar_all",
   "mean_groups",
   "fisher_score",
   "kruskal_effsize"
@@ -33,7 +33,7 @@ rank_metrics <- function(metrics, method, ...) {
   )
 }
 
-# Rankings of all four methods side by side
+# Rankings of all three methods side by side
 rank_all_methods <- function(metrics) {
   map(set_names(all_methods), \(method) rank_metrics(metrics, method))
 }
@@ -81,67 +81,26 @@ fischer <- evaluate_metrics(
   method = "fisher_score",
   metrics_number = 20
 )
-coeffvar <- evaluate_metrics(
-  metrics,
-  method = "coeffvar_all",
-  metrics_number = 20
-)
 
 plot_metrics(metrics, fischer, force = TRUE) +
   ggtitle("Metrics selected by Fisher score")
-plot_metrics(metrics, coeffvar, force = TRUE) +
-  ggtitle("Metrics selected by coefficient of variation")
 
-# 3 coeffvar_all breaks on metrics that cross zero -----------------------------
+# 3 coeffvar_all broke on metrics that cross zero (method removed 2026-08-04) --
 
-# pafrac = 2 / slope of log(area) ~ log(perimeter). With few patches the slope is
-# badly estimated and can be near zero (pafrac explodes) or negative (pafrac
-# becomes negative), although its theoretical range is [1, 2]. The mean then sits
-# near zero and CV = sd / mean is meaningless.
-
-set.seed(9)
-landscapes_bands <- create_landscapes(
-  n = 12,
-  patterns = c("bands", "gaps", "spots")
-)
-metrics_bands <- calculate_metrics(landscapes_bands)
-
-metrics_bands |>
-  filter(metric == "pafrac") |>
-  summarise(
-    min = min(value, na.rm = TRUE),
-    max = max(value, na.rm = TRUE),
-    mean = mean(value, na.rm = TRUE),
-    sd = sd(value, na.rm = TRUE),
-    cv = sd / mean,
-    n_na = sum(is.na(value))
-  )
-
-### pafrac is ranked first of all metrics, purely as a numerical artefact
-rank_with_incomplete <- evaluate_metrics(
-  metrics_bands,
-  method = "coeffvar_all",
-  metrics_number = 10,
-  exclude_incomplete_metrics = FALSE
-)
-
-rank_with_incomplete
-
-plot_metrics(metrics_bands, rank_with_incomplete) +
-  ggtitle(
-    "Metrics selected by coeffvar_all (exclude_incomplete_metrics = FALSE)"
-  )
-
-# The default exclude_incomplete_metrics = TRUE usually saves us here, because
-# landscapemetrics returns NA for pafrac when NP < 10. It only bites when every
-# landscape happens to have enough patches.
+# pafrac = 2 / slope of log(area) ~ log(perimeter). With few patches the slope
+# is badly estimated and can be near zero (pafrac explodes) or negative
+# (pafrac becomes negative), although its theoretical range is [1, 2]. CV =
+# sd / mean is meaningless once the mean sits near zero, which is what made
+# coeffvar_all rank pafrac first on some real data purely as a numerical
+# artefact. A ratio-scale guard was added to exclude such metrics (see
+# CHANGELOG 2026-07-30); the method itself was removed 2026-08-04. Full
+# demonstration and evidence: dev/evaluate_metrics_problems.qmd.
 
 # 4 mean_groups ignores the within-group spread --------------------------------
 
 # Three metrics with identical group means (1, 2, 3) but very different noise.
 # Only the tight one separates the patterns, yet mean_groups sees the same
 # relative mean differences in all three and ranks essentially at random.
-# coeffvar_all does the opposite of what we want and picks the noisiest.
 
 set.seed(1)
 n_per <- 40
@@ -198,8 +157,8 @@ rank_all_methods(metrics_outlier)
 # 6 mean_groups explodes when the overall mean is near zero --------------------
 
 # rel_mean_diff divides by the overall mean. A metric centred on zero gets a huge
-# score even though it is pure noise, and both mean_groups and coeffvar_all rank
-# it above a genuinely informative metric.
+# score even though it is pure noise, and mean_groups ranks it above a
+# genuinely informative metric.
 
 set.seed(2)
 metrics_zero <- make_metrics(
