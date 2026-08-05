@@ -364,7 +364,9 @@ train_pixel_model <- function(
   # Check cross-validation method and parameters -------------------------------
   # Run model with cross validation --------------------------------------------
   if (cv_method != "none") {
-    cli::cli_h2("Cross-validation ({cv_method}, {cv_folds} folds)")
+    if (verbose) {
+      cli::cli_h2("Cross-validation ({cv_method}, {cv_folds} folds)")
+    }
     # Create stratified fold assignments ---------------------------------------
     if (cv_method == "loo") {
       # If method is "loo", each sample is it's own fold
@@ -430,11 +432,13 @@ train_pixel_model <- function(
           verbose = 0
         )
 
-      # Evaluate the model on the validation fold
-      evaluation <- fold_model |> keras3::evaluate(x_val, y_val)
+      # Evaluate the model on the validation fold. Silenced like the fit() call
+      # above: keras would otherwise print a progress bar per fold regardless of
+      # verbose.
+      evaluation <- fold_model |> keras3::evaluate(x_val, y_val, verbose = 0)
 
       # Store predictions
-      probs <- fold_model |> predict(x_val)
+      probs <- fold_model |> predict(x_val, verbose = 0)
 
       # Add class names as column names
       colnames(probs) <- class_names
@@ -487,9 +491,11 @@ train_pixel_model <- function(
       cli::cli_text("")
     }
 
-    cli::cli_h2(
-      "Training final model on all data (validation split: {validation_split})"
-    )
+    if (verbose) {
+      cli::cli_h2(
+        "Training final model on all data (validation split: {validation_split})"
+      )
+    }
 
     # Build final model with all data
     final_model <- create_keras_model(
@@ -520,10 +526,9 @@ train_pixel_model <- function(
       )
   } else {
     # No cross-validation: train on ALL data
-    cli::cli_h2("Training final model on all data")
     if (verbose) {
-      cli::cli_alert_info(
-        "Training on all data (validation split is {validation_split})..."
+      cli::cli_h2(
+        "Training final model on all data (validation split: {validation_split})"
       )
     }
 
