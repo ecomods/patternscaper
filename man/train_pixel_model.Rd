@@ -17,7 +17,6 @@ train_pixel_model(
   model_path = NULL,
   loss = "categorical_crossentropy",
   optimizer = "adam",
-  metrics = c("accuracy"),
   validation_split = 0,
   callbacks = NULL,
   patience = 15,
@@ -71,10 +70,6 @@ strongly imbalanced. See \code{\link[keras3]{loss_categorical_crossentropy}} for
 \item{optimizer}{Character. Optimizer algorithm: "adam" (default), "sgd", "rmsprop".
 Adam is recommended for most cases. See \code{\link[keras3]{optimizer_adam}}.
 Note: Advanced optimizer parameters (e.g., momentum, beta values) are not currently exposed.}
-
-\item{metrics}{Character vector. Metrics to track during training (default: c("accuracy")).
-Additional options: "categorical_accuracy", "top_k_categorical_accuracy".
-Does not affect training, only monitoring. See \code{\link[keras3]{compile}}.}
 
 \item{validation_split}{Numeric. Fraction of training data to use as validation set during
 final model training and passed to \code{\link[keras3]{fit}}(0-1, default: 0).

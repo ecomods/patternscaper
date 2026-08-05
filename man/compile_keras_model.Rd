@@ -8,8 +8,7 @@ compile_keras_model(
   model,
   learning_rate = 0.001,
   loss = "categorical_crossentropy",
-  optimizer = "adam",
-  metrics = c("accuracy")
+  optimizer = "adam"
 )
 }
 \arguments{
@@ -20,8 +19,6 @@ compile_keras_model(
 \item{loss}{Character. Loss function (default: "categorical_crossentropy").}
 
 \item{optimizer}{Character. Optimizer name: "adam", "sgd", "rmsprop" (default: "adam").}
-
-\item{metrics}{Character vector. Metrics to track (default: c("accuracy")).}
 }
 \value{
 Compiled keras model.

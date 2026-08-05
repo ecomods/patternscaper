@@ -39,9 +39,6 @@
 #' @param optimizer Character. Optimizer algorithm: "adam" (default), "sgd", "rmsprop".
 #'   Adam is recommended for most cases. See \code{\link[keras3]{optimizer_adam}}.
 #'   Note: Advanced optimizer parameters (e.g., momentum, beta values) are not currently exposed.
-#' @param metrics Character vector. Metrics to track during training (default: c("accuracy")).
-#'   Additional options: "categorical_accuracy", "top_k_categorical_accuracy".
-#'   Does not affect training, only monitoring. See \code{\link[keras3]{compile}}.
 #' @param callbacks List. Optional keras callbacks for advanced training control (default: NULL).
 #'   Examples: early stopping, learning rate scheduling, model checkpointing.
 #'   Note: Only applies to final model training. CV folds always use patience-based
@@ -116,7 +113,6 @@ train_pixel_model <- function(
   model_path = NULL,
   loss = "categorical_crossentropy",
   optimizer = "adam",
-  metrics = c("accuracy"),
   validation_split = 0,
   callbacks = NULL,
   patience = 15,
@@ -425,8 +421,7 @@ train_pixel_model <- function(
         model = fold_model,
         learning_rate = learning_rate,
         loss = loss,
-        optimizer = optimizer,
-        metrics = metrics
+        optimizer = optimizer
       )
 
       # Create fold-specific callbacks
@@ -530,8 +525,7 @@ train_pixel_model <- function(
       model = final_model,
       learning_rate = learning_rate,
       loss = loss,
-      optimizer = optimizer,
-      metrics = metrics
+      optimizer = optimizer
     )
     # Train the fold model
     history <- final_model |>
@@ -563,8 +557,7 @@ train_pixel_model <- function(
       model = final_model,
       learning_rate = learning_rate,
       loss = loss,
-      optimizer = optimizer,
-      metrics = metrics
+      optimizer = optimizer
     )
 
     history <- final_model |>
@@ -1012,7 +1005,6 @@ create_keras_model <- function(
 #' @param learning_rate Numeric. Learning rate for optimizer (default: 0.001).
 #' @param loss Character. Loss function (default: "categorical_crossentropy").
 #' @param optimizer Character. Optimizer name: "adam", "sgd", "rmsprop" (default: "adam").
-#' @param metrics Character vector. Metrics to track (default: c("accuracy")).
 #'
 #' @return Compiled keras model.
 #' @keywords internal
@@ -1020,8 +1012,7 @@ compile_keras_model <- function(
   model,
   learning_rate = 0.001,
   loss = "categorical_crossentropy",
-  optimizer = "adam",
-  metrics = c("accuracy")
+  optimizer = "adam"
 ) {
   # Create optimizer based on type
   opt <- switch(
@@ -1041,7 +1032,7 @@ compile_keras_model <- function(
     keras3::compile(
       loss = loss,
       optimizer = opt,
-      metrics = metrics
+      metrics = c("accuracy")
     )
 
   return(compiled_model)
