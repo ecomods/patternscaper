@@ -73,6 +73,10 @@ plot_classified_landscapes <- function(
   subset_index = NULL,
   ...
 ) {
+  if (!is.logical(only_misclassified) || length(only_misclassified) != 1) {
+    cli::cli_abort("{.arg only_misclassified} must be a single logical value")
+  }
+
   if (!is.logical(score_note) || length(score_note) != 1) {
     cli::cli_abort("{.arg score_note} must be a single logical value")
   }
@@ -111,8 +115,9 @@ plot_classified_landscapes <- function(
   }
 
   # Finally check if all elements are landscape objects
-  if (any(!sapply(landscapes, is_landscape))) {
-    invalid_indices <- which(!sapply(landscapes, is_landscape))
+  valid_landscapes <- vapply(landscapes, is_landscape, logical(1))
+  if (any(!valid_landscapes)) {
+    invalid_indices <- which(!valid_landscapes)
     cli::cli_abort(c(
       "All elements must be landscape objects.",
       "x" = "Found {length(invalid_indices)} invalid element{?s} at {?index/indices}: {.val {invalid_indices}}"
@@ -223,7 +228,7 @@ plot_classified_landscapes <- function(
           paste0(
             predicted_class,
             " (",
-            round(score, 2),
+            sprintf("%.2f", score),
             ")"
           ),
         predicted_class == actual_class ~
@@ -231,7 +236,7 @@ plot_classified_landscapes <- function(
             "<span style='color: #0072B2;'>",
             predicted_class,
             "</span> (",
-            round(score, 2),
+            sprintf("%.2f", score),
             ")<br>",
             "Actual: ",
             actual_class
@@ -241,7 +246,7 @@ plot_classified_landscapes <- function(
             "<span style='color: #D55E00;'><b>",
             predicted_class,
             "</b></span> (",
-            round(score, 2),
+            sprintf("%.2f", score),
             ")<br>",
             "Actual: ",
             actual_class
@@ -268,7 +273,11 @@ plot_classified_landscapes <- function(
   if (score_note) {
     plots <- plots +
       patchwork::plot_annotation(
-        caption = "Number in brackets: score of the predicted class (not a calibrated probability)"
+        caption = "Number in brackets: score of the predicted class (not a calibrated probability)",
+        # left align caption
+        theme = ggplot2::theme(
+          plot.caption = ggplot2::element_text(hjust = 0)
+        )
       )
   }
 

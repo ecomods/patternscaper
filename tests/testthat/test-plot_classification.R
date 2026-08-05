@@ -519,6 +519,64 @@ test_that("plot_classified_landscapes rejects invalid subset_index", {
   )
 })
 
+test_that("plot_classified_landscapes rejects a non-logical only_misclassified", {
+  landscapes <- list(create_landscape("sharp", width = 20, height = 20))
+
+  classification <- data.frame(
+    landscape_id = 1,
+    actual_class = "sharp",
+    predicted_class = "sharp",
+    score = 0.9
+  )
+
+  expect_error(
+    plot_classified_landscapes(
+      classification,
+      landscapes,
+      only_misclassified = "yes"
+    ),
+    "must be a single logical value"
+  )
+  expect_error(
+    plot_classified_landscapes(
+      classification,
+      landscapes,
+      only_misclassified = c(TRUE, FALSE)
+    ),
+    "must be a single logical value"
+  )
+})
+
+test_that("plot_classified_landscapes shows scores with a fixed 2 decimals", {
+  landscapes <- list(
+    create_landscape("sharp", width = 20, height = 20),
+    create_landscape("diffuse", width = 20, height = 20)
+  )
+
+  # round() would render these as "1" and "0.5", giving ragged titles across
+  # panels
+  classification <- data.frame(
+    landscape_id = 1:2,
+    actual_class = c("sharp", "diffuse"),
+    predicted_class = c("sharp", "bands"),
+    score = c(1, 0.5)
+  )
+
+  result <- plot_classified_landscapes(classification, landscapes)
+  titles <- vapply(
+    seq_along(landscapes),
+    function(i) result[[i]]$labels$title,
+    character(1)
+  )
+
+  expect_match(titles[1], "(1.00)", fixed = TRUE)
+  expect_match(titles[2], "(0.50)", fixed = TRUE)
+
+  # The score note is left-aligned to match the panel titles, against ggplot2's
+  # right-aligned caption default
+  expect_equal(result$patches$annotation$theme$plot.caption$hjust, 0)
+})
+
 test_that("plot_classified_landscapes marks correct and misclassified titles", {
   landscapes <- list(
     create_landscape("sharp", width = 20, height = 20),
