@@ -173,6 +173,19 @@ test_that("train_pixel_model handles model_path validation", {
   )
 })
 
+test_that("train_pixel_model aborts on landscapes with NA cells", {
+  # The NA guard fires before the CNN is built, so no keras training is needed
+  m <- matrix(c(0, 1), nrow = 20, ncol = 20)
+  clean <- landscape(m, pattern = "a", name = "clean")
+  m[1, 1] <- NA
+  masked <- landscape(m, pattern = "b", name = "masked")
+
+  expect_error(
+    train_pixel_model(list(clean, masked), cv_method = "none"),
+    "NA cells"
+  )
+})
+
 test_that("train_pixel_model saves model and overwrites an existing file", {
   skip_if_not_installed("keras3")
 

@@ -252,6 +252,55 @@ scale_fold <- function(train_predictors, val_predictors) {
   )
 }
 
+#' Abort if any landscape contains NA cells
+#'
+#' The CNN has no representation for a missing cell. How an NA reaches the
+#' network depends on the raster's type: as `NaN` for a float raster, as a
+#' corrupted integer for the integer rasters \code{\link{create_landscapes}}
+#' Neither raises an error on its own, so training or prediction
+#' runs to completion on meaningless pixel values. Used by both
+#' \code{\link{train_pixel_model}} and \code{\link{apply_pixel_model}} so the two
+#' refuse the same input.
+#'
+#' @param landscapes List of landscape objects.
+#' @param action Character. Verb naming what the caller was about to do, used in
+#'   the error message ("train on", "classify").
+#'
+#' @return Invisibly `NULL`. Called for the error.
+#'
+#' @keywords internal
+#' @importFrom cli cli_abort
+abort_on_na_cells <- function(landscapes, action) {
+  na_counts <- vapply(
+    landscapes,
+    function(l) sum(is.na(terra::values(l$data))),
+    numeric(1)
+  )
+
+  if (any(na_counts > 0)) {
+    bad <- which(na_counts > 0)
+    landscape_names <- vapply(
+      landscapes,
+      function(l) if (!is.null(l$name)) l$name else NA_character_,
+      character(1)
+    )
+    labels <- ifelse(
+      is.na(landscape_names[bad]),
+      paste0("landscape ", bad),
+      landscape_names[bad]
+    )
+    detail <- paste0(labels, " (", na_counts[bad], " NA)")
+    cli::cli_abort(c(
+      "Cannot {action} landscapes that contain NA cells.",
+      "x" = "Affected: {.val {detail}}",
+      "i" = "NA cells do not survive conversion to the array the CNN uses, so the result is based on meaningless pixel values.",
+      "i" = "Crop to a rectangular region without NA. Do not fill NA with 0, which fabricates bare ground."
+    ))
+  }
+
+  invisible(NULL)
+}
+
 #' Validate and adjust cross-validation parameters
 #'
 #' Checks if the dataset is suitable for the requested cross-validation method

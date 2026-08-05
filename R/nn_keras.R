@@ -278,6 +278,8 @@ train_pixel_model <- function(
     ))
   }
 
+  abort_on_na_cells(landscapes, "train on")
+
   # Convert all landscapes to arrays
   training_arrays <- lapply(landscapes, function(l) {
     landscape_data <- l$data
@@ -719,29 +721,7 @@ apply_pixel_model <- function(
     if (!is.null(l$name)) l$name else NA_character_
   })
 
-  # Guard against NA cells. NAs would reach the CNN as NaN which produces confident
-  # but meaningless predictions. Therefore we abort, naming the offending landscapes
-  # if this case happens.
-  na_counts <- vapply(
-    landscapes,
-    function(l) sum(is.na(terra::values(l$data))),
-    numeric(1)
-  )
-  if (any(na_counts > 0)) {
-    bad <- which(na_counts > 0)
-    labels <- ifelse(
-      is.na(landscape_names[bad]),
-      paste0("landscape ", bad),
-      landscape_names[bad]
-    )
-    detail <- paste0(labels, " (", na_counts[bad], " NA)")
-    cli::cli_abort(c(
-      "Cannot classify landscapes that contain NA cells.",
-      "x" = "Affected: {.val {detail}}",
-      "i" = "NA cells reach the CNN as NaN and yield meaningless predictions.",
-      "i" = "Crop to a rectangular region without NA. Do not fill NA with 0, which fabricates bare ground."
-    ))
-  }
+  abort_on_na_cells(landscapes, "classify")
 
   # Warn on aspect-ratio distortion. Resizing a landscape whose aspect ratio
   # differs from the training grid stretches it anisotropically which is a
