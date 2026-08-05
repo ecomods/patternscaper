@@ -10,7 +10,11 @@ plot_metrics(
   force = FALSE,
   metric_labels = "abbreviation",
   label_wrap_width = NULL,
-  pattern_order = NULL
+  pattern_order = NULL,
+  jitter_seed = NA,
+  jitter_width = 0.1,
+  point_size = 1,
+  point_alpha = 0.7
 )
 }
 \arguments{
@@ -53,6 +57,21 @@ should appear along the y-axis, or NULL (default) for alphabetical order.
 Must contain exactly the patterns present in \code{metrics}, i.e. every
 pattern once and no others. The first element is drawn at the bottom of
 the axis.}
+
+\item{jitter_seed}{Seed controlling the random jitter of the points, passed
+to \code{\link[ggplot2]{position_jitter}}. NA (default) draws fresh jitter each
+render.}
+
+\item{jitter_width}{Numeric. Horizontal spread of the points around each
+pattern (default: 0.1). Set to 0 to disable jitter. Points are never
+displaced along the value axis, so they always sit at their true metric
+value.}
+
+\item{point_size}{Numeric. Size of the data points (default: 1).
+Reduce for plots with many landscapes per pattern.}
+
+\item{point_alpha}{Numeric between 0 and 1. Opacity of the data points
+(default: 0.7). Reduce to make overlapping points easier to read.}
 }
 \value{
 A ggplot2 object showing boxplots of metric values by pattern type.
@@ -97,6 +116,17 @@ plot_metrics(
   metrics,
   selected_metrics = c("ai", "lsi"),
   pattern_order = c("spots", "labyrinth")
+)
+
+# Fix the jitter so that repeated runs produce an identical figure
+plot_metrics(metrics, selected_metrics = c("ai", "lsi"), jitter_seed = 42)
+
+# Adjust point appearance for plots with many landscapes per pattern
+plot_metrics(
+  metrics,
+  selected_metrics = c("ai", "lsi"),
+  point_size = 0.5,
+  point_alpha = 0.4
 )
 }
 \seealso{

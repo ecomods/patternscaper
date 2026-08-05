@@ -343,3 +343,96 @@ test_that("plot_metrics stops when pattern_order has an unknown pattern", {
     "pattern_order must contain exactly the patterns"
   )
 })
+
+# Jitter and point appearance ---------------------------------------------
+
+test_that("plot_metrics stops on invalid jitter_seed", {
+  expect_error(
+    plot_metrics(
+      test_metrics_landscape,
+      selected_metrics = "ai",
+      jitter_seed = c(1, 2)
+    ),
+    "jitter_seed must be NA, NULL, or a single number"
+  )
+
+  expect_error(
+    plot_metrics(
+      test_metrics_landscape,
+      selected_metrics = "ai",
+      jitter_seed = "42"
+    ),
+    "jitter_seed must be NA, NULL, or a single number"
+  )
+})
+
+test_that("plot_metrics stops on invalid point appearance arguments", {
+  expect_error(
+    plot_metrics(
+      test_metrics_landscape,
+      selected_metrics = "ai",
+      jitter_width = -0.1
+    ),
+    "jitter_width must be a single non-negative number"
+  )
+
+  expect_error(
+    plot_metrics(
+      test_metrics_landscape,
+      selected_metrics = "ai",
+      point_size = 0
+    ),
+    "point_size must be a single positive number"
+  )
+
+  expect_error(
+    plot_metrics(
+      test_metrics_landscape,
+      selected_metrics = "ai",
+      point_alpha = 1.5
+    ),
+    "point_alpha must be a single number between 0 and 1"
+  )
+})
+
+test_that("plot_metrics gives identical jitter for the same jitter_seed", {
+  jittered <- function(seed) {
+    p <- plot_metrics(
+      test_metrics_landscape,
+      selected_metrics = "ai",
+      jitter_seed = seed
+    )
+    ggplot2::ggplot_build(p)$data[[2]]$x
+  }
+
+  expect_identical(jittered(42), jittered(42))
+  expect_false(identical(jittered(42), jittered(1)))
+})
+
+test_that("plot_metrics jitter does not displace metric values", {
+  p <- plot_metrics(
+    test_metrics_landscape,
+    selected_metrics = "ai",
+    jitter_seed = 42
+  )
+  point_layer <- ggplot2::ggplot_build(p)$data[[2]]
+
+  expected <- test_metrics_landscape |>
+    dplyr::filter(metric == "ai") |>
+    dplyr::pull(value)
+
+  expect_setequal(point_layer$y, expected)
+})
+
+test_that("plot_metrics passes point appearance through to the layer", {
+  p <- plot_metrics(
+    test_metrics_landscape,
+    selected_metrics = "ai",
+    point_size = 0.5,
+    point_alpha = 0.4
+  )
+  point_layer <- ggplot2::ggplot_build(p)$data[[2]]
+
+  expect_equal(unique(point_layer$size), 0.5)
+  expect_equal(unique(point_layer$alpha), 0.4)
+})

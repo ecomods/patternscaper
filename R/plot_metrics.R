@@ -43,6 +43,17 @@
 #'   Must contain exactly the patterns present in \code{metrics}, i.e. every
 #'   pattern once and no others. The first element is drawn at the bottom of
 #'   the axis.
+#' @param jitter_seed Seed controlling the random jitter of the points, passed
+#'   to \code{\link[ggplot2]{position_jitter}}. NA (default) draws fresh jitter each
+#'   render.
+#' @param jitter_width Numeric. Horizontal spread of the points around each
+#'   pattern (default: 0.1). Set to 0 to disable jitter. Points are never
+#'   displaced along the value axis, so they always sit at their true metric
+#'   value.
+#' @param point_size Numeric. Size of the data points (default: 1).
+#'   Reduce for plots with many landscapes per pattern.
+#' @param point_alpha Numeric between 0 and 1. Opacity of the data points
+#'   (default: 0.7). Reduce to make overlapping points easier to read.
 #'
 #' @return A ggplot2 object showing boxplots of metric values by pattern type.
 #'
@@ -85,19 +96,29 @@
 #'   selected_metrics = c("ai", "lsi"),
 #'   pattern_order = c("spots", "labyrinth")
 #' )
+#'
+#' # Fix the jitter so that repeated runs produce an identical figure
+#' plot_metrics(metrics, selected_metrics = c("ai", "lsi"), jitter_seed = 42)
+#'
+#' # Adjust point appearance for plots with many landscapes per pattern
+#' plot_metrics(
+#'   metrics,
+#'   selected_metrics = c("ai", "lsi"),
+#'   point_size = 0.5,
+#'   point_alpha = 0.4
+#' )
 plot_metrics <- function(
   metrics,
   selected_metrics = NULL,
   force = FALSE,
   metric_labels = "abbreviation",
   label_wrap_width = NULL,
-  pattern_order = NULL
+  pattern_order = NULL,
+  jitter_seed = NA,
+  jitter_width = 0.1,
+  point_size = 1,
+  point_alpha = 0.7
 ) {
-  # Visual parameters (internal only, adjust during development)
-  jitter_width <- 0.1
-  point_size <- 1
-  point_alpha <- 0.7
-
   # Validate metric_labels
   if (
     !is.character(metric_labels) ||
@@ -125,6 +146,56 @@ plot_metrics <- function(
   if (!is.null(pattern_order) && !is.character(pattern_order)) {
     cli::cli_abort(
       "pattern_order must be a character vector of pattern names"
+    )
+  }
+
+  # Validate jitter_seed. NA (fresh jitter each render) and NULL (use the
+  # current global stream) both mean something to position_jitter(), so both
+  # are passed through untouched.
+  if (
+    !is.null(jitter_seed) &&
+      !(length(jitter_seed) == 1 &&
+        (identical(jitter_seed, NA) || is.numeric(jitter_seed)))
+  ) {
+    cli::cli_abort(
+      "jitter_seed must be NA, NULL, or a single number"
+    )
+  }
+
+  # Validate jitter_width (0 disables jitter)
+  if (
+    !is.numeric(jitter_width) ||
+      length(jitter_width) != 1 ||
+      is.na(jitter_width) ||
+      jitter_width < 0
+  ) {
+    cli::cli_abort(
+      "jitter_width must be a single non-negative number"
+    )
+  }
+
+  # Validate point_size
+  if (
+    !is.numeric(point_size) ||
+      length(point_size) != 1 ||
+      is.na(point_size) ||
+      point_size <= 0
+  ) {
+    cli::cli_abort(
+      "point_size must be a single positive number"
+    )
+  }
+
+  # Validate point_alpha
+  if (
+    !is.numeric(point_alpha) ||
+      length(point_alpha) != 1 ||
+      is.na(point_alpha) ||
+      point_alpha < 0 ||
+      point_alpha > 1
+  ) {
+    cli::cli_abort(
+      "point_alpha must be a single number between 0 and 1"
     )
   }
 
@@ -309,7 +380,13 @@ plot_metrics <- function(
   p <- p +
     ggplot2::geom_boxplot() +
     ggplot2::geom_jitter(
-      position = ggplot2::position_jitter(width = jitter_width),
+      # height = 0 keeps the points at their true metric value; jitter only
+      # ever spreads them across the pattern axis
+      position = ggplot2::position_jitter(
+        width = jitter_width,
+        height = 0,
+        seed = jitter_seed
+      ),
       size = point_size,
       alpha = point_alpha
     ) +
