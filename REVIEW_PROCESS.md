@@ -10,7 +10,10 @@ Items whose title is prefixed **[Fable]** are findings only the third pass raise
 The original topic-based IDs (e.g. *§1.1*, *ChatGPT §A*, *F1*) are kept in brackets for
 traceability.
 
-> Passes: Claude + ChatGPT 2026-07-05; Fable 2026-07-05. Not yet triaged by the maintainer.
+> Passes: Claude + ChatGPT 2026-07-05; Fable 2026-07-05.
+> Triaged and partially worked since. **Last re-verified against the source 2026-08-05** — every
+> item below was checked against the current code, not just carried forward. Items marked
+> **[new]** were added at that re-verification and did not come from the three original passes.
 
 ---
 
@@ -23,9 +26,10 @@ traceability.
 ## 🟠 Medium — real inconsistency, latent bug, methodological issue, or maintainability risk
 
 ### M3. `create_landscapes()` failure bookkeeping is fragile (trailing failures misreported as full success)  — [Claude] [Fable] *(§1.4 / F5)*
-`R/landscape_create.R:452-474`. On failure the code does `all_landscapes[[i]] <- NULL`, which
+*Confirmed still open 2026-08-05; line refs updated after the M13 refactor.*
+`R/landscape_create.R:388-410`. On failure the code does `all_landscapes[[i]] <- NULL`, which
 **removes** the element rather than reserving a slot. For a **trailing** failure the list
-simply stays short, so `n_failed <- sum(sapply(..., is.null))` (`:462`) counts only interior
+simply stays short, so `n_failed <- sum(sapply(..., is.null))` (`:398`) counts only interior
 `NULL` gaps → `0`, and the function prints *"Successfully generated all N …"* while returning
 fewer than N. Interior failures happen to be back-filled with `NULL` by a later assignment, so
 only trailing failures are misreported.
@@ -57,39 +61,13 @@ than `"accuracy"`, `evaluation[["accuracy"]]` is `NULL`, `round(NULL, 4)` is `nu
 - **Fix:** derive the key from the compiled metric name (first non-`"loss"` element of
   `evaluation`, or look up by the user's `metrics[1]`) and guard against a missing key.
 
-### M7. `create_landscapes()` silently fails for `gaps` if the user supplies `invert_landscape`  — [ChatGPT] [Fable] *(ChatGPT §A)*
-`R/landscape_parameter_validation.R:179-185` allows `invert_landscape` for `gaps`, but
-`R/landscape_create_gaps.R:38-46` does **not** accept that argument (it hardcodes `TRUE`
-internally). In the batch path, merged params flow through `do.call(create_landscape, ...)` →
-`create_landscape_gaps(...)`, so `params_list = list(gaps = list(invert_landscape = FALSE))`
-triggers an unused-argument error, which `try_create_landscape()`
-(`R/landscape_create.R:541-563`) swallows — the user sees only generic retry/failure messages.
-Fable confirmed. A real silent-failure path, beyond the drift in L10.
-- **Fix:** either accept `invert_landscape` in `create_landscape_gaps()` or remove it from the
-  `gaps` spec; and surface the underlying error (see M12).
-
 ### M8. Invalid pattern names are silently dropped in `create_landscapes()`  — [ChatGPT] [Fable] *(ChatGPT §D)*
-`R/landscape_create.R:234-248` uses `patterns <- intersect(patterns, valid_patterns)`. A mix of
+`R/landscape_create.R:248` uses `patterns <- intersect(patterns, valid_patterns)`. A mix of
 valid and invalid names silently ignores the invalid ones (only the all-invalid case errors).
-Fable confirmed.
+Fable confirmed; still open 2026-08-05.
 - **Effect:** typos can quietly change the requested class set and distort the pattern
   distribution.
 - **Fix:** warn or abort on unknown entries instead of silently dropping them.
-
-### M9. `radius_noise_fraction` is unavailable through `create_landscapes()` for spots/gaps  — [ChatGPT] [Fable] *(ChatGPT §E / §2.5)*
-`radius_noise_fraction` is a formal argument of `create_landscape_spots()` /
-`create_landscape_gaps()` (`R/landscape_create_spots.R:81`, `R/landscape_create_gaps.R:44`) but
-is absent from `get_valid_param_specs()` and from `create_landscapes()`'s default param lists.
-Fable confirmed.
-- **Effect:** users cannot control this documented parameter through the batch generator; it's
-  treated as unknown input and removed during validation. (A concrete instance of the drift in
-  L10 / M13 — worth fixing directly.)
-
-### M10. `apply_metric_model()` has no `verbose`; `apply_pixel_model()` does  — [Claude] *(§2.1)*
-`R/nn_metrics.R:379-383` has no `verbose` parameter and **hardcodes `verbose = TRUE`** when
-evaluating performance (`:572`), so it always prints a confusion matrix. `apply_pixel_model()`
-(`R/nn_keras.R:558-563`) exposes `verbose` and threads it through.
-- **Fix:** add `verbose` to `apply_metric_model()` and pass it down, matching the sibling.
 
 ### M11. Inconsistent return shape when `return_performance = TRUE`  — [Claude] [ChatGPT] *(§2.2)*
 `apply_pixel_model()` always returns `list(predictions, performance)` (performance may be
@@ -101,47 +79,67 @@ evaluating performance (`:572`), so it always prints a confusion matrix. `apply_
   inconsistency rather than a pure correctness bug.
 
 ### M12. Generation failures are swallowed with no cause surfaced  — [Claude] *(§3.1)*
-`R/landscape_create.R:541-564`. `try_create_landscape()` catches **every** error and returns
-`NULL`; the user sees only generic "Retry k/3 … Failed …". A genuinely broken parameter combo
-is indistinguishable from bad luck (and hides M7).
+`R/landscape_create.R:480-503` (error handler at `:499-501`). `try_create_landscape()` catches
+**every** error and returns `NULL`; the user sees only generic "Retry k/3 … Failed …". A genuinely
+broken parameter combo is indistinguishable from bad luck. Still open 2026-08-05 — note this is
+the mechanism that hid M7 for as long as it did, which is the argument for fixing it.
 - **Fix:** capture and (at least in verbose mode) report `conditionMessage(e)`.
 
-### M13. Parameter definitions are duplicated in three places  — [Claude] *(§3.2)*
-Per-pattern parameter knowledge lives in (a) each `create_landscape_*()` signature/defaults,
-(b) `create_landscapes()`'s `default_params_list` (`R/landscape_create.R:255-307`), and
-(c) `get_valid_param_specs()` (`R/landscape_parameter_validation.R:130-193`). They already
-disagree (see M9, L10).
-- **Fix:** a single canonical spec (types, bounds, sampling defaults) that all three derive
-  from — prevents this whole class of drift.
+### M18. [new] Landscape parameters are undiscoverable through the public API  — *(added 2026-08-05)*
+Fallout from the 2026-08-04 unexport (see the M13/M9/M7 entries under **Completed**). The 11
+`create_landscape_*()` generators are now `@keywords internal`, but they are still where every
+per-pattern parameter is documented — and both public functions point users at them:
+- `create_landscape()` (`R/landscape_create.R:15-16`): *"See the documentation of the individual
+  functions for details on required and optional parameters."* Those pages are now internal and
+  off the pkgdown reference index.
+- `create_landscapes()` (`R/landscape_create.R:150-152`): `params_list` says the names and default
+  ranges *"can be found in the documentation of `create_landscape`"* — where they are not.
+
+**Effect:** a user has no documented route to learn that `spots` takes `n_spots` /
+`spot_radius` / `spot_radius_sd` / `radius_noise_fraction` / `regular_spots`, what their bounds
+are, or what ranges the batch generator samples by default. The API got smaller (good) but the
+documentation did not follow it.
+- **Fix:** surface the parameter reference on the public pages. `landscape_param_specs()`
+  (`R/landscape_parameter_validation.R:137`) already holds type, `min`/`max` and `batch_range`
+  for every parameter of all 11 patterns — generating the reference from it (roxygen `@evalRd`,
+  or a dedicated `?landscape_parameters` topic) keeps it from drifting the way M13 did.
+  Decision needed: auto-generated table vs. hand-written prose (see M19).
+
+### M19. [new] `create_landscape()`/`create_landscapes()` docs don't describe what actually happens  — *(added 2026-08-05)*
+Beyond the missing parameter table (M18), the two public help pages leave the batch behaviour
+undocumented:
+- **Rotation applies to only 5 of 11 patterns** and is silently dropped for the rest — see L10.
+- **`custom_pattern`** (`R/landscape_create.R:13-14`) is one cryptic line ("Optional pattern for
+  the landscape") with no explanation of why you would relabel a landscape and no example.
+- **How `params_list` values are interpreted** — a length-2 vector is a range sampled per
+  landscape, a length-1 value is fixed, logicals are sampled from the supplied set — is only
+  visible by reading `sample_landscape_params()`.
+- **What `create_landscapes()` returns on partial failure** is undocumented (and currently
+  mis-reported — see M3).
+- **The `@return` of `create_landscape()`** describes `data`/`pattern`/`params` but not `name`,
+  which the constructor does set.
+
+### M20. [new] Vignette is still organised around the now-internal generators  — *(added 2026-08-05)*
+`vignettes/landscape-generation.qmd` — the "Creating Single Landscapes" half (§"Spot Patterns",
+§"Clustered Patterns", §"Labyrinth Patterns") is structured per generator function, which no
+longer matches the 2-function public API. It does *not* call the internal functions directly
+(checked — it goes through `create_landscape()`), so it is not broken, just mis-shaped.
+- **Fix:** restructure around `create_landscape()` / `create_landscapes()` once M18 lands, and
+  link the parameter reference from it.
 
 ### M17. Add regression tests for the correctness bugs above  — [Claude] *(§7.1)*
-Specifically: (H1) `theme_landscape()` applies a minimal base (panel background ≠ grey);
-(M2) `frequency` varies across a batch of generated bands/labyrinth landscapes;
-(M3) `create_landscapes()` reports correct success/fail counts on a trailing failure.
+*Partially done.* (H1) `theme_landscape()` and (M2) `frequency` variation both have tests
+(`test-plot_themes.R`, `test-create-training-landscapes.R`). **Remaining:** (M3)
+`create_landscapes()` reports correct success/fail counts on a **trailing** failure.
 
 ---
 
 ## 🟡 Low — polish, docs, style, small consistency wins
 
-### L3. [Fable] Metrics classifier is least-squares regression to one-hot targets; `confidence` is uncalibrated post-hoc softmax  — [Fable] *(F6)*
-`R/nn_utils.R:515-523`, `R/nn_metrics.R:255-259,495-499`. `fit_nn_model()` calls `neuralnet()`
-with **no** `linear.output`/`err.fct`/`act.fct` (a repo-wide grep confirms none), so it runs
-with defaults `linear.output = TRUE`, `err.fct = "sse"`: fit by least squares against 0/1
-one-hot columns with linear output units — a regression, not a cross-entropy classifier. Raw
-outputs are unbounded reals, converted to "probabilities" via a manual softmax and reported as
-`confidence`/per-class probabilities.
-- **Effect:** (1) argmax classification still works (accuracy meaningful), but the
-  `confidence`/probability columns (plotted as "predicted (0.87)") are **not calibrated
-  probabilities** — softmax of arbitrary linear scores; (2) SSE-to-one-hot is a weaker
-  objective than cross-entropy, so the metrics model likely under-performs (relevant if the
-  paper compares metric- vs pixel-based accuracy).
-- **Fix:** either set `linear.output = FALSE` (bounded logistic outputs) and document/justify
-  the objective, or explicitly document that `confidence` is a relative score, not a calibrated
-  probability. At minimum make the choice deliberate.
-
 ### L4. [Fable] Pixel model's "k-fold" test silently runs LOO — the k-fold path is never exercised  — [Fable] *(F7)*
-`tests/testthat/test-nn_keras.R:106-124`. `test_that("train_pixel_model works with
-cv_method='k-fold'")` uses 12 landscapes (4/class) with `cv_folds = 3`, but
+`tests/testthat/test-nn_keras.R:125-137` (confirmed still open 2026-08-05).
+`test_that("train_pixel_model works with cv_method='k-fold'")` uses `n_per_class = 4` with
+`cv_folds = 3`, but
 `validate_cv_params()` (`R/nn_utils.R:163-171`) computes `max_suitable_folds =
 floor(4/3) = 1 < 2`, so it **switches to LOO** (`cv_folds = 12`). The test only asserts output
 structure, which LOO satisfies — it passes while testing the wrong branch; genuine k-fold
@@ -150,17 +148,19 @@ stratification has no passing pixel-side coverage.
   `model$performance$cv_method == "k-fold"` and `cv_folds == 3` to pin the branch.
 
 ### L5. [Fable] `fisher_score` poisoned to `NA` by any single-sample pattern  — [Fable] *(F8)*
-`R/metrics_evaluation.R:341-379`. Within-group variance (`:371-372`) uses
-`(group_stats$n - 1) * group_stats$sd_val^2`. For a pattern with one landscape,
-`sd_val = sd(<one value>) = NA`, and `0 * NA = NA` (not `0`), making `within_var` `NA` → **every
-metric's Fisher score `NA`**. `dplyr::arrange(desc(NA))` then returns the input order, so
-`method = "fisher_score"` silently returns a meaningless ranking with no warning.
-`rank_by_kruskal()` (`:402-405`) and `rank_by_linear_model()` (`:274-280`) guard with
-`tryCatch`; `fisher_score` doesn't. Low incidence in the balanced `create_landscapes()`
-pipeline, but `evaluate_metrics()` accepts arbitrary user metrics.
+*Still open, description corrected 2026-08-05.* `rank_by_fisher_score()` is now at
+`R/metrics_evaluation.R:652-690`. Two parts of the original finding no longer apply: a
+`length(unique(df$pattern)) < 2` guard (`:659-661`) catches the *single-group* case, and the
+ranking now tie-breaks deterministically (`arrange(desc(score), metric)`, `:686`) rather than
+silently returning input order.
+**What remains:** the *single-sample-per-group* case. Within-group variance (`:681-682`) still
+uses `(group_stats$n - 1) * group_stats$sd_val^2`; for a pattern with one landscape
+`sd_val = sd(<one value>) = NA` and `0 * NA = NA` (not `0`), so `within_var` is `NA` → that
+metric's Fisher score is `NA`. Low incidence in the balanced `create_landscapes()` pipeline, but
+`evaluate_metrics()` accepts arbitrary user metrics.
 - **Fix:** treat single-member groups as zero within-group contribution (drop them from the
   `sd` term or coerce `NA` sd to 0), and/or wrap the per-metric computation in `tryCatch` like
-  the sibling methods.
+  `rank_by_kruskal()`.
 
 ### L7. Single-landscape handling differs between the two `apply_*`  — [Claude] *(§2.3)*
 `apply_pixel_model()` explicitly wraps a lone `landscape` into a list (`R/nn_keras.R:591-593`);
@@ -168,15 +168,36 @@ pipeline, but `evaluate_metrics()` accepts arbitrary user metrics.
 *(verify both accept a single `landscape` identically)*.
 
 ### L9. Default parameters drift between single generators and the batch wrapper  — [Claude] *(§2.5)*
-E.g. gaps `n_spots = 15` in `create_landscape_gaps()` vs `c(5, 10)` in `create_landscapes()`;
-`invert_landscape` in the spots default list but not gaps; `radius_noise_fraction` a generator
-arg but absent from `get_valid_param_specs()` (see M9). See M13 — a single source of truth would
-prevent this.
+*Mostly resolved 2026-08-04 by M13.* Two of the three sources are now derived from
+`landscape_param_specs()`. **Remaining — the third axis:** each generator's own *signature
+defaults* are still written independently of the spec. E.g. `create_landscape_gaps()` has
+`n_spots = 15` (`R/landscape_create_gaps.R:43`) while the spec's `batch_range` is `c(5, 10)`, so
+`create_landscape("gaps")` and `create_landscapes(patterns = "gaps")` produce
+differently-distributed landscapes with no note anywhere saying so.
+- **Fix (decide first):** either derive the signature defaults from the spec too, or accept the
+  divergence deliberately and document it under M18/M19 — a single-landscape default and a batch
+  sampling range arguably *should* differ, but right now the difference is accidental.
 
 ### L10. Rotation silently ignored for most patterns  — [Claude] *(§3.3)*
-Only `c("sharp","diffuse","fingers","clustered","bands")` (`R/landscape_create.R:392-398`) honour
+Only `c("sharp","diffuse","fingers","clustered","bands")` (`R/landscape_create.R:328-334`) honour
 `rotation`; for the others it's silently dropped. Document in `create_landscapes()` (and ideally
-warn if a non-zero rotation is set for a pattern that ignores it).
+warn if a non-zero rotation is set for a pattern that ignores it). *Note 2026-08-05:* the doc
+half of this is now folded into M19; the warning half stays here.
+
+### L25. [new] `radius_noise_fraction` has no default batch range — open decision  — *(added 2026-08-05)*
+M9's fix made `radius_noise_fraction` a valid, settable `params_list` parameter, but deliberately
+gave it `batch_range = NULL` (`R/landscape_parameter_validation.R:319-324`) so published results
+were unaffected. **Consequence:** every batch-generated spots/gaps landscape still uses the
+generator default `0` — perfectly sharp circular edges — in all training and test sets.
+- **Decision needed:** should it get a `batch_range` so edge noise is randomized like the other
+  spots/gaps parameters? This is a **results-changing** decision — it would alter
+  self-organized-pattern accuracy and require re-running those use cases. Tracked with the
+  analysis-side context in `../spatPatClassifyR_paper/REVISIONS.md` (`## Code`).
+
+### L26. [new] `pkgdown::build_reference()` hard-errors  — *(added 2026-08-05)*
+Pre-existing, unrelated to the landscape work: `print.metrics_evaluation` has no entry anywhere
+in `_pkgdown.yml`'s reference index, and pkgdown aborts on an unindexed topic. One-line fix,
+worth doing before the website work (which M18/M20 will touch anyway).
 
 ### L17. `sapply()` where `vapply()` is safer  — [Claude] [ChatGPT] *(§5.3)*
 `R/nn_keras.R` (several), `R/nn_utils.R`, `R/plot_*`. `sapply()` can silently return a list or
@@ -184,9 +205,10 @@ matrix; `vapply()` with a template is the package-dev norm. **[ChatGPT]:** low p
 prioritize ahead of concrete user-facing bugs.
 
 ### L19. Inconsistent source-file naming  — [Claude] *(§5.5)*
-`create_landscape_bare.R` / `create_landscape_dense.R` vs the rest `landscape_create_*.R`, with
-dispatcher `landscape_create.R`. Pick one convention (e.g. `create_landscape_*.R`) and rename
-for discoverability.
+`create_landscape_bare.R` / `create_landscape_dense.R` vs the other nine `landscape_create_*.R`,
+with dispatcher `landscape_create.R`. Pick one convention (e.g. `landscape_create_*.R`, now the
+majority) and rename for discoverability. Confirmed still open 2026-08-05. Pure file rename — no
+behaviour change, no `man/` change.
 
 ### L21. Empty README badge block  — [Claude] *(§6.3)*
 `README.Rmd:18-19` / `README.md:6-8`. Consider lifecycle / R-CMD-check / test-coverage /
@@ -196,11 +218,6 @@ for discoverability.
 Once M11 is resolved, add tests asserting the return **shape** of both `apply_*` under
 `return_performance = TRUE/FALSE`, with and without known classes — the surface the sibling
 analysis repo depends on.
-
-### L23. Tests missing for several user-facing mismatches  — [ChatGPT] [Fable] *(ChatGPT §F)*
-No tests seen for: `theme_landscape()` composition (H1); plotting classification with unknown
-classes / missing `actual_class` (H3); the `gaps + invert_landscape` batch failure (M7); the
-`frequency` sampling for bands (M2). Extends M17.
 
 ### L24. `plot_classified_landscapes(only_misclassified = TRUE)` aborts when nothing is misclassified  — [Fable]
 `R/plot_classification.R`. When a model classifies every landscape correctly (e.g. the ecotone
@@ -215,14 +232,32 @@ cases after M2.
 
 ---
 
-## Suggested first batch (highest value, lowest risk)
+## Next batch (re-planned 2026-08-05)
 
-1. `theme_landscape()` composition — **H1** (visible, isolated, testable).
-2. Vignette `exclude_na` → `exclude_NA_metrics` — **H2** (user-facing error).
-3. Remove `LazyData: true` — **M16** — and flesh out `Description:` — **M14** (pre-submission hygiene).
-4. Repair `frequency` integer sampling — **M2** (affects training-data quality).
-5. Fold-internal scaling — **M1** (removes CV leakage before any headline numbers are quoted).
-6. Add `verbose` to `apply_metric_model()` + unify `apply_*` return shape — **M10 / M11**.
+The original "first batch" is fully done (H1, H2, M16, M14, M2, M1, M10) — see **Completed**.
+Remaining work, grouped by **whether it can change published results**, because that determines
+whether the analysis repo has to be re-run:
+
+**Group A — cannot change any result** (docs, messages, tests, file names). Safe to do in one go:
+1. **M18** — make landscape parameters discoverable from the public API *(the main gap)*.
+2. **M19** — document rotation applicability, `custom_pattern`, `params_list` semantics, `@return`.
+3. **M20** — restructure `landscape-generation.qmd` around the 2-function API.
+4. **L26** — one-line `_pkgdown.yml` fix so `build_reference()` stops erroring.
+5. **L19** — file renames; **L17** — `sapply()` → `vapply()`; **L21** — README badges.
+
+**Group B — changes only error/warning paths, not successful runs.** Existing golden checks
+should stay byte-identical; only failure behaviour moves:
+6. **M3 / M8 / M12** — the `create_landscapes()` failure path (miscounted trailing failures,
+   silently dropped invalid pattern names, swallowed error causes), plus the M17 test.
+7. **L24** — `plot_classified_landscapes(only_misclassified = TRUE)` at 100% accuracy.
+8. **L7** — single-landscape handling parity between the two `apply_*`.
+
+**Group C — will or may change results; needs the analysis re-run and a manuscript check:**
+9. **L25** — `radius_noise_fraction` batch randomization *(decision first, then re-run)*.
+10. **M11 / L22** — unify the `apply_*` return contract (touches the analysis repo's call sites).
+11. **M5 / M6** — pixel-model input encoding and the hardcoded `evaluate()` metric keys.
+12. **L5** — `fisher_score` single-sample guard (changes metric ranking when it fires).
+13. **L9** — generator signature defaults vs. batch ranges *(decision first)*.
 
 ---
 
@@ -249,6 +284,61 @@ Checked against current source; correct as-is, no action needed:
 ---
 
 ## Completed
+
+### M13 + M9 + M7. Parameter definitions duplicated in three places, and the two drifts it caused  — [Claude] [ChatGPT] [Fable] *(§3.2 / ChatGPT §E / ChatGPT §A)*
+*Fixed 2026-08-04*, as one consolidation with two follow-on fixes. Per-pattern parameter knowledge
+lived in three independently-maintained places — each `create_landscape_*()` signature,
+`create_landscapes()`'s `default_params_list`, and `get_valid_param_specs()` — and they had
+already drifted apart in two user-visible ways.
+- **M13:** introduced `landscape_param_specs()` (`R/landscape_parameter_validation.R:137`) as the
+  single canonical table: `type`, `min`/`max`, and `batch_range` (a literal vector, a
+  `function(width, height)` for size-scaled ranges, or `NULL` for validation-only parameters).
+  `get_valid_param_specs()` (validation) and `build_default_params_list()` (batch defaults) now
+  both derive from it, as does the integer-vs-continuous sampling decision, which was previously a
+  hardcoded name list in `create_landscapes()`. Commits `0021e85`, `1640346`.
+- **M9:** `radius_noise_fraction` added to the spots/gaps spec — it had been silently stripped
+  from any `params_list`, so it was stuck at the generator default `0` in *every* batch-generated
+  landscape ever produced. Given `batch_range = NULL` so existing results are unaffected; whether
+  it should be randomized is now tracked as **L25**. Commit `fdfa3ce`.
+- **M7:** the phantom `invert_landscape` entry removed from the `gaps` spec — validation accepted
+  it, then the generator (which hardcodes `TRUE`; that *is* the spots/gaps distinction) failed
+  with "unused argument", swallowed by `try_create_landscape()`. `gaps` stays non-invertible.
+  Commit `d7330f0`.
+
+Done as small individually-verified steps behind a new exact-match golden harness for landscape
+generation (`dev/golden/run_golden_landscapes.R`, commits `6b376eb`/`09dd47b`), added *first* as
+the safety net. Verified: 1938 tests pass / 0 fail, `R CMD check` 0 errors / 0 warnings (same 4
+pre-existing NOTEs), landscape golden check byte-exact across all 11 patterns, classification
+golden check within tolerance, and one ecotone + one self-organized analysis-repo use case re-run
+against the installed local package. **No result changes.** New tests in
+`tests/testthat/test-landscape-parameter-specs.R`. The same session also reduced the public
+creation API from 13 exported functions to 2 (`create_landscape`, `create_landscapes`; commits
+`17c2e62`, `49a0ae5`) — which is what **M18/M19/M20** now follow up on, since the documentation
+did not follow the API.
+
+### M10. `apply_metric_model()` has no `verbose`; `apply_pixel_model()` does  — [Claude] *(§2.1)*
+*Fixed (verified present 2026-08-05).* `apply_metric_model()` (`R/nn_metrics.R:518-523`) now takes
+`verbose = TRUE` as a formal argument, validates it, and threads it into
+`evaluate_cv_performance()` instead of hardcoding `TRUE`, matching `apply_pixel_model()`. Logged in
+`../spatPatClassifyR_paper/REVISIONS.md` under "Kleine Bugs".
+
+### L3. [Fable] Metrics classifier `confidence` is an uncalibrated post-hoc softmax  — [Fable] *(F6)*
+*Fixed 2026-08-03.* Raw `neuralnet` outputs are now projected onto the probability simplex and the
+column renamed `confidence` → `score`, making the "this is a relative score, not a calibrated
+probability" point explicit rather than implied. Full write-up, measured before/after numbers and
+the rejected alternatives are in `../spatPatClassifyR_paper/CLASS_SCORES.md`; commits `d0d8f13`,
+`5603825`, `b329c2f`, `c80ac14`. Supplement §S1.5.1, §S1.6 and the Figure S1/S2 captions updated.
+(The second half of the original finding — that SSE-to-one-hot is a weaker objective than
+cross-entropy — was considered and deliberately not changed; the classifier is argmax-based and
+accuracy is unaffected.)
+
+### L23. Tests missing for several user-facing mismatches  — [ChatGPT] [Fable] *(ChatGPT §F)*
+*Complete (verified 2026-08-05).* All four named gaps now have coverage: `theme_landscape()`
+composition (H1) in `test-plot_themes.R`; unknown-class / missing `actual_class` plotting (H3) in
+`test-plot_classification.R:189`; `gaps + invert_landscape` (M7) in
+`test-landscape-parameter-specs.R:150`; `frequency` sampling for bands (M2) in
+`test-create-training-landscapes.R`. The remaining M17 clause (M3, trailing-failure counts) stays
+open under **M17**.
 
 ### H1. `theme_landscape()` never composes the base theme  — [Claude] [ChatGPT] [Fable] *(§1.1)*
 *Fixed 2026-07-06.* `R/plot_themes.R` evaluated `theme_minimal(...)` and `%+replace%` as discarded
