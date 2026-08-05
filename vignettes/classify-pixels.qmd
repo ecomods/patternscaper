@@ -178,7 +178,7 @@ classification$performance$per_class_metrics
 ```
 
 To visualize the classified landscapes along with their true and predicted patterns
-use the function `plot_classified_landscapes`. Correctly classified landscapes are shown in green, misclassified ones in red. To plot only misclassified landscapes, set `only_misclassified = TRUE`.
+use the function `plot_classified_landscapes`. Correctly classified landscapes are shown in blue, misclassified ones in bold orange. To plot only misclassified landscapes, set `only_misclassified = TRUE`.
 
 :::{.callout-note}
 If you classified landscapes where the true patterns are not known, the plot will

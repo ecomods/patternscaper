@@ -190,7 +190,7 @@ plot_classified_landscapes <- function(
           ),
         predicted_class == actual_class ~
           paste0(
-            "<span style='color: #228B22;'>",
+            "<span style='color: #0072B2;'>",
             predicted_class,
             "</span> (",
             round(score, 2),
@@ -200,9 +200,9 @@ plot_classified_landscapes <- function(
           ),
         predicted_class != actual_class ~
           paste0(
-            "<span style='color: #FF6347;'>",
+            "<span style='color: #D55E00;'><b>",
             predicted_class,
-            "</span> (",
+            "</b></span> (",
             round(score, 2),
             ")<br>",
             "Actual: ",

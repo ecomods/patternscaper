@@ -392,6 +392,36 @@ test_that("plot_classified_landscapes renders predicted-only titles for unlabele
   expect_false(any(grepl("Actual:", titles)))
 })
 
+test_that("plot_classified_landscapes marks correct and misclassified titles", {
+  landscapes <- list(
+    create_landscape("sharp", width = 20, height = 20),
+    create_landscape("diffuse", width = 20, height = 20)
+  )
+
+  classification <- data.frame(
+    landscape_id = 1:2,
+    actual_class = c("sharp", "diffuse"),
+    predicted_class = c("sharp", "sharp"), # 2nd wrong
+    score = c(0.95, 0.65)
+  )
+
+  result <- plot_classified_landscapes(classification, landscapes)
+  titles <- vapply(
+    seq_along(landscapes),
+    function(i) result[[i]]$labels$title,
+    character(1)
+  )
+
+  # Okabe-Ito blue/vermillion, not the former green/red pair
+  expect_match(titles[1], "#0072B2", fixed = TRUE)
+  expect_match(titles[2], "#D55E00", fixed = TRUE)
+  expect_false(any(grepl("#228B22|#FF6347", titles)))
+
+  # Bold is the redundant, non-colour cue on the misclassified panel only
+  expect_match(titles[2], "<b>sharp</b>", fixed = TRUE)
+  expect_false(grepl("<b>", titles[1], fixed = TRUE))
+})
+
 test_that("plot_classified_landscapes returns a placeholder when nothing is misclassified", {
   landscapes <- list(
     create_landscape("sharp", width = 20, height = 20),
