@@ -10,7 +10,7 @@ create_landscape(
   width = 100,
   height = 100,
   name = NULL,
-  custom_pattern = NULL,
+  pattern_label = NULL,
   params = NULL,
   rotation = 0,
   ...
@@ -27,8 +27,12 @@ create_landscape(
 
 \item{name}{Character. Optional name for the landscape (default: NULL).}
 
-\item{custom_pattern}{Character. Optional pattern for the landscape (default: NULL uses the default
-pattern of the corresponding function).}
+\item{pattern_label}{Character. Label to store in the landscape's
+\code{pattern} field instead of \code{pattern} itself (default: NULL
+keeps \code{pattern}). Generation is unaffected -- only the label
+changes. Use it to group several patterns under one class, for example
+labelling both "sharp" and "diffuse" landscapes as "ecotone" so a
+classifier is trained on the group.}
 
 \item{params}{Output of the \code{pattern_*()} constructor matching \code{pattern},
 for example \code{\link{pattern_spots}} (default: NULL). Must hold single values
@@ -38,19 +42,26 @@ for each parameter, ranges are only meaningful for \code{\link{create_landscapes
 Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated.
 The remaining patterns ignore it, and are generated without rotation.}
 
-\item{...}{Parameters passed to specific landscape functions. See the documentation
-of the individual functions for details on required and optional parameters.}
+\item{...}{Pattern parameters given individually rather than through
+\code{params}. The two cannot be combined.}
 }
 \value{
 A landscape object with pattern corresponding to the pattern, containing:
   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
-  \item{pattern}{Character string with the  pattern type}
+  \item{pattern}{Character string with the pattern type, or \code{pattern_label} if given}
   \item{params}{List of all input parameters used to generate the landscape}
+  \item{name}{Character string with the landscape name, \code{NA} if none was given}
 }
 \description{
-A generic function that creates various patterns of landscape matrices using
-specialized functions. The pattern of landscape is determined by the 'pattern'
-parameter.
+Creates a single binary landscape with the requested spatial pattern.
+
+Each pattern has its own parameters, set through its constructor:
+\code{\link{pattern_random}}, \code{\link{pattern_bare}},
+\code{\link{pattern_dense}}, \code{\link{pattern_sharp}},
+\code{\link{pattern_diffuse}}, \code{\link{pattern_fingers}},
+\code{\link{pattern_clustered}}, \code{\link{pattern_bands}},
+\code{\link{pattern_spots}}, \code{\link{pattern_gaps}} and
+\code{\link{pattern_labyrinth}}.
 }
 \examples{
 # Create a default landscape of various patterns

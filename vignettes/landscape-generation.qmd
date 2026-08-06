@@ -379,7 +379,7 @@ landscapes_example <- set_landscape_name(
 )
 landscapes_example <- set_landscape_pattern(
   landscapes_example,
-  "custom_pattern"
+  "ecotone"
 )
 landscapes_example
 ```

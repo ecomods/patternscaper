@@ -127,6 +127,39 @@ test_that("create_landscape handles rotation parameter", {
   expect_equal(terra::nrow(l$data), 50)
 })
 
+test_that("pattern_label relabels without changing the landscape", {
+  set.seed(8)
+  l_labelled <- create_landscape(
+    "sharp",
+    width = 30,
+    height = 30,
+    pattern_label = "ecotone"
+  )
+
+  set.seed(8)
+  l_plain <- create_landscape("sharp", width = 30, height = 30)
+
+  expect_equal(l_labelled$pattern, "ecotone")
+  expect_equal(l_plain$pattern, "sharp")
+  expect_equal(
+    terra::as.matrix(l_labelled$data, wide = TRUE),
+    terra::as.matrix(l_plain$data, wide = TRUE)
+  )
+})
+
+test_that("pattern_label and name set different fields", {
+  l <- create_landscape(
+    "spots",
+    width = 20,
+    height = 20,
+    name = "site_a",
+    pattern_label = "patchy"
+  )
+
+  expect_equal(l$pattern, "patchy")
+  expect_equal(l$name, "site_a")
+})
+
 test_that("every rotatable pattern accepts rotation", {
   for (pattern in c("sharp", "diffuse", "fingers", "clustered", "bands")) {
     l <- create_landscape(pattern, width = 50, height = 50, rotation = 45)

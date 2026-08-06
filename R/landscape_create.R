@@ -1,8 +1,15 @@
 #' Create a Landscape with Specified Pattern
 #'
-#' A generic function that creates various patterns of landscape matrices using
-#' specialized functions. The pattern of landscape is determined by the 'pattern'
-#' parameter.
+#' @description
+#' Creates a single binary landscape with the requested spatial pattern.
+#'
+#' Each pattern has its own parameters, set through its constructor:
+#' \code{\link{pattern_random}}, \code{\link{pattern_bare}},
+#' \code{\link{pattern_dense}}, \code{\link{pattern_sharp}},
+#' \code{\link{pattern_diffuse}}, \code{\link{pattern_fingers}},
+#' \code{\link{pattern_clustered}}, \code{\link{pattern_bands}},
+#' \code{\link{pattern_spots}}, \code{\link{pattern_gaps}} and
+#' \code{\link{pattern_labyrinth}}.
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
@@ -10,21 +17,26 @@
 #'        "dense", "sharp", "diffuse", "fingers", "bands", "clustered",
 #'        "spots", "gaps", "labyrinth"
 #' @param name Character. Optional name for the landscape (default: NULL).
-#' @param custom_pattern Character. Optional pattern for the landscape (default: NULL uses the default
-#'     pattern of the corresponding function).
+#' @param pattern_label Character. Label to store in the landscape's
+#'     \code{pattern} field instead of \code{pattern} itself (default: NULL
+#'     keeps \code{pattern}). Generation is unaffected -- only the label
+#'     changes. Use it to group several patterns under one class, for example
+#'     labelling both "sharp" and "diffuse" landscapes as "ecotone" so a
+#'     classifier is trained on the group.
 #' @param params Output of the \code{pattern_*()} constructor matching \code{pattern},
 #'     for example \code{\link{pattern_spots}} (default: NULL). Must hold single values
 #'     for each parameter, ranges are only meaningful for \code{\link{create_landscapes}}.
 #' @param rotation Numeric. Angle to rotate the landscape in degrees (default: 0).
 #'     Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated.
 #'     The remaining patterns ignore it, and are generated without rotation.
-#' @param ... Parameters passed to specific landscape functions. See the documentation
-#'        of the individual functions for details on required and optional parameters.
+#' @param ... Pattern parameters given individually rather than through
+#'     \code{params}. The two cannot be combined.
 #'
 #' @return A landscape object with pattern corresponding to the pattern, containing:
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
-#'   \item{pattern}{Character string with the  pattern type}
+#'   \item{pattern}{Character string with the pattern type, or \code{pattern_label} if given}
 #'   \item{params}{List of all input parameters used to generate the landscape}
+#'   \item{name}{Character string with the landscape name, \code{NA} if none was given}
 #'
 #' @family landscape creation
 #' @seealso \code{\link{plot_landscapes}}
@@ -77,7 +89,7 @@ create_landscape <- function(
   width = 100,
   height = 100,
   name = NULL,
-  custom_pattern = NULL,
+  pattern_label = NULL,
   params = NULL,
   rotation = 0,
   ...
@@ -142,9 +154,9 @@ create_landscape <- function(
     landscape <- set_landscape_name(landscape, name)
   }
 
-  # Set a pattern different from the default if requested
-  if (!is.null(custom_pattern)) {
-    landscape <- set_landscape_pattern(landscape, custom_pattern)
+  # Relabel the landscape if requested
+  if (!is.null(pattern_label)) {
+    landscape <- set_landscape_pattern(landscape, pattern_label)
   }
 
   return(landscape)
@@ -153,14 +165,26 @@ create_landscape <- function(
 
 #' Create Multiple Landscapes
 #'
-#' Create a series of landscape models with variations.
-#' Creates a total of n landscapes distributed across different landscape patterns.
+#' @description
+#' Creates \code{n} landscapes spread across the requested patterns, varying
+#' their parameters between landscapes. This is how training sets are built.
+#'
+#' Each pattern has its own parameters, set through its constructor:
+#' \code{\link{pattern_random}}, \code{\link{pattern_bare}},
+#' \code{\link{pattern_dense}}, \code{\link{pattern_sharp}},
+#' \code{\link{pattern_diffuse}}, \code{\link{pattern_fingers}},
+#' \code{\link{pattern_clustered}}, \code{\link{pattern_bands}},
+#' \code{\link{pattern_spots}}, \code{\link{pattern_gaps}} and
+#' \code{\link{pattern_labyrinth}}.
 #'
 #' @param n Integer. Total number of landscapes to create (default: 50).
 #' @param patterns Character vector. patterns of landscapes to sample from (default: all patterns).
 #' @param width Integer. Width of all landscapes in pixels (default: 100).
 #' @param height Integer. Height of all landscapes in pixels (default: 100).
-#' @param rotation Numeric vector. Rotation angles in degrees (default: 0:360).
+#' @param rotation Numeric vector. Angles in degrees to sample from, one per
+#'     landscape (default: 0:360). A single value applies that angle to every
+#'     landscape. Only "sharp", "diffuse", "fingers", "clustered" and "bands"
+#'     are rotated; the remaining patterns ignore it.
 #' @param params_list List. Per-pattern parameters, keyed by pattern name (default: NULL).
 #'     Each entry is either the output of the matching \code{pattern_*()} constructor,
 #'     for example \code{\link{pattern_spots}}, or a plain named list. A single value
@@ -188,21 +212,14 @@ create_landscape <- function(
 #' # Get all landscape patterns
 #' sapply(landscapes, function(x) x$pattern)
 #'
-#' # Custom parameters for spot patterns and sharp vegetation boundary
-#' # Can be given as a range (min, max) or a single value.
-#' pattern_params <- list(
-#'   spots = list(
-#'     n_spots = 15,
-#'     spot_radius = 10,
-#'     spot_radius_sd = 3
-#'   ),
-#'   sharp = list(
-#'     boundary_position = c(0.4,0.6)
-#' ))
+#' # Custom parameters, as a single value or as a range sampled per landscape
 #' landscapes_custom <- create_landscapes(
 #'   n = 12,
-#'  patterns = c("spots", "sharp"),
-#'  params_list = pattern_params
+#'   patterns = c("spots", "sharp"),
+#'   params_list = list(
+#'     spots = pattern_spots(n_spots = 15, spot_radius = c(8, 12)),
+#'     sharp = pattern_sharp(boundary_position = c(0.4, 0.6))
+#'   )
 #' )
 #'
 #' @export

@@ -25,7 +25,10 @@ create_landscapes(
 
 \item{height}{Integer. Height of all landscapes in pixels (default: 100).}
 
-\item{rotation}{Numeric vector. Rotation angles in degrees (default: 0:360).}
+\item{rotation}{Numeric vector. Angles in degrees to sample from, one per
+landscape (default: 0:360). A single value applies that angle to every
+landscape. Only "sharp", "diffuse", "fingers", "clustered" and "bands"
+are rotated; the remaining patterns ignore it.}
 
 \item{params_list}{List. Per-pattern parameters, keyed by pattern name (default: NULL).
 Each entry is either the output of the matching \code{pattern_*()} constructor,
@@ -43,8 +46,16 @@ The default value NULL creates equally balanced patterns.}
 A named list of landscape objects. Names indicate the pattern and optional rotation.
 }
 \description{
-Create a series of landscape models with variations.
-Creates a total of n landscapes distributed across different landscape patterns.
+Creates \code{n} landscapes spread across the requested patterns, varying
+their parameters between landscapes. This is how training sets are built.
+
+Each pattern has its own parameters, set through its constructor:
+\code{\link{pattern_random}}, \code{\link{pattern_bare}},
+\code{\link{pattern_dense}}, \code{\link{pattern_sharp}},
+\code{\link{pattern_diffuse}}, \code{\link{pattern_fingers}},
+\code{\link{pattern_clustered}}, \code{\link{pattern_bands}},
+\code{\link{pattern_spots}}, \code{\link{pattern_gaps}} and
+\code{\link{pattern_labyrinth}}.
 }
 \examples{
 # Generate 20 landscapes
@@ -59,21 +70,14 @@ landscapes[[1]]$pattern
 # Get all landscape patterns
 sapply(landscapes, function(x) x$pattern)
 
-# Custom parameters for spot patterns and sharp vegetation boundary
-# Can be given as a range (min, max) or a single value.
-pattern_params <- list(
-  spots = list(
-    n_spots = 15,
-    spot_radius = 10,
-    spot_radius_sd = 3
-  ),
-  sharp = list(
-    boundary_position = c(0.4,0.6)
-))
+# Custom parameters, as a single value or as a range sampled per landscape
 landscapes_custom <- create_landscapes(
   n = 12,
- patterns = c("spots", "sharp"),
- params_list = pattern_params
+  patterns = c("spots", "sharp"),
+  params_list = list(
+    spots = pattern_spots(n_spots = 15, spot_radius = c(8, 12)),
+    sharp = pattern_sharp(boundary_position = c(0.4, 0.6))
+  )
 )
 
 }
