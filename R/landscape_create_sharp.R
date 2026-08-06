@@ -3,8 +3,12 @@
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param boundary_position Numeric. Relative position of vegetation boundary from top (0-1) (default: 0.5).
-#' @param random_spots Numeric vector of length 2. Probabilities for flipping cells: [1→0, 0→1] (default: c(0,0)).
+#' @param boundary_position Numeric. Relative position of vegetation boundary
+#'     from top (0-1) (default: 0.5).
+#' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
+#'     bare, adding gaps within the vegetation (0-1, default: 0).
+#' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
+#'     vegetated, scattering vegetation beyond the boundary (0-1, default: 0).
 #' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
 #'
 #' @return A landscape object with pattern "sharp" containing:
@@ -25,10 +29,10 @@
 #'   boundary_position = 0.7
 #' )
 #'
-#' # Landscape with rotation and some spots
+#' # Landscape with rotation and scattered vegetation beyond the boundary
 #' sharp_rotated <- create_landscape_sharp(
 #'   boundary_position = 0.3,
-#'   random_spots = c(0, 0.1),
+#'   noise_bare_to_veg = 0.1,
 #'   rotation = 45
 #' )
 #' }
@@ -36,14 +40,16 @@ create_landscape_sharp <- function(
   width = 100,
   height = 100,
   boundary_position = 0.5,
-  random_spots = c(0, 0),
+  noise_veg_to_bare = 0,
+  noise_bare_to_veg = 0,
   rotation = 0
 ) {
   # Validate inputs
   validate_dimensions(width = width, height = height)
   validate_boundary_position(boundary_position = boundary_position)
   validate_rotation(rotation = rotation)
-  validate_random_spots(random_spots = random_spots)
+  validate_noise_prob(noise_veg_to_bare, "noise_veg_to_bare")
+  validate_noise_prob(noise_bare_to_veg, "noise_bare_to_veg")
 
   # Calculate width and height of the actual landscape to produce
   # In case of rotation, the landscape needs to be larger to avoid cropping pattern
@@ -62,15 +68,15 @@ create_landscape_sharp <- function(
     mat[1:boundary_row, ] <- 1
   }
 
-  # Add random spots if requested
-  if (any(random_spots > 0)) {
+  # Add boundary noise if requested
+  if (noise_veg_to_bare > 0 || noise_bare_to_veg > 0) {
     # Indices for each type
     idx_1 <- which(mat == 1)
     idx_0 <- which(mat == 0)
 
     # Flip some cells based on probabilities
-    flip_to_0 <- idx_1[rbinom(length(idx_1), 1, random_spots[1]) == 1]
-    flip_to_1 <- idx_0[rbinom(length(idx_0), 1, random_spots[2]) == 1]
+    flip_to_0 <- idx_1[rbinom(length(idx_1), 1, noise_veg_to_bare) == 1]
+    flip_to_1 <- idx_0[rbinom(length(idx_0), 1, noise_bare_to_veg) == 1]
 
     mat[flip_to_0] <- 0
     mat[flip_to_1] <- 1
@@ -94,7 +100,8 @@ create_landscape_sharp <- function(
       width = width,
       height = height,
       boundary_position = boundary_position,
-      random_spots = random_spots,
+      noise_veg_to_bare = noise_veg_to_bare,
+      noise_bare_to_veg = noise_bare_to_veg,
       rotation = rotation
     )
   )

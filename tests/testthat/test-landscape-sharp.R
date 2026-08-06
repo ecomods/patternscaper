@@ -34,14 +34,16 @@ test_that("create_landscape_sharp stores all params correctly", {
     width = 30,
     height = 40,
     boundary_position = 0.7,
-    random_spots = c(0.1, 0.2),
+    noise_veg_to_bare = 0.1,
+    noise_bare_to_veg = 0.2,
     rotation = 45
   )
 
   expect_equal(l$params$width, 30)
   expect_equal(l$params$height, 40)
   expect_equal(l$params$boundary_position, 0.7)
-  expect_equal(l$params$random_spots, c(0.1, 0.2))
+  expect_equal(l$params$noise_veg_to_bare, 0.1)
+  expect_equal(l$params$noise_bare_to_veg, 0.2)
   expect_equal(l$params$rotation, 45)
 })
 
@@ -74,24 +76,28 @@ test_that("create_landscape_sharp handles extreme treeline positions", {
   expect_true(is_landscape(l_top))
 })
 
-test_that("create_landscape_sharp handles extreme random_spots values", {
-  # No random spots
-  l_no_spots <- create_landscape_sharp(
+test_that("create_landscape_sharp handles extreme boundary noise values", {
+  # No noise
+  l_no_noise <- create_landscape_sharp(
     width = 50,
     height = 50,
-    random_spots = c(0, 0)
+    noise_veg_to_bare = 0,
+    noise_bare_to_veg = 0
   )
-  expect_true(is_landscape(l_no_spots))
-  expect_equal(l_no_spots$params$random_spots, c(0, 0))
+  expect_true(is_landscape(l_no_noise))
+  expect_equal(l_no_noise$params$noise_veg_to_bare, 0)
+  expect_equal(l_no_noise$params$noise_bare_to_veg, 0)
 
-  # Maximum random spots
-  l_max_spots <- create_landscape_sharp(
+  # Maximum noise
+  l_max_noise <- create_landscape_sharp(
     width = 50,
     height = 50,
-    random_spots = c(1, 1)
+    noise_veg_to_bare = 1,
+    noise_bare_to_veg = 1
   )
-  expect_true(is_landscape(l_max_spots))
-  expect_equal(l_max_spots$params$random_spots, c(1, 1))
+  expect_true(is_landscape(l_max_noise))
+  expect_equal(l_max_noise$params$noise_veg_to_bare, 1)
+  expect_equal(l_max_noise$params$noise_bare_to_veg, 1)
 })
 
 # Integration tests -----------------------------------------------------------
@@ -103,7 +109,8 @@ test_that("create_landscape_sharp handles multiple extreme parameters", {
     height = 5,
     boundary_position = 0,
     rotation = 90,
-    random_spots = c(0.5, 0.5)
+    noise_veg_to_bare = 0.5,
+    noise_bare_to_veg = 0.5
   )
 
   expect_true(is_landscape(l_extreme))

@@ -8,9 +8,13 @@
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
 #' @param boundary_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
-#' @param random_spots Numeric vector of length 2. Probabilities for flipping
-#'   cells: `[prob(1→0), prob(0→1)]`. Used to add noise to the landscape
-#'   (default: c(0,0)).
+#' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell
+#'   to bare, adding gaps within the vegetation. Applied to the underlying
+#'   sharp treeline, before the clusters are placed (0-1, default: 0).
+#' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
+#'   vegetated, scattering vegetation beyond the treeline. Applied to the
+#'   underlying sharp treeline, before the clusters are placed (0-1,
+#'   default: 0).
 #' @param n_clusters Integer. Number of cluster centers (default: 10).
 #' @param cluster_radius Numeric. Radius of clusters in pixels (default: 5).
 #' @param scatter_zone_prop Numeric. Proportion of height for scatter zone
@@ -63,7 +67,8 @@ create_landscape_clustered <- function(
   width = 100,
   height = 100,
   boundary_position = 0.5,
-  random_spots = c(0, 0),
+  noise_veg_to_bare = 0,
+  noise_bare_to_veg = 0,
   n_clusters = 10,
   cluster_radius = 5,
   scatter_zone_prop = 0.3,
@@ -74,7 +79,8 @@ create_landscape_clustered <- function(
   # Input validation
   validate_dimensions(width = width, height = height)
   validate_boundary_position(boundary_position = boundary_position)
-  validate_random_spots(random_spots = random_spots)
+  validate_noise_prob(noise_veg_to_bare, "noise_veg_to_bare")
+  validate_noise_prob(noise_bare_to_veg, "noise_bare_to_veg")
   validate_rotation(rotation = rotation)
 
   # n_clusters must be a positive integer
@@ -147,7 +153,8 @@ create_landscape_clustered <- function(
     width = width_actual,
     height = height_actual,
     boundary_position = boundary_position,
-    random_spots = random_spots,
+    noise_veg_to_bare = noise_veg_to_bare,
+    noise_bare_to_veg = noise_bare_to_veg,
     rotation = 0
   )
 
@@ -270,7 +277,8 @@ create_landscape_clustered <- function(
       elongation_x = elongation_x,
       elongation_y = elongation_y,
       rotation = rotation,
-      random_spots = random_spots
+      noise_veg_to_bare = noise_veg_to_bare,
+      noise_bare_to_veg = noise_bare_to_veg
     )
   )
 }

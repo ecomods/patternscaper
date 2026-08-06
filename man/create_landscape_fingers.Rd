@@ -8,7 +8,8 @@ create_landscape_fingers(
   width = 100,
   height = 100,
   boundary_position = 0.5,
-  random_spots = c(0, 0),
+  noise_veg_to_bare = 0,
+  noise_bare_to_veg = 0,
   sine_length_mean = 20,
   sine_length_sd = 12,
   sine_height_mean = 5,
@@ -23,7 +24,11 @@ create_landscape_fingers(
 
 \item{boundary_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
 
-\item{random_spots}{Numeric vector of length 2. Probabilities for flipping cells: [1→0, 0→1] (default: c(0,0)).}
+\item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell to
+bare, adding gaps within the vegetation (0-1, default: 0).}
+
+\item{noise_bare_to_veg}{Numeric. Probability of flipping a bare cell to
+vegetated, scattering vegetation beyond the treeline (0-1, default: 0).}
 
 \item{sine_length_mean}{Numeric. Mean wavelength of sinusoidal curve in pixels (default: 20).}
 

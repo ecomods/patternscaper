@@ -8,7 +8,8 @@ create_landscape_clustered(
   width = 100,
   height = 100,
   boundary_position = 0.5,
-  random_spots = c(0, 0),
+  noise_veg_to_bare = 0,
+  noise_bare_to_veg = 0,
   n_clusters = 10,
   cluster_radius = 5,
   scatter_zone_prop = 0.3,
@@ -24,9 +25,14 @@ create_landscape_clustered(
 
 \item{boundary_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
 
-\item{random_spots}{Numeric vector of length 2. Probabilities for flipping
-cells: `[prob(1→0), prob(0→1)]`. Used to add noise to the landscape
-(default: c(0,0)).}
+\item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell
+to bare, adding gaps within the vegetation. Applied to the underlying
+sharp treeline, before the clusters are placed (0-1, default: 0).}
+
+\item{noise_bare_to_veg}{Numeric. Probability of flipping a bare cell to
+vegetated, scattering vegetation beyond the treeline. Applied to the
+underlying sharp treeline, before the clusters are placed (0-1,
+default: 0).}
 
 \item{n_clusters}{Integer. Number of cluster centers (default: 10).}
 

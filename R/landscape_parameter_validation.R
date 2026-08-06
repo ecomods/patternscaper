@@ -88,27 +88,30 @@ validate_boundary_position <- function(boundary_position) {
   invisible(NULL)
 }
 
-#' Validate Random Spots Parameter
+#' Validate Cell-Flipping Noise Probability
 #'
-#' Validates random_spots parameter for landscapes with random cell flipping.
+#' Validates one of the two boundary-noise probabilities used by the ecotone
+#' generators.
 #'
-#' @param random_spots Numeric vector of length 2. Probabilities for flipping
-#'   cells: [1→0, 0→1].
+#' @param prob Numeric. Probability of flipping a cell (0-1).
+#' @param arg Character. Name of the argument being validated, used in the
+#'   error message.
 #'
 #' @return NULL (invisibly). Called for side effects (validation).
 #'
 #' @keywords internal
 #' @noRd
-validate_random_spots <- function(random_spots) {
+validate_noise_prob <- function(prob, arg) {
   if (
-    !is.numeric(random_spots) ||
-      length(random_spots) != 2 ||
-      any(random_spots < 0) ||
-      any(random_spots > 1)
+    !is.numeric(prob) ||
+      length(prob) != 1 ||
+      is.na(prob) ||
+      prob < 0 ||
+      prob > 1
   ) {
     cli::cli_abort(c(
-      "{.arg random_spots} must be a numeric vector of length 2 with values between 0 and 1.",
-      "x" = "You supplied {.val {random_spots}}"
+      "{.arg {arg}} must be a single number between 0 and 1.",
+      "x" = "You supplied {.val {prob}}"
     ))
   }
 
@@ -166,6 +169,18 @@ landscape_param_specs <- function() {
         min = 0,
         max = 1,
         batch_range = c(0.2, 0.8)
+      ),
+      noise_veg_to_bare = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = NULL
+      ),
+      noise_bare_to_veg = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = NULL
       )
     ),
     diffuse = list(
@@ -188,6 +203,18 @@ landscape_param_specs <- function() {
         min = 0,
         max = 1,
         batch_range = c(0.3, 0.6)
+      ),
+      noise_veg_to_bare = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = NULL
+      ),
+      noise_bare_to_veg = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = NULL
       ),
       sine_length_mean = list(
         type = "numeric",
@@ -220,6 +247,18 @@ landscape_param_specs <- function() {
         min = 0,
         max = 1,
         batch_range = c(0.4, 0.6)
+      ),
+      noise_veg_to_bare = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = NULL
+      ),
+      noise_bare_to_veg = list(
+        type = "numeric",
+        min = 0,
+        max = 1,
+        batch_range = NULL
       ),
       n_clusters = list(
         type = "integer",

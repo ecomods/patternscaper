@@ -8,7 +8,8 @@ create_landscape_sharp(
   width = 100,
   height = 100,
   boundary_position = 0.5,
-  random_spots = c(0, 0),
+  noise_veg_to_bare = 0,
+  noise_bare_to_veg = 0,
   rotation = 0
 )
 }
@@ -17,9 +18,14 @@ create_landscape_sharp(
 
 \item{height}{Integer. Height of the landscape in pixels (default: 100).}
 
-\item{boundary_position}{Numeric. Relative position of vegetation boundary from top (0-1) (default: 0.5).}
+\item{boundary_position}{Numeric. Relative position of vegetation boundary
+from top (0-1) (default: 0.5).}
 
-\item{random_spots}{Numeric vector of length 2. Probabilities for flipping cells: [1→0, 0→1] (default: c(0,0)).}
+\item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell to
+bare, adding gaps within the vegetation (0-1, default: 0).}
+
+\item{noise_bare_to_veg}{Numeric. Probability of flipping a bare cell to
+vegetated, scattering vegetation beyond the boundary (0-1, default: 0).}
 
 \item{rotation}{Numeric. Angle to rotate landscape in degrees (default: 0).}
 }
@@ -42,10 +48,10 @@ sharp_modified <- create_landscape_sharp(
   boundary_position = 0.7
 )
 
-# Landscape with rotation and some spots
+# Landscape with rotation and scattered vegetation beyond the boundary
 sharp_rotated <- create_landscape_sharp(
   boundary_position = 0.3,
-  random_spots = c(0, 0.1),
+  noise_bare_to_veg = 0.1,
   rotation = 45
 )
 }

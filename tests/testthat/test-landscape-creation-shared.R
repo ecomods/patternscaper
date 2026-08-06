@@ -223,46 +223,32 @@ test_that("landscape generators validate rotation parameter", {
   }
 })
 
-# Pattern-specific validation: random_spots parameter ------------------------
-test_that("landscape generators validate random_spots parameter", {
+# Pattern-specific validation: boundary noise parameters ----------------------
+test_that("landscape generators validate the boundary noise parameters", {
   generators <- list(
     sharp = create_landscape_sharp,
     fingers = create_landscape_fingers,
     clustered = create_landscape_clustered
   )
 
+  noise_args <- c("noise_veg_to_bare", "noise_bare_to_veg")
+  bad_values <- list("invalid", c(0.5, 0.5), -0.1, 1.5, NA_real_)
+
   for (name in names(generators)) {
     gen <- generators[[name]]
 
-    expect_error(
-      gen(random_spots = "invalid"),
-      "must be a numeric vector of length 2",
-      info = paste("Testing", name, "with non-numeric random_spots")
-    )
+    for (arg in noise_args) {
+      for (value in bad_values) {
+        args <- list(value)
+        names(args) <- arg
 
-    expect_error(
-      gen(random_spots = c(0.5)),
-      "must be a numeric vector of length 2",
-      info = paste("Testing", name, "with length 1 random_spots")
-    )
-
-    expect_error(
-      gen(random_spots = c(0.5, 0.5, 0.5)),
-      "must be a numeric vector of length 2",
-      info = paste("Testing", name, "with length 3 random_spots")
-    )
-
-    expect_error(
-      gen(random_spots = c(-0.1, 0.5)),
-      "must be a numeric vector of length 2",
-      info = paste("Testing", name, "with negative value in random_spots")
-    )
-
-    expect_error(
-      gen(random_spots = c(0.5, 1.5)),
-      "must be a numeric vector of length 2",
-      info = paste("Testing", name, "with value > 1 in random_spots")
-    )
+        expect_error(
+          do.call(gen, args),
+          "must be a single number between 0 and 1",
+          info = paste(name, arg, "=", toString(value))
+        )
+      }
+    }
   }
 })
 
