@@ -126,3 +126,45 @@ test_that("create_landscape handles rotation parameter", {
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
 })
+
+test_that("every rotatable pattern accepts rotation", {
+  for (pattern in c("sharp", "diffuse", "fingers", "clustered", "bands")) {
+    l <- create_landscape(pattern, width = 50, height = 50, rotation = 45)
+
+    expect_equal(l$params$rotation, 45, info = pattern)
+  }
+})
+
+test_that("patterns without rotation ignore it", {
+  for (pattern in c("random", "bare", "dense", "spots", "gaps", "labyrinth")) {
+    set.seed(5)
+    l_rotation <- create_landscape(
+      pattern,
+      width = 20,
+      height = 20,
+      rotation = 45
+    )
+
+    set.seed(5)
+    l_plain <- create_landscape(pattern, width = 20, height = 20)
+
+    expect_equal(
+      terra::as.matrix(l_rotation$data, wide = TRUE),
+      terra::as.matrix(l_plain$data, wide = TRUE),
+      info = pattern
+    )
+  }
+})
+
+test_that("leaving rotation unset generates the same landscape as before", {
+  set.seed(11)
+  l_unset <- create_landscape("sharp", width = 30, height = 30)
+
+  set.seed(11)
+  l_zero <- create_landscape("sharp", width = 30, height = 30, rotation = 0)
+
+  expect_equal(
+    terra::as.matrix(l_unset$data, wide = TRUE),
+    terra::as.matrix(l_zero$data, wide = TRUE)
+  )
+})

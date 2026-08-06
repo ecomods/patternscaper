@@ -12,6 +12,7 @@ create_landscape(
   name = NULL,
   custom_pattern = NULL,
   params = NULL,
+  rotation = 0,
   ...
 )
 }
@@ -32,6 +33,11 @@ pattern of the corresponding function).}
 \item{params}{Output of the \code{pattern_*()} constructor matching \code{pattern},
 for example \code{\link{pattern_spots}} (default: NULL). Must hold single values
 for each parameter, ranges are only meaningful for \code{\link{create_landscapes}}.}
+
+\item{rotation}{Numeric. Angle to rotate the landscape in degrees (default: 0).
+Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated.
+The remaining patterns -- "random", "bare", "dense", "spots", "gaps" and
+"labyrinth" -- ignore it, and are generated as if it had not been given.}
 
 \item{...}{Parameters passed to specific landscape functions. See the documentation
 of the individual functions for details on required and optional parameters.}

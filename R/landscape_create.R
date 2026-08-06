@@ -15,6 +15,9 @@
 #' @param params Output of the \code{pattern_*()} constructor matching \code{pattern},
 #'     for example \code{\link{pattern_spots}} (default: NULL). Must hold single values
 #'     for each parameter, ranges are only meaningful for \code{\link{create_landscapes}}.
+#' @param rotation Numeric. Angle to rotate the landscape in degrees (default: 0).
+#'     Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated.
+#'     The remaining patterns ignore it, and are generated without rotation.
 #' @param ... Parameters passed to specific landscape functions. See the documentation
 #'        of the individual functions for details on required and optional parameters.
 #'
@@ -76,6 +79,7 @@ create_landscape <- function(
   name = NULL,
   custom_pattern = NULL,
   params = NULL,
+  rotation = 0,
   ...
 ) {
   # Define valid patterns
@@ -121,6 +125,12 @@ create_landscape <- function(
 
   # Parameters can arrive through params, individually, or both
   pattern_params <- resolve_pattern_params(params, list(...), matched)
+
+  # Rotation is a transform applied after generation, so it is an argument here
+  # rather than a pattern parameter -- and only some generators apply it
+  if (!missing(rotation) && matched %in% rotatable_patterns()) {
+    pattern_params$rotation <- rotation
+  }
 
   landscape <- do.call(
     generator,
@@ -331,13 +341,7 @@ create_landscapes <- function(
   }
 
   # Define which patterns support rotation
-  patterns_with_rotation <- c(
-    "sharp",
-    "diffuse",
-    "fingers",
-    "clustered",
-    "bands"
-  )
+  patterns_with_rotation <- rotatable_patterns()
 
   # Generate each landscape
   for (i in 1:n) {
@@ -416,6 +420,20 @@ create_landscapes <- function(
   }
 
   return(all_landscapes)
+}
+
+#' Patterns That Support Rotation
+#'
+#' The patterns whose generators take a \code{rotation} argument. Both
+#' \code{\link{create_landscape}} and \code{\link{create_landscapes}} ask here
+#' rather than keeping their own copies.
+#'
+#' @return Character vector of pattern names.
+#'
+#' @keywords internal
+#' @noRd
+rotatable_patterns <- function() {
+  c("sharp", "diffuse", "fingers", "clustered", "bands")
 }
 
 #' Sample Parameters for Landscape Generation
