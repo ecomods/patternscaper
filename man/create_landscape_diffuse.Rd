@@ -74,7 +74,8 @@ Other landscape creation:
 \code{\link[=create_landscape_random]{create_landscape_random()}},
 \code{\link[=create_landscape_sharp]{create_landscape_sharp()}},
 \code{\link[=create_landscape_spots]{create_landscape_spots()}},
-\code{\link[=create_landscapes]{create_landscapes()}}
+\code{\link[=create_landscapes]{create_landscapes()}},
+\code{\link[=pattern_spots]{pattern_spots()}}
 }
 \concept{landscape creation}
 \keyword{internal}

@@ -27,9 +27,11 @@ create_landscapes(
 
 \item{rotation}{Numeric vector. Rotation angles in degrees (default: 0:360).}
 
-\item{params_list}{List. List of parameter ranges or single values for the parameters of each landscape pattern (default: NULL).
-The names and default parameter ranges for the different patterns can be found
-in the documentation of \code{\link{create_landscape}}.}
+\item{params_list}{List. Per-pattern parameters, keyed by pattern name (default: NULL).
+Each entry is either the output of the matching \code{pattern_*()} constructor,
+for example \code{\link{pattern_spots}}, or a plain named list. A single value
+fixes a parameter; a length-2 vector is a range sampled once per landscape.
+Patterns left out fall back to the default ranges.}
 
 \item{pattern_probs}{Numeric vector. Probability that a specific landscape pattern is chosen from the list
 of patterns. Should be a numeric vector of the same length as 'patterns'.
@@ -90,6 +92,7 @@ Other landscape creation:
 \code{\link[=create_landscape_labyrinth]{create_landscape_labyrinth()}},
 \code{\link[=create_landscape_random]{create_landscape_random()}},
 \code{\link[=create_landscape_sharp]{create_landscape_sharp()}},
-\code{\link[=create_landscape_spots]{create_landscape_spots()}}
+\code{\link[=create_landscape_spots]{create_landscape_spots()}},
+\code{\link[=pattern_spots]{pattern_spots()}}
 }
 \concept{landscape creation}

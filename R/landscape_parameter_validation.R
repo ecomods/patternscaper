@@ -534,6 +534,19 @@ validate_params_list <- function(params_list, patterns) {
       ))
     }
 
+    # A pattern_*() list carries the pattern it was built for, so it can be
+    # caught under the wrong name instead of validating against the wrong specs
+    if (inherits(pattern_params, "landscape_params")) {
+      params_pattern <- attr(pattern_params, "pattern")
+
+      if (!identical(params_pattern, pattern)) {
+        cli::cli_abort(c(
+          "Parameters for pattern {.val {pattern}} were built by {.fn pattern_{params_pattern}}.",
+          "i" = "Use {.code pattern_{pattern}()} under {.val {pattern}}."
+        ))
+      }
+    }
+
     # Filter to only valid parameters
     cleaned_pattern_params <- list()
 

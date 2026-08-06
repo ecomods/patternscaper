@@ -12,6 +12,9 @@
 #' @param name Character. Optional name for the landscape (default: NULL).
 #' @param custom_pattern Character. Optional pattern for the landscape (default: NULL uses the default
 #'     pattern of the corresponding function).
+#' @param params Output of the \code{pattern_*()} constructor matching \code{pattern},
+#'     for example \code{\link{pattern_spots}} (default: NULL). Must hold single values
+#'     for each parameter, ranges are only meaningful for \code{\link{create_landscapes}}.
 #' @param ... Parameters passed to specific landscape functions. See the documentation
 #'        of the individual functions for details on required and optional parameters.
 #'
@@ -72,6 +75,7 @@ create_landscape <- function(
   height = 100,
   name = NULL,
   custom_pattern = NULL,
+  params = NULL,
   ...
 ) {
   # Define valid patterns
@@ -99,28 +103,28 @@ create_landscape <- function(
     }
   }
 
-  # Call the appropriate function based on the pattern
-  landscape <- switch(
+  # Select the generator for the pattern
+  generator <- switch(
     matched,
-    random = create_landscape_random(width = width, height = height, ...),
-    bare = create_landscape_bare(width = width, height = height, ...),
-    dense = create_landscape_dense(width = width, height = height, ...),
-    sharp = create_landscape_sharp(
-      width = width,
-      height = height,
-      ...
-    ),
-    diffuse = create_landscape_diffuse(
-      width = width,
-      height = height,
-      ...
-    ),
-    fingers = create_landscape_fingers(width = width, height = height, ...),
-    clustered = create_landscape_clustered(width = width, height = height, ...),
-    bands = create_landscape_bands(width = width, height = height, ...),
-    spots = create_landscape_spots(width = width, height = height, ...),
-    gaps = create_landscape_gaps(width = width, height = height, ...),
-    labyrinth = create_landscape_labyrinth(width = width, height = height, ...)
+    random = create_landscape_random,
+    bare = create_landscape_bare,
+    dense = create_landscape_dense,
+    sharp = create_landscape_sharp,
+    diffuse = create_landscape_diffuse,
+    fingers = create_landscape_fingers,
+    clustered = create_landscape_clustered,
+    bands = create_landscape_bands,
+    spots = create_landscape_spots,
+    gaps = create_landscape_gaps,
+    labyrinth = create_landscape_labyrinth
+  )
+
+  # Parameters can arrive through params, individually, or both
+  pattern_params <- resolve_pattern_params(params, list(...), matched)
+
+  landscape <- do.call(
+    generator,
+    c(list(width = width, height = height), pattern_params)
   )
 
   # Set the name if provided
@@ -147,9 +151,11 @@ create_landscape <- function(
 #' @param width Integer. Width of all landscapes in pixels (default: 100).
 #' @param height Integer. Height of all landscapes in pixels (default: 100).
 #' @param rotation Numeric vector. Rotation angles in degrees (default: 0:360).
-#' @param params_list List. List of parameter ranges or single values for the parameters of each landscape pattern (default: NULL).
-#'     The names and default parameter ranges for the different patterns can be found
-#'     in the documentation of \code{\link{create_landscape}}.
+#' @param params_list List. Per-pattern parameters, keyed by pattern name (default: NULL).
+#'     Each entry is either the output of the matching \code{pattern_*()} constructor,
+#'     for example \code{\link{pattern_spots}}, or a plain named list. A single value
+#'     fixes a parameter; a length-2 vector is a range sampled once per landscape.
+#'     Patterns left out fall back to the default ranges.
 #' @param pattern_probs Numeric vector. Probability that a specific landscape pattern is chosen from the list
 #'     of patterns. Should be a numeric vector of the same length as 'patterns'.
 #'     The default value NULL creates equally balanced patterns.
