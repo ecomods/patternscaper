@@ -473,6 +473,110 @@ pattern_spots <- function(
   new_landscape_params(params, pattern = "spots")
 }
 
+#' Parameters for the Gaps Pattern
+#'
+#' Builds a validated parameter list for the \code{"gaps"} pattern, to pass to
+#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#'
+#' @details
+#' A single value fixes a parameter. A length-2 vector is a range, sampled once
+#' per landscape by \code{\link{create_landscapes}} and rejected by
+#' \code{\link{create_landscape}}.
+#'
+#' Gaps are bare patches in vegetated ground, the inverse of
+#' \code{\link{pattern_spots}}. The inversion is what distinguishes the two
+#' patterns, so unlike \code{\link{pattern_spots}} this has no
+#' \code{invert_landscape} parameter.
+#'
+#' @inheritParams create_landscape_gaps
+#'
+#' @return A named list of the supplied parameters, classed
+#'     \code{"landscape_params"}.
+#'
+#' @family landscape creation
+#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
+#'
+#' @examples
+#' create_landscape("gaps", params = pattern_gaps(n_spots = 5, spot_radius = 8))
+#'
+#' @export
+pattern_gaps <- function(
+  n_spots = 15,
+  spot_radius = 5,
+  spot_radius_sd = 0,
+  radius_noise_fraction = 0,
+  regular_spots = FALSE
+) {
+  params <- list()
+
+  if (!missing(n_spots)) {
+    params$n_spots <- n_spots
+  }
+  if (!missing(spot_radius)) {
+    params$spot_radius <- spot_radius
+  }
+  if (!missing(spot_radius_sd)) {
+    params$spot_radius_sd <- spot_radius_sd
+  }
+  if (!missing(radius_noise_fraction)) {
+    params$radius_noise_fraction <- radius_noise_fraction
+  }
+  if (!missing(regular_spots)) {
+    params$regular_spots <- regular_spots
+  }
+
+  new_landscape_params(params, pattern = "gaps")
+}
+
+#' Parameters for the Labyrinth Pattern
+#'
+#' Builds a validated parameter list for the \code{"labyrinth"} pattern, to
+#' pass to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#'
+#' @details
+#' A single value fixes a parameter. A length-2 vector is a range, sampled once
+#' per landscape by \code{\link{create_landscapes}} and rejected by
+#' \code{\link{create_landscape}}.
+#'
+#' @inheritParams create_landscape_labyrinth
+#'
+#' @return A named list of the supplied parameters, classed
+#'     \code{"landscape_params"}.
+#'
+#' @family landscape creation
+#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
+#'
+#' @examples
+#' create_landscape(
+#'   "labyrinth",
+#'   params = pattern_labyrinth(frequency = 3.5, octaves = 3)
+#' )
+#'
+#' @export
+pattern_labyrinth <- function(
+  frequency = 3,
+  veg_threshold = 0.5,
+  band_fuzziness = 0.08,
+  octaves = 2
+) {
+  params <- list()
+
+  if (!missing(frequency)) {
+    params$frequency <- frequency
+  }
+  if (!missing(veg_threshold)) {
+    params$veg_threshold <- veg_threshold
+  }
+  if (!missing(band_fuzziness)) {
+    params$band_fuzziness <- band_fuzziness
+  }
+  if (!missing(octaves)) {
+    params$octaves <- octaves
+  }
+
+  new_landscape_params(params, pattern = "labyrinth")
+}
+
 #' Resolve Pattern Parameters for a Single Landscape
 #'
 #' Checks a \code{pattern_*()} parameter list, or falls back to parameters

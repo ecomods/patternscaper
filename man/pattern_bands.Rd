@@ -73,6 +73,8 @@ Other landscape creation:
 \code{\link[=pattern_dense]{pattern_dense()}},
 \code{\link[=pattern_diffuse]{pattern_diffuse()}},
 \code{\link[=pattern_fingers]{pattern_fingers()}},
+\code{\link[=pattern_gaps]{pattern_gaps()}},
+\code{\link[=pattern_labyrinth]{pattern_labyrinth()}},
 \code{\link[=pattern_random]{pattern_random()}},
 \code{\link[=pattern_sharp]{pattern_sharp()}},
 \code{\link[=pattern_spots]{pattern_spots()}}

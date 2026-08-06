@@ -14,7 +14,12 @@ pattern_constructors <- list(
     generate = create_landscape_clustered
   ),
   bands = list(build = pattern_bands, generate = create_landscape_bands),
-  spots = list(build = pattern_spots, generate = create_landscape_spots)
+  spots = list(build = pattern_spots, generate = create_landscape_spots),
+  gaps = list(build = pattern_gaps, generate = create_landscape_gaps),
+  labyrinth = list(
+    build = pattern_labyrinth,
+    generate = create_landscape_labyrinth
+  )
 )
 
 # Constructor/generator default drift guard -----------------------------------
@@ -39,6 +44,43 @@ test_that("constructor defaults match the generator defaults", {
 
     expect_equal(built, generated, info = name)
   }
+})
+
+test_that("every pattern has a constructor", {
+  expect_setequal(
+    names(pattern_constructors),
+    names(landscape_param_specs())
+  )
+})
+
+test_that("each constructor exposes exactly its pattern's parameters", {
+  # The spec is already checked against the generator formals elsewhere, so
+  # this closes the triangle: nothing in the spec is unreachable from a
+  # constructor, and no constructor offers a parameter that does not exist.
+  specs <- landscape_param_specs()
+
+  for (name in names(pattern_constructors)) {
+    formal_names <- names(formals(pattern_constructors[[name]]$build))
+    spec_names <- names(specs[[name]])
+
+    expect_equal(
+      setdiff(spec_names, formal_names),
+      character(0),
+      info = paste(name, "- spec parameter(s) with no constructor argument")
+    )
+    expect_equal(
+      setdiff(formal_names, spec_names),
+      character(0),
+      info = paste(name, "- constructor argument(s) that are not parameters")
+    )
+  }
+})
+
+test_that("pattern_gaps has no invert_landscape, unlike pattern_spots", {
+  # Inverting is what makes gaps gaps: create_landscape_gaps() hardcodes it,
+  # so exposing it would let a caller turn gaps back into spots
+  expect_false("invert_landscape" %in% names(formals(pattern_gaps)))
+  expect_true("invert_landscape" %in% names(formals(pattern_spots)))
 })
 
 test_that("each constructor tags the pattern it was built for", {
@@ -179,6 +221,33 @@ test_that("the ecotone constructors match passing parameters individually", {
     fingers = list(sine_length_mean = 15, sine_height_mean = 6),
     clustered = list(n_clusters = 6, cluster_radius = 4),
     bands = list(band_thickness = 4, band_spacing = 12)
+  )
+
+  for (name in names(cases)) {
+    build <- pattern_constructors[[name]]$build
+    args <- list(name, width = 60, height = 60)
+
+    set.seed(9)
+    l_params <- do.call(
+      create_landscape,
+      c(args, list(params = do.call(build, cases[[name]])))
+    )
+
+    set.seed(9)
+    l_dots <- do.call(create_landscape, c(args, cases[[name]]))
+
+    expect_equal(
+      terra::as.matrix(l_params$data, wide = TRUE),
+      terra::as.matrix(l_dots$data, wide = TRUE),
+      info = name
+    )
+  }
+})
+
+test_that("the self-organized constructors match passing parameters individually", {
+  cases <- list(
+    gaps = list(n_spots = 4, spot_radius = 6),
+    labyrinth = list(frequency = 3.5, octaves = 3)
   )
 
   for (name in names(cases)) {
