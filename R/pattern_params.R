@@ -38,6 +38,102 @@ new_landscape_params <- function(params, pattern) {
   )
 }
 
+#' Parameters for the Random Pattern
+#'
+#' Builds a validated parameter list for the \code{"random"} pattern, to pass to
+#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#'
+#' @details
+#' A single value fixes a parameter. A length-2 vector is a range, sampled once
+#' per landscape by \code{\link{create_landscapes}} and rejected by
+#' \code{\link{create_landscape}}.
+#'
+#' @inheritParams create_landscape_random
+#'
+#' @return A named list of the supplied parameters, classed
+#'     \code{"landscape_params"}.
+#'
+#' @family landscape creation
+#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
+#'
+#' @examples
+#' create_landscape("random", params = pattern_random(veg_prop = 0.3))
+#'
+#' @export
+pattern_random <- function(veg_prop = 0.5) {
+  params <- list()
+
+  if (!missing(veg_prop)) {
+    params$veg_prop <- veg_prop
+  }
+
+  new_landscape_params(params, pattern = "random")
+}
+
+#' Parameters for the Bare Pattern
+#'
+#' Builds a validated parameter list for the \code{"bare"} pattern, to pass to
+#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#'
+#' @details
+#' A single value fixes a parameter. A length-2 vector is a range, sampled once
+#' per landscape by \code{\link{create_landscapes}} and rejected by
+#' \code{\link{create_landscape}}.
+#'
+#' @inheritParams create_landscape_bare
+#'
+#' @return A named list of the supplied parameters, classed
+#'     \code{"landscape_params"}.
+#'
+#' @family landscape creation
+#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
+#'
+#' @examples
+#' create_landscape("bare", params = pattern_bare(veg_prop = 0.05))
+#'
+#' @export
+pattern_bare <- function(veg_prop = 0.1) {
+  params <- list()
+
+  if (!missing(veg_prop)) {
+    params$veg_prop <- veg_prop
+  }
+
+  new_landscape_params(params, pattern = "bare")
+}
+
+#' Parameters for the Dense Pattern
+#'
+#' Builds a validated parameter list for the \code{"dense"} pattern, to pass to
+#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#'
+#' @details
+#' A single value fixes a parameter. A length-2 vector is a range, sampled once
+#' per landscape by \code{\link{create_landscapes}} and rejected by
+#' \code{\link{create_landscape}}.
+#'
+#' @inheritParams create_landscape_dense
+#'
+#' @return A named list of the supplied parameters, classed
+#'     \code{"landscape_params"}.
+#'
+#' @family landscape creation
+#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
+#'
+#' @examples
+#' create_landscape("dense", params = pattern_dense(veg_prop = 0.95))
+#'
+#' @export
+pattern_dense <- function(veg_prop = 0.9) {
+  params <- list()
+
+  if (!missing(veg_prop)) {
+    params$veg_prop <- veg_prop
+  }
+
+  new_landscape_params(params, pattern = "dense")
+}
+
 #' Parameters for the Spots Pattern
 #'
 #' Builds a validated parameter list for the \code{"spots"} pattern, to pass to

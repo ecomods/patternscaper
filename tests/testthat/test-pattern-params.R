@@ -1,19 +1,24 @@
 # Tests for the pattern_*() parameter constructors ----------------------------
 
+# Every constructor, paired with the generator it documents. Add a row here
+# with each new pattern.
+pattern_constructors <- list(
+  random = list(build = pattern_random, generate = create_landscape_random),
+  bare = list(build = pattern_bare, generate = create_landscape_bare),
+  dense = list(build = pattern_dense, generate = create_landscape_dense),
+  spots = list(build = pattern_spots, generate = create_landscape_spots)
+)
+
 # Constructor/generator default drift guard -----------------------------------
 
 # The constructors repeat the generators' defaults so that the help page shows
 # real values instead of NULL. Nothing else keeps the two copies in step, and a
 # constructor showing a default the generator does not use would document a
-# value the user never gets. Add a row here with every new constructor.
+# value the user never gets.
 
 test_that("constructor defaults match the generator defaults", {
-  constructors <- list(
-    spots = list(build = pattern_spots, generate = create_landscape_spots)
-  )
-
-  for (name in names(constructors)) {
-    pair <- constructors[[name]]
+  for (name in names(pattern_constructors)) {
+    pair <- pattern_constructors[[name]]
 
     # eval() rather than a plain comparison: one default in the package is the
     # expression 2 * pi / 100, not a literal
@@ -25,6 +30,16 @@ test_that("constructor defaults match the generator defaults", {
     )
 
     expect_equal(built, generated, info = name)
+  }
+})
+
+test_that("each constructor tags the pattern it was built for", {
+  for (name in names(pattern_constructors)) {
+    params <- pattern_constructors[[name]]$build()
+
+    expect_s3_class(params, "landscape_params")
+    expect_equal(attr(params, "pattern"), name, info = name)
+    expect_length(params, 0)
   }
 })
 
@@ -111,6 +126,29 @@ test_that("create_landscape leaves unset parameters at the generator defaults", 
     terra::as.matrix(l_empty$data, wide = TRUE),
     terra::as.matrix(l_default$data, wide = TRUE)
   )
+})
+
+test_that("the veg_prop constructors match passing the parameter individually", {
+  for (name in c("random", "bare", "dense")) {
+    build <- pattern_constructors[[name]]$build
+
+    set.seed(3)
+    l_params <- create_landscape(
+      name,
+      width = 20,
+      height = 20,
+      params = build(veg_prop = 0.3)
+    )
+
+    set.seed(3)
+    l_dots <- create_landscape(name, width = 20, height = 20, veg_prop = 0.3)
+
+    expect_equal(
+      terra::as.matrix(l_params$data, wide = TRUE),
+      terra::as.matrix(l_dots$data, wide = TRUE),
+      info = name
+    )
+  }
 })
 
 test_that("create_landscape rejects params built for another pattern", {
