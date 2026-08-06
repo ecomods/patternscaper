@@ -36,8 +36,7 @@ for each parameter, ranges are only meaningful for \code{\link{create_landscapes
 
 \item{rotation}{Numeric. Angle to rotate the landscape in degrees (default: 0).
 Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated.
-The remaining patterns -- "random", "bare", "dense", "spots", "gaps" and
-"labyrinth" -- ignore it, and are generated as if it had not been given.}
+The remaining patterns ignore it, and are generated without rotation.}
 
 \item{...}{Parameters passed to specific landscape functions. See the documentation
 of the individual functions for details on required and optional parameters.}
@@ -100,9 +99,14 @@ Other landscape creation:
 \code{\link[=create_landscape_sharp]{create_landscape_sharp()}},
 \code{\link[=create_landscape_spots]{create_landscape_spots()}},
 \code{\link[=create_landscapes]{create_landscapes()}},
+\code{\link[=pattern_bands]{pattern_bands()}},
 \code{\link[=pattern_bare]{pattern_bare()}},
+\code{\link[=pattern_clustered]{pattern_clustered()}},
 \code{\link[=pattern_dense]{pattern_dense()}},
+\code{\link[=pattern_diffuse]{pattern_diffuse()}},
+\code{\link[=pattern_fingers]{pattern_fingers()}},
 \code{\link[=pattern_random]{pattern_random()}},
+\code{\link[=pattern_sharp]{pattern_sharp()}},
 \code{\link[=pattern_spots]{pattern_spots()}}
 }
 \concept{landscape creation}

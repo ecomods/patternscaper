@@ -43,8 +43,13 @@ Other landscape creation:
 \code{\link[=create_landscape_sharp]{create_landscape_sharp()}},
 \code{\link[=create_landscape_spots]{create_landscape_spots()}},
 \code{\link[=create_landscapes]{create_landscapes()}},
+\code{\link[=pattern_bands]{pattern_bands()}},
 \code{\link[=pattern_bare]{pattern_bare()}},
+\code{\link[=pattern_clustered]{pattern_clustered()}},
+\code{\link[=pattern_diffuse]{pattern_diffuse()}},
+\code{\link[=pattern_fingers]{pattern_fingers()}},
 \code{\link[=pattern_random]{pattern_random()}},
+\code{\link[=pattern_sharp]{pattern_sharp()}},
 \code{\link[=pattern_spots]{pattern_spots()}}
 }
 \concept{landscape creation}

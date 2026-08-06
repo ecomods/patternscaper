@@ -6,6 +6,14 @@ pattern_constructors <- list(
   random = list(build = pattern_random, generate = create_landscape_random),
   bare = list(build = pattern_bare, generate = create_landscape_bare),
   dense = list(build = pattern_dense, generate = create_landscape_dense),
+  sharp = list(build = pattern_sharp, generate = create_landscape_sharp),
+  diffuse = list(build = pattern_diffuse, generate = create_landscape_diffuse),
+  fingers = list(build = pattern_fingers, generate = create_landscape_fingers),
+  clustered = list(
+    build = pattern_clustered,
+    generate = create_landscape_clustered
+  ),
+  bands = list(build = pattern_bands, generate = create_landscape_bands),
   spots = list(build = pattern_spots, generate = create_landscape_spots)
 )
 
@@ -148,6 +156,66 @@ test_that("the veg_prop constructors match passing the parameter individually", 
       terra::as.matrix(l_dots$data, wide = TRUE),
       info = name
     )
+  }
+})
+
+test_that("params combines with rotation, which is not a pattern parameter", {
+  l <- create_landscape(
+    "sharp",
+    width = 40,
+    height = 40,
+    params = pattern_sharp(boundary_position = 0.3),
+    rotation = 45
+  )
+
+  expect_equal(l$params$boundary_position, 0.3)
+  expect_equal(l$params$rotation, 45)
+})
+
+test_that("the ecotone constructors match passing parameters individually", {
+  cases <- list(
+    sharp = list(boundary_position = 0.3, noise_bare_to_veg = 0.1),
+    diffuse = list(steepness = 0.3, boundary_position = 0.4),
+    fingers = list(sine_length_mean = 15, sine_height_mean = 6),
+    clustered = list(n_clusters = 6, cluster_radius = 4),
+    bands = list(band_thickness = 4, band_spacing = 12)
+  )
+
+  for (name in names(cases)) {
+    build <- pattern_constructors[[name]]$build
+    args <- list(name, width = 60, height = 60)
+
+    set.seed(9)
+    l_params <- do.call(
+      create_landscape,
+      c(args, list(params = do.call(build, cases[[name]])))
+    )
+
+    set.seed(9)
+    l_dots <- do.call(create_landscape, c(args, cases[[name]]))
+
+    expect_equal(
+      terra::as.matrix(l_params$data, wide = TRUE),
+      terra::as.matrix(l_dots$data, wide = TRUE),
+      info = name
+    )
+  }
+})
+
+test_that("the noise parameters are reachable through create_landscapes", {
+  # Before the split they were absent from the spec, so params_list dropped
+  # them and every batch-generated ecotone landscape had no boundary noise
+  set.seed(4)
+  landscapes <- create_landscapes(
+    n = 2,
+    patterns = "sharp",
+    width = 40,
+    height = 40,
+    params_list = list(sharp = pattern_sharp(noise_bare_to_veg = 0.2))
+  )
+
+  for (l in landscapes) {
+    expect_equal(l$params$noise_bare_to_veg, 0.2)
   }
 })
 
