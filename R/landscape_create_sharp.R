@@ -1,23 +1,14 @@
 #' Create a Landscape with a Sharp Vegetation Boundary
 #'
 #'
-#' @param width Integer. Width of the landscape in pixels (default: 100).
-#' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param boundary_position Numeric. Relative position of vegetation boundary
-#'     from top (0-1) (default: 0.5).
-#' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
-#'     bare, adding gaps within the vegetation (0-1, default: 0).
-#' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
-#'     vegetated, scattering vegetation beyond the boundary (0-1, default: 0).
-#' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
+#' Parameters are documented on \code{\link{pattern_sharp}}.
 #'
 #' @return A landscape object with pattern "sharp" containing:
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string "sharp"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @family landscape creation
-#' @keywords internal
+#' @noRd
 #'
 #' @examples
 #' \dontrun{

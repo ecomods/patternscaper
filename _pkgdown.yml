@@ -14,23 +14,22 @@ reference:
   - create_landscape
   - create_landscapes
 
-- title: Individual pattern generators
+- title: Pattern parameters
   desc: >
-    Internal building blocks dispatched to by create_landscape()/create_landscapes().
-    Not part of the public API but documented here as a parameter reference for each landscape
-    pattern; use create_landscape(pattern = ...) to actually generate landscapes.
+    One constructor per pattern, holding that pattern's parameters. Pass the result to
+    create_landscape(params = ...) or create_landscapes(params_list = ...).
   contents:
-  - create_landscape_bands
-  - create_landscape_bare
-  - create_landscape_clustered
-  - create_landscape_dense
-  - create_landscape_diffuse
-  - create_landscape_fingers
-  - create_landscape_gaps
-  - create_landscape_labyrinth
-  - create_landscape_random
-  - create_landscape_sharp
-  - create_landscape_spots
+  - pattern_random
+  - pattern_bare
+  - pattern_dense
+  - pattern_sharp
+  - pattern_diffuse
+  - pattern_fingers
+  - pattern_clustered
+  - pattern_bands
+  - pattern_spots
+  - pattern_gaps
+  - pattern_labyrinth
 
 - title: Landscape objects
   desc: Functions for creating and manipulating landscape objects
@@ -46,6 +45,7 @@ reference:
   contents:
   - calculate_metrics
   - evaluate_metrics
+  - print.metrics_evaluation
 
 - title: Neural network training
   desc: Train neural network classifiers

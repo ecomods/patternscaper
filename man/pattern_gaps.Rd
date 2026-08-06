@@ -13,26 +13,26 @@ pattern_gaps(
 )
 }
 \arguments{
-\item{n_spots}{Integer. Number of circular spots to generate.
+\item{n_spots}{Integer. Number of circular gaps to generate.
 For regular placement, this may be automatically reduced if the landscape
 cannot accommodate the requested number at the given `spot_radius`.}
 
-\item{spot_radius}{Numeric. Mean radius of each spot in cells.
+\item{spot_radius}{Numeric. Mean radius of each gap in cells.
 Must be positive and smaller than landscape dimensions.}
 
-\item{spot_radius_sd}{Numeric. Standard deviation for random variation in spot radius.
-Each spot's radius is sampled from N(spot_radius, spot_radius_sd).
+\item{spot_radius_sd}{Numeric. Standard deviation for random variation in gap radius.
+Each gap's radius is sampled from N(spot_radius, spot_radius_sd).
 (default: 0 - no variation)}
 
-\item{radius_noise_fraction}{Numeric (0 to 1). Proportion of the spot radius
+\item{radius_noise_fraction}{Numeric (0 to 1). Proportion of the gap radius
 where gradual edge noise is applied. 0 creates sharp circular edges,
 1 applies probabilistic cell inclusion across the entire radius.
 For example, 0.2 means the outer 20% of the radius has a gradient transition.
 Works independently of `spot_radius_sd` (which varies the overall size,
 while this parameter affects edge sharpness).}
 
-\item{regular_spots}{Logical. If TRUE, spots are arranged on a hexagonal grid
-using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).}
+\item{regular_spots}{Logical. If TRUE, gaps are arranged on a hexagonal grid
+using k-means clustering. If FALSE, gaps are placed randomly (default: FALSE).}
 }
 \value{
 A named list of the supplied parameters, classed
@@ -61,17 +61,6 @@ create_landscape("gaps", params = pattern_gaps(n_spots = 5, spot_radius = 8))
 
 Other landscape creation:
 \code{\link[=create_landscape]{create_landscape()}},
-\code{\link[=create_landscape_bands]{create_landscape_bands()}},
-\code{\link[=create_landscape_bare]{create_landscape_bare()}},
-\code{\link[=create_landscape_clustered]{create_landscape_clustered()}},
-\code{\link[=create_landscape_dense]{create_landscape_dense()}},
-\code{\link[=create_landscape_diffuse]{create_landscape_diffuse()}},
-\code{\link[=create_landscape_fingers]{create_landscape_fingers()}},
-\code{\link[=create_landscape_gaps]{create_landscape_gaps()}},
-\code{\link[=create_landscape_labyrinth]{create_landscape_labyrinth()}},
-\code{\link[=create_landscape_random]{create_landscape_random()}},
-\code{\link[=create_landscape_sharp]{create_landscape_sharp()}},
-\code{\link[=create_landscape_spots]{create_landscape_spots()}},
 \code{\link[=create_landscapes]{create_landscapes()}},
 \code{\link[=pattern_bands]{pattern_bands()}},
 \code{\link[=pattern_bare]{pattern_bare()}},

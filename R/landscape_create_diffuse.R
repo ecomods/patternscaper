@@ -2,22 +2,14 @@
 #'
 #' Generates a binary landscape with a diffuse vegetation boundary where vegetation probability decreases with distance.
 #'
-#' @param width Integer. Width of the landscape in pixels (default: 100).
-#' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param boundary_position Numeric. Relative position of vegetation boundary from top (0-1) (default: 0.5).
-#' @param steepness Numeric. Controls the transition gradient (0-1).
-#'   Lower values (e.g., 0.1) create sharper transitions.
-#'   Higher values (e.g., 0.9) create more gradual, diffuse transitions
-#'   where vegetation probability persists further below the vegetation boundary (default: 0.5).
-#' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
+#' Parameters are documented on \code{\link{pattern_diffuse}}.
 #'
 #' @return A landscape object with pattern "diffuse" containing:
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string "diffuse"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @family landscape creation
-#' @keywords internal
+#' @noRd
 #' @importFrom cli cli_abort
 #' @importFrom stats runif
 #'

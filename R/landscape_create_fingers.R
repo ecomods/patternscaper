@@ -3,26 +3,14 @@
 #' Generates a binary landscape with a curvy finger treeline following a sine wave pattern
 #' with random length and amplitude for each wave segment.
 #'
-#' @param width Integer. Width of the landscape in pixels (default: 100).
-#' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param boundary_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
-#' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
-#'     bare, adding gaps within the vegetation (0-1, default: 0).
-#' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
-#'     vegetated, scattering vegetation beyond the treeline (0-1, default: 0).
-#' @param sine_length_mean Numeric. Mean wavelength of sinusoidal curve in pixels (default: 20).
-#' @param sine_length_sd Numeric. Standard deviation of wavelength in pixels (default: 12).
-#' @param sine_height_mean Numeric. Mean amplitude of sinusoidal curve in pixels (default: 5).
-#' @param sine_height_sd Numeric. Standard deviation of amplitude in pixels (default: 4).
-#' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
+#' Parameters are documented on \code{\link{pattern_fingers}}.
 #'
 #' @return A landscape object with pattern "fingers" containing:
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string "fingers"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @family landscape creation
-#' @keywords internal
+#' @noRd
 #' @importFrom cli cli_warn cli_abort
 #'
 #' @examples

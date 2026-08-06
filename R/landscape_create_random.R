@@ -1,10 +1,7 @@
 #' Create a Binary Landscape with Randomly Distributed Vegetation
 #'
 #'
-#' @param width Integer. Width of the landscape in pixels (default: 100).
-#' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param veg_prop Numeric. Probability of vegetation presence (0-1) (default: 0.5).
-#'    Higher values result in a denser vegetation cover.
+#' Parameters are documented on \code{\link{pattern_random}}.
 #'
 #' @return A landscape object with random pattern containing:
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
@@ -23,8 +20,7 @@
 #' random_large <- create_landscape_random(width = 200, height = 150)
 #' }
 #'
-#' @family landscape creation
-#' @keywords internal
+#' @noRd
 #' @importFrom stats rbinom
 create_landscape_random <- function(
   width = 100,

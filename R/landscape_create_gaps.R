@@ -5,7 +5,7 @@
 #' \code{invert_landscape = TRUE} by default, making "gaps" and "spots" semantically
 #' distinct pattern names for the same underlying algorithm.
 #'
-#' @inheritParams create_landscape_spots
+#' Parameters are documented on \code{\link{pattern_gaps}}.
 #'
 #' @details
 #' The distinction between "spots" and "gaps":
@@ -22,8 +22,7 @@
 #'   \item{pattern}{Character string "gaps"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @family landscape creation
-#' @keywords internal
+#' @noRd
 #' @examples
 #' \dontrun{
 #' # Default gaps (bare patches in vegetation)

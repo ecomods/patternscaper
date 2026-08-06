@@ -68,17 +68,6 @@ create_landscapes(
 
 Other landscape creation:
 \code{\link[=create_landscape]{create_landscape()}},
-\code{\link[=create_landscape_bands]{create_landscape_bands()}},
-\code{\link[=create_landscape_bare]{create_landscape_bare()}},
-\code{\link[=create_landscape_clustered]{create_landscape_clustered()}},
-\code{\link[=create_landscape_dense]{create_landscape_dense()}},
-\code{\link[=create_landscape_diffuse]{create_landscape_diffuse()}},
-\code{\link[=create_landscape_fingers]{create_landscape_fingers()}},
-\code{\link[=create_landscape_gaps]{create_landscape_gaps()}},
-\code{\link[=create_landscape_labyrinth]{create_landscape_labyrinth()}},
-\code{\link[=create_landscape_random]{create_landscape_random()}},
-\code{\link[=create_landscape_sharp]{create_landscape_sharp()}},
-\code{\link[=create_landscape_spots]{create_landscape_spots()}},
 \code{\link[=create_landscapes]{create_landscapes()}},
 \code{\link[=pattern_bands]{pattern_bands()}},
 \code{\link[=pattern_bare]{pattern_bare()}},

@@ -5,38 +5,17 @@
 #' the treeline. Clusters can be elongated in x or y directions to create
 #' elliptical patterns.
 #'
-#' @param width Integer. Width of the landscape in pixels (default: 100).
-#' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param boundary_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
-#' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell
-#'   to bare, adding gaps within the vegetation. Applied to the underlying
-#'   sharp treeline, before the clusters are placed (0-1, default: 0).
-#' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
-#'   vegetated, scattering vegetation beyond the treeline. Applied to the
-#'   underlying sharp treeline, before the clusters are placed (0-1,
-#'   default: 0).
-#' @param n_clusters Integer. Number of cluster centers (default: 10).
-#' @param cluster_radius Numeric. Radius of clusters in pixels (default: 5).
-#' @param scatter_zone_prop Numeric. Proportion of height for scatter zone
-#'   measured downward from treeline (0-1, default: 0.3).
-#' @param elongation_x Numeric. Horizontal elongation factor for clusters.
-#'   Values > 1 stretch clusters horizontally, creating wider ellipses.
-#'   Values < 1 compress horizontally (default: 1).
-#' @param elongation_y Numeric. Vertical elongation factor for clusters.
-#'   Values > 1 stretch clusters vertically, creating taller ellipses.
-#'   Values < 1 compress vertically (default: 1).
-#' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
+#' Parameters are documented on \code{\link{pattern_clustered}}.
 #'
 #' @return A landscape object with pattern "clustered" containing:
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string "clustered"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @family landscape creation
+#' @noRd
 #' @importFrom stats runif
 #' @importFrom terra as.matrix
 #' @importFrom cli cli_abort
-#' @keywords internal
 #'
 #' @examples
 #' \dontrun{

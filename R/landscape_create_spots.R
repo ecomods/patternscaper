@@ -3,33 +3,13 @@
 #' Generates a binary landscape with circular spots representing either vegetated patches
 #' in bare ground (spots) or bare patches in vegetated ground (when inverted, gaps).
 #'
-#' @param width Integer. Number of columns in the landscape (default: 100).
-#' @param height Integer. Number of rows in the landscape (default: 100).
-#' @param n_spots Integer. Number of circular spots to generate.
-#'     For regular placement, this may be automatically reduced if the landscape
-#'     cannot accommodate the requested number at the given `spot_radius`.
-#' @param spot_radius Numeric. Mean radius of each spot in cells.
-#'     Must be positive and smaller than landscape dimensions.
-#' @param spot_radius_sd Numeric. Standard deviation for random variation in spot radius.
-#'     Each spot's radius is sampled from N(spot_radius, spot_radius_sd).
-#'     (default: 0 - no variation)
-#' @param radius_noise_fraction Numeric (0 to 1). Proportion of the spot radius
-#'     where gradual edge noise is applied. 0 creates sharp circular edges,
-#'     1 applies probabilistic cell inclusion across the entire radius.
-#'     For example, 0.2 means the outer 20% of the radius has a gradient transition.
-#'     Works independently of `spot_radius_sd` (which varies the overall size,
-#'     while this parameter affects edge sharpness).
-#' @param invert_landscape Logical. If TRUE, creates bare patches in vegetated ground
-#'     (equivalent to "gaps" pattern). If FALSE (default), creates vegetated spots in bare ground.
+#' Parameters are documented on \code{\link{pattern_spots}}.
 #'
 #' @details
 #' This function can generate both "spots" and "gaps" patterns depending on \code{invert_landscape}.
-#' For semantic clarity in training data, use \code{\link{create_landscape_gaps}} when you
+#' For semantic clarity in training data, use \code{create_landscape_gaps()} when you
 #' want bare patches in vegetated ground, which sets \code{invert_landscape = TRUE} by default
 #' and labels the pattern as "gaps".
-#'
-#' @param regular_spots Logical. If TRUE, spots are arranged on a hexagonal grid
-#'     using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).
 #'
 #' @return A landscape object with pattern "spots" containing:
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
@@ -70,10 +50,9 @@
 #' )
 #' }
 #'
-#' @family landscape creation
+#' @noRd
 #' @importFrom stats kmeans rnorm runif
 #' @importFrom cli cli_alert_warning
-#' @keywords internal
 create_landscape_spots <- function(
   width = 100,
   height = 100,

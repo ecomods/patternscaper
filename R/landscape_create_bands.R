@@ -2,26 +2,14 @@
 #'
 #' Generates a binary landscape with parallel sine-wave bands.
 #'
-#' @param width Integer. Width of the landscape in pixels (default: 100).
-#' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param boundary_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
-#' @param band_zone_prop Numeric. Proportion of height of the total landscape to
-#'     allocate for bands below the treeline (default: 0.2). If the band zone is too small
-#'     for the given band spacing, no bands will be drawn and a warning will be issued.
-#' @param band_thickness Integer. Thickness of each band in pixels (default: 3).
-#' @param band_spacing Integer. Spacing between bands in pixels (default: 10).
-#' @param frequency Numeric. Frequency of sine wave (default: 2*pi/100).
-#' @param amplitude Numeric. Amplitude of sine wave in pixels (default: 5).
-#' @param noise_sd Numeric. Standard deviation for random noise (default: 0).
-#' @param rotation Numeric. Angle to rotate landscape in degrees (default: 0).
+#' Parameters are documented on \code{\link{pattern_bands}}.
 #'
 #' @return A landscape object with pattern "bands" containing:
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string "bands"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @family landscape creation
-#' @keywords internal
+#' @noRd
 #' @examples
 #' \dontrun{
 #' # Default sine bands

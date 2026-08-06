@@ -4,17 +4,14 @@
 #' This is a specialized wrapper around \code{\link{create_landscape_random}}
 #' with low vegetation proportions.
 #'
-#' @param veg_prop Numeric. Proportion of cells with vegetation (0-1). Default: 0.1.
-#' @param width Integer. Width of landscape in cells. Default: 100.
-#' @param height Integer. Height of landscape in cells. Default: 100.
+#' Parameters are documented on \code{\link{pattern_bare}}.
 #'
 #' @return A landscape object with pattern "bare" containing.
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string "bare"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @family landscape creation
-#' @keywords internal
+#' @noRd
 #' @examples
 #' \dontrun{
 #' # Create default bare landscape (10% vegetation)

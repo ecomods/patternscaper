@@ -2,28 +2,7 @@
 #'
 #' Generates a landscape with a labyrinth-like vegetation pattern,
 #'  this mimics Turing patterns.
-#' @param width Integer. Number of columns in the landscape (default: 100).
-#' @param height Integer. Number of rows in the landscape (default: 100).
-#' @param frequency Numeric. Controls the spatial scale of the noise pattern:
-#'    Lower values produce broad, smooth bands, higher values produce finer, maze-like structures (default: 3).
-#' @param veg_threshold Numeric between 0 and 1. Defines the cutoff value that separates vegetated
-#'    from non-vegetated cells. Values above the threshold become vegetation.
-#'    Adjusting this changes the overall proportion of vegetated area (default: 0.5).
-#' @param band_fuzziness Numeric between 0 and 0.5. Controls the amount of
-#'    geometric edge roughness applied *after* thresholding. At 0, vegetation
-#'    boundaries are sharp and fully deterministic. Small values (≈ 0.05–0.1)
-#'    introduce slight, irregular boundary perturbations without changing the
-#'    overall topology of the pattern. Larger values progressively erode vegetation
-#'    edges and can fragment bands if set too high. This parameter affects boundary
-#'    geometry only and does not influence the global structure or connectivity
-#'    of the labyrinth. (default: 0.08)
-#' @param octaves Integer >= 1. Number of noise layers (octaves) combined to
-#'    generate the underlying continuous field. A single octave produces very smooth,
-#'    large-scale bands. Using two to three octaves adds limited fine structure while preserving
-#'    a dominant wavelength, which is characteristic of labyrinth (Turing-like)
-#'    patterns. Higher values introduce fractal detail at smaller scales and can obscure
-#'    the banded structure, making patterns less clearly classifiable as
-#'    labyrinths. (default: 2).
+#' Parameters are documented on \code{\link{pattern_labyrinth}}.
 #'
 #' @return A landscape object with pattern "labyrinth" containing:
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
@@ -48,8 +27,7 @@
 #' The combination of `frequency` and `octaves` controls pattern complexity,
 #' while `veg_threshold` determines vegetation proportion.
 #'
-#' @family landscape creation
-#' @keywords internal
+#' @noRd
 #' @examples
 #' \dontrun{
 #' # Default labyrinth pattern

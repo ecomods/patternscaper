@@ -4,16 +4,14 @@
 #' This is a specialized wrapper around \code{\link{create_landscape_random}}
 #' with high vegetation proportions.
 #'
-#' @param veg_prop Numeric. Proportion of cells with vegetation (0-1). Default: 0.9.
-#' @param width Integer. Width of landscape in cells. Default: 100.
-#' @param height Integer. Height of landscape in cells. Default: 100.
+#' Parameters are documented on \code{\link{pattern_dense}}.
 #'
 #' @return A landscape object with pattern "dense" containing
 #'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string "dense"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @family landscape creation
+#' @noRd
 #' @examples
 #' \dontrun{
 #' # Create default dense landscape (90% vegetation)
@@ -22,7 +20,6 @@
 #' # Create very dense landscape
 #' very_dense <- create_landscape_dense(veg_prop = 0.95)
 #' }
-#' @keywords internal
 create_landscape_dense <- function(
   veg_prop = 0.9,
   width = 100,

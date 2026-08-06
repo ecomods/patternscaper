@@ -12,7 +12,7 @@ Lower values (e.g., 0.1) create sharper transitions.
 Higher values (e.g., 0.9) create more gradual, diffuse transitions
 where vegetation probability persists further below the vegetation boundary (default: 0.5).}
 
-\item{boundary_position}{Numeric. Relative position of vegetation boundary from top (0-1) (default: 0.5).}
+\item{boundary_position}{Numeric. Relative position of vegetation boundary from top (0-1) (default: 0.2).}
 }
 \value{
 A named list of the supplied parameters, classed
@@ -39,17 +39,6 @@ create_landscape(
 
 Other landscape creation:
 \code{\link[=create_landscape]{create_landscape()}},
-\code{\link[=create_landscape_bands]{create_landscape_bands()}},
-\code{\link[=create_landscape_bare]{create_landscape_bare()}},
-\code{\link[=create_landscape_clustered]{create_landscape_clustered()}},
-\code{\link[=create_landscape_dense]{create_landscape_dense()}},
-\code{\link[=create_landscape_diffuse]{create_landscape_diffuse()}},
-\code{\link[=create_landscape_fingers]{create_landscape_fingers()}},
-\code{\link[=create_landscape_gaps]{create_landscape_gaps()}},
-\code{\link[=create_landscape_labyrinth]{create_landscape_labyrinth()}},
-\code{\link[=create_landscape_random]{create_landscape_random()}},
-\code{\link[=create_landscape_sharp]{create_landscape_sharp()}},
-\code{\link[=create_landscape_spots]{create_landscape_spots()}},
 \code{\link[=create_landscapes]{create_landscapes()}},
 \code{\link[=pattern_bands]{pattern_bands()}},
 \code{\link[=pattern_bare]{pattern_bare()}},
