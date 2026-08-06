@@ -114,20 +114,10 @@ installed `INDEX`, so `help(package = "spatPatClassifyR")` does not list them. R
 name, invisible when browsing. `_pkgdown.yml` already lists all 11 explicitly, so the *website*
 side is fine; the console side is not.
 
-**Approach (settled 2026-08-05 after a peer review by GPT-5.4 and Gemini — both independently
-rejected the first proposal, which was to keep the docs on the generator pages):**
-1. **Enrich `landscape_param_specs()` with a `desc` field** so names, types, bounds, batch ranges
-   *and* one-line descriptions all live in one object. Today the metadata is in the spec table and
-   the prose is in the generators' `@param` tags, with nothing keeping them in sync — both
-   reviewers called this split the real problem, not a footnote. *Do this first; every version of
-   the plan needs it.*
-2. **Add a generated `?landscape_patterns` overview topic** — a doc-only topic (roxygen `@name` +
-   `NULL`, no function attached, so no `\usage`), with the per-pattern table produced from the
-   spec via `@evalRd`. Drift-proof by construction. Link to it from the *top* of both public pages,
-   not from `@seealso` at the bottom.
-3. **Per-pattern deep-dive pages — on hold, see M21.** Do *not* build 11 doc-only topics until the
-   parameter-constructor decision is made; `?spots_params` pages would replace them.
-4. **`@noRd` the 11 generators** once their content has moved, removing the dead-end pages. ⚠️
+**Approach — superseded by M21 (2026-08-06).** The `pattern_*()` constructors *are* the per-pattern
+documentation, so the doc-only route is dropped: no `desc` field on the spec, no generated
+`?landscape_patterns` overview topic. What survives from this entry:
+1. **`@noRd` the 11 generators** once their content has moved, removing the dead-end pages. ⚠️
    `_pkgdown.yml` lists all 11 topics explicitly and pkgdown *errors* on an unresolvable
    `contents:` entry — that section must be updated in the same commit.
 
@@ -207,10 +197,8 @@ from vignettes.
 `list(n_spots = 15)` keeps working unchanged. No deprecation, no result change. Verified
 2026-08-05: the analysis repo has **zero** `params_list` call sites, so the blast radius is nil.
 
-**Consequence for M18/M19/M20 — do not build 11 doc-only per-pattern topics until this is
-decided**, because `?spots_params` pages would replace them. Safe to build regardless: the
-`desc`-enriched spec table and the single `?landscape_patterns` overview (a cross-pattern
-comparison table, which constructors do not provide).
+**Consequence for M18/M19/M20:** no doc-only per-pattern topics, and no `?landscape_patterns`
+overview topic — the `pattern_*` help pages replace both.
 
 ### M22. [new] `random_spots` is silently stripped in batch generation — M9 all over again  — *(found 2026-08-05)*
 `random_spots` is a working formal of `create_landscape_sharp()`, `create_landscape_fingers()` and
@@ -232,12 +220,19 @@ spots/gaps; this one was missed because nothing compared the spec against the ge
 Found by running M18's proposed consistency test while writing the implementation plan — which is
 the argument for that test existing.
 
-- **Fix, in two deliberately separate steps:**
-  1. Add `random_spots` to the spec with `batch_range = NULL` (validation-only) → makes it
-     settable, **changes no existing result**. Note it is a length-2 numeric (flip probabilities
-     `c(1→0, 0→1)`), so it does not fit the scalar `min`/`max` spec shape cleanly.
-  2. *Later, separately:* decide whether it deserves a default `batch_range`. **Results-changing**
-     — same open decision as L25, and on the paper's main patterns. See "Open decisions".
+**Fix — decided 2026-08-06: split the parameter, in two deliberately separate steps.** A length-2
+value cannot be added to the spec as-is: the batch path reads length 2 as a *range* to sample from,
+so it would be collapsed to a scalar, rejected inside the generator, and swallowed by
+`try_create_landscape()` — a silently dropped landscape, worse than today's warning.
+  1. Replace `random_spots` with two scalars, `noise_veg_to_bare` and `noise_bare_to_veg`, and add
+     all six entries to the spec with `batch_range = NULL` (validation-only) → settable through
+     both entry points, **changes no existing raster**. Removes the package's only vector-valued
+     parameter, so no `arity` concept is needed and the shared validator/sampler are untouched.
+     Milestone 0.2 of `../spatPatClassifyR_paper/PATTERN_CONSTRUCTORS_PLAN.md`, which carries the
+     full usage inventory showing the parameter has never influenced a published number.
+  2. *Later, separately:* decide whether the two deserve a default `batch_range`.
+     **Results-changing** — same open decision as L25, and on the paper's main patterns. See
+     "Open decisions".
 
 ### M17. Add regression tests for the correctness bugs above  — [Claude] *(§7.1)*
 *Partially done.* (H1) `theme_landscape()` and (M2) `frequency` variation both have tests
@@ -357,14 +352,10 @@ whether the analysis repo has to be re-run:
 pages, so anything built per-pattern now is at risk of being thrown away.
 
 *Safe regardless of M21 — do these:*
-1. **M18 step 1** — add a `desc` field to `landscape_param_specs()`. Needed by every version of
-   the plan (generates the overview; would also document/validate the M21 constructors).
-2. **M18 step 2** — the generated `?landscape_patterns` overview topic. A cross-pattern comparison
-   table is something constructors do *not* provide, so it survives either way.
-3. **M19** — document rotation applicability, `custom_pattern`, `params_list` semantics, `@return`.
-4. **L26** — one-line `_pkgdown.yml` fix so `build_reference()` stops erroring.
-5. **L19** — file renames; **L17** — `sapply()` → `vapply()`; **L21** — README badges.
-6. **M20**, visual-tour half only — one figure per pattern in the vignette.
+1. **M19** — document rotation applicability, `custom_pattern`, `params_list` semantics, `@return`.
+2. **L26** — one-line `_pkgdown.yml` fix so `build_reference()` stops erroring.
+3. **L19** — file renames; **L17** — `sapply()` → `vapply()`; **L21** — README badges.
+4. **M20**, visual-tour half only — one figure per pattern in the vignette.
 
 *On hold until M21 is decided — do NOT start:*
 - 11 per-pattern doc-only topics (M18 step 3).
@@ -383,9 +374,9 @@ should stay byte-identical; only failure behaviour moves:
 
 **Open decisions (not tasks — settle these before the work they gate):**
 - **L25** — `radius_noise_fraction` batch randomization. Gates a self-organized re-run.
-- **M22 step 2** — `random_spots` batch randomization. Same question, on the *ecotone* patterns.
-  Worth deciding together with L25: they are the same decision about whether batch training sets
-  should vary edge/cell noise at all.
+- **M22 step 2** — batch randomization of `noise_veg_to_bare` / `noise_bare_to_veg` (post-split).
+  Same question, on the *ecotone* patterns. Worth deciding together with L25: they are the same
+  decision about whether batch training sets should vary edge/cell noise at all.
 - **L9** — generator signature defaults vs. batch ranges.
 - ~~**M21**~~ — decided 2026-08-05, go ahead; see `PATTERN_CONSTRUCTORS_PLAN.md`.
 
