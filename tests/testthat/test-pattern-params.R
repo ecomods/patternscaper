@@ -76,6 +76,39 @@ test_that("each constructor exposes exactly its pattern's parameters", {
   }
 })
 
+test_that("the generated batch-range section covers every parameter", {
+  # The section is built from the spec so it cannot drift from what
+  # create_landscapes() actually samples. That only holds if every parameter
+  # reaches it.
+  specs <- landscape_param_specs()
+
+  for (name in names(pattern_constructors)) {
+    rd <- rd_batch_ranges(name)
+
+    for (param in names(specs[[name]])) {
+      expect_true(
+        any(grepl(paste0("\\code{", param, "} \\tab"), rd, fixed = TRUE)),
+        info = paste(name, "-", param)
+      )
+    }
+  }
+})
+
+test_that("validation-only parameters are described as not sampled", {
+  # radius_noise_fraction and the two noise probabilities have batch_range NULL,
+  # so a batch never varies them -- the page has to say so rather than render
+  # an empty range
+  rd <- rd_batch_ranges("spots")
+  noise <- grep("radius_noise_fraction", rd, value = TRUE)
+
+  expect_match(noise, "not sampled")
+
+  expect_match(
+    grep("noise_bare_to_veg", rd_batch_ranges("sharp"), value = TRUE),
+    "not sampled"
+  )
+})
+
 test_that("pattern_gaps has no invert_landscape, unlike pattern_spots", {
   # Inverting is what makes gaps gaps: create_landscape_gaps() hardcodes it,
   # so exposing it would let a caller turn gaps back into spots

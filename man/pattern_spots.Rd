@@ -28,7 +28,7 @@ Each spot's radius is sampled from N(spot_radius, spot_radius_sd).
 \item{radius_noise_fraction}{Numeric (0 to 1). Proportion of the spot radius
 where gradual edge noise is applied. 0 creates sharp circular edges,
 1 applies probabilistic cell inclusion across the entire radius.
-For example, 0.2 means the outer 20% of the radius has a gradient transition.
+For example, 0.2 means the outer 20\% of the radius has a gradient transition.
 Works independently of `spot_radius_sd` (which varies the overall size,
 while this parameter affects edge sharpness).}
 
@@ -81,3 +81,17 @@ Other landscape creation:
 \code{\link[=pattern_sharp]{pattern_sharp()}}
 }
 \concept{landscape creation}
+\section{Defaults in create_landscapes()}{
+\code{\link{create_landscapes}} samples a value per landscape for every
+parameter left unset, so the defaults shown in Usage apply to
+\code{\link{create_landscape}} only. Ranges that scale with landscape
+size are shown for the default 100 by 100. What a batch uses instead:
+\tabular{ll}{
+\code{n_spots} \tab 5 to 10 \cr
+\code{spot_radius} \tab 10 to 20, scales with size \cr
+\code{spot_radius_sd} \tab 0 to 2, scales with size \cr
+\code{radius_noise_fraction} \tab not sampled \cr
+\code{regular_spots} \tab TRUE or FALSE \cr
+\code{invert_landscape} \tab always FALSE \cr
+}
+}

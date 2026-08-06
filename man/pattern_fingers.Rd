@@ -69,3 +69,18 @@ Other landscape creation:
 \code{\link[=pattern_spots]{pattern_spots()}}
 }
 \concept{landscape creation}
+\section{Defaults in create_landscapes()}{
+\code{\link{create_landscapes}} samples a value per landscape for every
+parameter left unset, so the defaults shown in Usage apply to
+\code{\link{create_landscape}} only. Ranges that scale with landscape
+size are shown for the default 100 by 100. What a batch uses instead:
+\tabular{ll}{
+\code{boundary_position} \tab 0.3 to 0.6 \cr
+\code{noise_veg_to_bare} \tab not sampled \cr
+\code{noise_bare_to_veg} \tab not sampled \cr
+\code{sine_length_mean} \tab 20 to 50, scales with size \cr
+\code{sine_length_sd} \tab 10 to 50, scales with size \cr
+\code{sine_height_mean} \tab 5 to 20, scales with size \cr
+\code{sine_height_sd} \tab 5 to 25, scales with size \cr
+}
+}

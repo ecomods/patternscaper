@@ -74,3 +74,15 @@ Other landscape creation:
 \code{\link[=pattern_spots]{pattern_spots()}}
 }
 \concept{landscape creation}
+\section{Defaults in create_landscapes()}{
+\code{\link{create_landscapes}} samples a value per landscape for every
+parameter left unset, so the defaults shown in Usage apply to
+\code{\link{create_landscape}} only. Ranges that scale with landscape
+size are shown for the default 100 by 100. What a batch uses instead:
+\tabular{ll}{
+\code{frequency} \tab 2.5 to 3.5 \cr
+\code{veg_threshold} \tab 0.45 to 0.55 \cr
+\code{band_fuzziness} \tab 0.06 to 0.25 \cr
+\code{octaves} \tab 2 to 4 \cr
+}
+}

@@ -60,6 +60,8 @@ new_landscape_params <- function(params, pattern) {
 #' @examples
 #' create_landscape("random", params = pattern_random(veg_prop = 0.3))
 #'
+#' @evalRd rd_batch_ranges("random")
+#'
 #' @export
 pattern_random <- function(veg_prop = 0.5) {
   params <- list()
@@ -92,6 +94,8 @@ pattern_random <- function(veg_prop = 0.5) {
 #' @examples
 #' create_landscape("bare", params = pattern_bare(veg_prop = 0.05))
 #'
+#' @evalRd rd_batch_ranges("bare")
+#'
 #' @export
 pattern_bare <- function(veg_prop = 0.1) {
   params <- list()
@@ -123,6 +127,8 @@ pattern_bare <- function(veg_prop = 0.1) {
 #'
 #' @examples
 #' create_landscape("dense", params = pattern_dense(veg_prop = 0.95))
+#'
+#' @evalRd rd_batch_ranges("dense")
 #'
 #' @export
 pattern_dense <- function(veg_prop = 0.9) {
@@ -167,6 +173,8 @@ pattern_dense <- function(veg_prop = 0.9) {
 #'   params = pattern_sharp(noise_bare_to_veg = 0.1),
 #'   rotation = 45
 #' )
+#'
+#' @evalRd rd_batch_ranges("sharp")
 #'
 #' @export
 pattern_sharp <- function(
@@ -217,6 +225,8 @@ pattern_sharp <- function(
 #'   params = pattern_diffuse(steepness = 0.1, boundary_position = 0.3)
 #' )
 #'
+#' @evalRd rd_batch_ranges("diffuse")
+#'
 #' @export
 pattern_diffuse <- function(
   steepness = 0.5,
@@ -265,6 +275,8 @@ pattern_diffuse <- function(
 #'   "fingers",
 #'   params = pattern_fingers(sine_length_mean = 15, sine_height_mean = 10)
 #' )
+#'
+#' @evalRd rd_batch_ranges("fingers")
 #'
 #' @export
 pattern_fingers <- function(
@@ -344,6 +356,8 @@ pattern_fingers <- function(
 #'   params = pattern_clustered(n_clusters = 8, cluster_radius = 7)
 #' )
 #'
+#' @evalRd rd_batch_ranges("clustered")
+#'
 #' @export
 pattern_clustered <- function(
   boundary_position = 0.5,
@@ -417,6 +431,8 @@ pattern_clustered <- function(
 #'   params = pattern_bands(band_thickness = 4, band_spacing = 12)
 #' )
 #'
+#' @evalRd rd_batch_ranges("bands")
+#'
 #' @export
 pattern_bands <- function(
   boundary_position = 0.5,
@@ -475,7 +491,7 @@ pattern_bands <- function(
 #' @param radius_noise_fraction Numeric (0 to 1). Proportion of the spot radius
 #'     where gradual edge noise is applied. 0 creates sharp circular edges,
 #'     1 applies probabilistic cell inclusion across the entire radius.
-#'     For example, 0.2 means the outer 20% of the radius has a gradient transition.
+#'     For example, 0.2 means the outer 20\% of the radius has a gradient transition.
 #'     Works independently of `spot_radius_sd` (which varies the overall size,
 #'     while this parameter affects edge sharpness).
 #' @param regular_spots Logical. If TRUE, spots are arranged on a hexagonal grid
@@ -499,6 +515,8 @@ pattern_bands <- function(
 #'   patterns = "spots",
 #'   params_list = list(spots = pattern_spots(n_spots = c(5, 15)))
 #' )
+#'
+#' @evalRd rd_batch_ranges("spots")
 #'
 #' @export
 pattern_spots <- function(
@@ -559,7 +577,7 @@ pattern_spots <- function(
 #' @param radius_noise_fraction Numeric (0 to 1). Proportion of the gap radius
 #'     where gradual edge noise is applied. 0 creates sharp circular edges,
 #'     1 applies probabilistic cell inclusion across the entire radius.
-#'     For example, 0.2 means the outer 20% of the radius has a gradient transition.
+#'     For example, 0.2 means the outer 20\% of the radius has a gradient transition.
 #'     Works independently of `spot_radius_sd` (which varies the overall size,
 #'     while this parameter affects edge sharpness).
 #' @param regular_spots Logical. If TRUE, gaps are arranged on a hexagonal grid
@@ -573,6 +591,8 @@ pattern_spots <- function(
 #'
 #' @examples
 #' create_landscape("gaps", params = pattern_gaps(n_spots = 5, spot_radius = 8))
+#'
+#' @evalRd rd_batch_ranges("gaps")
 #'
 #' @export
 pattern_gaps <- function(
@@ -646,6 +666,8 @@ pattern_gaps <- function(
 #'   params = pattern_labyrinth(frequency = 3.5, octaves = 3)
 #' )
 #'
+#' @evalRd rd_batch_ranges("labyrinth")
+#'
 #' @export
 pattern_labyrinth <- function(
   frequency = 3,
@@ -669,6 +691,83 @@ pattern_labyrinth <- function(
   }
 
   new_landscape_params(params, pattern = "labyrinth")
+}
+
+#' Render a Pattern's Batch Sampling Ranges as Rd
+#'
+#' Builds the "Defaults in create_landscapes()" section for a
+#' \code{pattern_*()} help page from \code{\link{landscape_param_specs}}, so the
+#' documented ranges cannot drift from the ones actually sampled. Called from
+#' \code{@evalRd} in each constructor's roxygen block.
+#'
+#' @param pattern Character. Pattern to describe.
+#'
+#' @return Character vector of Rd markup, one element per line.
+#'
+#' @keywords internal
+#' @noRd
+rd_batch_ranges <- function(pattern) {
+  specs <- landscape_param_specs()[[pattern]]
+
+  # Width/height-dependent ranges are reported at the default landscape size
+  width <- 100
+  height <- 100
+
+  describe_range <- function(range) {
+    if (is.null(range)) {
+      return("not sampled")
+    }
+
+    if (is.logical(range)) {
+      if (length(range) == 1) {
+        return(paste("always", range))
+      }
+      return(paste(range, collapse = " or "))
+    }
+
+    if (is.function(range)) {
+      value <- range(width, height)
+      return(sprintf(
+        "%s to %s, scales with size",
+        format(value[1]),
+        format(value[2])
+      ))
+    }
+
+    if (length(range) == 1) {
+      return(paste("always", format(range)))
+    }
+
+    sprintf("%s to %s", format(range[1]), format(range[2]))
+  }
+
+  rows <- vapply(
+    names(specs),
+    function(name) {
+      sprintf(
+        "\\code{%s} \\tab %s \\cr",
+        name,
+        describe_range(specs[[name]]$batch_range)
+      )
+    },
+    character(1)
+  )
+
+  c(
+    "\\section{Defaults in create_landscapes()}{",
+    "\\code{\\link{create_landscapes}} samples a value per landscape for every",
+    "parameter left unset, so the defaults shown in Usage apply to",
+    "\\code{\\link{create_landscape}} only. Ranges that scale with landscape",
+    sprintf(
+      "size are shown for the default %d by %d. What a batch uses instead:",
+      width,
+      height
+    ),
+    "\\tabular{ll}{",
+    unname(rows),
+    "}",
+    "}"
+  )
 }
 
 #' Resolve Pattern Parameters for a Single Landscape

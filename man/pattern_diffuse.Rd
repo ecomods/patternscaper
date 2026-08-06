@@ -52,3 +52,13 @@ Other landscape creation:
 \code{\link[=pattern_spots]{pattern_spots()}}
 }
 \concept{landscape creation}
+\section{Defaults in create_landscapes()}{
+\code{\link{create_landscapes}} samples a value per landscape for every
+parameter left unset, so the defaults shown in Usage apply to
+\code{\link{create_landscape}} only. Ranges that scale with landscape
+size are shown for the default 100 by 100. What a batch uses instead:
+\tabular{ll}{
+\code{steepness} \tab 0.1 to 1 \cr
+\code{boundary_position} \tab 0.1 to 0.4 \cr
+}
+}
