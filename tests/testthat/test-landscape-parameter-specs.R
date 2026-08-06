@@ -185,3 +185,61 @@ test_that("get_integer_param_names matches the former hardcoded set, minus the t
   expect_false("nhills" %in% get_integer_param_names())
   expect_false("nbands" %in% get_integer_param_names())
 })
+
+# Spec/formals drift guard -----------------------------------------------------
+
+# The spec table and the generator formals are maintained separately, and every
+# drift found so far was a parameter present in one but not the other.
+# Comparing them directly makes the next one fail here instead of
+# waiting to be noticed.
+#
+# rotation is the one legitimate exception: a formal of the five
+# rotation-capable generators, deliberately absent from the spec because
+# create_landscapes() supplies it from its own argument instead of sampling it
+# per pattern.
+
+test_that("spec parameter names match the generator formals for all 11 patterns", {
+  generators <- list(
+    random = create_landscape_random,
+    bare = create_landscape_bare,
+    dense = create_landscape_dense,
+    sharp = create_landscape_sharp,
+    diffuse = create_landscape_diffuse,
+    fingers = create_landscape_fingers,
+    clustered = create_landscape_clustered,
+    bands = create_landscape_bands,
+    spots = create_landscape_spots,
+    gaps = create_landscape_gaps,
+    labyrinth = create_landscape_labyrinth
+  )
+
+  specs <- landscape_param_specs()
+  not_pattern_params <- c("width", "height", "rotation")
+
+  expect_setequal(names(specs), names(generators))
+
+  for (pattern in names(generators)) {
+    formal_names <- setdiff(
+      names(formals(generators[[pattern]])),
+      not_pattern_params
+    )
+    spec_names <- names(specs[[pattern]])
+
+    expect_equal(
+      setdiff(formal_names, spec_names),
+      character(0),
+      info = paste(
+        pattern,
+        "- formal(s) missing from the spec, so create_landscapes() drops them"
+      )
+    )
+    expect_equal(
+      setdiff(spec_names, formal_names),
+      character(0),
+      info = paste(
+        pattern,
+        "- spec entr(ies) with no matching formal, so the generator errors"
+      )
+    )
+  }
+})
