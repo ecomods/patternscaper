@@ -22,89 +22,332 @@ set.seed(123456)
 
 ## Overview
 
-You can:
+Landscape generation uses three kinds of function:
 
-- Generate batches of training landscapes with `create_landscapes()`
-- Create individual landscapes with custom parameters using `create_landscape()`
-- Visualize one or more landscapes with `plot_landscapes()`
+- `create_landscapes()` generates a batch of landscapes for training
+- `create_landscape()` generates a single landscape
+- `pattern_random()`, `pattern_spots()`, ... set the parameters of one pattern
 
-### Available patterns
+The first two are the entry points. Each pattern has its own parameters, and those are set through the pattern's own constructor, which is passed to `params`:
 
-Currently, there are 11 different spatial patterns available:
+```{r}
+#| label: api-shape
+#| fig-width: 4
+#| fig-height: 3
+#| fig-alt: "A single spots landscape with 8 large spots"
 
-#### Control patterns
+big_spots <- create_landscape(
+  "spots",
+  params = pattern_spots(n_spots = 8, spot_radius = 12)
+)
 
-- **random**: Randomly distributed vegetation
-- **bare**: No/minimal vegetation (control)
-- **dense**: Complete/maximal vegetation cover (control)
+plot_landscapes(list(big_spots), show_legend = FALSE)
+```
+
+Typing `pattern_` and pressing <kbd>Tab</kbd> lists all 11 patterns, and each constructor's arguments are that pattern's parameters -- so autocomplete works, and `?pattern_spots` documents them.
+
+## The patterns
+
+Currently there are 11 spatial patterns. This section shows what each one looks like and which parameters shape it.
+
+### Control patterns
+
+**random**, **bare** and **dense** all place vegetation at random. They differ only in `veg_prop`, the proportion of vegetated cells: `bare` defaults to 0.1, `random` to 0.5 and `dense` to 0.9. They serve as controls -- landscapes with no spatial structure at all.
 
 ```{r}
 #| label: control-patterns
-#| echo: false
 #| fig-width: 8
 #| fig-height: 3
-#| fig-alt: "Three landscapes showing control patterns: random, bare, and dense"
+#| fig-alt: "Three landscapes showing control patterns: bare, random, and dense"
 
-random <- create_landscape("random", name = "Random")
-bare <- create_landscape("bare", name = "Bare")
-dense <- create_landscape("dense", name = "Dense")
+bare <- create_landscape("bare", name = "bare (veg_prop 0.1)")
+random <- create_landscape("random", name = "random (veg_prop 0.5)")
+dense <- create_landscape("dense", name = "dense (veg_prop 0.9)")
 
-plot_landscapes(list(random, bare, dense), show_legend = FALSE)
-```
-
-#### Ecotone patterns
-
-- **sharp**: Sharp boundary
-- **diffuse**: Gradual transition
-- **fingers**: Curvy, finger-like extensions
-- **clustered**: Vegetation clusters above a treeline
-- **bands**: Sinusoidal vegetation bands
-
-```{r}
-#| label: ecotone-patterns
-#| echo: false
-#| fig-width: 8
-#| fig-height: 6
-#| fig-alt: "Five landscapes showing ecotone patterns: sharp, diffuse, fingers, clustered, and bands"
-
-sharp <- create_landscape("sharp", name = "Sharp treeline")
-diffuse <- create_landscape("diffuse", name = "Diffuse treeline")
-fingers <- create_landscape("fingers", name = "Fingers")
-clustered <- create_landscape("clustered", name = "Clustered")
-bands <- create_landscape("bands", name = "Bands")
 plot_landscapes(
-  list(sharp, diffuse, fingers, clustered, bands),
-  show_legend = FALSE,
-  ncol = 3
+  list(bare, random, dense),
+  titles = "name",
+  show_legend = FALSE
 )
 ```
 
-#### Patch patterns
+See `?pattern_random`, `?pattern_bare` and `?pattern_dense`.
 
-- **spots**: Circular vegetation patches
-- **gaps**: Circular vegetation gaps
-- **labyrinth**: Maze-like vegetation patterns
+### Ecotone patterns
+
+Ecotone patterns have a vegetated zone and a bare zone separated by a transition. `boundary_position` places that transition in all five.
+
+#### sharp
+
+An abrupt boundary. `noise_veg_to_bare` and `noise_bare_to_veg` flip individual cells across it, blurring the edge without moving it.
 
 ```{r}
-#| label: patch-patterns
-#| echo: false
+#| label: pattern-sharp
 #| fig-width: 8
 #| fig-height: 3
-#| fig-alt: "Three landscapes showing patch patterns: spots, gaps, and labyrinth"
+#| fig-alt: "Three sharp-boundary landscapes: default, low boundary, and a noisy boundary"
 
-spots <- create_landscape("spots", name = "Spots")
-gaps <- create_landscape("gaps", name = "Gaps")
-labyrinth <- create_landscape("labyrinth", name = "Labyrinth")
-plot_landscapes(list(spots, gaps, labyrinth), show_legend = FALSE)
+plot_landscapes(
+  list(
+    create_landscape("sharp", name = "default"),
+    create_landscape(
+      "sharp",
+      name = "boundary_position = 0.3",
+      params = pattern_sharp(boundary_position = 0.3)
+    ),
+    create_landscape(
+      "sharp",
+      name = "noise_bare_to_veg = 0.15",
+      params = pattern_sharp(noise_bare_to_veg = 0.15)
+    )
+  ),
+  titles = "name",
+  show_legend = FALSE
+)
 ```
 
-For detailed parameter descriptions and examples of each pattern type, see `?create_landscape`.
+See `?pattern_sharp`.
 
+#### diffuse
 
-## Creating Multiple Training Landscapes
+A gradual transition, where the chance of a cell being vegetated falls off with distance from the boundary. `steepness` runs from 0 to 1 and sets how wide that transition zone is: **higher** values spread it over more of the landscape.
 
-The quickest way to generate training data is with `create_landscapes()`.
-It generates multiple landscapes balanced across all available patterns.
+```{r}
+#| label: pattern-diffuse
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Three diffuse-boundary landscapes with increasingly wide transition zones"
+
+plot_landscapes(
+  list(
+    create_landscape(
+      "diffuse",
+      name = "steepness = 0.1 (narrow)",
+      params = pattern_diffuse(steepness = 0.1)
+    ),
+    create_landscape("diffuse", name = "default (0.5)"),
+    create_landscape(
+      "diffuse",
+      name = "steepness = 1 (broad)",
+      params = pattern_diffuse(steepness = 1)
+    )
+  ),
+  titles = "name",
+  show_legend = FALSE
+)
+```
+
+See `?pattern_diffuse`.
+
+#### fingers
+
+Curvy, finger-like extensions of vegetation into the bare zone. Their width is set by `sine_length_mean` and how far they reach by `sine_height_mean`, each with a matching `_sd` for variation between fingers.
+
+```{r}
+#| label: pattern-fingers
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Three finger landscapes: default, broad fingers, and narrow tall fingers"
+
+plot_landscapes(
+  list(
+    create_landscape("fingers", name = "default"),
+    create_landscape(
+      "fingers",
+      name = "broad, far-reaching",
+      params = pattern_fingers(sine_length_mean = 40, sine_height_mean = 12)
+    ),
+    create_landscape(
+      "fingers",
+      name = "narrow, tall",
+      params = pattern_fingers(sine_length_mean = 10, sine_height_mean = 15)
+    )
+  ),
+  titles = "name",
+  show_legend = FALSE
+)
+```
+
+See `?pattern_fingers`.
+
+#### clustered
+
+Vegetation clusters scattered above the boundary. `n_clusters` and `cluster_radius` set how many and how big, `scatter_zone_prop` how far into the bare zone they reach, and `elongation_x` / `elongation_y` stretch them along one axis.
+
+```{r}
+#| label: pattern-clustered
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Three clustered landscapes: default, few large clusters, and many small elongated clusters"
+
+plot_landscapes(
+  list(
+    create_landscape("clustered", name = "default"),
+    create_landscape(
+      "clustered",
+      name = "few, large",
+      params = pattern_clustered(n_clusters = 5, cluster_radius = 10)
+    ),
+    create_landscape(
+      "clustered",
+      name = "many, small, elongated",
+      params = pattern_clustered(
+        n_clusters = 20,
+        cluster_radius = 3,
+        elongation_x = 3
+      )
+    )
+  ),
+  titles = "name",
+  show_legend = FALSE
+)
+```
+
+See `?pattern_clustered`.
+
+#### bands
+
+Sinusoidal vegetation bands running parallel to the boundary. `band_thickness` and `band_spacing` set their geometry, `amplitude` and `frequency` how strongly they wave.
+
+```{r}
+#| label: pattern-bands
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Three banded landscapes: default, thick widely spaced bands, and strongly waved bands"
+
+plot_landscapes(
+  list(
+    create_landscape("bands", name = "default"),
+    create_landscape(
+      "bands",
+      name = "thick, widely spaced",
+      params = pattern_bands(band_thickness = 6, band_spacing = 20)
+    ),
+    create_landscape(
+      "bands",
+      name = "strongly waved",
+      params = pattern_bands(amplitude = 15, frequency = 0.15)
+    )
+  ),
+  titles = "name",
+  show_legend = FALSE
+)
+```
+
+See `?pattern_bands`.
+
+### Patch patterns
+
+Self-organized patterns, without a boundary between two zones.
+
+#### spots
+
+Circular vegetation patches on bare ground. `n_spots` and `spot_radius` set the count and size, `spot_radius_sd` varies the size between spots, `radius_noise_fraction` roughens their edges, and `regular_spots = TRUE` places them on a grid instead of at random.
+
+```{r}
+#| label: pattern-spots
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Three spot landscapes: default, fewer larger variable spots, and a regular grid"
+
+plot_landscapes(
+  list(
+    create_landscape("spots", name = "default"),
+    create_landscape(
+      "spots",
+      name = "fewer, larger, variable",
+      params = pattern_spots(
+        n_spots = 8,
+        spot_radius = 12,
+        spot_radius_sd = 3
+      )
+    ),
+    create_landscape(
+      "spots",
+      name = "regular grid",
+      params = pattern_spots(
+        n_spots = 9,
+        spot_radius = 8,
+        regular_spots = TRUE
+      )
+    )
+  ),
+  titles = "name",
+  show_legend = FALSE
+)
+```
+
+See `?pattern_spots`.
+
+#### gaps
+
+The inverse of spots: circular bare gaps in otherwise vegetated ground. It takes the same parameters, except that inverting is what makes it `gaps`, so that is not adjustable.
+
+```{r}
+#| label: pattern-gaps
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Three gap landscapes: default, few large gaps, and many gaps with ragged edges"
+
+plot_landscapes(
+  list(
+    create_landscape("gaps", name = "default"),
+    create_landscape(
+      "gaps",
+      name = "few, large",
+      params = pattern_gaps(n_spots = 5, spot_radius = 15)
+    ),
+    create_landscape(
+      "gaps",
+      name = "ragged edges",
+      params = pattern_gaps(
+        n_spots = 12,
+        spot_radius = 8,
+        radius_noise_fraction = 0.4
+      )
+    )
+  ),
+  titles = "name",
+  show_legend = FALSE
+)
+```
+
+See `?pattern_gaps`.
+
+#### labyrinth
+
+Maze-like bands of vegetation. `frequency` sets the scale of the maze and `octaves` how much fine detail is layered on top; `veg_threshold` shifts the overall vegetated proportion.
+
+```{r}
+#| label: pattern-labyrinth
+#| fig-width: 8
+#| fig-height: 3
+#| fig-alt: "Three labyrinth landscapes: default, a finer maze, and a sparser maze"
+
+plot_landscapes(
+  list(
+    create_landscape("labyrinth", name = "default"),
+    create_landscape(
+      "labyrinth",
+      name = "finer, more detailed",
+      params = pattern_labyrinth(frequency = 6, octaves = 3)
+    ),
+    create_landscape(
+      "labyrinth",
+      name = "veg_threshold = 0.35",
+      params = pattern_labyrinth(veg_threshold = 0.35)
+    )
+  ),
+  titles = "name",
+  show_legend = FALSE
+)
+```
+
+See `?pattern_labyrinth`.
+
+## Creating training landscapes
+
+The quickest way to generate training data is `create_landscapes()`. It generates multiple landscapes balanced across all available patterns, varying their parameters between landscapes.
 
 ```{r}
 #| label: create-training-landscapes
@@ -116,7 +359,7 @@ It generates multiple landscapes balanced across all available patterns.
 landscapes <- create_landscapes(n = 20)
 ```
 
-The `landscapes` are returned as a list of `landscape` objects (see [below](landscape-generation.qmd#landscape-object-structure) for more info on the data structure).
+The `landscapes` are returned as a list of `landscape` objects (see [below](landscape-generation.qmd#the-landscape-object) for more info on the data structure).
 
 They can be visualized using the `plot_landscapes()` function:
 
@@ -137,7 +380,7 @@ By default, landscapes are created in a balanced way, so that each pattern type 
 table(purrr::map_chr(landscapes, ~ .x$pattern))
 ```
 
-### Selecting Specific Patterns
+### Selecting specific patterns
 
 Specific patterns can be selected to create only a subset of patterns using the `patterns` argument. For example, to create landscapes with only labyrinth, spots, and clustered patterns:
 
@@ -156,17 +399,15 @@ landscapes <- create_landscapes(
 plot_landscapes(landscapes)
 ```
 
-### Control landscape parameters
+### Landscape size
 
-#### Landscape size
-
-To modify the size (number of pixels in x- and y-direction) of all generated landscapes, use the `ncol` and `nrow` arguments. By default, landscapes are created with a size of 100x100 pixels.
+To modify the size (number of pixels in x- and y-direction) of all generated landscapes, use the `width` and `height` arguments. By default, landscapes are created with a size of 100x100 pixels.
 
 ```{r}
 #| label: custom-size
 #| fig-width: 8
 #| fig-height: 2
-#| fig-alt: "Three landscapes showing different sizes: 50x20 pixels"
+#| fig-alt: "Three non-square landscapes of 50x20 pixels"
 non_square <- create_landscapes(
   n = 3,
   width = 50,
@@ -176,7 +417,7 @@ non_square <- create_landscapes(
 plot_landscapes(non_square)
 ```
 
-#### Landscape rotation
+### Landscape rotation
 
 By default, landscapes are rotated by angles randomly chosen between 0 and 360 degrees.
 This ensures that classifiers trained on these landscapes are invariant to landscape orientation.
@@ -206,147 +447,38 @@ defined_angles <- create_landscapes(
 plot_landscapes(c(no_rotation, defined_angles))
 ```
 
-#### Pattern-specific parameters
+Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated. The remaining patterns ignore `rotation`, since a batch can mix rotatable and non-rotatable patterns.
 
-You can modify default parameters for all generated landscapes of a specific pattern by passing a list of parameter values to the `params_list` argument. For example, to create landscapes with more spots of larger size:
+### Pattern-specific parameters
+
+The `params_list` argument sets parameters per pattern, keyed by pattern name, using the same `pattern_*()` constructors. The difference from `create_landscape()` is that here a parameter may be given as a **range** -- a length-2 vector -- which is sampled once per landscape:
 
 ```{r}
 #| label: custom-parameters
 #| message: false
 #| fig-width: 8
 #| fig-height: 6
-#| fig-alt: "Grid showing landscapes with many large spots"
+#| fig-alt: "Grid showing landscapes with many large spots of varying size"
 
-# Custom parameters for spot patterns
-pattern_params <- list(
-  spots = list(
-    n_spots = 15,
-    spot_radius = 10,
-    spot_radius_sd = 3
-  )
-)
 bigger_spots <- create_landscapes(
   n = 12,
   patterns = "spots",
-  params_list = pattern_params
+  params_list = list(
+    spots = pattern_spots(
+      n_spots = c(10, 20),
+      spot_radius = c(8, 12),
+      spot_radius_sd = 3,
+      regular_spots = FALSE
+    )
+  )
 )
 
 plot_landscapes(bigger_spots)
 ```
 
-To check parameter names and default values for each pattern type, see the function help `create_landscape()`.
+A single value fixes a parameter for every landscape in the batch; a length-2 vector is a range. Above, `n_spots` and `spot_radius` vary between landscapes, while `spot_radius_sd` and `regular_spots` are the same throughout. Patterns left out of `params_list` fall back to their default sampling ranges, which are listed on each constructor's help page.
 
-## Creating Single Landscapes
-
-To create single landscapes of all patterns with specific parameters, use the `create_landscape()` function. Check the help page `?create_landscape` for a full list of available parameters for each pattern type.
-
-### Spot Patterns
-
-```{r}
-#| label: spot-patterns-examples
-#| fig-width: 8
-#| fig-height: 3
-#| fig-alt: "Three landscapes showing spot patterns with different numbers and sizes of vegetation patches"
-
-# Default spots
-spots_default <- create_landscape("spots", name = "Default")
-
-# More spots with size variation
-spots_many <- create_landscape(
-  "spots",
-  name = "Many variable spots",
-  n_spots = 15,
-  spot_radius = 8,
-  spot_radius_sd = 2
-)
-
-# Regular grid of spots
-spots_regular <- create_landscape(
-  "spots",
-  name = "Regular grid",
-  n_spots = 15,
-  spot_radius = 20,
-  spot_radius_sd = 0,
-  regular_spots = TRUE
-)
-
-plot_landscapes(
-  list(spots_default, spots_many, spots_regular),
-  titles = "name"
-)
-```
-
-### Clustered Patterns
-
-```{r}
-#| label: clustered-patterns-examples
-#| fig-width: 8
-#| fig-height: 3
-#| fig-alt: "Three landscapes showing clustered vegetation with different cluster sizes and numbers"
-
-# Few large clusters
-clustered_large <- create_landscape(
-  "clustered",
-  name = "Few large clusters",
-  n_clusters = 5,
-  cluster_radius = 12,
-  scatter_zone_prop = 0.5
-)
-
-# Many small clusters
-clustered_small <- create_landscape(
-  "clustered",
-  name = "Many small clusters",
-  n_clusters = 30,
-  cluster_radius = 2,
-  scatter_zone_prop = 0.6
-)
-
-# Elongated clusters
-clustered_horizontal <- create_landscape(
-  "clustered",
-  name = "Horizontal clusters",
-  n_clusters = 15,
-  cluster_radius = 5,
-  elongation_x = 3,
-  elongation_y = 1,
-  scatter_zone_prop = 0.4
-)
-
-plot_landscapes(
-  list(
-    clustered_large,
-    clustered_small,
-    clustered_horizontal
-  ),
-  titles = "name"
-)
-```
-
-### Labyrinth Patterns
-
-```{r}
-#| label: labyrinth-patterns-examples
-#| fig-width: 8
-#| fig-height: 3
-#| fig-alt: "Two landscapes showing labyrinth-like vegetation patterns with different frequencies"
-
-# Default labyrinth
-labyrinth_default <- create_landscape("labyrinth", name = "Default")
-
-# Higher frequency with multiple octaves
-labyrinth_complex <- create_landscape(
-  "labyrinth",
-  name = "Complex",
-  frequency = 8,
-  octaves = 3,
-  band_fuzziness = 0.05
-)
-
-plot_landscapes(list(labyrinth_default, labyrinth_complex), titles = "name")
-```
-
-## The landscape Object
+## The landscape object
 
 In `spatPatClassifyR`, landscapes are stored as lists containing the landscape data and metadata. All landscape generation functions return landscapes in this format and all other functions expect landscapes to be provided in this format.
 
@@ -366,7 +498,7 @@ landscape_example <- create_landscape("spots", name = "Example")
 str(landscape_example)
 ```
 
-#### Modifying Landscape Metadata
+### Modifying landscape metadata
 
 Users can modify landscape metadata using the helper functions `set_landscape_pattern()` and `set_landscape_name()`. For example, to change the pattern label or name of existing landscapes:
 
@@ -389,4 +521,3 @@ landscapes_example
 - See `vignette("landscape-metrics")` for extracting landscape features and finding the most informative metrics
 - See `vignette("classify-metrics")` for training spatial pattern classifiers on the landscape metrics
 - See `vignette("classify-pixels")` for training spatial pattern classifiers on the raw landscape data using Keras
-
