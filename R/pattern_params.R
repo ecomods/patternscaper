@@ -175,8 +175,8 @@ pattern_dense <- function(veg_prop = 0.9) {
 #' validated parameter list for the \code{"sharp"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
-#' @param boundary_position Numeric. Relative position of the vegetation boundary
-#'     from the top (0-1, default: 0.5).
+#' @param boundary_position Numeric. Relative position of the horizontal
+#'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
 #' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
 #'     bare, adding small gaps within the vegetation (0-1, default: 0).
 #' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
@@ -257,8 +257,8 @@ pattern_sharp <- function(
 #'   Lower values (e.g., 0.1) create sharper transitions.
 #'   Higher values (e.g., 0.9) create more gradual, diffuse transitions
 #'   where vegetation grows further below the vegetation boundary (default: 0.5).
-#' @param boundary_position Numeric. Relative position of the vegetation boundary
-#'     from the top (0-1, default: 0.2).
+#' @param boundary_position Numeric. Relative position of the horizontal
+#'     vegetation boundary (if not rotated) from the top (0-1, default: 0.2).
 #'
 #' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
@@ -321,17 +321,25 @@ pattern_diffuse <- function(
 #' Builds a validated parameter list for the \code{"fingers"} pattern, to pass
 #' to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
-#' @param boundary_position Numeric. Relative position of the vegetation boundary
-#'     from the top (0-1, default: 0.5).
+#' @param boundary_position Numeric. Relative position of the horizontal
+#'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
 #' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
 #'     bare, adding small gaps within the vegetation (0-1, default: 0).
 #' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
 #'     vegetated, scattering some vegetated cells beyond the vegetation boundary
 #'     (0-1, default: 0).
-#' @param sine_length_mean Numeric. Mean wavelength of sinusoidal curve in pixels (default: 20).
-#' @param sine_length_sd Numeric. Standard deviation of wavelength in pixels (default: 12).
-#' @param sine_height_mean Numeric. Mean amplitude of sinusoidal curve in pixels (default: 5).
-#' @param sine_height_sd Numeric. Standard deviation of amplitude in pixels (default: 4).
+#' @param sine_length_mean Numeric. Mean wavelength of sinusoidal curve in pixels. 
+#'     Larger values produce longer, more widely spaced bends; smaller values 
+#'     produce shorter, more frequent bends (default: 20).
+#' @param sine_length_sd Numeric. Standard deviation of wavelength in pixels.
+#'     Larger values increase variation in bend length, producing less 
+#'     regular curves (default: 12).
+#' @param sine_height_mean Numeric. Mean amplitude of sinusoidal curve in pixels.
+#'     Larger values produce wider, more pronounced bends; 
+#'     smaller values produce flatter, less pronounced bends (default: 5).
+#' @param sine_height_sd Numeric. Standard deviation of amplitude in pixels.
+#'     Larger values increase variation in bend height, producing curves 
+#'     with more variable bend widths (default: 4).
 #'
 #' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
@@ -414,8 +422,8 @@ pattern_fingers <- function(
 #' parameter list for the \code{"clustered"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
-#' @param boundary_position Numeric. Relative position of the vegetation boundary
-#'     from the top (0-1, default: 0.5).
+#' @param boundary_position Numeric. Relative position of the horizontal
+#'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
 #' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
 #'     bare, adding small gaps within the vegetation. Applied to the underlying
 #'     sharp boundary, before the clusters are placed (0-1, default: 0).
@@ -519,17 +527,19 @@ pattern_clustered <- function(
 #' validated parameter list for the \code{"bands"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
-#' @param boundary_position Numeric. Relative position of the vegetation boundary
-#'     from the top (0-1, default: 0.5).
+#' @param boundary_position Numeric. Relative position of the horizontal
+#'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
 #' @param band_zone_prop Numeric. Proportion of the total landscape height to
 #'     allocate for bands below the vegetation boundary (0-1, default: 0.2). If
 #'     the band zone is too small for the given band spacing, no bands are drawn
 #'     and a warning is issued.
 #' @param band_thickness Integer. Thickness of each band in pixels (default: 3).
 #' @param band_spacing Integer. Spacing between bands in pixels (default: 10).
-#' @param frequency Numeric. Frequency of sine wave (default: 2*pi/100).
-#' @param amplitude Numeric. Amplitude of sine wave in pixels (default: 5).
-#' @param noise_sd Numeric. Standard deviation for random noise (default: 0).
+#' @param frequency Numeric. Frequency of sine wave of the bands (default: 2*pi/100).
+#' @param amplitude Numeric. Amplitude of sine wave of the bands in pixels (default: 5).
+#' @param noise_sd Numeric. Standard deviation for random noise.
+#'     Controls how strongly each band randomly deviates up and down 
+#'     from its baseline along the x-axis (default: 0).
 #'
 #' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
