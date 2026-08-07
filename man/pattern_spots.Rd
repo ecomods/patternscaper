@@ -39,8 +39,7 @@ using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).}
 (equivalent to "gaps" pattern). If FALSE (default), creates vegetated spots in bare ground.}
 }
 \value{
-A named list of the supplied parameters, classed
-    \code{"landscape_params"}.
+A named list of the supplied parameters of the class \code{"landscape_params"}.
 }
 \description{
 Circular vegetation patches on bare ground. Builds a validated parameter

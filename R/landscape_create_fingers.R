@@ -1,7 +1,8 @@
-#' Create a Landscape with Finger-like Treeline
+#' Create a Landscape with a Finger-like Vegetation Boundary
 #'
-#' Generates a binary landscape with a curvy finger treeline following a sine wave pattern
-#' with random length and amplitude for each wave segment.
+#' Generates a binary landscape with a curvy, finger-like vegetation boundary
+#' following a sine wave pattern with random length and amplitude for each wave
+#' segment.
 #'
 #' Parameters are documented on \code{\link{pattern_fingers}}.
 #'
@@ -15,7 +16,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Default curvy fingers treeline
+#' # Default curvy fingers boundary
 #' fingers_default <- create_landscape_fingers()
 #'
 #' # Modified parameters for more variation

@@ -63,11 +63,13 @@ validate_rotation <- function(rotation) {
   invisible(NULL)
 }
 
-#' Validate Treeline Position Parameter
+#' Validate Vegetation Boundary Position Parameter
 #'
-#' Validates treeline position parameter for treeline-based landscapes.
+#' Validates the boundary position parameter for patterns with a vegetation
+#' boundary.
 #'
-#' @param boundary_position Numeric. Relative position of treeline from top (0-1).
+#' @param boundary_position Numeric. Relative position of the vegetation
+#'     boundary from the top (0-1).
 #'
 #' @return NULL (invisibly). Called for side effects (validation).
 #'

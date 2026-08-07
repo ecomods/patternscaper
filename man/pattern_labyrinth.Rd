@@ -39,8 +39,7 @@ the banded structure, making patterns less clearly classifiable as
 labyrinths. (default: 2).}
 }
 \value{
-A named list of the supplied parameters, classed
-    \code{"landscape_params"}.
+A named list of the supplied parameters of the class \code{"landscape_params"}.
 }
 \description{
 Maze-like bands of vegetation, mimicking a Turing pattern. Builds a

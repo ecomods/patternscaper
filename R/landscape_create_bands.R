@@ -136,7 +136,7 @@ create_landscape_bands <- function(
   if (num_bands == 0) {
     cli::cli_warn(c(
       "No bands can fit in available space.",
-      "i" = "Available space below treeline: {available_space} px",
+      "i" = "Available space below the vegetation boundary: {available_space} px",
       "i" = "Band spacing required: {band_spacing} px",
       "i" = "Consider decreasing {.arg band_spacing}, {.arg boundary_position}, or increasing {.arg band_zone_prop}."
     ))

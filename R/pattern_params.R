@@ -282,8 +282,8 @@ pattern_sharp <- function(
 #'   Lower values (e.g., 0.1) create sharper transitions.
 #'   Higher values (e.g., 0.9) create more gradual, diffuse transitions
 #'   where vegetation grows further below the vegetation boundary (default: 0.5).
-#' @param boundary_position Numeric. Relative position of vegetation boundary
-#'     from top (0-1, default: 0.2).
+#' @param boundary_position Numeric. Relative position of the vegetation boundary
+#'     from the top (0-1, default: 0.2).
 #'
 #' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
@@ -351,19 +351,19 @@ pattern_diffuse <- function(
 #' per landscape by \code{\link{create_landscapes}} and rejected by
 #' \code{\link{create_landscape}}.
 #'
-#' @param boundary_position Numeric. Relative position of the treeline from the top
-#'     (0-1, default: 0.5).
+#' @param boundary_position Numeric. Relative position of the vegetation boundary
+#'     from the top (0-1, default: 0.5).
 #' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
-#'     bare, adding gaps within the vegetation (0-1, default: 0).
+#'     bare, adding small gaps within the vegetation (0-1, default: 0).
 #' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
-#'     vegetated, scattering vegetation beyond the treeline (0-1, default: 0).
+#'     vegetated, scattering some vegetated cells beyond the vegetation boundary
+#'     (0-1, default: 0).
 #' @param sine_length_mean Numeric. Mean wavelength of sinusoidal curve in pixels (default: 20).
 #' @param sine_length_sd Numeric. Standard deviation of wavelength in pixels (default: 12).
 #' @param sine_height_mean Numeric. Mean amplitude of sinusoidal curve in pixels (default: 5).
 #' @param sine_height_sd Numeric. Standard deviation of amplitude in pixels (default: 4).
 #'
-#' @return A named list of the supplied parameters, classed
-#'     \code{"landscape_params"}.
+#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
 #' @family landscape creation
 #'
@@ -449,19 +449,19 @@ pattern_fingers <- function(
 #' per landscape by \code{\link{create_landscapes}} and rejected by
 #' \code{\link{create_landscape}}.
 #'
-#' @param boundary_position Numeric. Relative position of treeline from top
-#'     (0-1, default: 0.5).
-#' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell
-#'   to bare, adding gaps within the vegetation. Applied to the underlying
-#'   sharp treeline, before the clusters are placed (0-1, default: 0).
+#' @param boundary_position Numeric. Relative position of the vegetation boundary
+#'     from the top (0-1, default: 0.5).
+#' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
+#'     bare, adding small gaps within the vegetation. Applied to the underlying
+#'     sharp boundary, before the clusters are placed (0-1, default: 0).
 #' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
-#'   vegetated, scattering vegetation beyond the treeline. Applied to the
-#'   underlying sharp treeline, before the clusters are placed (0-1,
-#'   default: 0).
+#'     vegetated, scattering some vegetated cells beyond the vegetation boundary.
+#'     Applied to the underlying sharp boundary, before the clusters are placed
+#'     (0-1, default: 0).
 #' @param n_clusters Integer. Number of cluster centers (default: 10).
 #' @param cluster_radius Numeric. Radius of clusters in pixels (default: 5).
-#' @param scatter_zone_prop Numeric. Proportion of height for scatter zone
-#'   measured downward from treeline (0-1, default: 0.3).
+#' @param scatter_zone_prop Numeric. Proportion of height for the scatter zone,
+#'     measured downward from the vegetation boundary (0-1, default: 0.3).
 #' @param elongation_x Numeric. Horizontal elongation factor for clusters.
 #'   Values > 1 stretch clusters horizontally, creating wider ellipses.
 #'   Values < 1 compress horizontally (default: 1).
@@ -469,8 +469,7 @@ pattern_fingers <- function(
 #'   Values > 1 stretch clusters vertically, creating taller ellipses.
 #'   Values < 1 compress vertically (default: 1).
 #'
-#' @return A named list of the supplied parameters, classed
-#'     \code{"landscape_params"}.
+#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
 #' @family landscape creation
 #'
@@ -560,19 +559,19 @@ pattern_clustered <- function(
 #' per landscape by \code{\link{create_landscapes}} and rejected by
 #' \code{\link{create_landscape}}.
 #'
-#' @param boundary_position Numeric. Relative position of treeline from top
-#'     (0-1, default: 0.5).
-#' @param band_zone_prop Numeric. Proportion of height of the total landscape to
-#'     allocate for bands below the treeline (default: 0.2). If the band zone is too small
-#'     for the given band spacing, no bands will be drawn and a warning will be issued.
+#' @param boundary_position Numeric. Relative position of the vegetation boundary
+#'     from the top (0-1, default: 0.5).
+#' @param band_zone_prop Numeric. Proportion of the total landscape height to
+#'     allocate for bands below the vegetation boundary (0-1, default: 0.2). If
+#'     the band zone is too small for the given band spacing, no bands are drawn
+#'     and a warning is issued.
 #' @param band_thickness Integer. Thickness of each band in pixels (default: 3).
 #' @param band_spacing Integer. Spacing between bands in pixels (default: 10).
 #' @param frequency Numeric. Frequency of sine wave (default: 2*pi/100).
 #' @param amplitude Numeric. Amplitude of sine wave in pixels (default: 5).
 #' @param noise_sd Numeric. Standard deviation for random noise (default: 0).
 #'
-#' @return A named list of the supplied parameters, classed
-#'     \code{"landscape_params"}.
+#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
 #' @family landscape creation
 #'
@@ -677,8 +676,7 @@ pattern_bands <- function(
 #' @param invert_landscape Logical. If TRUE, creates bare patches in vegetated ground
 #'     (equivalent to "gaps" pattern). If FALSE (default), creates vegetated spots in bare ground.
 #'
-#' @return A named list of the supplied parameters, classed
-#'     \code{"landscape_params"}.
+#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
 #' @family landscape creation
 #'
@@ -779,8 +777,7 @@ pattern_spots <- function(
 #' @param regular_spots Logical. If TRUE, gaps are arranged on a hexagonal grid
 #'     using k-means clustering. If FALSE, gaps are placed randomly (default: FALSE).
 #'
-#' @return A named list of the supplied parameters, classed
-#'     \code{"landscape_params"}.
+#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
 #' @family landscape creation
 #'
@@ -878,8 +875,7 @@ pattern_gaps <- function(
 #'    the banded structure, making patterns less clearly classifiable as
 #'    labyrinths. (default: 2).
 #'
-#' @return A named list of the supplied parameters, classed
-#'     \code{"landscape_params"}.
+#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
 #' @family landscape creation
 #'

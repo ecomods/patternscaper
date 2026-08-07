@@ -1,9 +1,9 @@
 #' Create a Landscape with Clustered Features
 #'
-#' Generates a binary landscape with clustered features below a treeline.
-#' Features are arranged in clusters within a scatter zone that extends below
-#' the treeline. Clusters can be elongated in x or y directions to create
-#' elliptical patterns.
+#' Generates a binary landscape with clustered features below a vegetation
+#' boundary. Features are arranged in clusters within a scatter zone that
+#' extends below the boundary. Clusters can be elongated in x or y directions
+#' to create elliptical patterns.
 #'
 #' Parameters are documented on \code{\link{pattern_clustered}}.
 #'

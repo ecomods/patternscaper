@@ -11,11 +11,10 @@ pattern_dense(veg_prop = 0.9)
 default: 0.9). Higher values give a denser vegetation cover.}
 }
 \value{
-A named list of the supplied parameters, classed
-    \code{"landscape_params"}.
+A named list of the supplied parameters of the class \code{"landscape_params"}.
 }
 \description{
-Dense vegetation placed at random, with no spatial structure. Builds a
+Dense vegetation placed at random, without spatial structure. Builds a
 validated parameter list for the \code{"dense"} pattern, to pass to
 \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 }

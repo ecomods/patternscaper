@@ -15,14 +15,15 @@ pattern_fingers(
 )
 }
 \arguments{
-\item{boundary_position}{Numeric. Relative position of treeline from top
-(0-1, default: 0.5).}
+\item{boundary_position}{Numeric. Relative position of the vegetation boundary
+from the top (0-1, default: 0.5).}
 
 \item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell to
-bare, adding gaps within the vegetation (0-1, default: 0).}
+bare, adding small gaps within the vegetation (0-1, default: 0).}
 
 \item{noise_bare_to_veg}{Numeric. Probability of flipping a bare cell to
-vegetated, scattering vegetation beyond the treeline (0-1, default: 0).}
+vegetated, scattering some vegetated cells beyond the vegetation boundary
+(0-1, default: 0).}
 
 \item{sine_length_mean}{Numeric. Mean wavelength of sinusoidal curve in pixels (default: 20).}
 
@@ -33,11 +34,10 @@ vegetated, scattering vegetation beyond the treeline (0-1, default: 0).}
 \item{sine_height_sd}{Numeric. Standard deviation of amplitude in pixels (default: 4).}
 }
 \value{
-A named list of the supplied parameters, classed
-    \code{"landscape_params"}.
+A named list of the supplied parameters of the class \code{"landscape_params"}.
 }
 \description{
-Curvy, finger-like extensions of vegetation reaching into the bare zone.
+Finger-like extensions of vegetation growing into the bare zone.
 Builds a validated parameter list for the \code{"fingers"} pattern, to pass
 to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 }

@@ -16,24 +16,24 @@ pattern_clustered(
 )
 }
 \arguments{
-\item{boundary_position}{Numeric. Relative position of treeline from top
-(0-1, default: 0.5).}
+\item{boundary_position}{Numeric. Relative position of the vegetation boundary
+from the top (0-1, default: 0.5).}
 
-\item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell
-to bare, adding gaps within the vegetation. Applied to the underlying
-sharp treeline, before the clusters are placed (0-1, default: 0).}
+\item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell to
+bare, adding small gaps within the vegetation. Applied to the underlying
+sharp boundary, before the clusters are placed (0-1, default: 0).}
 
 \item{noise_bare_to_veg}{Numeric. Probability of flipping a bare cell to
-vegetated, scattering vegetation beyond the treeline. Applied to the
-underlying sharp treeline, before the clusters are placed (0-1,
-default: 0).}
+vegetated, scattering some vegetated cells beyond the vegetation boundary.
+Applied to the underlying sharp boundary, before the clusters are placed
+(0-1, default: 0).}
 
 \item{n_clusters}{Integer. Number of cluster centers (default: 10).}
 
 \item{cluster_radius}{Numeric. Radius of clusters in pixels (default: 5).}
 
-\item{scatter_zone_prop}{Numeric. Proportion of height for scatter zone
-measured downward from treeline (0-1, default: 0.3).}
+\item{scatter_zone_prop}{Numeric. Proportion of height for the scatter zone,
+measured downward from the vegetation boundary (0-1, default: 0.3).}
 
 \item{elongation_x}{Numeric. Horizontal elongation factor for clusters.
 Values > 1 stretch clusters horizontally, creating wider ellipses.
@@ -44,8 +44,7 @@ Values > 1 stretch clusters vertically, creating taller ellipses.
 Values < 1 compress vertically (default: 1).}
 }
 \value{
-A named list of the supplied parameters, classed
-    \code{"landscape_params"}.
+A named list of the supplied parameters of the class \code{"landscape_params"}.
 }
 \description{
 Vegetation clusters scattered into the bare zone. Builds a validated

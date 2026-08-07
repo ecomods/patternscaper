@@ -11,21 +11,20 @@ pattern_sharp(
 )
 }
 \arguments{
-\item{boundary_position}{Numeric. Relative position of vegetation boundary
-from top (0-1, default: 0.5).}
+\item{boundary_position}{Numeric. Relative position of the vegetation boundary
+from the top (0-1, default: 0.5).}
 
 \item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell to
-bare, adding gaps within the vegetation (0-1, default: 0).}
+bare, adding small gaps within the vegetation (0-1, default: 0).}
 
 \item{noise_bare_to_veg}{Numeric. Probability of flipping a bare cell to
-vegetated, scattering vegetation beyond the boundary (0-1, default: 0).}
+vegetated, scattering some vegetated cells beyond the boundary (0-1, default: 0).}
 }
 \value{
-A named list of the supplied parameters, classed
-    \code{"landscape_params"}.
+A named list of the supplied parameters of the class \code{"landscape_params"}.
 }
 \description{
-A vegetated and a bare zone with an abrupt boundary between them. Builds a
+A vegetated and a bare zone with a sharp boundary between them. Builds a
 validated parameter list for the \code{"sharp"} pattern, to pass to
 \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 }

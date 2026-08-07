@@ -35,8 +35,7 @@ while this parameter affects edge sharpness).}
 using k-means clustering. If FALSE, gaps are placed randomly (default: FALSE).}
 }
 \value{
-A named list of the supplied parameters, classed
-    \code{"landscape_params"}.
+A named list of the supplied parameters of the class \code{"landscape_params"}.
 }
 \description{
 Circular bare gaps in vegetated ground. Builds a validated parameter list
