@@ -2,14 +2,25 @@
 #'
 #' @description
 #' Creates a single binary landscape with the requested spatial pattern.
+#' Each pattern name below links to its \code{pattern_*()} constructor, which
+#' sets that pattern's parameters.
 #'
-#' Each pattern has its own parameters, set through its constructor:
-#' \code{\link{pattern_random}}, \code{\link{pattern_bare}},
-#' \code{\link{pattern_dense}}, \code{\link{pattern_sharp}},
-#' \code{\link{pattern_diffuse}}, \code{\link{pattern_fingers}},
-#' \code{\link{pattern_clustered}}, \code{\link{pattern_bands}},
-#' \code{\link{pattern_spots}}, \code{\link{pattern_gaps}} and
-#' \code{\link{pattern_labyrinth}}.
+#' \itemize{
+#'   \item \strong{Control} patterns have no spatial structure and differ only
+#'     in vegetation cover: \code{\link[=pattern_bare]{"bare"}},
+#'     \code{\link[=pattern_random]{"random"}},
+#'     \code{\link[=pattern_dense]{"dense"}}.
+#'   \item \strong{Ecotone} patterns have a vegetated and a bare zone separated
+#'     by a transition: \code{\link[=pattern_sharp]{"sharp"}} (abrupt),
+#'     \code{\link[=pattern_diffuse]{"diffuse"}} (gradual),
+#'     \code{\link[=pattern_fingers]{"fingers"}} (finger-like extensions),
+#'     \code{\link[=pattern_clustered]{"clustered"}} (scattered clusters),
+#'     \code{\link[=pattern_bands]{"bands"}} (sinusoidal bands).
+#'   \item \strong{Patch} patterns are self-organized, without a boundary:
+#'     \code{\link[=pattern_spots]{"spots"}} (vegetation patches),
+#'     \code{\link[=pattern_gaps]{"gaps"}} (bare gaps),
+#'     \code{\link[=pattern_labyrinth]{"labyrinth"}} (maze-like bands).
+#' }
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
@@ -17,12 +28,10 @@
 #'        "dense", "sharp", "diffuse", "fingers", "bands", "clustered",
 #'        "spots", "gaps", "labyrinth"
 #' @param name Character. Optional name for the landscape (default: NULL).
-#' @param pattern_label Character. Label to store in the landscape's
+#' @param pattern_label Character. Optional label to store in the landscape's
 #'     \code{pattern} field instead of \code{pattern} itself (default: NULL
-#'     keeps \code{pattern}). Generation is unaffected -- only the label
-#'     changes. Use it to group several patterns under one class, for example
-#'     labelling both "sharp" and "diffuse" landscapes as "ecotone" so a
-#'     classifier is trained on the group.
+#'     keeps \code{pattern}). Use it to group several patterns under one class,
+#'     so a classifier model is trained on the group.
 #' @param params Output of the \code{pattern_*()} constructor matching \code{pattern},
 #'     for example \code{\link{pattern_spots}} (default: NULL). Must hold single values
 #'     for each parameter, ranges are only meaningful for \code{\link{create_landscapes}}.
@@ -30,11 +39,11 @@
 #'     Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated.
 #'     The remaining patterns ignore it, and are generated without rotation.
 #'
-#' @return A landscape object with pattern corresponding to the pattern, containing:
-#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
+#' @return A landscape object, containing:
+#'   \item{data}{SpatRaster with the generated pattern with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string with the pattern type, or \code{pattern_label} if given}
 #'   \item{params}{List of all input parameters used to generate the landscape}
-#'   \item{name}{Character string with the landscape name, \code{NA} if none was given}
+#'   \item{name}{Character string with the landscape name, "unnamed" if none was given}
 #'
 #' @family landscape creation
 #' @seealso \code{\link{plot_landscapes}}
