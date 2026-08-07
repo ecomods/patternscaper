@@ -102,9 +102,9 @@ once per landscape by \code{\link{create_landscapes}} and rejected by
 
 \emph{valid} values that \code{\link{create_landscape}} accepts, and
 \emph{sampled} ranges that \code{\link{create_landscapes}} draws from
-for each landscape. For each parameter that is left unset, the defaults are used
-Ranges that scale with
-landscape size are shown for the default 100 by 100.
+once per landscape for any parameter left unset. The defaults shown in
+Usage therefore apply to \code{\link{create_landscape}} only. Ranges that
+scale with landscape size are shown for the default 100 by 100.
 \tabular{lll}{
 \strong{Parameter} \tab \strong{Valid} \tab \strong{Sampled} \cr
 \code{frequency} \tab greater than 0 \tab 2.5 to 3.5 \cr

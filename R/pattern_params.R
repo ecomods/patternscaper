@@ -976,10 +976,10 @@ rd_param_ranges <- function(pattern) {
     "",
     "\\emph{valid} values that \\code{\\link{create_landscape}} accepts, and",
     "\\emph{sampled} ranges that \\code{\\link{create_landscapes}} draws from",
-    "for each landscape. For each parameter that is left unset, the defaults are used",
-    "Ranges that scale with",
+    "once per landscape for any parameter left unset. The defaults shown in",
+    "Usage therefore apply to \\code{\\link{create_landscape}} only. Ranges that",
     sprintf(
-      "landscape size are shown for the default %d by %d.",
+      "scale with landscape size are shown for the default %d by %d.",
       width,
       height
     ),
