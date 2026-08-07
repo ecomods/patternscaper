@@ -47,9 +47,35 @@ per landscape by \code{\link{create_landscapes}} and rejected by
 \code{\link{create_landscape}}.
 }
 \examples{
+# A single landscape, with fixed values
 create_landscape(
   "bands",
   params = pattern_bands(band_thickness = 4, band_spacing = 12)
+)
+
+# A batch, with parameters drawn from ranges once per landscape.
+# Parameters left unset vary too, over their default ranges
+create_landscapes(
+  n = 4,
+  patterns = "bands",
+  params_list = list(
+    bands = pattern_bands(
+      band_thickness = c(2, 5),
+      band_spacing = c(8, 16)
+    )
+  )
+)
+
+# A batch, mixing a fixed value with a range
+create_landscapes(
+  n = 4,
+  patterns = "bands",
+  params_list = list(
+    bands = pattern_bands(
+      band_thickness = 3,
+      band_spacing = c(8, 16)
+    )
+  )
 )
 
 }

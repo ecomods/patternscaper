@@ -47,9 +47,35 @@ per landscape by \code{\link{create_landscapes}} and rejected by
 \code{\link{create_landscape}}.
 }
 \examples{
+# A single landscape, with fixed values
 create_landscape(
   "fingers",
   params = pattern_fingers(sine_length_mean = 15, sine_height_mean = 10)
+)
+
+# A batch, with parameters drawn from ranges once per landscape.
+# Parameters left unset vary too, over their default ranges
+create_landscapes(
+  n = 4,
+  patterns = "fingers",
+  params_list = list(
+    fingers = pattern_fingers(
+      sine_length_mean = c(10, 30),
+      sine_height_mean = c(5, 15)
+    )
+  )
+)
+
+# A batch, mixing a fixed value with a range
+create_landscapes(
+  n = 4,
+  patterns = "fingers",
+  params_list = list(
+    fingers = pattern_fingers(
+      sine_length_mean = 20,
+      sine_height_mean = c(5, 15)
+    )
+  )
 )
 
 }

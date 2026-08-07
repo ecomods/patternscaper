@@ -54,7 +54,33 @@ patterns, so unlike \code{\link{pattern_spots}} this has no
 \code{invert_landscape} parameter.
 }
 \examples{
+# A single landscape, with fixed values
 create_landscape("gaps", params = pattern_gaps(n_spots = 5, spot_radius = 8))
+
+# A batch, with parameters drawn from ranges once per landscape.
+# Parameters left unset vary too, over their default ranges
+create_landscapes(
+  n = 4,
+  patterns = "gaps",
+  params_list = list(
+    gaps = pattern_gaps(
+      n_spots = c(4, 10),
+      spot_radius = c(5, 10)
+    )
+  )
+)
+
+# A batch, mixing a fixed value with a range
+create_landscapes(
+  n = 4,
+  patterns = "gaps",
+  params_list = list(
+    gaps = pattern_gaps(
+      n_spots = 6,
+      spot_radius = c(5, 10)
+    )
+  )
+)
 
 }
 \seealso{

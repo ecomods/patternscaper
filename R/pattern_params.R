@@ -60,7 +60,7 @@ new_landscape_params_unchecked <- function(params, pattern) {
 
 #' Parameters for the Random Pattern
 #'
-#' Vegetation placed at random, with no spatial structure. Builds a validated
+#' Vegetation placed at random without spatial structure. Builds a validated
 #' parameter list for the \code{"random"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
@@ -72,13 +72,20 @@ new_landscape_params_unchecked <- function(params, pattern) {
 #' @param veg_prop Numeric. Probability that a cell is vegetated (0-1,
 #'     default: 0.5). Higher values give a denser vegetation cover.
 #'
-#' @return A named list of the supplied parameters, classed
-#'     \code{"landscape_params"}.
+#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
 #' @family landscape creation
 #'
 #' @examples
+#' # A single landscape, with a fixed value
 #' create_landscape("random", params = pattern_random(veg_prop = 0.3))
+#'
+#' # A batch, with veg_prop drawn from a range once per landscape
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "random",
+#'   params_list = list(random = pattern_random(veg_prop = c(0.2, 0.8)))
+#' )
 #'
 #' @evalRd rd_param_ranges("random")
 #'
@@ -95,7 +102,7 @@ pattern_random <- function(veg_prop = 0.5) {
 
 #' Parameters for the Bare Pattern
 #'
-#' Sparse vegetation placed at random, with no spatial structure. Builds a
+#' Sparse vegetation placed at random without spatial structure. Builds a
 #' validated parameter list for the \code{"bare"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
@@ -107,13 +114,20 @@ pattern_random <- function(veg_prop = 0.5) {
 #' @param veg_prop Numeric. Probability that a cell is vegetated (0-1,
 #'     default: 0.1). Higher values give a denser vegetation cover.
 #'
-#' @return A named list of the supplied parameters, classed
-#'     \code{"landscape_params"}.
+#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
 #' @family landscape creation
 #'
 #' @examples
+#' # A single landscape, with a fixed value
 #' create_landscape("bare", params = pattern_bare(veg_prop = 0.05))
+#'
+#' # A batch, with veg_prop drawn from a range once per landscape
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "bare",
+#'   params_list = list(bare = pattern_bare(veg_prop = c(0, 0.1)))
+#' )
 #'
 #' @evalRd rd_param_ranges("bare")
 #'
@@ -130,7 +144,7 @@ pattern_bare <- function(veg_prop = 0.1) {
 
 #' Parameters for the Dense Pattern
 #'
-#' Dense vegetation placed at random, with no spatial structure. Builds a
+#' Dense vegetation placed at random, without spatial structure. Builds a
 #' validated parameter list for the \code{"dense"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
@@ -142,13 +156,20 @@ pattern_bare <- function(veg_prop = 0.1) {
 #' @param veg_prop Numeric. Probability that a cell is vegetated (0-1,
 #'     default: 0.9). Higher values give a denser vegetation cover.
 #'
-#' @return A named list of the supplied parameters, classed
-#'     \code{"landscape_params"}.
+#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
 #' @family landscape creation
 #'
 #' @examples
+#' # A single landscape, with a fixed value
 #' create_landscape("dense", params = pattern_dense(veg_prop = 0.95))
+#'
+#' # A batch, with veg_prop drawn from a range once per landscape
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "dense",
+#'   params_list = list(dense = pattern_dense(veg_prop = c(0.85, 1)))
+#' )
 #'
 #' @evalRd rd_param_ranges("dense")
 #'
@@ -165,7 +186,7 @@ pattern_dense <- function(veg_prop = 0.9) {
 
 #' Parameters for the Sharp Pattern
 #'
-#' A vegetated and a bare zone with an abrupt boundary between them. Builds a
+#' A vegetated and a bare zone with a sharp boundary between them. Builds a
 #' validated parameter list for the \code{"sharp"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
@@ -174,20 +195,45 @@ pattern_dense <- function(veg_prop = 0.9) {
 #' per landscape by \code{\link{create_landscapes}} and rejected by
 #' \code{\link{create_landscape}}.
 #'
-#' @param boundary_position Numeric. Relative position of vegetation boundary
-#'     from top (0-1, default: 0.5).
+#' @param boundary_position Numeric. Relative position of the vegetation boundary
+#'     from the top (0-1, default: 0.5).
 #' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
-#'     bare, adding gaps within the vegetation (0-1, default: 0).
+#'     bare, adding small gaps within the vegetation (0-1, default: 0).
 #' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
-#'     vegetated, scattering vegetation beyond the boundary (0-1, default: 0).
+#'     vegetated, scattering some vegetated cells beyond the boundary (0-1, default: 0).
 #'
-#' @return A named list of the supplied parameters, classed
-#'     \code{"landscape_params"}.
+#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
 #' @family landscape creation
 #'
 #' @examples
+#' # A single landscape, with fixed values
 #' create_landscape("sharp", params = pattern_sharp(boundary_position = 0.3))
+#'
+#' # A batch, with parameters drawn from ranges once per landscape.
+#' # Parameters left unset vary too, over their default ranges
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "sharp",
+#'   params_list = list(
+#'     sharp = pattern_sharp(
+#'       boundary_position = c(0.2, 0.8),
+#'       noise_bare_to_veg = c(0, 0.1)
+#'     )
+#'   )
+#' )
+#'
+#' # A batch, mixing a fixed value with a range
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "sharp",
+#'   params_list = list(
+#'     sharp = pattern_sharp(
+#'       boundary_position = 0.5,
+#'       noise_bare_to_veg = c(0, 0.1)
+#'     )
+#'   )
+#' )
 #'
 #' # Rotation is an argument of create_landscape(), not a pattern parameter
 #' create_landscape(
@@ -222,7 +268,7 @@ pattern_sharp <- function(
 #' Parameters for the Diffuse Pattern
 #'
 #' A vegetated and a bare zone with a gradual transition between them, where
-#' the chance of a cell being vegetated falls off with distance from the
+#' the chance of a cell being vegetated decreases with distance from the
 #' boundary. Builds a validated parameter list for the \code{"diffuse"}
 #' pattern, to pass to \code{\link{create_landscape}} or
 #' \code{\link{create_landscapes}}.
@@ -235,19 +281,44 @@ pattern_sharp <- function(
 #' @param steepness Numeric. Controls the transition gradient (0-1).
 #'   Lower values (e.g., 0.1) create sharper transitions.
 #'   Higher values (e.g., 0.9) create more gradual, diffuse transitions
-#'   where vegetation probability persists further below the vegetation boundary (default: 0.5).
+#'   where vegetation grows further below the vegetation boundary (default: 0.5).
 #' @param boundary_position Numeric. Relative position of vegetation boundary
 #'     from top (0-1, default: 0.2).
 #'
-#' @return A named list of the supplied parameters, classed
-#'     \code{"landscape_params"}.
+#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
 #' @family landscape creation
 #'
 #' @examples
+#' # A single landscape, with fixed values
 #' create_landscape(
 #'   "diffuse",
 #'   params = pattern_diffuse(steepness = 0.1, boundary_position = 0.3)
+#' )
+#'
+#' # A batch, with parameters drawn from ranges once per landscape.
+#' # Parameters left unset vary too, over their default ranges
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "diffuse",
+#'   params_list = list(
+#'     diffuse = pattern_diffuse(
+#'       steepness = c(0.1, 1),
+#'       boundary_position = c(0.1, 0.4)
+#'     )
+#'   )
+#' )
+#'
+#' # A batch, mixing a fixed value with a range
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "diffuse",
+#'   params_list = list(
+#'     diffuse = pattern_diffuse(
+#'       steepness = 0.5,
+#'       boundary_position = c(0.1, 0.4)
+#'     )
+#'   )
 #' )
 #'
 #' @evalRd rd_param_ranges("diffuse")
@@ -271,7 +342,7 @@ pattern_diffuse <- function(
 
 #' Parameters for the Fingers Pattern
 #'
-#' Curvy, finger-like extensions of vegetation reaching into the bare zone.
+#' Finger-like extensions of vegetation growing into the bare zone.
 #' Builds a validated parameter list for the \code{"fingers"} pattern, to pass
 #' to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
@@ -280,7 +351,7 @@ pattern_diffuse <- function(
 #' per landscape by \code{\link{create_landscapes}} and rejected by
 #' \code{\link{create_landscape}}.
 #'
-#' @param boundary_position Numeric. Relative position of treeline from top
+#' @param boundary_position Numeric. Relative position of the treeline from the top
 #'     (0-1, default: 0.5).
 #' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
 #'     bare, adding gaps within the vegetation (0-1, default: 0).
@@ -297,9 +368,35 @@ pattern_diffuse <- function(
 #' @family landscape creation
 #'
 #' @examples
+#' # A single landscape, with fixed values
 #' create_landscape(
 #'   "fingers",
 #'   params = pattern_fingers(sine_length_mean = 15, sine_height_mean = 10)
+#' )
+#'
+#' # A batch, with parameters drawn from ranges once per landscape.
+#' # Parameters left unset vary too, over their default ranges
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "fingers",
+#'   params_list = list(
+#'     fingers = pattern_fingers(
+#'       sine_length_mean = c(10, 30),
+#'       sine_height_mean = c(5, 15)
+#'     )
+#'   )
+#' )
+#'
+#' # A batch, mixing a fixed value with a range
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "fingers",
+#'   params_list = list(
+#'     fingers = pattern_fingers(
+#'       sine_length_mean = 20,
+#'       sine_height_mean = c(5, 15)
+#'     )
+#'   )
 #' )
 #'
 #' @evalRd rd_param_ranges("fingers")
@@ -378,9 +475,35 @@ pattern_fingers <- function(
 #' @family landscape creation
 #'
 #' @examples
+#' # A single landscape, with fixed values
 #' create_landscape(
 #'   "clustered",
 #'   params = pattern_clustered(n_clusters = 8, cluster_radius = 7)
+#' )
+#'
+#' # A batch, with parameters drawn from ranges once per landscape.
+#' # Parameters left unset vary too, over their default ranges
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "clustered",
+#'   params_list = list(
+#'     clustered = pattern_clustered(
+#'       n_clusters = c(5, 12),
+#'       cluster_radius = c(4, 8)
+#'     )
+#'   )
+#' )
+#'
+#' # A batch, mixing a fixed value with a range
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "clustered",
+#'   params_list = list(
+#'     clustered = pattern_clustered(
+#'       n_clusters = 8,
+#'       cluster_radius = c(4, 8)
+#'     )
+#'   )
 #' )
 #'
 #' @evalRd rd_param_ranges("clustered")
@@ -454,9 +577,35 @@ pattern_clustered <- function(
 #' @family landscape creation
 #'
 #' @examples
+#' # A single landscape, with fixed values
 #' create_landscape(
 #'   "bands",
 #'   params = pattern_bands(band_thickness = 4, band_spacing = 12)
+#' )
+#'
+#' # A batch, with parameters drawn from ranges once per landscape.
+#' # Parameters left unset vary too, over their default ranges
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "bands",
+#'   params_list = list(
+#'     bands = pattern_bands(
+#'       band_thickness = c(2, 5),
+#'       band_spacing = c(8, 16)
+#'     )
+#'   )
+#' )
+#'
+#' # A batch, mixing a fixed value with a range
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "bands",
+#'   params_list = list(
+#'     bands = pattern_bands(
+#'       band_thickness = 3,
+#'       band_spacing = c(8, 16)
+#'     )
+#'   )
 #' )
 #'
 #' @evalRd rd_param_ranges("bands")
@@ -534,14 +683,32 @@ pattern_bands <- function(
 #' @family landscape creation
 #'
 #' @examples
-#' # A single landscape
+#' # A single landscape, with fixed values
 #' create_landscape("spots", params = pattern_spots(n_spots = 15))
 #'
-#' # A range, sampled once per landscape
+#' # A batch, with parameters drawn from ranges once per landscape.
+#' # Parameters left unset vary too, over their default ranges
 #' create_landscapes(
 #'   n = 4,
 #'   patterns = "spots",
-#'   params_list = list(spots = pattern_spots(n_spots = c(5, 15)))
+#'   params_list = list(
+#'     spots = pattern_spots(
+#'       n_spots = c(5, 15),
+#'       spot_radius = c(4, 8)
+#'     )
+#'   )
+#' )
+#'
+#' # A batch, mixing a fixed value with a range
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "spots",
+#'   params_list = list(
+#'     spots = pattern_spots(
+#'       n_spots = 10,
+#'       spot_radius = c(4, 8)
+#'     )
+#'   )
 #' )
 #'
 #' @evalRd rd_param_ranges("spots")
@@ -618,7 +785,33 @@ pattern_spots <- function(
 #' @family landscape creation
 #'
 #' @examples
+#' # A single landscape, with fixed values
 #' create_landscape("gaps", params = pattern_gaps(n_spots = 5, spot_radius = 8))
+#'
+#' # A batch, with parameters drawn from ranges once per landscape.
+#' # Parameters left unset vary too, over their default ranges
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "gaps",
+#'   params_list = list(
+#'     gaps = pattern_gaps(
+#'       n_spots = c(4, 10),
+#'       spot_radius = c(5, 10)
+#'     )
+#'   )
+#' )
+#'
+#' # A batch, mixing a fixed value with a range
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "gaps",
+#'   params_list = list(
+#'     gaps = pattern_gaps(
+#'       n_spots = 6,
+#'       spot_radius = c(5, 10)
+#'     )
+#'   )
+#' )
 #'
 #' @evalRd rd_param_ranges("gaps")
 #'
@@ -691,9 +884,35 @@ pattern_gaps <- function(
 #' @family landscape creation
 #'
 #' @examples
+#' # A single landscape, with fixed values
 #' create_landscape(
 #'   "labyrinth",
 #'   params = pattern_labyrinth(frequency = 3.5, octaves = 3)
+#' )
+#'
+#' # A batch, with parameters drawn from ranges once per landscape.
+#' # Parameters left unset vary too, over their default ranges
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "labyrinth",
+#'   params_list = list(
+#'     labyrinth = pattern_labyrinth(
+#'       frequency = c(2.5, 4),
+#'       octaves = c(2, 4)
+#'     )
+#'   )
+#' )
+#'
+#' # A batch, mixing a fixed value with a range
+#' create_landscapes(
+#'   n = 4,
+#'   patterns = "labyrinth",
+#'   params_list = list(
+#'     labyrinth = pattern_labyrinth(
+#'       frequency = 3,
+#'       octaves = c(2, 4)
+#'     )
+#'   )
 #' )
 #'
 #' @evalRd rd_param_ranges("labyrinth")
@@ -811,7 +1030,11 @@ rd_param_ranges <- function(pattern) {
     "\\emph{Sampled} is the range \\code{\\link{create_landscapes}} draws from",
     "per landscape for any parameter left unset, so the defaults shown in Usage",
     "apply to \\code{\\link{create_landscape}} only. Ranges that scale with",
-    sprintf("landscape size are shown for the default %d by %d.", width, height),
+    sprintf(
+      "landscape size are shown for the default %d by %d.",
+      width,
+      height
+    ),
     "\\tabular{lll}{",
     "\\strong{Parameter} \\tab \\strong{Valid} \\tab \\strong{Sampled} \\cr",
     unname(rows),

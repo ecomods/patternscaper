@@ -58,9 +58,35 @@ per landscape by \code{\link{create_landscapes}} and rejected by
 \code{\link{create_landscape}}.
 }
 \examples{
+# A single landscape, with fixed values
 create_landscape(
   "clustered",
   params = pattern_clustered(n_clusters = 8, cluster_radius = 7)
+)
+
+# A batch, with parameters drawn from ranges once per landscape.
+# Parameters left unset vary too, over their default ranges
+create_landscapes(
+  n = 4,
+  patterns = "clustered",
+  params_list = list(
+    clustered = pattern_clustered(
+      n_clusters = c(5, 12),
+      cluster_radius = c(4, 8)
+    )
+  )
+)
+
+# A batch, mixing a fixed value with a range
+create_landscapes(
+  n = 4,
+  patterns = "clustered",
+  params_list = list(
+    clustered = pattern_clustered(
+      n_clusters = 8,
+      cluster_radius = c(4, 8)
+    )
+  )
 )
 
 }

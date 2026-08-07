@@ -25,7 +25,15 @@ per landscape by \code{\link{create_landscapes}} and rejected by
 \code{\link{create_landscape}}.
 }
 \examples{
+# A single landscape, with a fixed value
 create_landscape("dense", params = pattern_dense(veg_prop = 0.95))
+
+# A batch, with veg_prop drawn from a range once per landscape
+create_landscapes(
+  n = 4,
+  patterns = "dense",
+  params_list = list(dense = pattern_dense(veg_prop = c(0.85, 1)))
+)
 
 }
 \seealso{

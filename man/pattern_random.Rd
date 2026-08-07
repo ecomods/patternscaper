@@ -11,11 +11,10 @@ pattern_random(veg_prop = 0.5)
 default: 0.5). Higher values give a denser vegetation cover.}
 }
 \value{
-A named list of the supplied parameters, classed
-    \code{"landscape_params"}.
+A named list of the supplied parameters of the class \code{"landscape_params"}.
 }
 \description{
-Vegetation placed at random, with no spatial structure. Builds a validated
+Vegetation placed at random without spatial structure. Builds a validated
 parameter list for the \code{"random"} pattern, to pass to
 \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 }
@@ -25,7 +24,15 @@ per landscape by \code{\link{create_landscapes}} and rejected by
 \code{\link{create_landscape}}.
 }
 \examples{
+# A single landscape, with a fixed value
 create_landscape("random", params = pattern_random(veg_prop = 0.3))
+
+# A batch, with veg_prop drawn from a range once per landscape
+create_landscapes(
+  n = 4,
+  patterns = "random",
+  params_list = list(random = pattern_random(veg_prop = c(0.2, 0.8)))
+)
 
 }
 \seealso{

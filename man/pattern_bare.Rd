@@ -25,7 +25,15 @@ per landscape by \code{\link{create_landscapes}} and rejected by
 \code{\link{create_landscape}}.
 }
 \examples{
+# A single landscape, with a fixed value
 create_landscape("bare", params = pattern_bare(veg_prop = 0.05))
+
+# A batch, with veg_prop drawn from a range once per landscape
+create_landscapes(
+  n = 4,
+  patterns = "bare",
+  params_list = list(bare = pattern_bare(veg_prop = c(0, 0.1)))
+)
 
 }
 \seealso{

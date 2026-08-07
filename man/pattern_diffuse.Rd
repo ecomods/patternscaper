@@ -32,9 +32,35 @@ per landscape by \code{\link{create_landscapes}} and rejected by
 \code{\link{create_landscape}}.
 }
 \examples{
+# A single landscape, with fixed values
 create_landscape(
   "diffuse",
   params = pattern_diffuse(steepness = 0.1, boundary_position = 0.3)
+)
+
+# A batch, with parameters drawn from ranges once per landscape.
+# Parameters left unset vary too, over their default ranges
+create_landscapes(
+  n = 4,
+  patterns = "diffuse",
+  params_list = list(
+    diffuse = pattern_diffuse(
+      steepness = c(0.1, 1),
+      boundary_position = c(0.1, 0.4)
+    )
+  )
+)
+
+# A batch, mixing a fixed value with a range
+create_landscapes(
+  n = 4,
+  patterns = "diffuse",
+  params_list = list(
+    diffuse = pattern_diffuse(
+      steepness = 0.5,
+      boundary_position = c(0.1, 0.4)
+    )
+  )
 )
 
 }

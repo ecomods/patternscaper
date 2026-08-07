@@ -53,14 +53,32 @@ per landscape by \code{\link{create_landscapes}} and rejected by
 \code{\link{create_landscape}}.
 }
 \examples{
-# A single landscape
+# A single landscape, with fixed values
 create_landscape("spots", params = pattern_spots(n_spots = 15))
 
-# A range, sampled once per landscape
+# A batch, with parameters drawn from ranges once per landscape.
+# Parameters left unset vary too, over their default ranges
 create_landscapes(
   n = 4,
   patterns = "spots",
-  params_list = list(spots = pattern_spots(n_spots = c(5, 15)))
+  params_list = list(
+    spots = pattern_spots(
+      n_spots = c(5, 15),
+      spot_radius = c(4, 8)
+    )
+  )
+)
+
+# A batch, mixing a fixed value with a range
+create_landscapes(
+  n = 4,
+  patterns = "spots",
+  params_list = list(
+    spots = pattern_spots(
+      n_spots = 10,
+      spot_radius = c(4, 8)
+    )
+  )
 )
 
 }

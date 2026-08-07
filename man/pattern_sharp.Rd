@@ -35,7 +35,33 @@ per landscape by \code{\link{create_landscapes}} and rejected by
 \code{\link{create_landscape}}.
 }
 \examples{
+# A single landscape, with fixed values
 create_landscape("sharp", params = pattern_sharp(boundary_position = 0.3))
+
+# A batch, with parameters drawn from ranges once per landscape.
+# Parameters left unset vary too, over their default ranges
+create_landscapes(
+  n = 4,
+  patterns = "sharp",
+  params_list = list(
+    sharp = pattern_sharp(
+      boundary_position = c(0.2, 0.8),
+      noise_bare_to_veg = c(0, 0.1)
+    )
+  )
+)
+
+# A batch, mixing a fixed value with a range
+create_landscapes(
+  n = 4,
+  patterns = "sharp",
+  params_list = list(
+    sharp = pattern_sharp(
+      boundary_position = 0.5,
+      noise_bare_to_veg = c(0, 0.1)
+    )
+  )
+)
 
 # Rotation is an argument of create_landscape(), not a pattern parameter
 create_landscape(

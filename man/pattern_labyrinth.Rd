@@ -53,9 +53,35 @@ per landscape by \code{\link{create_landscapes}} and rejected by
 \code{\link{create_landscape}}.
 }
 \examples{
+# A single landscape, with fixed values
 create_landscape(
   "labyrinth",
   params = pattern_labyrinth(frequency = 3.5, octaves = 3)
+)
+
+# A batch, with parameters drawn from ranges once per landscape.
+# Parameters left unset vary too, over their default ranges
+create_landscapes(
+  n = 4,
+  patterns = "labyrinth",
+  params_list = list(
+    labyrinth = pattern_labyrinth(
+      frequency = c(2.5, 4),
+      octaves = c(2, 4)
+    )
+  )
+)
+
+# A batch, mixing a fixed value with a range
+create_landscapes(
+  n = 4,
+  patterns = "labyrinth",
+  params_list = list(
+    labyrinth = pattern_labyrinth(
+      frequency = 3,
+      octaves = c(2, 4)
+    )
+  )
 )
 
 }
