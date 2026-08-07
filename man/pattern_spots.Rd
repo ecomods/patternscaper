@@ -14,22 +14,22 @@ pattern_spots(
 )
 }
 \arguments{
-\item{n_spots}{Integer. Number of circular spots to generate.
+\item{n_spots}{Integer. Number of circular spots to generate (default: 15).
 For regular placement, this may be automatically reduced if the landscape
-cannot accommodate the requested number at the given `spot_radius`.}
+cannot accommodate the requested number at the given \code{spot_radius}.}
 
-\item{spot_radius}{Numeric. Mean radius of each spot in cells.
+\item{spot_radius}{Numeric. Mean radius of each spot in cells (default: 5).
 Must be positive and smaller than landscape dimensions.}
 
 \item{spot_radius_sd}{Numeric. Standard deviation for random variation in spot radius.
 Each spot's radius is sampled from N(spot_radius, spot_radius_sd).
-(default: 0 - no variation)}
+(default: 0, no variation)}
 
 \item{radius_noise_fraction}{Numeric (0 to 1). Proportion of the spot radius
 where gradual edge noise is applied. 0 creates sharp circular edges,
 1 applies probabilistic cell inclusion across the entire radius.
 For example, 0.2 means the outer 20\% of the radius has a gradient transition.
-Works independently of `spot_radius_sd` (which varies the overall size,
+Works independently of \code{spot_radius_sd} (which varies the overall size,
 while this parameter affects edge sharpness).}
 
 \item{regular_spots}{Logical. If TRUE, spots are arranged on a hexagonal grid
@@ -64,8 +64,6 @@ create_landscapes(
 
 }
 \seealso{
-\code{\link{create_landscape}}, \code{\link{create_landscapes}}
-
 Other landscape creation:
 \code{\link[=create_landscape]{create_landscape()}},
 \code{\link[=create_landscapes]{create_landscapes()}},

@@ -7,7 +7,8 @@
 pattern_dense(veg_prop = 0.9)
 }
 \arguments{
-\item{veg_prop}{Numeric. Proportion of cells with vegetation (0-1). Default: 0.9.}
+\item{veg_prop}{Numeric. Probability that a cell is vegetated (0-1,
+default: 0.9). Higher values give a denser vegetation cover.}
 }
 \value{
 A named list of the supplied parameters, classed
@@ -27,8 +28,6 @@ create_landscape("dense", params = pattern_dense(veg_prop = 0.95))
 
 }
 \seealso{
-\code{\link{create_landscape}}, \code{\link{create_landscapes}}
-
 Other landscape creation:
 \code{\link[=create_landscape]{create_landscape()}},
 \code{\link[=create_landscapes]{create_landscapes()}},

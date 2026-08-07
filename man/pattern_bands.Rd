@@ -15,7 +15,8 @@ pattern_bands(
 )
 }
 \arguments{
-\item{boundary_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
+\item{boundary_position}{Numeric. Relative position of treeline from top
+(0-1, default: 0.5).}
 
 \item{band_zone_prop}{Numeric. Proportion of height of the total landscape to
 allocate for bands below the treeline (default: 0.2). If the band zone is too small
@@ -52,8 +53,6 @@ create_landscape(
 
 }
 \seealso{
-\code{\link{create_landscape}}, \code{\link{create_landscapes}}
-
 Other landscape creation:
 \code{\link[=create_landscape]{create_landscape()}},
 \code{\link[=create_landscapes]{create_landscapes()}},

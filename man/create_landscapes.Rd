@@ -49,7 +49,7 @@ generations (default: 3).}
 }
 \value{
 A named list of \code{\link{landscape}} objects, each as returned by
-    \code{\link{create_landscape}}. Names are \code{"<pattern>_<index>"},
+    \code{\link{create_landscape}}. Landscape names are \code{"<pattern>_<index>"},
     with \code{"_rot<angle>"} appended for rotated landscapes. The list holds
     fewer than \code{n} landscapes if generation kept failing after
     \code{max_retries}, which is reported with a warning.

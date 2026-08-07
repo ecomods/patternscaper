@@ -12,7 +12,8 @@ Lower values (e.g., 0.1) create sharper transitions.
 Higher values (e.g., 0.9) create more gradual, diffuse transitions
 where vegetation probability persists further below the vegetation boundary (default: 0.5).}
 
-\item{boundary_position}{Numeric. Relative position of vegetation boundary from top (0-1) (default: 0.2).}
+\item{boundary_position}{Numeric. Relative position of vegetation boundary
+from top (0-1, default: 0.2).}
 }
 \value{
 A named list of the supplied parameters, classed
@@ -35,8 +36,6 @@ create_landscape(
 
 }
 \seealso{
-\code{\link{create_landscape}}, \code{\link{create_landscapes}}
-
 Other landscape creation:
 \code{\link[=create_landscape]{create_landscape()}},
 \code{\link[=create_landscapes]{create_landscapes()}},

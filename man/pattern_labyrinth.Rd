@@ -21,9 +21,9 @@ Adjusting this changes the overall proportion of vegetated area (default: 0.5).}
 
 \item{band_fuzziness}{Numeric between 0 and 1, the probability that an edge
 cell is eroded. Controls the amount of
-geometric edge roughness applied *after* thresholding. At 0, vegetation
-boundaries are sharp and fully deterministic. Small values (≈ 0.05–0.1)
-introduce slight, irregular boundary perturbations without changing the
+geometric edge roughness applied \emph{after} thresholding. At 0, vegetation
+boundaries are sharp and fully deterministic. Small values (roughly 0.05
+to 0.1) introduce slight, irregular boundary perturbations without changing the
 overall topology of the pattern. Larger values progressively erode vegetation
 edges and can fragment bands if set too high; above roughly 0.3 the result
 looks increasingly random rather than maze-like. This parameter affects boundary
@@ -59,8 +59,6 @@ create_landscape(
 
 }
 \seealso{
-\code{\link{create_landscape}}, \code{\link{create_landscapes}}
-
 Other landscape creation:
 \code{\link[=create_landscape]{create_landscape()}},
 \code{\link[=create_landscapes]{create_landscapes()}},

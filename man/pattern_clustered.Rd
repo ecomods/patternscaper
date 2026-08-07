@@ -16,7 +16,8 @@ pattern_clustered(
 )
 }
 \arguments{
-\item{boundary_position}{Numeric. Relative position of treeline from top (0-1) (default: 0.5).}
+\item{boundary_position}{Numeric. Relative position of treeline from top
+(0-1, default: 0.5).}
 
 \item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell
 to bare, adding gaps within the vegetation. Applied to the underlying
@@ -63,8 +64,6 @@ create_landscape(
 
 }
 \seealso{
-\code{\link{create_landscape}}, \code{\link{create_landscapes}}
-
 Other landscape creation:
 \code{\link[=create_landscape]{create_landscape()}},
 \code{\link[=create_landscapes]{create_landscapes()}},

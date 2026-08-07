@@ -68,14 +68,13 @@ new_landscape_params_unchecked <- function(params, pattern) {
 #' per landscape by \code{\link{create_landscapes}} and rejected by
 #' \code{\link{create_landscape}}.
 #'
-#' @param veg_prop Numeric. Probability of vegetation presence (0-1) (default: 0.5).
-#'    Higher values result in a denser vegetation cover.
+#' @param veg_prop Numeric. Probability that a cell is vegetated (0-1,
+#'     default: 0.5). Higher values give a denser vegetation cover.
 #'
 #' @return A named list of the supplied parameters, classed
 #'     \code{"landscape_params"}.
 #'
 #' @family landscape creation
-#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 #'
 #' @examples
 #' create_landscape("random", params = pattern_random(veg_prop = 0.3))
@@ -103,13 +102,13 @@ pattern_random <- function(veg_prop = 0.5) {
 #' per landscape by \code{\link{create_landscapes}} and rejected by
 #' \code{\link{create_landscape}}.
 #'
-#' @param veg_prop Numeric. Proportion of cells with vegetation (0-1). Default: 0.1.
+#' @param veg_prop Numeric. Probability that a cell is vegetated (0-1,
+#'     default: 0.1). Higher values give a denser vegetation cover.
 #'
 #' @return A named list of the supplied parameters, classed
 #'     \code{"landscape_params"}.
 #'
 #' @family landscape creation
-#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 #'
 #' @examples
 #' create_landscape("bare", params = pattern_bare(veg_prop = 0.05))
@@ -137,13 +136,13 @@ pattern_bare <- function(veg_prop = 0.1) {
 #' per landscape by \code{\link{create_landscapes}} and rejected by
 #' \code{\link{create_landscape}}.
 #'
-#' @param veg_prop Numeric. Proportion of cells with vegetation (0-1). Default: 0.9.
+#' @param veg_prop Numeric. Probability that a cell is vegetated (0-1,
+#'     default: 0.9). Higher values give a denser vegetation cover.
 #'
 #' @return A named list of the supplied parameters, classed
 #'     \code{"landscape_params"}.
 #'
 #' @family landscape creation
-#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 #'
 #' @examples
 #' create_landscape("dense", params = pattern_dense(veg_prop = 0.95))
@@ -172,7 +171,7 @@ pattern_dense <- function(veg_prop = 0.9) {
 #' \code{\link{create_landscape}}.
 #'
 #' @param boundary_position Numeric. Relative position of vegetation boundary
-#'     from top (0-1) (default: 0.5).
+#'     from top (0-1, default: 0.5).
 #' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
 #'     bare, adding gaps within the vegetation (0-1, default: 0).
 #' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
@@ -182,7 +181,6 @@ pattern_dense <- function(veg_prop = 0.9) {
 #'     \code{"landscape_params"}.
 #'
 #' @family landscape creation
-#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 #'
 #' @examples
 #' create_landscape("sharp", params = pattern_sharp(boundary_position = 0.3))
@@ -231,13 +229,13 @@ pattern_sharp <- function(
 #'   Lower values (e.g., 0.1) create sharper transitions.
 #'   Higher values (e.g., 0.9) create more gradual, diffuse transitions
 #'   where vegetation probability persists further below the vegetation boundary (default: 0.5).
-#' @param boundary_position Numeric. Relative position of vegetation boundary from top (0-1) (default: 0.2).
+#' @param boundary_position Numeric. Relative position of vegetation boundary
+#'     from top (0-1, default: 0.2).
 #'
 #' @return A named list of the supplied parameters, classed
 #'     \code{"landscape_params"}.
 #'
 #' @family landscape creation
-#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 #'
 #' @examples
 #' create_landscape(
@@ -274,7 +272,8 @@ pattern_diffuse <- function(
 #' per landscape by \code{\link{create_landscapes}} and rejected by
 #' \code{\link{create_landscape}}.
 #'
-#' @param boundary_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
+#' @param boundary_position Numeric. Relative position of treeline from top
+#'     (0-1, default: 0.5).
 #' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
 #'     bare, adding gaps within the vegetation (0-1, default: 0).
 #' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
@@ -288,7 +287,6 @@ pattern_diffuse <- function(
 #'     \code{"landscape_params"}.
 #'
 #' @family landscape creation
-#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 #'
 #' @examples
 #' create_landscape(
@@ -345,7 +343,8 @@ pattern_fingers <- function(
 #' per landscape by \code{\link{create_landscapes}} and rejected by
 #' \code{\link{create_landscape}}.
 #'
-#' @param boundary_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
+#' @param boundary_position Numeric. Relative position of treeline from top
+#'     (0-1, default: 0.5).
 #' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell
 #'   to bare, adding gaps within the vegetation. Applied to the underlying
 #'   sharp treeline, before the clusters are placed (0-1, default: 0).
@@ -368,7 +367,6 @@ pattern_fingers <- function(
 #'     \code{"landscape_params"}.
 #'
 #' @family landscape creation
-#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 #'
 #' @examples
 #' create_landscape(
@@ -429,7 +427,8 @@ pattern_clustered <- function(
 #' per landscape by \code{\link{create_landscapes}} and rejected by
 #' \code{\link{create_landscape}}.
 #'
-#' @param boundary_position Numeric. Relative position of treeline from top (0-1) (default: 0.5).
+#' @param boundary_position Numeric. Relative position of treeline from top
+#'     (0-1, default: 0.5).
 #' @param band_zone_prop Numeric. Proportion of height of the total landscape to
 #'     allocate for bands below the treeline (default: 0.2). If the band zone is too small
 #'     for the given band spacing, no bands will be drawn and a warning will be issued.
@@ -443,7 +442,6 @@ pattern_clustered <- function(
 #'     \code{"landscape_params"}.
 #'
 #' @family landscape creation
-#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 #'
 #' @examples
 #' create_landscape(
@@ -500,19 +498,19 @@ pattern_bands <- function(
 #' per landscape by \code{\link{create_landscapes}} and rejected by
 #' \code{\link{create_landscape}}.
 #'
-#' @param n_spots Integer. Number of circular spots to generate.
+#' @param n_spots Integer. Number of circular spots to generate (default: 15).
 #'     For regular placement, this may be automatically reduced if the landscape
-#'     cannot accommodate the requested number at the given `spot_radius`.
-#' @param spot_radius Numeric. Mean radius of each spot in cells.
+#'     cannot accommodate the requested number at the given \code{spot_radius}.
+#' @param spot_radius Numeric. Mean radius of each spot in cells (default: 5).
 #'     Must be positive and smaller than landscape dimensions.
 #' @param spot_radius_sd Numeric. Standard deviation for random variation in spot radius.
 #'     Each spot's radius is sampled from N(spot_radius, spot_radius_sd).
-#'     (default: 0 - no variation)
+#'     (default: 0, no variation)
 #' @param radius_noise_fraction Numeric (0 to 1). Proportion of the spot radius
 #'     where gradual edge noise is applied. 0 creates sharp circular edges,
 #'     1 applies probabilistic cell inclusion across the entire radius.
 #'     For example, 0.2 means the outer 20\% of the radius has a gradient transition.
-#'     Works independently of `spot_radius_sd` (which varies the overall size,
+#'     Works independently of \code{spot_radius_sd} (which varies the overall size,
 #'     while this parameter affects edge sharpness).
 #' @param regular_spots Logical. If TRUE, spots are arranged on a hexagonal grid
 #'     using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).
@@ -523,7 +521,6 @@ pattern_bands <- function(
 #'     \code{"landscape_params"}.
 #'
 #' @family landscape creation
-#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 #'
 #' @examples
 #' # A single landscape
@@ -586,19 +583,19 @@ pattern_spots <- function(
 #' patterns, so unlike \code{\link{pattern_spots}} this has no
 #' \code{invert_landscape} parameter.
 #'
-#' @param n_spots Integer. Number of circular gaps to generate.
+#' @param n_spots Integer. Number of circular gaps to generate (default: 15).
 #'     For regular placement, this may be automatically reduced if the landscape
-#'     cannot accommodate the requested number at the given `spot_radius`.
-#' @param spot_radius Numeric. Mean radius of each gap in cells.
+#'     cannot accommodate the requested number at the given \code{spot_radius}.
+#' @param spot_radius Numeric. Mean radius of each gap in cells (default: 5).
 #'     Must be positive and smaller than landscape dimensions.
 #' @param spot_radius_sd Numeric. Standard deviation for random variation in gap radius.
 #'     Each gap's radius is sampled from N(spot_radius, spot_radius_sd).
-#'     (default: 0 - no variation)
+#'     (default: 0, no variation)
 #' @param radius_noise_fraction Numeric (0 to 1). Proportion of the gap radius
 #'     where gradual edge noise is applied. 0 creates sharp circular edges,
 #'     1 applies probabilistic cell inclusion across the entire radius.
 #'     For example, 0.2 means the outer 20\% of the radius has a gradient transition.
-#'     Works independently of `spot_radius_sd` (which varies the overall size,
+#'     Works independently of \code{spot_radius_sd} (which varies the overall size,
 #'     while this parameter affects edge sharpness).
 #' @param regular_spots Logical. If TRUE, gaps are arranged on a hexagonal grid
 #'     using k-means clustering. If FALSE, gaps are placed randomly (default: FALSE).
@@ -607,7 +604,6 @@ pattern_spots <- function(
 #'     \code{"landscape_params"}.
 #'
 #' @family landscape creation
-#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 #'
 #' @examples
 #' create_landscape("gaps", params = pattern_gaps(n_spots = 5, spot_radius = 8))
@@ -660,9 +656,9 @@ pattern_gaps <- function(
 #'    Adjusting this changes the overall proportion of vegetated area (default: 0.5).
 #' @param band_fuzziness Numeric between 0 and 1, the probability that an edge
 #'    cell is eroded. Controls the amount of
-#'    geometric edge roughness applied *after* thresholding. At 0, vegetation
-#'    boundaries are sharp and fully deterministic. Small values (≈ 0.05–0.1)
-#'    introduce slight, irregular boundary perturbations without changing the
+#'    geometric edge roughness applied \emph{after} thresholding. At 0, vegetation
+#'    boundaries are sharp and fully deterministic. Small values (roughly 0.05
+#'    to 0.1) introduce slight, irregular boundary perturbations without changing the
 #'    overall topology of the pattern. Larger values progressively erode vegetation
 #'    edges and can fragment bands if set too high; above roughly 0.3 the result
 #'    looks increasingly random rather than maze-like. This parameter affects boundary
@@ -680,7 +676,6 @@ pattern_gaps <- function(
 #'     \code{"landscape_params"}.
 #'
 #' @family landscape creation
-#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
 #'
 #' @examples
 #' create_landscape(
