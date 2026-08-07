@@ -80,10 +80,10 @@ create_landscape_labyrinth <- function(
 
   # Validate band_fuzziness
   if (
-    !is.numeric(band_fuzziness) || band_fuzziness < 0 || band_fuzziness > 0.5
+    !is.numeric(band_fuzziness) || band_fuzziness < 0 || band_fuzziness > 1
   ) {
     cli::cli_abort(c(
-      "{.arg band_fuzziness} must be between 0 and 0.5.",
+      "{.arg band_fuzziness} must be between 0 and 1.",
       "x" = "You supplied {.val {band_fuzziness}}",
       "i" = "Values above 0.3 produce increasingly random-looking patterns."
     ))

@@ -1,21 +1,23 @@
 # Validation tests --------------------------------------------------------
 
 test_that("create_landscape_labyrinth validates band_fuzziness range", {
-  # Should reject values > 0.5
+  # band_fuzziness is the probability that an edge cell is eroded, so its
+  # domain is 0 to 1. Values above ~0.3 look random rather than maze-like,
+  # but that is guidance on the help page, not a rejection.
   expect_error(
     create_landscape_labyrinth(
       width = 50,
       height = 50,
-      band_fuzziness = 0.6
+      band_fuzziness = 1.5
     ),
-    "must be between 0 and 0.5"
+    "must be between 0 and 1"
   )
 
-  # Should accept 0.5 (boundary)
+  # Should accept 1 (boundary)
   l <- create_landscape_labyrinth(
     width = 50,
     height = 50,
-    band_fuzziness = 0.5
+    band_fuzziness = 1
   )
   expect_true(is_landscape(l))
 })

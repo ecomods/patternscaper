@@ -128,7 +128,9 @@ validate_noise_prob <- function(prob, arg) {
 #'
 #' @return Named list, keyed by pattern, of named lists of parameter specs.
 #'     Each spec has \code{type} ("numeric", "integer", or "logical"),
-#'     \code{min}/\code{max} bounds (numeric/integer only), and
+#'     \code{min}/\code{max} bounds (numeric/integer only), an optional
+#'     \code{exclusive_min = TRUE} for parameters the generator requires to be
+#'     strictly greater than \code{min}, and
 #'     \code{batch_range} which is the default range \code{\link{create_landscapes}}
 #'     samples from. \code{batch_range} is a literal vector, a
 #'     \code{function(width, height)} for ranges that scale with landscape
@@ -187,7 +189,7 @@ landscape_param_specs <- function() {
       steepness = list(
         type = "numeric",
         min = 0,
-        max = Inf,
+        max = 1,
         batch_range = c(0.1, 1)
       ),
       boundary_position = list(
@@ -219,6 +221,7 @@ landscape_param_specs <- function() {
       sine_length_mean = list(
         type = "numeric",
         min = 0,
+        exclusive_min = TRUE,
         max = Inf,
         batch_range = function(width, height) c(0.2, 0.5) * width
       ),
@@ -275,18 +278,21 @@ landscape_param_specs <- function() {
       scatter_zone_prop = list(
         type = "numeric",
         min = 0,
+        exclusive_min = TRUE,
         max = 1,
         batch_range = c(0.2, 1)
       ),
       elongation_x = list(
         type = "numeric",
         min = 0,
+        exclusive_min = TRUE,
         max = Inf,
         batch_range = c(0.5, 1.5)
       ),
       elongation_y = list(
         type = "numeric",
         min = 0,
+        exclusive_min = TRUE,
         max = Inf,
         batch_range = c(0.5, 1.5)
       )
@@ -394,6 +400,7 @@ landscape_param_specs <- function() {
       frequency = list(
         type = "numeric",
         min = 0,
+        exclusive_min = TRUE,
         max = Inf,
         batch_range = c(2.5, 3.5)
       ),
@@ -406,7 +413,7 @@ landscape_param_specs <- function() {
       band_fuzziness = list(
         type = "numeric",
         min = 0,
-        max = Inf,
+        max = 1,
         batch_range = c(0.06, 0.25)
       ),
       octaves = list(
@@ -752,10 +759,18 @@ validate_numeric_param <- function(param_value, param_name, pattern, spec) {
 #' @keywords internal
 #' @noRd
 check_numeric_bounds <- function(value, param_name, pattern, spec) {
-  if (!is.null(spec$min) && !is.infinite(spec$min) && value < spec$min) {
-    cli::cli_abort(c(
-      "Parameter {.val {param_name}} for pattern {.val {pattern}}: value {value} is below minimum {spec$min}."
-    ))
+  if (!is.null(spec$min) && !is.infinite(spec$min)) {
+    if (isTRUE(spec$exclusive_min)) {
+      if (value <= spec$min) {
+        cli::cli_abort(c(
+          "Parameter {.val {param_name}} for pattern {.val {pattern}}: value {value} must be greater than {spec$min}."
+        ))
+      }
+    } else if (value < spec$min) {
+      cli::cli_abort(c(
+        "Parameter {.val {param_name}} for pattern {.val {pattern}}: value {value} is below minimum {spec$min}."
+      ))
+    }
   }
 
   if (!is.null(spec$max) && !is.infinite(spec$max) && value > spec$max) {

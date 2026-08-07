@@ -658,12 +658,14 @@ pattern_gaps <- function(
 #' @param veg_threshold Numeric between 0 and 1. Defines the cutoff value that separates vegetated
 #'    from non-vegetated cells. Values above the threshold become vegetation.
 #'    Adjusting this changes the overall proportion of vegetated area (default: 0.5).
-#' @param band_fuzziness Numeric between 0 and 0.5. Controls the amount of
+#' @param band_fuzziness Numeric between 0 and 1, the probability that an edge
+#'    cell is eroded. Controls the amount of
 #'    geometric edge roughness applied *after* thresholding. At 0, vegetation
 #'    boundaries are sharp and fully deterministic. Small values (≈ 0.05–0.1)
 #'    introduce slight, irregular boundary perturbations without changing the
 #'    overall topology of the pattern. Larger values progressively erode vegetation
-#'    edges and can fragment bands if set too high. This parameter affects boundary
+#'    edges and can fragment bands if set too high; above roughly 0.3 the result
+#'    looks increasingly random rather than maze-like. This parameter affects boundary
 #'    geometry only and does not influence the global structure or connectivity
 #'    of the labyrinth. (default: 0.08)
 #' @param octaves Integer >= 1. Number of noise layers (octaves) combined to

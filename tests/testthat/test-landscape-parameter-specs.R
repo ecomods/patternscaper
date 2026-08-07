@@ -243,3 +243,80 @@ test_that("spec parameter names match the generator formals for all 11 patterns"
     )
   }
 })
+
+# Spec bounds vs. generator bounds -------------------------------------------
+
+# The spec's min/max gate what a user may supply; each generator then applies
+# its own checks. When the two disagree, the constructor accepts a value the
+# generator refuses and in create_landscapes() that error is swallowed by
+# try_create_landscape() into a quietly shorter batch. This caught diffuse's
+# steepness (spec said Inf, generator capped at 1) and four exclusive minimums.
+
+test_that("spec bounds match the bounds each generator enforces", {
+  specs <- landscape_param_specs()
+
+  # Generous canvas: some patterns fail on geometry at the default size, which
+  # is a different (legitimate) error -- see the message check below
+  width <- 200
+  height <- 200
+
+  for (pattern in names(specs)) {
+    build <- get(paste0("pattern_", pattern))
+
+    for (name in names(specs[[pattern]])) {
+      spec <- specs[[pattern]][[name]]
+      if (identical(spec$type, "logical")) {
+        next
+      }
+
+      # Values the spec declares legal, just inside each bound
+      probes <- c(
+        if (isTRUE(spec$exclusive_min)) spec$min + 0.01 else spec$min,
+        if (is.finite(spec$max)) spec$max else 5
+      )
+
+      for (value in probes) {
+        params <- tryCatch(
+          do.call(build, setNames(list(value), name)),
+          error = function(e) e
+        )
+
+        # The constructor must accept what the spec declares legal
+        expect_false(
+          inherits(params, "error"),
+          info = paste(
+            pattern,
+            name,
+            "- constructor rejects legal value",
+            value
+          )
+        )
+        if (inherits(params, "error")) {
+          next
+        }
+
+        # Extreme-but-legal values legitimately warn about geometry; only
+        # errors are of interest here
+        first_line <- suppressWarnings(tryCatch(
+          {
+            create_landscape(
+              pattern,
+              width = width,
+              height = height,
+              params = params
+            )
+            NA_character_
+          },
+          error = function(e) strsplit(conditionMessage(e), "\n")[[1]][1]
+        ))
+
+        # A geometry failure names no parameter on its first line; a bounds
+        # complaint names the one it is rejecting
+        expect_false(
+          !is.na(first_line) && grepl(name, first_line, fixed = TRUE),
+          info = paste(pattern, name, "=", value, "->", first_line)
+        )
+      }
+    }
+  }
+})
