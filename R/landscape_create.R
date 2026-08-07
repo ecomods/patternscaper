@@ -39,11 +39,11 @@
 #'     Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated.
 #'     The remaining patterns ignore it, and are generated without rotation.
 #'
-#' @return A landscape object, containing:
+#' @return A \code{\link{landscape}} object, containing:
 #'   \item{data}{SpatRaster with the generated pattern with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string with the pattern type, or \code{pattern_label} if given}
 #'   \item{params}{List of all input parameters used to generate the landscape}
-#'   \item{name}{Character string with the landscape name, "unnamed" if none was given}
+#'   \item{name}{Character string with the landscape name, \code{NA} if none was given}
 #'
 #' @family landscape creation
 #' @seealso \code{\link{plot_landscapes}}
@@ -171,36 +171,56 @@ create_landscape <- function(
 #' Create Multiple Landscapes
 #'
 #' @description
-#' Creates \code{n} landscapes spread across the requested patterns, varying
-#' their parameters between landscapes. This is how training sets are built.
+#' Creates \code{n} landscapes sampled from the requested patterns and varying
+#' their parameters between landscapes. This is how training sets can be built.
+#' Each pattern name below links to its \code{pattern_*()} constructor, which
+#' sets that pattern's parameters.
 #'
-#' Each pattern has its own parameters, set through its constructor:
-#' \code{\link{pattern_random}}, \code{\link{pattern_bare}},
-#' \code{\link{pattern_dense}}, \code{\link{pattern_sharp}},
-#' \code{\link{pattern_diffuse}}, \code{\link{pattern_fingers}},
-#' \code{\link{pattern_clustered}}, \code{\link{pattern_bands}},
-#' \code{\link{pattern_spots}}, \code{\link{pattern_gaps}} and
-#' \code{\link{pattern_labyrinth}}.
+#' \itemize{
+#'   \item \strong{Control} patterns have no spatial structure and differ only
+#'     in vegetation cover: \code{\link[=pattern_bare]{"bare"}},
+#'     \code{\link[=pattern_random]{"random"}},
+#'     \code{\link[=pattern_dense]{"dense"}}.
+#'   \item \strong{Ecotone} patterns have a vegetated and a bare zone separated
+#'     by a transition: \code{\link[=pattern_sharp]{"sharp"}} (abrupt),
+#'     \code{\link[=pattern_diffuse]{"diffuse"}} (gradual),
+#'     \code{\link[=pattern_fingers]{"fingers"}} (finger-like extensions),
+#'     \code{\link[=pattern_clustered]{"clustered"}} (scattered clusters),
+#'     \code{\link[=pattern_bands]{"bands"}} (sinusoidal bands).
+#'   \item \strong{Patch} patterns are self-organized, without a boundary:
+#'     \code{\link[=pattern_spots]{"spots"}} (vegetation patches),
+#'     \code{\link[=pattern_gaps]{"gaps"}} (bare gaps),
+#'     \code{\link[=pattern_labyrinth]{"labyrinth"}} (maze-like bands).
+#' }
 #'
 #' @param n Integer. Total number of landscapes to create (default: 50).
-#' @param patterns Character vector. patterns of landscapes to sample from (default: all patterns).
+#' @param patterns Character vector. Patterns to sample from. Valid patterns are:
+#'  "random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
+#'  "bands", "spots", "gaps", "labyrinth" (default: all patterns).
 #' @param width Integer. Width of all landscapes in pixels (default: 100).
 #' @param height Integer. Height of all landscapes in pixels (default: 100).
-#' @param rotation Numeric vector. Angles in degrees to sample from, one per
+#' @param rotation Numeric vector. Angles in degrees to sample from per
 #'     landscape (default: 0:360). A single value applies that angle to every
 #'     landscape. Only "sharp", "diffuse", "fingers", "clustered" and "bands"
 #'     are rotated; the remaining patterns ignore it.
-#' @param params_list List. Per-pattern parameters, keyed by pattern name (default: NULL).
-#'     Each entry is either the output of the matching \code{pattern_*()} constructor,
-#'     for example \code{\link{pattern_spots}}, or a plain named list. A single value
-#'     fixes a parameter; a length-2 vector is a range sampled once per landscape.
-#'     Patterns left out fall back to the default ranges.
-#' @param pattern_probs Numeric vector. Probability that a specific landscape pattern is chosen from the list
-#'     of patterns. Should be a numeric vector of the same length as 'patterns'.
-#'     The default value NULL creates equally balanced patterns.
-#' @param max_retries Integer. Maximum number of retries for failed landscape generations (default: 3).
+#' @param params_list Named list. Parameters to be sampled from for each pattern.
+#'     The list must be keyed by the pattern names. Each entry is the output of
+#'     the matching \code{pattern_*()} constructor, for example \code{\link{pattern_spots}}.
+#'     A single value fixes a parameter, a length-2 vector is a range sampled once per landscape
+#'     of that patterns. Patterns left out from \code{params_list} fall back to
+#'     the default ranges. Default NULL uses the default ranges for all patterns.
+#' @param pattern_probs Numeric vector. Probability that a specific landscape pattern
+#'     is chosen from the list of \code{patterns}. Should be a numeric vector of
+#'     the same length as \code{patterns}. The default value NULL creates equally
+#'     balanced patterns.
+#' @param max_retries Integer. Maximum number of retries for failed landscape
+#'     generations (default: 3).
 #'
-#' @return A named list of landscape objects. Names indicate the pattern and optional rotation.
+#' @return A named list of \code{\link{landscape}} objects, each as returned by
+#'     \code{\link{create_landscape}}. Landscape names are \code{"<pattern>_<index>"},
+#'     with \code{"_rot<angle>"} appended for rotated landscapes. The list holds
+#'     fewer than \code{n} landscapes if generation kept failing after
+#'     \code{max_retries}, which is reported with a warning.
 #' @family landscape creation
 #' @seealso \code{\link{plot_landscapes}}
 #'

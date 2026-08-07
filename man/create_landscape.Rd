@@ -40,11 +40,11 @@ Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated.
 The remaining patterns ignore it, and are generated without rotation.}
 }
 \value{
-A landscape object, containing:
+A \code{\link{landscape}} object, containing:
   \item{data}{SpatRaster with the generated pattern with binary values (0 = bare ground, 1 = vegetation)}
   \item{pattern}{Character string with the pattern type, or \code{pattern_label} if given}
   \item{params}{List of all input parameters used to generate the landscape}
-  \item{name}{Character string with the landscape name, "unnamed" if none was given}
+  \item{name}{Character string with the landscape name, \code{NA} if none was given}
 }
 \description{
 Creates a single binary landscape with the requested spatial pattern.
