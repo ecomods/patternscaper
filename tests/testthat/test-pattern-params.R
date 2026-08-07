@@ -76,14 +76,14 @@ test_that("each constructor exposes exactly its pattern's parameters", {
   }
 })
 
-test_that("the generated batch-range section covers every parameter", {
-  # The section is built from the spec so it cannot drift from what
-  # create_landscapes() actually samples. That only holds if every parameter
-  # reaches it.
+test_that("the generated ranges section covers every parameter", {
+  # The section is built from the spec so it cannot drift from the bounds
+  # actually enforced or the ranges actually sampled. That only holds if every
+  # parameter reaches it.
   specs <- landscape_param_specs()
 
   for (name in names(pattern_constructors)) {
-    rd <- rd_batch_ranges(name)
+    rd <- rd_param_ranges(name)
 
     for (param in names(specs[[name]])) {
       expect_true(
@@ -98,15 +98,35 @@ test_that("validation-only parameters are described as not sampled", {
   # radius_noise_fraction and the two noise probabilities have batch_range NULL,
   # so a batch never varies them -- the page has to say so rather than render
   # an empty range
-  rd <- rd_batch_ranges("spots")
+  rd <- rd_param_ranges("spots")
   noise <- grep("radius_noise_fraction", rd, value = TRUE)
 
   expect_match(noise, "not sampled")
 
   expect_match(
-    grep("noise_bare_to_veg", rd_batch_ranges("sharp"), value = TRUE),
+    grep("noise_bare_to_veg", rd_param_ranges("sharp"), value = TRUE),
     "not sampled"
   )
+})
+
+test_that("the ranges section reports the bounds a user is held to", {
+  # Inclusive, exclusive-minimum and unbounded-above all read differently, and
+  # a page that got these wrong would send a user to a value the generator
+  # rejects
+  veg <- grep("veg_prop", rd_param_ranges("random"), value = TRUE)
+  expect_match(veg, "0 to 1", fixed = TRUE)
+
+  elong <- grep("elongation_x", rd_param_ranges("clustered"), value = TRUE)
+  expect_match(elong, "greater than 0", fixed = TRUE)
+
+  scatter <- grep("scatter_zone_prop", rd_param_ranges("clustered"), value = TRUE)
+  expect_match(scatter, "greater than 0, up to 1", fixed = TRUE)
+
+  spots <- grep("n_spots", rd_param_ranges("spots"), value = TRUE)
+  expect_match(spots, "1 or more", fixed = TRUE)
+
+  regular <- grep("regular_spots", rd_param_ranges("spots"), value = TRUE)
+  expect_match(regular, "TRUE or FALSE", fixed = TRUE)
 })
 
 test_that("pattern_gaps has no invert_landscape, unlike pattern_spots", {

@@ -52,13 +52,15 @@ Other landscape creation:
 \code{\link[=pattern_spots]{pattern_spots()}}
 }
 \concept{landscape creation}
-\section{Defaults in create_landscapes()}{
-\code{\link{create_landscapes}} samples a value per landscape for every
-parameter left unset, so the defaults shown in Usage apply to
-\code{\link{create_landscape}} only. Ranges that scale with landscape
-size are shown for the default 100 by 100. What a batch uses instead:
-\tabular{ll}{
-\code{steepness} \tab 0.1 to 1 \cr
-\code{boundary_position} \tab 0.1 to 0.4 \cr
+\section{Valid values and batch sampling}{
+\emph{Valid} is what \code{\link{create_landscape}} accepts.
+\emph{Sampled} is the range \code{\link{create_landscapes}} draws from
+per landscape for any parameter left unset, so the defaults shown in Usage
+apply to \code{\link{create_landscape}} only. Ranges that scale with
+landscape size are shown for the default 100 by 100.
+\tabular{lll}{
+\strong{Parameter} \tab \strong{Valid} \tab \strong{Sampled} \cr
+\code{steepness} \tab 0 to 1 \tab 0.1 to 1 \cr
+\code{boundary_position} \tab 0 to 1 \tab 0.1 to 0.4 \cr
 }
 }

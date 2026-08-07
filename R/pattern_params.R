@@ -80,7 +80,7 @@ new_landscape_params_unchecked <- function(params, pattern) {
 #' @examples
 #' create_landscape("random", params = pattern_random(veg_prop = 0.3))
 #'
-#' @evalRd rd_batch_ranges("random")
+#' @evalRd rd_param_ranges("random")
 #'
 #' @export
 pattern_random <- function(veg_prop = 0.5) {
@@ -114,7 +114,7 @@ pattern_random <- function(veg_prop = 0.5) {
 #' @examples
 #' create_landscape("bare", params = pattern_bare(veg_prop = 0.05))
 #'
-#' @evalRd rd_batch_ranges("bare")
+#' @evalRd rd_param_ranges("bare")
 #'
 #' @export
 pattern_bare <- function(veg_prop = 0.1) {
@@ -148,7 +148,7 @@ pattern_bare <- function(veg_prop = 0.1) {
 #' @examples
 #' create_landscape("dense", params = pattern_dense(veg_prop = 0.95))
 #'
-#' @evalRd rd_batch_ranges("dense")
+#' @evalRd rd_param_ranges("dense")
 #'
 #' @export
 pattern_dense <- function(veg_prop = 0.9) {
@@ -194,7 +194,7 @@ pattern_dense <- function(veg_prop = 0.9) {
 #'   rotation = 45
 #' )
 #'
-#' @evalRd rd_batch_ranges("sharp")
+#' @evalRd rd_param_ranges("sharp")
 #'
 #' @export
 pattern_sharp <- function(
@@ -245,7 +245,7 @@ pattern_sharp <- function(
 #'   params = pattern_diffuse(steepness = 0.1, boundary_position = 0.3)
 #' )
 #'
-#' @evalRd rd_batch_ranges("diffuse")
+#' @evalRd rd_param_ranges("diffuse")
 #'
 #' @export
 pattern_diffuse <- function(
@@ -296,7 +296,7 @@ pattern_diffuse <- function(
 #'   params = pattern_fingers(sine_length_mean = 15, sine_height_mean = 10)
 #' )
 #'
-#' @evalRd rd_batch_ranges("fingers")
+#' @evalRd rd_param_ranges("fingers")
 #'
 #' @export
 pattern_fingers <- function(
@@ -376,7 +376,7 @@ pattern_fingers <- function(
 #'   params = pattern_clustered(n_clusters = 8, cluster_radius = 7)
 #' )
 #'
-#' @evalRd rd_batch_ranges("clustered")
+#' @evalRd rd_param_ranges("clustered")
 #'
 #' @export
 pattern_clustered <- function(
@@ -451,7 +451,7 @@ pattern_clustered <- function(
 #'   params = pattern_bands(band_thickness = 4, band_spacing = 12)
 #' )
 #'
-#' @evalRd rd_batch_ranges("bands")
+#' @evalRd rd_param_ranges("bands")
 #'
 #' @export
 pattern_bands <- function(
@@ -536,7 +536,7 @@ pattern_bands <- function(
 #'   params_list = list(spots = pattern_spots(n_spots = c(5, 15)))
 #' )
 #'
-#' @evalRd rd_batch_ranges("spots")
+#' @evalRd rd_param_ranges("spots")
 #'
 #' @export
 pattern_spots <- function(
@@ -612,7 +612,7 @@ pattern_spots <- function(
 #' @examples
 #' create_landscape("gaps", params = pattern_gaps(n_spots = 5, spot_radius = 8))
 #'
-#' @evalRd rd_batch_ranges("gaps")
+#' @evalRd rd_param_ranges("gaps")
 #'
 #' @export
 pattern_gaps <- function(
@@ -688,7 +688,7 @@ pattern_gaps <- function(
 #'   params = pattern_labyrinth(frequency = 3.5, octaves = 3)
 #' )
 #'
-#' @evalRd rd_batch_ranges("labyrinth")
+#' @evalRd rd_param_ranges("labyrinth")
 #'
 #' @export
 pattern_labyrinth <- function(
@@ -715,11 +715,12 @@ pattern_labyrinth <- function(
   new_landscape_params(params, pattern = "labyrinth")
 }
 
-#' Render a Pattern's Batch Sampling Ranges as Rd
+#' Render a Pattern's Valid and Sampled Ranges as Rd
 #'
-#' Builds the "Defaults in create_landscapes()" section for a
+#' Builds the "Valid values and batch sampling" section for a
 #' \code{pattern_*()} help page from \code{\link{landscape_param_specs}}, so the
-#' documented ranges cannot drift from the ones actually sampled. Called from
+#' documented bounds cannot drift from the ones actually enforced, nor the
+#' documented ranges from the ones actually sampled. Called from
 #' \code{@evalRd} in each constructor's roxygen block.
 #'
 #' @param pattern Character. Pattern to describe.
@@ -728,7 +729,7 @@ pattern_labyrinth <- function(
 #'
 #' @keywords internal
 #' @noRd
-rd_batch_ranges <- function(pattern) {
+rd_param_ranges <- function(pattern) {
   specs <- landscape_param_specs()[[pattern]]
 
   # Width/height-dependent ranges are reported at the default landscape size
@@ -763,12 +764,33 @@ rd_batch_ranges <- function(pattern) {
     sprintf("%s to %s", format(range[1]), format(range[2]))
   }
 
+  describe_bounds <- function(spec) {
+    if (identical(spec$type, "logical")) {
+      return("TRUE or FALSE")
+    }
+
+    if (isTRUE(spec$exclusive_min)) {
+      lower <- sprintf("greater than %s", format(spec$min))
+      if (is.finite(spec$max)) {
+        return(sprintf("%s, up to %s", lower, format(spec$max)))
+      }
+      return(lower)
+    }
+
+    if (is.finite(spec$max)) {
+      return(sprintf("%s to %s", format(spec$min), format(spec$max)))
+    }
+
+    sprintf("%s or more", format(spec$min))
+  }
+
   rows <- vapply(
     names(specs),
     function(name) {
       sprintf(
-        "\\code{%s} \\tab %s \\cr",
+        "\\code{%s} \\tab %s \\tab %s \\cr",
         name,
+        describe_bounds(specs[[name]]),
         describe_range(specs[[name]]$batch_range)
       )
     },
@@ -776,16 +798,14 @@ rd_batch_ranges <- function(pattern) {
   )
 
   c(
-    "\\section{Defaults in create_landscapes()}{",
-    "\\code{\\link{create_landscapes}} samples a value per landscape for every",
-    "parameter left unset, so the defaults shown in Usage apply to",
-    "\\code{\\link{create_landscape}} only. Ranges that scale with landscape",
-    sprintf(
-      "size are shown for the default %d by %d. What a batch uses instead:",
-      width,
-      height
-    ),
-    "\\tabular{ll}{",
+    "\\section{Valid values and batch sampling}{",
+    "\\emph{Valid} is what \\code{\\link{create_landscape}} accepts.",
+    "\\emph{Sampled} is the range \\code{\\link{create_landscapes}} draws from",
+    "per landscape for any parameter left unset, so the defaults shown in Usage",
+    "apply to \\code{\\link{create_landscape}} only. Ranges that scale with",
+    sprintf("landscape size are shown for the default %d by %d.", width, height),
+    "\\tabular{lll}{",
+    "\\strong{Parameter} \\tab \\strong{Valid} \\tab \\strong{Sampled} \\cr",
     unname(rows),
     "}",
     "}"

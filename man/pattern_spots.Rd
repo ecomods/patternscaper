@@ -81,17 +81,19 @@ Other landscape creation:
 \code{\link[=pattern_sharp]{pattern_sharp()}}
 }
 \concept{landscape creation}
-\section{Defaults in create_landscapes()}{
-\code{\link{create_landscapes}} samples a value per landscape for every
-parameter left unset, so the defaults shown in Usage apply to
-\code{\link{create_landscape}} only. Ranges that scale with landscape
-size are shown for the default 100 by 100. What a batch uses instead:
-\tabular{ll}{
-\code{n_spots} \tab 5 to 10 \cr
-\code{spot_radius} \tab 10 to 20, scales with size \cr
-\code{spot_radius_sd} \tab 0 to 2, scales with size \cr
-\code{radius_noise_fraction} \tab not sampled \cr
-\code{regular_spots} \tab TRUE or FALSE \cr
-\code{invert_landscape} \tab always FALSE \cr
+\section{Valid values and batch sampling}{
+\emph{Valid} is what \code{\link{create_landscape}} accepts.
+\emph{Sampled} is the range \code{\link{create_landscapes}} draws from
+per landscape for any parameter left unset, so the defaults shown in Usage
+apply to \code{\link{create_landscape}} only. Ranges that scale with
+landscape size are shown for the default 100 by 100.
+\tabular{lll}{
+\strong{Parameter} \tab \strong{Valid} \tab \strong{Sampled} \cr
+\code{n_spots} \tab 1 or more \tab 5 to 10 \cr
+\code{spot_radius} \tab 1 or more \tab 10 to 20, scales with size \cr
+\code{spot_radius_sd} \tab 0 or more \tab 0 to 2, scales with size \cr
+\code{radius_noise_fraction} \tab 0 to 1 \tab not sampled \cr
+\code{regular_spots} \tab TRUE or FALSE \tab TRUE or FALSE \cr
+\code{invert_landscape} \tab TRUE or FALSE \tab always FALSE \cr
 }
 }
