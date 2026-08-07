@@ -2,7 +2,7 @@
 % Please edit documentation in R/landscape_create.R
 \name{create_landscape}
 \alias{create_landscape}
-\title{Create a Landscape with Specified Pattern}
+\title{Create a Single Landscape}
 \usage{
 create_landscape(
   pattern = c("random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
@@ -16,9 +16,9 @@ create_landscape(
 )
 }
 \arguments{
-\item{pattern}{Character. pattern of landscape to generate: "random", "bare",
-"dense", "sharp", "diffuse", "fingers", "bands", "clustered",
-"spots", "gaps", "labyrinth"}
+\item{pattern}{Character. Pattern to generate. Valid patterns are:
+"random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
+"bands", "spots", "gaps", "labyrinth".}
 
 \item{width}{Integer. Width of the landscape in pixels (default: 100).}
 
@@ -41,7 +41,7 @@ The remaining patterns ignore it, and are generated without rotation.}
 }
 \value{
 A \code{\link{landscape}} object, containing:
-  \item{data}{SpatRaster with the generated pattern with binary values (0 = bare ground, 1 = vegetation)}
+  \item{data}{SpatRaster of the generated pattern, with binary values (0 = bare ground, 1 = vegetation)}
   \item{pattern}{Character string with the pattern type, or \code{pattern_label} if given}
   \item{params}{List of all input parameters used to generate the landscape}
   \item{name}{Character string with the landscape name, \code{NA} if none was given}

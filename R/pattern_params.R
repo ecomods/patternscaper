@@ -64,11 +64,6 @@ new_landscape_params_unchecked <- function(params, pattern) {
 #' parameter list for the \code{"random"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
-#' @details
-#' A single value fixes a parameter. A length-2 vector is a range, sampled once
-#' per landscape by \code{\link{create_landscapes}} and rejected by
-#' \code{\link{create_landscape}}.
-#'
 #' @param veg_prop Numeric. Probability that a cell is vegetated (0-1,
 #'     default: 0.5). Higher values give a denser vegetation cover.
 #'
@@ -105,11 +100,6 @@ pattern_random <- function(veg_prop = 0.5) {
 #' Sparse vegetation placed at random without spatial structure. Builds a
 #' validated parameter list for the \code{"bare"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
-#'
-#' @details
-#' A single value fixes a parameter. A length-2 vector is a range, sampled once
-#' per landscape by \code{\link{create_landscapes}} and rejected by
-#' \code{\link{create_landscape}}.
 #'
 #' @param veg_prop Numeric. Probability that a cell is vegetated (0-1,
 #'     default: 0.1). Higher values give a denser vegetation cover.
@@ -148,11 +138,6 @@ pattern_bare <- function(veg_prop = 0.1) {
 #' validated parameter list for the \code{"dense"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
-#' @details
-#' A single value fixes a parameter. A length-2 vector is a range, sampled once
-#' per landscape by \code{\link{create_landscapes}} and rejected by
-#' \code{\link{create_landscape}}.
-#'
 #' @param veg_prop Numeric. Probability that a cell is vegetated (0-1,
 #'     default: 0.9). Higher values give a denser vegetation cover.
 #'
@@ -189,11 +174,6 @@ pattern_dense <- function(veg_prop = 0.9) {
 #' A vegetated and a bare zone with a sharp boundary between them. Builds a
 #' validated parameter list for the \code{"sharp"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
-#'
-#' @details
-#' A single value fixes a parameter. A length-2 vector is a range, sampled once
-#' per landscape by \code{\link{create_landscapes}} and rejected by
-#' \code{\link{create_landscape}}.
 #'
 #' @param boundary_position Numeric. Relative position of the vegetation boundary
 #'     from the top (0-1, default: 0.5).
@@ -273,11 +253,6 @@ pattern_sharp <- function(
 #' pattern, to pass to \code{\link{create_landscape}} or
 #' \code{\link{create_landscapes}}.
 #'
-#' @details
-#' A single value fixes a parameter. A length-2 vector is a range, sampled once
-#' per landscape by \code{\link{create_landscapes}} and rejected by
-#' \code{\link{create_landscape}}.
-#'
 #' @param steepness Numeric. Controls the transition gradient (0-1).
 #'   Lower values (e.g., 0.1) create sharper transitions.
 #'   Higher values (e.g., 0.9) create more gradual, diffuse transitions
@@ -345,11 +320,6 @@ pattern_diffuse <- function(
 #' Finger-like extensions of vegetation growing into the bare zone.
 #' Builds a validated parameter list for the \code{"fingers"} pattern, to pass
 #' to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
-#'
-#' @details
-#' A single value fixes a parameter. A length-2 vector is a range, sampled once
-#' per landscape by \code{\link{create_landscapes}} and rejected by
-#' \code{\link{create_landscape}}.
 #'
 #' @param boundary_position Numeric. Relative position of the vegetation boundary
 #'     from the top (0-1, default: 0.5).
@@ -443,11 +413,6 @@ pattern_fingers <- function(
 #' Vegetation clusters scattered into the bare zone. Builds a validated
 #' parameter list for the \code{"clustered"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
-#'
-#' @details
-#' A single value fixes a parameter. A length-2 vector is a range, sampled once
-#' per landscape by \code{\link{create_landscapes}} and rejected by
-#' \code{\link{create_landscape}}.
 #'
 #' @param boundary_position Numeric. Relative position of the vegetation boundary
 #'     from the top (0-1, default: 0.5).
@@ -554,11 +519,6 @@ pattern_clustered <- function(
 #' validated parameter list for the \code{"bands"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
-#' @details
-#' A single value fixes a parameter. A length-2 vector is a range, sampled once
-#' per landscape by \code{\link{create_landscapes}} and rejected by
-#' \code{\link{create_landscape}}.
-#'
 #' @param boundary_position Numeric. Relative position of the vegetation boundary
 #'     from the top (0-1, default: 0.5).
 #' @param band_zone_prop Numeric. Proportion of the total landscape height to
@@ -651,11 +611,6 @@ pattern_bands <- function(
 #' Circular vegetation patches on bare ground. Builds a validated parameter
 #' list for the \code{"spots"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
-#'
-#' @details
-#' A single value fixes a parameter. A length-2 vector is a range, sampled once
-#' per landscape by \code{\link{create_landscapes}} and rejected by
-#' \code{\link{create_landscape}}.
 #'
 #' @param n_spots Integer. Number of circular spots to generate (default: 15).
 #'     For regular placement, this may be automatically reduced if the landscape
@@ -751,14 +706,9 @@ pattern_spots <- function(
 #' \code{\link{create_landscapes}}.
 #'
 #' @details
-#' A single value fixes a parameter. A length-2 vector is a range, sampled once
-#' per landscape by \code{\link{create_landscapes}} and rejected by
-#' \code{\link{create_landscape}}.
-#'
-#' Gaps are bare patches in vegetated ground, the inverse of
-#' \code{\link{pattern_spots}}. The inversion is what distinguishes the two
-#' patterns, so unlike \code{\link{pattern_spots}} this has no
-#' \code{invert_landscape} parameter.
+#' This is the inverse of \code{\link{pattern_spots}}. The inversion is what
+#' distinguishes the two patterns, so unlike \code{\link{pattern_spots}} this
+#' has no \code{invert_landscape} parameter.
 #'
 #' @param n_spots Integer. Number of circular gaps to generate (default: 15).
 #'     For regular placement, this may be automatically reduced if the landscape
@@ -846,11 +796,6 @@ pattern_gaps <- function(
 #' Maze-like bands of vegetation, mimicking a Turing pattern. Builds a
 #' validated parameter list for the \code{"labyrinth"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
-#'
-#' @details
-#' A single value fixes a parameter. A length-2 vector is a range, sampled once
-#' per landscape by \code{\link{create_landscapes}} and rejected by
-#' \code{\link{create_landscape}}.
 #'
 #' @param frequency Numeric. Controls the spatial scale of the noise pattern:
 #'    Lower values produce broad, smooth bands, higher values produce finer, maze-like structures (default: 3).
@@ -946,6 +891,9 @@ pattern_labyrinth <- function(
 #' documented ranges from the ones actually sampled. Called from
 #' \code{@evalRd} in each constructor's roxygen block.
 #'
+#' The section also carries the sentence on how single values and length-2
+#' ranges are treated, which would otherwise be repeated on all eleven pages.
+#'
 #' @param pattern Character. Pattern to describe.
 #'
 #' @return Character vector of Rd markup, one element per line.
@@ -1022,10 +970,14 @@ rd_param_ranges <- function(pattern) {
 
   c(
     "\\section{Valid values and batch sampling}{",
-    "\\emph{Valid} is what \\code{\\link{create_landscape}} accepts.",
-    "\\emph{Sampled} is the range \\code{\\link{create_landscapes}} draws from",
-    "per landscape for any parameter left unset, so the defaults shown in Usage",
-    "apply to \\code{\\link{create_landscape}} only. Ranges that scale with",
+    "A single value fixes a parameter. A length-2 vector is a range, sampled",
+    "once per landscape by \\code{\\link{create_landscapes}} and rejected by",
+    "\\code{\\link{create_landscape}}. The table below shows for each parameter: ",
+    "",
+    "\\emph{valid} values that \\code{\\link{create_landscape}} accepts, and",
+    "\\emph{sampled} ranges that \\code{\\link{create_landscapes}} draws from",
+    "for each landscape. For each parameter that is left unset, the defaults are used",
+    "Ranges that scale with",
     sprintf(
       "landscape size are shown for the default %d by %d.",
       width,

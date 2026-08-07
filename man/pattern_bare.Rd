@@ -18,11 +18,6 @@ Sparse vegetation placed at random without spatial structure. Builds a
 validated parameter list for the \code{"bare"} pattern, to pass to
 \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 }
-\details{
-A single value fixes a parameter. A length-2 vector is a range, sampled once
-per landscape by \code{\link{create_landscapes}} and rejected by
-\code{\link{create_landscape}}.
-}
 \examples{
 # A single landscape, with a fixed value
 create_landscape("bare", params = pattern_bare(veg_prop = 0.05))
@@ -52,6 +47,10 @@ Other landscape creation:
 }
 \concept{landscape creation}
 \section{Valid values and batch sampling}{
+A single value fixes a parameter. A length-2 vector is a range, sampled
+once per landscape by \code{\link{create_landscapes}} and rejected by
+\code{\link{create_landscape}}.
+
 \emph{Valid} is what \code{\link{create_landscape}} accepts.
 \emph{Sampled} is the range \code{\link{create_landscapes}} draws from
 per landscape for any parameter left unset, so the defaults shown in Usage

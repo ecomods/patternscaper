@@ -1,4 +1,4 @@
-#' Create a Landscape with Specified Pattern
+#' Create a Single Landscape
 #'
 #' @description
 #' Creates a single binary landscape with the requested spatial pattern.
@@ -24,9 +24,9 @@
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param pattern Character. pattern of landscape to generate: "random", "bare",
-#'        "dense", "sharp", "diffuse", "fingers", "bands", "clustered",
-#'        "spots", "gaps", "labyrinth"
+#' @param pattern Character. Pattern to generate. Valid patterns are:
+#'     "random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
+#'     "bands", "spots", "gaps", "labyrinth".
 #' @param name Character. Optional name for the landscape (default: NULL).
 #' @param pattern_label Character. Optional label to store in the landscape's
 #'     \code{pattern} field instead of \code{pattern} itself (default: NULL
@@ -40,7 +40,7 @@
 #'     The remaining patterns ignore it, and are generated without rotation.
 #'
 #' @return A \code{\link{landscape}} object, containing:
-#'   \item{data}{SpatRaster with the generated pattern with binary values (0 = bare ground, 1 = vegetation)}
+#'   \item{data}{SpatRaster of the generated pattern, with binary values (0 = bare ground, 1 = vegetation)}
 #'   \item{pattern}{Character string with the pattern type, or \code{pattern_label} if given}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'   \item{name}{Character string with the landscape name, \code{NA} if none was given}
@@ -207,7 +207,7 @@ create_landscape <- function(
 #'     The list must be keyed by the pattern names. Each entry is the output of
 #'     the matching \code{pattern_*()} constructor, for example \code{\link{pattern_spots}}.
 #'     A single value fixes a parameter, a length-2 vector is a range sampled once per landscape
-#'     of that patterns. Patterns left out from \code{params_list} fall back to
+#'     of that pattern. Patterns left out from \code{params_list} fall back to
 #'     the default ranges. Default NULL uses the default ranges for all patterns.
 #' @param pattern_probs Numeric vector. Probability that a specific landscape pattern
 #'     is chosen from the list of \code{patterns}. Should be a numeric vector of

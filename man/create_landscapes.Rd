@@ -36,7 +36,7 @@ are rotated; the remaining patterns ignore it.}
 The list must be keyed by the pattern names. Each entry is the output of
 the matching \code{pattern_*()} constructor, for example \code{\link{pattern_spots}}.
 A single value fixes a parameter, a length-2 vector is a range sampled once per landscape
-of that patterns. Patterns left out from \code{params_list} fall back to
+of that pattern. Patterns left out from \code{params_list} fall back to
 the default ranges. Default NULL uses the default ranges for all patterns.}
 
 \item{pattern_probs}{Numeric vector. Probability that a specific landscape pattern

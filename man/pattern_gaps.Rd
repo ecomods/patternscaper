@@ -43,14 +43,9 @@ for the \code{"gaps"} pattern, to pass to \code{\link{create_landscape}} or
 \code{\link{create_landscapes}}.
 }
 \details{
-A single value fixes a parameter. A length-2 vector is a range, sampled once
-per landscape by \code{\link{create_landscapes}} and rejected by
-\code{\link{create_landscape}}.
-
-Gaps are bare patches in vegetated ground, the inverse of
-\code{\link{pattern_spots}}. The inversion is what distinguishes the two
-patterns, so unlike \code{\link{pattern_spots}} this has no
-\code{invert_landscape} parameter.
+This is the inverse of \code{\link{pattern_spots}}. The inversion is what
+distinguishes the two patterns, so unlike \code{\link{pattern_spots}} this
+has no \code{invert_landscape} parameter.
 }
 \examples{
 # A single landscape, with fixed values
@@ -99,6 +94,10 @@ Other landscape creation:
 }
 \concept{landscape creation}
 \section{Valid values and batch sampling}{
+A single value fixes a parameter. A length-2 vector is a range, sampled
+once per landscape by \code{\link{create_landscapes}} and rejected by
+\code{\link{create_landscape}}.
+
 \emph{Valid} is what \code{\link{create_landscape}} accepts.
 \emph{Sampled} is the range \code{\link{create_landscapes}} draws from
 per landscape for any parameter left unset, so the defaults shown in Usage
