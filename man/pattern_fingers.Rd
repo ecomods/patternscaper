@@ -37,6 +37,7 @@ A named list of the supplied parameters, classed
     \code{"landscape_params"}.
 }
 \description{
+Curvy, finger-like extensions of vegetation reaching into the bare zone.
 Builds a validated parameter list for the \code{"fingers"} pattern, to pass
 to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 }

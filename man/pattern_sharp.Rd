@@ -25,7 +25,8 @@ A named list of the supplied parameters, classed
     \code{"landscape_params"}.
 }
 \description{
-Builds a validated parameter list for the \code{"sharp"} pattern, to pass to
+A vegetated and a bare zone with an abrupt boundary between them. Builds a
+validated parameter list for the \code{"sharp"} pattern, to pass to
 \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 }
 \details{

@@ -60,7 +60,8 @@ new_landscape_params_unchecked <- function(params, pattern) {
 
 #' Parameters for the Random Pattern
 #'
-#' Builds a validated parameter list for the \code{"random"} pattern, to pass to
+#' Vegetation placed at random, with no spatial structure. Builds a validated
+#' parameter list for the \code{"random"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
 #' @details
@@ -94,7 +95,8 @@ pattern_random <- function(veg_prop = 0.5) {
 
 #' Parameters for the Bare Pattern
 #'
-#' Builds a validated parameter list for the \code{"bare"} pattern, to pass to
+#' Sparse vegetation placed at random, with no spatial structure. Builds a
+#' validated parameter list for the \code{"bare"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
 #' @details
@@ -128,7 +130,8 @@ pattern_bare <- function(veg_prop = 0.1) {
 
 #' Parameters for the Dense Pattern
 #'
-#' Builds a validated parameter list for the \code{"dense"} pattern, to pass to
+#' Dense vegetation placed at random, with no spatial structure. Builds a
+#' validated parameter list for the \code{"dense"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
 #' @details
@@ -162,7 +165,8 @@ pattern_dense <- function(veg_prop = 0.9) {
 
 #' Parameters for the Sharp Pattern
 #'
-#' Builds a validated parameter list for the \code{"sharp"} pattern, to pass to
+#' A vegetated and a bare zone with an abrupt boundary between them. Builds a
+#' validated parameter list for the \code{"sharp"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
 #' @details
@@ -217,8 +221,11 @@ pattern_sharp <- function(
 
 #' Parameters for the Diffuse Pattern
 #'
-#' Builds a validated parameter list for the \code{"diffuse"} pattern, to pass
-#' to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#' A vegetated and a bare zone with a gradual transition between them, where
+#' the chance of a cell being vegetated falls off with distance from the
+#' boundary. Builds a validated parameter list for the \code{"diffuse"}
+#' pattern, to pass to \code{\link{create_landscape}} or
+#' \code{\link{create_landscapes}}.
 #'
 #' @details
 #' A single value fixes a parameter. A length-2 vector is a range, sampled once
@@ -264,6 +271,7 @@ pattern_diffuse <- function(
 
 #' Parameters for the Fingers Pattern
 #'
+#' Curvy, finger-like extensions of vegetation reaching into the bare zone.
 #' Builds a validated parameter list for the \code{"fingers"} pattern, to pass
 #' to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
@@ -335,8 +343,9 @@ pattern_fingers <- function(
 
 #' Parameters for the Clustered Pattern
 #'
-#' Builds a validated parameter list for the \code{"clustered"} pattern, to
-#' pass to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#' Vegetation clusters scattered into the bare zone. Builds a validated
+#' parameter list for the \code{"clustered"} pattern, to pass to
+#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
 #' @details
 #' A single value fixes a parameter. A length-2 vector is a range, sampled once
@@ -419,7 +428,8 @@ pattern_clustered <- function(
 
 #' Parameters for the Bands Pattern
 #'
-#' Builds a validated parameter list for the \code{"bands"} pattern, to pass to
+#' Sinusoidal vegetation bands running parallel to the boundary. Builds a
+#' validated parameter list for the \code{"bands"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
 #' @details
@@ -490,7 +500,8 @@ pattern_bands <- function(
 
 #' Parameters for the Spots Pattern
 #'
-#' Builds a validated parameter list for the \code{"spots"} pattern, to pass to
+#' Circular vegetation patches on bare ground. Builds a validated parameter
+#' list for the \code{"spots"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
 #' @details
@@ -570,8 +581,9 @@ pattern_spots <- function(
 
 #' Parameters for the Gaps Pattern
 #'
-#' Builds a validated parameter list for the \code{"gaps"} pattern, to pass to
-#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#' Circular bare gaps in vegetated ground. Builds a validated parameter list
+#' for the \code{"gaps"} pattern, to pass to \code{\link{create_landscape}} or
+#' \code{\link{create_landscapes}}.
 #'
 #' @details
 #' A single value fixes a parameter. A length-2 vector is a range, sampled once
@@ -641,8 +653,9 @@ pattern_gaps <- function(
 
 #' Parameters for the Labyrinth Pattern
 #'
-#' Builds a validated parameter list for the \code{"labyrinth"} pattern, to
-#' pass to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#' Maze-like bands of vegetation, mimicking a Turing pattern. Builds a
+#' validated parameter list for the \code{"labyrinth"} pattern, to pass to
+#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
 #' @details
 #' A single value fixes a parameter. A length-2 vector is a range, sampled once

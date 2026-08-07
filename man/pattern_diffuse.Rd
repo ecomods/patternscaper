@@ -20,8 +20,11 @@ A named list of the supplied parameters, classed
     \code{"landscape_params"}.
 }
 \description{
-Builds a validated parameter list for the \code{"diffuse"} pattern, to pass
-to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+A vegetated and a bare zone with a gradual transition between them, where
+the chance of a cell being vegetated falls off with distance from the
+boundary. Builds a validated parameter list for the \code{"diffuse"}
+pattern, to pass to \code{\link{create_landscape}} or
+\code{\link{create_landscapes}}.
 }
 \details{
 A single value fixes a parameter. A length-2 vector is a range, sampled once

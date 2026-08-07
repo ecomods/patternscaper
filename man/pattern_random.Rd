@@ -15,7 +15,8 @@ A named list of the supplied parameters, classed
     \code{"landscape_params"}.
 }
 \description{
-Builds a validated parameter list for the \code{"random"} pattern, to pass to
+Vegetation placed at random, with no spatial structure. Builds a validated
+parameter list for the \code{"random"} pattern, to pass to
 \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 }
 \details{

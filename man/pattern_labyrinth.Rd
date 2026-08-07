@@ -43,8 +43,9 @@ A named list of the supplied parameters, classed
     \code{"landscape_params"}.
 }
 \description{
-Builds a validated parameter list for the \code{"labyrinth"} pattern, to
-pass to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+Maze-like bands of vegetation, mimicking a Turing pattern. Builds a
+validated parameter list for the \code{"labyrinth"} pattern, to pass to
+\code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 }
 \details{
 A single value fixes a parameter. A length-2 vector is a range, sampled once
