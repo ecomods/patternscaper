@@ -31,6 +31,26 @@ new_landscape_params <- function(params, pattern) {
     )
   }
 
+  new_landscape_params_unchecked(params, pattern)
+}
+
+#' Tag a Pattern Parameter List Without Validating It
+#'
+#' For callers holding values that are already known good. The batch path
+#' samples from ranges \code{\link{validate_params_list}} has already checked,
+#' so re-validating every draw would add a failure mode inside
+#' \code{\link{try_create_landscape}}'s \code{tryCatch}, where an error becomes
+#' a silently dropped landscape rather than a message.
+#'
+#' @param params Named list of parameters.
+#' @param pattern Character. Pattern the parameters belong to.
+#'
+#' @return Named list with class \code{"landscape_params"} and a \code{pattern}
+#'     attribute.
+#'
+#' @keywords internal
+#' @noRd
+new_landscape_params_unchecked <- function(params, pattern) {
   structure(
     params,
     class = c("landscape_params", "list"),

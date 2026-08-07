@@ -521,10 +521,28 @@ sample_landscape_params <- function(
 try_create_landscape <- function(pattern, params, index, rotation) {
   tryCatch(
     {
-      landscape <- do.call(
-        create_landscape,
-        c(list(pattern = pattern), params)
+      # width/height/rotation are arguments of create_landscape(); everything
+      # else is a pattern parameter. Values come from sample_landscape_params()
+      # and are already known valid, so they skip the constructor's checks.
+      fixed <- c("width", "height", "rotation")
+
+      args <- list(
+        pattern = pattern,
+        width = params$width,
+        height = params$height,
+        params = new_landscape_params_unchecked(
+          params[setdiff(names(params), fixed)],
+          pattern
+        )
       )
+
+      # Only rotatable patterns carry a rotation, and create_landscape() tests
+      # missing(rotation) -- so pass it through only when it is actually set
+      if (!is.null(params$rotation)) {
+        args$rotation <- params$rotation
+      }
+
+      landscape <- do.call(create_landscape, args)
 
       # Set descriptive name
       landscape_name <- paste0(
