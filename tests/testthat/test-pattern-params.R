@@ -126,15 +126,6 @@ test_that("each constructor tags the pattern it was built for", {
   }
 })
 
-test_that("pattern_spots returns a tagged list of only the supplied parameters", {
-  params <- pattern_spots(n_spots = 15, spot_radius = 8)
-
-  expect_s3_class(params, "landscape_params")
-  expect_equal(attr(params, "pattern"), "spots")
-  expect_equal(names(params), c("n_spots", "spot_radius"))
-  expect_equal(params$n_spots, 15)
-})
-
 test_that("pattern_spots drops unsupplied parameters instead of filling defaults", {
   # The signature carries the generators' defaults so they show up in the help
   # page, but recording them would override the generator -- and in the batch
@@ -168,29 +159,53 @@ test_that("pattern_spots accepts ranges for create_landscapes", {
 
 # create_landscape() ----------------------------------------------------------
 
-test_that("params produces the same landscape as passing parameters individually", {
-  set.seed(42)
-  l_params <- create_landscape(
-    "spots",
-    width = 40,
-    height = 40,
-    params = pattern_spots(n_spots = 5, spot_radius = 4)
+# This compares the constructor route against calling the generator directly.
+# That is the guarantee that matters: the values a user puts into pattern_*()
+# reach the generator unchanged. Until 0.3.0 it compared against passing
+# parameters through ..., which no longer exists.
+
+test_that("every constructor reaches its generator unchanged", {
+  cases <- list(
+    random = list(veg_prop = 0.3),
+    bare = list(veg_prop = 0.3),
+    dense = list(veg_prop = 0.3),
+    sharp = list(boundary_position = 0.3, noise_bare_to_veg = 0.1),
+    diffuse = list(steepness = 0.3, boundary_position = 0.4),
+    fingers = list(sine_length_mean = 15, sine_height_mean = 6),
+    clustered = list(n_clusters = 6, cluster_radius = 4),
+    bands = list(band_thickness = 4, band_spacing = 12),
+    spots = list(n_spots = 5, spot_radius = 4),
+    gaps = list(n_spots = 4, spot_radius = 6),
+    labyrinth = list(frequency = 3.5, octaves = 3)
   )
 
-  set.seed(42)
-  l_dots <- create_landscape(
-    "spots",
-    width = 40,
-    height = 40,
-    n_spots = 5,
-    spot_radius = 4
-  )
+  # Adding a pattern to the fixture fails here until it gets a case
+  expect_setequal(names(cases), names(pattern_constructors))
 
-  expect_equal(
-    terra::as.matrix(l_params$data, wide = TRUE),
-    terra::as.matrix(l_dots$data, wide = TRUE)
-  )
-  expect_equal(l_params$params, l_dots$params)
+  for (name in names(cases)) {
+    pair <- pattern_constructors[[name]]
+
+    set.seed(9)
+    l_params <- create_landscape(
+      name,
+      width = 60,
+      height = 60,
+      params = do.call(pair$build, cases[[name]])
+    )
+
+    set.seed(9)
+    l_direct <- do.call(
+      pair$generate,
+      c(list(width = 60, height = 60), cases[[name]])
+    )
+
+    expect_equal(
+      terra::as.matrix(l_params$data, wide = TRUE),
+      terra::as.matrix(l_direct$data, wide = TRUE),
+      info = name
+    )
+    expect_equal(l_params$params, l_direct$params, info = name)
+  }
 })
 
 test_that("create_landscape leaves unset parameters at the generator defaults", {
@@ -211,29 +226,6 @@ test_that("create_landscape leaves unset parameters at the generator defaults", 
   )
 })
 
-test_that("the veg_prop constructors match passing the parameter individually", {
-  for (name in c("random", "bare", "dense")) {
-    build <- pattern_constructors[[name]]$build
-
-    set.seed(3)
-    l_params <- create_landscape(
-      name,
-      width = 20,
-      height = 20,
-      params = build(veg_prop = 0.3)
-    )
-
-    set.seed(3)
-    l_dots <- create_landscape(name, width = 20, height = 20, veg_prop = 0.3)
-
-    expect_equal(
-      terra::as.matrix(l_params$data, wide = TRUE),
-      terra::as.matrix(l_dots$data, wide = TRUE),
-      info = name
-    )
-  }
-})
-
 test_that("params combines with rotation, which is not a pattern parameter", {
   l <- create_landscape(
     "sharp",
@@ -245,63 +237,6 @@ test_that("params combines with rotation, which is not a pattern parameter", {
 
   expect_equal(l$params$boundary_position, 0.3)
   expect_equal(l$params$rotation, 45)
-})
-
-test_that("the ecotone constructors match passing parameters individually", {
-  cases <- list(
-    sharp = list(boundary_position = 0.3, noise_bare_to_veg = 0.1),
-    diffuse = list(steepness = 0.3, boundary_position = 0.4),
-    fingers = list(sine_length_mean = 15, sine_height_mean = 6),
-    clustered = list(n_clusters = 6, cluster_radius = 4),
-    bands = list(band_thickness = 4, band_spacing = 12)
-  )
-
-  for (name in names(cases)) {
-    build <- pattern_constructors[[name]]$build
-    args <- list(name, width = 60, height = 60)
-
-    set.seed(9)
-    l_params <- do.call(
-      create_landscape,
-      c(args, list(params = do.call(build, cases[[name]])))
-    )
-
-    set.seed(9)
-    l_dots <- do.call(create_landscape, c(args, cases[[name]]))
-
-    expect_equal(
-      terra::as.matrix(l_params$data, wide = TRUE),
-      terra::as.matrix(l_dots$data, wide = TRUE),
-      info = name
-    )
-  }
-})
-
-test_that("the self-organized constructors match passing parameters individually", {
-  cases <- list(
-    gaps = list(n_spots = 4, spot_radius = 6),
-    labyrinth = list(frequency = 3.5, octaves = 3)
-  )
-
-  for (name in names(cases)) {
-    build <- pattern_constructors[[name]]$build
-    args <- list(name, width = 60, height = 60)
-
-    set.seed(9)
-    l_params <- do.call(
-      create_landscape,
-      c(args, list(params = do.call(build, cases[[name]])))
-    )
-
-    set.seed(9)
-    l_dots <- do.call(create_landscape, c(args, cases[[name]]))
-
-    expect_equal(
-      terra::as.matrix(l_params$data, wide = TRUE),
-      terra::as.matrix(l_dots$data, wide = TRUE),
-      info = name
-    )
-  }
 })
 
 test_that("the noise parameters are reachable through create_landscapes", {
@@ -335,24 +270,11 @@ test_that("create_landscape rejects a range, which it cannot sample", {
   )
 })
 
-test_that("create_landscape rejects params combined with individual parameters", {
+test_that("create_landscape rejects pattern parameters passed directly", {
+  # params is the only route -- create_landscape() has no ... to absorb them
   expect_error(
-    create_landscape(
-      "spots",
-      params = pattern_spots(n_spots = 5),
-      n_spots = 10
-    ),
-    "not both"
-  )
-
-  # Also when the two do not overlap -- one route per call, always
-  expect_error(
-    create_landscape(
-      "spots",
-      params = pattern_spots(n_spots = 5),
-      spot_radius = 4
-    ),
-    "not both"
+    create_landscape("spots", n_spots = 5),
+    "unused argument"
   )
 })
 
@@ -398,7 +320,7 @@ test_that("params_list treats a constructor range as a range", {
 test_that("params_list accepts constructor output and plain lists together", {
   set.seed(7)
   landscapes <- create_landscapes(
-    n = 2,
+    n = 6,
     patterns = c("spots", "sharp"),
     width = 40,
     height = 40,
@@ -408,7 +330,16 @@ test_that("params_list accepts constructor output and plain lists together", {
     )
   )
 
-  expect_length(landscapes, 2)
+  expect_length(landscapes, 6)
+
+  # Both routes have to actually take effect, not just be accepted
+  for (l in landscapes) {
+    if (l$pattern == "spots") {
+      expect_equal(l$params$n_spots, 4)
+    } else {
+      expect_equal(l$params$boundary_position, 0.4)
+    }
+  }
 })
 
 test_that("params_list rejects constructor output under the wrong pattern", {

@@ -792,29 +792,18 @@ rd_batch_ranges <- function(pattern) {
 
 #' Resolve Pattern Parameters for a Single Landscape
 #'
-#' Checks a \code{pattern_*()} parameter list, or falls back to parameters
-#' passed individually. The two cannot be combined: parameters come from one
-#' place or the other, so there is only ever one way to read a call.
+#' Checks a \code{pattern_*()} parameter list and unwraps it for the generator.
 #'
 #' @param params Output of a \code{pattern_*()} constructor, or \code{NULL}.
-#' @param dots Named list of individually supplied parameters.
 #' @param pattern Character. Pattern being generated.
 #'
 #' @return Named list of parameters to pass to the generator.
 #'
 #' @keywords internal
 #' @noRd
-resolve_pattern_params <- function(params, dots, pattern) {
+resolve_pattern_params <- function(params, pattern) {
   if (is.null(params)) {
-    return(dots)
-  }
-
-  if (length(dots) > 0) {
-    cli::cli_abort(c(
-      "Parameters must come either from {.arg params} or on their own, not both.",
-      "x" = "Also supplied individually: {.val {names(dots)}}.",
-      "i" = "{cli::qty(dots)}Add {?it/them} to {.code pattern_{pattern}()}."
-    ))
+    return(list())
   }
 
   if (!inherits(params, "landscape_params")) {

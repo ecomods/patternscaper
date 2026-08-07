@@ -55,7 +55,7 @@ test_that("create_landscape creates correct landscape types", {
       "clustered",
       width = 10,
       height = 10,
-      cluster_radius = 1
+      params = pattern_clustered(cluster_radius = 1)
     )$pattern,
     "clustered"
   )
@@ -64,11 +64,21 @@ test_that("create_landscape creates correct landscape types", {
     "bands"
   )
   expect_equal(
-    create_landscape("spots", width = 10, height = 10, spot_radius = 1)$pattern,
+    create_landscape(
+      "spots",
+      width = 10,
+      height = 10,
+      params = pattern_spots(spot_radius = 1)
+    )$pattern,
     "spots"
   )
   expect_equal(
-    create_landscape("gaps", width = 10, height = 10, spot_radius = 1)$pattern,
+    create_landscape(
+      "gaps",
+      width = 10,
+      height = 10,
+      params = pattern_gaps(spot_radius = 1)
+    )$pattern,
     "gaps"
   )
   expect_equal(
@@ -83,7 +93,7 @@ test_that("create_landscape passes parameters correctly", {
     "sharp",
     width = 30,
     height = 40,
-    boundary_position = 0.7
+    params = pattern_sharp(boundary_position = 0.7)
   )
 
   expect_equal(terra::ncol(l$data), 30)

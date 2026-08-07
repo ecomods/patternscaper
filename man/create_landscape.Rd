@@ -12,8 +12,7 @@ create_landscape(
   name = NULL,
   pattern_label = NULL,
   params = NULL,
-  rotation = 0,
-  ...
+  rotation = 0
 )
 }
 \arguments{
@@ -41,9 +40,6 @@ for each parameter, ranges are only meaningful for \code{\link{create_landscapes
 \item{rotation}{Numeric. Angle to rotate the landscape in degrees (default: 0).
 Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated.
 The remaining patterns ignore it, and are generated without rotation.}
-
-\item{...}{Pattern parameters given individually rather than through
-\code{params}. The two cannot be combined.}
 }
 \value{
 A landscape object with pattern corresponding to the pattern, containing:
@@ -70,26 +66,26 @@ sharp_default <- create_landscape("sharp")
 diffuse_default <- create_landscape("diffuse")
 clustered_default <- create_landscape("clustered")
 
-# Create a modified landscape with custom parameters
+# Set pattern parameters through the matching constructor
 random_modified <- create_landscape(
   "random",
-  veg_prop = 0.3
+  params = pattern_random(veg_prop = 0.3)
 )
 
-# Create a modified landscape with custom parameters
 diffuse_modified <- create_landscape(
   "diffuse",
-  boundary_position = 0.3,
-  steepness = 0.1
+  params = pattern_diffuse(boundary_position = 0.3, steepness = 0.1)
 )
 
-# Create a rotated landscape
+# Rotation is an argument of create_landscape(), not a pattern parameter
 bands_rotated <- create_landscape(
   "bands",
-  band_thickness = 4,
-  band_spacing = 12,
-  amplitude = 6,
-  noise_sd = 2,
+  params = pattern_bands(
+    band_thickness = 4,
+    band_spacing = 12,
+    amplitude = 6,
+    noise_sd = 2
+  ),
   rotation = 45
 )
 
