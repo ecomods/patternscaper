@@ -49,12 +49,12 @@ Other landscape creation:
 \section{Valid values and batch sampling}{
 A single value fixes a parameter. A length-2 vector is a range, sampled
 once per landscape by \code{\link{create_landscapes}} and rejected by
-\code{\link{create_landscape}}.
+\code{\link{create_landscape}}. The table below shows for each parameter: 
 
-\emph{Valid} is what \code{\link{create_landscape}} accepts.
-\emph{Sampled} is the range \code{\link{create_landscapes}} draws from
-per landscape for any parameter left unset, so the defaults shown in Usage
-apply to \code{\link{create_landscape}} only. Ranges that scale with
+\emph{valid} values that \code{\link{create_landscape}} accepts, and
+\emph{sampled} ranges that \code{\link{create_landscapes}} draws from
+for each landscape. For each parameter that is left unset, the defaults are used
+Ranges that scale with
 landscape size are shown for the default 100 by 100.
 \tabular{lll}{
 \strong{Parameter} \tab \strong{Valid} \tab \strong{Sampled} \cr
