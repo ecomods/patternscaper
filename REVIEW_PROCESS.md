@@ -13,7 +13,8 @@ traceability.
 > Passes: Claude + ChatGPT 2026-07-05; Fable 2026-07-05.
 > Triaged and partially worked since. **Last re-verified against the source 2026-08-05** — every
 > item below was checked against the current code, not just carried forward. Items marked
-> **[new]** were added at that re-verification and did not come from the three original passes.
+> **[new]** were added at or after that re-verification — each carries its own date — and did not
+> come from the three original passes.
 
 ---
 
@@ -234,6 +235,31 @@ so it would be collapsed to a scalar, rejected inside the generator, and swallow
      **Results-changing** — same open decision as L25, and on the paper's main patterns. See
      "Open decisions".
 
+### M23. [new] Sampled batch parameters are never validated, and could not safely be  — *(added 2026-08-07)*
+`sample_landscape_params()` draws each landscape's parameters from `batch_range`, and nothing
+checks the result against the same spec's `min`/`max` before it reaches the generator. The obvious
+fix — routing the draw through the `pattern_*()` validation — is **not** safe where it would land:
+`try_create_landscape()` wraps generation in `tryCatch(error = \(e) NULL)`, so a validation failure
+becomes a retried-then-dropped landscape and `create_landscapes(n = 100)` quietly returns 97 with a
+warning. A short training set changes results; that is a worse failure than no check at all. Same
+`tryCatch` as M12, different fix: M12 wants the cause *reported*, this wants the error class *not
+to arrive there in the first place*.
+
+**Not currently reachable.** Measured 2026-08-07 while implementing Milestone 4.1: no `batch_range`
+sits outside its own `min`/`max` at 50×50, 100×100, 200×200, 500×200 or 30×300, and 3,300 draws
+(300 per pattern) produced zero rejections. The invariant *batch_range ⊆ [min, max]* holds today —
+but nothing enforces it, so widening a range later would surface as short batches.
+
+**Why it is open rather than fixed:** Milestone 4.1 rewired the batch path onto `params =` and
+deliberately used `new_landscape_params_unchecked()` (`R/pattern_params.R`) to keep behaviour
+provably identical, since that milestone claims zero results impact. Adding validation is new
+behaviour and belongs on its own.
+- **Fix:** validate the sampled draw *outside* the `tryCatch`, so a spec bug is a loud error rather
+  than a short batch. Pairs naturally with M12 and with M0.1's spec-vs-formals consistency test,
+  which guards the adjacent drift class.
+- **Cheaper alternative:** a test asserting `batch_range ⊆ [min, max]` for every spec entry across
+  several landscape sizes — enforces the invariant without touching the generation path.
+
 ### M17. Add regression tests for the correctness bugs above  — [Claude] *(§7.1)*
 *Partially done.* (H1) `theme_landscape()` and (M2) `frequency` variation both have tests
 (`test-plot_themes.R`, `test-create-training-landscapes.R`). **Remaining:** (M3)
@@ -365,8 +391,10 @@ pages, so anything built per-pattern now is at risk of being thrown away.
 
 **Group B — changes only error/warning paths, not successful runs.** Existing golden checks
 should stay byte-identical; only failure behaviour moves:
-6. **M3 / M8 / M12** — the `create_landscapes()` failure path (miscounted trailing failures,
-   silently dropped invalid pattern names, swallowed error causes), plus the M17 test.
+6. **M3 / M8 / M12 / M23** — the `create_landscapes()` failure path (miscounted trailing failures,
+   silently dropped invalid pattern names, swallowed error causes, unvalidated sampled parameters),
+   plus the M17 test. M12 and M23 are the same `tryCatch` from opposite ends — report the cause vs.
+   keep validation errors from reaching it — so they are best taken together.
 7. ~~**L24** — `plot_classified_landscapes(only_misclassified = TRUE)` at 100% accuracy.~~ *Done
    2026-08-05, together with the rest of the `plot_classified_landscapes()` batch — see
    **Completed**.*
