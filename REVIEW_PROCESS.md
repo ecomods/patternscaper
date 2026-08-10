@@ -11,10 +11,11 @@ The original topic-based IDs (e.g. *§1.1*, *ChatGPT §A*, *F1*) are kept in bra
 traceability.
 
 > Passes: Claude + ChatGPT 2026-07-05; Fable 2026-07-05.
-> Triaged and partially worked since. **Last re-verified against the source 2026-08-05** — every
-> item below was checked against the current code, not just carried forward. Items marked
-> **[new]** were added at or after that re-verification — each carries its own date — and did not
-> come from the three original passes.
+> Triaged and partially worked since. **Last re-verified against the source 2026-08-05**, and again
+> **2026-08-10** for the M18–M22 landscape-generation items specifically (all confirmed complete or
+> updated below after the 2026-08-06/07 `pattern_*()` constructor rollout — see **Completed**). Items
+> marked **[new]** were added at or after the 2026-08-05 re-verification — each carries its own date
+> — and did not come from the three original passes.
 
 ---
 
@@ -105,145 +106,8 @@ broken parameter combo is indistinguishable from bad luck. Still open 2026-08-05
 the mechanism that hid M7 for as long as it did, which is the argument for fixing it.
 - **Fix:** capture and (at least in verbose mode) report `conditionMessage(e)`.
 
-### M18. [new] Landscape parameters are undiscoverable through the public API  — *(added 2026-08-05)*
-Fallout from the 2026-08-04 unexport (see the M13/M9/M7 entries under **Completed**). The 11
-`create_landscape_*()` generators are now `@keywords internal`, but they are still where every
-per-pattern parameter is documented — and both public functions point users at them:
-- `create_landscape()` (`R/landscape_create.R:15-16`): *"See the documentation of the individual
-  functions for details on required and optional parameters."* Those pages are now internal and
-  off the pkgdown reference index.
-- `create_landscapes()` (`R/landscape_create.R:150-152`): `params_list` says the names and default
-  ranges *"can be found in the documentation of `create_landscape`"* — where they are not.
-
-**Effect:** a user has no documented route to learn that `spots` takes `n_spots` /
-`spot_radius` / `spot_radius_sd` / `radius_noise_fraction` / `regular_spots`, what their bounds
-are, or what ranges the batch generator samples by default. The API got smaller (good) but the
-documentation did not follow it.
-**Verified 2026-08-05** (against the installed package): `?create_landscape_bare` *does* resolve —
-`@keywords internal` affects indexing, not the help page — but 0 of the 11 topics appear in the
-installed `INDEX`, so `help(package = "spatPatClassifyR")` does not list them. Reachable by exact
-name, invisible when browsing. `_pkgdown.yml` already lists all 11 explicitly, so the *website*
-side is fine; the console side is not.
-
-**Approach — superseded by M21 (2026-08-06).** The `pattern_*()` constructors *are* the per-pattern
-documentation, so the doc-only route is dropped: no `desc` field on the spec, no generated
-`?landscape_patterns` overview topic. What survives from this entry:
-1. **`@noRd` the 11 generators** once their content has moved, removing the dead-end pages. ⚠️
-   `_pkgdown.yml` lists all 11 topics explicitly and pkgdown *errors* on an unresolvable
-   `contents:` entry — that section must be updated in the same commit.
-
-**Why not keep the docs on the generator pages:** the `\usage` section would show a signature the
-user cannot call, and `Usage` is the affordance users copy from; a "do not call directly" note does
-not fix that. Precedent for doc-only topics (verified locally): `?mgcv::smooth.terms` and
-`?mgcv::gam.models` are topics with no function of that name; `parsnip` uses `?details_*` per
-engine.
-
-**Backstop against drift:** add a test comparing the spec's parameter names per pattern against
-the corresponding `create_landscape_*()` formals (minus `width`/`height`), so a mismatch fails the
-suite instead of waiting to be noticed.
-
-### M19. [new] `create_landscape()`/`create_landscapes()` docs don't describe what actually happens  — *(added 2026-08-05)*
-Beyond the missing parameter table (M18), the two public help pages leave the batch behaviour
-undocumented:
-- **Rotation applies to only 5 of 11 patterns** and is silently dropped for the rest — see L10.
-- **`custom_pattern`** (`R/landscape_create.R:13-14`) is one cryptic line ("Optional pattern for
-  the landscape") with no explanation of why you would relabel a landscape and no example.
-- **How `params_list` values are interpreted** — a length-2 vector is a range sampled per
-  landscape, a length-1 value is fixed, logicals are sampled from the supplied set — is only
-  visible by reading `sample_landscape_params()`.
-- **What `create_landscapes()` returns on partial failure** is undocumented (and currently
-  mis-reported — see M3).
-- **The `@return` of `create_landscape()`** describes `data`/`pattern`/`params` but not `name`,
-  which the constructor does set.
-
-### M20. [new] Vignette is still organised around the now-internal generators  — *(added 2026-08-05)*
-`vignettes/landscape-generation.qmd` — the "Creating Single Landscapes" half (§"Spot Patterns",
-§"Clustered Patterns", §"Labyrinth Patterns") is structured per generator function, which no
-longer matches the 2-function public API. It does *not* call the internal functions directly
-(checked — it goes through `create_landscape()`), so it is not broken, just mis-shaped.
-- **Fix:** restructure around `create_landscape()` / `create_landscapes()` once M18 lands, and
-  link the parameter reference from it.
-- **Partly on hold (M21).** The *visual tour* half — one figure per pattern showing what it looks
-  like — is safe to write now and is arguably the vignette's main job (it answers "which pattern do
-  I want?" far better than a help page can). The *parameter-passing* sections are not: if M21 lands
-  they would need rewriting from `list(n_spots = 15)` to `spots_params(n_spots = 15)`.
-
-### M21. [new] Per-pattern parameter constructors (`pattern_spots()` …)  — *(added 2026-08-05)*
-**DECIDED 2026-08-05: go ahead.** Step-by-step implementation plan, milestones and verification
-schedule live in `../spatPatClassifyR_paper/PATTERN_CONSTRUCTORS_PLAN.md` (temporary working
-document — delete when done). This supersedes M18 steps 3–4: the `pattern_*` help pages *are* the
-per-pattern documentation, so no doc-only topics are needed. Naming settled as `pattern_*` (not
-`*_params`) so `pattern_<TAB>` lists all 11.
-
-Because `create_landscape()` dispatches through `...`, pattern parameters are invisible to
-autocomplete: typing `create_landscape("spots", ` will never suggest `n_spots`. Completion is
-driven by `formals()`, and `...` has nothing to offer. No documentation fixes this — only an API
-change does.
-
-**The idiom:** export one small parameter-constructor per pattern whose formals *are* that
-pattern's parameters, returning a validated plain list:
-
-    create_landscape("spots", params = spots_params(n_spots = 15, spot_radius = 10))
-    create_landscapes(n = 50, params_list = list(spots = spots_params(n_spots = c(5, 10))))
-
-Established R pattern for "one entry point, many type-specific parameter sets":
-`stats::glm(family = binomial(...))` and its `control = glm.control(...)`, `lme4::lmerControl()`,
-`ggplot2::element_text()`, `keras3::optimizer_adam()` (already a dependency).
-
-**What it would solve beyond autocomplete:**
-- The typo hazard disappears — `spots_params(n_spot = 5)` errors at the call site instead of
-  silently partial-matching (single path) or being warned-and-ignored (batch path).
-- **It resolves the M18 documentation problem outright.** `?spots_params` is a real exported
-  function with an honest `\usage`, runnable examples, and an entry in `help(package=)` — no
-  doc-only topics, no `\usage` lie, no dead-end pages on non-callable functions.
-- Validation moves to construction time, with the pattern known.
-
-**Costs:** public API goes 2 → 13 exports again, partially reversing the 2026-08-04 reduction
-(counter-argument: these are *parameter constructors*, not 11 ways to generate a landscape — the
-"one obvious way to generate" property is preserved). It is real code, not just docs. And the
-value depends on how much autocomplete matters for a companion package whose users mostly copy
-from vignettes.
-
-**Cheapness:** it can be **purely additive** — `spots_params()` returns a plain list, so
-`list(n_spots = 15)` keeps working unchanged. No deprecation, no result change. Verified
-2026-08-05: the analysis repo has **zero** `params_list` call sites, so the blast radius is nil.
-
-**Consequence for M18/M19/M20:** no doc-only per-pattern topics, and no `?landscape_patterns`
-overview topic — the `pattern_*` help pages replace both.
-
-### M22. [new] `random_spots` is silently stripped in batch generation — M9 all over again  — *(found 2026-08-05)*
-`random_spots` is a working formal of `create_landscape_sharp()`, `create_landscape_fingers()` and
-`create_landscape_clustered()`, and has its own validator (`validate_random_spots()`,
-`R/landscape_parameter_validation.R:102`) — but it is **not in `landscape_param_specs()`**, so
-`validate_params_list()` treats it as unknown and drops it. Verified 2026-08-05:
-
-    create_landscape("sharp", random_spots = c(0.3, 0.3))   # works, changes the landscape
-    create_landscapes(n = 2, patterns = "sharp",
-                      params_list = list(sharp = list(random_spots = c(0.3, 0.3))))
-    #> ! Unknown parameter "random_spots" for pattern "sharp" - will be ignored
-    #> params actually used: 0 0
-
-**Effect:** every batch-generated `sharp` / `fingers` / `clustered` landscape has
-`random_spots = c(0, 0)` — no cell-flipping noise — with no way to change it through
-`create_landscapes()`. These are the paper's **ecotone** patterns, i.e. the primary use case.
-Structurally identical to M9 (`radius_noise_fraction`), which the M13 consolidation fixed for
-spots/gaps; this one was missed because nothing compared the spec against the generator formals.
-Found by running M18's proposed consistency test while writing the implementation plan — which is
-the argument for that test existing.
-
-**Fix — decided 2026-08-06: split the parameter, in two deliberately separate steps.** A length-2
-value cannot be added to the spec as-is: the batch path reads length 2 as a *range* to sample from,
-so it would be collapsed to a scalar, rejected inside the generator, and swallowed by
-`try_create_landscape()` — a silently dropped landscape, worse than today's warning.
-  1. Replace `random_spots` with two scalars, `noise_veg_to_bare` and `noise_bare_to_veg`, and add
-     all six entries to the spec with `batch_range = NULL` (validation-only) → settable through
-     both entry points, **changes no existing raster**. Removes the package's only vector-valued
-     parameter, so no `arity` concept is needed and the shared validator/sampler are untouched.
-     Milestone 0.2 of `../spatPatClassifyR_paper/PATTERN_CONSTRUCTORS_PLAN.md`, which carries the
-     full usage inventory showing the parameter has never influenced a published number.
-  2. *Later, separately:* decide whether the two deserve a default `batch_range`.
-     **Results-changing** — same open decision as L25, and on the paper's main patterns. See
-     "Open decisions".
+*M18, M19, M20, M21 and M22 step 1 are done — see **Completed** ("M21 + M18 + M19 + M20 + M22 step 1").
+M22 step 2 remains open, tracked under "Open decisions" below alongside L25.*
 
 ### M23. [new] Sampled batch parameters are never validated, and could not safely be  — *(added 2026-08-07)*
 `sample_landscape_params()` draws each landscape's parameters from `batch_range`, and nothing
