@@ -220,12 +220,6 @@ user-facing bugs.
   evaluated twice.
 - **Remaining:** `R/nn_keras.R` (several), `R/nn_utils.R`, and the other `R/plot_*` files.
 
-### L19. Inconsistent source-file naming  — [Claude] *(§5.5)*
-`create_landscape_bare.R` / `create_landscape_dense.R` vs the other nine `landscape_create_*.R`,
-with dispatcher `landscape_create.R`. Pick one convention (e.g. `landscape_create_*.R`, now the
-majority) and rename for discoverability. Confirmed still open 2026-08-05. Pure file rename — no
-behaviour change, no `man/` change.
-
 ### L21. Empty README badge block  — [Claude] *(§6.3)*
 `README.Rmd:18-19` / `README.md:6-8`. Consider lifecycle / R-CMD-check / test-coverage /
 (eventual) CRAN badges.
@@ -287,7 +281,7 @@ whether the analysis repo has to be re-run:
 **M18/M19/M20/M21/M22 step 1 done 2026-08-06/07** — see **Completed**.
 
 *Remaining:*
-1. **L19** — file renames (`create_landscape_bare.R`/`_dense.R` → `landscape_create_*.R`).
+1. ~~**L19**~~ — done 2026-08-10, see **Completed**.
 2. **L17** — `sapply()` → `vapply()` (`R/nn_keras.R`, `R/nn_utils.R`, other `R/plot_*` files).
 3. **L21** — README badges.
 
@@ -345,6 +339,19 @@ Checked against current source; correct as-is, no action needed:
 ---
 
 ## Completed
+
+### L19. Inconsistent source-file naming  — [Claude] *(§5.5)*
+*Fixed 2026-08-10.* `create_landscape_bare.R` / `create_landscape_dense.R` were the only two
+generator files not following the `landscape_create_*.R` convention used by the other nine (and
+by the dispatcher `landscape_create.R`).
+**Fix:** renamed both files (`git mv`) to `landscape_create_bare.R` / `landscape_create_dense.R`.
+Pure file rename — the `create_landscape_bare()`/`create_landscape_dense()` function names,
+exports, and `man/` pages are unchanged, so no `devtools::document()` was needed. Checked
+`NAMESPACE`, `DESCRIPTION`, `.Rbuildignore`, `_pkgdown.yml`, tests, and `dev/` for any other
+reference to the old *filenames* — none found; the only remaining hits for
+`create_landscape_bare`/`create_landscape_dense` are the function names themselves, which did not
+change. Verified: `devtools::test()` (2406 pass / 0 fail) and `dev/golden/check_landscapes.R`
+(byte-exact, all 11 patterns).
 
 ### M3. `create_landscapes()` failure bookkeeping is fragile (trailing failures misreported as full success)  — [Claude] [Fable] *(§1.4 / F5)*
 *Fixed 2026-08-10.* `all_landscapes[[i]] <- NULL` on failure removed the element rather than
