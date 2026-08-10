@@ -67,14 +67,6 @@ than `"accuracy"`, `evaluation[["accuracy"]]` is `NULL`, `round(NULL, 4)` is `nu
 - **Fix:** derive the key from the compiled metric name (first non-`"loss"` element of
   `evaluation`, or look up by the user's `metrics[1]`) and guard against a missing key.
 
-### M8. Invalid pattern names are silently dropped in `create_landscapes()`  — [ChatGPT] [Fable] *(ChatGPT §D)*
-`R/landscape_create.R:248` uses `patterns <- intersect(patterns, valid_patterns)`. A mix of
-valid and invalid names silently ignores the invalid ones (only the all-invalid case errors).
-Fable confirmed; still open 2026-08-05.
-- **Effect:** typos can quietly change the requested class set and distort the pattern
-  distribution.
-- **Fix:** warn or abort on unknown entries instead of silently dropping them.
-
 ### M11. Inconsistent return shape when `return_performance = TRUE`  — [Claude] [ChatGPT] *(§2.2)*
 `apply_pixel_model()` always returns `list(predictions, performance)` (performance may be
 `NULL`); `apply_metric_model()` returns a **bare tibble** in some branches (unknown classes,
@@ -332,10 +324,10 @@ whether the analysis repo has to be re-run:
 **Group B — changes only error/warning paths, not successful runs.** Existing golden checks
 should stay byte-identical; only failure behaviour moves:
 6. ~~**M3**~~ — done 2026-08-10, see **Completed**.
-7. **M8 / M12 / M23** — the `create_landscapes()` failure path (silently dropped invalid pattern
-   names, swallowed error causes, unvalidated sampled parameters). M12 and M23 are the same
-   `tryCatch` from opposite ends — report the cause vs. keep validation errors from reaching it —
-   so they are best taken together.
+7. ~~**M8**~~ — done 2026-08-10, see **Completed**.
+8. **M12 / M23** — the `create_landscapes()` failure path (swallowed error causes, unvalidated
+   sampled parameters). Same `tryCatch` from opposite ends — report the cause vs. keep validation
+   errors from reaching it — so they are best taken together.
 7. ~~**L24** — `plot_classified_landscapes(only_misclassified = TRUE)` at 100% accuracy.~~ *Done
    2026-08-05, together with the rest of the `plot_classified_landscapes()` batch — see
    **Completed**.*
@@ -400,6 +392,19 @@ inside the generator) — with zero successes, every position is effectively a t
 pinning both the correct `"Generated 0/3 ... (3 failed)"` message and the empty return. Verified:
 `devtools::test()` (2398 pass / 0 fail) and `dev/golden/check_landscapes.R` (byte-exact, all 11
 patterns) — no change to any valid-input output.
+
+### M8. Invalid pattern names are silently dropped in `create_landscapes()`  — [ChatGPT] [Fable] *(ChatGPT §D)*
+*Fixed 2026-08-10.* `patterns <- intersect(patterns, valid_patterns)` silently ignored a mix of
+valid and invalid names (only the all-invalid case errored) — a typo could quietly shrink the
+requested pattern set and distort the class distribution instead of raising an error.
+**Fix:** abort as soon as any unknown pattern name is present, naming the offending name(s) and
+the valid options — matching `create_landscape()` (singular), which already aborted on an invalid
+pattern. Chose abort over warn-and-continue for consistency with that sibling function, and
+because a silently distorted training-set distribution is a worse failure mode than an upfront
+error. Existing all-invalid test updated to the new message; new regression test added for the
+mixed valid/invalid case (`test-create-training-landscapes.R`). Verified: `devtools::test()`
+(2399 pass / 0 fail) and `dev/golden/check_landscapes.R` (byte-exact) — no change to any
+valid-input output.
 
 ### M21 + M18 + M19 + M20 + M22 (step 1). Per-pattern parameter constructors (`pattern_*()`)  — [new]
 *Fixed 2026-08-06/07*, as Milestones 0–5 behind the existing golden harness. Full decision log kept

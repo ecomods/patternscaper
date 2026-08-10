@@ -289,7 +289,7 @@ create_landscapes <- function(
     validate_rotation(rotation)
   }
 
-  # Filter out invalid patterns
+  # Reject unknown pattern names
   valid_patterns <- c(
     "random",
     "bare",
@@ -303,10 +303,13 @@ create_landscapes <- function(
     "gaps",
     "labyrinth"
   )
-  patterns <- intersect(patterns, valid_patterns)
+  unknown_patterns <- setdiff(patterns, valid_patterns)
 
-  if (length(patterns) == 0) {
-    cli::cli_abort("No valid landscape patterns specified")
+  if (length(unknown_patterns) > 0) {
+    cli::cli_abort(c(
+      "Invalid pattern(s): {paste(unknown_patterns, collapse = ', ')}",
+      "i" = "Valid options are: {paste(valid_patterns, collapse = ', ')}"
+    ))
   }
 
   # Create full default parameter list

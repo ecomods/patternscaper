@@ -14,10 +14,19 @@ test_that("create_landscapes validates inputs", {
     "'n' must be a positive integer"
   )
 
-  # Invalid types - empty after filtering
+  # All-unknown patterns
   expect_error(
     create_landscapes(n = 10, patterns = c("invalid1", "invalid2")),
-    "No valid landscape patterns specified"
+    "Invalid pattern\\(s\\): invalid1, invalid2"
+  )
+})
+
+test_that("create_landscapes rejects a mix of valid and invalid pattern names (M8)", {
+  # A typo mixed in with valid patterns must abort, not silently shrink the
+  # requested pattern set to the valid subset.
+  expect_error(
+    create_landscapes(n = 10, patterns = c("random", "sharpp", "spots")),
+    "Invalid pattern\\(s\\): sharpp"
   )
 })
 
