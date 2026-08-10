@@ -624,12 +624,12 @@ pattern_bands <- function(
 #'
 #' @param n_spots Integer. Number of circular spots to generate (default: 5).
 #'     For regular placement, this may be automatically reduced if the landscape
-#'     cannot accommodate the requested number at the given \code{spot_radius}.
-#' @param spot_radius Numeric. Mean radius of each spot in cells (default: 10).
+#'     cannot accommodate the requested number with the given \code{spot_radius}.
+#' @param spot_radius Numeric. Mean radius of each spot in pixels (default: 10).
 #'     Must be positive and smaller than landscape dimensions.
 #' @param spot_radius_sd Numeric. Standard deviation for random variation in spot radius.
-#'     Each spot's radius is sampled from N(spot_radius, spot_radius_sd).
-#'     (default: 0, no variation)
+#'     Each spot's radius is sampled from a normal distribution with mean \code{spot_radius}
+#'     and standard deviation \code{spot_radius_sd} (default: 0, no variation).
 #' @param radius_noise_fraction Numeric (0 to 1). Proportion of the spot radius
 #'     where gradual edge noise is applied. 0 creates sharp circular edges,
 #'     1 applies probabilistic cell inclusion across the entire radius.
@@ -722,12 +722,12 @@ pattern_spots <- function(
 #'
 #' @param n_spots Integer. Number of circular gaps to generate (default: 5).
 #'     For regular placement, this may be automatically reduced if the landscape
-#'     cannot accommodate the requested number at the given \code{spot_radius}.
-#' @param spot_radius Numeric. Mean radius of each gap in cells (default: 10).
+#'     cannot accommodate the requested number with the given \code{spot_radius}.
+#' @param spot_radius Numeric. Mean radius of each gap in pixels (default: 10).
 #'     Must be positive and smaller than landscape dimensions.
 #' @param spot_radius_sd Numeric. Standard deviation for random variation in gap radius.
-#'     Each gap's radius is sampled from N(spot_radius, spot_radius_sd).
-#'     (default: 0, no variation)
+#'     Each gap's radius is sampled from a normal distribution with mean \code{spot_radius}
+#'     and standard deviation \code{spot_radius_sd} (default: 0, no variation).
 #' @param radius_noise_fraction Numeric (0 to 1). Proportion of the gap radius
 #'     where gradual edge noise is applied. 0 creates sharp circular edges,
 #'     1 applies probabilistic cell inclusion across the entire radius.
@@ -807,28 +807,28 @@ pattern_gaps <- function(
 #' validated parameter list for the \code{"labyrinth"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
-#' @param frequency Numeric. Controls the spatial scale of the noise pattern:
-#'    Lower values produce broad, smooth bands, higher values produce finer, maze-like structures (default: 3).
-#' @param veg_threshold Numeric between 0 and 1. Defines the cutoff value that separates vegetated
-#'    from non-vegetated cells. Values above the threshold become vegetation.
-#'    Adjusting this changes the overall proportion of vegetated area (default: 0.5).
-#' @param band_fuzziness Numeric between 0 and 1, the probability that an edge
-#'    cell is eroded. Controls the amount of
-#'    geometric edge roughness applied \emph{after} thresholding. At 0, vegetation
-#'    boundaries are sharp and fully deterministic. Small values (roughly 0.05
-#'    to 0.1) introduce slight, irregular boundary perturbations without changing the
-#'    overall topology of the pattern. Larger values progressively erode vegetation
-#'    edges and can fragment bands if set too high; above roughly 0.3 the result
-#'    looks increasingly random rather than maze-like. This parameter affects boundary
-#'    geometry only and does not influence the global structure or connectivity
-#'    of the labyrinth. (default: 0.08)
+#' @param frequency Numeric. Controls the spatial scale of the noise pattern.
+#'    Lower values produce broad, smoother bands, whereas higher values produce finer, 
+#'    more maze-like structures (default: 3).
+#' @param veg_threshold Numeric between 0 and 1. Threshold separating vegetated 
+#'    from non-vegetated cells. Values above the threshold are classified as vegetation. 
+#'    Lower values increase the proportion of vegetated cells, 
+#'    whereas higher values decrease it (default: 0.5). 
+#' @param band_fuzziness Numeric between 0 and 1. Probability that an edge
+#'    cell is eroded \emph{after} thresholding. Controls the geometric edge roughness 
+#'    without affecting the underlying noise field.
+#'    At 0, vegetation boundaries are sharp and fully deterministic.
+#'    Small values (roughly 0.05 to 0.1) introduce slight irregularities  
+#'    while largely preserving the topology of the pattern.
+#'    Higher values increasingly erode vegetation edges and may fragment bands.
+#'    Above roughly 0.3, patterns can appear increasingly random rather than 
+#'    maze-like (default: 0.08).
 #' @param octaves Integer >= 1. Number of noise layers (octaves) combined to
-#'    generate the underlying continuous field. A single octave produces very smooth,
-#'    large-scale bands. Using two to three octaves adds limited fine structure while preserving
-#'    a dominant wavelength, which is characteristic of labyrinth (Turing-like)
-#'    patterns. Higher values introduce fractal detail at smaller scales and can obscure
-#'    the banded structure, making patterns less clearly classifiable as
-#'    labyrinths. (default: 2).
+#'    generate the underlying continuous field. 
+#'    A lower value of 1 produces smooth patterns dominated by large-scale structure.
+#'    Two to three octaves add fine-scale variation while preserving a dominant wavelength 
+#'    characteristic of labyrinth (Turing-like) patterns. Higher values introduce
+#'    increasingly fine, fractal-like detail and can obscure the banded structure (default: 2).
 #'
 #' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
