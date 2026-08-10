@@ -46,11 +46,21 @@ only trailing failures are misreported.
 the raw raster array (`terra::as.array` → `abind::abind`, `:207`). The docstring
 (`nn_keras.R:9-11`, `:505-507`) advertises "0/1/2 for three types". For 3+ categories this
 feeds a single channel of **ordinal** integers, so class `2` is numerically twice class `1` —
-a semantically wrong, unnormalized encoding for categorical habitat types. **Harmless for the
-shipped binary 0/1 case** (0/1 is already a fine scale), so this is not a bug for the paper's
-experiments, but the documented 3-class path is statistically unsound.
+a semantically wrong, unnormalized encoding for categorical habitat types.
+**Correction 2026-08-10 — this is not just a documented-but-unused risk.**
+`../spatPatClassifyRAnalysis/analysis/02_usecases/classify_ecotones_3classes.R:357-374` calls
+`train_pixel_model()` directly on landscapes built by `add_third_class()`, which substitutes
+real pixels with a third cell value — exactly this scenario, on a real worked-example script,
+not a synthetic edge case. Whether that script's numbers reached a published table/figure is
+unconfirmed (the script is independently flagged as not yet rerun since an unrelated
+API-rename fix — see `../spatPatClassifyR_paper/REVISIONS.md`, "Analysis code"). The "harmless
+for the shipped binary case" framing still holds for every *other* pixel-model use case in the
+repo (all binary 0/1), so this stays scoped to the one 3-class script — but within that scope
+it is confirmed live code, not a theoretical concern.
 - **Fix:** either (a) restrict/validate input to binary and drop the 3-class claim, or
-  (b) one-hot categories into channels before `abind` (channels = n_classes).
+  (b) one-hot categories into channels before `abind` (channels = n_classes). Given the
+  confirmed usage, (b) is the one that actually fixes `classify_ecotones_3classes.R` rather
+  than just removing the claim.
 
 ### M6. ~~Fold accuracy/loss read from hardcoded keys that break if `metrics` is customized~~ — **DONE 2026-08-05** (`cf69fb5`)
 **Resolved by removing the `metrics` parameter from `train_pixel_model()`**, rather than by making the
@@ -260,6 +270,56 @@ behaviour and belongs on its own.
 - **Cheaper alternative:** a test asserting `batch_range ⊆ [min, max]` for every spec entry across
   several landscape sizes — enforces the invariant without touching the generation path.
 
+### M24. [new] No `keras3::clear_session()` between models in `train_pixel_model()` — *(added 2026-08-10)*
+`R/nn_keras.R:412-418` (CV fold loop) and `:516-522`/`:549-555` (final model, both branches).
+Every CV fold, plus the final model, builds a fresh `keras_model_sequential()` via
+`create_keras_model()`, but nothing calls `keras3::clear_session()` (confirmed exported by the
+installed `keras3`) between them. A single call can construct 2 to `cv_folds` models (up to
+`total_samples` under LOO) in one R process with no backend session/graph reset in between — a
+known TensorFlow/Keras source of accumulating graph state and memory growth across repeated
+model creation in one process.
+- **Effect:** unlikely to change model *outputs* — weight initialization is independent of
+  session bookkeeping — but a real stability risk on exactly the workload this package is built
+  for: the HPC systematic-test script trains in a loop for 8-16h per replicate x 10. Memory
+  growth/slowdown here would surface as a stalled or OOM-killed HPC job, not a wrong number, so
+  it is easy to miss until it happens. **Caveat (peer-reviewed 2026-08-10):** severity is
+  plausible but unverified without profiling — TF2's eager execution doesn't accumulate a graph
+  the way TF1 did, so the size of the leak in the currently-installed keras3 version is an open
+  question, not a measured fact.
+- **Fix:** call `keras3::clear_session()` at the top of each fold iteration and before building
+  the final model; pair with `gc()` right after, since R-side collection of the overwritten
+  `reticulate` model objects isn't synchronized with Python-side deallocation. Verify with
+  `dev/golden/check.R` before/after — not expected to change results, but this resets Keras's
+  internal state at exactly the point `set_random_seed()`-driven initialization happens, so
+  confirm rather than assume.
+
+### M25. [new] `apply_pixel_model()` skips performance for every landscape if any known-class landscape has an unseen class — *(added 2026-08-10)*
+`R/nn_keras.R:897-914`. When `return_performance = TRUE`, the function computes
+`unknown_classes <- setdiff(unique_actual, class_names)` across the *whole* known-class
+subset; if even one landscape's actual class is unseen by the model, performance evaluation is
+skipped for **all** landscapes with known classes, not just the offending one(s) —
+`predictions` is still returned, but `performance` comes back `NULL` for the entire batch. Not
+a crash, and arguably a deliberate conservative choice, but undocumented: nothing in the
+roxygen or the supplement says one unrecognized label voids evaluation of the rest. Related to
+**M11** (the `apply_*` return-shape inconsistency) — both concern what `apply_pixel_model()`
+actually promises under `return_performance = TRUE`.
+- **Fix:** either document the all-or-nothing behavior explicitly, or evaluate performance on
+  the subset of landscapes whose actual class *is* known to the model, warning about the rest.
+
+### M26. [new] No validation that raster values are actually categorical — *(added 2026-08-10)*
+`R/nn_keras.R` (`train_pixel_model()`, `apply_pixel_model()`). Both the roxygen and the
+supplement (§S1.5.2) state the pixel workflow "requires categorical/discrete raster data" and
+explicitly reject continuous data such as elevation or gradients — but neither function checks
+this. Any raster that passes the NA guard and the dimension guard is accepted, continuous or
+not; `terra::as.array()` doesn't care. Moot for package-generated landscapes (always integer
+0/1), but the stated requirement is unenforced for user-supplied rasters (e.g. the real-image
+worked example, or any external data).
+- **Before implementing:** check whether the real-image worked example's raster is stored as a
+  strict integer/factor type or as float-typed categorical values — a strict integer check
+  could reject currently-working input.
+- **Fix:** validate discreteness (e.g. all values are whole numbers, or few unique values) and
+  abort with a clear message, once the check above confirms it doesn't break existing use cases.
+
 ### M17. Add regression tests for the correctness bugs above  — [Claude] *(§7.1)*
 *Partially done.* (H1) `theme_landscape()` and (M2) `frequency` variation both have tests
 (`test-plot_themes.R`, `test-create-training-landscapes.R`). **Remaining:** (M3)
@@ -363,6 +423,46 @@ behaviour change, no `man/` change.
 Once M11 is resolved, add tests asserting the return **shape** of both `apply_*` under
 `return_performance = TRUE/FALSE`, with and without known classes — the surface the sibling
 analysis repo depends on.
+
+### L27. [new] `train_pixel_model()` silently writes an undocumented `_metadata.rds` file — *(added 2026-08-10)*
+`R/nn_keras.R:604-607`. When `model_path` is given, a second file
+(`<model_path minus .keras>_metadata.rds`) is written alongside the `.keras` file, holding
+everything in the return object except the model itself. Covered by a test
+(`tests/testthat/test-nn_keras.R:206-234`) but never mentioned in `@param model_path` or
+`@return` — a user saving a model has no documented way to know the second file exists, and
+there is no `load_pixel_model()` to reassemble the two. No result impact.
+- **Fix:** document the companion file in `@param model_path`, or fold into the existing
+  "Website: better guide on how to save and load a Keras model" item.
+
+### L28. [new] Same-dimensions guard checks rows/columns, not layer count — *(added 2026-08-10)*
+`R/nn_keras.R:259-278`. The guard added to give a clear error instead of a cryptic `abind()`
+failure compares `terra::nrow()`/`terra::ncol()` across training landscapes but not
+`terra::nlyr()`. Landscapes of matching width/height but differing layer count would still
+reach `abind()`'s raw error. Purely theoretical today — every `create_landscape_*()` generator
+emits single-layer rasters — so no result impact, and no in-repo path can trigger it.
+- **Fix:** add an `nlyr()` check alongside the existing one, if the guard is meant to fully
+  preempt `abind()` failures.
+
+### L29. [new] No per-class minimum-sample check when `cv_method = "none"` — *(added 2026-08-10)*
+`R/nn_utils.R`, `validate_cv_params()`. The singleton-class check only runs inside the `"loo"`
+branch; `cv_method = "none"` returns early with no check at all, so `train_pixel_model()` (and
+`train_metric_model()`, which shares this helper) will silently fit on a class with a single
+training example. Not a crash, and every landscape set the package's own generators produce is
+balanced, so no result impact — but no warning fires either.
+- **Fix:** a low-severity `cli_alert_info()` for very small classes, same style as the existing
+  "some classes have few samples" warning already in the k-fold/LOO branches, applied to
+  `"none"` too.
+
+### L30. [new] `set_random_seed()` does not guarantee bit-reproducibility on GPU — *(added 2026-08-10, unconfirmed relevance)*
+TensorFlow's GPU reduction/convolution ops are non-deterministic by default regardless of
+seeding; exact reproducibility on GPU additionally needs
+`Sys.setenv(TF_DETERMINISTIC_OPS = "1")` set before `keras3`/`tensorflow` loads. Likely moot
+here: `dev/golden/check.R` already verifies pixel predictions bit-reproducible across sessions
+on the same machine using only `set_random_seed()`, which would be surprising if GPU were in
+play without the extra env var — so CPU-only training is the more likely explanation. Not
+independently confirmed either way; flagging so it isn't lost, not asserting it's live.
+- **Fix, if GPU turns out to be used:** document the extra env var alongside
+  `set_random_seed()`.
 
 ---
 
