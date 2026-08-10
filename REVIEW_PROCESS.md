@@ -76,12 +76,6 @@ than `"accuracy"`, `evaluation[["accuracy"]]` is `NULL`, `round(NULL, 4)` is `nu
   metrics returns predictions-only when classes are unknown, so treat this as an API-design
   inconsistency rather than a pure correctness bug.
 
-### M12. Generation failures are swallowed with no cause surfaced  — [Claude] *(§3.1)*
-`R/landscape_create.R:480-503` (error handler at `:499-501`). `try_create_landscape()` catches
-**every** error and returns `NULL`; the user sees only generic "Retry k/3 … Failed …". A genuinely
-broken parameter combo is indistinguishable from bad luck. Still open 2026-08-05 — note this is
-the mechanism that hid M7 for as long as it did, which is the argument for fixing it.
-- **Fix:** capture and (at least in verbose mode) report `conditionMessage(e)`.
 
 *M18, M19, M20, M21 and M22 step 1 are done — see **Completed** ("M21 + M18 + M19 + M20 + M22 step 1").
 M22 step 2 remains open, tracked under "Open decisions" below alongside L25.*
@@ -325,9 +319,11 @@ whether the analysis repo has to be re-run:
 should stay byte-identical; only failure behaviour moves:
 6. ~~**M3**~~ — done 2026-08-10, see **Completed**.
 7. ~~**M8**~~ — done 2026-08-10, see **Completed**.
-8. **M12 / M23** — the `create_landscapes()` failure path (swallowed error causes, unvalidated
-   sampled parameters). Same `tryCatch` from opposite ends — report the cause vs. keep validation
-   errors from reaching it — so they are best taken together.
+8. ~~**M12**~~ — done 2026-08-10, see **Completed**.
+9. **M23** — sampled batch parameters are never validated. Was paired with M12 as "the same
+   `tryCatch` from opposite ends" (report the cause vs. keep validation errors from reaching it);
+   M12's half is done, M23's remains — validating the sampled draw is new behaviour, not a
+   message fix, and belongs on its own regardless.
 7. ~~**L24** — `plot_classified_landscapes(only_misclassified = TRUE)` at 100% accuracy.~~ *Done
    2026-08-05, together with the rest of the `plot_classified_landscapes()` batch — see
    **Completed**.*
@@ -405,6 +401,19 @@ error. Existing all-invalid test updated to the new message; new regression test
 mixed valid/invalid case (`test-create-training-landscapes.R`). Verified: `devtools::test()`
 (2399 pass / 0 fail) and `dev/golden/check_landscapes.R` (byte-exact) — no change to any
 valid-input output.
+
+### M12. Generation failures are swallowed with no cause surfaced  — [Claude] *(§3.1)*
+*Fixed 2026-08-10.* `try_create_landscape()` caught **every** error and returned `NULL`; the user
+saw only the generic "Retry k/3 … Failed …" messages, so a genuinely broken parameter combo was
+indistinguishable from bad luck — this is the mechanism that hid M7 for as long as it did.
+**Fix:** the `tryCatch`'s `error` handler now reports `conditionMessage(e)` via
+`cli::cli_alert_danger()` before returning `NULL`, e.g. *"Landscape 5 (pattern: clustered) failed:
+Scatter zone too small for cluster size. …"* — printed unconditionally (no new `verbose` parameter;
+the existing retry/failure messages in `create_landscapes()` were already unconditional, so this
+matches that precedent rather than introducing a second reporting mode). Existing direct test of
+`try_create_landscape()` extended to assert the cause is reported, not just that it returns `NULL`.
+Verified: `devtools::test()` (2400 pass / 0 fail) and `dev/golden/check_landscapes.R`
+(byte-exact) — no change to any valid-input output; only what gets printed on failure.
 
 ### M21 + M18 + M19 + M20 + M22 (step 1). Per-pattern parameter constructors (`pattern_*()`)  — [new]
 *Fixed 2026-08-06/07*, as Milestones 0–5 behind the existing golden harness. Full decision log kept

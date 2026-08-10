@@ -548,7 +548,7 @@ test_that("sample_landscape_params samples within ranges", {
   expect_true(all(sapply(samples, function(x) x$height == 100)))
 })
 
-test_that("try_create_landscape returns NULL on error", {
+test_that("try_create_landscape returns NULL on error and reports the cause (M12)", {
   # Invalid parameters that should cause error
   bad_params <- list(
     width = 10,
@@ -556,7 +556,13 @@ test_that("try_create_landscape returns NULL on error", {
     boundary_position = 5 # Invalid - out of range
   )
 
-  result <- try_create_landscape("sharp", bad_params, 1, 0)
+  # The underlying validation message must reach the user, not be swallowed
+  # silently -- otherwise a broken parameter combo is indistinguishable from
+  # bad luck (M12).
+  expect_message(
+    result <- try_create_landscape("sharp", bad_params, 1, 0),
+    "boundary_position.*between 0 and 1"
+  )
 
   expect_null(result)
 })

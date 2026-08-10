@@ -581,6 +581,9 @@ try_create_landscape <- function(pattern, params, index, rotation) {
       landscape
     },
     error = function(e) {
+      cli::cli_alert_danger(
+        "Landscape {index} (pattern: {pattern}) failed: {conditionMessage(e)}"
+      )
       NULL
     }
   )
