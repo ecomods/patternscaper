@@ -180,12 +180,6 @@ train-side problem — `train_pixel_model()` reporting a lone landscape's own fi
 element(s) at index(es): 1, 2, 3, 4" — was a separate finding, fixed in `a1ec361` by *aborting* with
 a clear message rather than wrapping, since training on one landscape is never valid.
 
-### L10. Rotation silently ignored for most patterns  — [Claude] *(§3.3)*
-Only `c("sharp","diffuse","fingers","clustered","bands")` (`R/landscape_create.R:328-334`) honour
-`rotation`; for the others it's silently dropped. Document in `create_landscapes()` (and ideally
-warn if a non-zero rotation is set for a pattern that ignores it). *Note 2026-08-05:* the doc
-half of this is now folded into M19; the warning half stays here.
-
 ### L25. [new] `radius_noise_fraction` has no default batch range — open decision  — *(added 2026-08-05)*
 M9's fix made `radius_noise_fraction` a valid, settable `params_list` parameter, but deliberately
 gave it `batch_range = NULL` (`R/landscape_parameter_validation.R:319-324`) so published results
@@ -327,6 +321,35 @@ Checked against current source; correct as-is, no action needed:
 ---
 
 ## Completed
+
+### L10. Rotation silently ignored for most patterns  — [Claude] *(§3.3)*
+*Fixed 2026-08-10.* Only `c("sharp", "diffuse", "fingers", "clustered", "bands")` honour
+`rotation`; the other six patterns silently dropped it. The doc half was already folded into M19;
+this closes the remaining warning half — but scoped to `create_landscape()` only, not
+`create_landscapes()` (see below).
+**Fix:** `create_landscape()` now warns (`cli::cli_warn()`) when a non-zero `rotation` is
+explicitly passed for a pattern outside that set — there, requesting rotation for one specific,
+named pattern that doesn't support it is plausibly a real mistake. Uses `missing(rotation)` to
+stay silent when `rotation` is left at its default, and when it is explicitly `0`, since nothing
+is actually being dropped in either case. `man/create_landscape.Rd` updated to match.
+`create_landscapes()` deliberately does **not** warn: mixing rotatable and non-rotatable patterns
+under one shared `rotation` is the documented, intended way to build a heterogeneous training set
+(the package's own default `patterns` is all 11), so warning there would fire on ordinary,
+common calls rather than mistakes — warning fatigue rather than a useful signal. A
+`create_landscapes()`-level warning was implemented and tested, then deliberately reverted after
+review; the trade-off is that a genuine typo/misunderstanding inside a batch call goes back to
+being silently dropped, same as before this fix, but that mistake still surfaces via
+`create_landscape()` during interactive exploration. Regression tests in `test-create-landscape.R`
+cover the warning firing for each non-rotatable pattern and the landscape value being unaffected
+by it; `test-create-training-landscapes.R` pins `create_landscapes()`'s silence, including the
+mixed rotatable/non-rotatable case. Verified: `devtools::test()` (0 fail) and
+`dev/golden/check_landscapes.R` (byte-exact, all 11 patterns) — no change to any valid-input
+output, only what gets printed for a `create_landscape()` input that was already a no-op.
+**Aside, out of scope:** `devtools::document()` also regenerated `pattern_gaps.Rd`,
+`pattern_spots.Rd`, `pattern_labyrinth.Rd`, and unrelated paragraphs of `create_landscape.Rd` /
+`create_landscapes.Rd` (`pattern_label`, `params`, `params_list`) — their roxygen source is
+already ahead of the committed `man/` output. Reverted those to keep this change scoped; the
+drift itself is pre-existing and untouched.
 
 ### L19. Inconsistent source-file naming  — [Claude] *(§5.5)*
 *Fixed 2026-08-10.* `create_landscape_bare.R` / `create_landscape_dense.R` were the only two

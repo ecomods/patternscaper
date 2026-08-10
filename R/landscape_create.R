@@ -28,9 +28,9 @@
 #'     "random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
 #'     "bands", "spots", "gaps", "labyrinth".
 #' @param name Character. Optional name for the landscape (default: NULL).
-#' @param pattern_label Character. Character. Optional pattern type label assigned to 
-#'     the generated landscape instead of the value of \code{pattern} (default: NULL, 
-#'     which uses \code{pattern}). Use this to assign landscapes generated with 
+#' @param pattern_label Character. Character. Optional pattern type label assigned to
+#'     the generated landscape instead of the value of \code{pattern} (default: NULL,
+#'     which uses \code{pattern}). Use this to assign landscapes generated with
 #'     different \code{patterns} to the same class when training a classifier.
 #' @param params Output of the \code{pattern_*()} constructor matching \code{pattern},
 #'     for example \code{\link{pattern_spots}} (default: NULL). Must hold single values
@@ -38,7 +38,8 @@
 #'     i.e. for creating multiple landscapes.
 #' @param rotation Numeric. Angle to rotate the landscape in degrees (default: 0).
 #'     Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated.
-#'     The remaining patterns ignore it, and are generated without rotation.
+#'     The remaining patterns ignore it, are generated without rotation and a
+#'     warning is given.
 #'
 #' @return A \code{\link{landscape}} object, containing:
 #'   \item{data}{SpatRaster of the generated pattern, with binary values (0 = bare ground, 1 = vegetation)}
@@ -148,6 +149,11 @@ create_landscape <- function(
   # rather than a pattern parameter -- and only some generators apply it
   if (!missing(rotation) && matched %in% rotatable_patterns()) {
     pattern_params$rotation <- rotation
+  } else if (!missing(rotation) && rotation != 0) {
+    cli::cli_warn(c(
+      "{.arg rotation} is ignored for pattern {.val {matched}}.",
+      "i" = "Only {paste(rotatable_patterns(), collapse = ', ')} support rotation."
+    ))
   }
 
   landscape <- do.call(
@@ -202,19 +208,19 @@ create_landscape <- function(
 #' @param height Integer. Height of all landscapes in pixels (default: 100).
 #' @param rotation Numeric vector. Angles in degrees to sample from per
 #'     landscape (default: 0:360). A single value applies that angle to every
-#'     landscape, whereas a length-2 vector gives the upper and lower boundaries of the 
-#'     random rotation angle (with uniform distribution). Only "sharp", 
+#'     landscape, whereas a length-2 vector gives the upper and lower boundaries of the
+#'     random rotation angle (with uniform distribution). Only "sharp",
 #'     "diffuse", "fingers", "clustered" and "bands"
 #'     are rotated; the remaining patterns ignore it.
 #' @param params_list Named list. Parameters to sample for each pattern.
-#'     Names must correspond to the pattern names, for example for example 
+#'     Names must correspond to the pattern names, for example for example
 #'     \code{\link{pattern_spots}} for \code{patterns} = "spots". Each
-#'     element must be the output of the corresponding pattern_*() constructor, 
+#'     element must be the output of the corresponding pattern_*() constructor,
 #'     for example of \code{\link{pattern_spots}}.
-#'     A single value fixes a parameter, whereas a length-2 vector is a range 
-#'     from which one value is sampled for each generated landscape of that pattern. 
+#'     A single value fixes a parameter, whereas a length-2 vector is a range
+#'     from which one value is sampled for each generated landscape of that pattern.
 #'     Patterns omitted from \code{params_list} use their default parameter ranges.
-#'     Default NULL uses the default ranges for all patterns.#' 
+#'     Default NULL uses the default ranges for all patterns.#'
 #' @param pattern_probs Numeric vector. Probability that a specific landscape pattern
 #'     is chosen from the list of \code{patterns}. Should be a numeric vector of
 #'     the same length as \code{patterns}. The default value NULL creates equally

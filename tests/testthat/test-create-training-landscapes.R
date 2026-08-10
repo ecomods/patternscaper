@@ -197,6 +197,53 @@ test_that("create_landscapes handles rotation correctly", {
   expect_true(all(rotations == 0))
 })
 
+test_that("create_landscapes never warns about rotation, even mixing patterns", {
+  # Mixing rotatable and non-rotatable patterns under one shared `rotation` is
+  # the documented, intended way to build a heterogeneous training set (the
+  # package's own default is all 11 patterns), so this must stay silent --
+  # unlike create_landscape(), which warns for a single explicitly-set pattern
+  set.seed(123)
+
+  expect_no_warning(
+    create_landscapes(
+      n = 4,
+      width = 20,
+      height = 20,
+      patterns = c("bare", "sharp"),
+      rotation = 45
+    )
+  )
+
+  expect_no_warning(
+    create_landscapes(
+      n = 4,
+      width = 20,
+      height = 20,
+      patterns = c("bare", "sharp")
+    )
+  )
+
+  expect_no_warning(
+    create_landscapes(
+      n = 4,
+      width = 20,
+      height = 20,
+      patterns = c("bare", "sharp"),
+      rotation = 0
+    )
+  )
+
+  expect_no_warning(
+    create_landscapes(
+      n = 4,
+      width = 20,
+      height = 20,
+      patterns = c("sharp", "bands"),
+      rotation = 45
+    )
+  )
+})
+
 test_that("create_landscapes respects width and height", {
   set.seed(123)
   landscapes <- create_landscapes(

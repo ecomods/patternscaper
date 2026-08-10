@@ -26,18 +26,20 @@ create_landscape(
 
 \item{name}{Character. Optional name for the landscape (default: NULL).}
 
-\item{pattern_label}{Character. Optional label to store in the landscape's
-\code{pattern} field instead of \code{pattern} itself (default: NULL
-keeps \code{pattern}). Use it to group several patterns under one class,
-so a classifier model is trained on the group.}
+\item{pattern_label}{Character. Character. Optional pattern type label assigned to
+the generated landscape instead of the value of \code{pattern} (default: NULL,
+which uses \code{pattern}). Use this to assign landscapes generated with
+different \code{patterns} to the same class when training a classifier.}
 
 \item{params}{Output of the \code{pattern_*()} constructor matching \code{pattern},
 for example \code{\link{pattern_spots}} (default: NULL). Must hold single values
-for each parameter, ranges are only meaningful for \code{\link{create_landscapes}}.}
+for each parameter, ranges are only meaningful for \code{\link{create_landscapes}},
+i.e. for creating multiple landscapes.}
 
 \item{rotation}{Numeric. Angle to rotate the landscape in degrees (default: 0).
 Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated.
-The remaining patterns ignore it, and are generated without rotation.}
+The remaining patterns ignore it, are generated without rotation and a
+warning is given.}
 }
 \value{
 A \code{\link{landscape}} object, containing:

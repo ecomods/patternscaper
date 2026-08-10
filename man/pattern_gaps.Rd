@@ -15,14 +15,14 @@ pattern_gaps(
 \arguments{
 \item{n_spots}{Integer. Number of circular gaps to generate (default: 5).
 For regular placement, this may be automatically reduced if the landscape
-cannot accommodate the requested number at the given \code{spot_radius}.}
+cannot accommodate the requested number with the given \code{spot_radius}.}
 
-\item{spot_radius}{Numeric. Mean radius of each gap in cells (default: 10).
+\item{spot_radius}{Numeric. Mean radius of each gap in pixels (default: 10).
 Must be positive and smaller than landscape dimensions.}
 
 \item{spot_radius_sd}{Numeric. Standard deviation for random variation in gap radius.
-Each gap's radius is sampled from N(spot_radius, spot_radius_sd).
-(default: 0, no variation)}
+Each gap's radius is sampled from a normal distribution with mean \code{spot_radius}
+and standard deviation \code{spot_radius_sd} (default: 0, no variation).}
 
 \item{radius_noise_fraction}{Numeric (0 to 1). Proportion of the gap radius
 where gradual edge noise is applied. 0 creates sharp circular edges,

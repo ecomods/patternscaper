@@ -178,14 +178,18 @@ test_that("every rotatable pattern accepts rotation", {
   }
 })
 
-test_that("patterns without rotation ignore it", {
+test_that("patterns without rotation ignore it, with a warning", {
   for (pattern in c("random", "bare", "dense", "spots", "gaps", "labyrinth")) {
     set.seed(5)
-    l_rotation <- create_landscape(
-      pattern,
-      width = 50,
-      height = 50,
-      rotation = 45
+    expect_warning(
+      create_landscape(pattern, width = 50, height = 50, rotation = 45),
+      "rotation.*ignored",
+      info = pattern
+    )
+
+    set.seed(5)
+    l_rotation <- suppressWarnings(
+      create_landscape(pattern, width = 50, height = 50, rotation = 45)
     )
 
     set.seed(5)
@@ -195,6 +199,22 @@ test_that("patterns without rotation ignore it", {
       terra::as.matrix(l_rotation$data, wide = TRUE),
       terra::as.matrix(l_plain$data, wide = TRUE),
       info = pattern
+    )
+  }
+})
+
+test_that("create_landscape does not warn about rotation when left unset or zero", {
+  for (pattern in c("random", "bare", "dense", "spots", "gaps", "labyrinth")) {
+    expect_no_warning(create_landscape(pattern, width = 50, height = 50))
+    expect_no_warning(
+      create_landscape(pattern, width = 50, height = 50, rotation = 0)
+    )
+  }
+
+  # Rotatable patterns never trigger the ignored-rotation warning either
+  for (pattern in c("sharp", "diffuse", "fingers", "clustered", "bands")) {
+    expect_no_warning(
+      create_landscape(pattern, width = 50, height = 50, rotation = 45)
     )
   }
 })

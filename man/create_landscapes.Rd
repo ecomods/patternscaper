@@ -29,15 +29,20 @@ create_landscapes(
 
 \item{rotation}{Numeric vector. Angles in degrees to sample from per
 landscape (default: 0:360). A single value applies that angle to every
-landscape. Only "sharp", "diffuse", "fingers", "clustered" and "bands"
+landscape, whereas a length-2 vector gives the upper and lower boundaries of the
+random rotation angle (with uniform distribution). Only "sharp",
+"diffuse", "fingers", "clustered" and "bands"
 are rotated; the remaining patterns ignore it.}
 
-\item{params_list}{Named list. Parameters to be sampled from for each pattern.
-The list must be keyed by the pattern names. Each entry is the output of
-the matching \code{pattern_*()} constructor, for example \code{\link{pattern_spots}}.
-A single value fixes a parameter, a length-2 vector is a range sampled once per landscape
-of that pattern. Patterns left out from \code{params_list} fall back to
-the default ranges. Default NULL uses the default ranges for all patterns.}
+\item{params_list}{Named list. Parameters to sample for each pattern.
+Names must correspond to the pattern names, for example for example
+\code{\link{pattern_spots}} for \code{patterns} = "spots". Each
+element must be the output of the corresponding pattern_*() constructor,
+for example of \code{\link{pattern_spots}}.
+A single value fixes a parameter, whereas a length-2 vector is a range
+from which one value is sampled for each generated landscape of that pattern.
+Patterns omitted from \code{params_list} use their default parameter ranges.
+Default NULL uses the default ranges for all patterns.#'}
 
 \item{pattern_probs}{Numeric vector. Probability that a specific landscape pattern
 is chosen from the list of \code{patterns}. Should be a numeric vector of
