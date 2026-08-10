@@ -342,8 +342,8 @@ create_landscapes <- function(
     params_list <- default_params_list[patterns]
   }
 
-  # Initialize results list
-  all_landscapes <- list()
+  # Initialize pre-allocated results list
+  all_landscapes <- vector("list", n)
 
   # Define which parameters should be integers so they are not treated
   # as numeric
@@ -437,17 +437,14 @@ create_landscapes <- function(
       retry_count <- retry_count + 1
     }
 
-    # Store result (NULL if all retries failed)
     if (!is.null(landscape)) {
       all_landscapes[[i]] <- landscape
       names(all_landscapes)[i] <- landscape$name
-    } else {
-      all_landscapes[[i]] <- NULL
     }
   }
 
   n_requested <- n
-  n_failed <- sum(sapply(all_landscapes, is.null))
+  n_failed <- sum(vapply(all_landscapes, is.null, logical(1)))
   all_landscapes <- Filter(Negate(is.null), all_landscapes)
   n_actual <- length(all_landscapes)
 

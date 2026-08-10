@@ -27,21 +27,6 @@ traceability.
 
 ## 🟠 Medium — real inconsistency, latent bug, methodological issue, or maintainability risk
 
-### M3. `create_landscapes()` failure bookkeeping is fragile (trailing failures misreported as full success)  — [Claude] [Fable] *(§1.4 / F5)*
-*Confirmed still open 2026-08-05; line refs updated after the M13 refactor.*
-`R/landscape_create.R:388-410`. On failure the code does `all_landscapes[[i]] <- NULL`, which
-**removes** the element rather than reserving a slot. For a **trailing** failure the list
-simply stays short, so `n_failed <- sum(sapply(..., is.null))` (`:398`) counts only interior
-`NULL` gaps → `0`, and the function prints *"Successfully generated all N …"* while returning
-fewer than N. Interior failures happen to be back-filled with `NULL` by a later assignment, so
-only trailing failures are misreported.
-- **Effect:** silent under-delivery of the requested sample size, with a message that says
-  everything is fine; downstream code assuming `length(landscapes) == n` is misled.
-- **Fix:** preallocate (`vector("list", n)`) or track success/failure with an explicit
-  counter/logical vector, and compare `length(result)` to `n_requested` for the success/warn
-  decision. (Fable rated this 🟡 given retries make failures rare; kept 🟠 per Claude because
-  the wrong success message is user-facing.)
-
 ### M5. [Fable] Multi-class pixel input fed to the CNN as ordinal integers (no one-hot / no normalization)  — [Fable] *(F2)*
 `R/nn_keras.R:187-208`. `train_pixel_model()`/`apply_pixel_model()` build the model input as
 the raw raster array (`terra::as.array` → `abind::abind`, `:207`). The docstring
@@ -185,9 +170,9 @@ worked example, or any external data).
   abort with a clear message, once the check above confirms it doesn't break existing use cases.
 
 ### M17. Add regression tests for the correctness bugs above  — [Claude] *(§7.1)*
-*Partially done.* (H1) `theme_landscape()` and (M2) `frequency` variation both have tests
-(`test-plot_themes.R`, `test-create-training-landscapes.R`). **Remaining:** (M3)
-`create_landscapes()` reports correct success/fail counts on a **trailing** failure.
+*Done.* (H1) `theme_landscape()`, (M2) `frequency` variation, and (M3, fixed 2026-08-10)
+`create_landscapes()` trailing-failure counts all have tests (`test-plot_themes.R`,
+`test-create-training-landscapes.R`).
 
 ---
 
@@ -346,10 +331,11 @@ whether the analysis repo has to be re-run:
 
 **Group B — changes only error/warning paths, not successful runs.** Existing golden checks
 should stay byte-identical; only failure behaviour moves:
-6. **M3 / M8 / M12 / M23** — the `create_landscapes()` failure path (miscounted trailing failures,
-   silently dropped invalid pattern names, swallowed error causes, unvalidated sampled parameters),
-   plus the M17 test. M12 and M23 are the same `tryCatch` from opposite ends — report the cause vs.
-   keep validation errors from reaching it — so they are best taken together.
+6. ~~**M3**~~ — done 2026-08-10, see **Completed**.
+7. **M8 / M12 / M23** — the `create_landscapes()` failure path (silently dropped invalid pattern
+   names, swallowed error causes, unvalidated sampled parameters). M12 and M23 are the same
+   `tryCatch` from opposite ends — report the cause vs. keep validation errors from reaching it —
+   so they are best taken together.
 7. ~~**L24** — `plot_classified_landscapes(only_misclassified = TRUE)` at 100% accuracy.~~ *Done
    2026-08-05, together with the rest of the `plot_classified_landscapes()` batch — see
    **Completed**.*
@@ -397,6 +383,23 @@ Checked against current source; correct as-is, no action needed:
 ---
 
 ## Completed
+
+### M3. `create_landscapes()` failure bookkeeping is fragile (trailing failures misreported as full success)  — [Claude] [Fable] *(§1.4 / F5)*
+*Fixed 2026-08-10.* `all_landscapes[[i]] <- NULL` on failure removed the element rather than
+reserving a slot, so a **trailing** failure left the list short instead of holding an explicit
+`NULL` — `n_failed <- sum(sapply(..., is.null))` then counted `0`, and the function reported
+*"Successfully generated all N …"* while quietly returning fewer than N.
+**Fix:** preallocate `all_landscapes <- vector("list", n)` up front, and drop the explicit
+`all_landscapes[[i]] <- NULL` on failure — against a preallocated (already-in-bounds) list that
+assignment would *remove* the element and reintroduce the identical bug in a different guise, so
+the failure branch now does nothing and simply leaves the preallocated `NULL` in place. `sapply`
+also swapped for `vapply` on the same line. Regression test added
+(`test-create-training-landscapes.R`): a deterministic all-fail case (`spot_radius` within its own
+valid range but geometrically impossible at the given landscape size, so every attempt aborts
+inside the generator) — with zero successes, every position is effectively a trailing failure,
+pinning both the correct `"Generated 0/3 ... (3 failed)"` message and the empty return. Verified:
+`devtools::test()` (2398 pass / 0 fail) and `dev/golden/check_landscapes.R` (byte-exact, all 11
+patterns) — no change to any valid-input output.
 
 ### M21 + M18 + M19 + M20 + M22 (step 1). Per-pattern parameter constructors (`pattern_*()`)  — [new]
 *Fixed 2026-08-06/07*, as Milestones 0–5 behind the existing golden harness. Full decision log kept
@@ -523,8 +526,8 @@ accuracy is unaffected.)
 composition (H1) in `test-plot_themes.R`; unknown-class / missing `actual_class` plotting (H3) in
 `test-plot_classification.R:189`; `gaps + invert_landscape` (M7) in
 `test-landscape-parameter-specs.R:150`; `frequency` sampling for bands (M2) in
-`test-create-training-landscapes.R`. The remaining M17 clause (M3, trailing-failure counts) stays
-open under **M17**.
+`test-create-training-landscapes.R`. The remaining M17 clause (M3, trailing-failure counts) was
+closed 2026-08-10 — see **M17** and **M3** under **Completed**.
 
 ### H1. `theme_landscape()` never composes the base theme  — [Claude] [ChatGPT] [Fable] *(§1.1)*
 *Fixed 2026-07-06.* `R/plot_themes.R` evaluated `theme_minimal(...)` and `%+replace%` as discarded

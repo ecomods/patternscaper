@@ -479,6 +479,27 @@ test_that("create_landscapes respects max_retries parameter", {
   expect_true(length(landscapes_retry) >= length(landscapes_no_retry))
 })
 
+test_that("create_landscapes reports the correct failure count when every landscape fails (M3)", {
+  # spot_radius = 20 passes pattern_spots()'s own validation (min 1, no
+  # upper bound) but is geometrically impossible at width/height = 10, so
+  # every attempt aborts inside create_landscape_spots() deterministically.
+  # With zero successes, `all_landscapes` never gets extended by a later
+  # assignment, which is exactly the case that hid trailing failures before
+  # the fix (list stayed short instead of holding explicit NULLs).
+  expect_message(
+    landscapes <- create_landscapes(
+      n = 3,
+      patterns = "spots",
+      width = 10,
+      height = 10,
+      params_list = list(spots = pattern_spots(spot_radius = 20)),
+      max_retries = 0
+    ),
+    "Generated 0/3 landscapes \\(3 failed\\)"
+  )
+  expect_length(landscapes, 0)
+})
+
 test_that("sample_landscape_params samples within ranges", {
   pattern_params <- list(
     boundary_position = c(0.3, 0.7),
