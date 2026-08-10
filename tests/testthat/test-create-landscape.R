@@ -160,8 +160,8 @@ test_that("pattern_label relabels without changing the landscape", {
 test_that("pattern_label and name set different fields", {
   l <- create_landscape(
     "spots",
-    width = 20,
-    height = 20,
+    width = 50,
+    height = 50,
     name = "site_a",
     pattern_label = "patchy"
   )
@@ -183,13 +183,13 @@ test_that("patterns without rotation ignore it", {
     set.seed(5)
     l_rotation <- create_landscape(
       pattern,
-      width = 20,
-      height = 20,
+      width = 50,
+      height = 50,
       rotation = 45
     )
 
     set.seed(5)
-    l_plain <- create_landscape(pattern, width = 20, height = 20)
+    l_plain <- create_landscape(pattern, width = 50, height = 50)
 
     expect_equal(
       terra::as.matrix(l_rotation$data, wide = TRUE),

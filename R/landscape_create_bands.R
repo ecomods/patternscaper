@@ -41,10 +41,10 @@ create_landscape_bands <- function(
   width = 100,
   height = 100,
   boundary_position = 0.5,
-  band_zone_prop = 0.2,
+  band_zone_prop = 0.3,
   band_thickness = 3,
   band_spacing = 10,
-  frequency = 2 * pi / 100,
+  frequency = 4 * pi / 100,
   amplitude = 5,
   noise_sd = 0,
   rotation = 0

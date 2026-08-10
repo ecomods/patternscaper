@@ -338,8 +338,8 @@ pattern_diffuse <- function(
 #'     Larger values produce wider, more pronounced bends; 
 #'     smaller values produce flatter, less pronounced bends (default: 5).
 #' @param sine_height_sd Numeric. Standard deviation of amplitude in pixels.
-#'     Larger values increase variation in bend height, producing curves 
-#'     with more variable bend widths (default: 4).
+#'     Larger values increase variation in bend height, producing curves
+#'     with more variable bend widths (default: 5).
 #'
 #' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
@@ -387,7 +387,7 @@ pattern_fingers <- function(
   sine_length_mean = 20,
   sine_length_sd = 12,
   sine_height_mean = 5,
-  sine_height_sd = 4
+  sine_height_sd = 5
 ) {
   params <- list()
 
@@ -530,12 +530,12 @@ pattern_clustered <- function(
 #' @param boundary_position Numeric. Relative position of the horizontal
 #'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
 #' @param band_zone_prop Numeric. Proportion of the total landscape height to
-#'     allocate for bands below the vegetation boundary (0-1, default: 0.2). If
+#'     allocate for bands below the vegetation boundary (0-1, default: 0.3). If
 #'     the band zone is too small for the given band spacing, no bands are drawn
 #'     and a warning is issued.
 #' @param band_thickness Integer. Thickness of each band in pixels (default: 3).
 #' @param band_spacing Integer. Spacing between bands in pixels (default: 10).
-#' @param frequency Numeric. Frequency of sine wave of the bands (default: 2*pi/100).
+#' @param frequency Numeric. Frequency of sine wave of the bands (default: 4*pi/100).
 #' @param amplitude Numeric. Amplitude of sine wave of the bands in pixels (default: 5).
 #' @param noise_sd Numeric. Standard deviation for random noise.
 #'     Controls how strongly each band randomly deviates up and down 
@@ -582,10 +582,10 @@ pattern_clustered <- function(
 #' @export
 pattern_bands <- function(
   boundary_position = 0.5,
-  band_zone_prop = 0.2,
+  band_zone_prop = 0.3,
   band_thickness = 3,
   band_spacing = 10,
-  frequency = 2 * pi / 100,
+  frequency = 4 * pi / 100,
   amplitude = 5,
   noise_sd = 0
 ) {
@@ -622,10 +622,10 @@ pattern_bands <- function(
 #' list for the \code{"spots"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
-#' @param n_spots Integer. Number of circular spots to generate (default: 15).
+#' @param n_spots Integer. Number of circular spots to generate (default: 5).
 #'     For regular placement, this may be automatically reduced if the landscape
 #'     cannot accommodate the requested number at the given \code{spot_radius}.
-#' @param spot_radius Numeric. Mean radius of each spot in cells (default: 5).
+#' @param spot_radius Numeric. Mean radius of each spot in cells (default: 10).
 #'     Must be positive and smaller than landscape dimensions.
 #' @param spot_radius_sd Numeric. Standard deviation for random variation in spot radius.
 #'     Each spot's radius is sampled from N(spot_radius, spot_radius_sd).
@@ -678,8 +678,8 @@ pattern_bands <- function(
 #'
 #' @export
 pattern_spots <- function(
-  n_spots = 15,
-  spot_radius = 5,
+  n_spots = 5,
+  spot_radius = 10,
   spot_radius_sd = 0,
   radius_noise_fraction = 0,
   regular_spots = FALSE,
@@ -720,10 +720,10 @@ pattern_spots <- function(
 #' distinguishes the two patterns, so unlike \code{\link{pattern_spots}} this
 #' has no \code{invert_landscape} parameter.
 #'
-#' @param n_spots Integer. Number of circular gaps to generate (default: 15).
+#' @param n_spots Integer. Number of circular gaps to generate (default: 5).
 #'     For regular placement, this may be automatically reduced if the landscape
 #'     cannot accommodate the requested number at the given \code{spot_radius}.
-#' @param spot_radius Numeric. Mean radius of each gap in cells (default: 5).
+#' @param spot_radius Numeric. Mean radius of each gap in cells (default: 10).
 #'     Must be positive and smaller than landscape dimensions.
 #' @param spot_radius_sd Numeric. Standard deviation for random variation in gap radius.
 #'     Each gap's radius is sampled from N(spot_radius, spot_radius_sd).
@@ -774,8 +774,8 @@ pattern_spots <- function(
 #'
 #' @export
 pattern_gaps <- function(
-  n_spots = 15,
-  spot_radius = 5,
+  n_spots = 5,
+  spot_radius = 10,
   spot_radius_sd = 0,
   radius_noise_fraction = 0,
   regular_spots = FALSE

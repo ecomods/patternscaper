@@ -11,12 +11,12 @@ pattern_fingers(
   sine_length_mean = 20,
   sine_length_sd = 12,
   sine_height_mean = 5,
-  sine_height_sd = 4
+  sine_height_sd = 5
 )
 }
 \arguments{
-\item{boundary_position}{Numeric. Relative position of the vegetation boundary
-from the top (0-1, default: 0.5).}
+\item{boundary_position}{Numeric. Relative position of the horizontal
+vegetation boundary (if not rotated) from the top (0-1, default: 0.5).}
 
 \item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell to
 bare, adding small gaps within the vegetation (0-1, default: 0).}
@@ -25,13 +25,21 @@ bare, adding small gaps within the vegetation (0-1, default: 0).}
 vegetated, scattering some vegetated cells beyond the vegetation boundary
 (0-1, default: 0).}
 
-\item{sine_length_mean}{Numeric. Mean wavelength of sinusoidal curve in pixels (default: 20).}
+\item{sine_length_mean}{Numeric. Mean wavelength of sinusoidal curve in pixels. 
+Larger values produce longer, more widely spaced bends; smaller values 
+produce shorter, more frequent bends (default: 20).}
 
-\item{sine_length_sd}{Numeric. Standard deviation of wavelength in pixels (default: 12).}
+\item{sine_length_sd}{Numeric. Standard deviation of wavelength in pixels.
+Larger values increase variation in bend length, producing less 
+regular curves (default: 12).}
 
-\item{sine_height_mean}{Numeric. Mean amplitude of sinusoidal curve in pixels (default: 5).}
+\item{sine_height_mean}{Numeric. Mean amplitude of sinusoidal curve in pixels.
+Larger values produce wider, more pronounced bends; 
+smaller values produce flatter, less pronounced bends (default: 5).}
 
-\item{sine_height_sd}{Numeric. Standard deviation of amplitude in pixels (default: 4).}
+\item{sine_height_sd}{Numeric. Standard deviation of amplitude in pixels.
+Larger values increase variation in bend height, producing curves
+with more variable bend widths (default: 5).}
 }
 \value{
 A named list of the supplied parameters of the class \code{"landscape_params"}.

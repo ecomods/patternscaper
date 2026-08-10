@@ -39,8 +39,8 @@
 create_landscape_gaps <- function(
   width = 100,
   height = 100,
-  n_spots = 15,
-  spot_radius = 5,
+  n_spots = 5,
+  spot_radius = 10,
   spot_radius_sd = 0,
   radius_noise_fraction = 0,
   regular_spots = FALSE

@@ -12,8 +12,8 @@ Lower values (e.g., 0.1) create sharper transitions.
 Higher values (e.g., 0.9) create more gradual, diffuse transitions
 where vegetation grows further below the vegetation boundary (default: 0.5).}
 
-\item{boundary_position}{Numeric. Relative position of the vegetation boundary
-from the top (0-1, default: 0.2).}
+\item{boundary_position}{Numeric. Relative position of the horizontal
+vegetation boundary (if not rotated) from the top (0-1, default: 0.2).}
 }
 \value{
 A named list of the supplied parameters of the class \code{"landscape_params"}.

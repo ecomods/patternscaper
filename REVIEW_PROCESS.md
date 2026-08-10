@@ -180,17 +180,6 @@ train-side problem — `train_pixel_model()` reporting a lone landscape's own fi
 element(s) at index(es): 1, 2, 3, 4" — was a separate finding, fixed in `a1ec361` by *aborting* with
 a clear message rather than wrapping, since training on one landscape is never valid.
 
-### L9. Default parameters drift between single generators and the batch wrapper  — [Claude] *(§2.5)*
-*Mostly resolved 2026-08-04 by M13.* Two of the three sources are now derived from
-`landscape_param_specs()`. **Remaining — the third axis:** each generator's own *signature
-defaults* are still written independently of the spec. E.g. `create_landscape_gaps()` has
-`n_spots = 15` (`R/landscape_create_gaps.R:43`) while the spec's `batch_range` is `c(5, 10)`, so
-`create_landscape("gaps")` and `create_landscapes(patterns = "gaps")` produce
-differently-distributed landscapes with no note anywhere saying so.
-- **Fix (decide first):** either derive the signature defaults from the spec too, or accept the
-  divergence deliberately and document it under M18/M19 — a single-landscape default and a batch
-  sampling range arguably *should* differ, but right now the difference is accidental.
-
 ### L10. Rotation silently ignored for most patterns  — [Claude] *(§3.3)*
 Only `c("sharp","diffuse","fingers","clustered","bands")` (`R/landscape_create.R:328-334`) honour
 `rotation`; for the others it's silently dropped. Document in `create_landscapes()` (and ideally
@@ -302,7 +291,7 @@ should stay byte-identical; only failure behaviour moves:
 - **M22 step 2** — batch randomization of `noise_veg_to_bare` / `noise_bare_to_veg` (post-split).
   Same question, on the *ecotone* patterns. Worth deciding together with L25: they are the same
   decision about whether batch training sets should vary edge/cell noise at all.
-- **L9** — generator signature defaults vs. batch ranges.
+- ~~**L9**~~ — decided and done 2026-08-10; see **Completed**.
 - ~~**M21**~~ — decided 2026-08-05, implemented 2026-08-06/07; see **Completed** and
   `../spatPatClassifyR_paper/CHANGELOG.md` (2026-08-06/2026-08-07 entries).
 
@@ -312,7 +301,6 @@ should stay byte-identical; only failure behaviour moves:
 11. **M5** — pixel-model input encoding (ordinal integers for 3+ classes). *(M6 was here too; done
     2026-08-05 by removing the `metrics` parameter, and it changed no results.)*
 12. **L5** — `fisher_score` single-sample guard (changes metric ranking when it fires).
-13. **L9** — generator signature defaults vs. batch ranges *(decision first)*.
 
 ---
 
@@ -433,6 +421,67 @@ fractional-lower-bound range that does span whole numbers. Verified: `devtools::
 (2406 pass / 0 fail), `dev/golden/check_landscapes.R` (byte-exact, all 11 patterns) and
 `dev/golden/check.R` (metrics within `1e-8`, pixel within `1e-5`) — **no result changes** at any
 size the package actually generates landscapes at.
+
+### L9. Default parameters drift between single generators and the batch wrapper  — [Claude] *(§2.5)*
+*Fixed 2026-08-10 — decided: harmonize the generator defaults into the spec's batch range.*
+7 parameters across 4 patterns had a signature default outside their own `batch_range` (at the
+generators' own default width/height = 100): `fingers/sine_height_sd` (4, range `[5,25]`),
+`bands/band_zone_prop` (0.2, range `[0.3,0.6]`), `bands/frequency` (2π/100, range `[0.1,0.3]`),
+`spots/n_spots` (15, range `[5,10]`), `spots/spot_radius` (5, range `[10,20]`), and the same two
+for `gaps`.
+
+**Why this cannot change `create_landscapes()` output.** Confirmed by reading the merge logic
+(`R/landscape_create.R`): for every parameter with a `batch_range`, the batch path *always*
+supplies an explicit value — either the user's override or the spec's own `batch_range` — before
+sampling. It never falls through to a generator's own formal default, whether or not the user's
+`params_list` mentions that pattern. Only `create_landscape()` (singular) and the `pattern_*()`
+constructors, called with a parameter omitted, ever consult the generator's default.
+
+**Checked before touching anything:** no call anywhere in the analysis repo that produces a
+published figure/table relies on these defaults — every real `pattern_spots()`/`pattern_gaps()`
+call there sets both `n_spots` and `spot_radius` explicitly, and every `fingers`/`bands` landscape
+there goes through the (unaffected) batch path. 8 low-stakes doc/vignette examples in this repo
+do omit one of these parameters and now render slightly differently — checked by running each one
+directly; all still execute without error.
+
+**New defaults** — `sine_height_sd = 5`; `band_zone_prop = 0.3`; `frequency = 4*pi/100` (kept
+tied to π rather than becoming an arbitrary decimal — this is "2 full waves across the default
+width" instead of the old "1 full wave", the smallest multiple that lands in range);
+`n_spots = 5`, `spot_radius = 10` for both `spots` and `gaps`.
+**Chosen by visual inspection, not just picking the range midpoint:** the midpoint choice for
+spots/gaps (`n_spots=8, spot_radius=15`) reliably produced heavily overlapping, merged blobs
+across every seed tried — not a fluke, but also not a *wrong* depiction of the pattern class
+(batch training data already samples `spot_radius` up to 20 and does include coalescing patches),
+just a poor choice for an illustrative single-landscape default. The range's low end
+(`n_spots=5, spot_radius=10`) stayed visually distinguishable as discrete spots/gaps across
+multiple seeds and was chosen instead — which also matches the "sits at the low end of its range"
+convention several *other* defaults in this spec already follow (`sine_height_mean`,
+`sine_length_mean`, `band_spacing`, `noise_sd`).
+
+**One non-obvious side effect, understood and expected:** the golden landscape harness's `single`
+section generates all 11 patterns in one sequence sharing a single RNG stream. `spots`'/`gaps`'
+placement draws `n_spots` values via `sample()`, so dropping their default from 15 to 5 changed how
+many random draws are consumed immediately before `labyrinth` runs right after them in that
+sequence — shifting `labyrinth`'s single-landscape matrix too, even though nothing about
+`labyrinth` itself changed. Confirmed harmless: `labyrinth`'s own defaults/params are untouched,
+and this coupling is an artifact of the harness generating all patterns from one shared seed, not
+something a real caller generating `labyrinth` on its own would ever see. `dev/golden/reference_landscapes.rds`
+re-captured after confirming (a) `batch_matrices`/`batch_params`/`batch_patterns` were 100%
+byte-identical, and (b) every `single_matrices`/`single_params` diff was confined to exactly the
+5 patterns expected to move (`fingers`, `bands`, `spots`, `gaps`, `labyrinth`).
+
+**Two existing tests fixed as a side effect**, not a regression: `test-create-landscape.R` had two
+tests using `width = height = 20` as an arbitrary small size, unrelated to what they actually test
+(`pattern_label`/`name` field separation; rotation being ignored for non-rotatable patterns) — the
+new `spot_radius = 10` default is exactly at the `spot_radius >= min(width,height)/2` boundary at
+that size, so both needed bumping to `width = height = 50`, matching the convention already used
+by sibling tests.
+
+Verified: `devtools::test()` (2406 pass / 0 fail), the constructor-vs-generator defaults
+consistency test (`test-pattern-params.R`) confirms the two copies stayed in sync,
+`dev/golden/check_landscapes.R` clean against the re-captured reference, and
+`dev/golden/check.R` (metrics within `1e-8`, pixel within `1e-5`) confirms the classification
+harness — batch-path only — is completely unaffected.
 
 ### M21 + M18 + M19 + M20 + M22 (step 1). Per-pattern parameter constructors (`pattern_*()`)  — [new]
 *Fixed 2026-08-06/07*, as Milestones 0–5 behind the existing golden harness. Full decision log kept

@@ -6,20 +6,20 @@
 \usage{
 pattern_bands(
   boundary_position = 0.5,
-  band_zone_prop = 0.2,
+  band_zone_prop = 0.3,
   band_thickness = 3,
   band_spacing = 10,
-  frequency = 2 * pi/100,
+  frequency = 4 * pi/100,
   amplitude = 5,
   noise_sd = 0
 )
 }
 \arguments{
-\item{boundary_position}{Numeric. Relative position of the vegetation boundary
-from the top (0-1, default: 0.5).}
+\item{boundary_position}{Numeric. Relative position of the horizontal
+vegetation boundary (if not rotated) from the top (0-1, default: 0.5).}
 
 \item{band_zone_prop}{Numeric. Proportion of the total landscape height to
-allocate for bands below the vegetation boundary (0-1, default: 0.2). If
+allocate for bands below the vegetation boundary (0-1, default: 0.3). If
 the band zone is too small for the given band spacing, no bands are drawn
 and a warning is issued.}
 
@@ -27,11 +27,13 @@ and a warning is issued.}
 
 \item{band_spacing}{Integer. Spacing between bands in pixels (default: 10).}
 
-\item{frequency}{Numeric. Frequency of sine wave (default: 2*pi/100).}
+\item{frequency}{Numeric. Frequency of sine wave of the bands (default: 4*pi/100).}
 
-\item{amplitude}{Numeric. Amplitude of sine wave in pixels (default: 5).}
+\item{amplitude}{Numeric. Amplitude of sine wave of the bands in pixels (default: 5).}
 
-\item{noise_sd}{Numeric. Standard deviation for random noise (default: 0).}
+\item{noise_sd}{Numeric. Standard deviation for random noise.
+Controls how strongly each band randomly deviates up and down 
+from its baseline along the x-axis (default: 0).}
 }
 \value{
 A named list of the supplied parameters of the class \code{"landscape_params"}.

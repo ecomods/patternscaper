@@ -5,8 +5,8 @@
 \title{Parameters for the Spots Pattern}
 \usage{
 pattern_spots(
-  n_spots = 15,
-  spot_radius = 5,
+  n_spots = 5,
+  spot_radius = 10,
   spot_radius_sd = 0,
   radius_noise_fraction = 0,
   regular_spots = FALSE,
@@ -14,11 +14,11 @@ pattern_spots(
 )
 }
 \arguments{
-\item{n_spots}{Integer. Number of circular spots to generate (default: 15).
+\item{n_spots}{Integer. Number of circular spots to generate (default: 5).
 For regular placement, this may be automatically reduced if the landscape
 cannot accommodate the requested number at the given \code{spot_radius}.}
 
-\item{spot_radius}{Numeric. Mean radius of each spot in cells (default: 5).
+\item{spot_radius}{Numeric. Mean radius of each spot in cells (default: 10).
 Must be positive and smaller than landscape dimensions.}
 
 \item{spot_radius_sd}{Numeric. Standard deviation for random variation in spot radius.

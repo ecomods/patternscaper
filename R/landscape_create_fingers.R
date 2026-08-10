@@ -41,7 +41,7 @@ create_landscape_fingers <- function(
   sine_length_mean = 20,
   sine_length_sd = 12,
   sine_height_mean = 5,
-  sine_height_sd = 4,
+  sine_height_sd = 5,
   rotation = 0
 ) {
   # Validate inputs

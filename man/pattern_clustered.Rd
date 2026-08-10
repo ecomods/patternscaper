@@ -16,8 +16,8 @@ pattern_clustered(
 )
 }
 \arguments{
-\item{boundary_position}{Numeric. Relative position of the vegetation boundary
-from the top (0-1, default: 0.5).}
+\item{boundary_position}{Numeric. Relative position of the horizontal
+vegetation boundary (if not rotated) from the top (0-1, default: 0.5).}
 
 \item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell to
 bare, adding small gaps within the vegetation. Applied to the underlying
