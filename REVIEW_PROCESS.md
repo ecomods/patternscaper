@@ -336,22 +336,13 @@ The original "first batch" is fully done (H1, H2, M16, M14, M2, M1, M10) — see
 Remaining work, grouped by **whether it can change published results**, because that determines
 whether the analysis repo has to be re-run:
 
-**Group A — cannot change any result** (docs, messages, tests, file names). *In progress.*
-**Constraint (2026-08-05): do only work that survives the M21 decision either way.** M21
-(per-pattern parameter constructors) would replace per-pattern doc topics with `?spots_params`
-pages, so anything built per-pattern now is at risk of being thrown away.
+**Group A — cannot change any result** (docs, messages, tests, file names).
+**M18/M19/M20/M21/M22 step 1 done 2026-08-06/07** — see **Completed**.
 
-*Safe regardless of M21 — do these:*
-1. **M19** — document rotation applicability, `custom_pattern`, `params_list` semantics, `@return`.
-2. **L26** — one-line `_pkgdown.yml` fix so `build_reference()` stops erroring.
-3. **L19** — file renames; **L17** — `sapply()` → `vapply()`; **L21** — README badges.
-4. **M20**, visual-tour half only — one figure per pattern in the vignette.
-
-*On hold until M21 is decided — do NOT start:*
-- 11 per-pattern doc-only topics (M18 step 3).
-- Rewriting the generators' `@examples` to `create_landscape("bands", ...)` — under either
-  outcome those pages get `@noRd`'d, so the examples disappear. Skip entirely.
-- The parameter-passing sections of the vignette (M20).
+*Remaining:*
+1. **L19** — file renames (`create_landscape_bare.R`/`_dense.R` → `landscape_create_*.R`).
+2. **L17** — `sapply()` → `vapply()` (`R/nn_keras.R`, `R/nn_utils.R`, other `R/plot_*` files).
+3. **L21** — README badges.
 
 **Group B — changes only error/warning paths, not successful runs.** Existing golden checks
 should stay byte-identical; only failure behaviour moves:
@@ -370,7 +361,8 @@ should stay byte-identical; only failure behaviour moves:
   Same question, on the *ecotone* patterns. Worth deciding together with L25: they are the same
   decision about whether batch training sets should vary edge/cell noise at all.
 - **L9** — generator signature defaults vs. batch ranges.
-- ~~**M21**~~ — decided 2026-08-05, go ahead; see `PATTERN_CONSTRUCTORS_PLAN.md`.
+- ~~**M21**~~ — decided 2026-08-05, implemented 2026-08-06/07; see **Completed** and
+  `../spatPatClassifyR_paper/CHANGELOG.md` (2026-08-06/2026-08-07 entries).
 
 **Group C — will or may change results; needs the analysis re-run and a manuscript check:**
 9. **L25** — `radius_noise_fraction` batch randomization *(decision first, then re-run)*.
@@ -405,6 +397,47 @@ Checked against current source; correct as-is, no action needed:
 ---
 
 ## Completed
+
+### M21 + M18 + M19 + M20 + M22 (step 1). Per-pattern parameter constructors (`pattern_*()`)  — [new]
+*Fixed 2026-08-06/07*, as Milestones 0–5 behind the existing golden harness. Full decision log kept
+in `../spatPatClassifyR_paper/PATTERN_CONSTRUCTORS_PLAN.md` until its deletion (2026-08-10); the
+dated summary that supersedes it is in `../spatPatClassifyR_paper/CHANGELOG.md`, 2026-08-06 and
+2026-08-07. Five review items land together because they were one fix:
+
+- **M21** (the design): one exported constructor per pattern — `pattern_spots()`, `pattern_bands()`,
+  … — whose formals are that pattern's parameters, returning a plain list classed
+  `"landscape_params"`. `pattern_<TAB>` now lists all 11 patterns; `?pattern_spots` is a real,
+  inherited-`@param` help page; validation happens at construction time via the existing
+  `validate_*_param()` functions, so the constructor and `params_list` cannot drift apart in what
+  they accept. Reviewed by GPT-5.4 and Gemini before the rollout.
+- **M18** (parameters undiscoverable): resolved by the constructors themselves, not by doc-only
+  topics — the originally planned `?landscape_patterns` overview and `desc` spec field were dropped
+  once the constructors made them redundant. The 11 generators are now `@noRd` (no dead-end pages);
+  `_pkgdown.yml`'s reference index swapped to the constructor pages in the same commit.
+- **M19** (undocumented behaviour): `create_landscape()`/`create_landscapes()` roxygen now states
+  which 5 of 11 patterns honour `rotation`, documents `params_list`'s fixed-value-vs-range semantics,
+  documents the partial-failure return shape, and lists `name` in `@return`. `custom_pattern` renamed
+  to **`pattern_label`** in the same pass (it read as "a pattern to generate", not a relabeling knob).
+- **M20** (vignette shape): `vignettes/landscape-generation.qmd` restructured around the 2-function
+  API, including a one-figure-per-pattern visual tour.
+- **M22 step 1** (`random_spots` silently stripped in batch generation): split into two scalars,
+  `noise_veg_to_bare` / `noise_bare_to_veg`, added to the spec with `batch_range = NULL`
+  (validation-only). Removes the package's only vector-valued parameter. **Changes no existing
+  raster** — `random_spots` was never reachable through `create_landscapes()`. **Step 2** (whether
+  the two deserve a real default `batch_range`) is a separate, results-changing decision, tracked
+  together with **L25** under "Open decisions" above.
+
+As a consequence of Milestone 4, `create_landscape()` no longer takes `...` — the constructors are
+now the *only* route for pattern parameters, a deliberate breaking change (`DESCRIPTION` → `0.3.0`).
+The analysis repo's two call sites that pass pattern parameters were migrated in the same window,
+which also surfaced and fixed a pre-existing, unrelated breakage (`tree_prop` → `veg_prop`, stale
+since a much earlier rename, independent of this work).
+
+**Verified 2026-08-10:** full suite (2396 pass / 0 fail), `dev/golden/check_landscapes.R` byte-exact
+(all 11 patterns), `dev/golden/check.R` within tolerance (metrics `1e-8`, pixel `1e-5`), and a full
+`devtools::check()` — 0 errors / 0 warnings, 6 NOTEs, none touching this work (sandbox `.claude` dir,
+clock skew, `scratch/` not in `.Rbuildignore`, plus pre-existing NOTEs unrelated to landscape
+generation). **No result changes.**
 
 ### L24 + the `plot_classified_landscapes()` batch  — [Fable] [new]
 *Fixed 2026-08-05*, as six small independently-verified commits. **L24** was the entry point: with a
