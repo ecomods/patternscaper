@@ -416,6 +416,10 @@ create_landscapes <- function(
         current_rotation <- 0
       }
 
+      # Outside try_create_landscape()'s tryCatch, so a spec bug aborts
+      # instead of being retried and silently dropped from the batch.
+      validate_sampled_params(sampled_params, pattern)
+
       # Attempt to create landscape
       landscape <- try_create_landscape(
         pattern,
@@ -507,10 +511,20 @@ sample_landscape_params <- function(
     } else if (length(param_range) == 1) {
       sampled_params[[param_name]] <- param_range
     } else if (param_name %in% integer_params) {
-      # Draw an integer step within the range. Index the candidate vector
-      # explicitly so a collapsed range (single value) is not reinterpreted by
-      # sample()'s "sample(n) means sample.int(n)" rule.
-      int_values <- seq(from = param_range[1], to = param_range[2], by = 1)
+      # Draw an integer step within the range. Round the ranges first so we
+      # are sure to get integers. Index the candidate vector explicitly so
+      # a collapsed range (single value) is not reinterpreted by sample()'s
+      # "sample(n) means sample.int(n)" rule.
+      lower <- ceiling(param_range[1])
+      upper <- floor(param_range[2])
+
+      if (lower > upper) {
+        # Range narrower than 1 with no whole number inside it; round to
+        # the closest one instead of passing from > to to seq().
+        int_values <- round(mean(param_range))
+      } else {
+        int_values <- seq(from = lower, to = upper, by = 1)
+      }
       sampled_params[[param_name]] <- int_values[
         sample.int(length(int_values), size = 1)
       ]

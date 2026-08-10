@@ -591,6 +591,45 @@ validate_params_list <- function(params_list, patterns) {
   cleaned_params
 }
 
+#' Validate a Sampled Batch Parameter Draw
+#'
+#' Validates one landscape's sampled parameters (a single concrete value per
+#' parameter, drawn from a spec's `batch_range`) against the same `min`/`max`
+#' bounds `validate_params_list()` enforces on user-supplied values. Must be
+#' called *outside* `try_create_landscape()`'s `tryCatch`, so a violation
+#' aborts instead of being retried and silently dropped from the batch.
+#'
+#' @param sampled_params List. Output of `sample_landscape_params()`, plus the
+#'   `rotation` element `create_landscapes()` adds for rotatable patterns.
+#' @param pattern Character. Pattern name.
+#'
+#' @return NULL (invisibly). Called for side effects (validation).
+#'
+#' @keywords internal
+#' @noRd
+validate_sampled_params <- function(sampled_params, pattern) {
+  pattern_specs <- get_valid_param_specs()[[pattern]]
+
+  # width/height/rotation are arguments of create_landscape(), not pattern
+  # parameters -- they have no entry in the spec to validate against.
+  fixed <- c("width", "height", "rotation")
+
+  for (param_name in setdiff(names(sampled_params), fixed)) {
+    spec <- pattern_specs[[param_name]]
+    param_value <- sampled_params[[param_name]]
+
+    if (spec$type == "logical") {
+      validate_logical_param(param_value, param_name, pattern)
+    } else if (spec$type == "integer") {
+      validate_integer_param(param_value, param_name, pattern, spec)
+    } else if (spec$type == "numeric") {
+      validate_numeric_param(param_value, param_name, pattern, spec)
+    }
+  }
+
+  invisible(NULL)
+}
+
 #' Validate Logical Parameter
 #'
 #' Validates that a logical parameter has correct type and length.

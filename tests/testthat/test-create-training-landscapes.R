@@ -548,6 +548,39 @@ test_that("sample_landscape_params samples within ranges", {
   expect_true(all(sapply(samples, function(x) x$height == 100)))
 })
 
+test_that("sample_landscape_params always returns a whole number for integer params, even from a fractional range", {
+  # A width/height-scaled batch_range can land on non-integer bounds (e.g.
+  # bands/band_thickness at height = 20 -> c(0.4, 0.8)) -- seq() starts
+  # exactly at `from` rather than rounding to it, so this used to sample a
+  # fractional "integer" silently.
+
+  # Range spans no whole number at all
+  narrow <- replicate(
+    20,
+    sample_landscape_params(
+      list(n_clusters = c(0.4, 0.8)),
+      integer_params = "n_clusters",
+      width = 100,
+      height = 100
+    )$n_clusters
+  )
+  expect_true(all(narrow == round(narrow)))
+  expect_true(all(narrow == narrow[1])) # only one whole number to round to
+
+  # Fractional lower bound, but the range does span whole numbers
+  wide <- replicate(
+    20,
+    sample_landscape_params(
+      list(n_clusters = c(2.5, 5)),
+      integer_params = "n_clusters",
+      width = 100,
+      height = 100
+    )$n_clusters
+  )
+  expect_true(all(wide == round(wide)))
+  expect_true(all(wide >= 3 & wide <= 5)) # 2.5 itself is not a whole number
+})
+
 test_that("try_create_landscape returns NULL on error and reports the cause (M12)", {
   # Invalid parameters that should cause error
   bad_params <- list(
@@ -565,6 +598,29 @@ test_that("try_create_landscape returns NULL on error and reports the cause (M12
   )
 
   expect_null(result)
+})
+
+test_that("validate_sampled_params aborts loudly on an out-of-bounds sampled value (M23)", {
+  # Simulates a spec bug: a sampled draw sitting outside its own min/max --
+  # e.g. a batch_range mismatched with the same entry's bounds. veg_prop's
+  # spec is min 0, max 1.
+  bad_sample <- list(veg_prop = 1.5, width = 50, height = 50)
+
+  expect_error(
+    validate_sampled_params(bad_sample, "random"),
+    "veg_prop"
+  )
+})
+
+test_that("validate_sampled_params is silent for a normal sampled draw", {
+  good_sample <- sample_landscape_params(
+    build_default_params_list(100, 100)[["spots"]],
+    get_integer_param_names(),
+    100,
+    100
+  )
+
+  expect_silent(validate_sampled_params(good_sample, "spots"))
 })
 
 test_that("try_create_landscape creates valid landscape on success", {

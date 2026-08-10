@@ -80,30 +80,6 @@ than `"accuracy"`, `evaluation[["accuracy"]]` is `NULL`, `round(NULL, 4)` is `nu
 *M18, M19, M20, M21 and M22 step 1 are done — see **Completed** ("M21 + M18 + M19 + M20 + M22 step 1").
 M22 step 2 remains open, tracked under "Open decisions" below alongside L25.*
 
-### M23. [new] Sampled batch parameters are never validated, and could not safely be  — *(added 2026-08-07)*
-`sample_landscape_params()` draws each landscape's parameters from `batch_range`, and nothing
-checks the result against the same spec's `min`/`max` before it reaches the generator. The obvious
-fix — routing the draw through the `pattern_*()` validation — is **not** safe where it would land:
-`try_create_landscape()` wraps generation in `tryCatch(error = \(e) NULL)`, so a validation failure
-becomes a retried-then-dropped landscape and `create_landscapes(n = 100)` quietly returns 97 with a
-warning. A short training set changes results; that is a worse failure than no check at all. Same
-`tryCatch` as M12, different fix: M12 wants the cause *reported*, this wants the error class *not
-to arrive there in the first place*.
-
-**Not currently reachable.** Measured 2026-08-07 while implementing Milestone 4.1: no `batch_range`
-sits outside its own `min`/`max` at 50×50, 100×100, 200×200, 500×200 or 30×300, and 3,300 draws
-(300 per pattern) produced zero rejections. The invariant *batch_range ⊆ [min, max]* holds today —
-but nothing enforces it, so widening a range later would surface as short batches.
-
-**Why it is open rather than fixed:** Milestone 4.1 rewired the batch path onto `params =` and
-deliberately used `new_landscape_params_unchecked()` (`R/pattern_params.R`) to keep behaviour
-provably identical, since that milestone claims zero results impact. Adding validation is new
-behaviour and belongs on its own.
-- **Fix:** validate the sampled draw *outside* the `tryCatch`, so a spec bug is a loud error rather
-  than a short batch. Pairs naturally with M12 and with M0.1's spec-vs-formals consistency test,
-  which guards the adjacent drift class.
-- **Cheaper alternative:** a test asserting `batch_range ⊆ [min, max]` for every spec entry across
-  several landscape sizes — enforces the invariant without touching the generation path.
 
 ### M24. [new] No `keras3::clear_session()` between models in `train_pixel_model()` — *(added 2026-08-10)*
 `R/nn_keras.R:412-418` (CV fold loop) and `:516-522`/`:549-555` (final model, both branches).
@@ -320,14 +296,12 @@ should stay byte-identical; only failure behaviour moves:
 6. ~~**M3**~~ — done 2026-08-10, see **Completed**.
 7. ~~**M8**~~ — done 2026-08-10, see **Completed**.
 8. ~~**M12**~~ — done 2026-08-10, see **Completed**.
-9. **M23** — sampled batch parameters are never validated. Was paired with M12 as "the same
-   `tryCatch` from opposite ends" (report the cause vs. keep validation errors from reaching it);
-   M12's half is done, M23's remains — validating the sampled draw is new behaviour, not a
-   message fix, and belongs on its own regardless.
-7. ~~**L24** — `plot_classified_landscapes(only_misclassified = TRUE)` at 100% accuracy.~~ *Done
-   2026-08-05, together with the rest of the `plot_classified_landscapes()` batch — see
-   **Completed**.*
-8. **L7** — single-landscape handling parity between the two `apply_*`.
+9. ~~**M23**~~ — done 2026-08-10, see **Completed**. Also fixed a real bug it surfaced along the
+   way: the integer-sampling path could silently draw a fractional value at small landscape sizes.
+10. ~~**L24** — `plot_classified_landscapes(only_misclassified = TRUE)` at 100% accuracy.~~ *Done
+    2026-08-05, together with the rest of the `plot_classified_landscapes()` batch — see
+    **Completed**.*
+11. **L7** — single-landscape handling parity between the two `apply_*`.
 
 **Open decisions (not tasks — settle these before the work they gate):**
 - **L25** — `radius_noise_fraction` batch randomization. Gates a self-organized re-run.
@@ -414,6 +388,44 @@ matches that precedent rather than introducing a second reporting mode). Existin
 `try_create_landscape()` extended to assert the cause is reported, not just that it returns `NULL`.
 Verified: `devtools::test()` (2400 pass / 0 fail) and `dev/golden/check_landscapes.R`
 (byte-exact) — no change to any valid-input output; only what gets printed on failure.
+
+### M23. Sampled batch parameters are never validated, and could not safely be
+*Fixed 2026-08-10.* `sample_landscape_params()` drew each landscape's parameters from
+`batch_range`, and nothing checked the result against the same spec's `min`/`max` before it
+reached the generator. Routing the draw through `pattern_*()` validation directly was not safe
+where it would land: `try_create_landscape()` wraps generation in `tryCatch(error = \(e) NULL)`,
+so a validation failure would become a retried-then-dropped landscape — a short training set,
+which is a worse failure than no check at all.
+**Fix:** new `validate_sampled_params()` (`R/landscape_parameter_validation.R`), reusing the same
+`validate_logical_param()`/`validate_integer_param()`/`validate_numeric_param()` functions
+`validate_params_list()` already applies to user-supplied values. Called in the retry loop right
+after sampling but *before* `try_create_landscape()`, i.e. outside its `tryCatch` — so a violation
+now aborts the whole `create_landscapes()` call instead of being silently retried away.
+
+**Immediately found a real bug it was meant to guard against.** `bands`/`band_thickness`'s
+`batch_range = function(width, height) c(0.02, 0.04) * height` gives `[0.4, 0.8]` at `height = 20`
+— no whole number in that range at all — yet the parameter is declared `type = "integer"`.
+`sample_landscape_params()`'s integer branch did `seq(from = range[1], to = range[2], by = 1)`,
+which starts *exactly* at `range[1]` rather than rounding to it, so any range with a fractional
+lower bound silently sampled a fractional value (e.g. `0.4`) that no generator ever checked either.
+Affects the 5 integer parameters with a width/height-scaled `batch_range`
+(`bands`/`band_thickness`, `bands`/`band_spacing`, `bands`/`amplitude`, `spots`/`spot_radius`,
+`gaps`/`spot_radius`). **Checked against the sizes that matter:** at 100×100 (the paper's standard
+size) and 50×50 (the robustness-test training size), every one of the 5 ranges already lands on
+whole numbers, so this was never reachable in any published result — only this package's own
+20×20 test fixtures (used for speed) hit it.
+**Fix:** round the range inward (`ceiling`/`floor`) before building the candidate sequence,
+falling back to `round(mean(range))` when that leaves no whole number at all. A no-op whenever the
+range already starts and ends on whole numbers, which is every case that matters for published
+results — confirmed by the unchanged golden references below.
+
+Regression tests added for both parts (`test-create-training-landscapes.R`): a direct
+`validate_sampled_params()` test with a manufactured out-of-bounds value, and a
+`sample_landscape_params()` test covering both a range with no whole number at all and a
+fractional-lower-bound range that does span whole numbers. Verified: `devtools::test()`
+(2406 pass / 0 fail), `dev/golden/check_landscapes.R` (byte-exact, all 11 patterns) and
+`dev/golden/check.R` (metrics within `1e-8`, pixel within `1e-5`) — **no result changes** at any
+size the package actually generates landscapes at.
 
 ### M21 + M18 + M19 + M20 + M22 (step 1). Per-pattern parameter constructors (`pattern_*()`)  — [new]
 *Fixed 2026-08-06/07*, as Milestones 0–5 behind the existing golden harness. Full decision log kept
