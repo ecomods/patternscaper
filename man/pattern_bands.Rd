@@ -6,7 +6,7 @@
 \usage{
 pattern_bands(
   boundary_position = 0.5,
-  band_zone_prop = 0.3,
+  band_zone = 0.3,
   band_thickness = 3,
   band_spacing = 10,
   frequency = 4 * pi/100,
@@ -18,7 +18,7 @@ pattern_bands(
 \item{boundary_position}{Numeric. Relative position of the horizontal
 vegetation boundary (if not rotated) from the top (0-1, default: 0.5).}
 
-\item{band_zone_prop}{Numeric. Proportion of the total landscape height to
+\item{band_zone}{Numeric. Proportion of the total landscape height to
 allocate for bands below the vegetation boundary (0-1, default: 0.3). If
 the band zone is too small for the given band spacing, no bands are drawn
 and a warning is issued.}
@@ -105,7 +105,7 @@ scale with landscape size are shown for the default 100 by 100.
 \tabular{lll}{
 \strong{Parameter} \tab \strong{Valid} \tab \strong{Sampled} \cr
 \code{boundary_position} \tab 0 to 1 \tab 0.3 to 0.5 \cr
-\code{band_zone_prop} \tab 0 to 1 \tab 0.3 to 0.6 \cr
+\code{band_zone} \tab 0 to 1 \tab 0.3 to 0.6 \cr
 \code{band_thickness} \tab 1 or more \tab 2 to 4, scales with size \cr
 \code{band_spacing} \tab 1 or more \tab 10 to 20, scales with size \cr
 \code{frequency} \tab 0 or more \tab 0.1 to 0.3 \cr

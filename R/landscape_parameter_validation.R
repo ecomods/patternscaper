@@ -114,7 +114,7 @@ validate_boundary_position <- function(boundary_position) {
 landscape_param_specs <- function() {
   list(
     random = list(
-      veg_prop = list(
+      veg_prob = list(
         type = "numeric",
         min = 0,
         max = 1,
@@ -122,7 +122,7 @@ landscape_param_specs <- function() {
       )
     ),
     bare = list(
-      veg_prop = list(
+      veg_prob = list(
         type = "numeric",
         min = 0,
         max = 1,
@@ -130,7 +130,7 @@ landscape_param_specs <- function() {
       )
     ),
     dense = list(
-      veg_prop = list(
+      veg_prob = list(
         type = "numeric",
         min = 0,
         max = 1,
@@ -211,7 +211,7 @@ landscape_param_specs <- function() {
         max = Inf,
         batch_range = c(5, 10)
       ),
-      scatter_zone_prop = list(
+      cluster_zone = list(
         type = "numeric",
         min = 0,
         exclusive_min = TRUE,
@@ -240,7 +240,7 @@ landscape_param_specs <- function() {
         max = 1,
         batch_range = c(0.3, 0.5)
       ),
-      band_zone_prop = list(
+      band_zone = list(
         type = "numeric",
         min = 0,
         max = 1,

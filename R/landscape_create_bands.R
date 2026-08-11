@@ -18,7 +18,7 @@
 #' # Modified sine bands with thicker bands, wider spacing and noise
 #' bands_modified <- create_landscape_bands(
 #'   boundary_position = 0.3,
-#'   band_zone_prop = 0.5,
+#'   band_zone = 0.5,
 #'   band_thickness = 5,
 #'   band_spacing = 15,
 #'   frequency = 1,
@@ -41,7 +41,7 @@ create_landscape_bands <- function(
   width = 100,
   height = 100,
   boundary_position = 0.5,
-  band_zone_prop = 0.3,
+  band_zone = 0.3,
   band_thickness = 3,
   band_spacing = 10,
   frequency = 4 * pi / 100,
@@ -54,11 +54,11 @@ create_landscape_bands <- function(
   validate_rotation(rotation = rotation)
   validate_boundary_position(boundary_position = boundary_position)
 
-  # Validate band_zone_prop
-  if (!is.numeric(band_zone_prop) || band_zone_prop < 0 || band_zone_prop > 1) {
+  # Validate band_zone
+  if (!is.numeric(band_zone) || band_zone < 0 || band_zone > 1) {
     cli::cli_abort(c(
-      "{.arg band_zone_prop} must be between 0 and 1.",
-      "x" = "You supplied {.val {band_zone_prop}}"
+      "{.arg band_zone} must be between 0 and 1.",
+      "x" = "You supplied {.val {band_zone}}"
     ))
   }
 
@@ -123,14 +123,14 @@ create_landscape_bands <- function(
   }
 
   # Calculate available space for bands below the boundary
-  band_zone <- round(height_actual * band_zone_prop)
+  band_zone_height <- round(height_actual * band_zone)
   available_space <- height_actual - max(base_boundary)
 
   # Constrain band zone to available space
-  band_zone <- min(band_zone, available_space)
+  band_zone_height <- min(band_zone_height, available_space)
 
   # Calculate number of bands that can fit
-  num_bands <- floor(band_zone / band_spacing)
+  num_bands <- floor(band_zone_height / band_spacing)
 
   # Warn if no bands can be drawn because the spacing is too large
   if (num_bands == 0) {
@@ -138,7 +138,7 @@ create_landscape_bands <- function(
       "No bands can fit in available space.",
       "i" = "Available space below the vegetation boundary: {available_space} px",
       "i" = "Band spacing required: {band_spacing} px",
-      "i" = "Consider decreasing {.arg band_spacing}, {.arg boundary_position}, or increasing {.arg band_zone_prop}."
+      "i" = "Consider decreasing {.arg band_spacing}, {.arg boundary_position}, or increasing {.arg band_zone}."
     ))
   }
 
@@ -181,7 +181,7 @@ create_landscape_bands <- function(
       width = width,
       height = height,
       boundary_position = boundary_position,
-      band_zone_prop = band_zone_prop,
+      band_zone = band_zone,
       band_thickness = band_thickness,
       band_spacing = band_spacing,
       frequency = frequency,

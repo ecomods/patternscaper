@@ -1,7 +1,7 @@
 #' Create a Landscape with Clustered Features
 #'
 #' Generates a binary landscape with clustered features below a vegetation
-#' boundary. Features are arranged in clusters within a scatter zone that
+#' boundary. Features are arranged in clusters within a cluster zone that
 #' extends below the boundary. Clusters can be elongated in x or y directions
 #' to create elliptical patterns.
 #'
@@ -27,7 +27,7 @@
 #'   boundary_position = 0.2,
 #'   n_clusters = 8,
 #'   cluster_radius = 7,
-#'   scatter_zone_prop = 0.6,
+#'   cluster_zone = 0.6,
 #'   elongation_x = 2.5,
 #'   elongation_y = 0.5
 #' )
@@ -36,7 +36,7 @@
 #' clustered_rotated <- create_landscape_clustered(
 #'   n_clusters = 20,
 #'   cluster_radius = 2,
-#'   scatter_zone_prop = 0.5,
+#'   cluster_zone = 0.5,
 #'   elongation_x = 1.8,
 #'   elongation_y = 1.4,
 #'   rotation = 45
@@ -48,7 +48,7 @@ create_landscape_clustered <- function(
   boundary_position = 0.5,
   n_clusters = 10,
   cluster_radius = 5,
-  scatter_zone_prop = 0.3,
+  cluster_zone = 0.3,
   elongation_x = 1,
   elongation_y = 1,
   rotation = 0
@@ -83,13 +83,13 @@ create_landscape_clustered <- function(
   }
 
   if (
-    !is.numeric(scatter_zone_prop) ||
-      scatter_zone_prop <= 0 ||
-      scatter_zone_prop > 1
+    !is.numeric(cluster_zone) ||
+      cluster_zone <= 0 ||
+      cluster_zone > 1
   ) {
     cli::cli_abort(c(
-      "{.arg scatter_zone_prop} must be between 0 and 1.",
-      "x" = "You supplied {.val {scatter_zone_prop}}"
+      "{.arg cluster_zone} must be between 0 and 1.",
+      "x" = "You supplied {.val {cluster_zone}}"
     ))
   }
 
@@ -113,13 +113,13 @@ create_landscape_clustered <- function(
   height_actual <- ifelse(rotation == 0, height, height * rotation_scale_factor)
   width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
-  # Ensure scatter zone is large enough for clusters
-  min_scatter_zone <- 2 * cluster_radius * max(elongation_y, 1)
-  if (scatter_zone_prop * height_actual < min_scatter_zone) {
+  # Ensure cluster zone is large enough for clusters
+  min_cluster_zone <- 2 * cluster_radius * max(elongation_y, 1)
+  if (cluster_zone * height_actual < min_cluster_zone) {
     cli::cli_abort(c(
-      "Scatter zone too small for cluster size.",
-      "i" = "Need at least {min_scatter_zone} pixels but got {scatter_zone_prop * height_actual}.",
-      "i" = "Increase {.arg scatter_zone_prop} or decrease {.arg cluster_radius}."
+      "Cluster zone too small for cluster size.",
+      "i" = "Need at least {min_cluster_zone} pixels but got {cluster_zone * height_actual}.",
+      "i" = "Increase {.arg cluster_zone} or decrease {.arg cluster_radius}."
     ))
   }
 
@@ -134,7 +134,7 @@ create_landscape_clustered <- function(
   # Extract matrix from landscape object
   mat <- terra::as.matrix(base_landscape$data, wide = TRUE)
 
-  # Define scatter zone boundaries
+  # Define cluster zone boundaries
   boundary_row <- round(height_actual * boundary_position)
 
   # For rotated landscapes, use inner portion to avoid edge artifacts after crop
@@ -151,20 +151,20 @@ create_landscape_clustered <- function(
     min_col <- 1
   }
 
-  scatter_zone_end <- min(
+  cluster_zone_end <- min(
     max_row,
-    boundary_row + floor(max_row * scatter_zone_prop)
+    boundary_row + floor(max_row * cluster_zone)
   )
 
-  # Validate that cluster centers can be placed within scatter zone
+  # Validate that cluster centers can be placed within cluster zone
   sample_row_start <- boundary_row + cluster_radius + 1
-  sample_row_end <- floor(scatter_zone_end - cluster_radius)
+  sample_row_end <- floor(cluster_zone_end - cluster_radius)
 
   if (sample_row_start > sample_row_end) {
     cli::cli_abort(c(
-      "Cannot place clusters: insufficient vertical space in scatter zone.",
+      "Cannot place clusters: insufficient vertical space in cluster zone.",
       "i" = "Row range [{sample_row_start}, {sample_row_end}] is invalid.",
-      "i" = "Increase {.arg scatter_zone_prop} or decrease {.arg cluster_radius}."
+      "i" = "Increase {.arg cluster_zone} or decrease {.arg cluster_radius}."
     ))
   }
 
@@ -246,7 +246,7 @@ create_landscape_clustered <- function(
       boundary_position = boundary_position,
       n_clusters = n_clusters,
       cluster_radius = cluster_radius,
-      scatter_zone_prop = scatter_zone_prop,
+      cluster_zone = cluster_zone,
       elongation_x = elongation_x,
       elongation_y = elongation_y,
       rotation = rotation

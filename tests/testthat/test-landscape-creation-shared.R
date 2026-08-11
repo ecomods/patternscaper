@@ -231,7 +231,7 @@ test_that("landscape generators handle very small landscapes", {
     fingers = list(fn = create_landscape_fingers, params = list()),
     spots = list(fn = create_landscape_spots, params = list(spot_radius = 3)),
     gaps = list(fn = create_landscape_gaps, params = list(gap_radius = 3)),
-    random = list(fn = create_landscape_random, params = list(veg_prop = 0.5))
+    random = list(fn = create_landscape_random, params = list(veg_prob = 0.5))
   )
 
   for (name in names(generators)) {

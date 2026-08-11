@@ -4,10 +4,10 @@
 \alias{pattern_random}
 \title{Parameters for the Random Pattern}
 \usage{
-pattern_random(veg_prop = 0.5)
+pattern_random(veg_prob = 0.5)
 }
 \arguments{
-\item{veg_prop}{Numeric. Probability that a cell is vegetated (0-1,
+\item{veg_prob}{Numeric. Probability that a cell is vegetated (0-1,
 default: 0.5). Higher values give a denser vegetation cover.}
 }
 \value{
@@ -20,13 +20,13 @@ parameter list for the \code{"random"} pattern, to pass to
 }
 \examples{
 # A single landscape, with a fixed value
-create_landscape("random", params = pattern_random(veg_prop = 0.3))
+create_landscape("random", params = pattern_random(veg_prob = 0.3))
 
-# A batch, with veg_prop drawn from a range once per landscape
+# A batch, with veg_prob drawn from a range once per landscape
 create_landscapes(
   n = 4,
   patterns = "random",
-  params_list = list(random = pattern_random(veg_prop = c(0.2, 0.8)))
+  params_list = list(random = pattern_random(veg_prob = c(0.2, 0.8)))
 )
 
 }
@@ -58,6 +58,6 @@ Usage therefore apply to \code{\link{create_landscape}} only. Ranges that
 scale with landscape size are shown for the default 100 by 100.
 \tabular{lll}{
 \strong{Parameter} \tab \strong{Valid} \tab \strong{Sampled} \cr
-\code{veg_prop} \tab 0 to 1 \tab 0.1 to 0.9 \cr
+\code{veg_prob} \tab 0 to 1 \tab 0.1 to 0.9 \cr
 }
 }

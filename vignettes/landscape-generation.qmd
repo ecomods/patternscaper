@@ -52,7 +52,7 @@ Currently there are 11 spatial patterns. This section shows what each one looks 
 
 ### Control patterns
 
-**random**, **bare** and **dense** all place vegetation at random. They differ only in `veg_prop`, the proportion of vegetated cells: `bare` defaults to 0.1, `random` to 0.5 and `dense` to 0.9. They serve as controls -- landscapes with no spatial structure at all.
+**random**, **bare** and **dense** all place vegetation at random. They differ only in `veg_prob`, the proportion of vegetated cells: `bare` defaults to 0.1, `random` to 0.5 and `dense` to 0.9. They serve as controls -- landscapes with no spatial structure at all.
 
 ```{r}
 #| label: control-patterns
@@ -60,9 +60,9 @@ Currently there are 11 spatial patterns. This section shows what each one looks 
 #| fig-height: 3
 #| fig-alt: "Three landscapes showing control patterns: bare, random, and dense"
 
-bare <- create_landscape("bare", name = "bare (veg_prop 0.1)")
-random <- create_landscape("random", name = "random (veg_prop 0.5)")
-dense <- create_landscape("dense", name = "dense (veg_prop 0.9)")
+bare <- create_landscape("bare", name = "bare (veg_prob 0.1)")
+random <- create_landscape("random", name = "random (veg_prob 0.5)")
+dense <- create_landscape("dense", name = "dense (veg_prob 0.9)")
 
 plot_landscapes(
   list(bare, random, dense),
@@ -167,7 +167,7 @@ See `?pattern_fingers`.
 
 #### clustered
 
-Vegetation clusters scattered above the boundary. `n_clusters` and `cluster_radius` set how many and how big, `scatter_zone_prop` how far into the bare zone they reach, and `elongation_x` / `elongation_y` stretch them along one axis.
+Vegetation clusters scattered above the boundary. `n_clusters` and `cluster_radius` set how many and how big, `cluster_zone` how far into the bare zone they reach, and `elongation_x` / `elongation_y` stretch them along one axis.
 
 ```{r}
 #| label: pattern-clustered

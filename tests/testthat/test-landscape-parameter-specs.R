@@ -27,9 +27,9 @@ test_that("build_default_params_list preserves exact order and values for all 11
   result <- build_default_params_list(width = 100, height = 100)
 
   expected <- list(
-    random = list(veg_prop = c(0.1, 0.9)),
-    bare = list(veg_prop = c(0, 0.1)),
-    dense = list(veg_prop = c(0.8, 1)),
+    random = list(veg_prob = c(0.1, 0.9)),
+    bare = list(veg_prob = c(0, 0.1)),
+    dense = list(veg_prob = c(0.8, 1)),
     sharp = list(boundary_position = c(0.2, 0.8)),
     diffuse = list(
       steepness = c(0.1, 1),
@@ -46,13 +46,13 @@ test_that("build_default_params_list preserves exact order and values for all 11
       boundary_position = c(0.4, 0.6),
       n_clusters = c(5, 12),
       cluster_radius = c(5, 10),
-      scatter_zone_prop = c(0.2, 1),
+      cluster_zone = c(0.2, 1),
       elongation_x = c(0.5, 1.5),
       elongation_y = c(0.5, 1.5)
     ),
     bands = list(
       boundary_position = c(0.3, 0.5),
-      band_zone_prop = c(0.3, 0.6),
+      band_zone = c(0.3, 0.6),
       band_thickness = c(2, 4),
       band_spacing = c(10, 20),
       frequency = c(0.1, 0.3),

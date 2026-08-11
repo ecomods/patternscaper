@@ -33,7 +33,7 @@ run_golden_landscapes <- function() {
   )
 
   # Package default size (100x100) -- several patterns' default/batch
-  # parameter ranges (e.g. clustered's cluster_radius, scatter_zone_prop) are
+  # parameter ranges (e.g. clustered's cluster_radius, cluster_zone) are
   # calibrated in absolute pixels for this size and fail geometry checks on a
   # much smaller canvas. Generation itself is cheap even at this size (no
   # model fitting involved), so there's no speed reason to shrink it.

@@ -73,7 +73,7 @@ clustered_default <- create_landscape("clustered")
 # Set pattern parameters through the matching constructor
 random_modified <- create_landscape(
   "random",
-  params = pattern_random(veg_prop = 0.3)
+  params = pattern_random(veg_prob = 0.3)
 )
 
 diffuse_modified <- create_landscape(

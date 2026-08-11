@@ -8,7 +8,7 @@ pattern_clustered(
   boundary_position = 0.5,
   n_clusters = 10,
   cluster_radius = 5,
-  scatter_zone_prop = 0.3,
+  cluster_zone = 0.3,
   elongation_x = 1,
   elongation_y = 1
 )
@@ -21,7 +21,7 @@ vegetation boundary (if not rotated) from the top (0-1, default: 0.5).}
 
 \item{cluster_radius}{Numeric. Radius of clusters in pixels (default: 5).}
 
-\item{scatter_zone_prop}{Numeric. Proportion of height for the scatter zone,
+\item{cluster_zone}{Numeric. Proportion of height for the cluster zone,
 measured downward from the vegetation boundary (0-1, default: 0.3).}
 
 \item{elongation_x}{Numeric. Horizontal elongation factor for clusters.
@@ -104,7 +104,7 @@ scale with landscape size are shown for the default 100 by 100.
 \code{boundary_position} \tab 0 to 1 \tab 0.4 to 0.6 \cr
 \code{n_clusters} \tab 1 or more \tab 5 to 12 \cr
 \code{cluster_radius} \tab 1 or more \tab 5 to 10 \cr
-\code{scatter_zone_prop} \tab greater than 0, up to 1 \tab 0.2 to 1 \cr
+\code{cluster_zone} \tab greater than 0, up to 1 \tab 0.2 to 1 \cr
 \code{elongation_x} \tab greater than 0 \tab 0.5 to 1.5 \cr
 \code{elongation_y} \tab greater than 0 \tab 0.5 to 1.5 \cr
 }

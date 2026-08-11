@@ -64,7 +64,7 @@ new_landscape_params_unchecked <- function(params, pattern) {
 #' parameter list for the \code{"random"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
-#' @param veg_prop Numeric. Probability that a cell is vegetated (0-1,
+#' @param veg_prob Numeric. Probability that a cell is vegetated (0-1,
 #'     default: 0.5). Higher values give a denser vegetation cover.
 #'
 #' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
@@ -73,23 +73,23 @@ new_landscape_params_unchecked <- function(params, pattern) {
 #'
 #' @examples
 #' # A single landscape, with a fixed value
-#' create_landscape("random", params = pattern_random(veg_prop = 0.3))
+#' create_landscape("random", params = pattern_random(veg_prob = 0.3))
 #'
-#' # A batch, with veg_prop drawn from a range once per landscape
+#' # A batch, with veg_prob drawn from a range once per landscape
 #' create_landscapes(
 #'   n = 4,
 #'   patterns = "random",
-#'   params_list = list(random = pattern_random(veg_prop = c(0.2, 0.8)))
+#'   params_list = list(random = pattern_random(veg_prob = c(0.2, 0.8)))
 #' )
 #'
 #' @evalRd rd_param_ranges("random")
 #'
 #' @export
-pattern_random <- function(veg_prop = 0.5) {
+pattern_random <- function(veg_prob = 0.5) {
   params <- list()
 
-  if (!missing(veg_prop)) {
-    params$veg_prop <- veg_prop
+  if (!missing(veg_prob)) {
+    params$veg_prob <- veg_prob
   }
 
   new_landscape_params(params, pattern = "random")
@@ -101,7 +101,7 @@ pattern_random <- function(veg_prop = 0.5) {
 #' validated parameter list for the \code{"bare"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
-#' @param veg_prop Numeric. Probability that a cell is vegetated (0-1,
+#' @param veg_prob Numeric. Probability that a cell is vegetated (0-1,
 #'     default: 0.1). Higher values give a denser vegetation cover.
 #'
 #' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
@@ -110,23 +110,23 @@ pattern_random <- function(veg_prop = 0.5) {
 #'
 #' @examples
 #' # A single landscape, with a fixed value
-#' create_landscape("bare", params = pattern_bare(veg_prop = 0.05))
+#' create_landscape("bare", params = pattern_bare(veg_prob = 0.05))
 #'
-#' # A batch, with veg_prop drawn from a range once per landscape
+#' # A batch, with veg_prob drawn from a range once per landscape
 #' create_landscapes(
 #'   n = 4,
 #'   patterns = "bare",
-#'   params_list = list(bare = pattern_bare(veg_prop = c(0, 0.1)))
+#'   params_list = list(bare = pattern_bare(veg_prob = c(0, 0.1)))
 #' )
 #'
 #' @evalRd rd_param_ranges("bare")
 #'
 #' @export
-pattern_bare <- function(veg_prop = 0.1) {
+pattern_bare <- function(veg_prob = 0.1) {
   params <- list()
 
-  if (!missing(veg_prop)) {
-    params$veg_prop <- veg_prop
+  if (!missing(veg_prob)) {
+    params$veg_prob <- veg_prob
   }
 
   new_landscape_params(params, pattern = "bare")
@@ -138,7 +138,7 @@ pattern_bare <- function(veg_prop = 0.1) {
 #' validated parameter list for the \code{"dense"} pattern, to pass to
 #' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
-#' @param veg_prop Numeric. Probability that a cell is vegetated (0-1,
+#' @param veg_prob Numeric. Probability that a cell is vegetated (0-1,
 #'     default: 0.9). Higher values give a denser vegetation cover.
 #'
 #' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
@@ -147,23 +147,23 @@ pattern_bare <- function(veg_prop = 0.1) {
 #'
 #' @examples
 #' # A single landscape, with a fixed value
-#' create_landscape("dense", params = pattern_dense(veg_prop = 0.95))
+#' create_landscape("dense", params = pattern_dense(veg_prob = 0.95))
 #'
-#' # A batch, with veg_prop drawn from a range once per landscape
+#' # A batch, with veg_prob drawn from a range once per landscape
 #' create_landscapes(
 #'   n = 4,
 #'   patterns = "dense",
-#'   params_list = list(dense = pattern_dense(veg_prop = c(0.85, 1)))
+#'   params_list = list(dense = pattern_dense(veg_prob = c(0.85, 1)))
 #' )
 #'
 #' @evalRd rd_param_ranges("dense")
 #'
 #' @export
-pattern_dense <- function(veg_prop = 0.9) {
+pattern_dense <- function(veg_prob = 0.9) {
   params <- list()
 
-  if (!missing(veg_prop)) {
-    params$veg_prop <- veg_prop
+  if (!missing(veg_prob)) {
+    params$veg_prob <- veg_prob
   }
 
   new_landscape_params(params, pattern = "dense")
@@ -381,7 +381,7 @@ pattern_fingers <- function(
 #'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
 #' @param n_clusters Integer. Number of cluster centers (default: 10).
 #' @param cluster_radius Numeric. Radius of clusters in pixels (default: 5).
-#' @param scatter_zone_prop Numeric. Proportion of height for the scatter zone,
+#' @param cluster_zone Numeric. Proportion of height for the cluster zone,
 #'     measured downward from the vegetation boundary (0-1, default: 0.3).
 #' @param elongation_x Numeric. Horizontal elongation factor for clusters.
 #'   Values > 1 stretch clusters horizontally, creating wider ellipses.
@@ -433,7 +433,7 @@ pattern_clustered <- function(
   boundary_position = 0.5,
   n_clusters = 10,
   cluster_radius = 5,
-  scatter_zone_prop = 0.3,
+  cluster_zone = 0.3,
   elongation_x = 1,
   elongation_y = 1
 ) {
@@ -448,8 +448,8 @@ pattern_clustered <- function(
   if (!missing(cluster_radius)) {
     params$cluster_radius <- cluster_radius
   }
-  if (!missing(scatter_zone_prop)) {
-    params$scatter_zone_prop <- scatter_zone_prop
+  if (!missing(cluster_zone)) {
+    params$cluster_zone <- cluster_zone
   }
   if (!missing(elongation_x)) {
     params$elongation_x <- elongation_x
@@ -469,7 +469,7 @@ pattern_clustered <- function(
 #'
 #' @param boundary_position Numeric. Relative position of the horizontal
 #'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
-#' @param band_zone_prop Numeric. Proportion of the total landscape height to
+#' @param band_zone Numeric. Proportion of the total landscape height to
 #'     allocate for bands below the vegetation boundary (0-1, default: 0.3). If
 #'     the band zone is too small for the given band spacing, no bands are drawn
 #'     and a warning is issued.
@@ -522,7 +522,7 @@ pattern_clustered <- function(
 #' @export
 pattern_bands <- function(
   boundary_position = 0.5,
-  band_zone_prop = 0.3,
+  band_zone = 0.3,
   band_thickness = 3,
   band_spacing = 10,
   frequency = 4 * pi / 100,
@@ -534,8 +534,8 @@ pattern_bands <- function(
   if (!missing(boundary_position)) {
     params$boundary_position <- boundary_position
   }
-  if (!missing(band_zone_prop)) {
-    params$band_zone_prop <- band_zone_prop
+  if (!missing(band_zone)) {
+    params$band_zone <- band_zone
   }
   if (!missing(band_thickness)) {
     params$band_thickness <- band_thickness

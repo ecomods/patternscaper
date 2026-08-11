@@ -18,15 +18,15 @@
 #' dense <- create_landscape_dense()
 #'
 #' # Create very dense landscape
-#' very_dense <- create_landscape_dense(veg_prop = 0.95)
+#' very_dense <- create_landscape_dense(veg_prob = 0.95)
 #' }
 create_landscape_dense <- function(
-  veg_prop = 0.9,
+  veg_prob = 0.9,
   width = 100,
   height = 100
 ) {
   landscape <- create_landscape_random(
-    veg_prop = veg_prop,
+    veg_prob = veg_prob,
     width = width,
     height = height
   )

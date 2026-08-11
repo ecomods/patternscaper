@@ -18,15 +18,15 @@
 #' bare <- create_landscape_bare()
 #'
 #' # Create very sparse landscape
-#' very_bare <- create_landscape_bare(veg_prop = 0.05)
+#' very_bare <- create_landscape_bare(veg_prob = 0.05)
 #' }
 create_landscape_bare <- function(
-  veg_prop = 0.1,
+  veg_prob = 0.1,
   width = 100,
   height = 100
 ) {
   landscape <- create_landscape_random(
-    veg_prop = veg_prop,
+    veg_prob = veg_prob,
     width = width,
     height = height
   )

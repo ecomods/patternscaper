@@ -34,29 +34,29 @@ test_that("create_landscape_clustered validates cluster_radius parameter", {
   )
 })
 
-test_that("create_landscape_clustered validates scatter_zone_prop parameter", {
+test_that("create_landscape_clustered validates cluster_zone parameter", {
   expect_error(
-    create_landscape_clustered(scatter_zone_prop = "0.3"),
+    create_landscape_clustered(cluster_zone = "0.3"),
     "must be between 0 and 1",
-    info = "Testing clustered with non-numeric scatter_zone_prop"
+    info = "Testing clustered with non-numeric cluster_zone"
   )
 
   expect_error(
-    create_landscape_clustered(scatter_zone_prop = -0.1),
+    create_landscape_clustered(cluster_zone = -0.1),
     "must be between 0 and 1",
-    info = "Testing clustered with negative scatter_zone_prop"
+    info = "Testing clustered with negative cluster_zone"
   )
 
   expect_error(
-    create_landscape_clustered(scatter_zone_prop = 0),
+    create_landscape_clustered(cluster_zone = 0),
     "must be between 0 and 1",
-    info = "Testing clustered with zero scatter_zone_prop"
+    info = "Testing clustered with zero cluster_zone"
   )
 
   expect_error(
-    create_landscape_clustered(scatter_zone_prop = 1.5),
+    create_landscape_clustered(cluster_zone = 1.5),
     "must be between 0 and 1",
-    info = "Testing clustered with scatter_zone_prop > 1"
+    info = "Testing clustered with cluster_zone > 1"
   )
 })
 
@@ -101,22 +101,22 @@ test_that("create_landscape_clustered validates elongation_y parameter", {
 })
 
 test_that("create_landscape_clustered validates cluster placement", {
-  # Cluster radius too large for scatter zone
+  # Cluster radius too large for cluster zone
   expect_error(
     create_landscape_clustered(
       width = 20,
       height = 20,
       boundary_position = 0.8,
-      scatter_zone_prop = 0.1,
+      cluster_zone = 0.1,
       cluster_radius = 10
     ),
-    "Scatter zone too small for cluster size"
+    "Cluster zone too small for cluster size"
   )
 })
 
 # Functionality tests ---------------------------------------------------------
 
-test_that("create_landscape_clustered creates clusters in scatter zone", {
+test_that("create_landscape_clustered creates clusters in cluster zone", {
   set.seed(123)
 
   l <- create_landscape_clustered(
@@ -125,7 +125,7 @@ test_that("create_landscape_clustered creates clusters in scatter zone", {
     boundary_position = 0.4,
     n_clusters = 10,
     cluster_radius = 3,
-    scatter_zone_prop = 0.4
+    cluster_zone = 0.4
   )
 
   expect_true(is_landscape(l))
@@ -137,9 +137,9 @@ test_that("create_landscape_clustered creates clusters in scatter zone", {
   # Clusters should be below the vegetation boundary
   mat <- matrix(vals, nrow = 30, ncol = 30)
   boundary_row <- round(30 * 0.4)
-  # Check scatter zone has clusters
-  scatter_zone <- mat[(boundary_row + 1):30, ]
-  expect_true(sum(scatter_zone == 1) > 0)
+  # Check cluster zone has clusters
+  cluster_zone <- mat[(boundary_row + 1):30, ]
+  expect_true(sum(cluster_zone == 1) > 0)
 })
 
 test_that("create_landscape_clustered elongation affects cluster shape", {
@@ -154,7 +154,7 @@ test_that("create_landscape_clustered elongation affects cluster shape", {
     cluster_radius = 5,
     elongation_x = 3,
     elongation_y = 1,
-    scatter_zone_prop = 0.6
+    cluster_zone = 0.6
   )
 
   # Get cluster dimensions (excluding the vegetation boundary area)
@@ -182,7 +182,7 @@ test_that("create_landscape_clustered elongation affects cluster shape", {
     cluster_radius = 5,
     elongation_x = 1,
     elongation_y = 3,
-    scatter_zone_prop = 0.8
+    cluster_zone = 0.8
   )
 
   # Get cluster dimensions (excluding the vegetation boundary area)
@@ -207,7 +207,7 @@ test_that("create_landscape_clustered stores all params correctly", {
     boundary_position = 0.6,
     n_clusters = 15,
     cluster_radius = 4,
-    scatter_zone_prop = 0.35,
+    cluster_zone = 0.35,
     elongation_x = 1.5,
     elongation_y = 2.0,
     rotation = 45
@@ -218,7 +218,7 @@ test_that("create_landscape_clustered stores all params correctly", {
   expect_equal(l$params$boundary_position, 0.6)
   expect_equal(l$params$n_clusters, 15)
   expect_equal(l$params$cluster_radius, 4)
-  expect_equal(l$params$scatter_zone_prop, 0.35)
+  expect_equal(l$params$cluster_zone, 0.35)
   expect_equal(l$params$elongation_x, 1.5)
   expect_equal(l$params$elongation_y, 2.0)
   expect_equal(l$params$rotation, 45)
@@ -286,7 +286,7 @@ test_that("create_landscape_clustered handles large number of clusters", {
     height = 100,
     n_clusters = 50,
     cluster_radius = 2,
-    scatter_zone_prop = 0.8
+    cluster_zone = 0.8
   )
   expect_true(is_landscape(l_many))
 })
@@ -297,7 +297,7 @@ test_that("create_landscape_clustered handles large cluster radius", {
     height = 100,
     n_clusters = 2,
     cluster_radius = 15,
-    scatter_zone_prop = 0.7
+    cluster_zone = 0.7
   )
   expect_true(is_landscape(l_large))
 })
@@ -319,7 +319,7 @@ test_that("create_landscape_clustered handles extreme elongation", {
     width = 150,
     height = 150,
     n_clusters = 3,
-    scatter_zone_prop = 0.9,
+    cluster_zone = 0.9,
     cluster_radius = 5,
     elongation_x = 1,
     elongation_y = 10
@@ -327,24 +327,24 @@ test_that("create_landscape_clustered handles extreme elongation", {
   expect_true(is_landscape(l_vertical))
 })
 
-test_that("create_landscape_clustered handles very small scatter zone", {
+test_that("create_landscape_clustered handles very small cluster zone", {
   l_small_zone <- create_landscape_clustered(
     width = 100,
     height = 100,
     boundary_position = 0.9,
-    scatter_zone_prop = 0.05,
+    cluster_zone = 0.05,
     n_clusters = 2,
     cluster_radius = 2
   )
   expect_true(is_landscape(l_small_zone))
 })
 
-test_that("create_landscape_clustered handles very large scatter zone", {
+test_that("create_landscape_clustered handles very large cluster zone", {
   l_large_zone <- create_landscape_clustered(
     width = 100,
     height = 100,
     boundary_position = 0.1,
-    scatter_zone_prop = 0.99,
+    cluster_zone = 0.99,
     n_clusters = 10,
     cluster_radius = 5
   )

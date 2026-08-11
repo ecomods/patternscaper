@@ -2,23 +2,23 @@
 
 # Validation tests ------------------------------------------------------------
 
-test_that("bands validates band_zone_prop parameter", {
+test_that("bands validates band_zone parameter", {
   expect_error(
-    create_landscape_bands(band_zone_prop = "0.2"),
+    create_landscape_bands(band_zone = "0.2"),
     "must be between 0 and 1",
-    info = "Testing bands with non-numeric band_zone_prop"
+    info = "Testing bands with non-numeric band_zone"
   )
 
   expect_error(
-    create_landscape_bands(band_zone_prop = -0.1),
+    create_landscape_bands(band_zone = -0.1),
     "must be between 0 and 1",
-    info = "Testing bands with negative band_zone_prop"
+    info = "Testing bands with negative band_zone"
   )
 
   expect_error(
-    create_landscape_bands(band_zone_prop = 1.5),
+    create_landscape_bands(band_zone = 1.5),
     "must be between 0 and 1",
-    info = "Testing bands with band_zone_prop > 1"
+    info = "Testing bands with band_zone > 1"
   )
 })
 
@@ -108,7 +108,7 @@ test_that("bands warns when no bands can fit", {
   expect_warning(
     create_landscape_bands(
       boundary_position = 0.7,
-      band_zone_prop = 0.15,
+      band_zone = 0.15,
       band_spacing = 20
     ),
     "No bands can fit in available space",
@@ -125,7 +125,7 @@ test_that("create_landscape_bands creates a vegetation boundary with bands below
     width = 30,
     height = 30,
     boundary_position = 0.4,
-    band_zone_prop = 0.3,
+    band_zone = 0.3,
     band_spacing = 5,
     band_thickness = 2
   )
@@ -217,7 +217,7 @@ test_that("create_landscape_bands stores all params correctly", {
     width = 30,
     height = 40,
     boundary_position = 0.6,
-    band_zone_prop = 0.3,
+    band_zone = 0.3,
     band_thickness = 4,
     band_spacing = 8,
     frequency = 0.2,
@@ -229,7 +229,7 @@ test_that("create_landscape_bands stores all params correctly", {
   expect_equal(l$params$width, 30)
   expect_equal(l$params$height, 40)
   expect_equal(l$params$boundary_position, 0.6)
-  expect_equal(l$params$band_zone_prop, 0.3)
+  expect_equal(l$params$band_zone, 0.3)
   expect_equal(l$params$band_thickness, 4)
   expect_equal(l$params$band_spacing, 8)
   expect_equal(l$params$frequency, 0.2)
@@ -268,7 +268,7 @@ test_that("create_landscape_bands warns when bands cannot fit", {
       width = 20,
       height = 20,
       boundary_position = 0.7,
-      band_zone_prop = 0.15,
+      band_zone = 0.15,
       band_spacing = 20
     ),
     "No bands can fit in available space"
@@ -280,7 +280,7 @@ test_that("create_landscape_bands handles edge cases", {
   l_small_zone <- create_landscape_bands(
     width = 20,
     height = 20,
-    band_zone_prop = 0.05,
+    band_zone = 0.05,
     band_spacing = 3
   )
   expect_true(is_landscape(l_small_zone))

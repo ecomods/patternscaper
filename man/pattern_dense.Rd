@@ -4,10 +4,10 @@
 \alias{pattern_dense}
 \title{Parameters for the Dense Pattern}
 \usage{
-pattern_dense(veg_prop = 0.9)
+pattern_dense(veg_prob = 0.9)
 }
 \arguments{
-\item{veg_prop}{Numeric. Probability that a cell is vegetated (0-1,
+\item{veg_prob}{Numeric. Probability that a cell is vegetated (0-1,
 default: 0.9). Higher values give a denser vegetation cover.}
 }
 \value{
@@ -20,13 +20,13 @@ validated parameter list for the \code{"dense"} pattern, to pass to
 }
 \examples{
 # A single landscape, with a fixed value
-create_landscape("dense", params = pattern_dense(veg_prop = 0.95))
+create_landscape("dense", params = pattern_dense(veg_prob = 0.95))
 
-# A batch, with veg_prop drawn from a range once per landscape
+# A batch, with veg_prob drawn from a range once per landscape
 create_landscapes(
   n = 4,
   patterns = "dense",
-  params_list = list(dense = pattern_dense(veg_prop = c(0.85, 1)))
+  params_list = list(dense = pattern_dense(veg_prob = c(0.85, 1)))
 )
 
 }
@@ -58,6 +58,6 @@ Usage therefore apply to \code{\link{create_landscape}} only. Ranges that
 scale with landscape size are shown for the default 100 by 100.
 \tabular{lll}{
 \strong{Parameter} \tab \strong{Valid} \tab \strong{Sampled} \cr
-\code{veg_prop} \tab 0 to 1 \tab 0.8 to 1 \cr
+\code{veg_prob} \tab 0 to 1 \tab 0.8 to 1 \cr
 }
 }

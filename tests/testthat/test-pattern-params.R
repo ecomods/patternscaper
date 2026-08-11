@@ -105,14 +105,14 @@ test_that("the ranges section reports the bounds a user is held to", {
   # Inclusive, exclusive-minimum and unbounded-above all read differently, and
   # a page that got these wrong would send a user to a value the generator
   # rejects
-  veg <- grep("veg_prop", rd_param_ranges("random"), value = TRUE)
+  veg <- grep("veg_prob", rd_param_ranges("random"), value = TRUE)
   expect_match(veg, "0 to 1", fixed = TRUE)
 
   elong <- grep("elongation_x", rd_param_ranges("clustered"), value = TRUE)
   expect_match(elong, "greater than 0", fixed = TRUE)
 
-  scatter <- grep("scatter_zone_prop", rd_param_ranges("clustered"), value = TRUE)
-  expect_match(scatter, "greater than 0, up to 1", fixed = TRUE)
+  zone <- grep("cluster_zone", rd_param_ranges("clustered"), value = TRUE)
+  expect_match(zone, "greater than 0, up to 1", fixed = TRUE)
 
   spots <- grep("n_spots", rd_param_ranges("spots"), value = TRUE)
   expect_match(spots, "1 or more", fixed = TRUE)
@@ -178,9 +178,9 @@ test_that("pattern_spots accepts ranges for create_landscapes", {
 
 test_that("every constructor reaches its generator unchanged", {
   cases <- list(
-    random = list(veg_prop = 0.3),
-    bare = list(veg_prop = 0.3),
-    dense = list(veg_prop = 0.3),
+    random = list(veg_prob = 0.3),
+    bare = list(veg_prob = 0.3),
+    dense = list(veg_prob = 0.3),
     sharp = list(boundary_position = 0.3),
     diffuse = list(steepness = 0.3, boundary_position = 0.4),
     fingers = list(sine_length_mean = 15, sine_height_mean = 6),

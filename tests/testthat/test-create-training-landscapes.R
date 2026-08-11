@@ -298,7 +298,7 @@ test_that("create_landscapes handles custom params_list", {
       boundary_position = c(0.4, 0.6)
     ),
     random = list(
-      veg_prop = c(0.5, 0.7)
+      veg_prob = c(0.5, 0.7)
     )
   )
 
@@ -317,8 +317,8 @@ test_that("create_landscapes handles custom params_list", {
       expect_true(l$params$boundary_position <= 0.6)
     }
     if (l$pattern == "random") {
-      expect_true(l$params$veg_prop >= 0.5)
-      expect_true(l$params$veg_prop <= 0.7)
+      expect_true(l$params$veg_prob >= 0.5)
+      expect_true(l$params$veg_prob <= 0.7)
     }
   }
 })
@@ -649,13 +649,13 @@ test_that("try_create_landscape returns NULL on error and reports the cause (M12
 
 test_that("validate_sampled_params aborts loudly on an out-of-bounds sampled value (M23)", {
   # Simulates a spec bug: a sampled draw sitting outside its own min/max --
-  # e.g. a batch_range mismatched with the same entry's bounds. veg_prop's
+  # e.g. a batch_range mismatched with the same entry's bounds. veg_prob's
   # spec is min 0, max 1.
-  bad_sample <- list(veg_prop = 1.5, width = 50, height = 50)
+  bad_sample <- list(veg_prob = 1.5, width = 50, height = 50)
 
   expect_error(
     validate_sampled_params(bad_sample, "random"),
-    "veg_prop"
+    "veg_prob"
   )
 })
 
