@@ -79,13 +79,13 @@ Ecotone patterns have a vegetated zone and a bare zone separated by a transition
 
 #### sharp
 
-An abrupt boundary. `noise_veg_to_bare` and `noise_bare_to_veg` flip individual cells across it, blurring the edge without moving it.
+An abrupt boundary, with `boundary_position` as its only parameter.
 
 ```{r}
 #| label: pattern-sharp
 #| fig-width: 8
 #| fig-height: 3
-#| fig-alt: "Three sharp-boundary landscapes: default, low boundary, and a noisy boundary"
+#| fig-alt: "Two sharp-boundary landscapes: default and a low boundary"
 
 plot_landscapes(
   list(
@@ -94,11 +94,6 @@ plot_landscapes(
       "sharp",
       name = "boundary_position = 0.3",
       params = pattern_sharp(boundary_position = 0.3)
-    ),
-    create_landscape(
-      "sharp",
-      name = "noise_bare_to_veg = 0.15",
-      params = pattern_sharp(noise_bare_to_veg = 0.15)
     )
   ),
   titles = "name",

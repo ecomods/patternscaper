@@ -205,8 +205,6 @@ test_that("create_landscape_clustered stores all params correctly", {
     width = 30,
     height = 40,
     boundary_position = 0.6,
-    noise_veg_to_bare = 0.1,
-    noise_bare_to_veg = 0.05,
     n_clusters = 15,
     cluster_radius = 4,
     scatter_zone_prop = 0.35,
@@ -218,8 +216,6 @@ test_that("create_landscape_clustered stores all params correctly", {
   expect_equal(l$params$width, 30)
   expect_equal(l$params$height, 40)
   expect_equal(l$params$boundary_position, 0.6)
-  expect_equal(l$params$noise_veg_to_bare, 0.1)
-  expect_equal(l$params$noise_bare_to_veg, 0.05)
   expect_equal(l$params$n_clusters, 15)
   expect_equal(l$params$cluster_radius, 4)
   expect_equal(l$params$scatter_zone_prop, 0.35)

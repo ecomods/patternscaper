@@ -177,69 +177,37 @@ pattern_dense <- function(veg_prop = 0.9) {
 #'
 #' @param boundary_position Numeric. Relative position of the horizontal
 #'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
-#' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
-#'     bare, adding small gaps within the vegetation (0-1, default: 0).
-#' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
-#'     vegetated, scattering some vegetated cells beyond the boundary (0-1, default: 0).
 #'
 #' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
 #'
 #' @family landscape creation
 #'
 #' @examples
-#' # A single landscape, with fixed values
+#' # A single landscape, with a fixed value
 #' create_landscape("sharp", params = pattern_sharp(boundary_position = 0.3))
 #'
-#' # A batch, with parameters drawn from ranges once per landscape.
-#' # Parameters left unset vary too, over their default ranges
+#' # A batch, with boundary_position drawn from a range once per landscape
 #' create_landscapes(
 #'   n = 4,
 #'   patterns = "sharp",
-#'   params_list = list(
-#'     sharp = pattern_sharp(
-#'       boundary_position = c(0.2, 0.8),
-#'       noise_bare_to_veg = c(0, 0.1)
-#'     )
-#'   )
-#' )
-#'
-#' # A batch, mixing a fixed value with a range
-#' create_landscapes(
-#'   n = 4,
-#'   patterns = "sharp",
-#'   params_list = list(
-#'     sharp = pattern_sharp(
-#'       boundary_position = 0.5,
-#'       noise_bare_to_veg = c(0, 0.1)
-#'     )
-#'   )
+#'   params_list = list(sharp = pattern_sharp(boundary_position = c(0.2, 0.8)))
 #' )
 #'
 #' # Rotation is an argument of create_landscape(), not a pattern parameter
 #' create_landscape(
 #'   "sharp",
-#'   params = pattern_sharp(noise_bare_to_veg = 0.1),
+#'   params = pattern_sharp(boundary_position = 0.3),
 #'   rotation = 45
 #' )
 #'
 #' @evalRd rd_param_ranges("sharp")
 #'
 #' @export
-pattern_sharp <- function(
-  boundary_position = 0.5,
-  noise_veg_to_bare = 0,
-  noise_bare_to_veg = 0
-) {
+pattern_sharp <- function(boundary_position = 0.5) {
   params <- list()
 
   if (!missing(boundary_position)) {
     params$boundary_position <- boundary_position
-  }
-  if (!missing(noise_veg_to_bare)) {
-    params$noise_veg_to_bare <- noise_veg_to_bare
-  }
-  if (!missing(noise_bare_to_veg)) {
-    params$noise_bare_to_veg <- noise_bare_to_veg
   }
 
   new_landscape_params(params, pattern = "sharp")
@@ -323,12 +291,7 @@ pattern_diffuse <- function(
 #'
 #' @param boundary_position Numeric. Relative position of the horizontal
 #'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
-#' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
-#'     bare, adding small gaps within the vegetation (0-1, default: 0).
-#' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
-#'     vegetated, scattering some vegetated cells beyond the vegetation boundary
-#'     (0-1, default: 0).
-#' @param sine_length_mean Numeric. Mean wavelength of sinusoidal curve in pixels. 
+#' @param sine_length_mean Numeric. Mean wavelength of sinusoidal curve in pixels.
 #'     Larger values produce longer, more widely spaced bends; smaller values 
 #'     produce shorter, more frequent bends (default: 20).
 #' @param sine_length_sd Numeric. Standard deviation of wavelength in pixels.
@@ -382,8 +345,6 @@ pattern_diffuse <- function(
 #' @export
 pattern_fingers <- function(
   boundary_position = 0.5,
-  noise_veg_to_bare = 0,
-  noise_bare_to_veg = 0,
   sine_length_mean = 20,
   sine_length_sd = 12,
   sine_height_mean = 5,
@@ -393,12 +354,6 @@ pattern_fingers <- function(
 
   if (!missing(boundary_position)) {
     params$boundary_position <- boundary_position
-  }
-  if (!missing(noise_veg_to_bare)) {
-    params$noise_veg_to_bare <- noise_veg_to_bare
-  }
-  if (!missing(noise_bare_to_veg)) {
-    params$noise_bare_to_veg <- noise_bare_to_veg
   }
   if (!missing(sine_length_mean)) {
     params$sine_length_mean <- sine_length_mean
@@ -424,13 +379,6 @@ pattern_fingers <- function(
 #'
 #' @param boundary_position Numeric. Relative position of the horizontal
 #'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
-#' @param noise_veg_to_bare Numeric. Probability of flipping a vegetated cell to
-#'     bare, adding small gaps within the vegetation. Applied to the underlying
-#'     sharp boundary, before the clusters are placed (0-1, default: 0).
-#' @param noise_bare_to_veg Numeric. Probability of flipping a bare cell to
-#'     vegetated, scattering some vegetated cells beyond the vegetation boundary.
-#'     Applied to the underlying sharp boundary, before the clusters are placed
-#'     (0-1, default: 0).
 #' @param n_clusters Integer. Number of cluster centers (default: 10).
 #' @param cluster_radius Numeric. Radius of clusters in pixels (default: 5).
 #' @param scatter_zone_prop Numeric. Proportion of height for the scatter zone,
@@ -483,8 +431,6 @@ pattern_fingers <- function(
 #' @export
 pattern_clustered <- function(
   boundary_position = 0.5,
-  noise_veg_to_bare = 0,
-  noise_bare_to_veg = 0,
   n_clusters = 10,
   cluster_radius = 5,
   scatter_zone_prop = 0.3,
@@ -495,12 +441,6 @@ pattern_clustered <- function(
 
   if (!missing(boundary_position)) {
     params$boundary_position <- boundary_position
-  }
-  if (!missing(noise_veg_to_bare)) {
-    params$noise_veg_to_bare <- noise_veg_to_bare
-  }
-  if (!missing(noise_bare_to_veg)) {
-    params$noise_bare_to_veg <- noise_bare_to_veg
   }
   if (!missing(n_clusters)) {
     params$n_clusters <- n_clusters

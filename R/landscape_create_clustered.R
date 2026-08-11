@@ -46,8 +46,6 @@ create_landscape_clustered <- function(
   width = 100,
   height = 100,
   boundary_position = 0.5,
-  noise_veg_to_bare = 0,
-  noise_bare_to_veg = 0,
   n_clusters = 10,
   cluster_radius = 5,
   scatter_zone_prop = 0.3,
@@ -58,8 +56,6 @@ create_landscape_clustered <- function(
   # Input validation
   validate_dimensions(width = width, height = height)
   validate_boundary_position(boundary_position = boundary_position)
-  validate_noise_prob(noise_veg_to_bare, "noise_veg_to_bare")
-  validate_noise_prob(noise_bare_to_veg, "noise_bare_to_veg")
   validate_rotation(rotation = rotation)
 
   # n_clusters must be a positive integer
@@ -132,8 +128,6 @@ create_landscape_clustered <- function(
     width = width_actual,
     height = height_actual,
     boundary_position = boundary_position,
-    noise_veg_to_bare = noise_veg_to_bare,
-    noise_bare_to_veg = noise_bare_to_veg,
     rotation = 0
   )
 
@@ -255,9 +249,7 @@ create_landscape_clustered <- function(
       scatter_zone_prop = scatter_zone_prop,
       elongation_x = elongation_x,
       elongation_y = elongation_y,
-      rotation = rotation,
-      noise_veg_to_bare = noise_veg_to_bare,
-      noise_bare_to_veg = noise_bare_to_veg
+      rotation = rotation
     )
   )
 }

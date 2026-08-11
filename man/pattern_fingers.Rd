@@ -6,8 +6,6 @@
 \usage{
 pattern_fingers(
   boundary_position = 0.5,
-  noise_veg_to_bare = 0,
-  noise_bare_to_veg = 0,
   sine_length_mean = 20,
   sine_length_sd = 12,
   sine_height_mean = 5,
@@ -18,14 +16,7 @@ pattern_fingers(
 \item{boundary_position}{Numeric. Relative position of the horizontal
 vegetation boundary (if not rotated) from the top (0-1, default: 0.5).}
 
-\item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell to
-bare, adding small gaps within the vegetation (0-1, default: 0).}
-
-\item{noise_bare_to_veg}{Numeric. Probability of flipping a bare cell to
-vegetated, scattering some vegetated cells beyond the vegetation boundary
-(0-1, default: 0).}
-
-\item{sine_length_mean}{Numeric. Mean wavelength of sinusoidal curve in pixels. 
+\item{sine_length_mean}{Numeric. Mean wavelength of sinusoidal curve in pixels.
 Larger values produce longer, more widely spaced bends; smaller values 
 produce shorter, more frequent bends (default: 20).}
 
@@ -111,8 +102,6 @@ scale with landscape size are shown for the default 100 by 100.
 \tabular{lll}{
 \strong{Parameter} \tab \strong{Valid} \tab \strong{Sampled} \cr
 \code{boundary_position} \tab 0 to 1 \tab 0.3 to 0.6 \cr
-\code{noise_veg_to_bare} \tab 0 to 1 \tab not sampled \cr
-\code{noise_bare_to_veg} \tab 0 to 1 \tab not sampled \cr
 \code{sine_length_mean} \tab greater than 0 \tab 20 to 50, scales with size \cr
 \code{sine_length_sd} \tab 0 or more \tab 10 to 50, scales with size \cr
 \code{sine_height_mean} \tab 0 or more \tab 5 to 20, scales with size \cr

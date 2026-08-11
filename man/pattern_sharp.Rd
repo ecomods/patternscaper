@@ -4,21 +4,11 @@
 \alias{pattern_sharp}
 \title{Parameters for the Sharp Pattern}
 \usage{
-pattern_sharp(
-  boundary_position = 0.5,
-  noise_veg_to_bare = 0,
-  noise_bare_to_veg = 0
-)
+pattern_sharp(boundary_position = 0.5)
 }
 \arguments{
 \item{boundary_position}{Numeric. Relative position of the horizontal
 vegetation boundary (if not rotated) from the top (0-1, default: 0.5).}
-
-\item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell to
-bare, adding small gaps within the vegetation (0-1, default: 0).}
-
-\item{noise_bare_to_veg}{Numeric. Probability of flipping a bare cell to
-vegetated, scattering some vegetated cells beyond the boundary (0-1, default: 0).}
 }
 \value{
 A named list of the supplied parameters of the class \code{"landscape_params"}.
@@ -29,38 +19,20 @@ validated parameter list for the \code{"sharp"} pattern, to pass to
 \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 }
 \examples{
-# A single landscape, with fixed values
+# A single landscape, with a fixed value
 create_landscape("sharp", params = pattern_sharp(boundary_position = 0.3))
 
-# A batch, with parameters drawn from ranges once per landscape.
-# Parameters left unset vary too, over their default ranges
+# A batch, with boundary_position drawn from a range once per landscape
 create_landscapes(
   n = 4,
   patterns = "sharp",
-  params_list = list(
-    sharp = pattern_sharp(
-      boundary_position = c(0.2, 0.8),
-      noise_bare_to_veg = c(0, 0.1)
-    )
-  )
-)
-
-# A batch, mixing a fixed value with a range
-create_landscapes(
-  n = 4,
-  patterns = "sharp",
-  params_list = list(
-    sharp = pattern_sharp(
-      boundary_position = 0.5,
-      noise_bare_to_veg = c(0, 0.1)
-    )
-  )
+  params_list = list(sharp = pattern_sharp(boundary_position = c(0.2, 0.8)))
 )
 
 # Rotation is an argument of create_landscape(), not a pattern parameter
 create_landscape(
   "sharp",
-  params = pattern_sharp(noise_bare_to_veg = 0.1),
+  params = pattern_sharp(boundary_position = 0.3),
   rotation = 45
 )
 
@@ -94,7 +66,5 @@ scale with landscape size are shown for the default 100 by 100.
 \tabular{lll}{
 \strong{Parameter} \tab \strong{Valid} \tab \strong{Sampled} \cr
 \code{boundary_position} \tab 0 to 1 \tab 0.2 to 0.8 \cr
-\code{noise_veg_to_bare} \tab 0 to 1 \tab not sampled \cr
-\code{noise_bare_to_veg} \tab 0 to 1 \tab not sampled \cr
 }
 }

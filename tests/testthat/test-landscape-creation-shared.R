@@ -223,35 +223,6 @@ test_that("landscape generators validate rotation parameter", {
   }
 })
 
-# Pattern-specific validation: boundary noise parameters ----------------------
-test_that("landscape generators validate the boundary noise parameters", {
-  generators <- list(
-    sharp = create_landscape_sharp,
-    fingers = create_landscape_fingers,
-    clustered = create_landscape_clustered
-  )
-
-  noise_args <- c("noise_veg_to_bare", "noise_bare_to_veg")
-  bad_values <- list("invalid", c(0.5, 0.5), -0.1, 1.5, NA_real_)
-
-  for (name in names(generators)) {
-    gen <- generators[[name]]
-
-    for (arg in noise_args) {
-      for (value in bad_values) {
-        args <- list(value)
-        names(args) <- arg
-
-        expect_error(
-          do.call(gen, args),
-          "must be a single number between 0 and 1",
-          info = paste(name, arg, "=", toString(value))
-        )
-      }
-    }
-  }
-})
-
 # Extreme dimensions ----------------------------------------------------------
 test_that("landscape generators handle very small landscapes", {
   generators <- list(

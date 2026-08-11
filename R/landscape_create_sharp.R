@@ -20,10 +20,9 @@
 #'   boundary_position = 0.7
 #' )
 #'
-#' # Landscape with rotation and scattered vegetation beyond the boundary
+#' # Landscape with rotation
 #' sharp_rotated <- create_landscape_sharp(
 #'   boundary_position = 0.3,
-#'   noise_bare_to_veg = 0.1,
 #'   rotation = 45
 #' )
 #' }
@@ -31,16 +30,12 @@ create_landscape_sharp <- function(
   width = 100,
   height = 100,
   boundary_position = 0.5,
-  noise_veg_to_bare = 0,
-  noise_bare_to_veg = 0,
   rotation = 0
 ) {
   # Validate inputs
   validate_dimensions(width = width, height = height)
   validate_boundary_position(boundary_position = boundary_position)
   validate_rotation(rotation = rotation)
-  validate_noise_prob(noise_veg_to_bare, "noise_veg_to_bare")
-  validate_noise_prob(noise_bare_to_veg, "noise_bare_to_veg")
 
   # Calculate width and height of the actual landscape to produce
   # In case of rotation, the landscape needs to be larger to avoid cropping pattern
@@ -57,20 +52,6 @@ create_landscape_sharp <- function(
   # Fill in other vegetation area (1) based on boundary position
   if (boundary_row > 0) {
     mat[1:boundary_row, ] <- 1
-  }
-
-  # Add boundary noise if requested
-  if (noise_veg_to_bare > 0 || noise_bare_to_veg > 0) {
-    # Indices for each type
-    idx_1 <- which(mat == 1)
-    idx_0 <- which(mat == 0)
-
-    # Flip some cells based on probabilities
-    flip_to_0 <- idx_1[rbinom(length(idx_1), 1, noise_veg_to_bare) == 1]
-    flip_to_1 <- idx_0[rbinom(length(idx_0), 1, noise_bare_to_veg) == 1]
-
-    mat[flip_to_0] <- 0
-    mat[flip_to_1] <- 1
   }
 
   # Rotate the landscape, crop and fill NAs if specified
@@ -91,8 +72,6 @@ create_landscape_sharp <- function(
       width = width,
       height = height,
       boundary_position = boundary_position,
-      noise_veg_to_bare = noise_veg_to_bare,
-      noise_bare_to_veg = noise_bare_to_veg,
       rotation = rotation
     )
   )

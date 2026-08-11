@@ -282,9 +282,8 @@ should stay byte-identical; only failure behaviour moves:
 
 **Open decisions (not tasks — settle these before the work they gate):**
 - **L25** — `radius_noise_fraction` batch randomization. Gates a self-organized re-run.
-- **M22 step 2** — batch randomization of `noise_veg_to_bare` / `noise_bare_to_veg` (post-split).
-  Same question, on the *ecotone* patterns. Worth deciding together with L25: they are the same
-  decision about whether batch training sets should vary edge/cell noise at all.
+- ~~**M22 step 2**~~ — decided 2026-08-11 by *removal*: `noise_veg_to_bare` / `noise_bare_to_veg`
+  are gone from the package entirely rather than given a `batch_range`. See **Completed**.
 - ~~**L9**~~ — decided and done 2026-08-10; see **Completed**.
 - ~~**M21**~~ — decided 2026-08-05, implemented 2026-08-06/07; see **Completed** and
   `../spatPatClassifyR_paper/CHANGELOG.md` (2026-08-06/2026-08-07 entries).
@@ -531,9 +530,21 @@ dated summary that supersedes it is in `../spatPatClassifyR_paper/CHANGELOG.md`,
 - **M22 step 1** (`random_spots` silently stripped in batch generation): split into two scalars,
   `noise_veg_to_bare` / `noise_bare_to_veg`, added to the spec with `batch_range = NULL`
   (validation-only). Removes the package's only vector-valued parameter. **Changes no existing
-  raster** — `random_spots` was never reachable through `create_landscapes()`. **Step 2** (whether
-  the two deserve a real default `batch_range`) is a separate, results-changing decision, tracked
-  together with **L25** under "Open decisions" above.
+  raster** — `random_spots` was never reachable through `create_landscapes()`.
+- **M22 step 2** (2026-08-11): resolved by removing both parameters from the package rather than
+  giving them a `batch_range`. Gone from the three ecotone generators, the spec table, the
+  `pattern_*()` constructors, and the vignette; `validate_noise_prob()` deleted as its only callers
+  were these. `pattern_sharp()` is now a single-parameter constructor. **Changes no raster** — both
+  defaulted to 0 and the flip block was guarded by `if (noise > 0)`, so it consumed no RNG at the
+  defaults; the golden landscape matrices are byte-identical and the classification harness passes
+  without re-blessing. Only the stored `params` lists lose the two keys, so
+  `reference_landscapes.rds` was recaptured.
+
+  A trial of the alternative (`batch_range = c(0, 0.01)`) was measured first and rejected: for
+  `clustered` it re-randomized the whole cluster layout rather than adding speckle, because
+  `create_landscape_clustered()` builds its base through `create_landscape_sharp()` *before*
+  sampling cluster centres, so switching noise off 0 shifts the stream. At noise = 1e-12, which
+  flips essentially nothing, clustered already differed by 584 of 10000 cells.
 
 As a consequence of Milestone 4, `create_landscape()` no longer takes `...` — the constructors are
 now the *only* route for pattern parameters, a deliberate breaking change (`DESCRIPTION` → `0.3.0`).

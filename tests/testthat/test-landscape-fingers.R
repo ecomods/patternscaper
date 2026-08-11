@@ -117,8 +117,6 @@ test_that("create_landscape_fingers stores all params correctly", {
     sine_length_sd = 10,
     sine_height_mean = 8,
     sine_height_sd = 3,
-    noise_veg_to_bare = 0.1,
-    noise_bare_to_veg = 0.2,
     rotation = 45
   )
 
@@ -129,38 +127,7 @@ test_that("create_landscape_fingers stores all params correctly", {
   expect_equal(l$params$sine_length_sd, 10)
   expect_equal(l$params$sine_height_mean, 8)
   expect_equal(l$params$sine_height_sd, 3)
-  expect_equal(l$params$noise_veg_to_bare, 0.1)
-  expect_equal(l$params$noise_bare_to_veg, 0.2)
   expect_equal(l$params$rotation, 45)
-})
-
-test_that("create_landscape_fingers boundary noise parameters work", {
-  set.seed(123)
-  # With no noise
-  l_no_noise <- create_landscape_fingers(
-    width = 20,
-    height = 20,
-    boundary_position = 0.5,
-    sine_height_mean = 3,
-    noise_veg_to_bare = 0,
-    noise_bare_to_veg = 0
-  )
-
-  set.seed(123)
-  # With noise
-  l_noise <- create_landscape_fingers(
-    width = 20,
-    height = 20,
-    boundary_position = 0.5,
-    sine_height_mean = 3,
-    noise_veg_to_bare = 0.2,
-    noise_bare_to_veg = 0.2
-  )
-
-  # Landscapes should differ due to randomness
-  vals_no_noise <- terra::values(l_no_noise$data)
-  vals_noise <- terra::values(l_noise$data)
-  expect_false(identical(vals_no_noise, vals_noise))
 })
 
 test_that("create_landscape_fingers produces variable patterns", {
@@ -325,46 +292,10 @@ test_that("create_landscape_fingers handles boundary_position boundary values", 
   expect_true(is_landscape(l_near_one))
 })
 
-test_that("create_landscape_fingers handles boundary noise edge values", {
-  # No noise
-  l_no_noise <- create_landscape_fingers(
-    noise_veg_to_bare = 0,
-    noise_bare_to_veg = 0
-  )
-  expect_true(is_landscape(l_no_noise))
-
-  # Maximum noise in both directions
-  l_max_noise <- create_landscape_fingers(
-    width = 20,
-    height = 20,
-    noise_veg_to_bare = 1,
-    noise_bare_to_veg = 1
-  )
-  expect_true(is_landscape(l_max_noise))
-
-  # One direction only, at probability 1: every cell of the source class flips,
-  # so each parameter must clear out exactly its own class.
-  l_all_bare <- create_landscape_fingers(
-    width = 20,
-    height = 20,
-    noise_veg_to_bare = 1,
-    noise_bare_to_veg = 0
-  )
-  expect_true(all(terra::values(l_all_bare$data) == 0))
-
-  l_all_veg <- create_landscape_fingers(
-    width = 20,
-    height = 20,
-    noise_veg_to_bare = 0,
-    noise_bare_to_veg = 1
-  )
-  expect_true(all(terra::values(l_all_veg$data) == 1))
-})
-
 # Integration tests ------------------------------------------------------------
 
 test_that("create_landscape_fingers handles multiple edge cases together", {
-  # Small landscape + extreme treeline + extreme sine params + max random + rotation
+  # Small landscape + extreme treeline + extreme sine params + rotation
   l_extreme <- create_landscape_fingers(
     width = 30,
     height = 30,
@@ -373,8 +304,6 @@ test_that("create_landscape_fingers handles multiple edge cases together", {
     sine_length_sd = 2,
     sine_height_mean = 10,
     sine_height_sd = 5,
-    noise_veg_to_bare = 0.5,
-    noise_bare_to_veg = 0.5,
     rotation = 45
   )
 

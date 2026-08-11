@@ -101,15 +101,6 @@ test_that("radius_noise_fraction is described with its sampled range", {
   expect_match(noise, "0 to 0.2", fixed = TRUE)
 })
 
-test_that("validation-only parameters are described as not sampled", {
-  # The two noise probabilities have batch_range NULL, so a batch never varies
-  # them -- the page has to say so rather than render an empty range
-  expect_match(
-    grep("noise_bare_to_veg", rd_param_ranges("sharp"), value = TRUE),
-    "not sampled"
-  )
-})
-
 test_that("the ranges section reports the bounds a user is held to", {
   # Inclusive, exclusive-minimum and unbounded-above all read differently, and
   # a page that got these wrong would send a user to a value the generator
@@ -190,7 +181,7 @@ test_that("every constructor reaches its generator unchanged", {
     random = list(veg_prop = 0.3),
     bare = list(veg_prop = 0.3),
     dense = list(veg_prop = 0.3),
-    sharp = list(boundary_position = 0.3, noise_bare_to_veg = 0.1),
+    sharp = list(boundary_position = 0.3),
     diffuse = list(steepness = 0.3, boundary_position = 0.4),
     fingers = list(sine_length_mean = 15, sine_height_mean = 6),
     clustered = list(n_clusters = 6, cluster_radius = 4),
@@ -258,23 +249,6 @@ test_that("params combines with rotation, which is not a pattern parameter", {
 
   expect_equal(l$params$boundary_position, 0.3)
   expect_equal(l$params$rotation, 45)
-})
-
-test_that("the noise parameters are reachable through create_landscapes", {
-  # Before the split they were absent from the spec, so params_list dropped
-  # them and every batch-generated ecotone landscape had no boundary noise
-  set.seed(4)
-  landscapes <- create_landscapes(
-    n = 2,
-    patterns = "sharp",
-    width = 40,
-    height = 40,
-    params_list = list(sharp = pattern_sharp(noise_bare_to_veg = 0.2))
-  )
-
-  for (l in landscapes) {
-    expect_equal(l$params$noise_bare_to_veg, 0.2)
-  }
 })
 
 test_that("create_landscape rejects params built for another pattern", {

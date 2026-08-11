@@ -36,8 +36,6 @@ create_landscape_fingers <- function(
   width = 100,
   height = 100,
   boundary_position = 0.5,
-  noise_veg_to_bare = 0,
-  noise_bare_to_veg = 0,
   sine_length_mean = 20,
   sine_length_sd = 12,
   sine_height_mean = 5,
@@ -48,8 +46,6 @@ create_landscape_fingers <- function(
   validate_dimensions(width = width, height = height)
   validate_boundary_position(boundary_position = boundary_position)
   validate_rotation(rotation = rotation)
-  validate_noise_prob(noise_veg_to_bare, "noise_veg_to_bare")
-  validate_noise_prob(noise_bare_to_veg, "noise_bare_to_veg")
 
   # Validate sine_length
   if (!is.numeric(sine_length_mean) || sine_length_mean <= 0) {
@@ -145,20 +141,6 @@ create_landscape_fingers <- function(
     }
   }
 
-  # Add boundary noise if requested
-  if (noise_veg_to_bare > 0 || noise_bare_to_veg > 0) {
-    # Indices for each type
-    idx_1 <- which(mat == 1)
-    idx_0 <- which(mat == 0)
-
-    # Flip some cells based on probabilities
-    flip_to_0 <- idx_1[rbinom(length(idx_1), 1, noise_veg_to_bare) == 1]
-    flip_to_1 <- idx_0[rbinom(length(idx_0), 1, noise_bare_to_veg) == 1]
-
-    mat[flip_to_0] <- 0
-    mat[flip_to_1] <- 1
-  }
-
   # Rotate the landscape, crop and fill NAs if specified
   if (rotation != 0) {
     mat <- rotate_and_crop_matrix(
@@ -181,8 +163,6 @@ create_landscape_fingers <- function(
       sine_length_sd = sine_length_sd,
       sine_height_mean = sine_height_mean,
       sine_height_sd = sine_height_sd,
-      noise_veg_to_bare = noise_veg_to_bare,
-      noise_bare_to_veg = noise_bare_to_veg,
       rotation = rotation
     )
   )

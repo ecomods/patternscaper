@@ -90,36 +90,6 @@ validate_boundary_position <- function(boundary_position) {
   invisible(NULL)
 }
 
-#' Validate Cell-Flipping Noise Probability
-#'
-#' Validates one of the two boundary-noise probabilities used by the ecotone
-#' generators.
-#'
-#' @param prob Numeric. Probability of flipping a cell (0-1).
-#' @param arg Character. Name of the argument being validated, used in the
-#'   error message.
-#'
-#' @return NULL (invisibly). Called for side effects (validation).
-#'
-#' @keywords internal
-#' @noRd
-validate_noise_prob <- function(prob, arg) {
-  if (
-    !is.numeric(prob) ||
-      length(prob) != 1 ||
-      is.na(prob) ||
-      prob < 0 ||
-      prob > 1
-  ) {
-    cli::cli_abort(c(
-      "{.arg {arg}} must be a single number between 0 and 1.",
-      "x" = "You supplied {.val {prob}}"
-    ))
-  }
-
-  invisible(NULL)
-}
-
 #' Canonical Landscape Parameter Specifications
 #'
 #' Single source of truth for per-pattern parameter type/bounds and default
@@ -173,18 +143,6 @@ landscape_param_specs <- function() {
         min = 0,
         max = 1,
         batch_range = c(0.2, 0.8)
-      ),
-      noise_veg_to_bare = list(
-        type = "numeric",
-        min = 0,
-        max = 1,
-        batch_range = NULL
-      ),
-      noise_bare_to_veg = list(
-        type = "numeric",
-        min = 0,
-        max = 1,
-        batch_range = NULL
       )
     ),
     diffuse = list(
@@ -207,18 +165,6 @@ landscape_param_specs <- function() {
         min = 0,
         max = 1,
         batch_range = c(0.3, 0.6)
-      ),
-      noise_veg_to_bare = list(
-        type = "numeric",
-        min = 0,
-        max = 1,
-        batch_range = NULL
-      ),
-      noise_bare_to_veg = list(
-        type = "numeric",
-        min = 0,
-        max = 1,
-        batch_range = NULL
       ),
       sine_length_mean = list(
         type = "numeric",
@@ -252,18 +198,6 @@ landscape_param_specs <- function() {
         min = 0,
         max = 1,
         batch_range = c(0.4, 0.6)
-      ),
-      noise_veg_to_bare = list(
-        type = "numeric",
-        min = 0,
-        max = 1,
-        batch_range = NULL
-      ),
-      noise_bare_to_veg = list(
-        type = "numeric",
-        min = 0,
-        max = 1,
-        batch_range = NULL
       ),
       n_clusters = list(
         type = "integer",

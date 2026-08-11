@@ -6,8 +6,6 @@
 \usage{
 pattern_clustered(
   boundary_position = 0.5,
-  noise_veg_to_bare = 0,
-  noise_bare_to_veg = 0,
   n_clusters = 10,
   cluster_radius = 5,
   scatter_zone_prop = 0.3,
@@ -18,15 +16,6 @@ pattern_clustered(
 \arguments{
 \item{boundary_position}{Numeric. Relative position of the horizontal
 vegetation boundary (if not rotated) from the top (0-1, default: 0.5).}
-
-\item{noise_veg_to_bare}{Numeric. Probability of flipping a vegetated cell to
-bare, adding small gaps within the vegetation. Applied to the underlying
-sharp boundary, before the clusters are placed (0-1, default: 0).}
-
-\item{noise_bare_to_veg}{Numeric. Probability of flipping a bare cell to
-vegetated, scattering some vegetated cells beyond the vegetation boundary.
-Applied to the underlying sharp boundary, before the clusters are placed
-(0-1, default: 0).}
 
 \item{n_clusters}{Integer. Number of cluster centers (default: 10).}
 
@@ -113,8 +102,6 @@ scale with landscape size are shown for the default 100 by 100.
 \tabular{lll}{
 \strong{Parameter} \tab \strong{Valid} \tab \strong{Sampled} \cr
 \code{boundary_position} \tab 0 to 1 \tab 0.4 to 0.6 \cr
-\code{noise_veg_to_bare} \tab 0 to 1 \tab not sampled \cr
-\code{noise_bare_to_veg} \tab 0 to 1 \tab not sampled \cr
 \code{n_clusters} \tab 1 or more \tab 5 to 12 \cr
 \code{cluster_radius} \tab 1 or more \tab 5 to 10 \cr
 \code{scatter_zone_prop} \tab greater than 0, up to 1 \tab 0.2 to 1 \cr
