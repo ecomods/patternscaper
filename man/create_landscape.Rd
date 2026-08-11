@@ -101,7 +101,9 @@ bands_rotated <- create_landscape(
 
 }
 \seealso{
-\code{\link{plot_landscapes}}
+\code{\link{landscape}} to wrap an existing raster, for example a
+    real map, into the same object type; \code{\link{plot_landscapes}} to
+    plot the result.
 
 Other landscape creation:
 \code{\link[=create_landscapes]{create_landscapes()}},

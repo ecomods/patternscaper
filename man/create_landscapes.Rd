@@ -42,7 +42,7 @@ for example of \code{\link{pattern_spots}}.
 A single value fixes a parameter, whereas a length-2 vector is a range
 from which one value is sampled for each generated landscape of that pattern.
 Patterns omitted from \code{params_list} use their default parameter ranges.
-Default NULL uses the default ranges for all patterns.#'}
+Default NULL uses the default ranges for all patterns.}
 
 \item{pattern_probs}{Numeric vector. Probability that a specific landscape pattern
 is chosen from the list of \code{patterns}. Should be a numeric vector of
@@ -107,7 +107,9 @@ landscapes_custom <- create_landscapes(
 
 }
 \seealso{
-\code{\link{plot_landscapes}}
+\code{\link{landscape}} to wrap an existing raster, for example a
+    real map, into the same object type; \code{\link{plot_landscapes}} to
+    plot the result.
 
 Other landscape creation:
 \code{\link[=create_landscape]{create_landscape()}},

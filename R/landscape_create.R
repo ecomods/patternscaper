@@ -48,7 +48,9 @@
 #'   \item{name}{Character string with the landscape name, \code{NA} if none was given}
 #'
 #' @family landscape creation
-#' @seealso \code{\link{plot_landscapes}}
+#' @seealso \code{\link{landscape}} to wrap an existing raster, for example a
+#'     real map, into the same object type; \code{\link{plot_landscapes}} to
+#'     plot the result.
 #'
 #' @examples
 #' # Create a default landscape of various patterns
@@ -202,7 +204,7 @@ create_landscape <- function(
 #'     A single value fixes a parameter, whereas a length-2 vector is a range
 #'     from which one value is sampled for each generated landscape of that pattern.
 #'     Patterns omitted from \code{params_list} use their default parameter ranges.
-#'     Default NULL uses the default ranges for all patterns.#'
+#'     Default NULL uses the default ranges for all patterns.
 #' @param pattern_probs Numeric vector. Probability that a specific landscape pattern
 #'     is chosen from the list of \code{patterns}. Should be a numeric vector of
 #'     the same length as \code{patterns}. The default value NULL creates equally
@@ -216,7 +218,9 @@ create_landscape <- function(
 #'     fewer than \code{n} landscapes if generation kept failing after
 #'     \code{max_retries}, which is reported with a warning.
 #' @family landscape creation
-#' @seealso \code{\link{plot_landscapes}}
+#' @seealso \code{\link{landscape}} to wrap an existing raster, for example a
+#'     real map, into the same object type; \code{\link{plot_landscapes}} to
+#'     plot the result.
 #'
 #' @examples
 #' # Generate 20 landscapes
