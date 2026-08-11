@@ -28,10 +28,6 @@
 #'     Valid patterns are: "random", "bare", "dense", "sharp", "diffuse",
 #'     "fingers", "clustered", "bands", "spots", "gaps", "labyrinth".
 #' @param name Character. Optional name for the landscape (default: NULL).
-#' @param pattern_label Character. Character. Optional pattern type label assigned to
-#'     the generated landscape instead of the value of \code{pattern} (default: NULL,
-#'     which uses \code{pattern}). Use this to assign landscapes generated with
-#'     different \code{patterns} to the same class when training a classifier.
 #' @param params Output of the \code{pattern_*()} constructor matching \code{pattern},
 #'     for example \code{\link{pattern_spots}} (default: NULL). Must hold single values
 #'     for each parameter, ranges are only meaningful for \code{\link{create_landscapes}},
@@ -43,7 +39,7 @@
 #'
 #' @return A \code{\link{landscape}} object, containing:
 #'   \item{data}{SpatRaster of the generated pattern, with binary values (0 = bare ground, 1 = vegetation)}
-#'   \item{pattern}{Character string with the pattern type, or \code{pattern_label} if given}
+#'   \item{pattern}{Character string with the pattern type.}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'   \item{name}{Character string with the landscape name, \code{NA} if none was given}
 #'
@@ -88,7 +84,6 @@ create_landscape <- function(
   width = 100,
   height = 100,
   name = NULL,
-  pattern_label = NULL,
   params = NULL,
   rotation = 0
 ) {
@@ -148,11 +143,6 @@ create_landscape <- function(
   # Set the name if provided
   if (!is.null(name)) {
     landscape <- set_landscape_name(landscape, name)
-  }
-
-  # Relabel the landscape if requested
-  if (!is.null(pattern_label)) {
-    landscape <- set_landscape_pattern(landscape, pattern_label)
   }
 
   return(landscape)

@@ -50,6 +50,15 @@ test_that("set_landscape_name and set_landscape_class work for single landscape"
   expect_equal(result_pattern$pattern, "new_pattern")
   expect_s3_class(result_name, "landscape")
   expect_s3_class(result_pattern, "landscape")
+
+  # Relabelling touches the label only. This is the route that replaced
+  # create_landscape()'s pattern_label argument, e.g. to train several
+  # patterns as one class, so the raster must survive it untouched.
+  expect_equal(
+    terra::as.matrix(result_pattern$data, wide = TRUE),
+    terra::as.matrix(landscape$data, wide = TRUE)
+  )
+  expect_equal(result_pattern$name, landscape$name)
 })
 
 test_that("set_landscape_name and set_landscape_pattern validate input types", {
