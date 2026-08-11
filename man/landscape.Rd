@@ -38,7 +38,7 @@ l <- landscape(mat, pattern = "random", name = "test_landscape")
 l <- landscape(
   mat,
   pattern = "sharp",
-  name = "alpine_ecotone",
+  name = "alpine_treeline",
   params = list(boundary_position = 0.5, rotation = 0)
 )
 

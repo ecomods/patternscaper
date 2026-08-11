@@ -20,7 +20,7 @@ Sets the name attribute of a landscape object.
 \examples{
 # Single landscape
 landscape <- create_landscape("sharp", width = 10, height = 10)
-landscape <- set_landscape_name(landscape, "alpine_ecotone")
+landscape <- set_landscape_name(landscape, "alpine_treeline")
 
 # Multiple landscapes with purrr
 landscapes <- list(

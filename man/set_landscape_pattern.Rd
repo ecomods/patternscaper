@@ -20,14 +20,14 @@ Sets the pattern attribute of a landscape object.
 \examples{
 # Single landscape
 landscape <- create_landscape("sharp", width = 10, height = 10)
-landscape <- set_landscape_pattern(landscape, "sharp_boundary")
+landscape <- set_landscape_pattern(landscape, "sharp_treeline")
 
 # Multiple landscapes with purrr
 landscapes <- list(
   create_landscape("sharp", width = 10, height = 10),
   create_landscape("random", width = 10, height = 10)
 )
-patterns_vec <- c("sharp_boundary", "random_pattern")
+patterns_vec <- c("sharp_treeline", "random_pattern")
 landscapes <- purrr::map2(landscapes, patterns_vec, set_landscape_pattern)
 
 # Multiple landscapes with base R
