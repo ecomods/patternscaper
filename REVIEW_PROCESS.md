@@ -16,6 +16,12 @@ traceability.
 > updated below after the 2026-08-06/07 `pattern_*()` constructor rollout — see **Completed**). Items
 > marked **[new]** were added at or after the 2026-08-05 re-verification — each carries its own date
 > — and did not come from the three original passes.
+>
+> **Synced 2026-08-11:** L25 and M22 step 2 were both settled on 2026-08-11 but this file still
+> listed L25 as an open decision. Both now sit under **Completed**, with L25's outstanding *re-run*
+> (not decision) kept in Group C. No landscape-generation code items remain open here; what is left
+> for landscape generation lives in `../spatPatClassifyR_paper/REVISIONS.md` under the 2026-08-07
+> "Pattern + creation help pages review".
 
 ---
 
@@ -77,8 +83,8 @@ than `"accuracy"`, `evaluation[["accuracy"]]` is `NULL`, `round(NULL, 4)` is `nu
   inconsistency rather than a pure correctness bug.
 
 
-*M18, M19, M20, M21 and M22 step 1 are done — see **Completed** ("M21 + M18 + M19 + M20 + M22 step 1").
-M22 step 2 remains open, tracked under "Open decisions" below alongside L25.*
+*M18, M19, M20, M21 and M22 (both steps) are all done — see **Completed** ("M21 + M18 + M19 + M20 +
+M22 step 1"), where step 2's resolution by removal is recorded.*
 
 
 ### M24. [new] No `keras3::clear_session()` between models in `train_pixel_model()` — *(added 2026-08-10)*
@@ -180,16 +186,6 @@ train-side problem — `train_pixel_model()` reporting a lone landscape's own fi
 element(s) at index(es): 1, 2, 3, 4" — was a separate finding, fixed in `a1ec361` by *aborting* with
 a clear message rather than wrapping, since training on one landscape is never valid.
 
-### L25. [new] `radius_noise_fraction` has no default batch range — open decision  — *(added 2026-08-05)*
-M9's fix made `radius_noise_fraction` a valid, settable `params_list` parameter, but deliberately
-gave it `batch_range = NULL` (`R/landscape_parameter_validation.R:319-324`) so published results
-were unaffected. **Consequence:** every batch-generated spots/gaps landscape still uses the
-generator default `0` — perfectly sharp circular edges — in all training and test sets.
-- **Decision needed:** should it get a `batch_range` so edge noise is randomized like the other
-  spots/gaps parameters? This is a **results-changing** decision — it would alter
-  self-organized-pattern accuracy and require re-running those use cases. Tracked with the
-  analysis-side context in `../spatPatClassifyR_paper/REVISIONS.md` (`## Code`).
-
 ### L26. [new] `pkgdown::build_reference()` hard-errors  — *(added 2026-08-05)*
 Pre-existing, unrelated to the landscape work: `print.metrics_evaluation` has no entry anywhere
 in `_pkgdown.yml`'s reference index, and pkgdown aborts on an unindexed topic. One-line fix,
@@ -281,7 +277,8 @@ should stay byte-identical; only failure behaviour moves:
 11. **L7** — single-landscape handling parity between the two `apply_*`.
 
 **Open decisions (not tasks — settle these before the work they gate):**
-- **L25** — `radius_noise_fraction` batch randomization. Gates a self-organized re-run.
+- ~~**L25**~~ — decided and implemented 2026-08-11; see **Completed**. The analysis re-run it gates
+  is still outstanding, and is tracked in Group C below.
 - ~~**M22 step 2**~~ — decided 2026-08-11 by *removal*: `noise_veg_to_bare` / `noise_bare_to_veg`
   are gone from the package entirely rather than given a `batch_range`. See **Completed**.
 - ~~**L9**~~ — decided and done 2026-08-10; see **Completed**.
@@ -289,7 +286,9 @@ should stay byte-identical; only failure behaviour moves:
   `../spatPatClassifyR_paper/CHANGELOG.md` (2026-08-06/2026-08-07 entries).
 
 **Group C — will or may change results; needs the analysis re-run and a manuscript check:**
-9. **L25** — `radius_noise_fraction` batch randomization *(decision first, then re-run)*.
+9. **L25** — code done 2026-08-11 (see **Completed**); the **re-run is the outstanding part**.
+   Scope and cost are in `../spatPatClassifyR_paper/REVISIONS.md` (`## Code`): self-organized and
+   ecotone use cases, the robustness test, image classification, and the HPC sweep.
 10. **M11 / L22** — unify the `apply_*` return contract (touches the analysis repo's call sites).
 11. **M5** — pixel-model input encoding (ordinal integers for 3+ classes). *(M6 was here too; done
     2026-08-05 by removing the `metrics` parameter, and it changed no results.)*
@@ -320,6 +319,30 @@ Checked against current source; correct as-is, no action needed:
 ---
 
 ## Completed
+
+### L25. `radius_noise_fraction` has no default batch range  — [new]
+*Decided and implemented 2026-08-11* (`11d1518`). **The code is done; the analysis re-run it forces
+is not, and is tracked in Group C above.** M9's fix had made `radius_noise_fraction` a valid,
+settable `params_list` parameter but deliberately left it `batch_range = NULL`, so every
+batch-generated spots/gaps landscape in every training and test set used the generator default `0`,
+i.e. perfectly sharp circular edges.
+**Decision: give it a real `batch_range`,** `c(0, 0.2)` for both `spots` and `gaps`
+(`R/landscape_parameter_validation.R`). The reasoning is recorded on the analysis side
+(`../spatPatClassifyR_paper/REVISIONS.md`, `## Code`): a batch range that is never reachable
+through normal batch generation is a half-implemented feature rather than a deliberate default, so
+the package default becomes the realistic (randomized) one, and any script needing the old
+deterministic condition sets it explicitly via `params_list` and documents that choice at the call
+site.
+**This is the one landscape-generation change that does move published numbers.** Self-organized
+pattern accuracy will shift, so both golden references (`reference_landscapes.rds` and the
+classification harness's `reference.rds`) were re-captured rather than checked. The same commit also
+seeds the landscape harness's `single` path independently of the batch path, so that a change to
+what the batch samples no longer shifts the RNG stream position the single landscapes start from.
+That is a fix to the harness rather than to the package, and it is what makes the two paths
+independently interpretable in future diffs.
+Decided together with M22 step 2 and originally tracked as a single item; the two halves then went
+opposite ways (M22 step 2 was resolved by removing its parameters instead, which changes no raster
+and needs no re-run). See **Completed → "M21 + M18 + M19 + M20 + M22 (step 1)"** for that half.
 
 ### L10. Rotation silently ignored for most patterns  — [Claude] *(§3.3)*
 *Fixed 2026-08-10.* Only `c("sharp", "diffuse", "fingers", "clustered", "bands")` honour
