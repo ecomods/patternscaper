@@ -10,7 +10,7 @@ create_landscapes(
     "bands", "spots", "gaps", "labyrinth"),
   width = 100,
   height = 100,
-  rotation = 0:360,
+  rotation = c(0, 360),
   params_list = NULL,
   pattern_probs = NULL,
   max_retries = 3
@@ -27,12 +27,12 @@ create_landscapes(
 
 \item{height}{Integer. Height of all landscapes in pixels (default: 100).}
 
-\item{rotation}{Numeric vector. Angles in degrees to sample from per
-landscape (default: 0:360). A single value applies that angle to every
-landscape, whereas a length-2 vector gives the upper and lower boundaries of the
-random rotation angle (with uniform distribution). Only "sharp",
-"diffuse", "fingers", "clustered" and "bands"
-are rotated; the remaining patterns ignore it.}
+\item{rotation}{Numeric. Angle in degrees (default: \code{c(0, 360)}).
+A single value applies that angle to every landscape, whereas a length-2
+vector gives the lower and upper bounds of a uniform range, drawn once
+per landscape and rounded to whole degrees. Only "sharp", "diffuse",
+"fingers", "clustered" and "bands" are rotated; the remaining patterns
+ignore it.}
 
 \item{params_list}{Named list. Parameters to sample for each pattern.
 Names must correspond to the pattern names, for example for example

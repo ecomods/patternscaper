@@ -414,11 +414,11 @@ plot_landscapes(non_square)
 
 ### Landscape rotation
 
-By default, landscapes are rotated by angles randomly chosen between 0 and 360 degrees.
+By default, landscapes are rotated by whole-degree angles randomly chosen between 0 and 360 degrees.
 This ensures that classifiers trained on these landscapes are invariant to landscape orientation.
 
 You can disable random rotation by setting the `rotation` parameter to `0`.
-This parameter can also be used to directly control the range of selected rotation angles. For example, to select only angles between 0 and 90 degrees:
+This parameter can also be used to directly control the range of selected rotation angles. For example, to select only angles between 45 and 90 degrees:
 
 ```{r}
 #| label: rotation-example

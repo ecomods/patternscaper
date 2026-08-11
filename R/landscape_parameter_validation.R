@@ -32,13 +32,15 @@ validate_dimensions <- function(width, height) {
 #' Validates rotation angle parameter(s).
 #'
 #' @param rotation Numeric. Angle(s) to rotate landscape in degrees.
-#'     Can be a single value or a vector of values.
+#' @param allow_range Logical. If TRUE, a length-2 vector is accepted as the
+#'     \code{c(min, max)} bounds \code{\link{create_landscapes}} samples from.
+#'     If FALSE (default), only a single angle is accepted.
 #'
 #' @return NULL (invisibly). Called for side effects (validation).
 #'
 #' @keywords internal
 #' @noRd
-validate_rotation <- function(rotation) {
+validate_rotation <- function(rotation, allow_range = FALSE) {
   if (!is.numeric(rotation)) {
     cli::cli_abort(c(
       "{.arg rotation} must be numeric.",
@@ -57,6 +59,33 @@ validate_rotation <- function(rotation) {
     cli::cli_abort(c(
       "{.arg rotation} must be between 0 and 360 degrees.",
       "x" = "You supplied {.val {rotation}}"
+    ))
+  }
+
+  # Length is checked after the values, so a range holding a bad angle reports
+  # the angle rather than the length.
+  if (!allow_range) {
+    if (length(rotation) != 1) {
+      cli::cli_abort(c(
+        "{.arg rotation} must be a single angle.",
+        "x" = "You supplied {length(rotation)} value{?s}.",
+        "i" = "Use {.fn create_landscapes} to sample angles from a range."
+      ))
+    }
+
+    return(invisible(NULL))
+  }
+
+  if (length(rotation) < 1 || length(rotation) > 2) {
+    cli::cli_abort(c(
+      "{.arg rotation} must be length 1 (fixed) or 2 (range).",
+      "x" = "You supplied length {length(rotation)}."
+    ))
+  }
+
+  if (length(rotation) == 2 && rotation[1] >= rotation[2]) {
+    cli::cli_abort(c(
+      "{.arg rotation}: min ({rotation[1]}) must be < max ({rotation[2]})."
     ))
   }
 

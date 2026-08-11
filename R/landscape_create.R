@@ -32,10 +32,10 @@
 #'     for example \code{\link{pattern_spots}} (default: NULL). Must hold single values
 #'     for each parameter, ranges are only meaningful for \code{\link{create_landscapes}},
 #'     i.e. for creating multiple landscapes.
-#' @param rotation Numeric. Angle to rotate the landscape in degrees (default: 0).
-#'     Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated.
-#'     The remaining patterns ignore it, are generated without rotation and a
-#'     warning is given.
+#' @param rotation Numeric. Angle to rotate the landscape in degrees
+#'     (0-360, default: 0). Only "sharp", "diffuse", "fingers",
+#'     "clustered" and "bands" are rotated. The remaining patterns ignore it,
+#'     are generated without rotation and a warning is given.
 #'
 #' @return A \code{\link{landscape}} object, containing:
 #'   \item{data}{SpatRaster of the generated pattern, with binary values (0 = bare ground, 1 = vegetation)}
@@ -105,6 +105,9 @@ create_landscape <- function(
       cli::cli_abort("'name' must be a single character string or NULL")
     }
   }
+
+  # Validate the rotation parameter
+  validate_rotation(rotation)
 
   # Select the generator for the pattern
   generator <- switch(
@@ -180,12 +183,12 @@ create_landscape <- function(
 #'  "bands", "spots", "gaps", "labyrinth" (default: all patterns).
 #' @param width Integer. Width of all landscapes in pixels (default: 100).
 #' @param height Integer. Height of all landscapes in pixels (default: 100).
-#' @param rotation Numeric vector. Angles in degrees to sample from per
-#'     landscape (default: 0:360). A single value applies that angle to every
-#'     landscape, whereas a length-2 vector gives the upper and lower boundaries of the
-#'     random rotation angle (with uniform distribution). Only "sharp",
-#'     "diffuse", "fingers", "clustered" and "bands"
-#'     are rotated; the remaining patterns ignore it.
+#' @param rotation Numeric. Angle in degrees (default: \code{c(0, 360)}).
+#'     A single value applies that angle to every landscape. A length-2
+#'     vector gives the lower and upper bounds of a uniform range, drawn for each
+#'     landscape as an integer. Only "sharp", "diffuse",
+#'     "fingers", "clustered" and "bands" are rotated; the remaining patterns
+#'     ignore it.
 #' @param params_list Named list. Parameters to sample for each pattern.
 #'     Names must correspond to the pattern names, for example for example
 #'     \code{\link{pattern_spots}} for \code{patterns} = "spots". Each
@@ -253,7 +256,7 @@ create_landscapes <- function(
   ),
   width = 100,
   height = 100,
-  rotation = 0:360,
+  rotation = c(0, 360),
   params_list = NULL,
   pattern_probs = NULL,
   max_retries = 3
@@ -273,9 +276,7 @@ create_landscapes <- function(
   validate_dimensions(width, height)
 
   # Validate rotation angles
-  if (!is.null(rotation)) {
-    validate_rotation(rotation)
-  }
+  validate_rotation(rotation, allow_range = TRUE)
 
   # Reject unknown pattern names
   unknown_patterns <- setdiff(patterns, valid_patterns())
@@ -384,7 +385,9 @@ create_landscapes <- function(
         if (length(rotation) == 1) {
           current_rotation <- rotation
         } else {
-          current_rotation <- sample(rotation, 1)
+          current_rotation <- round(
+            runif(1, min = rotation[1], max = rotation[2])
+          )
         }
         sampled_params$rotation <- current_rotation
       } else {

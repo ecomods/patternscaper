@@ -171,7 +171,7 @@ test_that("create_landscapes handles rotation correctly", {
     n = 10,
     width = 50,
     height = 50,
-    rotation = c(0, 45, 90),
+    rotation = c(0, 90),
     patterns = c("sharp", "bands", "fingers", "clustered")
   )
 
@@ -727,16 +727,16 @@ test_that("create_landscapes shows appropriate messages", {
 test_that("create_landscapes accepts valid rotation angles", {
   set.seed(123)
 
-  # Vector of angles
-  landscapes_vector <- create_landscapes(
+  # Range
+  landscapes_range <- create_landscapes(
     n = 5,
     patterns = "sharp",
     width = 20,
     height = 20,
-    rotation = c(0, 45, 90, 135)
+    rotation = c(0, 135)
   )
 
-  expect_equal(length(landscapes_vector), 5)
+  expect_equal(length(landscapes_range), 5)
 
   # Single angle
   landscapes_single <- create_landscapes(
@@ -761,13 +761,36 @@ test_that("create_landscapes accepts valid rotation angles", {
   expect_equal(length(landscapes_edges), 5)
 })
 
+test_that("create_landscapes samples rotation across the whole range", {
+  set.seed(123)
+
+  landscapes <- create_landscapes(
+    n = 30,
+    patterns = "sharp",
+    width = 12,
+    height = 12,
+    rotation = c(40, 80)
+  )
+
+  angles <- vapply(landscapes, \(x) x$params$rotation, numeric(1))
+
+  expect_true(all(angles >= 40 & angles <= 80))
+
+  # A range is sampled from, not treated as two candidate angles
+  expect_gt(length(unique(angles)), 2)
+
+  # Sampled angles are whole degrees, so landscape names stay readable
+  expect_true(all(angles %% 1 == 0))
+  expect_true(all(grepl("_rot\\d+$", names(landscapes))))
+})
+
 test_that("create_landscapes rejects invalid rotation angles", {
   # Negative angle
   expect_error(
     create_landscapes(
       n = 5,
       patterns = "sharp",
-      rotation = c(0, -45, 90)
+      rotation = c(-45, 90)
     ),
     "must be between 0 and 360"
   )
@@ -777,7 +800,7 @@ test_that("create_landscapes rejects invalid rotation angles", {
     create_landscapes(
       n = 5,
       patterns = "sharp",
-      rotation = c(0, 45, 400)
+      rotation = c(45, 400)
     ),
     "must be between 0 and 360"
   )
@@ -797,10 +820,61 @@ test_that("create_landscapes rejects invalid rotation angles", {
     create_landscapes(
       n = 5,
       patterns = "sharp",
-      rotation = c(0, NA, 90)
+      rotation = c(0, NA)
     ),
     "cannot contain NA"
   )
+})
+
+test_that("create_landscapes rejects rotation that is not a value or a range", {
+  # More than two angles is no longer a set to sample from
+  expect_error(
+    create_landscapes(
+      n = 5,
+      patterns = "sharp",
+      rotation = c(0, 45, 90)
+    ),
+    "length 1 \\(fixed\\) or 2 \\(range\\)"
+  )
+
+  expect_error(
+    create_landscapes(
+      n = 5,
+      patterns = "sharp",
+      rotation = numeric(0)
+    ),
+    "length 1 \\(fixed\\) or 2 \\(range\\)"
+  )
+
+  # Reversed bounds
+  expect_error(
+    create_landscapes(
+      n = 5,
+      patterns = "sharp",
+      rotation = c(90, 45)
+    ),
+    "must be <"
+  )
+
+  # Collapsed range
+  expect_error(
+    create_landscapes(
+      n = 5,
+      patterns = "sharp",
+      rotation = c(45, 45)
+    ),
+    "must be <"
+  )
+})
+
+test_that("create_landscape rejects a rotation range", {
+  for (pattern in c("sharp", "random")) {
+    expect_error(
+      create_landscape(pattern, width = 20, height = 20, rotation = c(0, 45)),
+      "must be a single angle",
+      info = pattern
+    )
+  }
 })
 
 # Integer sampling tests --------------------------------------------------
