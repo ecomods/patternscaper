@@ -107,7 +107,7 @@ scale with landscape size are shown for the default 100 by 100.
 \code{n_spots} \tab 1 or more \tab 5 to 10 \cr
 \code{spot_radius} \tab 1 or more \tab 10 to 20, scales with size \cr
 \code{spot_radius_sd} \tab 0 or more \tab 0 to 2, scales with size \cr
-\code{radius_noise_fraction} \tab 0 to 1 \tab not sampled \cr
+\code{radius_noise_fraction} \tab 0 to 1 \tab 0 to 0.2 \cr
 \code{regular_spots} \tab TRUE or FALSE \tab TRUE or FALSE \cr
 \code{invert_landscape} \tab TRUE or FALSE \tab always FALSE \cr
 }

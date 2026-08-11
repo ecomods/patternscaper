@@ -52,6 +52,11 @@ run_golden_landscapes <- function() {
 
   # Single path -- exercises create_landscape() directly, generator defaults,
   # for every pattern ---------------------------------------------------------
+  # Seeded independently of the batch above: without this, a change to what the
+  # batch samples shifts the stream position the single path starts from, and
+  # every stochastic single landscape drifts for a reason unrelated to
+  # create_landscape() itself.
+  set.seed(456)
   single <- stats::setNames(
     lapply(all_patterns, \(p) create_landscape(p, width = width, height = height)),
     all_patterns

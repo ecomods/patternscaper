@@ -366,7 +366,7 @@ landscape_param_specs <- function() {
         type = "numeric",
         min = 0,
         max = 1,
-        batch_range = NULL
+        batch_range = c(0, 0.2)
       ),
       regular_spots = list(type = "logical", batch_range = c(TRUE, FALSE)),
       invert_landscape = list(type = "logical", batch_range = c(FALSE))
@@ -394,7 +394,7 @@ landscape_param_specs <- function() {
         type = "numeric",
         min = 0,
         max = 1,
-        batch_range = NULL
+        batch_range = c(0, 0.2)
       ),
       regular_spots = list(type = "logical", batch_range = c(TRUE, FALSE))
     ),

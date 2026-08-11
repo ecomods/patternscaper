@@ -46,6 +46,7 @@ test_that("build_default_params_list preserves exact order and values for all 11
       n_spots = c(5, 10),
       spot_radius = c(10, 20),
       spot_radius_sd = c(0, 2),
+      radius_noise_fraction = c(0, 0.2),
       regular_spots = c(TRUE, FALSE),
       invert_landscape = c(FALSE)
     ),
@@ -53,6 +54,7 @@ test_that("build_default_params_list preserves exact order and values for all 11
       n_spots = c(5, 10),
       spot_radius = c(10, 20),
       spot_radius_sd = c(0, 2),
+      radius_noise_fraction = c(0, 0.2),
       regular_spots = c(TRUE, FALSE)
     ),
     labyrinth = list(
@@ -138,11 +140,11 @@ test_that("radius_noise_fraction is no longer silently stripped for spots/gaps",
   )
 })
 
-test_that("radius_noise_fraction stays out of default batch sampling for spots/gaps", {
+test_that("radius_noise_fraction is part of default batch sampling for spots/gaps", {
   result <- build_default_params_list(width = 100, height = 100)
 
-  expect_false("radius_noise_fraction" %in% names(result$spots))
-  expect_false("radius_noise_fraction" %in% names(result$gaps))
+  expect_equal(result$spots$radius_noise_fraction, c(0, 0.2))
+  expect_equal(result$gaps$radius_noise_fraction, c(0, 0.2))
 })
 
 # gaps invert_landscape removal (Step 5 fix) -----------------------------------

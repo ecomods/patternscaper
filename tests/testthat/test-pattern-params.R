@@ -94,15 +94,16 @@ test_that("the generated ranges section covers every parameter", {
   }
 })
 
-test_that("validation-only parameters are described as not sampled", {
-  # radius_noise_fraction and the two noise probabilities have batch_range NULL,
-  # so a batch never varies them -- the page has to say so rather than render
-  # an empty range
+test_that("radius_noise_fraction is described with its sampled range", {
   rd <- rd_param_ranges("spots")
   noise <- grep("radius_noise_fraction", rd, value = TRUE)
 
-  expect_match(noise, "not sampled")
+  expect_match(noise, "0 to 0.2", fixed = TRUE)
+})
 
+test_that("validation-only parameters are described as not sampled", {
+  # The two noise probabilities have batch_range NULL, so a batch never varies
+  # them -- the page has to say so rather than render an empty range
   expect_match(
     grep("noise_bare_to_veg", rd_param_ranges("sharp"), value = TRUE),
     "not sampled"
