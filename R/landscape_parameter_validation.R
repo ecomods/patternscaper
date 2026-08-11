@@ -10,19 +10,27 @@
 #' @keywords internal
 #' @noRd
 validate_dimensions <- function(width, height) {
-  if (!is.numeric(width) || width <= 0 || width != as.integer(width)) {
-    cli::cli_abort(c(
-      "{.arg width} must be a positive integer.",
-      "x" = "You supplied {.val {width}}"
-    ))
+  check_dimension <- function(value, arg) {
+    if (
+      !is.numeric(value) ||
+        length(value) != 1 ||
+        !is.finite(value) ||
+        value <= 0 ||
+        value %% 1 != 0
+    ) {
+      cli::cli_abort(c(
+        "{.arg {arg}} must be a positive integer.",
+        "x" = if (length(value) == 1) {
+          "You supplied {.val {value}}"
+        } else {
+          "You supplied {.type {value}} of length {length(value)}."
+        }
+      ))
+    }
   }
 
-  if (!is.numeric(height) || height <= 0 || height != as.integer(height)) {
-    cli::cli_abort(c(
-      "{.arg height} must be a positive integer.",
-      "x" = "You supplied {.val {height}}"
-    ))
-  }
+  check_dimension(width, "width")
+  check_dimension(height, "height")
 
   invisible(NULL)
 }

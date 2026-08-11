@@ -268,6 +268,30 @@ test_that("create_landscapes respects width and height", {
   }
 })
 
+test_that("create_landscape/s reject width and height that are not one number", {
+  for (bad in list(c(20, 30), numeric(0), NA_real_, Inf, "20")) {
+    expect_error(
+      create_landscapes(n = 2, patterns = "random", width = bad, height = 20),
+      "must be a positive integer"
+    )
+
+    expect_error(
+      create_landscapes(n = 2, patterns = "random", width = 20, height = bad),
+      "must be a positive integer"
+    )
+
+    expect_error(
+      create_landscape("random", width = bad, height = 20),
+      "must be a positive integer"
+    )
+
+    expect_error(
+      create_landscape("random", width = 20, height = bad),
+      "must be a positive integer"
+    )
+  }
+})
+
 test_that("create_landscapes is reproducible with seed", {
   set.seed(456)
   landscapes1 <- create_landscapes(

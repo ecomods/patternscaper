@@ -110,6 +110,30 @@ test_that("landscape generators validate width parameter", {
       "must be a positive integer",
       info = paste("Testing", name, "with non-integer width")
     )
+
+    expect_error(
+      gen(width = c(20, 30)),
+      "must be a positive integer",
+      info = paste("Testing", name, "with a width vector")
+    )
+
+    expect_error(
+      gen(width = numeric(0)),
+      "must be a positive integer",
+      info = paste("Testing", name, "with an empty width")
+    )
+
+    expect_error(
+      gen(width = NA_real_),
+      "must be a positive integer",
+      info = paste("Testing", name, "with NA width")
+    )
+
+    expect_error(
+      gen(width = Inf),
+      "must be a positive integer",
+      info = paste("Testing", name, "with infinite width")
+    )
   }
 })
 
@@ -153,6 +177,30 @@ test_that("landscape generators validate height parameter", {
       gen(height = 10.5),
       "must be a positive integer",
       info = paste("Testing", name, "with non-integer height")
+    )
+
+    expect_error(
+      gen(height = c(20, 30)),
+      "must be a positive integer",
+      info = paste("Testing", name, "with a height vector")
+    )
+
+    expect_error(
+      gen(height = numeric(0)),
+      "must be a positive integer",
+      info = paste("Testing", name, "with an empty height")
+    )
+
+    expect_error(
+      gen(height = NA_real_),
+      "must be a positive integer",
+      info = paste("Testing", name, "with NA height")
+    )
+
+    expect_error(
+      gen(height = Inf),
+      "must be a positive integer",
+      info = paste("Testing", name, "with infinite height")
     )
   }
 })
