@@ -186,10 +186,13 @@ train-side problem — `train_pixel_model()` reporting a lone landscape's own fi
 element(s) at index(es): 1, 2, 3, 4" — was a separate finding, fixed in `a1ec361` by *aborting* with
 a clear message rather than wrapping, since training on one landscape is never valid.
 
-### L26. [new] `pkgdown::build_reference()` hard-errors  — *(added 2026-08-05)*
+### L26. ~~[new] `pkgdown::build_reference()` hard-errors~~ — **DONE**, confirmed 2026-08-11
 Pre-existing, unrelated to the landscape work: `print.metrics_evaluation` has no entry anywhere
 in `_pkgdown.yml`'s reference index, and pkgdown aborts on an unindexed topic. One-line fix,
 worth doing before the website work (which M18/M20 will touch anyway).
+**Resolved along the way**, most likely while indexing the new `pattern_*()` topics:
+`pkgdown::check_pkgdown()` reports "No problems found" against the current source
+(checked 2026-08-11, index only, no site build).
 
 ### L17. `sapply()` where `vapply()` is safer  — [Claude] [ChatGPT] *(§5.3)*
 *Partially done 2026-08-05.* `sapply()` can silently return a list or matrix; `vapply()` with a
@@ -278,7 +281,8 @@ should stay byte-identical; only failure behaviour moves:
 
 **Open decisions (not tasks — settle these before the work they gate):**
 - ~~**L25**~~ — decided and implemented 2026-08-11; see **Completed**. The analysis re-run it gates
-  is still outstanding, and is tracked in Group C below.
+  is done for the use cases and image classification (2026-08-11); only the robustness test and the
+  HPC sweep remain. Tracked in Group C below.
 - ~~**M22 step 2**~~ — decided 2026-08-11 by *removal*: `noise_veg_to_bare` / `noise_bare_to_veg`
   are gone from the package entirely rather than given a `batch_range`. See **Completed**.
 - ~~**L9**~~ — decided and done 2026-08-10; see **Completed**.
@@ -286,9 +290,21 @@ should stay byte-identical; only failure behaviour moves:
   `../spatPatClassifyR_paper/CHANGELOG.md` (2026-08-06/2026-08-07 entries).
 
 **Group C — will or may change results; needs the analysis re-run and a manuscript check:**
-9. **L25** — code done 2026-08-11 (see **Completed**); the **re-run is the outstanding part**.
-   Scope and cost are in `../spatPatClassifyR_paper/REVISIONS.md` (`## Code`): self-organized and
-   ecotone use cases, the robustness test, image classification, and the HPC sweep.
+9. **L25** — code done 2026-08-11, and the re-run is now **mostly done** the same day. Numbers and
+   causes are in `../spatPatClassifyR_paper/CHANGELOG.md` (results ledger, 2026-08-11).
+   - *Done:* self-organized use cases (landscape scale `93743c9`, class scale and pixels
+     `95258b3`), ecotone use cases (`0eab8c1`, for the rotation change below), image classification
+     (`0ef2e4e`).
+   - *Outstanding:* `test_robustness.R` and the HPC systematic sweep. Both `data/` trees still date
+     from 2026-02-19, and the robustness test's cost was never assessed (REVISIONS.md flags this).
+   - *Fallout:* the edge noise stopped `classify_selforg_metrics_landscape.R` converging at the
+     default `stepmax`; it now passes `stepmax = 1e06` (`b0cc136`). **Open:** whether to keep the
+     noise and report accuracy 0.55, or revert `batch_range` to `NULL` and keep 0.63. Reverting
+     would not touch `classify_images.R`, which sets `radius_noise_fraction` explicitly on every
+     `create_landscape()` call and never used the batch default.
+9b. **Rotation range semantics** — new 2026-08-11, code and re-run both done (`0eab8c1`); no
+   decision outstanding. Results-changing for rotatable patterns only, and verified inert for the
+   self-organized ones. See the results ledger entry.
 10. **M11 / L22** — unify the `apply_*` return contract (touches the analysis repo's call sites).
 11. **M5** — pixel-model input encoding (ordinal integers for 3+ classes). *(M6 was here too; done
     2026-08-05 by removing the `metrics` parameter, and it changed no results.)*
