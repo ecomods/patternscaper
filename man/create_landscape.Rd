@@ -15,7 +15,7 @@ create_landscape(
 )
 }
 \arguments{
-\item{pattern}{Character. Pattern to generate (required, no default).
+\item{pattern}{Character. Pattern to generate.
 Valid patterns are: "random", "bare", "dense", "sharp", "diffuse",
 "fingers", "clustered", "bands", "spots", "gaps", "labyrinth".}
 

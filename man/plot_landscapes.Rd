@@ -66,7 +66,7 @@ plot_landscapes(l)
 
 # Custom title and legend for a single landscape
 plot_landscapes(l,
-                   titles = "My Sharp Treeline",
+                   titles = "My Sharp Boundary",
                    legend_title = "Vegetation")
 
 # Use & (not +) to add ggplot2 elements to every panel

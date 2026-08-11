@@ -123,7 +123,7 @@ create_landscape_clustered <- function(
     ))
   }
 
-  # Get base landscape with sharp treeline
+  # Get base landscape with sharp vegetation boundary
   base_landscape <- create_landscape_sharp(
     width = width_actual,
     height = height_actual,
@@ -135,7 +135,7 @@ create_landscape_clustered <- function(
   mat <- terra::as.matrix(base_landscape$data, wide = TRUE)
 
   # Define scatter zone boundaries
-  treeline_row <- round(height_actual * boundary_position)
+  boundary_row <- round(height_actual * boundary_position)
 
   # For rotated landscapes, use inner portion to avoid edge artifacts after crop
   rotation_safe_margin <- 1 / 6
@@ -153,11 +153,11 @@ create_landscape_clustered <- function(
 
   scatter_zone_end <- min(
     max_row,
-    treeline_row + floor(max_row * scatter_zone_prop)
+    boundary_row + floor(max_row * scatter_zone_prop)
   )
 
   # Validate that cluster centers can be placed within scatter zone
-  sample_row_start <- treeline_row + cluster_radius + 1
+  sample_row_start <- boundary_row + cluster_radius + 1
   sample_row_end <- floor(scatter_zone_end - cluster_radius)
 
   if (sample_row_start > sample_row_end) {

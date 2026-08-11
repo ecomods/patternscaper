@@ -1,4 +1,4 @@
-# Tests for diffuse treeline landscape creation ------------------------------
+# Tests for diffuse vegetation boundary landscape creation ------------------------------
 
 # Validation tests ------------------------------------------------------------
 test_that("create_landscape_diffuse validates steepness parameter", {
@@ -205,7 +205,7 @@ test_that("create_landscape_diffuse handles steepness boundary values", {
 # Integration tests -----------------------------------------------------------
 
 test_that("create_landscape_diffuse handles multiple edge cases together", {
-  # Small landscape + extreme treeline + extreme steepness + rotation
+  # Small landscape + extreme boundary + extreme steepness + rotation
   l_extreme <- create_landscape_diffuse(
     width = 5,
     height = 5,

@@ -10,10 +10,10 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Default randomly distributed trees
+#' # Default randomly distributed vegetation
 #' random_default <- create_landscape_random()
 #'
-#' # Higher tree density
+#' # Higher vegetation density
 #' random_dense <- create_landscape_random(veg_prop = 0.7)
 #'
 #' # Custom dimensions
@@ -38,7 +38,7 @@ create_landscape_random <- function(
     ))
   }
 
-  # Get landscape with random distribution of trees
+  # Get landscape with random distribution of vegetation
   mat <- matrix(
     stats::rbinom(width * height, size = 1, prob = veg_prop),
     nrow = height,

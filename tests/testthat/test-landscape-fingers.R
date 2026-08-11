@@ -101,7 +101,7 @@ test_that("create_landscape_fingers creates varying sinusoidal patterns", {
   )
   expect_true(is_landscape(l_curvy))
 
-  # Check that treeline position varies across columns
+  # Check that the boundary position varies across columns
   vals <- terra::values(l_curvy$data)
   mat <- matrix(vals, nrow = 20, ncol = 20)
   col_sums <- colSums(mat)
@@ -295,7 +295,7 @@ test_that("create_landscape_fingers handles boundary_position boundary values", 
 # Integration tests ------------------------------------------------------------
 
 test_that("create_landscape_fingers handles multiple edge cases together", {
-  # Small landscape + extreme treeline + extreme sine params + rotation
+  # Small landscape + extreme boundary + extreme sine params + rotation
   l_extreme <- create_landscape_fingers(
     width = 30,
     height = 30,

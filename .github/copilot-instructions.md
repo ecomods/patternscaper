@@ -26,8 +26,8 @@ list(
 
 ### File Organization
 
-- **One landscape generator per file**: `R/landscape_create_<type>.R` (e.g., `landscape_create_sharp_treeline.R`)
-- **Pattern types**: random, sharp, diffuse, fingers, clustered, bands, spots, gaps, labyrinth
+- **One landscape generator per file**: `R/landscape_create_<type>.R` (e.g., `landscape_create_sharp.R`)
+- **Pattern types**: random, bare, dense, sharp, diffuse, fingers, clustered, bands, spots, gaps, labyrinth
 - **Centralized dispatch**: `create_landscape()` in `R/landscape_create.R` routes to specific generators
 - **Helper functions**: Can be in same file as exported functions; mark with `@keywords internal` or `@noRd`
 

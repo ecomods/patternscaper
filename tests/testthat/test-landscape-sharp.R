@@ -1,4 +1,4 @@
-# Tests for sharp treeline landscape creation --------------------------------
+# Tests for sharp vegetation boundary landscape creation --------------------------------
 
 # Validation tests ------------------------------------------------------------
 
@@ -54,8 +54,8 @@ test_that("create_landscape_sharp supports rotation parameter", {
 
 # Edge case tests -------------------------------------------------------------
 
-test_that("create_landscape_sharp handles extreme treeline positions", {
-  # Treeline at bottom (position = 0)
+test_that("create_landscape_sharp handles extreme boundary positions", {
+  # Boundary at bottom (position = 0)
   l_bottom <- create_landscape_sharp(
     width = 50,
     height = 50,
@@ -63,7 +63,7 @@ test_that("create_landscape_sharp handles extreme treeline positions", {
   )
   expect_true(is_landscape(l_bottom))
 
-  # Treeline at top (position = 1)
+  # Boundary at top (position = 1)
   l_top <- create_landscape_sharp(
     width = 50,
     height = 50,

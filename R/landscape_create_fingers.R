@@ -87,14 +87,14 @@ create_landscape_fingers <- function(
   width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
   # Convert position from proportion to row number
-  treeline_row <- round(height_actual * boundary_position)
+  boundary_row <- round(height_actual * boundary_position)
 
   # Create the landscape matrix
   mat <- matrix(0, nrow = height_actual, ncol = width_actual)
 
-  # Fill in other vegetation area (1) based on treeline position
-  if (treeline_row > 0) {
-    mat[1:treeline_row, ] <- 1
+  # Fill in other vegetation area (1) based on boundary position
+  if (boundary_row > 0) {
+    mat[1:boundary_row, ] <- 1
   }
 
   # slightly shifting curves
@@ -134,7 +134,7 @@ create_landscape_fingers <- function(
     phase <- phase + (2 * pi / current_length)
     phase <- phase %% (2 * pi) # Keep phase bounded
 
-    y_sine <- treeline_row + sin(phase) * current_height
+    y_sine <- boundary_row + sin(phase) * current_height
 
     for (i in 1:height_actual) {
       mat[i, j] <- ifelse(i > y_sine, 0, 1)

@@ -74,10 +74,10 @@ test_that("create_landscape_random creates valid random distributions", {
   expect_equal(terra::ncol(l$data), 50)
   expect_equal(terra::nrow(l$data), 50)
 
-  # Tree proportion should be approximately 0.5
+  # Vegetation proportion should be approximately 0.5
   vals <- terra::values(l$data)
-  prop_trees <- sum(vals == 1) / length(vals)
-  expect_true(prop_trees > 0.45 && prop_trees < 0.55)
+  prop_veg <- sum(vals == 1) / length(vals)
+  expect_true(prop_veg > 0.45 && prop_veg < 0.55)
 })
 
 test_that("create_landscape_random veg_prop affects density", {
@@ -103,7 +103,7 @@ test_that("create_landscape_random veg_prop affects density", {
   prop_sparse <- sum(vals_sparse == 1) / length(vals_sparse)
   prop_dense <- sum(vals_dense == 1) / length(vals_dense)
 
-  # Dense should have more trees than sparse
+  # Dense should have more vegetation than sparse
   expect_true(prop_dense > prop_sparse)
   expect_true(prop_sparse < 0.3)
   expect_true(prop_dense > 0.7)
@@ -147,7 +147,7 @@ test_that("create_landscape_random produces reproducible results with seed", {
 # Edge case tests -------------------------------------------------------------
 
 test_that("create_landscape_random handles edge case veg_prop values", {
-  # All trees
+  # All vegetation
   l_full <- create_landscape_random(
     width = 20,
     height = 20,
@@ -156,7 +156,7 @@ test_that("create_landscape_random handles edge case veg_prop values", {
   vals_full <- terra::values(l_full$data)
   expect_true(all(vals_full == 1))
 
-  # No trees
+  # No vegetation
   l_empty <- create_landscape_random(
     width = 20,
     height = 20,
@@ -169,7 +169,7 @@ test_that("create_landscape_random handles edge case veg_prop values", {
 # Integration tests -----------------------------------------------------------
 
 test_that("create_landscape_random works with extreme parameter combinations", {
-  # Very small landscape with no trees
+  # Very small landscape with no vegetation
   l1 <- create_landscape_random(
     width = 5,
     height = 5,
@@ -177,7 +177,7 @@ test_that("create_landscape_random works with extreme parameter combinations", {
   )
   expect_true(is_landscape(l1))
 
-  # Very small landscape with all trees
+  # Very small landscape with all vegetation
   l2 <- create_landscape_random(
     width = 5,
     height = 5,

@@ -109,22 +109,22 @@ create_landscape_bands <- function(
   # Initialize empty landscape
   mat <- matrix(0, nrow = height_actual, ncol = width_actual)
 
-  # Base sine wave, used for both treeline and bands
+  # Base sine wave, used for both the vegetation boundary and the bands
   base_sine <- amplitude * sin(frequency * seq_len(width_actual))
 
-  # Determine the treeline
-  base_treeline <- round(height_actual * boundary_position + base_sine)
-  base_treeline <- pmin(pmax(base_treeline, 1), height_actual)
+  # Determine the vegetation boundary
+  base_boundary <- round(height_actual * boundary_position + base_sine)
+  base_boundary <- pmin(pmax(base_boundary, 1), height_actual)
 
-  # Draw treeline: fill all cells above the treeline with trees (1)
+  # Fill all cells above the boundary with vegetation (1)
   for (x in seq_len(width_actual)) {
-    y <- base_treeline[x]
+    y <- base_boundary[x]
     mat[seq_len(y), x] <- 1
   }
 
-  # Calculate available space for bands below the treeline
+  # Calculate available space for bands below the boundary
   band_zone <- round(height_actual * band_zone_prop)
-  available_space <- height_actual - max(base_treeline)
+  available_space <- height_actual - max(base_boundary)
 
   # Constrain band zone to available space
   band_zone <- min(band_zone, available_space)
@@ -149,7 +149,7 @@ create_landscape_bands <- function(
     band_noise <- stats::rnorm(width_actual, mean = 0, sd = noise_sd)
 
     for (x in seq_len(width_actual)) {
-      y_center <- base_treeline[x] + offset + band_noise[x]
+      y_center <- base_boundary[x] + offset + band_noise[x]
 
       y_min <- max(1, floor(y_center - floor(band_thickness / 2)))
       y_max <- min(

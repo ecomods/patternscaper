@@ -578,8 +578,8 @@ test_that("sample_landscape_params samples within ranges", {
   )
 
   # Check boundary_position is in range
-  treeline_vals <- sapply(samples, function(x) x$boundary_position)
-  expect_true(all(treeline_vals >= 0.3 & treeline_vals <= 0.7))
+  boundary_vals <- sapply(samples, function(x) x$boundary_position)
+  expect_true(all(boundary_vals >= 0.3 & boundary_vals <= 0.7))
 
   # Check n_clusters is integer in range
   cluster_vals <- sapply(samples, function(x) x$n_clusters)
@@ -856,10 +856,10 @@ test_that("sample_landscape_params handles fixed single values", {
   )
 
   # Fixed values should always be the same
-  treeline_vals <- sapply(samples, function(x) x$boundary_position)
+  boundary_vals <- sapply(samples, function(x) x$boundary_position)
   invert_vals <- sapply(samples, function(x) x$invert_landscape)
 
-  expect_true(all(treeline_vals == 0.5))
+  expect_true(all(boundary_vals == 0.5))
   expect_true(all(invert_vals == FALSE))
 
   # Range should vary

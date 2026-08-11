@@ -1,6 +1,6 @@
 # Validation tests ------------------------------------------------------------
 
-test_that("clustered trees validates n_clusters parameter", {
+test_that("create_landscape_clustered validates n_clusters parameter", {
   expect_error(
     create_landscape_clustered(n_clusters = -5),
     "`n_clusters` must be a positive number",
@@ -14,7 +14,7 @@ test_that("clustered trees validates n_clusters parameter", {
   )
 })
 
-test_that("clustered trees validates cluster_radius parameter", {
+test_that("create_landscape_clustered validates cluster_radius parameter", {
   expect_error(
     create_landscape_clustered(cluster_radius = "5"),
     "must be a positive number",
@@ -34,7 +34,7 @@ test_that("clustered trees validates cluster_radius parameter", {
   )
 })
 
-test_that("clustered trees validates scatter_zone_prop parameter", {
+test_that("create_landscape_clustered validates scatter_zone_prop parameter", {
   expect_error(
     create_landscape_clustered(scatter_zone_prop = "0.3"),
     "must be between 0 and 1",
@@ -60,7 +60,7 @@ test_that("clustered trees validates scatter_zone_prop parameter", {
   )
 })
 
-test_that("clustered trees validates elongation_x parameter", {
+test_that("create_landscape_clustered validates elongation_x parameter", {
   expect_error(
     create_landscape_clustered(elongation_x = "1.5"),
     "must be a positive number",
@@ -80,7 +80,7 @@ test_that("clustered trees validates elongation_x parameter", {
   )
 })
 
-test_that("clustered trees validates elongation_y parameter", {
+test_that("create_landscape_clustered validates elongation_y parameter", {
   expect_error(
     create_landscape_clustered(elongation_y = "1.5"),
     "must be a positive number",
@@ -100,7 +100,7 @@ test_that("clustered trees validates elongation_y parameter", {
   )
 })
 
-test_that("clustered trees validates cluster placement", {
+test_that("create_landscape_clustered validates cluster placement", {
   # Cluster radius too large for scatter zone
   expect_error(
     create_landscape_clustered(
@@ -134,11 +134,11 @@ test_that("create_landscape_clustered creates clusters in scatter zone", {
   vals <- terra::values(l$data)
   expect_true(sum(vals == 1) > 0)
 
-  # Clusters should be below treeline
+  # Clusters should be below the vegetation boundary
   mat <- matrix(vals, nrow = 30, ncol = 30)
-  treeline_row <- round(30 * 0.4)
+  boundary_row <- round(30 * 0.4)
   # Check scatter zone has clusters
-  scatter_zone <- mat[(treeline_row + 1):30, ]
+  scatter_zone <- mat[(boundary_row + 1):30, ]
   expect_true(sum(scatter_zone == 1) > 0)
 })
 
@@ -157,12 +157,12 @@ test_that("create_landscape_clustered elongation affects cluster shape", {
     scatter_zone_prop = 0.6
   )
 
-  # Get cluster dimensions (excluding the treeline area)
+  # Get cluster dimensions (excluding the vegetation boundary area)
   mat_h <- terra::as.matrix(l_horizontal$data, wide = TRUE)
-  treeline_row_h <- round(80 * 0.2)
+  boundary_row_h <- round(80 * 0.2)
 
-  # Only look at vegetation below the treeline (where cluster is)
-  cluster_area_h <- mat_h[(treeline_row_h + 1):80, ]
+  # Only look at vegetation below the boundary (where cluster is)
+  cluster_area_h <- mat_h[(boundary_row_h + 1):80, ]
   veg_coords_h <- which(cluster_area_h == 1, arr.ind = TRUE)
 
   # Measure spread in each dimension
@@ -185,12 +185,12 @@ test_that("create_landscape_clustered elongation affects cluster shape", {
     scatter_zone_prop = 0.8
   )
 
-  # Get cluster dimensions (excluding treeline area)
+  # Get cluster dimensions (excluding the vegetation boundary area)
   mat_v <- terra::as.matrix(l_vertical$data, wide = TRUE)
-  treeline_row_v <- round(80 * 0.2)
+  boundary_row_v <- round(80 * 0.2)
 
-  # Only look at vegetation below the treeline (where cluster is)
-  cluster_area_v <- mat_v[(treeline_row_v + 1):80, ]
+  # Only look at vegetation below the boundary (where cluster is)
+  cluster_area_v <- mat_v[(boundary_row_v + 1):80, ]
   veg_coords_v <- which(cluster_area_v == 1, arr.ind = TRUE)
 
   width_spread_v <- diff(range(veg_coords_v[, "col"]))

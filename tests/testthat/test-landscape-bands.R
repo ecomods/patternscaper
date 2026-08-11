@@ -118,7 +118,7 @@ test_that("bands warns when no bands can fit", {
 
 # Functionality tests ---------------------------------------------------------
 
-test_that("create_landscape_bands creates treeline with bands below", {
+test_that("create_landscape_bands creates a vegetation boundary with bands below", {
   set.seed(123)
 
   l <- create_landscape_bands(
@@ -132,18 +132,18 @@ test_that("create_landscape_bands creates treeline with bands below", {
 
   expect_true(is_landscape(l))
 
-  # Should have vegetation (1s) both from treeline and bands
+  # Should have vegetation (1s) both from the boundary and the bands
   vals <- terra::values(l$data)
   expect_true(sum(vals == 1) > 0)
 
-  # Check that bands exist below treeline
+  # Check that bands exist below the boundary
   mat <- matrix(vals, nrow = 30, ncol = 30)
-  # Lower rows (below treeline) should have some 1s (bands)
+  # Lower rows (below the boundary) should have some 1s (bands)
   lower_half <- mat[20:30, ]
   expect_true(sum(lower_half == 1) > 0)
 })
 
-test_that("create_landscape_bands handles zero amplitude (straight treeline)", {
+test_that("create_landscape_bands handles zero amplitude (straight boundary)", {
   l <- create_landscape_bands(
     width = 20,
     height = 20,

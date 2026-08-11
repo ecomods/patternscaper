@@ -92,7 +92,7 @@ test_that("set_landscape_name and set_landscape_pattern work with multiple lands
     create_landscape("random", width = 10, height = 10)
   )
   names_vec <- c("alpine", "subalpine")
-  patterns_vec <- c("sharp_treeline", "random_pattern")
+  patterns_vec <- c("sharp_boundary", "random_pattern")
 
   # Using mapply
   result_names <- mapply(
@@ -110,7 +110,7 @@ test_that("set_landscape_name and set_landscape_pattern work with multiple lands
 
   expect_equal(result_names[[1]]$name, "alpine")
   expect_equal(result_names[[2]]$name, "subalpine")
-  expect_equal(result_patterns[[1]]$pattern, "sharp_treeline")
+  expect_equal(result_patterns[[1]]$pattern, "sharp_boundary")
   expect_equal(result_patterns[[2]]$pattern, "random_pattern")
 })
 
