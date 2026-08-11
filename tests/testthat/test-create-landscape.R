@@ -102,7 +102,7 @@ test_that("create_landscape creates correct landscape types", {
       "gaps",
       width = 10,
       height = 10,
-      params = pattern_gaps(spot_radius = 1)
+      params = pattern_gaps(gap_radius = 1)
     )$pattern,
     "gaps"
   )

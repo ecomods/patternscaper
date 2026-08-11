@@ -5,33 +5,33 @@
 \title{Parameters for the Gaps Pattern}
 \usage{
 pattern_gaps(
-  n_spots = 5,
-  spot_radius = 10,
-  spot_radius_sd = 0,
+  n_gaps = 5,
+  gap_radius = 10,
+  gap_radius_sd = 0,
   radius_noise_fraction = 0,
-  regular_spots = FALSE
+  regular_gaps = FALSE
 )
 }
 \arguments{
-\item{n_spots}{Integer. Number of circular gaps to generate (default: 5).
+\item{n_gaps}{Integer. Number of circular gaps to generate (default: 5).
 For regular placement, this may be automatically reduced if the landscape
-cannot accommodate the requested number with the given \code{spot_radius}.}
+cannot accommodate the requested number with the given \code{gap_radius}.}
 
-\item{spot_radius}{Numeric. Mean radius of each gap in pixels (default: 10).
+\item{gap_radius}{Numeric. Mean radius of each gap in pixels (default: 10).
 Must be positive and smaller than landscape dimensions.}
 
-\item{spot_radius_sd}{Numeric. Standard deviation for random variation in gap radius.
-Each gap's radius is sampled from a normal distribution with mean \code{spot_radius}
-and standard deviation \code{spot_radius_sd} (default: 0, no variation).}
+\item{gap_radius_sd}{Numeric. Standard deviation for random variation in gap radius.
+Each gap's radius is sampled from a normal distribution with mean \code{gap_radius}
+and standard deviation \code{gap_radius_sd} (default: 0, no variation).}
 
 \item{radius_noise_fraction}{Numeric (0 to 1). Proportion of the gap radius
 where gradual edge noise is applied. 0 creates sharp circular edges,
 1 applies probabilistic cell inclusion across the entire radius.
 For example, 0.2 means the outer 20\% of the radius has a gradient transition.
-Works independently of \code{spot_radius_sd} (which varies the overall size,
+Works independently of \code{gap_radius_sd} (which varies the overall size,
 while this parameter affects edge sharpness).}
 
-\item{regular_spots}{Logical. If TRUE, gaps are arranged on a hexagonal grid
+\item{regular_gaps}{Logical. If TRUE, gaps are arranged on a hexagonal grid
 using k-means clustering. If FALSE, gaps are placed randomly (default: FALSE).}
 }
 \value{
@@ -49,7 +49,7 @@ has no \code{invert_landscape} parameter.
 }
 \examples{
 # A single landscape, with fixed values
-create_landscape("gaps", params = pattern_gaps(n_spots = 5, spot_radius = 8))
+create_landscape("gaps", params = pattern_gaps(n_gaps = 5, gap_radius = 8))
 
 # A batch, with parameters drawn from ranges once per landscape.
 # Parameters left unset vary too, over their default ranges
@@ -58,8 +58,8 @@ create_landscapes(
   patterns = "gaps",
   params_list = list(
     gaps = pattern_gaps(
-      n_spots = c(4, 10),
-      spot_radius = c(5, 10)
+      n_gaps = c(4, 10),
+      gap_radius = c(5, 10)
     )
   )
 )
@@ -70,8 +70,8 @@ create_landscapes(
   patterns = "gaps",
   params_list = list(
     gaps = pattern_gaps(
-      n_spots = 6,
-      spot_radius = c(5, 10)
+      n_gaps = 6,
+      gap_radius = c(5, 10)
     )
   )
 )
@@ -105,10 +105,10 @@ Usage therefore apply to \code{\link{create_landscape}} only. Ranges that
 scale with landscape size are shown for the default 100 by 100.
 \tabular{lll}{
 \strong{Parameter} \tab \strong{Valid} \tab \strong{Sampled} \cr
-\code{n_spots} \tab 1 or more \tab 5 to 10 \cr
-\code{spot_radius} \tab 1 or more \tab 10 to 20, scales with size \cr
-\code{spot_radius_sd} \tab 0 or more \tab 0 to 2, scales with size \cr
+\code{n_gaps} \tab 1 or more \tab 5 to 10 \cr
+\code{gap_radius} \tab 1 or more \tab 10 to 20, scales with size \cr
+\code{gap_radius_sd} \tab 0 or more \tab 0 to 2, scales with size \cr
 \code{radius_noise_fraction} \tab 0 to 1 \tab 0 to 0.2 \cr
-\code{regular_spots} \tab TRUE or FALSE \tab TRUE or FALSE \cr
+\code{regular_gaps} \tab TRUE or FALSE \tab TRUE or FALSE \cr
 }
 }

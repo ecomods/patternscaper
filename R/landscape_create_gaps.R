@@ -30,35 +30,49 @@
 #'
 #' # More gaps with size variation
 #' gaps_modified <- create_landscape_gaps(
-#'   n_spots = 15,
-#'   spot_radius = 8,
-#'   spot_radius_sd = 2
+#'   n_gaps = 15,
+#'   gap_radius = 8,
+#'   gap_radius_sd = 2
 #' )
 #' }
 #'
 create_landscape_gaps <- function(
   width = 100,
   height = 100,
-  n_spots = 5,
-  spot_radius = 10,
-  spot_radius_sd = 0,
+  n_gaps = 5,
+  gap_radius = 10,
+  gap_radius_sd = 0,
   radius_noise_fraction = 0,
-  regular_spots = FALSE
+  regular_gaps = FALSE
 ) {
-  # Call create_landscape_spots with invert_landscape = TRUE
+  # Call create_landscape_spots with invert_landscape = TRUE. The shared
+  # implementation speaks in spots, so the gap names are translated here.
   result <- create_landscape_spots(
     width = width,
     height = height,
-    n_spots = n_spots,
-    spot_radius = spot_radius,
-    spot_radius_sd = spot_radius_sd,
+    n_spots = n_gaps,
+    spot_radius = gap_radius,
+    spot_radius_sd = gap_radius_sd,
     radius_noise_fraction = radius_noise_fraction,
     invert_landscape = TRUE,
-    regular_spots = regular_spots
+    regular_spots = regular_gaps
   )
 
   # Update pattern to "gaps"
   result$pattern <- "gaps"
+
+  # Report the parameters back as gaps. Renaming the keys rather than
+  # rebuilding the list keeps the values create_landscape_spots() actually
+  # used, which are not always the ones passed in: it coerces the count to
+  # integer, and reduces it to what fits under regular placement.
+  gap_names <- c(
+    n_spots = "n_gaps",
+    spot_radius = "gap_radius",
+    spot_radius_sd = "gap_radius_sd",
+    regular_spots = "regular_gaps"
+  )
+  renamed <- names(result$params) %in% names(gap_names)
+  names(result$params)[renamed] <- gap_names[names(result$params)[renamed]]
 
   return(result)
 }

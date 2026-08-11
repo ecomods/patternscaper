@@ -306,19 +306,19 @@ landscape_param_specs <- function() {
       invert_landscape = list(type = "logical", batch_range = c(FALSE))
     ),
     gaps = list(
-      n_spots = list(
+      n_gaps = list(
         type = "integer",
         min = 1,
         max = Inf,
         batch_range = c(5, 10)
       ),
-      spot_radius = list(
+      gap_radius = list(
         type = "integer",
         min = 1,
         max = Inf,
         batch_range = function(width, height) c(0.1, 0.2) * width
       ),
-      spot_radius_sd = list(
+      gap_radius_sd = list(
         type = "numeric",
         min = 0,
         max = Inf,
@@ -330,7 +330,7 @@ landscape_param_specs <- function() {
         max = 1,
         batch_range = c(0, 0.2)
       ),
-      regular_spots = list(type = "logical", batch_range = c(TRUE, FALSE))
+      regular_gaps = list(type = "logical", batch_range = c(TRUE, FALSE))
     ),
     labyrinth = list(
       frequency = list(

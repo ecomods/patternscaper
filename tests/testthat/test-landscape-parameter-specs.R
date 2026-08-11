@@ -68,11 +68,11 @@ test_that("build_default_params_list preserves exact order and values for all 11
       invert_landscape = c(FALSE)
     ),
     gaps = list(
-      n_spots = c(5, 10),
-      spot_radius = c(10, 20),
-      spot_radius_sd = c(0, 2),
+      n_gaps = c(5, 10),
+      gap_radius = c(10, 20),
+      gap_radius_sd = c(0, 2),
       radius_noise_fraction = c(0, 0.2),
-      regular_spots = c(TRUE, FALSE)
+      regular_gaps = c(TRUE, FALSE)
     ),
     labyrinth = list(
       frequency = c(2.5, 3.5),
@@ -186,6 +186,8 @@ test_that("invert_landscape for gaps is rejected as unknown instead of silently 
 # integer_params derivation (Step 6 fix) ---------------------------------------
 
 test_that("get_integer_param_names matches the former hardcoded set, minus the two dead entries", {
+  # n_gaps/gap_radius joined the set when gaps got its own parameter names;
+  # they are the same two integer parameters spots already contributed.
   expect_equal(
     sort(get_integer_param_names()),
     sort(c(
@@ -195,6 +197,8 @@ test_that("get_integer_param_names matches the former hardcoded set, minus the t
       "band_spacing",
       "n_spots",
       "spot_radius",
+      "n_gaps",
+      "gap_radius",
       "octaves",
       "amplitude"
     ))

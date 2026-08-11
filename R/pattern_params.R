@@ -660,21 +660,21 @@ pattern_spots <- function(
 #' distinguishes the two patterns, so unlike \code{\link{pattern_spots}} this
 #' has no \code{invert_landscape} parameter.
 #'
-#' @param n_spots Integer. Number of circular gaps to generate (default: 5).
+#' @param n_gaps Integer. Number of circular gaps to generate (default: 5).
 #'     For regular placement, this may be automatically reduced if the landscape
-#'     cannot accommodate the requested number with the given \code{spot_radius}.
-#' @param spot_radius Numeric. Mean radius of each gap in pixels (default: 10).
+#'     cannot accommodate the requested number with the given \code{gap_radius}.
+#' @param gap_radius Numeric. Mean radius of each gap in pixels (default: 10).
 #'     Must be positive and smaller than landscape dimensions.
-#' @param spot_radius_sd Numeric. Standard deviation for random variation in gap radius.
-#'     Each gap's radius is sampled from a normal distribution with mean \code{spot_radius}
-#'     and standard deviation \code{spot_radius_sd} (default: 0, no variation).
+#' @param gap_radius_sd Numeric. Standard deviation for random variation in gap radius.
+#'     Each gap's radius is sampled from a normal distribution with mean \code{gap_radius}
+#'     and standard deviation \code{gap_radius_sd} (default: 0, no variation).
 #' @param radius_noise_fraction Numeric (0 to 1). Proportion of the gap radius
 #'     where gradual edge noise is applied. 0 creates sharp circular edges,
 #'     1 applies probabilistic cell inclusion across the entire radius.
 #'     For example, 0.2 means the outer 20\% of the radius has a gradient transition.
-#'     Works independently of \code{spot_radius_sd} (which varies the overall size,
+#'     Works independently of \code{gap_radius_sd} (which varies the overall size,
 #'     while this parameter affects edge sharpness).
-#' @param regular_spots Logical. If TRUE, gaps are arranged on a hexagonal grid
+#' @param regular_gaps Logical. If TRUE, gaps are arranged on a hexagonal grid
 #'     using k-means clustering. If FALSE, gaps are placed randomly (default: FALSE).
 #'
 #' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
@@ -683,7 +683,7 @@ pattern_spots <- function(
 #'
 #' @examples
 #' # A single landscape, with fixed values
-#' create_landscape("gaps", params = pattern_gaps(n_spots = 5, spot_radius = 8))
+#' create_landscape("gaps", params = pattern_gaps(n_gaps = 5, gap_radius = 8))
 #'
 #' # A batch, with parameters drawn from ranges once per landscape.
 #' # Parameters left unset vary too, over their default ranges
@@ -692,8 +692,8 @@ pattern_spots <- function(
 #'   patterns = "gaps",
 #'   params_list = list(
 #'     gaps = pattern_gaps(
-#'       n_spots = c(4, 10),
-#'       spot_radius = c(5, 10)
+#'       n_gaps = c(4, 10),
+#'       gap_radius = c(5, 10)
 #'     )
 #'   )
 #' )
@@ -704,8 +704,8 @@ pattern_spots <- function(
 #'   patterns = "gaps",
 #'   params_list = list(
 #'     gaps = pattern_gaps(
-#'       n_spots = 6,
-#'       spot_radius = c(5, 10)
+#'       n_gaps = 6,
+#'       gap_radius = c(5, 10)
 #'     )
 #'   )
 #' )
@@ -714,28 +714,28 @@ pattern_spots <- function(
 #'
 #' @export
 pattern_gaps <- function(
-  n_spots = 5,
-  spot_radius = 10,
-  spot_radius_sd = 0,
+  n_gaps = 5,
+  gap_radius = 10,
+  gap_radius_sd = 0,
   radius_noise_fraction = 0,
-  regular_spots = FALSE
+  regular_gaps = FALSE
 ) {
   params <- list()
 
-  if (!missing(n_spots)) {
-    params$n_spots <- n_spots
+  if (!missing(n_gaps)) {
+    params$n_gaps <- n_gaps
   }
-  if (!missing(spot_radius)) {
-    params$spot_radius <- spot_radius
+  if (!missing(gap_radius)) {
+    params$gap_radius <- gap_radius
   }
-  if (!missing(spot_radius_sd)) {
-    params$spot_radius_sd <- spot_radius_sd
+  if (!missing(gap_radius_sd)) {
+    params$gap_radius_sd <- gap_radius_sd
   }
   if (!missing(radius_noise_fraction)) {
     params$radius_noise_fraction <- radius_noise_fraction
   }
-  if (!missing(regular_spots)) {
-    params$regular_spots <- regular_spots
+  if (!missing(regular_gaps)) {
+    params$regular_gaps <- regular_gaps
   }
 
   new_landscape_params(params, pattern = "gaps")

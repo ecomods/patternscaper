@@ -290,7 +290,7 @@ plot_landscapes(
     create_landscape(
       "gaps",
       name = "few, large",
-      params = pattern_gaps(n_spots = 5, spot_radius = 15)
+      params = pattern_gaps(n_gaps = 5, gap_radius = 15)
     ),
     create_landscape(
       "gaps",

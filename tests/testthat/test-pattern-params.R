@@ -187,7 +187,7 @@ test_that("every constructor reaches its generator unchanged", {
     clustered = list(n_clusters = 6, cluster_radius = 4),
     bands = list(band_thickness = 4, band_spacing = 12),
     spots = list(n_spots = 5, spot_radius = 4),
-    gaps = list(n_spots = 4, spot_radius = 6),
+    gaps = list(n_gaps = 4, gap_radius = 6),
     labyrinth = list(frequency = 3.5, octaves = 3)
   )
 
