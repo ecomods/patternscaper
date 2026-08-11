@@ -5,8 +5,7 @@
 \title{Create a Single Landscape}
 \usage{
 create_landscape(
-  pattern = c("random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
-    "bands", "spots", "gaps", "labyrinth"),
+  pattern,
   width = 100,
   height = 100,
   name = NULL,
@@ -16,9 +15,9 @@ create_landscape(
 )
 }
 \arguments{
-\item{pattern}{Character. Pattern to generate. Valid patterns are:
-"random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
-"bands", "spots", "gaps", "labyrinth".}
+\item{pattern}{Character. Pattern to generate (required, no default).
+Valid patterns are: "random", "bare", "dense", "sharp", "diffuse",
+"fingers", "clustered", "bands", "spots", "gaps", "labyrinth".}
 
 \item{width}{Integer. Width of the landscape in pixels (default: 100).}
 

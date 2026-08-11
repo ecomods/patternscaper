@@ -3,22 +3,47 @@
 # Validation tests ------------------------------------------------------------
 
 test_that("create_landscape validates pattern input", {
+  # Short match strings throughout: cli wraps long messages at console width,
+  # so a phrase can be split across lines.
+
   # Invalid type - not a character
   expect_error(
     create_landscape(123),
-    "'pattern' must be a single character string"
+    "must be a character vector"
   )
 
-  # Multiple patterns provided
+  # Multiple patterns provided -- points at the function that takes several
   expect_error(
     create_landscape(c("sharp", "diffuse")),
-    "'pattern' must be a single character string"
+    "create_landscapes"
   )
 
   # Invalid pattern name
   expect_error(
     create_landscape("invalid_pattern"),
-    "Invalid pattern"
+    "must be one of"
+  )
+})
+
+test_that("create_landscape requires a pattern", {
+  # pattern has no default: omitting it is an error, not a silent "random"
+  expect_error(
+    create_landscape(),
+    "not absent"
+  )
+})
+
+test_that("create_landscape suggests a correction but does not partial match", {
+  # arg_match() offers the near miss ...
+  expect_error(
+    create_landscape("labyrinths"),
+    "Did you mean"
+  )
+
+  # ... but an unambiguous prefix is still rejected, unlike match.arg()
+  expect_error(
+    create_landscape("lab"),
+    "must be one of"
   )
 })
 

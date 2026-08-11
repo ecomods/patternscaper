@@ -24,9 +24,9 @@
 #'
 #' @param width Integer. Width of the landscape in pixels (default: 100).
 #' @param height Integer. Height of the landscape in pixels (default: 100).
-#' @param pattern Character. Pattern to generate. Valid patterns are:
-#'     "random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
-#'     "bands", "spots", "gaps", "labyrinth".
+#' @param pattern Character. Pattern to generate.
+#'     Valid patterns are: "random", "bare", "dense", "sharp", "diffuse",
+#'     "fingers", "clustered", "bands", "spots", "gaps", "labyrinth".
 #' @param name Character. Optional name for the landscape (default: NULL).
 #' @param pattern_label Character. Character. Optional pattern type label assigned to
 #'     the generated landscape instead of the value of \code{pattern} (default: NULL,
@@ -82,19 +82,7 @@
 #'
 #' @export
 create_landscape <- function(
-  pattern = c(
-    "random",
-    "bare",
-    "dense",
-    "sharp",
-    "diffuse",
-    "fingers",
-    "clustered",
-    "bands",
-    "spots",
-    "gaps",
-    "labyrinth"
-  ),
+  pattern,
   width = 100,
   height = 100,
   name = NULL,
@@ -102,23 +90,17 @@ create_landscape <- function(
   params = NULL,
   rotation = 0
 ) {
-  # Define valid patterns
-  valid_patterns <- eval(formals()$pattern)
-
-  # Check if pattern is a valid string
-  if (!is.character(pattern) || length(pattern) != 1) {
-    cli::cli_abort("'pattern' must be a single character string")
-  }
-
-  # Check for exact match first
-  if (pattern %in% valid_patterns) {
-    matched <- pattern
-  } else {
+  # Checked before arg_match(), which reports only the first element when
+  # several are given. missing() is left to arg_match(), which names it.
+  if (!missing(pattern) && length(pattern) != 1) {
     cli::cli_abort(c(
-      "Invalid pattern '{pattern}'",
-      "i" = "Valid options are: {paste(valid_patterns, collapse = ', ')}"
+      "{.arg pattern} must be a single pattern name.",
+      "x" = "You supplied {length(pattern)} value{?s}.",
+      "i" = "Use {.fn create_landscapes} to create landscapes with several patterns."
     ))
   }
+
+  matched <- rlang::arg_match(pattern, values = valid_patterns())
 
   # Validate the name parameter
   if (!is.null(name)) {
@@ -302,25 +284,12 @@ create_landscapes <- function(
   }
 
   # Reject unknown pattern names
-  valid_patterns <- c(
-    "random",
-    "bare",
-    "dense",
-    "sharp",
-    "diffuse",
-    "fingers",
-    "clustered",
-    "bands",
-    "spots",
-    "gaps",
-    "labyrinth"
-  )
-  unknown_patterns <- setdiff(patterns, valid_patterns)
+  unknown_patterns <- setdiff(patterns, valid_patterns())
 
   if (length(unknown_patterns) > 0) {
     cli::cli_abort(c(
       "Invalid pattern(s): {paste(unknown_patterns, collapse = ', ')}",
-      "i" = "Valid options are: {paste(valid_patterns, collapse = ', ')}"
+      "i" = "Valid options are: {paste(valid_patterns(), collapse = ', ')}"
     ))
   }
 
@@ -478,6 +447,34 @@ create_landscapes <- function(
   }
 
   return(all_landscapes)
+}
+
+#' Valid Pattern Names
+#'
+#' The patterns that can be generated. Both \code{\link{create_landscape}} and
+#' \code{\link{create_landscapes}} ask here rather than keeping their own
+#' copies. \code{create_landscapes()}'s \code{patterns} default repeats the list
+#' so it stays visible in the help page's usage section, and a test pins the two
+#' together.
+#'
+#' @return Character vector of pattern names.
+#'
+#' @keywords internal
+#' @noRd
+valid_patterns <- function() {
+  c(
+    "random",
+    "bare",
+    "dense",
+    "sharp",
+    "diffuse",
+    "fingers",
+    "clustered",
+    "bands",
+    "spots",
+    "gaps",
+    "labyrinth"
+  )
 }
 
 #' Patterns That Support Rotation

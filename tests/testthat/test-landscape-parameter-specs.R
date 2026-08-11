@@ -1,5 +1,22 @@
 # Regression coverage for the canonical parameter spec table -----------------
 
+# valid_patterns() is the single source for which patterns exist. Three other
+# places name patterns and none of them can be derived from it: the spec table
+# keys are parameter metadata, create_landscapes()'s default is a formal (kept
+# literal so the help page's usage section lists the patterns), and rotation is
+# a property of a subset. Pin them together so none can drift unnoticed.
+
+test_that("everything that names patterns agrees with valid_patterns()", {
+  expect_setequal(names(landscape_param_specs()), valid_patterns())
+
+  expect_equal(
+    eval(formals(create_landscapes)$patterns),
+    valid_patterns()
+  )
+
+  expect_true(all(rotatable_patterns() %in% valid_patterns()))
+})
+
 # build_default_params_list() feeds sample_landscape_params(), which draws
 # RNG values in list order -- so both the key order AND the literal values
 # below must stay pinned exactly. These are the same values create_landscapes()
