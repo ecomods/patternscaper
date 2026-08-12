@@ -648,28 +648,36 @@ train_pixel_model <- function(
 #'   aspect ratio differs from the training grid is resized anisotropically (stretched),
 #'   which raises a warning.
 #' @param nn_model List. CNN model object from \code{\link{train_pixel_model}}.
-#' @param return_performance Logical. Whether to return performance metrics when actual classes are available (default: FALSE).
+#' @param evaluate Character. Whether to evaluate the predictions against the
+#'   true known classes of the landscapes: \code{"auto"} (default) evaluates when true
+#'   classes are available and classifies only otherwise, \code{"required"}
+#'   evaluates them and raises an error if it cannot, and \code{"none"} classifies
+#'   only without performance evaluation.
 #' @param verbose Logical. Show informational messages and performance summaries (default: TRUE).
 #'   When TRUE, displays resize operations and performance evaluation results.
 #'   When FALSE, runs silently. Warnings about unknown classes or invalid data always appear.
 #'
-#' @return When actual classes unavailable or return_performance=FALSE: tibble with columns:
+#' @return List with two elements:
 #'   \describe{
-#'     \item{landscape_id}{Numeric landscape identifier}
-#'     \item{landscape_name}{Character landscape name (if available)}
-#'     \item{predicted_class}{Predicted landscape pattern}
-#'     \item{score}{Score of the predicted class, i.e. the largest of the
-#'           class scores below (not a calibrated probability). See
-#'           \code{\link{apply_metric_model}}, section "Interpreting the class
-#'           scores", which applies to both workflows.}
-#'     \item{<class_name>}{Score for each trained class, straight from the
-#'           network's softmax output layer, so each row sums to 1.}
-#'   }
-#'
-#'   When actual classes available and return_performance=TRUE: List containing:
-#'   \describe{
-#'     \item{predictions}{Tibble as above, plus actual_class column}
-#'     \item{performance}{Performance metrics from evaluate_cv_performance()}
+#'     \item{predictions}{Tibble with one row per input landscape, in input
+#'       order, and columns:
+#'       \describe{
+#'         \item{landscape_id}{Numeric landscape identifier}
+#'         \item{landscape_name}{Character landscape name (if available)}
+#'         \item{actual_class}{True class (if available)}
+#'         \item{predicted_class}{Predicted landscape pattern}
+#'         \item{score}{Score of the predicted class, i.e. the largest of the
+#'               class scores below (not a calibrated probability). See
+#'               \code{\link{apply_metric_model}}, section "Interpreting the class
+#'               scores", which applies to both workflows.}
+#'         \item{<class_name>}{Score for each trained class, straight from the
+#'               network's softmax output layer, so each row sums to 1.}
+#'       }}
+#'     \item{performance}{Performance metrics:
+#'       confusion matrix, accuracy, and per-class recall/precision/F1. NULL
+#'       if nothing was evaluated, which happens when \code{evaluate = "none"},
+#'       when no landscape has a known true class, or when some landscape's true
+#'       known class was never seen during training.}
 #'   }
 #' @examplesIf keras_available()
 #' # Create training data. Kept small so the example runs quickly; real
@@ -694,19 +702,22 @@ train_pixel_model <- function(
 #' )
 #' results <- apply_pixel_model(
 #'   landscapes = test_landscapes,
-#'   nn_model = final_model,
-#'   return_performance = TRUE
+#'   nn_model = final_model
 #' )
+#' results$predictions
+#' results$performance
 #' @seealso \code{\link{train_pixel_model}}, \code{\link{plot_classified_landscapes}}
 #' @family neural network application
 #' @export
 apply_pixel_model <- function(
   landscapes,
   nn_model,
-  return_performance = FALSE,
+  evaluate = "auto",
   verbose = TRUE
 ) {
   # Input validation
+  evaluate <- validate_evaluate_param(evaluate)
+
   if (
     !is.list(nn_model) ||
       !all(c("model", "classes", "input_shape") %in% names(nn_model))
@@ -879,29 +890,8 @@ apply_pixel_model <- function(
     predictions$landscape_name <- landscape_names
   }
 
-  # Check if we have actual classes (not NA or "unclassified")
-  has_actual_classes <- !all(
-    is.na(landscape_pattern) | landscape_pattern == "unclassified"
-  )
-
   # Always add actual_class column
   predictions$actual_class <- landscape_pattern
-
-  # Check for mixed scenario (some valid, some invalid actual classes)
-  if (return_performance && has_actual_classes) {
-    valid_mask <- !is.na(landscape_pattern) &
-      landscape_pattern != "unclassified"
-    n_valid <- sum(valid_mask)
-    n_total <- length(landscape_pattern)
-
-    if (n_valid < n_total) {
-      if (verbose) {
-        cli::cli_alert_info(
-          "Evaluating performance on {n_valid}/{n_total} landscapes with known classes"
-        )
-      }
-    }
-  }
 
   # Reorder columns: landscape info, then actual (if present), then predicted
   predictions <- predictions |>
@@ -912,88 +902,18 @@ apply_pixel_model <- function(
       score
     ))
 
-  # Evaluate performance if actual classes are available and requested----------
-  if (has_actual_classes & return_performance) {
-    # Filter to only valid rows for evaluation
-    valid_mask <- !is.na(predictions$actual_class) &
-      predictions$actual_class != "unclassified"
+  # Score against the true classes, when there are any and the caller wants it
+  performance <- evaluate_predictions(
+    predictions = predictions,
+    class_names = class_names,
+    evaluate = evaluate,
+    verbose = verbose
+  )
 
-    if (!any(valid_mask)) {
-      cli::cli_warn(
-        "No valid actual classes found - returning predictions only"
-      )
-      return(list(
-        predictions = predictions,
-        performance = NULL
-      ))
-    }
-
-    # Check unknown classes only on valid rows
-    valid_predictions <- predictions[valid_mask, ]
-    unique_actual <- unique(valid_predictions$actual_class)
-    unknown_classes <- setdiff(unique_actual, class_names)
-
-    if (length(unknown_classes) > 0) {
-      cli::cli_warn(c(
-        "Input landscapes contain classes not seen during training:",
-        "x" = "{.val {unknown_classes}}",
-        "i" = "Model trained on: {.val {class_names}}",
-        "i" = "Performance evaluation skipped - returning predictions only"
-      ))
-
-      return(list(
-        predictions = predictions,
-        performance = NULL
-      ))
-    }
-
-    # Evaluate only on valid rows
-    cv_predictions <- list(valid_predictions$predicted_class)
-    cv_probabilities <- list(as.matrix(
-      valid_predictions |>
-        dplyr::select(dplyr::all_of(class_names))
-    ))
-    cv_actual <- list(valid_predictions$actual_class)
-    cv_landscape_ids <- list(valid_predictions$landscape_id)
-
-    # Evaluate performance using same function as training
-    performance <- evaluate_cv_performance(
-      cv_predictions = cv_predictions,
-      cv_probabilities = cv_probabilities,
-      cv_actual = cv_actual,
-      cv_landscape_ids = cv_landscape_ids,
-      class_names = class_names,
-      cv_method = "none", # Not actual CV, just test set evaluation
-      cv_folds = 1,
-      verbose = verbose,
-      return_predictions = FALSE
-    )
-
-    # Return all predictions, but performance only on valid subset
-    return(list(
-      predictions = predictions,
-      performance = performance
-    ))
-  } else {
-    # No actual classes or performance not requested
-    if (return_performance) {
-      # Check if user requested performance but we have no valid classes
-      if (!has_actual_classes) {
-        cli::cli_warn(
-          "No valid actual classes found - returning predictions only"
-        )
-      }
-
-      # Return a list for consistency
-      return(list(
-        predictions = predictions,
-        performance = NULL
-      ))
-    } else {
-      # Just predictions requested
-      return(predictions)
-    }
-  }
+  list(
+    predictions = predictions,
+    performance = performance
+  )
 }
 
 #' Create Keras Model Architecture

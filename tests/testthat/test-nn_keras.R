@@ -593,8 +593,9 @@ test_that("apply_pixel_model returns predictions for single landscape", {
   # Single landscape
   result <- apply_pixel_model(
     landscapes = landscapes[[1]],
-    nn_model = model
-  )
+    nn_model = model,
+    evaluate = "none"
+  )$predictions
 
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 1)
@@ -626,8 +627,9 @@ test_that("apply_pixel_model returns predictions for multiple landscapes", {
 
   result <- apply_pixel_model(
     landscapes = landscapes[1:5],
-    nn_model = model
-  )
+    nn_model = model,
+    evaluate = "none"
+  )$predictions
 
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 5)
@@ -648,7 +650,6 @@ test_that("apply_pixel_model returns performance when requested", {
   result <- apply_pixel_model(
     landscapes = landscapes,
     nn_model = model,
-    return_performance = TRUE,
     verbose = FALSE
   )
 
@@ -678,7 +679,6 @@ test_that("apply_pixel_model handles mixed valid/NA classes", {
   result <- apply_pixel_model(
     landscapes = test_landscapes,
     nn_model = model,
-    return_performance = TRUE,
     verbose = FALSE
   )
 
@@ -708,18 +708,31 @@ test_that("apply_pixel_model returns NULL performance for all invalid classes", 
     test_landscapes[[i]]$pattern <- NA
   }
 
+  # No ground truth to score against is the ordinary inference case, so "auto"
+  # simply returns predictions without complaining
   expect_warning(
     result <- apply_pixel_model(
       landscapes = test_landscapes,
       nn_model = model,
-      return_performance = TRUE
+      verbose = FALSE
     ),
-    "No valid actual classes"
+    NA
   )
 
   expect_type(result, "list")
   expect_null(result$performance)
   expect_equal(nrow(result$predictions), 3)
+
+  # "required" is how a caller says the labels were meant to be there
+  expect_error(
+    apply_pixel_model(
+      landscapes = test_landscapes,
+      nn_model = model,
+      evaluate = "required",
+      verbose = FALSE
+    ),
+    "no landscape has a known true class"
+  )
 })
 
 test_that("apply_pixel_model warns about unknown classes", {
@@ -741,13 +754,37 @@ test_that("apply_pixel_model warns about unknown classes", {
     result <- apply_pixel_model(
       landscapes = test_landscapes,
       nn_model = model,
-      return_performance = TRUE
+      verbose = FALSE
     ),
     "classes not seen during training"
   )
 
+  # Predictions come back for every landscape, but nothing is scored: evaluating
+  # only the recognized ones would drop guaranteed errors from the denominator
   expect_type(result, "list")
+  expect_equal(nrow(result$predictions), 3)
   expect_null(result$performance)
+
+  expect_error(
+    apply_pixel_model(
+      landscapes = test_landscapes,
+      nn_model = model,
+      evaluate = "required",
+      verbose = FALSE
+    ),
+    "true class the model never saw"
+  )
+
+  # Nothing is scored under "none", so the warning never fires
+  expect_warning(
+    apply_pixel_model(
+      landscapes = test_landscapes,
+      nn_model = model,
+      evaluate = "none",
+      verbose = FALSE
+    ),
+    NA
+  )
 })
 
 test_that("apply_pixel_model handles resizing correctly", {
@@ -771,8 +808,9 @@ test_that("apply_pixel_model handles resizing correctly", {
   result <- apply_pixel_model(
     landscapes = small_landscape,
     nn_model = model,
+    evaluate = "none",
     verbose = FALSE
-  )
+  )$predictions
 
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 1)

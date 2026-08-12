@@ -576,7 +576,6 @@ test_that("apply_metric_model can be silenced with verbose = FALSE", {
       apply_metric_model(
         minimal_landscapes,
         model,
-        return_performance = TRUE,
         verbose = FALSE
       )
     )
@@ -587,14 +586,13 @@ test_that("apply_metric_model can be silenced with verbose = FALSE", {
     suppressWarnings(
       apply_metric_model(
         minimal_landscapes,
-        model,
-        return_performance = TRUE
+        model
       )
     )
   )
 })
 
-test_that("apply_metric_model validates return_performance parameter", {
+test_that("apply_metric_model validates evaluate parameter", {
   # Train a simple model first
   model <- train_metric_model(
     fixtures$minimal_metrics,
@@ -606,22 +604,79 @@ test_that("apply_metric_model validates return_performance parameter", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   expect_error(
-    apply_metric_model(
-      minimal_landscapes,
-      model,
-      return_performance = "yes"
-    ),
-    "return_performance must be a single logical value"
+    apply_metric_model(minimal_landscapes, model, evaluate = "yes"),
+    'evaluate must be one of: "auto", "required", or "none"'
   )
 
   expect_error(
-    apply_metric_model(
-      minimal_landscapes,
-      model,
-      return_performance = c(TRUE, FALSE)
-    ),
-    "return_performance must be a single logical value"
+    apply_metric_model(minimal_landscapes, model, evaluate = c("auto", "none")),
+    'evaluate must be one of: "auto", "required", or "none"'
   )
+
+  expect_error(
+    apply_metric_model(minimal_landscapes, model, evaluate = TRUE),
+    'evaluate must be one of: "auto", "required", or "none"'
+  )
+
+  # Accepted case-insensitively, like cv_method
+  expect_no_error(
+    suppressWarnings(
+      apply_metric_model(
+        minimal_landscapes,
+        model,
+        evaluate = "NONE",
+        verbose = FALSE
+      )
+    )
+  )
+})
+
+test_that("apply_metric_model return shape does not depend on the data", {
+  # The whole point of the contract: a caller can tell what came back without
+  # inspecting it, whatever the landscapes happen to carry.
+  model <- train_metric_model(
+    fixtures$minimal_metrics,
+    cv_method = "none",
+    verbose = FALSE
+  )
+  minimal_landscapes <- create_fixture_landscapes("minimal")
+
+  labelled <- minimal_landscapes
+  unlabelled <- lapply(minimal_landscapes, \(l) {
+    l$pattern <- "unclassified"
+    l
+  })
+
+  cases <- list(
+    labelled_auto = list(unlabelled = FALSE, evaluate = "auto"),
+    labelled_none = list(unlabelled = FALSE, evaluate = "none"),
+    unlabelled_auto = list(unlabelled = TRUE, evaluate = "auto"),
+    unlabelled_none = list(unlabelled = TRUE, evaluate = "none")
+  )
+
+  for (case_name in names(cases)) {
+    case <- cases[[case_name]]
+    result <- suppressWarnings(apply_metric_model(
+      if (case$unlabelled) unlabelled else labelled,
+      model,
+      evaluate = case$evaluate,
+      verbose = FALSE
+    ))
+
+    expect_type(result, "list")
+    expect_named(result, c("predictions", "performance"), info = case_name)
+    expect_s3_class(result$predictions, "tbl_df")
+    expect_equal(
+      nrow(result$predictions),
+      length(minimal_landscapes),
+      info = case_name
+    )
+
+    # Performance is present exactly when there was ground truth to score and
+    # the caller did not opt out
+    scored_expected <- !case$unlabelled && case$evaluate != "none"
+    expect_equal(!is.null(result$performance), scored_expected, info = case_name)
+  }
 })
 
 test_that("apply_metric_model validates nn_model structure", {
@@ -684,8 +739,8 @@ test_that("apply_metric_model works with single landscape", {
   result <- apply_metric_model(
     minimal_landscapes[[1]],
     model,
-    return_performance = FALSE
-  )
+    evaluate = "none"
+  )$predictions
 
   # Check structure
   expect_s3_class(result, "tbl_df")
@@ -718,8 +773,8 @@ test_that("apply_metric_model works with list of landscapes", {
   result <- apply_metric_model(
     minimal_landscapes,
     model,
-    return_performance = FALSE
-  )
+    evaluate = "none"
+  )$predictions
 
   # Check structure
   expect_s3_class(result, "tbl_df")
@@ -746,8 +801,8 @@ test_that("apply_metric_model reports the class that has the highest score", {
   result <- apply_metric_model(
     minimal_landscapes,
     model,
-    return_performance = FALSE
-  )
+    evaluate = "none"
+  )$predictions
 
   scores <- as.matrix(result[, model$classes])
   highest_scoring <- model$classes[max.col(scores, ties.method = "first")]
@@ -757,7 +812,7 @@ test_that("apply_metric_model reports the class that has the highest score", {
   expect_equal(rowSums(scores), rep(1, nrow(scores)), tolerance = 1e-10)
 })
 
-test_that("apply_metric_model returns performance when requested", {
+test_that("apply_metric_model scores automatically when classes are known", {
   # Train model
   model <- train_metric_model(
     fixtures$minimal_metrics,
@@ -769,11 +824,7 @@ test_that("apply_metric_model returns performance when requested", {
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
   # Apply with performance evaluation
-  result <- apply_metric_model(
-    minimal_landscapes,
-    model,
-    return_performance = TRUE
-  )
+  result <- apply_metric_model(minimal_landscapes, model)
 
   # Should return a list with predictions and performance
   expect_type(result, "list")
@@ -795,7 +846,7 @@ test_that("apply_metric_model returns performance when requested", {
   expect_lte(result$performance$accuracy, 1)
 })
 
-test_that("apply_metric_model returns only predictions when classes unknown", {
+test_that("apply_metric_model returns NULL performance when classes unknown", {
   # Train model
   model <- train_metric_model(
     fixtures$minimal_metrics,
@@ -811,15 +862,19 @@ test_that("apply_metric_model returns only predictions when classes unknown", {
     minimal_landscapes[[i]]$pattern <- "unclassified"
   }
 
-  # Apply with return_performance = TRUE (should still return only predictions)
-  result <- apply_metric_model(
-    minimal_landscapes,
-    model,
-    return_performance = TRUE
-  )
+  # The return shape does not depend on whether anything could be scored
+  result <- apply_metric_model(minimal_landscapes, model)
 
-  # Should return tibble (not list) since no actual classes available
-  expect_s3_class(result, "tbl_df")
+  expect_type(result, "list")
+  expect_named(result, c("predictions", "performance"))
+  expect_s3_class(result$predictions, "tbl_df")
+  expect_null(result$performance)
+
+  # "required" turns the same situation into an error
+  expect_error(
+    apply_metric_model(minimal_landscapes, model, evaluate = "required"),
+    "no landscape has a known true class"
+  )
 })
 
 test_that("apply_metric_model warns about unknown classes", {
@@ -850,16 +905,33 @@ test_that("apply_metric_model warns about unknown classes", {
 
     # Should warn about unknown class
     expect_warning(
-      result <- apply_metric_model(
-        landscapes_other,
-        model_subset,
-        return_performance = TRUE
-      ),
+      result <- apply_metric_model(landscapes_other, model_subset),
       "Input landscapes contain classes not seen during training"
     )
 
-    # Should return only predictions (not performance)
-    expect_s3_class(result, "tbl_df")
+    # Predictions are still returned in full, but nothing is scored: evaluating
+    # only the recognized landscapes would drop guaranteed errors from the
+    # denominator and overstate the accuracy.
+    expect_named(result, c("predictions", "performance"))
+    expect_s3_class(result$predictions, "tbl_df")
+    expect_equal(nrow(result$predictions), length(landscapes_other))
+    expect_null(result$performance)
+
+    # "required" turns the same situation into an error
+    expect_error(
+      apply_metric_model(
+        landscapes_other,
+        model_subset,
+        evaluate = "required"
+      ),
+      "true class the model never saw"
+    )
+
+    # "none" skips scoring entirely, so the warning never fires
+    expect_warning(
+      apply_metric_model(landscapes_other, model_subset, evaluate = "none"),
+      NA
+    )
   }
 })
 
@@ -882,8 +954,8 @@ test_that("apply_metric_model works with class-level metrics", {
   result <- apply_metric_model(
     small_landscapes[1:3],
     model,
-    return_performance = FALSE
-  )
+    evaluate = "none"
+  )$predictions
 
   # Should work with class-level features
   expect_s3_class(result, "tbl_df")
@@ -923,7 +995,7 @@ test_that("apply_metric_model returns unclassifiable landscapes as NA", {
   )
 
   expect_warning(
-    result <- apply_metric_model(new_landscapes, model),
+    result <- apply_metric_model(new_landscapes, model, evaluate = "none")$predictions,
     "Could not classify 1 landscape"
   )
 
@@ -962,7 +1034,7 @@ test_that("apply_metric_model errors when metrics cannot be calculated", {
     apply_metric_model(
       invalid_landscape,
       model,
-      return_performance = FALSE
+      evaluate = "none"
     )
   )
 })
@@ -982,8 +1054,8 @@ test_that("apply_metric_model includes landscape_name when available", {
   result <- apply_metric_model(
     minimal_landscapes,
     model,
-    return_performance = FALSE
-  )
+    evaluate = "none"
+  )$predictions
 
   # Should include landscape_name if present
   if ("name" %in% names(minimal_landscapes[[1]])) {
@@ -1006,8 +1078,8 @@ test_that("apply_metric_model maintains landscape order", {
   result <- apply_metric_model(
     minimal_landscapes,
     model,
-    return_performance = FALSE
-  )
+    evaluate = "none"
+  )$predictions
 
   # landscape_id should match input order
   expect_equal(

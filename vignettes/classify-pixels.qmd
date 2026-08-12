@@ -137,8 +137,10 @@ test_landscapes <- create_landscapes(
 
 If test landscapes have been created with `create_landscapes()`, their true patterns are known. Therefore they can be used to evaluate classification performance.
 
+The result always has the same two parts, `$predictions` and `$performance`.
+
 :::{.callout-note}
-To get additional performance metrics, set `return_performance = TRUE` when applying the model. This only works if true patterns are known. If true patterns are not known, set `return_performance = FALSE` (default).
+Performance is evaluated automatically when the true patterns are known. Landscapes that carry a `pattern` but you don't want to evaluate model performance with them but only classify them can skip evaluation with `evaluate = "none"`. Setting `evaluate = "required"` raises an error instead of quietly returning no performance when the true patterns turn out to be missing in some or all cases.
 :::
 
 
@@ -147,8 +149,7 @@ To get additional performance metrics, set `return_performance = TRUE` when appl
 #| output: false
 classification <- apply_pixel_model(
   landscapes = test_landscapes,
-  nn_model = model,
-  return_performance = TRUE
+  nn_model = model
 )
 ```
 

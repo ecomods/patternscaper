@@ -4,12 +4,7 @@
 \alias{apply_pixel_model}
 \title{Apply a Keras CNN Model for Landscape Pattern Classification}
 \usage{
-apply_pixel_model(
-  landscapes,
-  nn_model,
-  return_performance = FALSE,
-  verbose = TRUE
-)
+apply_pixel_model(landscapes, nn_model, evaluate = "auto", verbose = TRUE)
 }
 \arguments{
 \item{landscapes}{landscape object, or list of landscape objects. Landscape(s) to classify.
@@ -24,30 +19,38 @@ which raises a warning.}
 
 \item{nn_model}{List. CNN model object from \code{\link{train_pixel_model}}.}
 
-\item{return_performance}{Logical. Whether to return performance metrics when actual classes are available (default: FALSE).}
+\item{evaluate}{Character. Whether to evaluate the predictions against the
+true known classes of the landscapes: \code{"auto"} (default) evaluates when true
+classes are available and classifies only otherwise, \code{"required"}
+evaluates them and raises an error if it cannot, and \code{"none"} classifies
+only without performance evaluation.}
 
 \item{verbose}{Logical. Show informational messages and performance summaries (default: TRUE).
 When TRUE, displays resize operations and performance evaluation results.
 When FALSE, runs silently. Warnings about unknown classes or invalid data always appear.}
 }
 \value{
-When actual classes unavailable or return_performance=FALSE: tibble with columns:
+List with two elements:
   \describe{
-    \item{landscape_id}{Numeric landscape identifier}
-    \item{landscape_name}{Character landscape name (if available)}
-    \item{predicted_class}{Predicted landscape pattern}
-    \item{score}{Score of the predicted class, i.e. the largest of the
-          class scores below (not a calibrated probability). See
-          \code{\link{apply_metric_model}}, section "Interpreting the class
-          scores", which applies to both workflows.}
-    \item{<class_name>}{Score for each trained class, straight from the
-          network's softmax output layer, so each row sums to 1.}
-  }
-
-  When actual classes available and return_performance=TRUE: List containing:
-  \describe{
-    \item{predictions}{Tibble as above, plus actual_class column}
-    \item{performance}{Performance metrics from evaluate_cv_performance()}
+    \item{predictions}{Tibble with one row per input landscape, in input
+      order, and columns:
+      \describe{
+        \item{landscape_id}{Numeric landscape identifier}
+        \item{landscape_name}{Character landscape name (if available)}
+        \item{actual_class}{True class (if available)}
+        \item{predicted_class}{Predicted landscape pattern}
+        \item{score}{Score of the predicted class, i.e. the largest of the
+              class scores below (not a calibrated probability). See
+              \code{\link{apply_metric_model}}, section "Interpreting the class
+              scores", which applies to both workflows.}
+        \item{<class_name>}{Score for each trained class, straight from the
+              network's softmax output layer, so each row sums to 1.}
+      }}
+    \item{performance}{Performance metrics:
+      confusion matrix, accuracy, and per-class recall/precision/F1. NULL
+      if nothing was evaluated, which happens when \code{evaluate = "none"},
+      when no landscape has a known true class, or when some landscape's true
+      known class was never seen during training.}
   }
 }
 \description{
@@ -79,9 +82,10 @@ test_landscapes <- create_landscapes(
 )
 results <- apply_pixel_model(
   landscapes = test_landscapes,
-  nn_model = final_model,
-  return_performance = TRUE
+  nn_model = final_model
 )
+results$predictions
+results$performance
 \dontshow{\}) # examplesIf}
 }
 \seealso{

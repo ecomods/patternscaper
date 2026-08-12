@@ -31,6 +31,5 @@ test_landscapes <- create_landscapes(
 
 results <- apply_pixel_model(
   landscapes = test_landscapes,
-  nn_model = reloaded,
-  return_performance = TRUE
+  nn_model = reloaded
 )

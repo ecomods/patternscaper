@@ -38,9 +38,8 @@ run_golden <- function() {
     verbose          = FALSE
   )
   validation <- apply_metric_model(
-    landscapes         = test,
-    nn_model           = model,
-    return_performance = TRUE
+    landscapes = test,
+    nn_model   = model
   )
 
   # Pixel-based workflow -- keras is reproducible across sessions on the same
@@ -54,10 +53,9 @@ run_golden <- function() {
     verbose    = FALSE
   )
   validation_pix <- apply_pixel_model(
-    landscapes         = test,
-    nn_model           = model_pix,
-    return_performance = TRUE,
-    verbose            = FALSE
+    landscapes = test,
+    nn_model   = model_pix,
+    verbose    = FALSE
   )
 
   # Collect reference values ----------------------------------------------------

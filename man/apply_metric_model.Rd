@@ -4,12 +4,7 @@
 \alias{apply_metric_model}
 \title{Apply Neural Network for Landscape Pattern Classification Based on their Landscape Metrics}
 \usage{
-apply_metric_model(
-  landscapes,
-  nn_model,
-  return_performance = FALSE,
-  verbose = TRUE
-)
+apply_metric_model(landscapes, nn_model, evaluate = "auto", verbose = TRUE)
 }
 \arguments{
 \item{landscapes}{Landscape object (single) or list of landscape objects to classify.
@@ -18,37 +13,43 @@ Landscapes must have valid raster data that can be analyzed by landscapemetrics.
 \item{nn_model}{List. Trained model object returned from train_metric_model().
 Must contain elements: model, scaling, classes, features, and features_level.}
 
-\item{return_performance}{Logical. If TRUE and landscapes contain known classes
-(pattern attribute), calculate and return performance metrics. If FALSE or
-classes unknown, only return predictions. Default: FALSE.}
+\item{evaluate}{Character. Whether to evaluate the predictions against the
+true known classes of the landscapes: \code{"auto"} (default) evaluates when true
+classes are available and classifies only otherwise, \code{"required"}
+evaluates them and raises an error if it cannot, and \code{"none"} classifies
+only without performance evaluation.}
 
-\item{verbose}{Logical. Show performance summaries when `return_performance = TRUE`
-(default: TRUE). When FALSE, runs silently. Warnings about unknown classes or
-incomplete metrics always appear.}
+\item{verbose}{Logical. Show performance summaries when the predictions are
+evaluated (default: TRUE). When FALSE, runs silently. Warnings about unknown
+classes or incomplete metrics always appear.}
 }
 \value{
-When return_performance = FALSE or actual classes unavailable:
-  Tibble with one row per input landscape and columns:
+List with two elements:
   \describe{
-    \item{landscape_id}{Numeric landscape identifier}
-    \item{landscape_name}{Character landscape name (if available)}
-    \item{predicted_class}{Predicted landscape pattern, or NA if the landscape
-          could not be classified}
-    \item{score}{Score of the predicted class, i.e. the largest of the
-          class scores below (not a calibrated probability).
-          See the "Interpreting the class scores" section.}
-    \item{<class_name>}{Score for each class the model was trained on. The raw
-          network outputs are projected onto the probability simplex, so each
-          row is non-negative and sums to 1.}
+    \item{predictions}{Tibble with one row per input landscape, in input
+      order, and columns:
+      \describe{
+        \item{landscape_id}{Numeric landscape identifier}
+        \item{landscape_name}{Character landscape name (if available)}
+        \item{actual_class}{True class (if available)}
+        \item{predicted_class}{Predicted landscape pattern, or NA if the
+              landscape could not be classified}
+        \item{score}{Score of the predicted class, i.e. the largest of the
+              class scores below (not a calibrated probability).
+              See the "Interpreting the class scores" section.}
+        \item{<class_name>}{Score for each class the model was trained on. The
+              raw network outputs are projected onto the probability simplex,
+              so each row is non-negative and sums to 1.}
+      }}
+    \item{performance}{Performance metrics:
+      confusion matrix, accuracy, and per-class recall/precision/F1. NULL
+      if nothing was evaluated, which happens when \code{evaluate = "none"},
+      when no landscape has a known true class, or when some landscape's true
+      known class was never seen during training.}
   }
 
-  When return_performance = TRUE and actual classes available:
-  List containing:
-  \describe{
-    \item{predictions}{Tibble as above, plus actual_class column}
-    \item{performance}{Performance metrics from evaluate_cv_performance():
-      confusion matrix, accuracy, and per-class recall/precision/F1}
-  }
+  Landscapes that could not be classified count as incorrect, and appear in
+  the confusion matrix under "no prediction".
 }
 \description{
 Applies a trained neural network model to classify new landscapes according to their
@@ -131,13 +132,14 @@ new_landscapes <- create_landscapes(
   n = 6,
   patterns = c("random", "sharp", "diffuse")
 )
-predictions <- apply_metric_model(new_landscapes, model)
-predictions
-
-# Evaluate performance on labeled data
-results <- apply_metric_model(new_landscapes, model, return_performance = TRUE)
+results <- apply_metric_model(new_landscapes, model)
 results$predictions
+
+# The true classes are known here, so performance is scored automatically
 results$performance
+
+# Classify without scoring, even though the landscapes carry true classes
+apply_metric_model(new_landscapes, model, evaluate = "none")$predictions
 
 # A model saved earlier is read back with readr::read_rds()
 saved_model <- readr::read_rds(model_file)

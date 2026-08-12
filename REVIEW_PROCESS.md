@@ -73,7 +73,82 @@ than `"accuracy"`, `evaluation[["accuracy"]]` is `NULL`, `round(NULL, 4)` is `nu
 - **Fix:** derive the key from the compiled metric name (first non-`"loss"` element of
   `evaluation`, or look up by the user's `metrics[1]`) and guard against a missing key.
 
-### M11. Inconsistent return shape when `return_performance = TRUE`  — [Claude] [ChatGPT] *(§2.2)*
+### M11 + M25 + L22. The `apply_*` return contract, unseen classes, and the tests that pin them — **DONE 2026-08-12**
+Three items resolved as one change, because they are all about what `apply_*` promises. Original
+M11 and M25 text below; L22 is under **Low**.
+
+**The contract.** Both `apply_*` now always return `list(predictions, performance)`.
+`predictions` is always full-batch and row-aligned with the input; `performance` is `NULL`
+whenever nothing was scored. Chosen over the alternatives because a return type that varies with
+the *data's values* is the base-R `sapply(simplify=)` / `[ , drop=]` anti-pattern, and because
+`train_metric_model()` already returned a list with a nullable `performance` (NULL when
+`cv_method = "none"`), so this restores the train/apply symmetry rather than inventing a
+convention. A broom-style split (`apply_*` predicts, a separate `evaluate_*` scores) was
+rejected: it breaks the `train_*` / `apply_*` pairing the package is built on.
+
+**`return_performance` replaced by `evaluate`.** Once the shape no longer depends on it, a logical
+flag could only skip a computation that is trivial next to prediction. But deleting it outright was
+wrong, as the owner spotted: *presence of a `pattern` field is not the same as intent to evaluate*,
+and the analysis repo's `classify_images.R` is a live case (patterns parsed from image filenames,
+script only writes prediction CSVs). So `evaluate = c("auto", "required", "none")`, scalar default
+validated in the `cv_method` style:
+- `"auto"` (default) scores when ground truth is present, classifies only otherwise
+- `"none"` never scores, so **no scoring diagnostic can fire on a pure classification run**
+- `"required"` scores and errors if it cannot, which catches "I meant to evaluate but my labels
+  did not load" - something neither the old flag nor a bare auto-detect could express
+
+The old argument controlled the return *type*; the new one controls only whether a computation
+runs, which raises none of the same objections. Named `"auto"/"required"/"none"` rather than
+`"always"/"never"`: those are frequency adverbs, implying a policy across runs, when the argument
+governs one call. `"none"` matches the existing `cv_method = "none"`.
+
+**M25 resolved by keeping the refusal, not by subset scoring.** Reviewed by GPT-5.4 and Gemini
+across three rounds. Both independently attacked subset scoring as the dangerous option: with 50
+known-class landscapes all correct and 50 unseen-class all wrong, a subset accuracy reads 100%
+where the batch achieved 50%, and `n_scored` bookkeeping does not protect, because people extract
+`performance$accuracy` into a table and leave the denominator in the console. An intermediate
+design (dual `accuracy` / `accuracy_known_classes` fields plus a non-square confusion matrix) was
+worked out and then dropped as over-built: all of that machinery existed only to make subset
+scoring safe, and it never fires in this repo. So the behaviour is unchanged - one unseen class
+withholds performance for the whole batch - but the warning now says *why*, and `@return`
+documents it. What M25 actually complained about was that the refusal was undocumented, not that
+refusing was wrong.
+
+**One real defect fixed along the way.** Landscapes the metrics model could not classify were
+dropped from the denominator (`R/nn_metrics.R`, old `scored <- !is.na(predicted_class)`), which is
+subset scoring through the back door: a model failing on the hard landscapes and succeeding on the
+easy ones reported a high number. They now count as **wrong**, and appear in the confusion matrix
+under a `"no prediction"` row, so `sum(diag(cm))/sum(cm)` still equals `accuracy` exactly. Recall
+divides by every landscape actually of that class including these; precision does not, since the
+model never claimed them. **Verified inert:** no `NA` predicted class exists in any of the 39
+stored prediction files in the analysis repo, so this never fired in a published run.
+
+**Implementation.** New internal `evaluate_predictions()` in `R/nn_utils.R`, called by both
+`apply_*`, replacing two near-identical blocks that had drifted apart in wording and in whether
+they handled `NA` predictions at all. That single scoring path is what now keeps the two workflows
+from diverging; a separate `has_ground_truth()` predicate was written and then removed, because
+once the scoring path was centralized it had exactly one caller and was a second layer of
+abstraction over a one-line expression. `evaluate_cv_performance()` was deliberately **not**
+widened to take the excluded rows, since `train_*` calls it with fold structures where unseen
+classes cannot occur.
+
+**`absent_classes` stays a warning.** A demotion to a verbose-gated info was proposed and rejected
+after review: a 4-class model evaluated on data containing 3 classes yields an accuracy that is not
+comparable to a 4-class accuracy, because a 3-class problem is easier, and `verbose = FALSE`
+pipeline runs would swallow that. The warning-fatigue argument for demoting it is answered instead
+by `evaluate = "none"`, which stops it firing on classification-only runs.
+
+**Verified:** full suite 2539 pass / 0 fail; `dev/golden/check.R` byte-inert (metrics `1e-8`, pixel
+`1e-5`) - expected, since the reference stores extracted scalars and both harness calls already
+returned a list. **No published number moves.** `DESCRIPTION` 0.3.0 -> 0.4.0 (breaking).
+
+**Follow-up recorded, not done:** class the return value (`spatpat_classification`) with a
+`print()` method and a `plot()` method, so printing a result summarises instead of dumping the list
+and `plot(results, landscapes)` works. Deferred because it drags in whether `train_*` results
+should be classed too, which is its own decision. See **L32**.
+
+Original M11 finding:
+
 `apply_pixel_model()` always returns `list(predictions, performance)` (performance may be
 `NULL`); `apply_metric_model()` returns a **bare tibble** in some branches (unknown classes,
 `R/nn_metrics.R:550`) and a **list** in others (`:576-579`). Downstream
@@ -143,7 +218,11 @@ most likely TensorFlow's allocator not returning arenas to the OS plus `tf.funct
 (retracing warnings are visible in this package's own test output). **For the HPC systematic-test
 sweep the dependable answer is a fresh R process per replicate**, not in-loop cleanup.
 
-### M25. [new] `apply_pixel_model()` skips performance for every landscape if any known-class landscape has an unseen class — *(added 2026-08-10)*
+### M25. ~~[new] `apply_pixel_model()` skips performance for every landscape if any known-class landscape has an unseen class~~ — **DONE 2026-08-12**, resolved with M11 above
+*Scoping correction:* filed as a pixel-side item, but `apply_metric_model()` did exactly the same
+thing (`R/nn_metrics.R`, old `:711-720`), and additionally returned a bare tibble in that branch,
+which is M11. The two were one item. Original finding below.
+
 `R/nn_keras.R:897-914`. When `return_performance = TRUE`, the function computes
 `unknown_classes <- setdiff(unique_actual, class_names)` across the *whole* known-class
 subset; if even one landscape's actual class is unseen by the model, performance evaluation is
@@ -239,10 +318,35 @@ user-facing bugs.
 `README.Rmd:18-19` / `README.md:6-8`. Consider lifecycle / R-CMD-check / test-coverage /
 (eventual) CRAN badges.
 
-### L22. Pin the `apply_*` return contract with tests  — [Claude] *(§7.2)*
+### L22. ~~Pin the `apply_*` return contract with tests~~ — **DONE 2026-08-12**, with M11
+`test-nn_metrics.R` now loops all four combinations of labelled/unlabelled input against
+`evaluate = "auto"/"none"` and asserts the shape is identical in every one, with `performance`
+present exactly when there was ground truth and the caller did not opt out. `test-nn_utils.R` pins
+the new helpers directly: `validate_evaluate_param()`, `has_ground_truth()`, the batch refusal on
+an unseen class under all three `evaluate` levels, and the no-prediction arithmetic (accuracy
+0.75 not 1.0, `"no prediction"` row present, `sum(diag(cm))/sum(cm) == accuracy`). Original text
+below.
+
 Once M11 is resolved, add tests asserting the return **shape** of both `apply_*` under
 `return_performance = TRUE/FALSE`, with and without known classes — the surface the sibling
 analysis repo depends on.
+
+### L32. [new] Class the `apply_*` return value — *(added 2026-08-12)*
+`apply_*` now returns a plain `list(predictions, performance)`. Printing one dumps the whole list,
+predictions tibble included, which is real console noise in interactive use. Classing it
+(`spatpat_classification`, constructor + `print()` + `plot()` method) would fix that and let
+`plot(results, landscapes)` work, per Gemini's round-three design: under 25 lines, no dependencies.
+Deliberately deferred out of the M11 change for scope: if `apply_*` results are classed, the
+package's train/apply symmetry pushes toward classing `train_*` results too, and that object is
+consumed by both `apply_*`, the tests and the analysis repo. Settle that question as part of this
+item rather than as a rider.
+- **Decided along the way:** `plot_classified_landscapes()` stays **strict**, accepting only the
+  predictions tibble, so callers write `results$predictions`. A permissive unwrap
+  (`if (is.list(x) && !is.data.frame(x) && is.data.frame(x$predictions))`) was proposed and
+  rejected after both reviewers objected: it is heuristic rather than a contract, any list with a
+  `predictions` element would be accepted, error messages get layered when a user passes a
+  modified result, and it would make the outer list's schema part of the plotting API. If input
+  polymorphism is wanted later, S3 dispatch is the way to get it, which is this item.
 
 ### L27. [new] `train_pixel_model()` silently writes an undocumented `_metadata.rds` file — *(added 2026-08-10)*
 `R/nn_keras.R:604-607`. When `model_path` is given, a second file
@@ -379,7 +483,10 @@ should stay byte-identical; only failure behaviour moves:
 9b. **Rotation range semantics** — new 2026-08-11, code and re-run both done (`0eab8c1`); no
    decision outstanding. Results-changing for rotatable patterns only, and verified inert for the
    self-organized ones. See the results ledger entry.
-10. **M11 / L22** — unify the `apply_*` return contract (touches the analysis repo's call sites).
+10. ~~**M11 / L22**~~ — done 2026-08-12, together with M25; see **Medium**. Changed no result: the
+    unseen-class branch is unreachable in the analysis repo, and the no-prediction branch never
+    fired there either (checked against all 39 stored prediction files). The analysis repo's call
+    sites still need migrating, which is the second commit of that work.
 11. **M5** — pixel-model input encoding (ordinal integers for 3+ classes). *(M6 was here too; done
     2026-08-05 by removing the `metrics` parameter, and it changed no results.)*
 12. **L5** — `fisher_score` single-sample guard (changes metric ranking when it fires).

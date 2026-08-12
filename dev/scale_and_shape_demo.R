@@ -124,10 +124,10 @@ report <- purrr::imap_dfr(scenarios, \(landscapes, label) {
     cell_size = terra::res(landscapes[[1]]$data)[1],
     n_na = sum(is.na(terra::values(landscapes[[1]]$data))),
     metrics = accuracy_or_error(
-      apply_metric_model(landscapes, metrics_model, return_performance = TRUE)
+      apply_metric_model(landscapes, metrics_model)
     ),
     pixels = accuracy_or_error(
-      apply_pixel_model(landscapes, pixel_model, return_performance = TRUE, verbose = FALSE)
+      apply_pixel_model(landscapes, pixel_model, verbose = FALSE)
     )
   )
 })

@@ -51,7 +51,7 @@ models <- list(auto = fit_model(auto_selected), normalised = fit_model(normalise
 
 accuracy_of <- function(model, landscapes) {
   result <- suppressWarnings(
-    apply_metric_model(landscapes, model, return_performance = TRUE)
+    apply_metric_model(landscapes, model)
   )
   if (is.null(result$performance)) return(NA_real_)
   round(result$performance$accuracy, 3)

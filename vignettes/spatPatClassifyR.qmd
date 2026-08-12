@@ -99,7 +99,9 @@ new_landscapes <- create_landscapes(
   n = 10,
   patterns = c("labyrinth", "random", "clustered")
 )
-apply_metric_model(new_landscapes, model)
+# These landscapes carry their true patterns, so performance would be scored
+# automatically. This step only classifies, so scoring is switched off.
+apply_metric_model(new_landscapes, model, evaluate = "none")$predictions
 ```
 
 ## Next steps

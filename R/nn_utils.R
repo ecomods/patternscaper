@@ -608,9 +608,19 @@ evaluate_cv_performance <- function(
     )
   }
 
-  # Create confusion matrix
+  # Create confusion matrix. A landscape the model could not classify counts as
+  # a failure, so it gets its own row rather than dropping out of the table
+  no_prediction_label <- "no prediction"
+  predicted_vec <- unlist(cv_predictions)
+  predicted_levels <- class_names
+
+  if (anyNA(predicted_vec)) {
+    predicted_vec[is.na(predicted_vec)] <- no_prediction_label
+    predicted_levels <- c(class_names, no_prediction_label)
+  }
+
   conf_matrix <- table(
-    Predicted = factor(unlist(cv_predictions), levels = class_names),
+    Predicted = factor(predicted_vec, levels = predicted_levels),
     Actual = factor(unlist(cv_actual), levels = class_names)
   )
 
@@ -624,9 +634,13 @@ evaluate_cv_performance <- function(
   )
   absent_classes <- class_names[is.na(class_counts)]
 
+  # Square known-class block, whose diagonal holds the correct predictions. The
+  # "no prediction" row sits outside it, so it lowers recall but not precision
+  conf_known <- conf_matrix[class_names, , drop = FALSE]
+
   # Check for known classes that were never correctly predicted. Classes
   # absent from the evaluation data are reported separately below instead
-  correctly_predicted <- diag(conf_matrix)
+  correctly_predicted <- diag(conf_known)
   never_predicted_classes <- setdiff(
     class_names[correctly_predicted == 0],
     absent_classes
@@ -644,12 +658,14 @@ evaluate_cv_performance <- function(
     )
   }
 
-  # Calculate overall accuracy
-  accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+  # Calculate overall accuracy over the whole table, so that landscapes with no
+  # prediction count against it
+  accuracy <- sum(correctly_predicted) / sum(conf_matrix)
 
-  # Calculate per-class metrics
-  class_recall <- diag(conf_matrix) / colSums(conf_matrix)
-  class_precision <- diag(conf_matrix) / rowSums(conf_matrix)
+  # Recall divides by every landscape of that class, precision only by the ones
+  # the model assigned to it
+  class_recall <- correctly_predicted / colSums(conf_matrix)
+  class_precision <- correctly_predicted / rowSums(conf_known)
 
   # Handle divisions by zero for classes that do occur in the evaluation data
   # but that the model never guesses
@@ -736,6 +752,135 @@ evaluate_cv_performance <- function(
   }
 
   return(result)
+}
+
+#' Validate the `evaluate` argument of the apply functions
+#'
+#' @param evaluate Value supplied by the user.
+#'
+#' @return The validated value, lowercased.
+#'
+#' @keywords internal
+validate_evaluate_param <- function(evaluate) {
+  valid <- c("auto", "required", "none")
+
+  if (is.character(evaluate) && length(evaluate) == 1) {
+    evaluate <- tolower(evaluate)
+  }
+
+  if (
+    !is.character(evaluate) || length(evaluate) != 1 || !evaluate %in% valid
+  ) {
+    cli::cli_abort('evaluate must be one of: "auto", "required", or "none"')
+  }
+
+  evaluate
+}
+
+#' Evaluate predictions against their true classes
+#'
+#' Used in both \code{apply_metric_model()} and
+#' \code{apply_pixel_model()} to evaluate model performance.
+#' Decides whether performance can and should be evaluated,
+#' then evaluates it on the landscapes by comparing the predicted with the actual
+#' class.
+#'
+#' Landscapes with no actual class are excluded. Landscapes whose actual class
+#' the model was never trained on are different: the model cannot produce that
+#' label, so they are guaranteed wrong, and scoring only the rest would report a
+#' higher accuracy than the batch achieved. Nothing is evaluated in that case,
+#' the result is NULL, and the user is warned.
+#'
+#' @param predictions Tibble of predictions from the calling
+#'   \code{apply_*} function. Must carry \code{predicted_class} and, to be
+#'   scorable at all, an \code{actual_class} column.
+#' @param class_names Character vector of the classes the model was trained on.
+#' @param evaluate Character. One of "auto", "required" or "none". See
+#'   \code{\link{apply_metric_model}}.
+#' @param verbose Logical. Show the performance summary and the note about
+#'   landscapes skipped for having no true class.
+#'
+#' @return List of performance metrics from \code{evaluate_cv_performance()}, or
+#'   NULL when nothing was scored.
+#'
+#' @keywords internal
+evaluate_predictions <- function(
+  predictions,
+  class_names,
+  evaluate = "auto",
+  verbose = TRUE
+) {
+  if (evaluate == "none") {
+    return(NULL)
+  }
+
+  # NA and "unclassified" both mean the true class is unknown.
+  actual_class <- predictions[["actual_class"]]
+  scorable <- !is.na(actual_class) & actual_class != "unclassified"
+
+  if (!any(scorable)) {
+    if (evaluate == "required") {
+      cli::cli_abort(c(
+        "Cannot evaluate performance: no landscape has a known true class.",
+        "i" = "Use {.code evaluate = \"none\"} to classify without evaluating."
+      ))
+    }
+    return(NULL)
+  }
+
+  if (verbose && !all(scorable)) {
+    cli::cli_alert_info(
+      "Evaluating performance on {sum(scorable)}/{length(scorable)} landscapes with known classes"
+    )
+  }
+
+  scored <- predictions[scorable, ]
+  unknown_classes <- setdiff(unique(scored$actual_class), class_names)
+
+  if (length(unknown_classes) > 0) {
+    detail <- c(
+      "x" = "{.val {unknown_classes}}",
+      "i" = "Model trained on: {.val {class_names}}"
+    )
+
+    if (evaluate == "required") {
+      cli::cli_abort(c(
+        "Cannot evaluate performance: some landscapes have a true class the model never saw.",
+        detail
+      ))
+    }
+
+    cli::cli_warn(c(
+      "Input landscapes contain classes not seen during training:",
+      detail,
+      "i" = "Performance is not evaluated for any landscape to avoid inflating accuracy.",
+      "i" = "Predictions are still returned for every landscape."
+    ))
+
+    return(NULL)
+  }
+
+  n_unpredicted <- sum(is.na(scored$predicted_class))
+
+  if (n_unpredicted > 0) {
+    cli::cli_warn(
+      "{n_unpredicted} landscape{?s} could not be classified and {?is/are} counted as incorrect in the performance metrics."
+    )
+  }
+
+  evaluate_cv_performance(
+    cv_predictions = list(scored$predicted_class),
+    cv_probabilities = list(as.matrix(
+      scored |> dplyr::select(dplyr::all_of(class_names))
+    )),
+    cv_actual = list(scored$actual_class),
+    cv_landscape_ids = list(scored$landscape_id),
+    class_names = class_names,
+    cv_method = "none",
+    cv_folds = 1,
+    verbose = verbose,
+    return_predictions = FALSE
+  )
 }
 
 #' Remove landscapes with incomplete metrics

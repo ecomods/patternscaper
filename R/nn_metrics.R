@@ -415,35 +415,41 @@ train_metric_model <- function(
 #'   Landscapes must have valid raster data that can be analyzed by landscapemetrics.
 #' @param nn_model List. Trained model object returned from train_metric_model().
 #'   Must contain elements: model, scaling, classes, features, and features_level.
-#' @param return_performance Logical. If TRUE and landscapes contain known classes
-#'   (pattern attribute), calculate and return performance metrics. If FALSE or
-#'   classes unknown, only return predictions. Default: FALSE.
-#' @param verbose Logical. Show performance summaries when `return_performance = TRUE`
-#'   (default: TRUE). When FALSE, runs silently. Warnings about unknown classes or
-#'   incomplete metrics always appear.
+#' @param evaluate Character. Whether to evaluate the predictions against the
+#'   true known classes of the landscapes: \code{"auto"} (default) evaluates when true
+#'   classes are available and classifies only otherwise, \code{"required"}
+#'   evaluates them and raises an error if it cannot, and \code{"none"} classifies
+#'   only without performance evaluation.
+#' @param verbose Logical. Show performance summaries when the predictions are
+#'   evaluated (default: TRUE). When FALSE, runs silently. Warnings about unknown
+#'   classes or incomplete metrics always appear.
 #'
-#' @return When return_performance = FALSE or actual classes unavailable:
-#'   Tibble with one row per input landscape and columns:
+#' @return List with two elements:
 #'   \describe{
-#'     \item{landscape_id}{Numeric landscape identifier}
-#'     \item{landscape_name}{Character landscape name (if available)}
-#'     \item{predicted_class}{Predicted landscape pattern, or NA if the landscape
-#'           could not be classified}
-#'     \item{score}{Score of the predicted class, i.e. the largest of the
-#'           class scores below (not a calibrated probability).
-#'           See the "Interpreting the class scores" section.}
-#'     \item{<class_name>}{Score for each class the model was trained on. The raw
-#'           network outputs are projected onto the probability simplex, so each
-#'           row is non-negative and sums to 1.}
+#'     \item{predictions}{Tibble with one row per input landscape, in input
+#'       order, and columns:
+#'       \describe{
+#'         \item{landscape_id}{Numeric landscape identifier}
+#'         \item{landscape_name}{Character landscape name (if available)}
+#'         \item{actual_class}{True class (if available)}
+#'         \item{predicted_class}{Predicted landscape pattern, or NA if the
+#'               landscape could not be classified}
+#'         \item{score}{Score of the predicted class, i.e. the largest of the
+#'               class scores below (not a calibrated probability).
+#'               See the "Interpreting the class scores" section.}
+#'         \item{<class_name>}{Score for each class the model was trained on. The
+#'               raw network outputs are projected onto the probability simplex,
+#'               so each row is non-negative and sums to 1.}
+#'       }}
+#'     \item{performance}{Performance metrics:
+#'       confusion matrix, accuracy, and per-class recall/precision/F1. NULL
+#'       if nothing was evaluated, which happens when \code{evaluate = "none"},
+#'       when no landscape has a known true class, or when some landscape's true
+#'       known class was never seen during training.}
 #'   }
 #'
-#'   When return_performance = TRUE and actual classes available:
-#'   List containing:
-#'   \describe{
-#'     \item{predictions}{Tibble as above, plus actual_class column}
-#'     \item{performance}{Performance metrics from evaluate_cv_performance():
-#'       confusion matrix, accuracy, and per-class recall/precision/F1}
-#'   }
+#'   Landscapes that could not be classified count as incorrect, and appear in
+#'   the confusion matrix under "no prediction".
 #'
 #' @section Interpreting the class scores:
 #' \code{predicted_class} is the class with the largest *raw* network output, so
@@ -518,13 +524,14 @@ train_metric_model <- function(
 #'   n = 6,
 #'   patterns = c("random", "sharp", "diffuse")
 #' )
-#' predictions <- apply_metric_model(new_landscapes, model)
-#' predictions
-#'
-#' # Evaluate performance on labeled data
-#' results <- apply_metric_model(new_landscapes, model, return_performance = TRUE)
+#' results <- apply_metric_model(new_landscapes, model)
 #' results$predictions
+#'
+#' # The true classes are known here, so performance is scored automatically
 #' results$performance
+#'
+#' # Classify without scoring, even though the landscapes carry true classes
+#' apply_metric_model(new_landscapes, model, evaluate = "none")$predictions
 #'
 #' # A model saved earlier is read back with readr::read_rds()
 #' saved_model <- readr::read_rds(model_file)
@@ -541,13 +548,11 @@ train_metric_model <- function(
 apply_metric_model <- function(
   landscapes,
   nn_model,
-  return_performance = FALSE,
+  evaluate = "auto",
   verbose = TRUE
 ) {
   # Input validation ---------------------------------------------------------
-  if (!is.logical(return_performance) || length(return_performance) != 1) {
-    cli::cli_abort("return_performance must be a single logical value")
-  }
+  evaluate <- validate_evaluate_param(evaluate)
 
   if (!is.logical(verbose) || length(verbose) != 1) {
     cli::cli_abort("verbose must be a single logical value")
@@ -725,62 +730,16 @@ apply_metric_model <- function(
 
   predictions <- dplyr::bind_cols(landscape_info, predictions)
 
-  # Evaluate performance if actual classes are available ---------------------
-  if ("actual_class" %in% colnames(predictions) && return_performance) {
-    # Check if actual classes match model's trained classes
-    unique_actual <- unique(predictions$actual_class)
-    unknown_classes <- setdiff(unique_actual, class_names)
+  # Score against the true classes, when there are any and the caller wants it
+  performance <- evaluate_predictions(
+    predictions = predictions,
+    class_names = class_names,
+    evaluate = evaluate,
+    verbose = verbose
+  )
 
-    if (length(unknown_classes) > 0) {
-      cli::cli_warn(c(
-        "Input landscapes contain classes not seen during training",
-        "x" = "Unknown: {.val {unknown_classes}}",
-        "i" = "Model trained on: {.val {class_names}}",
-        "i" = "Performance evaluation skipped - returning predictions only"
-      ))
-
-      return(predictions)
-    }
-
-    # All classes are valid - proceed with performance evaluation.
-    # Unclassified landscapes have no predicted class to score, so they are
-    # excluded here; they remain in the returned predictions table though.
-    scored <- !is.na(predictions$predicted_class)
-
-    if (any(!scored)) {
-      cli::cli_warn(
-        "Performance is based on the {sum(scored)} classified landscape{?s}, excluding {sum(!scored)} that could not be classified"
-      )
-    }
-
-    # Create single-fold structure for evaluate_cv_performance
-    cv_predictions <- list(predictions$predicted_class[scored])
-    cv_probabilities <- list(as.matrix(
-      predictions[scored, ] |>
-        dplyr::select(dplyr::all_of(class_names))
-    ))
-    cv_actual <- list(predictions$actual_class[scored])
-    cv_landscape_ids <- list(predictions$landscape_id[scored])
-
-    # Evaluate performance using same function as training
-    performance <- evaluate_cv_performance(
-      cv_predictions = cv_predictions,
-      cv_probabilities = cv_probabilities,
-      cv_actual = cv_actual,
-      cv_landscape_ids = cv_landscape_ids,
-      class_names = class_names,
-      cv_method = "none",
-      cv_folds = 1,
-      verbose = verbose,
-      return_predictions = FALSE
-    )
-
-    return(list(
-      predictions = predictions,
-      performance = performance
-    ))
-  } else {
-    # No actual classes - just return predictions
-    return(predictions)
-  }
+  list(
+    predictions = predictions,
+    performance = performance
+  )
 }

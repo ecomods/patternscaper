@@ -874,3 +874,141 @@ test_that("keras_available returns FALSE rather than erroring with no backend", 
   )
   expect_false(keras_available())
 })
+
+# evaluate / scoring helpers --------------------------------------------------
+
+test_that("validate_evaluate_param accepts the three levels, case-insensitively", {
+  expect_equal(validate_evaluate_param("auto"), "auto")
+  expect_equal(validate_evaluate_param("required"), "required")
+  expect_equal(validate_evaluate_param("none"), "none")
+  expect_equal(validate_evaluate_param("Auto"), "auto")
+
+  for (bad in list("yes", "", NA_character_, TRUE, 1, c("auto", "none"), NULL)) {
+    expect_error(
+      validate_evaluate_param(bad),
+      'evaluate must be one of: "auto", "required", or "none"'
+    )
+  }
+})
+
+test_that("landscapes with no prediction count as wrong, not as excluded", {
+  # A model that fails on the hard landscapes and succeeds on the easy ones must
+  # not be able to report a high accuracy by dropping its own failures from the
+  # denominator.
+  class_names <- c("a", "b")
+  probs <- matrix(
+    c(0.9, 0.1, 0.9, 0.1, 0.1, 0.9, 0.5, 0.5),
+    ncol = 2,
+    byrow = TRUE,
+    dimnames = list(NULL, class_names)
+  )
+
+  perf <- suppressWarnings(evaluate_cv_performance(
+    cv_predictions = list(c("a", "a", "b", NA)),
+    cv_probabilities = list(probs),
+    cv_actual = list(c("a", "a", "b", "b")),
+    cv_landscape_ids = list(1:4),
+    class_names = class_names,
+    cv_method = "none",
+    cv_folds = 1,
+    verbose = FALSE,
+    return_predictions = FALSE
+  ))
+
+  # 3 of 4 correct, NOT 3 of 3
+  expect_equal(perf$accuracy, 0.75)
+
+  # The unclassified landscape is visible in the table rather than dropped, so
+  # the headline accuracy stays derivable from the confusion matrix
+  expect_true("no prediction" %in% rownames(perf$confusion_matrix))
+  expect_equal(sum(perf$confusion_matrix), 4)
+  expect_equal(
+    sum(diag(perf$confusion_matrix)) / sum(perf$confusion_matrix),
+    perf$accuracy
+  )
+
+  # Recall for "b" counts the missing prediction against it; precision does not,
+  # since the model never claimed that landscape was a "b"
+  metrics_b <- perf$per_class_metrics[perf$per_class_metrics$class == "b", ]
+  expect_equal(unname(metrics_b$recall), 0.5)
+  expect_equal(unname(metrics_b$precision), 1)
+})
+
+test_that("evaluate_cv_performance stays square when every landscape is predicted", {
+  class_names <- c("a", "b")
+  probs <- matrix(
+    c(0.9, 0.1, 0.1, 0.9),
+    ncol = 2,
+    byrow = TRUE,
+    dimnames = list(NULL, class_names)
+  )
+
+  perf <- evaluate_cv_performance(
+    cv_predictions = list(c("a", "b")),
+    cv_probabilities = list(probs),
+    cv_actual = list(c("a", "b")),
+    cv_landscape_ids = list(1:2),
+    class_names = class_names,
+    cv_method = "none",
+    cv_folds = 1,
+    verbose = FALSE,
+    return_predictions = FALSE
+  )
+
+  expect_equal(dim(perf$confusion_matrix), c(2L, 2L))
+  expect_equal(perf$accuracy, 1)
+})
+
+test_that("evaluate_predictions refuses the whole batch on an unseen class", {
+  class_names <- c("a", "b")
+  predictions <- tibble::tibble(
+    landscape_id = 1:3,
+    actual_class = c("a", "b", "elsewhere"),
+    predicted_class = c("a", "b", "a"),
+    a = c(0.9, 0.1, 0.8),
+    b = c(0.1, 0.9, 0.2)
+  )
+
+  expect_warning(
+    perf <- evaluate_predictions(predictions, class_names, verbose = FALSE),
+    "classes not seen during training"
+  )
+  expect_null(perf)
+
+  expect_error(
+    evaluate_predictions(
+      predictions,
+      class_names,
+      evaluate = "required",
+      verbose = FALSE
+    ),
+    "true class the model never saw"
+  )
+
+  expect_null(
+    evaluate_predictions(
+      predictions,
+      class_names,
+      evaluate = "none",
+      verbose = FALSE
+    )
+  )
+})
+
+test_that("evaluate_predictions skips rows with no ground truth", {
+  class_names <- c("a", "b")
+  predictions <- tibble::tibble(
+    landscape_id = 1:4,
+    actual_class = c("a", "b", NA, "unclassified"),
+    predicted_class = c("a", "b", "a", "b"),
+    a = c(0.9, 0.1, 0.8, 0.2),
+    b = c(0.1, 0.9, 0.2, 0.8)
+  )
+
+  perf <- evaluate_predictions(predictions, class_names, verbose = FALSE)
+
+  # Only the two labelled landscapes are scored; the unlabelled ones have no
+  # correct answer to miss, so leaving them out biases nothing
+  expect_equal(sum(perf$confusion_matrix), 2)
+  expect_equal(perf$accuracy, 1)
+})
