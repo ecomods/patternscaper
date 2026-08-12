@@ -177,6 +177,27 @@ test_that("train_pixel_model aborts on heterogeneous training dimensions", {
   )
 })
 
+test_that("train_pixel_model aborts on heterogeneous layer counts", {
+  # The generators always produce single-layer rasters, but landscape() accepts
+  # any SpatRaster, so a multi-layer landscape can reach training.
+  single_layer <- create_landscape("random", width = 30, height = 30, name = "r1")
+  two_layer <- landscape(
+    c(single_layer$data, single_layer$data),
+    pattern = "sharp",
+    name = "s1"
+  )
+
+  expect_error(
+    train_pixel_model(
+      list(single_layer, two_layer),
+      cv_method = "none",
+      epochs = 1,
+      verbose = FALSE
+    ),
+    "same dimensions"
+  )
+})
+
 test_that("train_pixel_model handles model_path validation", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 

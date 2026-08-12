@@ -256,24 +256,24 @@ train_pixel_model <- function(
     ))
   }
 
-  # Require identical cell dimensions across training landscapes. The CNN input
-  # layer is fixed to one size, so arrays of differing size cannot be stacked;
-  # abort clearly here rather than letting abind() fail later with a cryptic
-  # "arg 'X2' has dims=..." message.
+  # Require identical cell dimensions and layer counts across training
+  # landscapes. The CNN input layer is fixed to one shape, so arrays differing
+  # in any dimension cannot be stacked; abort clearly here rather than letting
+  # abind() fail later with a cryptic "arg 'X2' has dims=..." message.
   dims <- lapply(landscapes, function(l) {
-    c(terra::nrow(l$data), terra::ncol(l$data))
+    c(terra::nrow(l$data), terra::ncol(l$data), terra::nlyr(l$data))
   })
   unique_dims <- unique(dims)
   if (length(unique_dims) > 1) {
     dim_labels <- vapply(
       unique_dims,
-      function(d) paste0(d[1], "x", d[2]),
+      function(d) paste0(d[1], "x", d[2], "x", d[3]),
       character(1)
     )
     cli::cli_abort(c(
       "All training landscapes must have the same dimensions.",
-      "x" = "Found {length(unique_dims)} different sizes: {.val {dim_labels}}",
-      "i" = "The CNN input layer is fixed to one size. Create the training landscapes at a common width and height, or resize them before training."
+      "x" = "Found {length(unique_dims)} different shapes (rows x columns x layers): {.val {dim_labels}}",
+      "i" = "The CNN input layer is fixed to one shape. Create the training landscapes at a common width, height and layer count, or resize them before training."
     ))
   }
 
