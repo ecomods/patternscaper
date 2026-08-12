@@ -315,7 +315,8 @@ abort_on_na_cells <- function(landscapes, action) {
 #' @param n_predictors Integer. Number of predictor variables (optional, for
 #'   sample-to-predictor ratio check).
 #' @param min_samples_per_fold Integer. Minimum samples per class per fold for
-#'   k-fold CV (default: 3).
+#'   k-fold CV, and the count below which a class is reported as small for any
+#'   CV method (default: 3).
 #'
 #' @return List with validated/adjusted CV parameters:
 #'   \item{cv_method}{Adjusted CV method (may switch from k-fold to loo)}
@@ -337,17 +338,7 @@ validate_cv_params <- function(
   min_class_count <- min(class_counts)
   total_samples <- length(patterns)
 
-  # Return early for cv_method = "none"
-  if (cv_method == "none") {
-    return(list(
-      cv_method = cv_method,
-      cv_folds = 1L,
-      class_counts = class_counts,
-      total_samples = total_samples
-    ))
-  }
-
-  # Check sample-to-predictor ratio if provided
+  # Class-composition checks run for every cv_method ("none" included)
   if (!is.null(n_predictors)) {
     samples_per_predictor <- total_samples / n_predictors
     if (samples_per_predictor < 5) {
@@ -357,12 +348,28 @@ validate_cv_params <- function(
     }
   }
 
-  # Check for severe class imbalance
   imbalance_ratio <- max(class_counts) / min(class_counts)
   if (imbalance_ratio > 5) {
     cli::cli_alert_info(
-      "Severe class imbalance detected (ratio {round(imbalance_ratio, 1)}:1). CV results may be unreliable for minority classes."
+      "Severe class imbalance detected (ratio {round(imbalance_ratio, 1)}:1). Minority classes may be classified unreliably."
     )
+  }
+
+  small_classes <- names(class_counts[class_counts < min_samples_per_fold])
+  if (length(small_classes) > 0) {
+    cli::cli_alert_info(
+      "Some classes have few samples (< {min_samples_per_fold}): {.val {small_classes}}. The model may not learn these classes reliably."
+    )
+  }
+
+  # Return early for cv_method = "none"
+  if (cv_method == "none") {
+    return(list(
+      cv_method = cv_method,
+      cv_folds = 1L,
+      class_counts = class_counts,
+      total_samples = total_samples
+    ))
   }
 
   # Validate and adjust k-fold parameters
@@ -404,14 +411,6 @@ validate_cv_params <- function(
     }
 
     cv_folds <- total_samples
-  }
-
-  # Warn about very small classes
-  small_classes <- names(class_counts[class_counts < min_samples_per_fold])
-  if (length(small_classes) > 0) {
-    cli::cli_alert_info(
-      "Some classes have few samples (< {min_samples_per_fold}): {.val {small_classes}}. CV results for these may be unreliable."
-    )
   }
 
   return(list(

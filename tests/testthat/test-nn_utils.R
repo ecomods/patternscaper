@@ -648,6 +648,21 @@ test_that("validate_cv_params warns about small classes", {
   )
 })
 
+test_that("validate_cv_params reports class composition for cv_method = 'none'", {
+  # Without cross-validation there is no confusion matrix to reveal a starved
+  # class, so these alerts are the only signal the user gets.
+  patterns <- factor(c(rep("A", 2), rep("B", 20), rep("C", 20)))
+
+  expect_message(
+    validate_cv_params(patterns = patterns, cv_method = "none", cv_folds = 5),
+    "Some classes have few samples.*A"
+  )
+  expect_message(
+    validate_cv_params(patterns = patterns, cv_method = "none", cv_folds = 5),
+    "Severe class imbalance"
+  )
+})
+
 test_that("validate_cv_params respects min_samples_per_fold parameter", {
   patterns <- factor(c(rep("A", 10), rep("B", 10)))
 
