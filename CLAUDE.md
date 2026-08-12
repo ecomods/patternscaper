@@ -1,75 +1,102 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for AI coding assistants working in this repository.
+
+**Read `../_workspace_context/PROJECT_CONTEXT.md` first.** It is the handoff document: what the
+project is, how the three repositories relate, the commands, the conventions, and how work should be
+delivered. `../_workspace_context/OPEN_WORK.md` is the live worklist and leads with the open
+decisions. This file carries only what is dangerous to get wrong before you have read them.
 
 ## What this is
 
-`spatPatClassifyR` is an R package for classifying spatial landscape patterns with neural networks.
-It generates artificial binary landscapes with defined spatial patterns, optionally computes
-landscape metrics, trains a classifier, and applies it to new landscapes. It is the software
-companion to a paper (Baldauf, Tietjen & Berger).
+`spatPatClassifyR` is an R package that classifies spatial landscape patterns with neural networks.
+It generates artificial binary landscapes (`SpatRaster`, 0 = bare ground, 1 = vegetation),
+optionally computes landscape metrics, trains a classifier, and applies it to new landscapes,
+including real vegetation photographs. It is the software companion to a paper by Baldauf, Tietjen
+and Berger, currently in review.
 
-**Two classification approaches run in parallel throughout the package** — keep this symmetry when
-adding code:
+The folder is named `ecotoneClassifyR` while the package is `spatPatClassifyR`. A rename to
+`patternClassifyR` is under discussion but not decided.
 
-- **Pixel-based** — convolutional net via `keras3`: `train_pixel_model()` / `apply_pixel_model()`.
-- **Metrics-based** — landscape metrics (`landscapemetrics`) fed to a `neuralnet`:
-  `train_metric_model()` / `apply_metric_model()`.
+## Two approaches, kept symmetric
 
-**Sibling analysis repo.** `../spatPatClassifyRAnalysis` reproduces the paper's figures/tables and
-depends on this package's exported API. **Renaming or changing the signature of an export can
-silently break that repo** — update its call sites in the same change (it can load this package's
-local source via its own `dev/use_local_package.R`).
+- **Pixel based**: convolutional net via `keras3`. `train_pixel_model()` / `apply_pixel_model()`.
+- **Metrics based**: `landscapemetrics` features fed to `neuralnet`. `train_metric_model()` /
+  `apply_metric_model()`.
 
-## Dev environment & the loop
+Preserve the `train_*` / `apply_*` crossed with `metric` / `pixel` pairing when adding or renaming.
 
-- **R ≥ 4.1** (native pipe `|>`, anonymous functions `\(x)`).
-- **keras3 / TensorFlow** is required for the pixel side and runs locally (slowly on tiny nets).
-- Inner loop after a change:
-  1. `devtools::load_all()`
-  2. `devtools::document()` — after any roxygen/export change (regenerates `man/` + `NAMESPACE`)
-  3. `devtools::test()` — the primary gate; the suite is thorough (testthat edition 3)
-- **`devtools::check()` is slow** — vignettes and examples are computationally heavy. Use
-  `devtools::check(vignettes = FALSE)` (or skip examples) in the loop, and reserve the *full*
-  check for milestones. Don't run the full check casually.
+## The 11 patterns fall into three groups
 
-## Code map (`R/`)
+- **Ecotone**: `sharp`, `diffuse`, `fingers`, `clustered`, `bands`. A vegetated zone and a bare zone
+  separated by a transition, placed by `boundary_position`.
+- **Patch**, that is self-organized: `spots`, `labyrinth`, `gaps`. No boundary between two zones.
+- **Control**: `random`, `bare`, `dense`. No spatial structure at all; they differ only in `veg_prob`.
 
-- **Landscape generation** — `create_landscape(pattern, ...)` dispatches by `pattern` to a
-  `create_landscape_*()` implementation; `create_landscapes()` is the batch wrapper. Landscapes are
-  binary `SpatRaster`s (0 = bare ground, 1 = vegetation). Files: `landscape_create*.R`,
-  `create_landscape_*.R`.
-- **`landscape` S3 class** — constructor `landscape()`, `print`/`plot` methods, setters
-  `set_landscape_name()` / `set_landscape_pattern()`, and `set_random_seed()`. Files:
-  `landscape_class.R`, `landscape_methods.R`, `landscape_utils.R`, `landscape_parameter_validation.R`.
-- **Metrics** — `calculate_metrics()` computes features; `evaluate_metrics()`
-  assesses / selects them. Files: `metrics.R`, `metrics_evaluation.R`.
-- **Neural networks** — metrics-based in `nn_metrics.R`, pixel-based in `nn_keras.R`, shared helpers
-  in `nn_utils.R`.
-- **Plotting** — `plot_landscape()`, `plot_landscapes()`, `plot_classified_landscapes()`,
-  `plot_metrics()`; shared theme/palette in `plot_themes.R`. Files: `plot_*.R`.
-- **Misc** — package-level docs in `spatPatClassifyR.R`.
+`vignettes/landscape-generation.qmd` is the authority. Note that the analysis scripts train each
+pattern family *together with* the controls, so `ecotone_patterns` there includes `random` and
+`selforg_patterns` includes `bare` and `dense`. That is training-set composition, not what the
+patterns are. Never describe a control as an ecotone or a self-organized pattern in prose,
+documentation or the manuscript.
 
-**Two pattern sets** recur across the analyses:
-- *Ecotones:* `sharp`, `diffuse`, `clustered`, `fingers`, `bands`, `random`
-- *Self-organized:* `bare`, `spots`, `labyrinth`, `gaps`, `dense`
+## Working agreements
 
-## Conventions
+- **Do not commit.** Do the work, verify it, propose a commit message, then stop. Selina reviews the
+  diff and commits it herself.
+- **Small steps.** One reviewable change at a time. Stop for review rather than delivering a whole
+  approved batch in one go.
+- **Sequence by blast radius.** Everything that cannot change results first, then changes that move
+  only error paths, then anything that moves a published number. Results-changing items are
+  decisions for Selina, not tasks: a moved number means re-running the analysis repository and
+  checking the manuscript tables.
+- **No em dashes**, anywhere: code, docs, commit messages, replies. Use colons, commas, parentheses
+  or a second sentence.
+- **Prefer the simple design.** The package has no external users yet, so breaking changes are cheap
+  and compatibility shims are dead weight.
+- **Roxygen is user-facing.** It says how to use a function, not why it was designed that way.
+  Rationale belongs in `../_workspace_context/DECISIONS_ARCHIVE.md`.
 
-- Tidyverse idiom, native pipe `|>`, anonymous functions `\(x)`; `cli::` for user-facing
-  messages, warnings, and errors (used throughout).
-- **Parallel naming across model families:** `train_*` / `apply_*` × `metrics` / `pixels`. Preserve
-  this pairing when adding or renaming functions.
-- Match the surrounding R style. Defer to the **`r-coding-style`** (formatting/idiom) and
-  **`r-analysis-workflow`** (data/reproducibility) skills — consult them before generating R code.
+## The loop
 
-## Testing
+```r
+devtools::load_all()
+devtools::document()   # after any roxygen or export change
+devtools::test()       # the primary gate
+```
 
-- `tests/testthat/` (edition 3); fixtures in `tests/testthat/fixtures/`, shared setup in
-  `helper-fixtures.R`. Run with `devtools::test()`. Pixel/keras tests run locally.
-- `dev/` is a scratch folder for development experiments — build-ignored (`.Rbuildignore`), and its
-  heavy model artifacts (`*.keras`, `*.h5`) are git-ignored. Nothing there ships in the package.
+Then, whenever a change could have moved results:
 
-## Current work
+```r
+source("dev/golden/check.R")             # metrics within 1e-8, pixel within 1e-5
+source("dev/golden/check_landscapes.R")  # exact, no tolerance
+```
 
-Active revisions are tracked in `../spatPatClassifyR_paper/REVISIONS.md` (the live todo list).
+`devtools::check()` is slow because examples and vignettes are heavy; use
+`devtools::check(vignettes = FALSE)` in the loop. **Never run `pkgdown::build_site()` or
+`build_reference()` on a branch**: they write about 79 files into the tracked `docs/`. Use
+`pkgdown::check_pkgdown()` instead, which takes seconds and writes nothing.
+
+## The sibling analysis repository
+
+`../spatPatClassifyRanalysis` reproduces the paper's figures and tables against this package's
+exported API. **Renaming or changing the signature of an export silently breaks it.** Update its
+call sites in the same change.
+
+## Code map
+
+- **Landscape generation**: `landscape_create.R` dispatches by pattern to 11 internal
+  `landscape_create_*.R` generators. Public surface is `create_landscape()` and
+  `create_landscapes()` only.
+- **Parameters**: `pattern_params.R` holds the 11 `pattern_*()` constructors;
+  `landscape_parameter_validation.R` holds the single canonical spec table.
+- **`landscape` S3 class**: `landscape_class.R`, `landscape_methods.R`, `landscape_utils.R`,
+  `landscape_geometry.R`.
+- **Metrics**: `metrics.R` computes, `metrics_evaluation.R` ranks and selects.
+- **Neural networks**: `nn_metrics.R`, `nn_keras.R`, shared helpers in `nn_utils.R`.
+- **Plotting**: `plot_landscapes.R`, `plot_classification.R`, `plot_metrics.R`, `plot_themes.R`.
+
+## Style
+
+Tidyverse idiom, native pipe `|>`, anonymous functions `\(x)`, `cli::` for all user-facing
+messages. R >= 4.1. Match the surrounding style, and consult the `r-coding-style` and
+`r-analysis-workflow` skills before generating R code.
