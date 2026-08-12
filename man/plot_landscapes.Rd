@@ -96,10 +96,10 @@ plot_landscapes(landscapes,
                    legend_title = "Vegetation")
 
 # Create many landscapes and handle overflow
-many_landscapes <- create_landscapes(n = 50)
+many_landscapes <- create_landscapes(n = 12, width = 50, height = 50)
 plot_landscapes(many_landscapes,
-                   max_landscapes = 9,  # Show first 9 only
-                   ncol = 3)            # In 3x3 grid
+                   max_landscapes = 4,  # Show first 4 only
+                   ncol = 2)            # In 2x2 grid
 }
 \seealso{
 \code{\link{create_landscape}}, \code{\link{create_landscapes}}

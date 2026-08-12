@@ -74,7 +74,9 @@ Note: Advanced optimizer parameters (e.g., momentum, beta values) are not curren
 \item{validation_split}{Numeric. Fraction of training data to use as validation set during
 final model training and passed to \code{\link[keras3]{fit}}(0-1, default: 0).
 When > 0, enables monitoring and early stopping on validation loss. Particularly useful when cv_method="none"
-to prevent overfitting. Ignored during CV fold training (which uses its own validation splits).}
+to prevent overfitting. Ignored during CV fold training (which uses its own validation splits).
+The training data is shuffled before the split, so the validation set is a
+random sample rather than the final landscapes in the order they were supplied.}
 
 \item{callbacks}{List. Optional keras callbacks for advanced training control (default: NULL).
 Examples: early stopping, learning rate scheduling, model checkpointing.
@@ -118,24 +120,27 @@ distinguishing different landscape patterns.
 }
 \examples{
 \donttest{
-# Create training data
+# Create training data. Kept small so the example runs quickly; real
+# training needs many more landscapes and epochs, see the vignette
+# "Classify landscapes using Keras on landscape rasters".
 training_landscapes <- create_landscapes(
-  n = 200,
-  patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
+  n = 12,
+  patterns = c("sharp", "diffuse", "random")
 )
 
 # Train with cross-validation
 model <- train_pixel_model(
   landscapes = training_landscapes,
   cv_method = "k-fold",
-  cv_folds = 5
+  cv_folds = 2,
+  epochs = 5
 )
 
 # Train without cross validation on all data
 final_model <- train_pixel_model(
   landscapes = training_landscapes,
   cv_method = "none",
-  epochs = 100
+  epochs = 5
 )
 }
 }

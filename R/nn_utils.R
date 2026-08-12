@@ -22,8 +22,8 @@
 #' \donttest{
 #' # Ensure reproducible training
 #' set_random_seed(42)
-#' landscapes <- create_landscapes(n=5)
-#' model <- train_pixel_model(landscapes, cv_method = "none", epochs = 10)
+#' landscapes <- create_landscapes(n = 6, patterns = c("sharp", "random"))
+#' model <- train_pixel_model(landscapes, cv_method = "none", epochs = 5)
 #' }
 set_random_seed <- function(seed) {
   if (!is.numeric(seed) || length(seed) != 1) {

@@ -57,24 +57,25 @@ model's expected dimensions.
 }
 \examples{
 \donttest{
-# Create training data
+# Create training data. Kept small so the example runs quickly; real
+# training needs many more landscapes and epochs, see the vignette
+# "Classify landscapes using Keras on landscape rasters".
 training_landscapes <- create_landscapes(
-  n = 200,
-  patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
+  n = 12,
+  patterns = c("sharp", "diffuse", "random")
 )
-
 
 # Train on all data for final deployment model
 final_model <- train_pixel_model(
   landscapes = training_landscapes,
   cv_method = "none",
-  epochs = 100
+  epochs = 5
 )
 
 # Evaluate on separate test set
 test_landscapes <- create_landscapes(
-  n = 10,
-  patterns = c("sharp", "diffuse", "clustered", "fingers", "bands", "random")
+  n = 6,
+  patterns = c("sharp", "diffuse", "random")
 )
 results <- apply_pixel_model(
   landscapes = test_landscapes,
