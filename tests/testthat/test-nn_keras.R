@@ -421,6 +421,26 @@ test_that("apply_pixel_model aborts on landscapes with NA cells", {
   )
 })
 
+test_that("apply_pixel_model aborts on a layer-count mismatch", {
+  # A stub model is enough here: the layer guard fires before the CNN is
+  # touched, so no keras training is needed.
+  stub_model <- list(
+    model = NULL,
+    classes = c("a", "b"),
+    input_shape = c(10, 10, 2)
+  )
+  single_layer <- landscape(
+    matrix(1, nrow = 10, ncol = 10),
+    pattern = "a",
+    name = "single"
+  )
+
+  expect_error(
+    apply_pixel_model(single_layer, stub_model),
+    "same number of layers"
+  )
+})
+
 test_that("apply_pixel_model warns on aspect-ratio distortion", {
   # Stub model + try(): the aspect warning fires before the CNN is used, and the
   # subsequent predict() on the stub errors, which try() swallows.

@@ -733,6 +733,18 @@ apply_pixel_model <- function(
 
   abort_on_na_cells(landscapes, "classify")
 
+  # Make sure that the data has the same number of layers as the training data
+  expected_layers <- input_shape[3]
+  n_layers <- vapply(landscapes, function(l) terra::nlyr(l$data), numeric(1))
+  if (any(n_layers != expected_layers)) {
+    wrong_indices <- which(n_layers != expected_layers)
+    cli::cli_abort(c(
+      "All landscapes must have the same number of layers as the training data.",
+      "x" = "Expected {expected_layers}, found {.val {unique(n_layers[wrong_indices])}} at index(es): {paste(wrong_indices, collapse = ', ')}",
+      "i" = "Resizing adjusts rows and columns only, not the layer count."
+    ))
+  }
+
   # Warn on aspect-ratio distortion. Resizing a landscape whose aspect ratio
   # differs from the training grid stretches it anisotropically which is a
   # geometric distortion of the pattern. (Extent differences alone are fine: the

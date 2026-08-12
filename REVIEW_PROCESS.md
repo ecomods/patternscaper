@@ -251,6 +251,22 @@ independently confirmed either way; flagging so it isn't lost, not asserting it'
 - **Fix, if GPU turns out to be used:** document the extra env var alongside
   `set_random_seed()`.
 
+### L31. ~~[new] `apply_pixel_model()` never checks the layer count against the trained model~~ (DONE 2026-08-12, found the same day)
+`R/nn_keras.R`, `apply_pixel_model()`. The function compares rows and columns against
+`nn_model$input_shape` and resamples to fit, but never compares `terra::nlyr()` against
+`input_shape[3]`. A landscape with a different layer count reached TensorFlow and failed there with
+`InvalidArgumentError: Graph execution error ... tf2xla conversion failed`, the apply-side twin of
+the cryptic `abind()` error **L28** prevents on the train side. Found while checking whether
+multi-layer landscapes can be trained on at all: they can, uniformly, since the layers arrive as CNN
+input channels and `create_multiscale_model()` takes its channel count from the data. No result
+impact, since every generator emits single-layer rasters and no analysis script feeds multi-layer
+input.
+- **Fixed:** abort when a landscape's layer count differs from the trained input shape, with a
+  regression test using a stub 2-channel model.
+- **Left open deliberately:** multi-layer input stays undocumented. It works by construction rather
+  than by design, is untested against the categorical-data requirement, and documenting it would
+  turn an accident into a supported contract.
+
 ---
 
 ## Next batch (re-planned 2026-08-05)
