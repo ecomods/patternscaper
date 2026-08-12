@@ -19,9 +19,9 @@
 #' }
 #'
 #' @examples
-#' # Create a landscape
-#' mat <- matrix(1:100, 10, 10)
-#' l <- landscape(mat, pattern = "test", name = "example")
+#' # Create a landscape (0 = bare ground, 1 = vegetation)
+#' mat <- matrix(rbinom(100, 1, 0.5), 10, 10)
+#' l <- landscape(mat, pattern = "random", name = "example")
 #'
 #' # Print it (calls print.landscape automatically)
 #' l
@@ -107,9 +107,9 @@ print.landscape <- function(x, ...) {
 #' the \code{\link{plot_landscapes}} function for higher-level customization.
 #'
 #' @examples
-#' # Create a landscape
-#' mat <- matrix(1:100, 10, 10)
-#' l <- landscape(mat, pattern = "test", name = "example")
+#' # Create a landscape (0 = bare ground, 1 = vegetation)
+#' mat <- matrix(rbinom(100, 1, 0.5), 10, 10)
+#' l <- landscape(mat, pattern = "random", name = "example")
 #'
 #' # Get basic plot
 #' p <- plot(l)

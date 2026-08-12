@@ -40,8 +40,8 @@ new_landscape <- function(
 #'     Default is NULL.
 #' @return A landscape object
 #' @examples
-#' # Create from a matrix
-#' mat <- matrix(runif(100), nrow = 10, ncol = 10)
+#' # Create from a binary matrix (0 = bare ground, 1 = vegetation)
+#' mat <- matrix(rbinom(100, 1, 0.5), nrow = 10, ncol = 10)
 #' l <- landscape(mat)
 #'
 #' # Create with pattern and name
