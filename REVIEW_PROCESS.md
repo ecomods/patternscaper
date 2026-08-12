@@ -221,6 +221,31 @@ there is no `load_pixel_model()` to reassemble the two. No result impact.
 - **Fix:** document the companion file in `@param model_path`, or fold into the existing
   "Website: better guide on how to save and load a Keras model" item.
 
+**Widened 2026-08-12: the companion file is a symptom, saving and loading is the item.** Checked
+across both workflows while working the pixel batch:
+
+| | metrics | pixels |
+|---|---|---|
+| save | `model_path` writes one `.rds` | `model_path` writes `.keras` plus `_metadata.rds` |
+| load | `readr::read_rds()`, shown in the `apply_metric_model()` example (`R/nn_metrics.R:507`) | nothing documented |
+| does the obvious load work? | yes | no |
+| vignette coverage | none | none |
+
+`keras3::load_model()` returns only the network, but `apply_pixel_model()` (`R/nn_keras.R:689-696`)
+requires a list carrying `model`, `classes` and `input_shape`, so loading the saved `.keras` file the
+obvious way aborts with *"'nn_model' must be a trained model from train_pixel_model()"*. The
+reassembly recipe (read the metadata, reattach the network to it) is written down only in
+`dev/test_save_load_pixels.R`, which is build-ignored and itself broken: lines 23-24 use
+`metadata_file` and `model_file` without ever defining them.
+
+**Decided 2026-08-12: resolve with convenience functions, not documentation.** The user should never
+handle the metadata file, so the fix is a save/load pair covering both workflows rather than prose
+explaining the two-file dance. The doc-only fix above was deliberately **not** done, because it would
+be rewritten by this work. Open design questions: function names and how far the two workflows should
+be made symmetric (the metrics side needs no helper today, but an asymmetric API is its own cost).
+Fixing `dev/test_save_load_pixels.R` belongs to this work too. Related: the "Better guide on how to
+save and load a Keras model" item under `# Website` in `../spatPatClassifyR_paper/REVISIONS.md`.
+
 ### L28. [new] Same-dimensions guard checks rows/columns, not layer count — *(added 2026-08-10)*
 `R/nn_keras.R:259-278`. The guard added to give a clear error instead of a cryptic `abind()`
 failure compares `terra::nrow()`/`terra::ncol()` across training landscapes but not
