@@ -52,6 +52,8 @@
 #'   final model training and passed to \code{\link[keras3]{fit}}(0-1, default: 0).
 #'   When > 0, enables monitoring and early stopping on validation loss. Particularly useful when cv_method="none"
 #'   to prevent overfitting. Ignored during CV fold training (which uses its own validation splits).
+#'   The training data is shuffled before the split, so the validation set is a
+#'   random sample rather than the final landscapes in the order they were supplied.
 #' @param verbose Logical. Show training progress and performance summaries (default: TRUE).
 #'   When TRUE, displays epoch-by-epoch training/validation metrics during final model training,
 #'   plus CV fold accuracies and final performance summaries. CV fold epoch details are not shown.
@@ -378,6 +380,19 @@ train_pixel_model <- function(
   cv_method <- cv_params$cv_method
   cv_folds <- cv_params$cv_folds
 
+  # Shuffle the training data for the final model.
+  # keras3::fit() uses the last portion of the data for validation so we
+  # shuffle it in case a validation split is used to make sure it is balanced.
+  # The CV folds are left in input order because find_balanced_cv_folds()
+  # stratifies them already.
+  x_final <- x_data
+  y_final <- y_data
+  if (validation_split > 0) {
+    shuffled_order <- sample(nrow(x_data))
+    x_final <- x_data[shuffled_order, , , , drop = FALSE]
+    y_final <- y_data[shuffled_order, , drop = FALSE]
+  }
+
   # Check cross-validation method and parameters -------------------------------
   # Run model with cross validation --------------------------------------------
   if (cv_method != "none") {
@@ -531,8 +546,8 @@ train_pixel_model <- function(
     # Train the fold model
     history <- final_model |>
       keras3::fit(
-        x = x_data,
-        y = y_data,
+        x = x_final,
+        y = y_final,
         epochs = epochs,
         batch_size = batch_size,
         callbacks = callbacks,
@@ -563,8 +578,8 @@ train_pixel_model <- function(
 
     history <- final_model |>
       keras3::fit(
-        x = x_data,
-        y = y_data,
+        x = x_final,
+        y = y_final,
         epochs = epochs,
         batch_size = batch_size,
         validation_split = validation_split,

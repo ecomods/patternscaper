@@ -215,6 +215,29 @@ test_that("train_pixel_model aborts on continuous cell values", {
   )
 })
 
+test_that("train_pixel_model shuffles only when a validation split is used", {
+  skip_if_not_installed("keras3")
+
+  # keras carves the validation set from the end of the input, so the data is
+  # shuffled first. That draw must not happen at validation_split = 0, where it
+  # would shift the RNG stream and move existing results.
+  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+
+  run_and_capture_seed <- function(validation_split) {
+    set.seed(1)
+    train_pixel_model(
+      landscapes,
+      cv_method = "none",
+      epochs = 1,
+      validation_split = validation_split,
+      verbose = FALSE
+    )
+    get(".Random.seed", envir = .GlobalEnv)
+  }
+
+  expect_false(identical(run_and_capture_seed(0.2), run_and_capture_seed(0)))
+})
+
 test_that("train_pixel_model handles model_path validation", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 
