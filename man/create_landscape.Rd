@@ -29,9 +29,8 @@ for example \code{\link{pattern_spots}} (default: NULL). Must hold single values
 for each parameter, ranges are only meaningful for \code{\link{create_landscapes}},
 i.e. for creating multiple landscapes.}
 
-\item{rotation}{Numeric. Single angle to rotate the landscape in degrees
-(0-360, default: 0). Ranges are only meaningful for
-\code{\link{create_landscapes}}. Only "sharp", "diffuse", "fingers",
+\item{rotation}{Numeric. Angle to rotate the landscape in degrees
+(0-360, default: 0). Only "sharp", "diffuse", "fingers",
 "clustered" and "bands" are rotated. The remaining patterns ignore it,
 are generated without rotation and a warning is given.}
 }

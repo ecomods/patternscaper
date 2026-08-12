@@ -28,9 +28,9 @@ create_landscapes(
 \item{height}{Integer. Height of all landscapes in pixels (default: 100).}
 
 \item{rotation}{Numeric. Angle in degrees (default: \code{c(0, 360)}).
-A single value applies that angle to every landscape, whereas a length-2
-vector gives the lower and upper bounds of a uniform range, drawn once
-per landscape and rounded to whole degrees. Only "sharp", "diffuse",
+A single value applies that angle to every landscape. A length-2
+vector gives the lower and upper bounds of a uniform range, drawn for each
+landscape as an integer. Only "sharp", "diffuse",
 "fingers", "clustered" and "bands" are rotated; the remaining patterns
 ignore it.}
 
