@@ -16,3 +16,6 @@
 ^README\.Rmd$
 \.drawio$
 ^tests/testthat/_problems$
+^CLAUDE\.md$
+^\.quarto$
+^tests/testthat/Rplots\.pdf$
