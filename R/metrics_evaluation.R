@@ -123,7 +123,7 @@ new_metrics_evaluation <- function(
 #'
 #' @return `x`, invisibly.
 #' @examples
-#' landscapes <- create_landscapes(n = 20, patterns = c("spots", "random"))
+#' landscapes <- create_landscapes(n = 10, patterns = c("spots", "random"))
 #' metrics <- calculate_metrics(landscapes, level = "landscape")
 #' evaluate_metrics(metrics, metrics_number = 5)
 #' @family metrics
@@ -248,7 +248,7 @@ print.metrics_evaluation <- function(x, ...) {
 #'   this object directly, so it can be passed straight on.
 #' @examples
 #' # Calculate most suitable metrics to discriminate between spots and random landscapes
-#' landscapes <- create_landscapes(n = 50, patterns = c("spots","random"))
+#' landscapes <- create_landscapes(n = 10, patterns = c("spots", "random"))
 #' metrics <- calculate_metrics(
 #'   landscapes,
 #'   level = "landscape"

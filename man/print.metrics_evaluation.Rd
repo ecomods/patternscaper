@@ -21,7 +21,7 @@ passed in and is usually too long to read in the console; use `x$ranking` to
 see it.
 }
 \examples{
-landscapes <- create_landscapes(n = 20, patterns = c("spots", "random"))
+landscapes <- create_landscapes(n = 10, patterns = c("spots", "random"))
 metrics <- calculate_metrics(landscapes, level = "landscape")
 evaluate_metrics(metrics, metrics_number = 5)
 }

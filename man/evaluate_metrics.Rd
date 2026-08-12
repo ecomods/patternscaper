@@ -112,7 +112,7 @@ for given data regardless of its row order.
 
 \examples{
 # Calculate most suitable metrics to discriminate between spots and random landscapes
-landscapes <- create_landscapes(n = 50, patterns = c("spots","random"))
+landscapes <- create_landscapes(n = 10, patterns = c("spots", "random"))
 metrics <- calculate_metrics(
   landscapes,
   level = "landscape"

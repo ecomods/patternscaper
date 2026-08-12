@@ -106,7 +106,6 @@ calculate_single_metric <- function(landscapes, function_name) {
 #' @importFrom purrr map_dfr
 #'
 #' @examples
-#' \donttest{
 #' # Calculate all landscape-level metrics for a single landscape
 #' landscape <- create_landscape(pattern = "labyrinth")
 #' metrics <- calculate_metrics(landscape)
@@ -118,8 +117,6 @@ calculate_single_metric <- function(landscapes, function_name) {
 #'   metrics = c("ai", "lsi"),
 #'   level = "landscape"
 #' )
-#'
-#' }
 calculate_metrics <- function(
   landscapes,
   metrics = NULL,

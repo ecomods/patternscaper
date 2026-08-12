@@ -56,7 +56,6 @@ from the landscapemetrics package. Returns a standardized tibble with results
 including landscape identifiers, metric values, and any warnings.
 }
 \examples{
-\donttest{
 # Calculate all landscape-level metrics for a single landscape
 landscape <- create_landscape(pattern = "labyrinth")
 metrics <- calculate_metrics(landscape)
@@ -68,8 +67,6 @@ metrics <- calculate_metrics(
   metrics = c("ai", "lsi"),
   level = "landscape"
 )
-
-}
 }
 \references{
 Hesselbarth, M.H.K., Sciaini, M., With, K.A., Wiegand, K., & Nowosad, J.
