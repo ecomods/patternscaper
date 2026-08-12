@@ -198,6 +198,23 @@ test_that("train_pixel_model aborts on heterogeneous layer counts", {
   )
 })
 
+test_that("train_pixel_model aborts on continuous cell values", {
+  # Aborts before any keras call, so no training happens.
+  landscapes <- list(
+    landscape(matrix(0, nrow = 10, ncol = 10), pattern = "a", name = "l1"),
+    landscape(
+      matrix(c(0.5, rep(1, 99)), nrow = 10, ncol = 10),
+      pattern = "b",
+      name = "l2"
+    )
+  )
+
+  expect_error(
+    train_pixel_model(landscapes, cv_method = "none", epochs = 1, verbose = FALSE),
+    "continuous cell values"
+  )
+})
+
 test_that("train_pixel_model handles model_path validation", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 
@@ -419,6 +436,66 @@ test_that("apply_pixel_model aborts on landscapes with NA cells", {
     apply_pixel_model(masked, stub_model),
     "NA cells"
   )
+})
+
+test_that("apply_pixel_model aborts on continuous cell values", {
+  stub_model <- list(
+    model = NULL,
+    classes = c("a", "b"),
+    input_shape = c(10, 10, 1)
+  )
+  continuous <- landscape(
+    matrix(seq(0, 1, length.out = 100), nrow = 10, ncol = 10),
+    pattern = "a",
+    name = "continuous"
+  )
+
+  expect_error(
+    apply_pixel_model(continuous, stub_model),
+    "continuous cell values"
+  )
+})
+
+test_that("apply_pixel_model warns on many distinct cell values", {
+  # Whole numbers, so the abort does not fire, but 100 classes is not habitat
+  # data. Stub model + try(): the warning fires before the CNN is used.
+  stub_model <- list(
+    model = NULL,
+    classes = c("a", "b"),
+    input_shape = c(10, 10, 1)
+  )
+  many_valued <- landscape(
+    matrix(seq_len(100), nrow = 10, ncol = 10),
+    pattern = "a",
+    name = "many"
+  )
+
+  w <- capture_warnings(try(
+    apply_pixel_model(many_valued, stub_model),
+    silent = TRUE
+  ))
+  expect_true(any(grepl("distinct cell values", w)))
+})
+
+test_that("apply_pixel_model accepts whole numbers stored as doubles", {
+  # binarize_images() in the analysis repo builds 0/1 with ifelse(), which
+  # returns doubles. The guard tests values, not the raster's storage type.
+  stub_model <- list(
+    model = NULL,
+    classes = c("a", "b"),
+    input_shape = c(10, 10, 1)
+  )
+  binary_double <- landscape(
+    matrix(rep(c(0, 1), 50), nrow = 10, ncol = 10),
+    pattern = "a",
+    name = "binary"
+  )
+
+  err <- tryCatch(
+    apply_pixel_model(binary_double, stub_model),
+    error = function(e) conditionMessage(e)
+  )
+  expect_false(grepl("continuous cell values", err))
 })
 
 test_that("apply_pixel_model aborts on a layer-count mismatch", {

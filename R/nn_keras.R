@@ -292,6 +292,7 @@ train_pixel_model <- function(
   }
 
   abort_on_na_cells(landscapes, "train on")
+  check_categorical_values(landscapes, "train on")
 
   # Convert all landscapes to arrays
   training_arrays <- lapply(landscapes, function(l) {
@@ -732,6 +733,7 @@ apply_pixel_model <- function(
   })
 
   abort_on_na_cells(landscapes, "classify")
+  check_categorical_values(landscapes, "classify")
 
   # Make sure that the data has the same number of layers as the training data
   expected_layers <- input_shape[3]

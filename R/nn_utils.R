@@ -301,6 +301,57 @@ abort_on_na_cells <- function(landscapes, action) {
   invisible(NULL)
 }
 
+#' Check that cell values are categorical
+#'
+#' The pixel workflow reads raw cell values and we need to ensure that they are
+#' categorical in nature. We accept whole numbers but warn if there are too many
+#' as many distinct whole values are legal but usually mean integer-coded continuous data
+#' (e.g. elevation in whole metres).
+#' Used by both \code{\link{train_pixel_model}} and \code{\link{apply_pixel_model}}
+#' so the two refuse the same input.
+#'
+#' @param landscapes List of landscape objects.
+#' @param action Character. Verb naming what the caller was about to do, used in
+#'   the message ("train on", "classify").
+#' @param max_distinct Integer. Distinct-value count above which the input is
+#'   reported as probably continuous (default: 20). Chosen to sit above any
+#'   habitat classification scheme in practical use and far below the hundreds
+#'   or thousands of levels continuous data carries.
+#'
+#' @return Invisibly `NULL`. Called for the error and the warning.
+#'
+#' @keywords internal
+#' @importFrom cli cli_abort cli_warn
+check_categorical_values <- function(landscapes, action, max_distinct = 20) {
+  # Unique per landscape first, so the union stays small for large training sets
+  distinct_values <- unique(unlist(lapply(
+    landscapes,
+    function(l) unique(terra::values(l$data))
+  )))
+  distinct_values <- distinct_values[!is.na(distinct_values)]
+
+  non_whole <- sort(distinct_values[distinct_values != round(distinct_values)])
+  if (length(non_whole) > 0) {
+    shown <- non_whole[seq_len(min(5, length(non_whole)))]
+    cli::cli_abort(c(
+      "Cannot {action} landscapes with continuous cell values.",
+      "x" = "Found {length(non_whole)} non-whole value{?s}, including {.val {shown}}",
+      "i" = "The pixel workflow reads cell values as class labels, so it requires categorical data.",
+      "i" = "Classify continuous data, such as elevation or a vegetation index, into discrete types first."
+    ))
+  }
+
+  if (length(distinct_values) > max_distinct) {
+    cli::cli_warn(c(
+      "Landscapes hold {length(distinct_values)} distinct cell values.",
+      "i" = "Categorical habitat data usually has a handful of classes. Make sure your data is valid.",
+      "i" = "Integer-coded continuous data, for example elevation in whole metres, passes the check but is meaningless to use in the model."
+    ))
+  }
+
+  invisible(NULL)
+}
+
 #' Validate and adjust cross-validation parameters
 #'
 #' Checks if the dataset is suitable for the requested cross-validation method
