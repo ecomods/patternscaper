@@ -82,22 +82,29 @@ output layer represents the pattern classes.
 \examples{
 \donttest{
 # Generate training landscapes
-landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse"))
+landscapes <- create_landscapes(n = 18, patterns = c("random", "sharp", "diffuse"))
 
 # Calculate landscape metrics
 metrics <- calculate_metrics(landscapes, level = "landscape")
 
-# Find the best 10 metrics for classification
-best_10 <- evaluate_metrics(metrics, metrics_number = 10)
+# Find the best 5 metrics for classification
+best_5 <- evaluate_metrics(metrics, metrics_number = 5)
 
-# Train model with cross-validation
-model <- train_metric_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
+# Train model with cross-validation. Only 2 folds, as each fold needs at
+# least 3 landscapes per pattern.
+model <- train_metric_model(
+  metrics,
+  metrics_selected = best_5,
+  cv_method = "k-fold",
+  cv_folds = 2
+)
 
-# Train with specific metrics
+# Train with specific metrics, on all data and without cross-validation
 selected <- c("ai", "lsi", "ed", "np")
 model <- train_metric_model(
   metrics,
   metrics_selected = selected,
+  cv_method = "none",
   hidden_layers = c(8, 4)
 )
 }

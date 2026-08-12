@@ -109,14 +109,19 @@ informative note (suppressed when \code{verbose = FALSE}).
 \examples{
 \donttest{
 # Train a model on reference landscapes
-train_landscapes <- create_landscapes(n = 30, patterns = c("random", "sharp", "diffuse"))
+train_landscapes <- create_landscapes(n = 18, patterns = c("random", "sharp", "diffuse"))
 metrics <- calculate_metrics(train_landscapes, level = "landscape")
-# find the best 10 metrics for classification
-best_10 <- evaluate_metrics(metrics, metrics_number = 10)
-model <- train_metric_model(metrics, metrics_selected = best_10, cv_method = "k-fold", cv_folds = 3)
+# find the best 5 metrics for classification
+best_5 <- evaluate_metrics(metrics, metrics_number = 5)
+# Train on all data, then evaluate below on a separate test set
+model <- train_metric_model(
+  metrics,
+  metrics_selected = best_5,
+  cv_method = "none"
+)
 
 # Apply to new landscapes
-new_landscapes <- create_landscapes(n = 5, patterns = c("random", "sharp"))
+new_landscapes <- create_landscapes(n = 6, patterns = c("random", "sharp", "diffuse"))
 predictions <- apply_metric_model(new_landscapes, model)
 predictions
 
