@@ -496,6 +496,11 @@ train_pixel_model <- function(
           "Fold {fold}/{cv_folds} accuracy: {round(evaluation[['accuracy']], 4)}"
         )
       }
+
+      # Release the fold model before the next one is built
+      rm(fold_model)
+      gc(verbose = FALSE)
+      keras3::clear_session()
     }
 
     # Evaluate cv performance -------------------------------------------------

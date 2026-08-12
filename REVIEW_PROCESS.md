@@ -110,6 +110,39 @@ model creation in one process.
   internal state at exactly the point `set_random_seed()`-driven initialization happens, so
   confirm rather than assume.
 
+**MEASURED and DONE 2026-08-12.** The leak is real and larger than the "plausible, unverified"
+framing above. 20 iterations of the real create/compile/fit cycle at 50x50 input, one R process per
+variant, RSS via `ps::ps_memory_info()`:
+
+| variant | growth over 20 iterations | MB per model | reduction |
+|---|---|---|---|
+| no cleanup | 780 MB | 41.3 | baseline |
+| `clear_session()` alone | 685 MB | 35.3 | 15% |
+| `rm()` + `gc()` + `clear_session()` | 578 MB | 30.2 | 27% |
+
+Growth is linear rather than a warmup ramp: the no-cleanup run grows 40 MB per iteration over
+iterations 1 to 5 and 41 MB over iterations 10 to 20.
+
+**Two corrections to the fix as written above.** First, `clear_session()` in keras3 1.5.1 is
+`clear_session(free_memory = TRUE)`, and `free_memory` is documented as "whether to call Python
+garbage collection", so Python collection already happens and was never the reason to add `gc()`.
+The R-side `gc()` earns its 5 MB per iteration for a different reason: Python cannot free an object
+while its `reticulate` proxy is still referenced from R. Second, that makes the order matter, and the
+suggested one was backwards: `rm()`, then `gc()`, then `clear_session()`. Placing `clear_session()`
+at the *top* of the iteration as suggested would not have helped at all, since `fold_model` still
+points at the previous model at that moment.
+
+**Implemented in the fold loop only**, not before the final model: in the CV branch the last
+iteration's cleanup has already run, and in the `cv_method = "none"` branch there is nothing to
+clear. **Verified inert** against the freshly blessed `dev/golden/check.R` (metrics `1e-8`, pixel
+`1e-5`); the harness runs `cv_folds = 2`, so the cleanup path is genuinely exercised.
+
+**Known limitation, not fixable from R.** About 30 MB per model still leaks with full cleanup, so a
+5-fold run loses roughly 150 MB and a long sweep keeps climbing. The residual sits below the R API,
+most likely TensorFlow's allocator not returning arenas to the OS plus `tf.function` tracing caches
+(retracing warnings are visible in this package's own test output). **For the HPC systematic-test
+sweep the dependable answer is a fresh R process per replicate**, not in-loop cleanup.
+
 ### M25. [new] `apply_pixel_model()` skips performance for every landscape if any known-class landscape has an unseen class — *(added 2026-08-10)*
 `R/nn_keras.R:897-914`. When `return_performance = TRUE`, the function computes
 `unknown_classes <- setdiff(unique_actual, class_names)` across the *whole* known-class
