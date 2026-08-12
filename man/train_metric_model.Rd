@@ -121,6 +121,7 @@ model <- train_metric_model(
 \code{\link{apply_metric_model}}, \code{\link{evaluate_metrics}}
 
 Other neural network training:
+\code{\link[=keras_available]{keras_available()}},
 \code{\link[=set_random_seed]{set_random_seed()}},
 \code{\link[=train_pixel_model]{train_pixel_model()}}
 }

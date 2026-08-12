@@ -23,17 +23,17 @@ The `keras3` package is installed together with `spatPatClassifyR`, and `reticul
 
 ```{r}
 #| label: load-packages
+library(spatPatClassifyR)
 library(keras3)
 library(reticulate)
 ```
 
-First, you can check if you already have the keras and tensorflow modules installed
-using:
+First, you can check whether `keras3` can already reach a working TensorFlow
+backend:
 
 ```{r}
 #| label: check-keras
-reticulate::py_module_available("keras") &&
-  reticulate::py_module_available("tensorflow")
+keras_available()
 ```
 
 If this returns `TRUE`, your installation is already working and you can skip the rest of this guide.
@@ -91,8 +91,7 @@ Now, check again if the installation was successful:
 
 ```{r}
 #| label: check-keras-again
-reticulate::py_module_available("keras") &&
-  reticulate::py_module_available("tensorflow")
+keras_available()
 ```
 
 ## Test Your Installation

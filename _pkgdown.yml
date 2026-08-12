@@ -53,6 +53,7 @@ reference:
   - train_metric_model
   - train_pixel_model
   - set_random_seed
+  - keras_available
 
 - title: Neural network application
   desc: Apply trained classifiers to new landscapes

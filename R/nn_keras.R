@@ -80,8 +80,7 @@
 #' @family neural network training
 #' @export
 #' @importFrom utils flush.console
-#' @examples
-#' \donttest{
+#' @examplesIf keras_available()
 #' # Create training data. Kept small so the example runs quickly; real
 #' # training needs many more landscapes and epochs, see the vignette
 #' # "Classify landscapes using Keras on landscape rasters".
@@ -104,7 +103,6 @@
 #'   cv_method = "none",
 #'   epochs = 5
 #' )
-#' }
 train_pixel_model <- function(
   landscapes,
   cv_method = "k-fold",
@@ -673,8 +671,7 @@ train_pixel_model <- function(
 #'     \item{predictions}{Tibble as above, plus actual_class column}
 #'     \item{performance}{Performance metrics from evaluate_cv_performance()}
 #'   }
-#' @examples
-#' \donttest{
+#' @examplesIf keras_available()
 #' # Create training data. Kept small so the example runs quickly; real
 #' # training needs many more landscapes and epochs, see the vignette
 #' # "Classify landscapes using Keras on landscape rasters".
@@ -700,7 +697,6 @@ train_pixel_model <- function(
 #'   nn_model = final_model,
 #'   return_performance = TRUE
 #' )
-#' }
 #' @seealso \code{\link{train_pixel_model}}, \code{\link{plot_classified_landscapes}}
 #' @family neural network application
 #' @export

@@ -56,7 +56,7 @@ spatial patterns. Automatically resizes input landscapes to match the
 model's expected dimensions.
 }
 \examples{
-\donttest{
+\dontshow{if (keras_available()) withAutoprint(\{ # examplesIf}
 # Create training data. Kept small so the example runs quickly; real
 # training needs many more landscapes and epochs, see the vignette
 # "Classify landscapes using Keras on landscape rasters".
@@ -82,7 +82,7 @@ results <- apply_pixel_model(
   nn_model = final_model,
   return_performance = TRUE
 )
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link{train_pixel_model}}, \code{\link{plot_classified_landscapes}}

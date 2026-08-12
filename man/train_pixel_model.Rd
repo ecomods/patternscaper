@@ -119,7 +119,7 @@ spatial patterns (pixel data). The function uses a multiscale CNN architecture o
 distinguishing different landscape patterns.
 }
 \examples{
-\donttest{
+\dontshow{if (keras_available()) withAutoprint(\{ # examplesIf}
 # Create training data. Kept small so the example runs quickly; real
 # training needs many more landscapes and epochs, see the vignette
 # "Classify landscapes using Keras on landscape rasters".
@@ -142,12 +142,13 @@ final_model <- train_pixel_model(
   cv_method = "none",
   epochs = 5
 )
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link{apply_pixel_model}}
 
 Other neural network training:
+\code{\link[=keras_available]{keras_available()}},
 \code{\link[=set_random_seed]{set_random_seed()}},
 \code{\link[=train_metric_model]{train_metric_model()}}
 }

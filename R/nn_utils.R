@@ -1,3 +1,37 @@
+#' Is the Keras TensorFlow Backend Usable?
+#'
+#' Reports whether \pkg{keras3} can reach a working TensorFlow backend. Use it
+#' to check your setup before running \code{\link{train_pixel_model}} or
+#' \code{\link{apply_pixel_model}}.
+#'
+#' @details
+#' Only TensorFlow is checked as a backend; \pkg{keras3} also runs on jax and torch, but the
+#' pixel workflow is tested against TensorFlow, which is what
+#' \code{\link[keras3]{install_keras}} installs by default.
+#'
+#' If this returns \code{FALSE}, the backend is missing or is not TensorFlow,
+#' and the pixel-based functions cannot run. The metrics-based workflow
+#' (\code{\link{train_metric_model}}) is unaffected. To set up the
+#' backend, point \pkg{reticulate} at a suitable Python and run
+#' \code{keras3::install_keras()}, which
+#' \code{vignette("install-keras", package = "spatPatClassifyR")} walks
+#' through.
+#'
+#' @return `TRUE` or `FALSE` depending on whether the backend is set up.
+#'
+#' @seealso \code{\link[keras3]{install_keras}} to set the backend up.
+#' @family neural network training
+#' @export
+#' @examples
+#' # TRUE once keras3 has a working TensorFlow backend
+#' keras_available()
+keras_available <- function() {
+  tryCatch(
+    identical(keras3::config_backend(), "tensorflow"),
+    error = function(e) FALSE
+  )
+}
+
 #' Set Random Seeds for Reproducible Neural Network Training
 #'
 #' Sets random seeds for R and Keras to ensure reproducible results when
@@ -18,13 +52,11 @@
 #'
 #' @family neural network training
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf keras_available()
 #' # Ensure reproducible training
 #' set_random_seed(42)
 #' landscapes <- create_landscapes(n = 6, patterns = c("sharp", "random"))
 #' model <- train_pixel_model(landscapes, cv_method = "none", epochs = 5)
-#' }
 set_random_seed <- function(seed) {
   if (!is.numeric(seed) || length(seed) != 1) {
     cli::cli_abort("{.arg seed} must be a single integer value")

@@ -26,15 +26,16 @@ Both must be seeded for reproducible results. Note that minor variations
 may still occur across different hardware/software configurations.
 }
 \examples{
-\donttest{
+\dontshow{if (keras_available()) withAutoprint(\{ # examplesIf}
 # Ensure reproducible training
 set_random_seed(42)
 landscapes <- create_landscapes(n = 6, patterns = c("sharp", "random"))
 model <- train_pixel_model(landscapes, cv_method = "none", epochs = 5)
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other neural network training:
+\code{\link[=keras_available]{keras_available()}},
 \code{\link[=train_metric_model]{train_metric_model()}},
 \code{\link[=train_pixel_model]{train_pixel_model()}}
 }
