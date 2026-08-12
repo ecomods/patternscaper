@@ -23,19 +23,6 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @noRd
-#' @examples
-#' \dontrun{
-#' # Default gaps (bare patches in vegetation)
-#' gaps_default <- create_landscape_gaps()
-#'
-#' # More gaps with size variation
-#' gaps_modified <- create_landscape_gaps(
-#'   n_gaps = 15,
-#'   gap_radius = 8,
-#'   gap_radius_sd = 2
-#' )
-#' }
-#'
 create_landscape_gaps <- function(
   width = 100,
   height = 100,

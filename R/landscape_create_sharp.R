@@ -9,23 +9,6 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @noRd
-#'
-#' @examples
-#' \dontrun{
-#' # Default sharp vegetation boundary
-#' sharp_default <- create_landscape_sharp()
-#'
-#' # Modified sharp vegetation boundary with higher boundary position
-#' sharp_modified <- create_landscape_sharp(
-#'   boundary_position = 0.7
-#' )
-#'
-#' # Landscape with rotation
-#' sharp_rotated <- create_landscape_sharp(
-#'   boundary_position = 0.3,
-#'   rotation = 45
-#' )
-#' }
 create_landscape_sharp <- function(
   width = 100,
   height = 100,

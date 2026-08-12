@@ -16,32 +16,6 @@
 #' @importFrom stats runif
 #' @importFrom terra as.matrix
 #' @importFrom cli cli_abort
-#'
-#' @examples
-#' \dontrun{
-#' # Default clustered features
-#' clustered_default <- create_landscape_clustered()
-#'
-#' # Modified clustered features with horizontally elongated clusters
-#' clustered_modified <- create_landscape_clustered(
-#'   boundary_position = 0.2,
-#'   n_clusters = 8,
-#'   cluster_radius = 7,
-#'   cluster_zone = 0.6,
-#'   elongation_x = 2.5,
-#'   elongation_y = 0.5
-#' )
-#'
-#' # Rotated landscape with mixed parameters
-#' clustered_rotated <- create_landscape_clustered(
-#'   n_clusters = 20,
-#'   cluster_radius = 2,
-#'   cluster_zone = 0.5,
-#'   elongation_x = 1.8,
-#'   elongation_y = 1.4,
-#'   rotation = 45
-#' )
-#' }
 create_landscape_clustered <- function(
   width = 100,
   height = 100,

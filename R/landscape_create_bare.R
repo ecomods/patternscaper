@@ -12,14 +12,6 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @noRd
-#' @examples
-#' \dontrun{
-#' # Create default bare landscape (10% vegetation)
-#' bare <- create_landscape_bare()
-#'
-#' # Create very sparse landscape
-#' very_bare <- create_landscape_bare(veg_prob = 0.05)
-#' }
 create_landscape_bare <- function(
   veg_prob = 0.1,
   width = 100,

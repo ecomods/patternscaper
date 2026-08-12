@@ -8,18 +8,6 @@
 #'   \item{pattern}{Character string "random"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @examples
-#' \dontrun{
-#' # Default randomly distributed vegetation
-#' random_default <- create_landscape_random()
-#'
-#' # Higher vegetation density
-#' random_dense <- create_landscape_random(veg_prob = 0.7)
-#'
-#' # Custom dimensions
-#' random_large <- create_landscape_random(width = 200, height = 150)
-#' }
-#'
 #' @noRd
 #' @importFrom stats rbinom
 create_landscape_random <- function(

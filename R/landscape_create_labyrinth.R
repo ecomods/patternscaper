@@ -28,28 +28,6 @@
 #' while `veg_threshold` determines vegetation proportion.
 #'
 #' @noRd
-#' @examples
-#' \dontrun{
-#' # Default labyrinth pattern
-#' labyrinth_default <- create_landscape_labyrinth()
-#'
-#' # Modified labyrinth with higher frequency and multiple octaves
-#' labyrinth_modified <- create_landscape_labyrinth(
-#'   frequency = 8,
-#'   octaves = 3,
-#'   band_fuzziness = 0.05
-#' )
-#'
-#' # Adjust vegetation coverage
-#' labyrinth_sparse <- create_landscape_labyrinth(
-#'   veg_threshold = 0.6  # Less vegetation
-#' )
-#'
-#' labyrinth_dense <- create_landscape_labyrinth(
-#'   veg_threshold = 0.3  # More vegetation
-#' )
-#' }
-#'
 #' @importFrom ambient long_grid gen_perlin
 create_landscape_labyrinth <- function(
   width = 100,

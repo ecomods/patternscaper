@@ -12,14 +12,6 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @noRd
-#' @examples
-#' \dontrun{
-#' # Create default dense landscape (90% vegetation)
-#' dense <- create_landscape_dense()
-#'
-#' # Create very dense landscape
-#' very_dense <- create_landscape_dense(veg_prob = 0.95)
-#' }
 create_landscape_dense <- function(
   veg_prob = 0.9,
   width = 100,

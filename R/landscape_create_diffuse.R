@@ -12,32 +12,6 @@
 #' @noRd
 #' @importFrom cli cli_abort
 #' @importFrom stats runif
-#'
-#' @examples
-#' \dontrun{
-#' # Default diffuse vegetation boundary
-#' diffuse_default <- create_landscape_diffuse()
-#'
-#' # Sharp transition (lower steepness)
-#' diffuse_sharp <- create_landscape_diffuse(
-#'   boundary_position = 0.2,
-#'   steepness = 0.1
-#' )
-#'
-#' # Gradual transition (higher steepness)
-#' diffuse_gradual <- create_landscape_diffuse(
-#'   boundary_position = 0.3,
-#'   steepness = 0.9
-#' )
-#'
-#' # With rotation
-#' diffuse_rotated <- create_landscape_diffuse(
-#'   boundary_position = 0.3,
-#'   steepness = 0.7,
-#'   rotation = 45
-#' )
-#' }
-#'
 create_landscape_diffuse <- function(
   width = 100,
   height = 100,

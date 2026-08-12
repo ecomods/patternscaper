@@ -13,25 +13,6 @@
 #'
 #' @noRd
 #' @importFrom cli cli_warn cli_abort
-#'
-#' @examples
-#' \dontrun{
-#' # Default curvy fingers boundary
-#' fingers_default <- create_landscape_fingers()
-#'
-#' # Modified parameters for more variation
-#' fingers_modified <- create_landscape_fingers(
-#'   sine_length_mean = 15,
-#'   sine_length_sd = 10,
-#'   sine_height_mean = 10,
-#'   sine_height_sd = 6
-#' )
-#'
-#' # With rotation
-#' fingers_rotated <- create_landscape_fingers(
-#'   rotation = 45
-#' )
-#' }
 create_landscape_fingers <- function(
   width = 100,
   height = 100,

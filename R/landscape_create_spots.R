@@ -16,40 +16,6 @@
 #'   \item{pattern}{Character string "spots"}
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
-#' @examples
-#' \dontrun{
-#' # Default spots (random placement)
-#' spots_default <- create_landscape_spots()
-#'
-#' # More spots with random size variation
-#' spots_modified <- create_landscape_spots(
-#'   n_spots = 15,
-#'   spot_radius = 8,
-#'   spot_radius_sd = 2
-#' )
-#'
-#' # Regular hexagonal arrangement with slight jitter
-#' spots_regular <- create_landscape_spots(
-#'   n_spots = 12,
-#'   spot_radius = 10,
-#'   regular_spots = TRUE
-#' )
-#'
-#' # Gradual edges using radius noise fraction
-#' spots_gradual <- create_landscape_spots(
-#'   n_spots = 10,
-#'   spot_radius = 12,
-#'   radius_noise_fraction = 0.3
-#' )
-#'
-#' # Inverted (bare patches in vegetated ground)
-#' spots_inverted <- create_landscape_spots(
-#'   n_spots = 15,
-#'   spot_radius = 8,
-#'   invert_landscape = TRUE
-#' )
-#' }
-#'
 #' @noRd
 #' @importFrom stats kmeans rnorm runif
 #' @importFrom cli cli_alert_warning

@@ -10,32 +10,6 @@
 #'   \item{params}{List of all input parameters used to generate the landscape}
 #'
 #' @noRd
-#' @examples
-#' \dontrun{
-#' # Default sine bands
-#' bands_default <- create_landscape_bands()
-#'
-#' # Modified sine bands with thicker bands, wider spacing and noise
-#' bands_modified <- create_landscape_bands(
-#'   boundary_position = 0.3,
-#'   band_zone = 0.5,
-#'   band_thickness = 5,
-#'   band_spacing = 15,
-#'   frequency = 1,
-#'   amplitude = 8,
-#'   noise_sd = 1.5
-#' )
-#'
-#' # With rotation
-#' bands_rotated <- create_landscape_bands(
-#'   band_thickness = 4,
-#'   band_spacing = 12,
-#'   amplitude = 6,
-#'   noise_sd = 2,
-#'   rotation = 45
-#' )
-#' }
-#'
 #' @importFrom stats rnorm
 create_landscape_bands <- function(
   width = 100,
