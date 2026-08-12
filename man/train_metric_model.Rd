@@ -82,7 +82,10 @@ output layer represents the pattern classes.
 \examples{
 \donttest{
 # Generate training landscapes
-landscapes <- create_landscapes(n = 18, patterns = c("random", "sharp", "diffuse"))
+landscapes <- create_landscapes(
+  n = 18,
+  patterns = c("random", "sharp", "diffuse")
+)
 
 # Calculate landscape metrics
 metrics <- calculate_metrics(landscapes, level = "landscape")
@@ -107,13 +110,14 @@ model <- train_metric_model(
   cv_method = "none",
   hidden_layers = c(8, 4)
 )
-}
 
-\dontrun{
-# Save model to file
+# Save the model, to apply it later without retraining
+model_file <- tempfile(fileext = ".rds")
 model <- train_metric_model(
   metrics,
-  model_path = "models/landscape_classifier.rds"
+  metrics_selected = best_5,
+  cv_method = "none",
+  model_path = model_file
 )
 }
 }

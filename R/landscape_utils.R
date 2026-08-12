@@ -46,7 +46,10 @@ matrix_to_raster <- function(
 #' landscapes <- purrr::map2(landscapes, names_vec, set_landscape_name)
 #'
 #' # Multiple landscapes with base R
-#' landscapes <- mapply(set_landscape_name, landscapes, names_vec, SIMPLIFY = FALSE)
+#' landscapes <- mapply(
+#'   set_landscape_name, landscapes, names_vec,
+#'   SIMPLIFY = FALSE
+#' )
 #' @family landscape objects
 #' @export
 set_landscape_name <- function(x, name) {
@@ -78,7 +81,10 @@ set_landscape_name <- function(x, name) {
 #' landscapes <- purrr::map2(landscapes, patterns_vec, set_landscape_pattern)
 #'
 #' # Multiple landscapes with base R
-#' landscapes <- mapply(set_landscape_pattern, landscapes, patterns_vec, SIMPLIFY = FALSE)
+#' landscapes <- mapply(
+#'   set_landscape_pattern, landscapes, patterns_vec,
+#'   SIMPLIFY = FALSE
+#' )
 #' @family landscape objects
 #' @export
 set_landscape_pattern <- function(x, pattern) {

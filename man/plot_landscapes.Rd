@@ -66,8 +66,8 @@ plot_landscapes(l)
 
 # Custom title and legend for a single landscape
 plot_landscapes(l,
-                   titles = "My Sharp Treeline",
-                   legend_title = "Vegetation")
+                titles = "My Sharp Treeline",
+                legend_title = "Vegetation")
 
 # Use & (not +) to add ggplot2 elements to every panel
 plot_landscapes(l) & ggplot2::theme_dark()
@@ -87,19 +87,19 @@ plot_landscapes(landscapes) & ggplot2::theme_dark()
 
 # 2-column grid with custom titles
 plot_landscapes(landscapes,
-                   titles = c("Sharp", "Random", "Diffuse"),
-                   ncol = 2)
+                titles = c("Sharp", "Random", "Diffuse"),
+                ncol = 2)
 
 # Plot only first two landscapes
 plot_landscapes(landscapes,
-                   subset_index = 1:2,
-                   legend_title = "Vegetation")
+                subset_index = 1:2,
+                legend_title = "Vegetation")
 
 # Create many landscapes and handle overflow
 many_landscapes <- create_landscapes(n = 12, width = 50, height = 50)
 plot_landscapes(many_landscapes,
-                   max_landscapes = 4,  # Show first 4 only
-                   ncol = 2)            # In 2x2 grid
+                max_landscapes = 4,  # Show first 4 only
+                ncol = 2)            # In 2x2 grid
 }
 \seealso{
 \code{\link{create_landscape}}, \code{\link{create_landscapes}}

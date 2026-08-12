@@ -109,19 +109,28 @@ informative note (suppressed when \code{verbose = FALSE}).
 \examples{
 \donttest{
 # Train a model on reference landscapes
-train_landscapes <- create_landscapes(n = 18, patterns = c("random", "sharp", "diffuse"))
+train_landscapes <- create_landscapes(
+  n = 18,
+  patterns = c("random", "sharp", "diffuse")
+)
 metrics <- calculate_metrics(train_landscapes, level = "landscape")
 # find the best 5 metrics for classification
 best_5 <- evaluate_metrics(metrics, metrics_number = 5)
-# Train on all data, then evaluate below on a separate test set
+# Train on all data, then evaluate below on a separate test set.
+# model_path saves the fitted model so it can be reused without retraining.
+model_file <- tempfile(fileext = ".rds")
 model <- train_metric_model(
   metrics,
   metrics_selected = best_5,
-  cv_method = "none"
+  cv_method = "none",
+  model_path = model_file
 )
 
 # Apply to new landscapes
-new_landscapes <- create_landscapes(n = 6, patterns = c("random", "sharp", "diffuse"))
+new_landscapes <- create_landscapes(
+  n = 6,
+  patterns = c("random", "sharp", "diffuse")
+)
 predictions <- apply_metric_model(new_landscapes, model)
 predictions
 
@@ -129,12 +138,10 @@ predictions
 results <- apply_metric_model(new_landscapes, model, return_performance = TRUE)
 results$predictions
 results$performance
-}
 
-\dontrun{
-# Load a saved model
-model <- readr::read_rds("models/landscape_classifier.rds")
-predictions <- apply_metric_model(new_landscapes, model)
+# A model saved earlier is read back with readr::read_rds()
+saved_model <- readr::read_rds(model_file)
+apply_metric_model(new_landscapes, saved_model)
 }
 }
 \references{

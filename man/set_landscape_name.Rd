@@ -31,7 +31,10 @@ names_vec <- c("alpine", "subalpine")
 landscapes <- purrr::map2(landscapes, names_vec, set_landscape_name)
 
 # Multiple landscapes with base R
-landscapes <- mapply(set_landscape_name, landscapes, names_vec, SIMPLIFY = FALSE)
+landscapes <- mapply(
+  set_landscape_name, landscapes, names_vec,
+  SIMPLIFY = FALSE
+)
 }
 \seealso{
 Other landscape objects:

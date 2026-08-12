@@ -247,7 +247,7 @@ print.metrics_evaluation <- function(x, ...) {
 #'   \code{\link{train_metric_model}} and \code{\link{plot_metrics}} accept
 #'   this object directly, so it can be passed straight on.
 #' @examples
-#' # Calculate most suitable metrics to discriminate between spots and random landscapes
+#' # Most suitable metrics to tell spots and random landscapes apart
 #' landscapes <- create_landscapes(n = 10, patterns = c("spots", "random"))
 #' metrics <- calculate_metrics(
 #'   landscapes,

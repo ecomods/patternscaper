@@ -35,7 +35,10 @@
 #' @examples
 #' \donttest{
 #' # Generate training landscapes
-#' landscapes <- create_landscapes(n = 18, patterns = c("random", "sharp", "diffuse"))
+#' landscapes <- create_landscapes(
+#'   n = 18,
+#'   patterns = c("random", "sharp", "diffuse")
+#' )
 #'
 #' # Calculate landscape metrics
 #' metrics <- calculate_metrics(landscapes, level = "landscape")

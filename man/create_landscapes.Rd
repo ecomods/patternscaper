@@ -93,7 +93,7 @@ landscapes[[1]]
 landscapes[[1]]$pattern
 
 # Get all landscape patterns
-sapply(landscapes, function(x) x$pattern)
+sapply(landscapes, \(x) x$pattern)
 
 # Custom parameters, as a single value or as a range sampled per landscape
 landscapes_custom <- create_landscapes(

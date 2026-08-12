@@ -7,23 +7,22 @@
 keras_available()
 }
 \value{
-A single `TRUE` or `FALSE`. Never throws an error.
+`TRUE` or `FALSE` depending on whether the backend is set up.
 }
 \description{
 Reports whether \pkg{keras3} can reach a working TensorFlow backend. Use it
 to check your setup before running \code{\link{train_pixel_model}} or
-\code{\link{apply_pixel_model}}, or to skip pixel-based code that would
-otherwise fail.
+\code{\link{apply_pixel_model}}.
 }
 \details{
-Only TensorFlow counts. \pkg{keras3} also runs on jax and torch, but the
+Only TensorFlow is checked as a backend; \pkg{keras3} also runs on jax and torch, but the
 pixel workflow is tested against TensorFlow, which is what
 \code{\link[keras3]{install_keras}} installs by default.
 
 If this returns \code{FALSE}, the backend is missing or is not TensorFlow,
 and the pixel-based functions cannot run. The metrics-based workflow
-(\code{\link{train_metric_model}}) is pure R and is unaffected. To set the
-backend up, point \pkg{reticulate} at a suitable Python and run
+(\code{\link{train_metric_model}}) is unaffected. To set up the
+backend, point \pkg{reticulate} at a suitable Python and run
 \code{keras3::install_keras()}, which
 \code{vignette("install-keras", package = "spatPatClassifyR")} walks
 through.
