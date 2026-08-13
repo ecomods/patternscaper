@@ -76,12 +76,14 @@ the cross-validation method `cv_method` are:
 
 For details and further options see the function help of `train_pixel_model()`.
 
-The only built-in architecture, `"multiscale"`, processes the landscapes as raster
+The built-in architecture, `"multiscale"`, processes the landscapes as raster
 arrays. It has two sequential convolutional blocks. Each block applies 3 by 3 and
 5 by 5 convolutions followed by max pooling, with 32 filters in the first block and
 64 in the second. Dropout and a dense layer precede the softmax output. Users can
 tune the learning rate, epochs, batch size, dropout, dense-layer size, and training
 validation settings; see `?train_pixel_model` for the complete interface.
+Experienced Keras users can also supply a custom architecture; see the optional
+section at the end of this guide.
 
 Here, we train the model using 2-fold cross-validation to keep computational time
 low.
@@ -240,3 +242,37 @@ plot_classified_landscapes(
   landscapes = test_landscapes
 )
 ```
+
+## Optional: Use a Custom Architecture
+
+Users familiar with Keras can pass a model-building function to `architecture`.
+The function must accept the four arguments shown below and return a new,
+uncompiled Keras model. `train_pixel_model()` calls it separately for each
+cross-validation fold and for the final model, then compiles and trains each
+model.
+
+```r
+shallow_cnn <- function(input_shape, n_classes, dropout_rate, dense_units) {
+  keras3::keras_model_sequential(input_shape = input_shape) |>
+    keras3::layer_conv_2d(
+      filters = 32,
+      kernel_size = c(3, 3),
+      activation = "relu"
+    ) |>
+    keras3::layer_max_pooling_2d() |>
+    keras3::layer_flatten() |>
+    keras3::layer_dropout(rate = dropout_rate) |>
+    keras3::layer_dense(units = dense_units, activation = "relu") |>
+    keras3::layer_dense(units = n_classes, activation = "softmax")
+}
+
+custom_model <- train_pixel_model(
+  landscapes = training_landscapes,
+  architecture = shallow_cnn
+)
+```
+
+The final layer must contain one softmax output for each pattern class. The
+`n_classes` argument supplies this number automatically. The built-in architecture
+is recommended unless the user is comfortable designing and evaluating neural
+networks.

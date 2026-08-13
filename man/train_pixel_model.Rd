@@ -47,9 +47,11 @@ Note: May be automatically reduced to ensure adequate samples per fold.}
 
 \item{learning_rate}{Numeric. Learning rate for the optimizer (default: 0.001).}
 
-\item{architecture}{Character. CNN architecture (default: "multiscale").
-Currently only "multiscale" is supported. It uses sequential convolutional
-blocks with 3 by 3 and 5 by 5 kernels.}
+\item{architecture}{Either "multiscale" for the built-in CNN architecture or
+a model-building function. A custom function must accept the arguments
+\code{input_shape}, \code{n_classes}, \code{dropout_rate}, and
+\code{dense_units}, and return a new uncompiled Keras model each time it is
+called.}
 
 \item{dropout_rate}{Numeric. Dropout rate for regularization (0-1, default: 0.3).
 Higher values reduce overfitting but may decrease model capacity. Applied between
@@ -102,7 +104,7 @@ List containing:
     \item{history}{Training history object from keras3::fit()}
     \item{classes}{Character vector of class names used during training}
     \item{input_shape}{Integer vector of input dimensions (height, width, channels)}
-    \item{architecture}{Character, architecture type used ("multiscale")}
+    \item{architecture}{Character, either "multiscale" or "custom"}
     \item{performance}{Performance metrics. When cv_method != "none", contains
       results from evaluate_cv_performance() including confusion matrix, per-class
       metrics, and overall accuracy. When cv_method = "none", contains training
@@ -114,8 +116,8 @@ List containing:
 }
 \description{
 Trains a CNN model using the Keras framework via \pkg{keras3} to classify
-landscapes from their raster cell values. The function uses the built-in
-multiscale CNN architecture.
+landscapes from their raster cell values. By default, the function uses the
+built-in multiscale CNN architecture.
 }
 \examples{
 \dontshow{if (keras_available()) withAutoprint(\{ # examplesIf}

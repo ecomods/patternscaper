@@ -13,7 +13,7 @@ create_keras_model(
 )
 }
 \arguments{
-\item{architecture}{Character. Architecture type.}
+\item{architecture}{Either "multiscale" or a model-building function.}
 
 \item{input_shape}{Integer vector. Input dimensions (height, width, channels).}
 

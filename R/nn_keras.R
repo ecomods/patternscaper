@@ -1,8 +1,8 @@
 #' Train a Convolutional Neural Network for Landscape Pattern Classification
 #'
 #' Trains a CNN model using the Keras framework via \pkg{keras3} to classify
-#' landscapes from their raster cell values. The function uses the built-in
-#' multiscale CNN architecture.
+#' landscapes from their raster cell values. By default, the function uses the
+#' built-in multiscale CNN architecture.
 #'
 #' @param landscapes List. List of landscape objects created by \code{\link{create_landscape}} or
 #' \code{\link{create_landscapes}}.
@@ -22,9 +22,11 @@
 #' @param epochs Integer. Number of training epochs (default: 50).
 #' @param batch_size Integer. Batch size for training (default: 16).
 #' @param learning_rate Numeric. Learning rate for the optimizer (default: 0.001).
-#' @param architecture Character. CNN architecture (default: "multiscale").
-#'   Currently only "multiscale" is supported. It uses sequential convolutional
-#'   blocks with 3 by 3 and 5 by 5 kernels.
+#' @param architecture Either "multiscale" for the built-in CNN architecture or
+#'   a model-building function. A custom function must accept the arguments
+#'   \code{input_shape}, \code{n_classes}, \code{dropout_rate}, and
+#'   \code{dense_units}, and return a new uncompiled Keras model each time it is
+#'   called.
 #' @param dropout_rate Numeric. Dropout rate for regularization (0-1, default: 0.3).
 #'  Higher values reduce overfitting but may decrease model capacity. Applied between
 #'  convolutional and dense layers.
@@ -68,7 +70,7 @@
 #'     \item{history}{Training history object from keras3::fit()}
 #'     \item{classes}{Character vector of class names used during training}
 #'     \item{input_shape}{Integer vector of input dimensions (height, width, channels)}
-#'     \item{architecture}{Character, architecture type used ("multiscale")}
+#'     \item{architecture}{Character, either "multiscale" or "custom"}
 #'     \item{performance}{Performance metrics. When cv_method != "none", contains
 #'       results from evaluate_cv_performance() including confusion matrix, per-class
 #'       metrics, and overall accuracy. When cv_method = "none", contains training
@@ -224,13 +226,15 @@ train_pixel_model <- function(
     cli::cli_abort("patience must be a single positive integer or NULL")
   }
 
-  if (
-    !is.character(architecture) ||
-      length(architecture) != 1 ||
-      is.na(architecture) ||
-      architecture != "multiscale"
-  ) {
-    cli::cli_abort('architecture must be "multiscale"')
+  built_in_architecture <-
+    is.character(architecture) &&
+    length(architecture) == 1 &&
+    !is.na(architecture) &&
+    architecture == "multiscale"
+  if (!built_in_architecture && !is.function(architecture)) {
+    cli::cli_abort(
+      'architecture must be "multiscale" or a model-building function'
+    )
   }
 
   if (
@@ -645,7 +649,7 @@ train_pixel_model <- function(
     history = history,
     classes = class_names,
     input_shape = input_shape,
-    architecture = architecture,
+    architecture = if (built_in_architecture) "multiscale" else "custom",
     performance = performance,
     training_geometry = summarise_training_geometry(landscapes)
   )
@@ -965,7 +969,7 @@ apply_pixel_model <- function(
 
 #' Create Keras Model Architecture
 #'
-#' @param architecture Character. Architecture type.
+#' @param architecture Either "multiscale" or a model-building function.
 #' @param input_shape Integer vector. Input dimensions (height, width, channels).
 #' @param n_classes Integer. Number of output classes.
 #' @param dropout_rate Numeric. Dropout rate for regularization (default: 0.3).
@@ -980,7 +984,22 @@ create_keras_model <- function(
   dropout_rate = 0.3,
   dense_units = 128
 ) {
-  if (architecture == "multiscale") {
+  if (is.function(architecture)) {
+    model <- tryCatch(
+      architecture(
+        input_shape = input_shape,
+        n_classes = n_classes,
+        dropout_rate = dropout_rate,
+        dense_units = dense_units
+      ),
+      error = \(cnd) {
+        cli::cli_abort(
+          "The custom architecture function failed while building a model.",
+          parent = cnd
+        )
+      }
+    )
+  } else if (identical(architecture, "multiscale")) {
     model <- create_multiscale_model(
       input_shape = input_shape,
       n_classes = n_classes,
@@ -988,10 +1007,15 @@ create_keras_model <- function(
       dense_units = dense_units
     )
   } else {
-    cli::cli_abort(c(
-      "Unsupported architecture: {architecture}",
-      "i" = "Available architectures: 'multiscale'"
-    ))
+    cli::cli_abort(
+      'architecture must be "multiscale" or a model-building function'
+    )
+  }
+
+  if (!inherits(model, "keras.src.models.model.Model")) {
+    cli::cli_abort(
+      "The architecture must return a Keras model."
+    )
   }
 
   return(model)

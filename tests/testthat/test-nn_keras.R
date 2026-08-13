@@ -156,7 +156,7 @@ test_that("train_pixel_model validates architecture and early-stopping parameter
   for (bad in list("other", NA_character_, 1, c("multiscale", "other"))) {
     expect_error(
       train_pixel_model(landscapes, architecture = bad),
-      'architecture must be "multiscale"'
+      'architecture must be "multiscale" or a model-building function'
     )
   }
 })
@@ -363,6 +363,60 @@ test_that("train_pixel_model works with cv_method='none'", {
   expect_equal(model$training_geometry$n_col, 50)
   expect_equal(model$training_geometry$cell_size_x, 1)
   expect_true(model$training_geometry$homogeneous)
+})
+
+test_that("train_pixel_model accepts a custom architecture function", {
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 6)
+  build_count <- 0
+  custom_architecture <- function(
+    input_shape,
+    n_classes,
+    dropout_rate,
+    dense_units
+  ) {
+    build_count <<- build_count + 1
+    expect_equal(input_shape, c(50, 50, 1))
+    expect_equal(n_classes, 3)
+    expect_equal(dropout_rate, 0.2)
+    expect_equal(dense_units, 8)
+
+    keras3::keras_model_sequential(input_shape = input_shape) |>
+      keras3::layer_flatten() |>
+      keras3::layer_dropout(rate = dropout_rate) |>
+      keras3::layer_dense(units = dense_units, activation = "relu") |>
+      keras3::layer_dense(units = n_classes, activation = "softmax")
+  }
+
+  set_random_seed(42)
+  model <- train_pixel_model(
+    landscapes,
+    cv_method = "k-fold",
+    cv_folds = 2,
+    architecture = custom_architecture,
+    dropout_rate = 0.2,
+    dense_units = 8,
+    epochs = 1,
+    verbose = FALSE
+  )
+
+  # One fresh model for each fold and another for final training.
+  expect_equal(build_count, 3)
+  expect_equal(model$architecture, "custom")
+})
+
+test_that("custom architecture functions must return a Keras model", {
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+
+  expect_error(
+    create_keras_model(
+      architecture = \(...) NULL,
+      input_shape = c(10, 10, 1),
+      n_classes = 2
+    ),
+    "must return a Keras model"
+  )
 })
 
 test_that("train_pixel_model works with cv_method='k-fold'", {
