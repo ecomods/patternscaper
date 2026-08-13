@@ -1030,13 +1030,12 @@ create_multiscale_model <- function(
   dropout_rate = 0.3,
   dense_units = 128
 ) {
-  model <- keras3::keras_model_sequential() |>
+  model <- keras3::keras_model_sequential(input_shape = input_shape) |>
     # Detect fine details with small kernels
     keras3::layer_conv_2d(
       filters = 32,
       kernel_size = c(3, 3),
-      padding = "same",
-      input_shape = input_shape
+      padding = "same"
     ) |>
     keras3::layer_activation("relu") |>
     # Detect larger patterns with bigger kernels
