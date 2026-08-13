@@ -13,7 +13,8 @@ knitr:
 In addition to using landscapes generated with the functions in `spatPatClassifyR`, you can also import your own landscapes to use them for training or classification.
 These can be landscapes created manually as matrices or rasters, or landscapes read in from files (e.g. from classified remote sensing images).
 
-Please note that right now, we only support landscapes with categorical cover classes.
+Please note that right now, the pixel workflow supports one raster layer with
+categorical cover classes.
 
 ```{r}
 #| label: setup

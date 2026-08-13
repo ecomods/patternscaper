@@ -337,6 +337,34 @@ abort_on_na_cells <- function(landscapes, action) {
   invisible(NULL)
 }
 
+#' Reject multi-layer landscapes in the pixel workflow
+#'
+#' @param landscapes List of landscape objects.
+#' @param action Character. Verb naming what the caller was about to do, used in
+#'   the error message.
+#'
+#' @return Invisibly `NULL`. Called for the error.
+#'
+#' @keywords internal
+abort_on_multilayer_landscapes <- function(landscapes, action) {
+  layer_counts <- vapply(
+    landscapes,
+    function(l) terra::nlyr(l$data),
+    numeric(1)
+  )
+
+  if (any(layer_counts != 1)) {
+    bad <- which(layer_counts != 1)
+    cli::cli_abort(c(
+      "Cannot {action} multi-layer landscapes.",
+      "x" = "Found {.val {layer_counts[bad]}} raster layers at index(es): {paste(bad, collapse = ', ')}",
+      "i" = "The pixel workflow currently requires one categorical raster layer per landscape."
+    ))
+  }
+
+  invisible(NULL)
+}
+
 #' Check that cell values are categorical
 #'
 #' The pixel workflow reads raw cell values and we need to ensure that they are

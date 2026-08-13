@@ -155,12 +155,12 @@ Finally, you can create some new test landscapes and classify them using the tra
 In reality this could be landscapes read in from files or created in other ways.
 For details on importing own landscapes, see the [importing landscapes vignette](importing-landscapes.html).
 
-Application landscapes must contain categorical values, have no `NA` cells, and
-have the same number of layers as the training data. `apply_pixel_model()`
-resamples their rows and columns to the training dimensions with nearest-neighbor
-resampling. It warns when a different aspect ratio means that this stretches the
-pattern. See [Matching training and application data](matching-training-application.html)
-for the practical consequences of resizing.
+Application landscapes must contain one raster layer with categorical values and
+have no `NA` cells. `apply_pixel_model()` resamples their rows and columns to the
+training dimensions with nearest-neighbor resampling. It warns when a different
+aspect ratio means that this stretches the pattern. See
+[Matching training and application data](matching-training-application.html) for
+the practical consequences of resizing.
 
 ```{r}
 #| label: test-landscapes

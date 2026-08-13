@@ -252,25 +252,35 @@ test_that("train_pixel_model aborts on heterogeneous training dimensions", {
   )
 })
 
-test_that("train_pixel_model aborts on heterogeneous layer counts", {
+test_that("train_pixel_model rejects multi-layer landscapes", {
   # The generators always produce single-layer rasters, but landscape() accepts
   # any SpatRaster, so a multi-layer landscape can reach training.
   single_layer <- create_landscape("random", width = 30, height = 30, name = "r1")
-  two_layer <- landscape(
+  two_layer_sharp <- landscape(
     c(single_layer$data, single_layer$data),
     pattern = "sharp",
     name = "s1"
   )
-
-  expect_error(
-    train_pixel_model(
-      list(single_layer, two_layer),
-      cv_method = "none",
-      epochs = 1,
-      verbose = FALSE
-    ),
-    "same dimensions"
+  two_layer_random <- landscape(
+    c(single_layer$data, single_layer$data),
+    pattern = "random",
+    name = "r2"
   )
+
+  for (landscapes in list(
+    list(single_layer, two_layer_sharp),
+    list(two_layer_random, two_layer_sharp)
+  )) {
+    expect_error(
+      train_pixel_model(
+        landscapes,
+        cv_method = "none",
+        epochs = 1,
+        verbose = FALSE
+      ),
+      "requires one categorical raster layer"
+    )
+  }
 })
 
 test_that("train_pixel_model aborts on continuous cell values", {
@@ -647,23 +657,24 @@ test_that("apply_pixel_model accepts whole numbers stored as doubles", {
   expect_false(grepl("continuous cell values", err))
 })
 
-test_that("apply_pixel_model aborts on a layer-count mismatch", {
+test_that("apply_pixel_model rejects multi-layer landscapes", {
   # A stub model is enough here: the layer guard fires before the CNN is
   # touched, so no keras training is needed.
   stub_model <- list(
     model = NULL,
     classes = c("a", "b"),
-    input_shape = c(10, 10, 2)
+    input_shape = c(10, 10, 1)
   )
-  single_layer <- landscape(
-    matrix(1, nrow = 10, ncol = 10),
+  first_layer <- terra::rast(matrix(1, nrow = 10, ncol = 10))
+  multi_layer <- landscape(
+    c(first_layer, first_layer),
     pattern = "a",
-    name = "single"
+    name = "multi"
   )
 
   expect_error(
-    apply_pixel_model(single_layer, stub_model),
-    "same number of layers"
+    apply_pixel_model(multi_layer, stub_model),
+    "requires one categorical raster layer"
   )
 })
 

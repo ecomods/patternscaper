@@ -98,9 +98,9 @@ changes the apparent size of landscape structures. Two cautions remain:
 x Cannot classify landscapes that contain NA cells.
 ```
 
-The training side is stricter still: all training landscapes must have the same
-numbers of rows, columns, and layers, since their arrays are stacked into one
-tensor.
+The training side is stricter still: the pixel workflow accepts one categorical
+raster layer per landscape, and all training landscapes must have the same
+numbers of rows and columns since their arrays are stacked into one tensor.
 `train_pixel_model()` checks this and aborts with a clear message rather than
 letting the stacking fail cryptically.
 

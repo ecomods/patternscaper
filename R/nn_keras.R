@@ -8,9 +8,9 @@
 #' \code{\link{create_landscapes}}.
 #' Input landscapes must contain categorical/discrete habitat data, such as 0/1
 #' for two habitat types or 0/1/2 for three types. Continuous data, such as
-#' elevation or gradients, is not supported. Landscapes must be free of NA cells
-#' and have the same number of rows, columns, and layers. At least two labelled
-#' pattern classes are required.
+#' elevation or gradients, is not supported. Each landscape must contain exactly
+#' one raster layer, be free of NA cells, and have the same number of rows and
+#' columns. At least two labelled pattern classes are required.
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #'   \itemize{
 #'     \item "k-fold" or "loo": Performs cross-validation and returns performance metrics
@@ -279,24 +279,25 @@ train_pixel_model <- function(
     ))
   }
 
-  # Require identical cell dimensions and layer counts across training
-  # landscapes. The CNN input layer is fixed to one shape, so arrays differing
-  # in any dimension cannot be stacked; abort clearly here rather than letting
-  # abind() fail later with a cryptic "arg 'X2' has dims=..." message.
+  abort_on_multilayer_landscapes(landscapes, "train on")
+
+  # Require identical cell dimensions across training landscapes. The CNN input
+  # layer is fixed to one shape, so arrays differing in rows or columns cannot be
+  # stacked.
   dims <- lapply(landscapes, function(l) {
-    c(terra::nrow(l$data), terra::ncol(l$data), terra::nlyr(l$data))
+    c(terra::nrow(l$data), terra::ncol(l$data))
   })
   unique_dims <- unique(dims)
   if (length(unique_dims) > 1) {
     dim_labels <- vapply(
       unique_dims,
-      function(d) paste0(d[1], "x", d[2], "x", d[3]),
+      function(d) paste0(d[1], "x", d[2]),
       character(1)
     )
     cli::cli_abort(c(
       "All training landscapes must have the same dimensions.",
-      "x" = "Found {length(unique_dims)} different shapes (rows x columns x layers): {.val {dim_labels}}",
-      "i" = "The CNN input layer is fixed to one shape. Create the training landscapes at a common width, height and layer count, or resize them before training."
+      "x" = "Found {length(unique_dims)} different shapes (rows x columns): {.val {dim_labels}}",
+      "i" = "The CNN input layer is fixed to one shape. Create the training landscapes at a common width and height, or resize them before training."
     ))
   }
 
@@ -665,13 +666,12 @@ train_pixel_model <- function(
 #'
 #' @param landscapes Landscape object, or list of landscape objects, to classify.
 #'   Rows and columns are resampled to the model's input dimensions using nearest
-#'   neighbor resampling, which preserves categorical cell values. The number of
-#'   layers must already match the training data. Input landscapes must contain
-#'   categorical/discrete habitat data, such as 0/1 for two habitat types or 0/1/2
-#'   for three types. Continuous data, such as elevation or gradients, is not
-#'   supported. Landscapes must also be free of NA cells. A landscape whose aspect
-#'   ratio differs from the training grid is resized anisotropically (stretched),
-#'   which raises a warning.
+#'   neighbor resampling, which preserves categorical cell values. Each landscape
+#'   must contain exactly one raster layer with categorical/discrete habitat data,
+#'   such as 0/1 for two habitat types or 0/1/2 for three types. Continuous data,
+#'   such as elevation or gradients, is not supported. Landscapes must also be
+#'   free of NA cells. A landscape whose aspect ratio differs from the training
+#'   grid is resized anisotropically (stretched), which raises a warning.
 #' @param nn_model List. CNN model object from \code{\link{train_pixel_model}}.
 #' @param evaluate Character. Whether to evaluate the predictions against the
 #'   true known classes of the landscapes: \code{"auto"} (default) evaluates when true
@@ -796,6 +796,8 @@ apply_pixel_model <- function(
     ))
   }
 
+  abort_on_multilayer_landscapes(landscapes, "classify")
+
   # Get the training labels (pattern field of the landscape object) if available
   landscape_pattern <- vapply(
     landscapes,
@@ -812,18 +814,6 @@ apply_pixel_model <- function(
 
   abort_on_na_cells(landscapes, "classify")
   check_categorical_values(landscapes, "classify")
-
-  # Make sure that the data has the same number of layers as the training data
-  expected_layers <- input_shape[3]
-  n_layers <- vapply(landscapes, function(l) terra::nlyr(l$data), numeric(1))
-  if (any(n_layers != expected_layers)) {
-    wrong_indices <- which(n_layers != expected_layers)
-    cli::cli_abort(c(
-      "All landscapes must have the same number of layers as the training data.",
-      "x" = "Expected {expected_layers}, found {.val {unique(n_layers[wrong_indices])}} at index(es): {paste(wrong_indices, collapse = ', ')}",
-      "i" = "Resizing adjusts rows and columns only, not the layer count."
-    ))
-  }
 
   # Warn on aspect-ratio distortion. Resizing a landscape whose aspect ratio
   # differs from the training grid stretches it anisotropically which is a

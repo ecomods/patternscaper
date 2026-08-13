@@ -27,9 +27,9 @@ train_pixel_model(
 \code{\link{create_landscapes}}.
 Input landscapes must contain categorical/discrete habitat data, such as 0/1
 for two habitat types or 0/1/2 for three types. Continuous data, such as
-elevation or gradients, is not supported. Landscapes must be free of NA cells
-and have the same number of rows, columns, and layers. At least two labelled
-pattern classes are required.}
+elevation or gradients, is not supported. Each landscape must contain exactly
+one raster layer, be free of NA cells, and have the same number of rows and
+columns. At least two labelled pattern classes are required.}
 
 \item{cv_method}{Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 \itemize{
