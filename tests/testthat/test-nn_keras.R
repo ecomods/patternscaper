@@ -437,6 +437,19 @@ test_that("apply_pixel_model validates model structure", {
   )
 })
 
+test_that("apply_pixel_model rejects an empty landscape list", {
+  stub_model <- list(
+    model = NULL,
+    classes = c("a", "b"),
+    input_shape = c(10, 10, 1)
+  )
+
+  expect_error(
+    apply_pixel_model(list(), stub_model),
+    "at least one landscape object"
+  )
+})
+
 test_that("apply_pixel_model validates landscapes input", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 

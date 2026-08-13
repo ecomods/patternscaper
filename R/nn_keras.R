@@ -765,6 +765,12 @@ apply_pixel_model <- function(
     landscapes <- list(landscapes)
   }
 
+  if (length(landscapes) == 0) {
+    cli::cli_abort(
+      "{.arg landscapes} must contain at least one landscape object."
+    )
+  }
+
   # Check if landscapes is a list of landscape objects
   valid_landscapes <- vapply(landscapes, is_landscape, logical(1))
   if (any(!valid_landscapes)) {
