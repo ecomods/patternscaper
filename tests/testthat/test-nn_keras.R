@@ -1,5 +1,7 @@
 # Use minimal landscapes for speed
 helper_create_tiny_training_set <- function(n_per_class = 3) {
+  set.seed(42)
+
   create_landscapes(
     n = n_per_class * 3,
     patterns = c("sharp", "diffuse", "random"),
@@ -224,7 +226,7 @@ test_that("train_pixel_model shuffles only when a validation split is used", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 
   run_and_capture_seed <- function(validation_split) {
-    set.seed(1)
+    set_random_seed(1)
     train_pixel_model(
       landscapes,
       cv_method = "none",
@@ -275,6 +277,7 @@ test_that("train_pixel_model saves model and overwrites an existing file", {
   # which aborted after training had already finished
   file.create(temp_file)
 
+  set_random_seed(42)
   result <- train_pixel_model(
     landscapes,
     cv_method = "none",
@@ -299,6 +302,7 @@ test_that("train_pixel_model works with cv_method='none'", {
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
 
+  set_random_seed(42)
   model <- train_pixel_model(
     landscapes,
     cv_method = "none",
@@ -341,13 +345,17 @@ test_that("train_pixel_model works with cv_method='k-fold'", {
   # exercising the k-fold branch
   landscapes <- helper_create_tiny_training_set(n_per_class = 9)
 
-  model <- train_pixel_model(
-    landscapes,
-    cv_method = "k-fold",
-    cv_folds = 3,
-    epochs = 2,
-    batch_size = 4,
-    verbose = FALSE
+  set_random_seed(42)
+  expect_warning(
+    model <- train_pixel_model(
+      landscapes,
+      cv_method = "k-fold",
+      cv_folds = 3,
+      epochs = 5,
+      batch_size = 4,
+      verbose = FALSE
+    ),
+    NA
   )
 
   expect_type(model, "list")
@@ -375,6 +383,7 @@ test_that("train_pixel_model accepts different optimizers", {
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
 
+  set_random_seed(42)
   expect_no_error(
     train_pixel_model(
       landscapes,
@@ -392,6 +401,7 @@ test_that("train_pixel_model respects patience parameter", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
 
   # With patience=NULL should run full epochs
+  set_random_seed(42)
   model <- train_pixel_model(
     landscapes,
     cv_method = "none",
@@ -419,6 +429,7 @@ test_that("apply_pixel_model validates landscapes input", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+  set_random_seed(42)
   model <- train_pixel_model(
     landscapes,
     cv_method = "none",
@@ -583,6 +594,7 @@ test_that("apply_pixel_model returns predictions for single landscape", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  set_random_seed(42)
   model <- train_pixel_model(
     landscapes,
     cv_method = "none",
@@ -618,6 +630,7 @@ test_that("apply_pixel_model returns predictions for multiple landscapes", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  set_random_seed(42)
   model <- train_pixel_model(
     landscapes,
     cv_method = "none",
@@ -640,6 +653,7 @@ test_that("apply_pixel_model returns performance when requested", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  set_random_seed(42)
   model <- train_pixel_model(
     landscapes,
     cv_method = "none",
@@ -647,10 +661,13 @@ test_that("apply_pixel_model returns performance when requested", {
     verbose = FALSE
   )
 
-  result <- apply_pixel_model(
-    landscapes = landscapes,
-    nn_model = model,
-    verbose = FALSE
+  expect_warning(
+    result <- apply_pixel_model(
+      landscapes = landscapes,
+      nn_model = model,
+      verbose = FALSE
+    ),
+    NA
   )
 
   expect_type(result, "list")
@@ -664,6 +681,7 @@ test_that("apply_pixel_model handles mixed valid/NA classes", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  set_random_seed(42)
   model <- train_pixel_model(
     landscapes,
     cv_method = "none",
@@ -676,10 +694,13 @@ test_that("apply_pixel_model handles mixed valid/NA classes", {
   test_landscapes[[2]]$pattern <- NA
   test_landscapes[[4]]$pattern <- "unclassified"
 
-  result <- apply_pixel_model(
-    landscapes = test_landscapes,
-    nn_model = model,
-    verbose = FALSE
+  expect_warning(
+    result <- apply_pixel_model(
+      landscapes = test_landscapes,
+      nn_model = model,
+      verbose = FALSE
+    ),
+    NA
   )
 
   # Should return list structure with NULL performance or valid performance
@@ -695,6 +716,7 @@ test_that("apply_pixel_model returns NULL performance for all invalid classes", 
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  set_random_seed(42)
   model <- train_pixel_model(
     landscapes,
     cv_method = "none",
@@ -739,6 +761,7 @@ test_that("apply_pixel_model warns about unknown classes", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  set_random_seed(42)
   model <- train_pixel_model(
     landscapes,
     cv_method = "none",
@@ -791,6 +814,7 @@ test_that("apply_pixel_model handles resizing correctly", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
+  set_random_seed(42)
   model <- train_pixel_model(
     landscapes,
     cv_method = "none",
