@@ -167,6 +167,18 @@ test_that("train_pixel_model rejects unclassified landscapes", {
   )
 })
 
+test_that("train_pixel_model rejects a single pattern class", {
+  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+  for (i in seq_along(landscapes)) {
+    landscapes[[i]]$pattern <- "sharp"
+  }
+
+  expect_error(
+    train_pixel_model(landscapes, cv_method = "none"),
+    "at least two pattern classes"
+  )
+})
+
 test_that("train_pixel_model aborts on heterogeneous training dimensions", {
   # Aborts before any keras call, so no training happens.
   mixed <- list(

@@ -296,6 +296,15 @@ train_pixel_model <- function(
     ))
   }
 
+  class_names <- sort(unique(training_labels))
+  if (length(class_names) < 2) {
+    cli::cli_abort(c(
+      "{.arg landscapes} must contain at least two pattern classes.",
+      "x" = "Only {.val {class_names}} is present.",
+      "i" = "Add labelled landscapes from another pattern class."
+    ))
+  }
+
   abort_on_na_cells(landscapes, "train on")
   check_categorical_values(landscapes, "train on")
 
@@ -311,8 +320,6 @@ train_pixel_model <- function(
     print(table(training_labels))
   }
 
-  # Get the unique class names
-  class_names <- sort(unique(training_labels))
   n_classes <- length(class_names)
 
   # Convert labels to integers and one-hot encode
