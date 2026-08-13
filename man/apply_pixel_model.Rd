@@ -10,11 +10,12 @@ apply_pixel_model(landscapes, nn_model, evaluate = "auto", verbose = TRUE)
 \item{landscapes}{Landscape object, or list of landscape objects, to classify.
 Rows and columns are resampled to the model's input dimensions using nearest
 neighbor resampling, which preserves categorical cell values. Each landscape
-must contain exactly one raster layer with categorical/discrete habitat data,
-such as 0/1 for two habitat types or 0/1/2 for three types. Continuous data,
-such as elevation or gradients, is not supported. Landscapes must also be
-free of NA cells. A landscape whose aspect ratio differs from the training
-grid is resized anisotropically (stretched), which raises a warning.}
+must contain exactly one raster layer with categorical/discrete habitat data
+represented by numeric whole-number codes. The codes must match those used
+during training. A trained habitat value may be absent, but a new value is
+rejected. Text labels, continuous data such as elevation or gradients, and
+NA cells are not supported. A landscape whose aspect ratio differs from the
+training grid is resized anisotropically (stretched), which raises a warning.}
 
 \item{nn_model}{List. CNN model object from \code{\link{train_pixel_model}}.}
 

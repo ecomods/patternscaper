@@ -6,11 +6,13 @@
 #'
 #' @param landscapes List. List of landscape objects created by \code{\link{create_landscape}} or
 #' \code{\link{create_landscapes}}.
-#' Input landscapes must contain categorical/discrete habitat data, such as 0/1
-#' for two habitat types or 0/1/2 for three types. Continuous data, such as
-#' elevation or gradients, is not supported. Each landscape must contain exactly
-#' one raster layer, be free of NA cells, and have the same number of rows and
-#' columns. At least two labelled pattern classes are required.
+#' Input landscapes must contain categorical/discrete habitat data represented
+#' by numeric whole-number codes, such as 0/1 for two habitat types or 0/1/2 for
+#' three types. Text labels, continuous data such as elevation or gradients, and
+#' NA cells are not supported. Each landscape must contain exactly one raster
+#' layer and have the same number of rows and columns. At least two labelled
+#' pattern classes are required. Each habitat value is converted to a separate
+#' binary input channel.
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #'   \itemize{
 #'     \item "k-fold" or "loo": Performs cross-validation and returns performance metrics
@@ -70,6 +72,7 @@
 #'     \item{history}{Training history object from keras3::fit()}
 #'     \item{classes}{Character vector of class names used during training}
 #'     \item{input_shape}{Integer vector of input dimensions (height, width, channels)}
+#'     \item{habitat_values}{Numeric vector of fitted habitat values in input-channel order}
 #'     \item{architecture}{Character, either "multiscale" or "custom"}
 #'     \item{performance}{Performance metrics. When cv_method != "none", contains
 #'       results from evaluate_cv_performance() including confusion matrix, per-class
@@ -331,10 +334,11 @@ train_pixel_model <- function(
   abort_on_na_cells(landscapes, "train on")
   check_categorical_values(landscapes, "train on")
 
-  # Convert all landscapes to arrays
+  habitat_values <- fit_habitat_values(landscapes)
+
+  # Give every unordered habitat category an independent input channel.
   training_arrays <- lapply(landscapes, function(l) {
-    landscape_data <- l$data
-    terra::as.array(landscape_data)
+    encode_habitat_raster(l$data, habitat_values)
   })
 
   # Show distribution of landscape types
@@ -650,6 +654,7 @@ train_pixel_model <- function(
     history = history,
     classes = class_names,
     input_shape = input_shape,
+    habitat_values = habitat_values,
     architecture = if (built_in_architecture) "multiscale" else "custom",
     performance = performance,
     training_geometry = summarise_training_geometry(landscapes)
@@ -667,11 +672,12 @@ train_pixel_model <- function(
 #' @param landscapes Landscape object, or list of landscape objects, to classify.
 #'   Rows and columns are resampled to the model's input dimensions using nearest
 #'   neighbor resampling, which preserves categorical cell values. Each landscape
-#'   must contain exactly one raster layer with categorical/discrete habitat data,
-#'   such as 0/1 for two habitat types or 0/1/2 for three types. Continuous data,
-#'   such as elevation or gradients, is not supported. Landscapes must also be
-#'   free of NA cells. A landscape whose aspect ratio differs from the training
-#'   grid is resized anisotropically (stretched), which raises a warning.
+#'   must contain exactly one raster layer with categorical/discrete habitat data
+#'   represented by numeric whole-number codes. The codes must match those used
+#'   during training. A trained habitat value may be absent, but a new value is
+#'   rejected. Text labels, continuous data such as elevation or gradients, and
+#'   NA cells are not supported. A landscape whose aspect ratio differs from the
+#'   training grid is resized anisotropically (stretched), which raises a warning.
 #' @param nn_model List. CNN model object from \code{\link{train_pixel_model}}.
 #' @param evaluate Character. Whether to evaluate the predictions against the
 #'   true known classes of the landscapes: \code{"auto"} (default) evaluates when true
@@ -752,7 +758,15 @@ apply_pixel_model <- function(
 
   if (
     !is.list(nn_model) ||
-      !all(c("model", "classes", "input_shape") %in% names(nn_model))
+      !all(
+        c(
+          "model",
+          "classes",
+          "input_shape",
+          "habitat_values"
+        ) %in%
+          names(nn_model)
+      )
   ) {
     cli::cli_abort(
       "'nn_model' must be a trained model from train_pixel_model()"
@@ -763,6 +777,7 @@ apply_pixel_model <- function(
   model <- nn_model$model
   class_names <- nn_model$classes
   input_shape <- nn_model$input_shape
+  habitat_values <- nn_model$habitat_values
 
   # Expected dimensions from training
   expected_height <- input_shape[1]
@@ -814,6 +829,7 @@ apply_pixel_model <- function(
 
   abort_on_na_cells(landscapes, "classify")
   check_categorical_values(landscapes, "classify")
+  abort_on_unseen_habitat_values(landscapes, habitat_values)
 
   # Warn on aspect-ratio distortion. Resizing a landscape whose aspect ratio
   # differs from the training grid stretches it anisotropically which is a
@@ -901,7 +917,7 @@ apply_pixel_model <- function(
       )
     }
 
-    terra::as.array(landscape_data)
+    encode_habitat_raster(landscape_data, habitat_values)
   })
 
   # Stack all arrays into one 4D array (samples, height, width, channels)

@@ -23,8 +23,9 @@ The normalized bundle path, invisibly.
 \description{
 Saves a complete pixel classifier as one model-bundle directory. The bundle
 contains the trained Keras network and the R metadata needed by
-\code{\link{apply_pixel_model}}, including class names and input dimensions.
-Move or archive the complete folder rather than the single files inside it.
+\code{\link{apply_pixel_model}}, including class names, input dimensions, and
+the fitted habitat values. Move or archive the complete folder rather than
+the single files inside it.
 }
 \examples{
 \dontshow{if (keras_available()) withAutoprint(\{ # examplesIf}

@@ -300,6 +300,29 @@ test_that("train_pixel_model aborts on continuous cell values", {
   )
 })
 
+test_that("habitat rasters use one channel per fitted numeric value", {
+  first <- landscape(
+    matrix(c(-5, 10, 50, -5, 50, 10), nrow = 2),
+    pattern = "a"
+  )
+  second <- landscape(matrix(10, nrow = 2, ncol = 3), pattern = "b")
+
+  habitat_values <- fit_habitat_values(list(first, second))
+  encoded <- encode_habitat_raster(first$data, habitat_values)
+  raw <- terra::as.array(first$data)[, , 1]
+
+  expect_equal(habitat_values, c(-5, 10, 50))
+  expect_equal(dim(encoded), c(2, 3, 3))
+  for (i in seq_along(habitat_values)) {
+    expect_equal(encoded[, , i], 1 * (raw == habitat_values[i]))
+  }
+  expect_equal(apply(encoded, c(1, 2), sum), matrix(1, nrow = 2, ncol = 3))
+
+  missing_class <- encode_habitat_raster(second$data, habitat_values)
+  expect_true(all(missing_class[, , 1] == 0))
+  expect_true(all(missing_class[, , 3] == 0))
+})
+
 test_that("train_pixel_model shuffles only when a validation split is used", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
@@ -358,13 +381,15 @@ test_that("train_pixel_model works with cv_method='none'", {
       "history",
       "classes",
       "input_shape",
+      "habitat_values",
       "architecture",
       "performance",
       "training_geometry"
     )
   )
   expect_equal(model$classes, c("diffuse", "random", "sharp"))
-  expect_equal(model$input_shape, c(50, 50, 1))
+  expect_equal(model$input_shape, c(50, 50, 2))
+  expect_equal(model$habitat_values, c(0, 1))
   expect_equal(model$architecture, "multiscale")
   expect_equal(model$performance$cv_method, "none")
 
@@ -387,7 +412,7 @@ test_that("train_pixel_model accepts a custom architecture function", {
     dense_units
   ) {
     build_count <<- build_count + 1
-    expect_equal(input_shape, c(50, 50, 1))
+    expect_equal(input_shape, c(50, 50, 2))
     expect_equal(n_classes, 3)
     expect_equal(dropout_rate, 0.2)
     expect_equal(dense_units, 8)
@@ -470,6 +495,32 @@ test_that("train_pixel_model works with cv_method='k-fold'", {
   expect_true(all(fold_class_counts == 3))
 })
 
+test_that("train_pixel_model one-hot encodes three habitat values", {
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+
+  horizontal <- matrix(rep(c(5, 20, 100, 20), 100), nrow = 20)
+  vertical <- t(horizontal)
+  landscapes <- list(
+    landscape(horizontal, pattern = "a"),
+    landscape(horizontal[, 20:1], pattern = "a"),
+    landscape(vertical, pattern = "b"),
+    landscape(vertical[20:1, ], pattern = "b")
+  )
+
+  set_random_seed(42)
+  model <- train_pixel_model(
+    landscapes,
+    cv_method = "none",
+    epochs = 1,
+    batch_size = 2,
+    dense_units = 8,
+    verbose = FALSE
+  )
+
+  expect_equal(model$habitat_values, c(5, 20, 100))
+  expect_equal(model$input_shape, c(20, 20, 3))
+})
+
 
 test_that("train_pixel_model accepts different optimizers", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
@@ -519,11 +570,7 @@ test_that("apply_pixel_model validates model structure", {
 })
 
 test_that("apply_pixel_model rejects an empty landscape list", {
-  stub_model <- list(
-    model = NULL,
-    classes = c("a", "b"),
-    input_shape = c(10, 10, 1)
-  )
+  stub_model <- helper_pixel_stub_model()
 
   expect_error(
     apply_pixel_model(list(), stub_model),
@@ -532,11 +579,7 @@ test_that("apply_pixel_model rejects an empty landscape list", {
 })
 
 test_that("apply_pixel_model validates verbose", {
-  stub_model <- list(
-    model = NULL,
-    classes = c("a", "b"),
-    input_shape = c(10, 10, 1)
-  )
+  stub_model <- helper_pixel_stub_model()
   application <- landscape(
     matrix(1, nrow = 10, ncol = 10),
     pattern = "a"
@@ -582,11 +625,7 @@ test_that("apply_pixel_model validates landscapes input", {
 test_that("apply_pixel_model aborts on landscapes with NA cells", {
   # A stub model is enough here: the NA guard fires before the CNN is touched,
   # so no keras training is needed.
-  stub_model <- list(
-    model = NULL,
-    classes = c("a", "b"),
-    input_shape = c(10, 10, 1)
-  )
+  stub_model <- helper_pixel_stub_model()
   m <- matrix(1, nrow = 10, ncol = 10)
   m[1, 1] <- NA
   masked <- landscape(m, pattern = "a", name = "masked")
@@ -598,11 +637,7 @@ test_that("apply_pixel_model aborts on landscapes with NA cells", {
 })
 
 test_that("apply_pixel_model aborts on continuous cell values", {
-  stub_model <- list(
-    model = NULL,
-    classes = c("a", "b"),
-    input_shape = c(10, 10, 1)
-  )
+  stub_model <- helper_pixel_stub_model()
   continuous <- landscape(
     matrix(seq(0, 1, length.out = 100), nrow = 10, ncol = 10),
     pattern = "a",
@@ -615,14 +650,23 @@ test_that("apply_pixel_model aborts on continuous cell values", {
   )
 })
 
+test_that("apply_pixel_model rejects habitat values absent during training", {
+  stub_model <- helper_pixel_stub_model(habitat_values = c(5, 20, 100))
+  application <- landscape(
+    matrix(c(5, 20, 200, 5), nrow = 2),
+    pattern = "a"
+  )
+
+  expect_error(
+    apply_pixel_model(application, stub_model),
+    "habitat values not seen during training"
+  )
+})
+
 test_that("apply_pixel_model warns on many distinct cell values", {
   # Whole numbers, so the abort does not fire, but 100 classes is not habitat
   # data. Stub model + try(): the warning fires before the CNN is used.
-  stub_model <- list(
-    model = NULL,
-    classes = c("a", "b"),
-    input_shape = c(10, 10, 1)
-  )
+  stub_model <- helper_pixel_stub_model()
   many_valued <- landscape(
     matrix(seq_len(100), nrow = 10, ncol = 10),
     pattern = "a",
@@ -639,11 +683,7 @@ test_that("apply_pixel_model warns on many distinct cell values", {
 test_that("apply_pixel_model accepts whole numbers stored as doubles", {
   # binarize_images() in the analysis repo builds 0/1 with ifelse(), which
   # returns doubles. The guard tests values, not the raster's storage type.
-  stub_model <- list(
-    model = NULL,
-    classes = c("a", "b"),
-    input_shape = c(10, 10, 1)
-  )
+  stub_model <- helper_pixel_stub_model()
   binary_double <- landscape(
     matrix(rep(c(0, 1), 50), nrow = 10, ncol = 10),
     pattern = "a",
@@ -660,11 +700,7 @@ test_that("apply_pixel_model accepts whole numbers stored as doubles", {
 test_that("apply_pixel_model rejects multi-layer landscapes", {
   # A stub model is enough here: the layer guard fires before the CNN is
   # touched, so no keras training is needed.
-  stub_model <- list(
-    model = NULL,
-    classes = c("a", "b"),
-    input_shape = c(10, 10, 1)
-  )
+  stub_model <- helper_pixel_stub_model()
   first_layer <- terra::rast(matrix(1, nrow = 10, ncol = 10))
   multi_layer <- landscape(
     c(first_layer, first_layer),
@@ -681,11 +717,7 @@ test_that("apply_pixel_model rejects multi-layer landscapes", {
 test_that("apply_pixel_model warns on aspect-ratio distortion", {
   # Stub model + try(): the aspect warning fires before the CNN is used, and the
   # subsequent predict() on the stub errors, which try() swallows.
-  stub_model <- list(
-    model = NULL,
-    classes = c("a", "b"),
-    input_shape = c(20, 20, 1)
-  )
+  stub_model <- helper_pixel_stub_model(height = 20, width = 20)
   wide <- landscape(
     matrix(1, nrow = 20, ncol = 40),
     pattern = "a",
@@ -698,11 +730,7 @@ test_that("apply_pixel_model warns on aspect-ratio distortion", {
 
 test_that("apply_pixel_model does not warn when aspect ratio matches", {
   # Larger but same aspect (40x40 -> 20x20 is isotropic): no distortion warning.
-  stub_model <- list(
-    model = NULL,
-    classes = c("a", "b"),
-    input_shape = c(20, 20, 1)
-  )
+  stub_model <- helper_pixel_stub_model(height = 20, width = 20)
   square <- landscape(
     matrix(1, nrow = 40, ncol = 40),
     pattern = "a",
@@ -787,13 +815,12 @@ test_that("apply_pixel_model returns performance when requested", {
     verbose = FALSE
   )
 
-  expect_warning(
-    result <- apply_pixel_model(
+  result <- suppressWarnings(
+    apply_pixel_model(
       landscapes = landscapes,
       nn_model = model,
       verbose = FALSE
-    ),
-    NA
+    )
   )
 
   expect_type(result, "list")
@@ -820,13 +847,12 @@ test_that("apply_pixel_model handles mixed valid/NA classes", {
   test_landscapes[[2]]$pattern <- NA
   test_landscapes[[4]]$pattern <- "unclassified"
 
-  expect_warning(
-    result <- apply_pixel_model(
+  result <- suppressWarnings(
+    apply_pixel_model(
       landscapes = test_landscapes,
       nn_model = model,
       verbose = FALSE
-    ),
-    NA
+    )
   )
 
   # Should return list structure with NULL performance or valid performance

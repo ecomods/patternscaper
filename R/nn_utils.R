@@ -394,6 +394,22 @@ check_categorical_values <- function(landscapes, action, max_distinct = 20) {
   )))
   distinct_values <- distinct_values[!is.na(distinct_values)]
 
+  if (!is.numeric(distinct_values)) {
+    cli::cli_abort(c(
+      "Cannot {action} landscapes with non-numeric cell values.",
+      "i" = "Use whole numbers as category codes, for example 1 for forest and 2 for lake."
+    ))
+  }
+
+  non_finite <- distinct_values[!is.finite(distinct_values)]
+  if (length(non_finite) > 0) {
+    cli::cli_abort(c(
+      "Cannot {action} landscapes with non-finite cell values.",
+      "x" = "Found {.val {non_finite}}.",
+      "i" = "Use finite whole numbers as category codes."
+    ))
+  }
+
   non_whole <- sort(distinct_values[distinct_values != round(distinct_values)])
   if (length(non_whole) > 0) {
     shown <- non_whole[seq_len(min(5, length(non_whole)))]
@@ -410,6 +426,76 @@ check_categorical_values <- function(landscapes, action, max_distinct = 20) {
       "Landscapes hold {length(distinct_values)} distinct cell values.",
       "i" = "Categorical habitat data usually has a handful of classes. Make sure your data is valid.",
       "i" = "Integer-coded continuous data, for example elevation in whole metres, passes the check but is meaningless to use in the model."
+    ))
+  }
+
+  invisible(NULL)
+}
+
+#' Fit the Habitat Encoding for a Pixel Model
+#'
+#' Finds the numeric habitat values present across the training landscapes and
+#' fixes their order for one-hot encoding.
+#'
+#' @param landscapes List of landscape objects.
+#'
+#' @return Sorted numeric vector of habitat values.
+#'
+#' @keywords internal
+fit_habitat_values <- function(landscapes) {
+  sort(unique(unlist(lapply(
+    landscapes,
+    function(l) terra::values(l$data)
+  ))))
+}
+
+#' One-Hot Encode a Habitat Raster
+#'
+#' Converts one numeric categorical raster layer into one binary array channel
+#' per fitted habitat value.
+#'
+#' @param landscape_data Single-layer SpatRaster.
+#' @param habitat_values Numeric vector fixing the channel order.
+#'
+#' @return Numeric array with dimensions rows by columns by habitat channels.
+#'
+#' @keywords internal
+encode_habitat_raster <- function(landscape_data, habitat_values) {
+  raster_array <- terra::as.array(landscape_data)
+  encoded <- array(
+    0,
+    dim = c(dim(raster_array)[1], dim(raster_array)[2], length(habitat_values))
+  )
+
+  for (i in seq_along(habitat_values)) {
+    encoded[, , i] <- raster_array[, , 1] == habitat_values[i]
+  }
+
+  encoded
+}
+
+#' Check Habitat Values Against a Fitted Pixel Model
+#'
+#' @param landscapes List of landscape objects to classify.
+#' @param habitat_values Numeric habitat values fitted during training.
+#'
+#' @return Invisibly `NULL`.
+#'
+#' @keywords internal
+abort_on_unseen_habitat_values <- function(landscapes, habitat_values) {
+  unseen <- lapply(landscapes, function(l) {
+    setdiff(unique(terra::values(l$data)), habitat_values)
+  })
+  invalid <- which(lengths(unseen) > 0)
+
+  if (length(invalid) > 0) {
+    details <- vapply(invalid, function(i) {
+      paste0(i, ": ", paste(sort(unseen[[i]]), collapse = ", "))
+    }, character(1))
+    cli::cli_abort(c(
+      "Cannot classify landscapes with habitat values not seen during training.",
+      "x" = "Unknown value{?s} by landscape index: {paste(details, collapse = '; ')}.",
+      "i" = "The model was trained with habitat values {.val {habitat_values}}."
     ))
   }
 

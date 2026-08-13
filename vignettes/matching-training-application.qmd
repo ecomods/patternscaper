@@ -104,6 +104,11 @@ numbers of rows and columns since their arrays are stacked into one tensor.
 `train_pixel_model()` checks this and aborts with a clear message rather than
 letting the stacking fail cryptically.
 
+Habitat categories must be numeric whole-number codes. Training fixes one input
+channel for each code, and application rasters must use the same codes. A trained
+category may be absent from an application landscape, but a previously unseen
+code cannot be interpreted by the fitted model.
+
 ## Preparing application data
 
 ### Keep the training set uniform

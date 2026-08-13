@@ -2,8 +2,9 @@
 #'
 #' Saves a complete pixel classifier as one model-bundle directory. The bundle
 #' contains the trained Keras network and the R metadata needed by
-#' \code{\link{apply_pixel_model}}, including class names and input dimensions.
-#' Move or archive the complete folder rather than the single files inside it.
+#' \code{\link{apply_pixel_model}}, including class names, input dimensions, and
+#' the fitted habitat values. Move or archive the complete folder rather than
+#' the single files inside it.
 #'
 #' @param nn_model List. Trained pixel model returned by
 #'   \code{\link{train_pixel_model}}.
@@ -76,7 +77,7 @@ save_pixel_model <- function(nn_model, path, overwrite = FALSE) {
   metadata$model <- NULL
   # Version the bundle structure independently of the trained model.
   bundle_metadata <- list(
-    format_version = 1L,
+    format_version = 2L,
     metadata = metadata
   )
   saveRDS(bundle_metadata, bundle_paths$metadata, version = 3)
@@ -165,7 +166,7 @@ validate_pixel_model_overwrite <- function(overwrite) {
 }
 
 validate_pixel_model_wrapper <- function(nn_model) {
-  required <- c("model", "classes", "input_shape")
+  required <- c("model", "classes", "input_shape", "habitat_values")
   if (
     !is.list(nn_model) ||
       !all(required %in% names(nn_model)) ||
@@ -196,7 +197,7 @@ validate_pixel_model_bundle_metadata <- function(bundle_metadata, path) {
     !is.numeric(version) ||
       length(version) != 1 ||
       is.na(version) ||
-      version != 1L
+      version != 2L
   ) {
     version_label <- if (length(version) == 1 && !is.na(version)) {
       as.character(version)
@@ -205,12 +206,12 @@ validate_pixel_model_bundle_metadata <- function(bundle_metadata, path) {
     }
     cli::cli_abort(c(
       "Unsupported pixel model bundle format: {version_label}.",
-      "i" = "This package version supports format 1."
+      "i" = "This package version supports format 2."
     ))
   }
 
   metadata <- bundle_metadata$metadata
-  required <- c("classes", "input_shape")
+  required <- c("classes", "input_shape", "habitat_values")
   if (!is.list(metadata) || !all(required %in% names(metadata))) {
     cli::cli_abort(
       "Pixel model bundle at {.path {path}} has invalid model metadata."

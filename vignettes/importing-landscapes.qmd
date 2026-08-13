@@ -14,7 +14,8 @@ In addition to using landscapes generated with the functions in `spatPatClassify
 These can be landscapes created manually as matrices or rasters, or landscapes read in from files (e.g. from classified remote sensing images).
 
 Please note that right now, the pixel workflow supports one raster layer with
-categorical cover classes.
+categorical cover classes represented by numeric whole-number codes. Text labels
+are not supported. The codes do not need to start at zero or be consecutive.
 
 ```{r}
 #| label: setup
@@ -38,6 +39,11 @@ landscape_matrix <- matrix(
 # Create a sample SpatRaster
 landscape_raster <- terra::rast(landscape_matrix)
 ```
+
+For example, the values `1`, `2`, and `3` can represent forest, grassland, and
+water. The pixel workflow treats these as names rather than quantities by
+converting each value to a separate binary channel. Training and application
+rasters must use the same code for the same habitat category.
 
 To convert these to `landscape` objects, use the `landscape()` function.
 The landscape object contains metadata about the landscape, such as its name and pattern.

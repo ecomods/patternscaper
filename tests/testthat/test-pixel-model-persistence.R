@@ -10,11 +10,8 @@ test_that("pixel model persistence validates paths and bundle metadata", {
     )
   }
 
-  stub_model <- list(
-    model = TRUE,
-    classes = c("a", "b"),
-    input_shape = c(10, 10, 1)
-  )
+  stub_model <- helper_pixel_stub_model()
+  stub_model$model <- TRUE
   expect_error(
     save_pixel_model(stub_model, file.path(test_root, "model.keras")),
     "bundle directory"
@@ -71,11 +68,23 @@ test_that("pixel model persistence validates paths and bundle metadata", {
     "Unsupported pixel model bundle format: 99"
   )
 
+  legacy <- file.path(test_root, "legacy")
+  dir.create(legacy)
+  file.create(file.path(legacy, "model.keras"))
+  saveRDS(
+    list(format_version = 1L, metadata = list()),
+    file.path(legacy, "metadata.rds")
+  )
+  expect_error(
+    load_pixel_model(legacy),
+    "Unsupported pixel model bundle format: 1"
+  )
+
   invalid <- file.path(test_root, "invalid")
   dir.create(invalid)
   file.create(file.path(invalid, "model.keras"))
   saveRDS(
-    list(format_version = 1L, metadata = list()),
+    list(format_version = 2L, metadata = list()),
     file.path(invalid, "metadata.rds")
   )
   expect_error(
@@ -123,7 +132,7 @@ test_that("pixel model bundle round trip works in the current process", {
   expect_true(file.exists(file.path(saved_path, "metadata.rds")))
 
   manifest <- readRDS(file.path(saved_path, "metadata.rds"))
-  expect_identical(manifest$format_version, 1L)
+  expect_identical(manifest$format_version, 2L)
   expect_false("model" %in% names(manifest$metadata))
   expect_equal(manifest$metadata$history, nn_model$history)
 
@@ -131,6 +140,7 @@ test_that("pixel model bundle round trip works in the current process", {
   expect_equal(names(reloaded), names(nn_model))
   expect_equal(reloaded$classes, nn_model$classes)
   expect_equal(reloaded$input_shape, nn_model$input_shape)
+  expect_equal(reloaded$habitat_values, nn_model$habitat_values)
   expect_equal(reloaded$history, nn_model$history)
 
   after <- apply_pixel_model(
@@ -158,7 +168,7 @@ test_that("a fresh R process can load and apply a pixel model bundle", {
   set_random_seed(42)
   keras_model <- create_keras_model(
     architecture = "multiscale",
-    input_shape = c(10, 10, 1),
+    input_shape = c(10, 10, 2),
     n_classes = 2,
     dropout_rate = 0.3,
     dense_units = 8
@@ -167,7 +177,8 @@ test_that("a fresh R process can load and apply a pixel model bundle", {
     model = keras_model,
     history = NULL,
     classes = c("a", "b"),
-    input_shape = c(10, 10, 1),
+    input_shape = c(10, 10, 2),
+    habitat_values = c(0, 1),
     architecture = "multiscale",
     performance = NULL,
     training_geometry = NULL

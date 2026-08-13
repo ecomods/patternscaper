@@ -76,6 +76,14 @@ the cross-validation method `cv_method` are:
 
 For details and further options see the function help of `train_pixel_model()`.
 
+The cell values must be numeric whole-number codes for unordered habitat
+categories. For example, `0` might represent bare ground and `1` vegetation, or
+`1`, `2`, and `3` might represent forest, grassland, and water. The numerical
+size and order of these codes have no meaning. `train_pixel_model()` converts
+each habitat value into its own binary input channel. A raster with three
+habitat values therefore produces three channels. Text labels are not
+supported.
+
 The built-in architecture, `"multiscale"`, processes the landscapes as raster
 arrays. It has two sequential convolutional blocks. Each block applies 3 by 3 and
 5 by 5 convolutions followed by max pooling, with 32 filters in the first block and
@@ -155,10 +163,13 @@ Finally, you can create some new test landscapes and classify them using the tra
 In reality this could be landscapes read in from files or created in other ways.
 For details on importing own landscapes, see the [importing landscapes vignette](importing-landscapes.html).
 
-Application landscapes must contain one raster layer with categorical values and
-have no `NA` cells. `apply_pixel_model()` resamples their rows and columns to the
-training dimensions with nearest-neighbor resampling. It warns when a different
-aspect ratio means that this stretches the pattern. See
+Application landscapes must contain one raster layer with numeric categorical
+values and have no `NA` cells. They must use the same category codes as the
+training data. A trained habitat category may be absent from a new landscape,
+but a new code that was not present during training causes an error.
+`apply_pixel_model()` resamples rows and columns to the training dimensions with
+nearest-neighbor resampling. It warns when a different aspect ratio means that
+this stretches the pattern. See
 [Matching training and application data](matching-training-application.html) for
 the practical consequences of resizing.
 

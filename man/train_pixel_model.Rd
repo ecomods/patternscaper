@@ -25,11 +25,13 @@ train_pixel_model(
 \arguments{
 \item{landscapes}{List. List of landscape objects created by \code{\link{create_landscape}} or
 \code{\link{create_landscapes}}.
-Input landscapes must contain categorical/discrete habitat data, such as 0/1
-for two habitat types or 0/1/2 for three types. Continuous data, such as
-elevation or gradients, is not supported. Each landscape must contain exactly
-one raster layer, be free of NA cells, and have the same number of rows and
-columns. At least two labelled pattern classes are required.}
+Input landscapes must contain categorical/discrete habitat data represented
+by numeric whole-number codes, such as 0/1 for two habitat types or 0/1/2 for
+three types. Text labels, continuous data such as elevation or gradients, and
+NA cells are not supported. Each landscape must contain exactly one raster
+layer and have the same number of rows and columns. At least two labelled
+pattern classes are required. Each habitat value is converted to a separate
+binary input channel.}
 
 \item{cv_method}{Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 \itemize{
@@ -104,6 +106,7 @@ List containing:
     \item{history}{Training history object from keras3::fit()}
     \item{classes}{Character vector of class names used during training}
     \item{input_shape}{Integer vector of input dimensions (height, width, channels)}
+    \item{habitat_values}{Numeric vector of fitted habitat values in input-channel order}
     \item{architecture}{Character, either "multiscale" or "custom"}
     \item{performance}{Performance metrics. When cv_method != "none", contains
       results from evaluate_cv_performance() including confusion matrix, per-class
