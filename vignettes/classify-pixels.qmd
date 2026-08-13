@@ -129,6 +129,23 @@ Or per class metrics like precision, recall, and F1-score:
 model$performance$per_class_metrics
 ```
 
+## Save and Reload the Model
+
+A pixel model contains both a Keras network and R metadata. Save the complete
+classifier with
+`save_pixel_model()` and reload it with `load_pixel_model()`:
+
+```{r}
+#| label: save-pixel-model
+pixel_model_bundle <- tempfile("pixel-model-")
+save_pixel_model(model, pixel_model_bundle)
+model <- load_pixel_model(pixel_model_bundle)
+```
+
+The supplied path is a directory containing `model.keras` and `metadata.rds`.
+Treat the complete directory as one model: move, copy, or archive the directory
+rather than the single files inside it. If a model already exists it cannot be overwritten, unless `overwrite = TRUE` is set.
+
 ## Step 3: Classify New Landscapes
 
 Finally, you can create some new test landscapes and classify them using the trained model. In this example, we create 20 new landscapes for testing. 

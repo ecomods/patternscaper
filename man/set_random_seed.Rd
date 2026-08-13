@@ -40,6 +40,7 @@ model <- train_pixel_model(landscapes, cv_method = "none", epochs = 5)
 \seealso{
 Other neural network training:
 \code{\link[=keras_available]{keras_available()}},
+\code{\link[=save_pixel_model]{save_pixel_model()}},
 \code{\link[=train_metric_model]{train_metric_model()}},
 \code{\link[=train_pixel_model]{train_pixel_model()}}
 }

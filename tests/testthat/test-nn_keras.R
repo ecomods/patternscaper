@@ -313,26 +313,6 @@ test_that("train_pixel_model shuffles only when a validation split is used", {
   expect_false(identical(run_and_capture_seed(0.2), run_and_capture_seed(0)))
 })
 
-test_that("train_pixel_model handles model_path validation", {
-  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
-
-  for (bad in list(1, NA_character_, "", c("a.keras", "b.keras"))) {
-    expect_error(
-      train_pixel_model(landscapes, model_path = bad),
-      "model_path must be a single non-empty character string or NULL"
-    )
-  }
-
-  expect_error(
-    train_pixel_model(
-      landscapes,
-      cv_method = "none",
-      model_path = "/nonexistent/path/model.keras"
-    ),
-    "Directory for model_path does not exist"
-  )
-})
-
 test_that("train_pixel_model aborts on landscapes with NA cells", {
   # The NA guard fires before the CNN is built, so no keras training is needed
   m <- matrix(c(0, 1), nrow = 20, ncol = 20)
@@ -344,37 +324,6 @@ test_that("train_pixel_model aborts on landscapes with NA cells", {
     train_pixel_model(list(clean, masked), cv_method = "none"),
     "NA cells"
   )
-})
-
-test_that("train_pixel_model saves model and overwrites an existing file", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
-
-  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
-  temp_file <- tempfile(fileext = ".keras")
-  metadata_file <- sub("\\.keras$", "_metadata.rds", temp_file)
-
-  # Occupy the path first: keras3::save_model() defaults to overwrite = FALSE,
-  # which aborted after training had already finished
-  file.create(temp_file)
-
-  set_random_seed(42)
-  result <- train_pixel_model(
-    landscapes,
-    cv_method = "none",
-    epochs = 1,
-    model_path = temp_file,
-    verbose = FALSE
-  )
-
-  expect_true(file.exists(temp_file))
-  expect_true(file.exists(metadata_file))
-
-  # Metadata holds everything except the model itself
-  metadata <- readRDS(metadata_file)
-  expect_null(metadata$model)
-  expect_equal(metadata$classes, result$classes)
-
-  unlink(c(temp_file, metadata_file))
 })
 
 test_that("train_pixel_model works with cv_method='none'", {

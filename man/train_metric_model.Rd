@@ -12,7 +12,6 @@ train_metric_model(
   hidden_layers = 6,
   threshold = 0.01,
   stepmax = 1e+05,
-  model_path = NULL,
   na_action = "drop_metrics",
   verbose = TRUE
 )
@@ -41,9 +40,6 @@ passed to \code{\link[neuralnet]{neuralnet}}.
 Smaller values = more training iterations. Default: 0.01.}
 
 \item{stepmax}{Integer. Maximum number of training steps passed to \code{\link[neuralnet]{neuralnet}}. Default: 1e+05.}
-
-\item{model_path}{Character. Optional file path (must end in .rds) to save
-the trained model. Default: NULL (no saving).}
 
 \item{na_action}{Character. How to obtain the complete predictor matrix the
 network requires when a metric is missing for some but not all landscapes.
@@ -113,12 +109,8 @@ model <- train_metric_model(
 
 # Save the model, to apply it later without retraining
 model_file <- tempfile(fileext = ".rds")
-model <- train_metric_model(
-  metrics,
-  metrics_selected = best_5,
-  cv_method = "none",
-  model_path = model_file
-)
+saveRDS(model, model_file)
+model <- readRDS(model_file)
 }
 }
 \seealso{
@@ -126,6 +118,7 @@ model <- train_metric_model(
 
 Other neural network training:
 \code{\link[=keras_available]{keras_available()}},
+\code{\link[=save_pixel_model]{save_pixel_model()}},
 \code{\link[=set_random_seed]{set_random_seed()}},
 \code{\link[=train_pixel_model]{train_pixel_model()}}
 }

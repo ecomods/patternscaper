@@ -8,20 +8,18 @@ train_landscapes <- create_landscapes(
   patterns = c("random", "sharp", "diffuse")
 )
 
+set_random_seed(1)
 model <- train_pixel_model(
   landscapes = train_landscapes,
   cv_method = "none",
-  epochs = 5,
-  # writes .keras + _metadata.rds automatically (you can also omit .keras, it will be added)
-  model_path = "test_pixel_model.keras"
+  epochs = 5
 )
 
-# Read and apply a model ------------------------------------------------------
+# Save, read, and apply a model -----------------------------------------------
 
-# Read in a saved model
-# Reattach the keras object to the metadata list.
-reloaded <- readRDS(metadata_file)
-reloaded$model <- keras3::load_model(model_file)
+model_bundle <- tempfile("test-pixel-model-")
+save_pixel_model(model, model_bundle)
+reloaded <- load_pixel_model(model_bundle)
 
 # Apply to new landscapes
 test_landscapes <- create_landscapes(
@@ -33,3 +31,5 @@ results <- apply_pixel_model(
   landscapes = test_landscapes,
   nn_model = reloaded
 )
+
+unlink(model_bundle, recursive = TRUE)

@@ -22,9 +22,6 @@
 #' @param epochs Integer. Number of training epochs (default: 50).
 #' @param batch_size Integer. Batch size for training (default: 16).
 #' @param learning_rate Numeric. Learning rate for the optimizer (default: 0.001).
-#' @param model_path Character. Path to save model. Models are saved as
-#'   \file{.keras} files.
-#'   (default: NULL means model is not saved).
 #' @param architecture Character. CNN architecture (default: "multiscale").
 #'   Currently only "multiscale" is supported. It uses sequential convolutional
 #'   blocks with 3 by 3 and 5 by 5 kernels.
@@ -117,7 +114,6 @@ train_pixel_model <- function(
   architecture = "multiscale",
   dropout_rate = 0.3,
   dense_units = 128,
-  model_path = NULL,
   loss = "categorical_crossentropy",
   optimizer = "adam",
   validation_split = 0,
@@ -247,34 +243,6 @@ train_pixel_model <- function(
   optimizer <- tolower(optimizer)
   if (!optimizer %in% c("adam", "sgd", "rmsprop")) {
     cli::cli_abort('optimizer must be one of: "adam", "sgd", or "rmsprop"')
-  }
-
-  # Validate and normalize model_path if provided
-  if (!is.null(model_path)) {
-    if (
-      !is.character(model_path) ||
-        length(model_path) != 1 ||
-        is.na(model_path) ||
-        !nzchar(model_path)
-    ) {
-      cli::cli_abort(
-        "model_path must be a single non-empty character string or NULL"
-      )
-    }
-    if (!stringr::str_detect(model_path, "\\.keras$")) {
-      cli::cli_alert_info(
-        "model_path should end with .keras (current: {model_path}). Automatically adding .keras extension."
-      )
-      model_path <- paste0(model_path, ".keras")
-    }
-
-    # Check if directory exists and is writable
-    model_dir <- dirname(model_path)
-    if (!dir.exists(model_dir)) {
-      cli::cli_abort(
-        "Directory for model_path does not exist: {model_dir}. Please create it first."
-      )
-    }
   }
 
   if (is_landscape(landscapes)) {
@@ -681,20 +649,6 @@ train_pixel_model <- function(
     performance = performance,
     training_geometry = summarise_training_geometry(landscapes)
   )
-
-  # Save model if requested
-  if (!is.null(model_path)) {
-    # overwrite = TRUE because keras3 otherwise aborts on an existing file,
-    # which would discard the model that was just trained. Matches
-    # train_metric_model(), where write_rds() overwrites.
-    keras3::save_model(final_model, model_path, overwrite = TRUE)
-
-    # Save metadata separately
-    metadata_path <- gsub("\\.keras$", "_metadata.rds", model_path)
-    metadata <- result
-    metadata$model <- NULL
-    readr::write_rds(metadata, metadata_path)
-  }
 
   return(result)
 }

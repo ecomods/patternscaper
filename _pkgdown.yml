@@ -61,6 +61,12 @@ reference:
   - apply_metric_model
   - apply_pixel_model
 
+- title: Model persistence
+  desc: Save and reload trained classifiers
+  contents:
+  - save_pixel_model
+  - load_pixel_model
+
 - title: Visualization
   desc: Plot landscapes, metrics, and classification results
   contents:

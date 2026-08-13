@@ -96,6 +96,7 @@ results$performance
 \code{\link{train_pixel_model}}, \code{\link{plot_classified_landscapes}}
 
 Other neural network application:
-\code{\link[=apply_metric_model]{apply_metric_model()}}
+\code{\link[=apply_metric_model]{apply_metric_model()}},
+\code{\link[=load_pixel_model]{load_pixel_model()}}
 }
 \concept{neural network application}

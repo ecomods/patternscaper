@@ -14,7 +14,6 @@ train_pixel_model(
   architecture = "multiscale",
   dropout_rate = 0.3,
   dense_units = 128,
-  model_path = NULL,
   loss = "categorical_crossentropy",
   optimizer = "adam",
   validation_split = 0,
@@ -58,10 +57,6 @@ convolutional and dense layers.}
 
 \item{dense_units}{Integer. Number of units in the final dense layer before output
 (default: 128). Controls model capacity for learning complex pattern combinations.}
-
-\item{model_path}{Character. Path to save model. Models are saved as
-\file{.keras} files.
-(default: NULL means model is not saved).}
 
 \item{loss}{Character. Loss function for training (default: "categorical_crossentropy").
 Labels are one-hot encoded internally, so the loss must accept one-hot targets.
@@ -153,6 +148,7 @@ final_model <- train_pixel_model(
 
 Other neural network training:
 \code{\link[=keras_available]{keras_available()}},
+\code{\link[=save_pixel_model]{save_pixel_model()}},
 \code{\link[=set_random_seed]{set_random_seed()}},
 \code{\link[=train_metric_model]{train_metric_model()}}
 }

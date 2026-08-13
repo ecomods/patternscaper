@@ -57,20 +57,6 @@ test_that("train_metric_model validates stepmax parameter", {
   )
 })
 
-test_that("train_metric_model validates model_path parameter", {
-  expect_error(
-    train_metric_model(fixtures$minimal_metrics, model_path = "model.txt"),
-    "model_path must end with .rds"
-  )
-  expect_error(
-    train_metric_model(
-      fixtures$minimal_metrics,
-      model_path = c("a.rds", "b.rds")
-    ),
-    "model_path must be a single character string"
-  )
-})
-
 test_that("train_metric_model validates cv_method parameter", {
   expect_error(
     train_metric_model(fixtures$minimal_metrics, cv_method = "invalid"),
@@ -384,27 +370,6 @@ test_that("train_metric_model handles custom hidden_layers configuration", {
     verbose = FALSE
   )
   expect_s3_class(result_multi$model, "nn")
-})
-
-test_that("train_metric_model saves model when model_path provided", {
-  temp_file <- tempfile(fileext = ".rds")
-
-  result <- train_metric_model(
-    fixtures$minimal_metrics,
-    model_path = temp_file,
-    cv_method = "none",
-    verbose = FALSE
-  )
-
-  # File should exist
-  expect_true(file.exists(temp_file))
-
-  # Should be able to load it
-  loaded_model <- readRDS(temp_file)
-  expect_equal(names(loaded_model), names(result))
-
-  # Clean up
-  unlink(temp_file)
 })
 
 # NA handling tests ------------------------------------------------------------

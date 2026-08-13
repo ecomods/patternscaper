@@ -22,8 +22,6 @@
 #'   passed to \code{\link[neuralnet]{neuralnet}}.
 #'   Smaller values = more training iterations. Default: 0.01.
 #' @param stepmax Integer. Maximum number of training steps passed to \code{\link[neuralnet]{neuralnet}}. Default: 1e+05.
-#' @param model_path Character. Optional file path (must end in .rds) to save
-#'   the trained model. Default: NULL (no saving).
 #' @param na_action Character. How to obtain the complete predictor matrix the
 #'   network requires when a metric is missing for some but not all landscapes.
 #'   \code{"drop_metrics"} (default) drops the affected metrics and keeps every
@@ -83,12 +81,8 @@
 #'
 #' # Save the model, to apply it later without retraining
 #' model_file <- tempfile(fileext = ".rds")
-#' model <- train_metric_model(
-#'   metrics,
-#'   metrics_selected = best_5,
-#'   cv_method = "none",
-#'   model_path = model_file
-#' )
+#' saveRDS(model, model_file)
+#' model <- readRDS(model_file)
 #' }
 #' @seealso \code{\link{apply_metric_model}}, \code{\link{evaluate_metrics}}
 #' @family neural network training
@@ -97,7 +91,6 @@
 #' @importFrom dplyr filter select any_of all_of
 #' @importFrom purrr pmap_lgl
 #' @importFrom neuralnet neuralnet
-#' @importFrom readr write_rds
 #' @importFrom stats predict
 train_metric_model <- function(
   metrics,
@@ -107,7 +100,6 @@ train_metric_model <- function(
   hidden_layers = 6,
   threshold = 0.01,
   stepmax = 1e+05,
-  model_path = NULL,
   na_action = "drop_metrics",
   verbose = TRUE
 ) {
@@ -144,15 +136,6 @@ train_metric_model <- function(
       cv_folds != floor(cv_folds)
   ) {
     cli::cli_abort("cv_folds must be a single integer >= 2")
-  }
-
-  if (!is.null(model_path)) {
-    if (!is.character(model_path) || length(model_path) != 1) {
-      cli::cli_abort("model_path must be a single character string")
-    }
-    if (!grepl("\\.rds$", model_path, ignore.case = TRUE)) {
-      cli::cli_abort("model_path must end with .rds extension")
-    }
   }
 
   # Validate columns of metrics
@@ -396,11 +379,6 @@ train_metric_model <- function(
     training_geometry = training_geometry
   )
 
-  # Save model if requested
-  if (!is.null(model_path)) {
-    readr::write_rds(result, model_path)
-  }
-
   return(result)
 }
 
@@ -510,14 +488,14 @@ train_metric_model <- function(
 #' # find the best 5 metrics for classification
 #' best_5 <- evaluate_metrics(metrics, metrics_number = 5)
 #' # Train on all data, then evaluate below on a separate test set.
-#' # model_path saves the fitted model so it can be reused without retraining.
-#' model_file <- tempfile(fileext = ".rds")
 #' model <- train_metric_model(
 #'   metrics,
 #'   metrics_selected = best_5,
-#'   cv_method = "none",
-#'   model_path = model_file
+#'   cv_method = "none"
 #' )
+#' model_file <- tempfile(fileext = ".rds")
+#' saveRDS(model, model_file)
+#' model <- readRDS(model_file)
 #'
 #' # Apply to new landscapes
 #' new_landscapes <- create_landscapes(
@@ -533,8 +511,8 @@ train_metric_model <- function(
 #' # Classify without scoring, even though the landscapes carry true classes
 #' apply_metric_model(new_landscapes, model, evaluate = "none")$predictions
 #'
-#' # A model saved earlier is read back with readr::read_rds()
-#' saved_model <- readr::read_rds(model_file)
+#' # A model saved earlier is read back with readRDS()
+#' saved_model <- readRDS(model_file)
 #' apply_metric_model(new_landscapes, saved_model)
 #' }
 #' @seealso \code{\link{train_metric_model}}, \code{\link{plot_classified_landscapes}}

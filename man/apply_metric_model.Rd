@@ -118,14 +118,14 @@ metrics <- calculate_metrics(train_landscapes, level = "landscape")
 # find the best 5 metrics for classification
 best_5 <- evaluate_metrics(metrics, metrics_number = 5)
 # Train on all data, then evaluate below on a separate test set.
-# model_path saves the fitted model so it can be reused without retraining.
-model_file <- tempfile(fileext = ".rds")
 model <- train_metric_model(
   metrics,
   metrics_selected = best_5,
-  cv_method = "none",
-  model_path = model_file
+  cv_method = "none"
 )
+model_file <- tempfile(fileext = ".rds")
+saveRDS(model, model_file)
+model <- readRDS(model_file)
 
 # Apply to new landscapes
 new_landscapes <- create_landscapes(
@@ -141,8 +141,8 @@ results$performance
 # Classify without scoring, even though the landscapes carry true classes
 apply_metric_model(new_landscapes, model, evaluate = "none")$predictions
 
-# A model saved earlier is read back with readr::read_rds()
-saved_model <- readr::read_rds(model_file)
+# A model saved earlier is read back with readRDS()
+saved_model <- readRDS(model_file)
 apply_metric_model(new_landscapes, saved_model)
 }
 }
@@ -155,6 +155,7 @@ Wang, W., & Carreira-Perpinan, M. A. (2013). Projection onto the
 \code{\link{train_metric_model}}, \code{\link{plot_classified_landscapes}}
 
 Other neural network application:
-\code{\link[=apply_pixel_model]{apply_pixel_model()}}
+\code{\link[=apply_pixel_model]{apply_pixel_model()}},
+\code{\link[=load_pixel_model]{load_pixel_model()}}
 }
 \concept{neural network application}

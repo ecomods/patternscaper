@@ -162,6 +162,20 @@ Or per class metrics like precision, recall, and F1-score:
 model$performance$per_class_metrics
 ```
 
+## Save and Reload the Model
+
+A metric model is an ordinary R object. Save and reload it with the base R
+functions `saveRDS()` and `readRDS()`:
+
+```{r}
+#| label: save-metric-model
+metric_model_file <- tempfile(fileext = ".rds")
+saveRDS(model, metric_model_file)
+model <- readRDS(metric_model_file)
+```
+
+Keep the `.rds` file to apply the model in a future R session without retraining.
+
 ## Step 5: Classify New Landscapes
 
 Finally, you can create some new test landscapes and classify them using the trained model. In this example, we create 10 new landscapes for testing. 

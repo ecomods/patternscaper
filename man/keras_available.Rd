@@ -35,6 +35,7 @@ keras_available()
 \code{\link[keras3]{install_keras}} to set the backend up.
 
 Other neural network training:
+\code{\link[=save_pixel_model]{save_pixel_model()}},
 \code{\link[=set_random_seed]{set_random_seed()}},
 \code{\link[=train_metric_model]{train_metric_model()}},
 \code{\link[=train_pixel_model]{train_pixel_model()}}
