@@ -227,9 +227,6 @@ train_pixel_model <- function(
     }
   }
 
-  # Check the container before iterating it. sapply() over a lone landscape
-  # walks its fields, so the element check below would report its
-  # data/pattern/params/name as the invalid elements.
   if (is_landscape(landscapes)) {
     cli::cli_abort(c(
       "{.arg landscapes} must be a list of landscape objects.",
@@ -250,9 +247,10 @@ train_pixel_model <- function(
   }
 
   # Check if landscapes is a list of landscape objects
-  if (any(!sapply(landscapes, is_landscape))) {
+  valid_landscapes <- vapply(landscapes, is_landscape, logical(1))
+  if (any(!valid_landscapes)) {
     # find out which element is not a landscape
-    invalid_indices <- which(!sapply(landscapes, is_landscape))
+    invalid_indices <- which(!valid_landscapes)
     cli::cli_abort(c(
       "All elements must be landscape objects.",
       "x" = "Invalid element(s) at index(es): {paste(invalid_indices, collapse = ', ')}"
@@ -281,7 +279,11 @@ train_pixel_model <- function(
   }
 
   # Get the training labels (pattern field of the landscape object)
-  training_labels <- sapply(landscapes, function(l) l$pattern)
+  training_labels <- vapply(
+    landscapes,
+    function(l) as.character(l$pattern),
+    character(1)
+  )
 
   # Check if all training labels are neither NA nor unclassified
   if (any(is.na(training_labels) | training_labels == "unclassified")) {
@@ -513,8 +515,16 @@ train_pixel_model <- function(
       verbose = verbose
     )
     # Calculate average accuracy and loss across folds
-    accuracies <- sapply(cv_evaluation, function(x) x$evaluation[["accuracy"]])
-    losses <- sapply(cv_evaluation, function(x) x$evaluation[["loss"]])
+    accuracies <- vapply(
+      cv_evaluation,
+      function(x) x$evaluation[["accuracy"]],
+      numeric(1)
+    )
+    losses <- vapply(
+      cv_evaluation,
+      function(x) x$evaluation[["loss"]],
+      numeric(1)
+    )
 
     if (verbose) {
       cli::cli_h2("Accuracy and loss across folds")
@@ -749,8 +759,9 @@ apply_pixel_model <- function(
   }
 
   # Check if landscapes is a list of landscape objects
-  if (any(!sapply(landscapes, is_landscape))) {
-    invalid_indices <- which(!sapply(landscapes, is_landscape))
+  valid_landscapes <- vapply(landscapes, is_landscape, logical(1))
+  if (any(!valid_landscapes)) {
+    invalid_indices <- which(!valid_landscapes)
     cli::cli_abort(c(
       "All elements must be landscape objects.",
       "x" = "Invalid element(s) at index(es): {paste(invalid_indices, collapse = ', ')}"
@@ -758,10 +769,18 @@ apply_pixel_model <- function(
   }
 
   # Get the training labels (pattern field of the landscape object) if available
-  landscape_pattern <- sapply(landscapes, function(l) l$pattern)
-  landscape_names <- sapply(landscapes, function(l) {
-    if (!is.null(l$name)) l$name else NA_character_
-  })
+  landscape_pattern <- vapply(
+    landscapes,
+    function(l) as.character(l$pattern),
+    character(1)
+  )
+  landscape_names <- vapply(
+    landscapes,
+    function(l) {
+      if (!is.null(l$name)) l$name else NA_character_
+    },
+    character(1)
+  )
 
   abort_on_na_cells(landscapes, "classify")
   check_categorical_values(landscapes, "classify")
@@ -815,7 +834,11 @@ apply_pixel_model <- function(
   })
 
   # Print batched resize message
-  needs_resize <- sapply(resize_info, function(x) x$needs_resize)
+  needs_resize <- vapply(
+    resize_info,
+    function(x) x$needs_resize,
+    logical(1)
+  )
   if (any(needs_resize)) {
     n_resize <- sum(needs_resize)
 
