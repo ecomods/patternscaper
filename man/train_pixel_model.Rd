@@ -26,11 +26,11 @@ train_pixel_model(
 \arguments{
 \item{landscapes}{List. List of landscape objects created by \code{\link{create_landscape}} or
 \code{\link{create_landscapes}}.
-**Note**: Input landscapes must contain categorical/discrete habitat data
-(e.g., 0/1 for two habitat types, or 0/1/2 for three types).
-Continuous data (e.g., elevation, gradients) is not supported.
-All training landscapes must have the same cell dimensions (width and height in
-cells).}
+Input landscapes must contain categorical/discrete habitat data, such as 0/1
+for two habitat types or 0/1/2 for three types. Continuous data, such as
+elevation or gradients, is not supported. Landscapes must be free of NA cells
+and have the same number of rows, columns, and layers. At least two labelled
+pattern classes are required.}
 
 \item{cv_method}{Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 \itemize{
@@ -46,11 +46,11 @@ Note: May be automatically reduced to ensure adequate samples per fold.}
 
 \item{batch_size}{Integer. Batch size for training (default: 16).}
 
-\item{learning_rate}{Numeric. Learning rate for Adam optimizer (default: 0.001).}
+\item{learning_rate}{Numeric. Learning rate for the optimizer (default: 0.001).}
 
 \item{architecture}{Character. CNN architecture (default: "multiscale").
-Currently only "multiscale" is supported, which uses multiple kernel sizes
-(3x3 and 5x5) to capture patterns at different spatial scales.}
+Currently only "multiscale" is supported. It uses sequential convolutional
+blocks with 3 by 3 and 5 by 5 kernels.}
 
 \item{dropout_rate}{Numeric. Dropout rate for regularization (0-1, default: 0.3).
 Higher values reduce overfitting but may decrease model capacity. Applied between
@@ -59,7 +59,8 @@ convolutional and dense layers.}
 \item{dense_units}{Integer. Number of units in the final dense layer before output
 (default: 128). Controls model capacity for learning complex pattern combinations.}
 
-\item{model_path}{Character. Path to save model. Models are saved as `.keras` files.
+\item{model_path}{Character. Path to save model. Models are saved as
+\file{.keras} files.
 (default: NULL means model is not saved).}
 
 \item{loss}{Character. Loss function for training (default: "categorical_crossentropy").
@@ -82,11 +83,14 @@ random sample rather than the final landscapes in the order they were supplied.}
 Examples: early stopping, learning rate scheduling, model checkpointing.
 Note: Only applies to final model training. CV folds always use patience-based
 early stopping if patience is specified. For an overview of available callbacks,
-see \code{\link[keras3]{callback_early_stopping}} (the callback used by default) and related `callback_` functions.}
+see \code{\link[keras3]{callback_early_stopping}} (the callback used by
+default) and related callback functions.}
 
 \item{patience}{Integer. Number of epochs with no improvement before early stopping (default: 15).
-Applied to both CV fold training (monitors validation loss) and final model training (monitors validation loss if `validation_split` > 0).
-Only used when callbacks=NULL. Set to NULL to train for full epoch count without early stopping.
+Applied to both CV fold training (monitors validation loss) and final model
+training (monitors validation loss if \code{validation_split > 0}).
+Only used when \code{callbacks = NULL}. Set to NULL to train for the full
+epoch count without early stopping.
 Is passed to \code{\link[keras3]{callback_early_stopping}}.}
 
 \item{verbose}{Logical. Show training progress and performance summaries (default: TRUE).
@@ -114,9 +118,9 @@ List containing:
   }
 }
 \description{
-Trains a CNN model using the Keras framework via \pkg{keras3} to classify landscapes based on their
-spatial patterns (pixel data). The function uses a multiscale CNN architecture optimized for
-distinguishing different landscape patterns.
+Trains a CNN model using the Keras framework via \pkg{keras3} to classify
+landscapes from their raster cell values. The function uses the built-in
+multiscale CNN architecture.
 }
 \examples{
 \dontshow{if (keras_available()) withAutoprint(\{ # examplesIf}

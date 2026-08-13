@@ -44,10 +44,10 @@ guards each accordingly.
 
 | | metric-based | pixel-based |
 |---|---|---|
-| Extent / resolution | metrics computed as-is; **warns** on a substantial mismatch | landscape **resized** onto the training grid; robust |
+| Extent / resolution | metrics computed as-is; **warns** on a substantial mismatch | rows and columns **resampled** onto the training grid; absolute grid size is discarded |
 | Aspect ratio | reflected in the metrics; **warns** on a large change | anisotropic resize distorts the pattern; **warns** |
-| Irregular shape (`NA`) | `NA` treated as outside the landscape; works | `NA` reaches the CNN as `NaN`; **error** |
-| Training set itself | **warns** if training landscapes are not uniform | **requires** identical training dimensions (error otherwise) |
+| Irregular shape (`NA`) | `NA` treated as outside the landscape; works | `NA` rejected before prediction; **error** |
+| Training set itself | **warns** if training landscapes are not uniform | **requires** identical rows, columns, and layer counts (error otherwise) |
 
 ### Metric-based workflow
 
@@ -81,24 +81,26 @@ then conflate the pattern with the landscape's size.
 
 ### Pixel-based workflow
 
-The CNN has a fixed input size, so `apply_pixel_model()` **resizes** every
-application landscape onto the training grid. This makes it robust to differences
-in extent and resolution — it effectively discards absolute scale. Two cautions
-remain:
+The CNN has a fixed input size, so `apply_pixel_model()` **resamples** every
+application landscape onto the training grid. This lets the function accept
+different row and column counts by discarding the absolute grid size. It does not
+make the CNN scale-invariant, and predictions can still change when resampling
+changes the apparent size of landscape structures. Two cautions remain:
 
 - **Aspect ratio.** Resizing a non-square landscape onto a (square) training grid
   stretches it anisotropically, distorting the pattern. `apply_pixel_model()` warns
   when this happens.
-- **`NA` cells.** They survive resizing and reach the network as `NaN`, which yields
-  confident but meaningless predictions. Rather than fail silently,
-  `apply_pixel_model()` raises an error.
+- **`NA` cells.** They cannot be interpreted as a habitat category. The function
+  raises an error before resizing or prediction rather than passing them to the
+  network.
 
 ```
 x Cannot classify landscapes that contain NA cells.
 ```
 
 The training side is stricter still: all training landscapes must have the same
-cell dimensions, since their arrays are stacked into one tensor.
+numbers of rows, columns, and layers, since their arrays are stacked into one
+tensor.
 `train_pixel_model()` checks this and aborts with a clear message rather than
 letting the stacking fail cryptically.
 
@@ -106,14 +108,15 @@ letting the stacking fail cryptically.
 
 ### Keep the training set uniform
 
-Generate training landscapes at a single width and height. `create_landscapes()`
-does this by default; if you assemble training data yourself, make the dimensions
-consistent.
+Generate training landscapes at a single width, height, and layer count.
+`create_landscapes()` does this by default; if you assemble training data yourself,
+make all three dimensions consistent.
 
 ### Different size, same shape
 
-No action needed. The pixel workflow resizes automatically, and the metric
-workflow is fine as long as the selected metrics are scale-invariant (see above).
+The pixel workflow resamples automatically, but check that the structures remain
+meaningfully comparable after rescaling. The metric workflow is suitable when the
+selected metrics are scale-invariant (see above).
 
 ### Different resolution (grain)
 
@@ -173,8 +176,8 @@ The cropped landscape now matches the training aspect ratio, so
 
 - The metric workflow is sensitive to **extent and resolution** (via scale-dependent
   metrics) but handles **irregular shapes**; it warns on geometry mismatch.
-- The pixel workflow is robust to **extent and resolution** (it resizes) but needs
-  **rectangular, `NA`-free, same-aspect** data; it errors or warns otherwise.
+- The pixel workflow accepts different row and column counts by **resampling** but
+  does not preserve absolute scale. It needs **rectangular, `NA`-free,
+  same-aspect** data to avoid errors or geometric distortion.
 - Keep training landscapes uniform, choose scale-appropriate metrics, and crop or
-  tile irregular areas — never fill `NA` with `0`.
-```
+  tile irregular areas. Never fill `NA` with `0`.

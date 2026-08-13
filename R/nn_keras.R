@@ -1,16 +1,16 @@
 #' Train a Convolutional Neural Network for Landscape Pattern Classification
 #'
-#' Trains a CNN model using the Keras framework via \pkg{keras3} to classify landscapes based on their
-#' spatial patterns (pixel data). The function uses a multiscale CNN architecture optimized for
-#' distinguishing different landscape patterns.
+#' Trains a CNN model using the Keras framework via \pkg{keras3} to classify
+#' landscapes from their raster cell values. The function uses the built-in
+#' multiscale CNN architecture.
 #'
 #' @param landscapes List. List of landscape objects created by \code{\link{create_landscape}} or
 #' \code{\link{create_landscapes}}.
-#' **Note**: Input landscapes must contain categorical/discrete habitat data
-#' (e.g., 0/1 for two habitat types, or 0/1/2 for three types).
-#' Continuous data (e.g., elevation, gradients) is not supported.
-#' All training landscapes must have the same cell dimensions (width and height in
-#' cells).
+#' Input landscapes must contain categorical/discrete habitat data, such as 0/1
+#' for two habitat types or 0/1/2 for three types. Continuous data, such as
+#' elevation or gradients, is not supported. Landscapes must be free of NA cells
+#' and have the same number of rows, columns, and layers. At least two labelled
+#' pattern classes are required.
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #'   \itemize{
 #'     \item "k-fold" or "loo": Performs cross-validation and returns performance metrics
@@ -21,12 +21,13 @@
 #'   Note: May be automatically reduced to ensure adequate samples per fold.
 #' @param epochs Integer. Number of training epochs (default: 50).
 #' @param batch_size Integer. Batch size for training (default: 16).
-#' @param learning_rate Numeric. Learning rate for Adam optimizer (default: 0.001).
-#' @param model_path Character. Path to save model. Models are saved as `.keras` files.
+#' @param learning_rate Numeric. Learning rate for the optimizer (default: 0.001).
+#' @param model_path Character. Path to save model. Models are saved as
+#'   \file{.keras} files.
 #'   (default: NULL means model is not saved).
 #' @param architecture Character. CNN architecture (default: "multiscale").
-#'   Currently only "multiscale" is supported, which uses multiple kernel sizes
-#'   (3x3 and 5x5) to capture patterns at different spatial scales.
+#'   Currently only "multiscale" is supported. It uses sequential convolutional
+#'   blocks with 3 by 3 and 5 by 5 kernels.
 #' @param dropout_rate Numeric. Dropout rate for regularization (0-1, default: 0.3).
 #'  Higher values reduce overfitting but may decrease model capacity. Applied between
 #'  convolutional and dense layers.
@@ -43,10 +44,13 @@
 #'   Examples: early stopping, learning rate scheduling, model checkpointing.
 #'   Note: Only applies to final model training. CV folds always use patience-based
 #'   early stopping if patience is specified. For an overview of available callbacks,
-#'   see \code{\link[keras3]{callback_early_stopping}} (the callback used by default) and related `callback_` functions.
+#'   see \code{\link[keras3]{callback_early_stopping}} (the callback used by
+#'   default) and related callback functions.
 #' @param patience Integer. Number of epochs with no improvement before early stopping (default: 15).
-#'   Applied to both CV fold training (monitors validation loss) and final model training (monitors validation loss if `validation_split` > 0).
-#'   Only used when callbacks=NULL. Set to NULL to train for full epoch count without early stopping.
+#'   Applied to both CV fold training (monitors validation loss) and final model
+#'   training (monitors validation loss if \code{validation_split > 0}).
+#'   Only used when \code{callbacks = NULL}. Set to NULL to train for the full
+#'   epoch count without early stopping.
 #'   Is passed to \code{\link[keras3]{callback_early_stopping}}.
 #' @param validation_split Numeric. Fraction of training data to use as validation set during
 #'   final model training and passed to \code{\link[keras3]{fit}}(0-1, default: 0).
@@ -698,17 +702,17 @@ train_pixel_model <- function(
 #' Apply a Keras CNN Model for Landscape Pattern Classification
 #'
 #' Applies a trained CNN model to classify new landscapes based on their
-#' spatial patterns. Automatically resizes input landscapes to match the
+#' spatial patterns. Automatically resamples input landscapes to match the
 #' model's expected dimensions.
 #'
-#' @param landscapes landscape object, or list of landscape objects. Landscape(s) to classify.
-#'   Landscapes will be automatically resized to match the model's input dimensions using
-#'   nearest neighbor interpolation, which preserves categorical cell values.
-#'   **Note**: Input landscapes must contain categorical/discrete habitat data (e.g., 0/1 for
-#'   two habitat types, or 0/1/2 for three types). Continuous data (e.g., elevation,
-#'   gradients) is not supported. Landscapes must also be free of NA cells as they would
-#'   produce meaningless predictions, so it raises an error instead. A landscape whose
-#'   aspect ratio differs from the training grid is resized anisotropically (stretched),
+#' @param landscapes Landscape object, or list of landscape objects, to classify.
+#'   Rows and columns are resampled to the model's input dimensions using nearest
+#'   neighbor resampling, which preserves categorical cell values. The number of
+#'   layers must already match the training data. Input landscapes must contain
+#'   categorical/discrete habitat data, such as 0/1 for two habitat types or 0/1/2
+#'   for three types. Continuous data, such as elevation or gradients, is not
+#'   supported. Landscapes must also be free of NA cells. A landscape whose aspect
+#'   ratio differs from the training grid is resized anisotropically (stretched),
 #'   which raises a warning.
 #' @param nn_model List. CNN model object from \code{\link{train_pixel_model}}.
 #' @param evaluate Character. Whether to evaluate the predictions against the
@@ -725,7 +729,7 @@ train_pixel_model <- function(
 #'     \item{predictions}{Tibble with one row per input landscape, in input
 #'       order, and columns:
 #'       \describe{
-#'         \item{landscape_id}{Numeric landscape identifier}
+#'         \item{landscape_id}{Integer landscape identifier}
 #'         \item{landscape_name}{Character landscape name (if available)}
 #'         \item{actual_class}{True class (if available)}
 #'         \item{predicted_class}{Predicted landscape pattern}
@@ -734,7 +738,11 @@ train_pixel_model <- function(
 #'               \code{\link{apply_metric_model}}, section "Interpreting the class
 #'               scores", which applies to both workflows.}
 #'         \item{<class_name>}{Score for each trained class, straight from the
-#'               network's softmax output layer, so each row sums to 1.}
+#'               network's softmax output layer, so each row sums to 1. These
+#'               scores show the model's relative support among the available
+#'               classes for that landscape. One dominant score indicates a more
+#'               decisive output, while similar scores indicate ambiguity. They
+#'               are not probabilities that the classification is correct.}
 #'       }}
 #'     \item{performance}{Performance metrics:
 #'       confusion matrix, accuracy, and per-class recall/precision/F1. NULL

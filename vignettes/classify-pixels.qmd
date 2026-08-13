@@ -30,23 +30,26 @@ Models are trained using the R package `keras3`. It requires a working installat
 
 You can refer to our [installation guide](install-keras.html) and the official [`keras3` package website](https://keras3.posit.co/) for instructions on how to install Keras and TensorFlow.
 
-To quickly test if your setup is working, you can run the following simple function from the `keras3` package:
+Use the package's backend check to confirm that `keras3` can reach TensorFlow:
 
 ```{r}
 #| label: test-keras
-keras3::to_categorical(0)
+keras_available()
 ```
 
-If the function does not return an error, your Keras installation is working correctly.
+This must return `TRUE` before the pixel workflow can run.
 
 ## Set seed for reproducibility
 
-Keras models do not use R's random number generator (RNG). Therefore, it is not enough to set a seed with `set.seed()`.
-To set both a seed for R and for Keras RNG, you can use the `set_random_seed()` function from `spatPatClassifyR`.
+The pixel workflow uses R's random-number generator for operations such as
+cross-validation fold assignment and data shuffling. Keras and TensorFlow use
+their own randomness for weight initialization and dropout. Use `set.seed()` to
+reproduce landscape generation, and call `set_random_seed()` immediately before
+training to reset both R and Keras.
 
 ```{r}
 #| label: set-seed
-set_random_seed(123456)
+set.seed(123456)
 ```
 
 ## Step 1: Generate Training Landscapes
@@ -73,7 +76,12 @@ the cross-validation method `cv_method` are:
 
 For details and further options see the function help of `train_pixel_model()`.
 
-The underlying model uses a multiscale convolutional neural network (CNN) architecture that processes the landscapes as 2D pixel arrays. The model layers multiple convolutional layers with different kernel sizes (3 x 3 and 5 x 5) to capture both fine-scale details and broader spatial patterns. The architecture consists of paired convolutional layers, followed by pooling to reduce dimensionality and a final dense layer for the classification. The user can specify various parameters for training the model, such as the learning rate, the number of epochs and patience, but also for validating the model, such as the cross-validation method (k-fold or leave-one-out) and the proportion of validation data.
+The only built-in architecture, `"multiscale"`, processes the landscapes as raster
+arrays. It has two sequential convolutional blocks. Each block applies 3 by 3 and
+5 by 5 convolutions followed by max pooling, with 32 filters in the first block and
+64 in the second. Dropout and a dense layer precede the softmax output. Users can
+tune the learning rate, epochs, batch size, dropout, dense-layer size, and training
+validation settings; see `?train_pixel_model` for the complete interface.
 
 Here, we train the model using 2-fold cross-validation to keep computational time
 low.
@@ -89,6 +97,7 @@ consider increasing the number of training landscapes or check the function help
 #| label: train-model
 #| message: false
 #| output: false
+set_random_seed(123456)
 model <- train_pixel_model(
   landscapes = training_landscapes,
   cv_method = "k-fold",
@@ -127,6 +136,13 @@ Finally, you can create some new test landscapes and classify them using the tra
 In reality this could be landscapes read in from files or created in other ways.
 For details on importing own landscapes, see the [importing landscapes vignette](importing-landscapes.html).
 
+Application landscapes must contain categorical values, have no `NA` cells, and
+have the same number of layers as the training data. `apply_pixel_model()`
+resamples their rows and columns to the training dimensions with nearest-neighbor
+resampling. It warns when a different aspect ratio means that this stretches the
+pattern. See [Matching training and application data](matching-training-application.html)
+for the practical consequences of resizing.
+
 ```{r}
 #| label: test-landscapes
 test_landscapes <- create_landscapes(
@@ -161,6 +177,16 @@ compare actual and predicted classes:
 # Predicted patterns
 classification$predictions
 ```
+
+The `predictions` table contains the predicted class, its `score`, and one score
+for every trained class. The class scores are non-negative and sum to one, but
+they are not calibrated probabilities. A score of 0.8 means that the model
+assigned 80% of its total output for this landscape to the predicted class and
+20% to all other classes combined. It does not mean that the prediction has an
+80% probability of being correct. Use the scores to judge how decisive the model
+was. A dominant score indicates stronger support for one class, while similar
+scores for several classes indicate that the landscape was ambiguous to the
+model.
 
 You can also look at performance summaries like confusion matrix:
 

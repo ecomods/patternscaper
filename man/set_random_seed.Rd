@@ -2,7 +2,7 @@
 % Please edit documentation in R/nn_utils.R
 \name{set_random_seed}
 \alias{set_random_seed}
-\title{Set Random Seeds for Reproducible Neural Network Training}
+\title{Set Random Seeds for Neural Network Training}
 \usage{
 set_random_seed(seed)
 }
@@ -10,26 +10,30 @@ set_random_seed(seed)
 \item{seed}{Integer seed value.}
 }
 \value{
-Invisibly returns `NULL`. Called for side effects.
+Invisibly returns \code{NULL}. Called for side effects.
 }
 \description{
-Sets random seeds for R and Keras to ensure reproducible results when
-training neural networks. This is a convenience wrapper around [base::set.seed()]
-and [keras3::set_random_seed()].
+Sets random seeds for R and Keras to support reproducible neural network
+training. This is a convenience wrapper around
+\code{\link[base]{set.seed}} and \code{\link[keras3]{set_random_seed}}.
 }
 \details{
-Neural network training involves randomness from:
-- R's RNG (data shuffling, CV fold creation)
-- Keras/TensorFlow's RNG (weight initialization, dropout)
+Neural network training involves randomness from R (data shuffling and CV fold
+creation) and Keras/TensorFlow (weight initialization and dropout).
 
-Both must be seeded for reproducible results. Note that minor variations
-may still occur across different hardware/software configurations.
+Seed both to reproduce a training run as closely as possible. Call this
+function immediately before each training call because landscape generation
+and other R operations advance R's random-number stream. Minor variations may
+still occur across different hardware and software configurations.
 }
 \examples{
 \dontshow{if (keras_available()) withAutoprint(\{ # examplesIf}
-# Ensure reproducible training
-set_random_seed(42)
+# Generate reproducible training data
+set.seed(42)
 landscapes <- create_landscapes(n = 6, patterns = c("sharp", "random"))
+
+# Reset both random-number generators immediately before training
+set_random_seed(42)
 model <- train_pixel_model(landscapes, cv_method = "none", epochs = 5)
 \dontshow{\}) # examplesIf}
 }

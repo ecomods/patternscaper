@@ -7,14 +7,14 @@
 apply_pixel_model(landscapes, nn_model, evaluate = "auto", verbose = TRUE)
 }
 \arguments{
-\item{landscapes}{landscape object, or list of landscape objects. Landscape(s) to classify.
-Landscapes will be automatically resized to match the model's input dimensions using
-nearest neighbor interpolation, which preserves categorical cell values.
-**Note**: Input landscapes must contain categorical/discrete habitat data (e.g., 0/1 for
-two habitat types, or 0/1/2 for three types). Continuous data (e.g., elevation,
-gradients) is not supported. Landscapes must also be free of NA cells as they would
-produce meaningless predictions, so it raises an error instead. A landscape whose
-aspect ratio differs from the training grid is resized anisotropically (stretched),
+\item{landscapes}{Landscape object, or list of landscape objects, to classify.
+Rows and columns are resampled to the model's input dimensions using nearest
+neighbor resampling, which preserves categorical cell values. The number of
+layers must already match the training data. Input landscapes must contain
+categorical/discrete habitat data, such as 0/1 for two habitat types or 0/1/2
+for three types. Continuous data, such as elevation or gradients, is not
+supported. Landscapes must also be free of NA cells. A landscape whose aspect
+ratio differs from the training grid is resized anisotropically (stretched),
 which raises a warning.}
 
 \item{nn_model}{List. CNN model object from \code{\link{train_pixel_model}}.}
@@ -35,7 +35,7 @@ List with two elements:
     \item{predictions}{Tibble with one row per input landscape, in input
       order, and columns:
       \describe{
-        \item{landscape_id}{Numeric landscape identifier}
+        \item{landscape_id}{Integer landscape identifier}
         \item{landscape_name}{Character landscape name (if available)}
         \item{actual_class}{True class (if available)}
         \item{predicted_class}{Predicted landscape pattern}
@@ -44,7 +44,11 @@ List with two elements:
               \code{\link{apply_metric_model}}, section "Interpreting the class
               scores", which applies to both workflows.}
         \item{<class_name>}{Score for each trained class, straight from the
-              network's softmax output layer, so each row sums to 1.}
+              network's softmax output layer, so each row sums to 1. These
+              scores show the model's relative support among the available
+              classes for that landscape. One dominant score indicates a more
+              decisive output, while similar scores indicate ambiguity. They
+              are not probabilities that the classification is correct.}
       }}
     \item{performance}{Performance metrics:
       confusion matrix, accuracy, and per-class recall/precision/F1. NULL
@@ -55,7 +59,7 @@ List with two elements:
 }
 \description{
 Applies a trained CNN model to classify new landscapes based on their
-spatial patterns. Automatically resizes input landscapes to match the
+spatial patterns. Automatically resamples input landscapes to match the
 model's expected dimensions.
 }
 \examples{
