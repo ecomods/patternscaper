@@ -216,7 +216,7 @@ test_that("train_pixel_model aborts on continuous cell values", {
 })
 
 test_that("train_pixel_model shuffles only when a validation split is used", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   # keras carves the validation set from the end of the input, so the data is
   # shuffled first. That draw must not happen at validation_split = 0, where it
@@ -265,7 +265,7 @@ test_that("train_pixel_model aborts on landscapes with NA cells", {
 })
 
 test_that("train_pixel_model saves model and overwrites an existing file", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
   temp_file <- tempfile(fileext = ".keras")
@@ -295,7 +295,7 @@ test_that("train_pixel_model saves model and overwrites an existing file", {
 })
 
 test_that("train_pixel_model works with cv_method='none'", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
 
@@ -333,7 +333,7 @@ test_that("train_pixel_model works with cv_method='none'", {
 })
 
 test_that("train_pixel_model works with cv_method='k-fold'", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   # 9 per class is the smallest set that keeps cv_folds = 3: validate_cv_params()
   # requires floor(min_class_count / 3) >= cv_folds, and anything less silently
@@ -371,7 +371,7 @@ test_that("train_pixel_model works with cv_method='k-fold'", {
 
 
 test_that("train_pixel_model accepts different optimizers", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
 
@@ -387,7 +387,7 @@ test_that("train_pixel_model accepts different optimizers", {
 })
 
 test_that("train_pixel_model respects patience parameter", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
 
@@ -416,7 +416,7 @@ test_that("apply_pixel_model validates model structure", {
 })
 
 test_that("apply_pixel_model validates landscapes input", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
   model <- train_pixel_model(
@@ -580,7 +580,7 @@ test_that("apply_pixel_model does not warn when aspect ratio matches", {
 })
 
 test_that("apply_pixel_model returns predictions for single landscape", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   model <- train_pixel_model(
@@ -615,7 +615,7 @@ test_that("apply_pixel_model returns predictions for single landscape", {
 })
 
 test_that("apply_pixel_model returns predictions for multiple landscapes", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   model <- train_pixel_model(
@@ -637,7 +637,7 @@ test_that("apply_pixel_model returns predictions for multiple landscapes", {
 })
 
 test_that("apply_pixel_model returns performance when requested", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   model <- train_pixel_model(
@@ -661,7 +661,7 @@ test_that("apply_pixel_model returns performance when requested", {
 })
 
 test_that("apply_pixel_model handles mixed valid/NA classes", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   model <- train_pixel_model(
@@ -692,7 +692,7 @@ test_that("apply_pixel_model handles mixed valid/NA classes", {
 })
 
 test_that("apply_pixel_model returns NULL performance for all invalid classes", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   model <- train_pixel_model(
@@ -736,7 +736,7 @@ test_that("apply_pixel_model returns NULL performance for all invalid classes", 
 })
 
 test_that("apply_pixel_model warns about unknown classes", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   model <- train_pixel_model(
@@ -788,7 +788,7 @@ test_that("apply_pixel_model warns about unknown classes", {
 })
 
 test_that("apply_pixel_model handles resizing correctly", {
-  skip_if_not_installed("keras3")
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   model <- train_pixel_model(
