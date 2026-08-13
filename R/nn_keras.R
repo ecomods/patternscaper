@@ -122,11 +122,18 @@ train_pixel_model <- function(
   verbose = TRUE
 ) {
   # Validate verbose parameter
-  if (!is.logical(verbose) || length(verbose) != 1) {
+  if (!is.logical(verbose) || length(verbose) != 1 || is.na(verbose)) {
     cli::cli_abort("verbose must be a single logical value (TRUE or FALSE)")
   }
 
   # Validate cv_method parameter
+  if (
+    !is.character(cv_method) ||
+      length(cv_method) != 1 ||
+      is.na(cv_method)
+  ) {
+    cli::cli_abort('cv_method must be one of: "none", "k-fold", or "loo"')
+  }
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold", "loo")) {
     cli::cli_abort('cv_method must be one of: "none", "k-fold", or "loo"')
@@ -139,6 +146,7 @@ train_pixel_model <- function(
   if (
     !is.numeric(cv_folds) ||
       length(cv_folds) != 1 ||
+      !is.finite(cv_folds) ||
       cv_folds < 2 ||
       cv_folds != floor(cv_folds)
   ) {
@@ -149,6 +157,7 @@ train_pixel_model <- function(
   if (
     !is.numeric(epochs) ||
       length(epochs) != 1 ||
+      !is.finite(epochs) ||
       epochs < 1 ||
       epochs != floor(epochs)
   ) {
@@ -157,6 +166,7 @@ train_pixel_model <- function(
   if (
     !is.numeric(batch_size) ||
       length(batch_size) != 1 ||
+      !is.finite(batch_size) ||
       batch_size < 1 ||
       batch_size != floor(batch_size)
   ) {
@@ -165,6 +175,7 @@ train_pixel_model <- function(
   if (
     !is.numeric(learning_rate) ||
       length(learning_rate) != 1 ||
+      !is.finite(learning_rate) ||
       learning_rate <= 0 ||
       learning_rate >= 1
   ) {
@@ -174,6 +185,7 @@ train_pixel_model <- function(
   if (
     !is.numeric(validation_split) ||
       length(validation_split) != 1 ||
+      !is.finite(validation_split) ||
       validation_split < 0 ||
       validation_split >= 1
   ) {
@@ -184,6 +196,7 @@ train_pixel_model <- function(
   if (
     !is.numeric(dropout_rate) ||
       length(dropout_rate) != 1 ||
+      !is.finite(dropout_rate) ||
       dropout_rate < 0 ||
       dropout_rate >= 1
   ) {
@@ -192,6 +205,7 @@ train_pixel_model <- function(
   if (
     !is.numeric(dense_units) ||
       length(dense_units) != 1 ||
+      !is.finite(dense_units) ||
       dense_units < 1 ||
       dense_units != floor(dense_units)
   ) {
@@ -203,14 +217,46 @@ train_pixel_model <- function(
     !is.null(patience) &&
       (!is.numeric(patience) ||
         length(patience) != 1 ||
+        !is.finite(patience) ||
         patience < 1 ||
         patience != floor(patience))
   ) {
     cli::cli_abort("patience must be a single positive integer or NULL")
   }
 
+  if (
+    !is.character(architecture) ||
+      length(architecture) != 1 ||
+      is.na(architecture) ||
+      architecture != "multiscale"
+  ) {
+    cli::cli_abort('architecture must be "multiscale"')
+  }
+
+  if (
+    !is.character(optimizer) ||
+      length(optimizer) != 1 ||
+      is.na(optimizer)
+  ) {
+    cli::cli_abort('optimizer must be one of: "adam", "sgd", or "rmsprop"')
+  }
+  optimizer <- tolower(optimizer)
+  if (!optimizer %in% c("adam", "sgd", "rmsprop")) {
+    cli::cli_abort('optimizer must be one of: "adam", "sgd", or "rmsprop"')
+  }
+
   # Validate and normalize model_path if provided
   if (!is.null(model_path)) {
+    if (
+      !is.character(model_path) ||
+        length(model_path) != 1 ||
+        is.na(model_path) ||
+        !nzchar(model_path)
+    ) {
+      cli::cli_abort(
+        "model_path must be a single non-empty character string or NULL"
+      )
+    }
     if (!stringr::str_detect(model_path, "\\.keras$")) {
       cli::cli_alert_info(
         "model_path should end with .keras (current: {model_path}). Automatically adding .keras extension."
@@ -734,6 +780,9 @@ apply_pixel_model <- function(
 ) {
   # Input validation
   evaluate <- validate_evaluate_param(evaluate)
+  if (!is.logical(verbose) || length(verbose) != 1 || is.na(verbose)) {
+    cli::cli_abort("verbose must be a single logical value (TRUE or FALSE)")
+  }
 
   if (
     !is.list(nn_model) ||

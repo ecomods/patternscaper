@@ -18,6 +18,13 @@ test_that("train_pixel_model validates cv_method parameter", {
     train_pixel_model(landscapes, cv_method = "invalid"),
     'cv_method must be one of: "none", "k-fold", or "loo"'
   )
+
+  for (bad in list(NA_character_, TRUE, c("none", "loo"), NULL)) {
+    expect_error(
+      train_pixel_model(landscapes, cv_method = bad),
+      'cv_method must be one of: "none", "k-fold", or "loo"'
+    )
+  }
 })
 
 test_that("train_pixel_model validates cv_folds", {
@@ -39,6 +46,10 @@ test_that("train_pixel_model validates cv_folds", {
   )
   expect_error(
     train_pixel_model(landscapes, cv_folds = "a"),
+    "cv_folds must be a single integer >= 2"
+  )
+  expect_error(
+    train_pixel_model(landscapes, cv_folds = NA_real_),
     "cv_folds must be a single integer >= 2"
   )
 })
@@ -84,6 +95,22 @@ test_that("train_pixel_model validates numeric parameters", {
     train_pixel_model(landscapes, learning_rate = c(0.1, 0.2)),
     "learning_rate must be between 0 and 1"
   )
+  expect_error(
+    train_pixel_model(landscapes, epochs = NA_real_),
+    "epochs must be a positive integer"
+  )
+  expect_error(
+    train_pixel_model(landscapes, batch_size = Inf),
+    "batch_size must be a positive integer"
+  )
+  expect_error(
+    train_pixel_model(landscapes, learning_rate = NaN),
+    "learning_rate must be between 0 and 1"
+  )
+  expect_error(
+    train_pixel_model(landscapes, validation_split = NA_real_),
+    "validation_split must be between 0 and 1"
+  )
 })
 
 test_that("train_pixel_model validates architecture and early-stopping parameters", {
@@ -113,6 +140,36 @@ test_that("train_pixel_model validates architecture and early-stopping parameter
     train_pixel_model(landscapes, patience = "many"),
     "patience must be a single positive integer or NULL"
   )
+  expect_error(
+    train_pixel_model(landscapes, dropout_rate = NA_real_),
+    "dropout_rate must be a single number between 0 and 1"
+  )
+  expect_error(
+    train_pixel_model(landscapes, dense_units = Inf),
+    "dense_units must be a single positive integer"
+  )
+  expect_error(
+    train_pixel_model(landscapes, patience = NA_real_),
+    "patience must be a single positive integer or NULL"
+  )
+
+  for (bad in list("other", NA_character_, 1, c("multiscale", "other"))) {
+    expect_error(
+      train_pixel_model(landscapes, architecture = bad),
+      'architecture must be "multiscale"'
+    )
+  }
+})
+
+test_that("train_pixel_model validates optimizer", {
+  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+
+  for (bad in list("other", NA_character_, 1, c("adam", "sgd"), NULL)) {
+    expect_error(
+      train_pixel_model(landscapes, optimizer = bad),
+      'optimizer must be one of: "adam", "sgd", or "rmsprop"'
+    )
+  }
 })
 
 test_that("train_pixel_model validates verbose", {
@@ -124,6 +181,10 @@ test_that("train_pixel_model validates verbose", {
   )
   expect_error(
     train_pixel_model(landscapes, verbose = c(TRUE, FALSE)),
+    "verbose must be a single logical value"
+  )
+  expect_error(
+    train_pixel_model(landscapes, verbose = NA),
     "verbose must be a single logical value"
   )
 })
@@ -254,6 +315,13 @@ test_that("train_pixel_model shuffles only when a validation split is used", {
 
 test_that("train_pixel_model handles model_path validation", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+
+  for (bad in list(1, NA_character_, "", c("a.keras", "b.keras"))) {
+    expect_error(
+      train_pixel_model(landscapes, model_path = bad),
+      "model_path must be a single non-empty character string or NULL"
+    )
+  }
 
   expect_error(
     train_pixel_model(
@@ -401,7 +469,7 @@ test_that("train_pixel_model accepts different optimizers", {
       landscapes,
       cv_method = "none",
       epochs = 1,
-      optimizer = "sgd",
+      optimizer = "SGD",
       verbose = FALSE
     )
   )
@@ -448,6 +516,25 @@ test_that("apply_pixel_model rejects an empty landscape list", {
     apply_pixel_model(list(), stub_model),
     "at least one landscape object"
   )
+})
+
+test_that("apply_pixel_model validates verbose", {
+  stub_model <- list(
+    model = NULL,
+    classes = c("a", "b"),
+    input_shape = c(10, 10, 1)
+  )
+  application <- landscape(
+    matrix(1, nrow = 10, ncol = 10),
+    pattern = "a"
+  )
+
+  for (bad in list("yes", c(TRUE, FALSE), NA)) {
+    expect_error(
+      apply_pixel_model(application, stub_model, verbose = bad),
+      "verbose must be a single logical value"
+    )
+  }
 })
 
 test_that("apply_pixel_model validates landscapes input", {
