@@ -43,20 +43,20 @@
 #'   Note: Advanced optimizer parameters (e.g., momentum, beta values) are not currently exposed.
 #' @param callbacks List. Optional keras callbacks for advanced training control (default: NULL).
 #'   Examples: early stopping, learning rate scheduling, model checkpointing.
-#'   Note: Only applies to final model training. CV folds always use patience-based
-#'   early stopping if patience is specified. For an overview of available callbacks,
-#'   see \code{\link[keras3]{callback_early_stopping}} (the callback used by
-#'   default) and related callback functions.
+#'   Only applies to final model training. CV folds always train for the full
+#'   requested number of epochs without callbacks. For an overview of available
+#'   callbacks, see \code{\link[keras3]{callback_early_stopping}} (the callback
+#'   used by default) and related callback functions.
 #' @param patience Integer. Number of epochs with no improvement before early stopping (default: 15).
-#'   Applied to both CV fold training (monitors validation loss) and final model
-#'   training (monitors validation loss if \code{validation_split > 0}).
-#'   Only used when \code{callbacks = NULL}. Set to NULL to train for the full
-#'   epoch count without early stopping.
+#'   Applied only to final model training, where it monitors validation loss if
+#'   \code{validation_split > 0}. CV folds always train for the full requested
+#'   number of epochs. Only used when \code{callbacks = NULL}. Set to NULL to
+#'   train the final model for the full epoch count without early stopping.
 #'   Is passed to \code{\link[keras3]{callback_early_stopping}}.
 #' @param validation_split Numeric. Fraction of training data to use as validation set during
 #'   final model training and passed to \code{\link[keras3]{fit}}(0-1, default: 0).
 #'   When > 0, enables monitoring and early stopping on validation loss. Particularly useful when cv_method="none"
-#'   to prevent overfitting. Ignored during CV fold training (which uses its own validation splits).
+#'   to prevent overfitting. Ignored during CV fold training.
 #'   The training data is shuffled before the split, so the validation set is a
 #'   random sample rather than the final landscapes in the order they were supplied.
 #' @param verbose Logical. Show training progress and performance summaries (default: TRUE).
@@ -76,8 +76,9 @@
 #'     \item{architecture}{Character, either "multiscale" or "custom"}
 #'     \item{performance}{Performance metrics. When cv_method != "none", contains
 #'       results from evaluate_cv_performance() including confusion matrix, per-class
-#'       metrics, and overall accuracy. When cv_method = "none", contains training
-#'       metadata only (see note field for evaluation instructions).}
+#'       metrics, overall accuracy, and the number of epochs completed by each
+#'       fold. When cv_method = "none", contains training metadata only (see note
+#'       field for evaluation instructions).}
 #'     \item{training_geometry}{One-row tibble summarising the geometry of the
 #'       training landscapes (cell dimensions and resolution), recorded for
 #'       reference.}
@@ -477,26 +478,14 @@ train_pixel_model <- function(
         optimizer = optimizer
       )
 
-      # Create fold-specific callbacks
-      fold_callbacks <- NULL
-      if (!is.null(patience)) {
-        fold_callbacks <- list(
-          keras3::callback_early_stopping(
-            monitor = "val_loss",
-            patience = patience,
-            restore_best_weights = TRUE
-          )
-        )
-      }
-
-      fold_model |>
+      # The held-out fold must not influence fitting because it is used to
+      # estimate performance after training.
+      fold_history <- fold_model |>
         keras3::fit(
           x = x_train,
           y = y_train,
           epochs = epochs,
           batch_size = batch_size,
-          validation_data = list(x_val, y_val),
-          callbacks = fold_callbacks,
           verbose = 0
         )
 
@@ -521,7 +510,8 @@ train_pixel_model <- function(
 
       # Store results for this fold
       cv_evaluation[[fold]] <- list(
-        evaluation = evaluation
+        evaluation = evaluation,
+        epochs_trained = length(fold_history$metrics$loss)
       )
 
       # Conditional fold accuracy
@@ -547,6 +537,11 @@ train_pixel_model <- function(
       cv_method = cv_method,
       cv_folds = cv_folds,
       verbose = verbose
+    )
+    performance$fold_epochs <- vapply(
+      cv_evaluation,
+      function(x) x$epochs_trained,
+      integer(1)
     )
     # Calculate average accuracy and loss across folds
     accuracies <- vapply(

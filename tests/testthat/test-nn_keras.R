@@ -483,6 +483,7 @@ test_that("train_pixel_model works with cv_method='k-fold'", {
 
   expect_equal(model$performance$cv_method, "k-fold")
   expect_equal(model$performance$cv_folds, 3)
+  expect_equal(model$performance$fold_epochs, rep(5L, 3))
 
   # Every landscape is held out exactly once across the folds
   validation <- model$performance$validation_results
@@ -493,6 +494,38 @@ test_that("train_pixel_model works with cv_method='k-fold'", {
   # puts 3 of every class in every fold
   fold_class_counts <- table(validation$fold, validation$actual_class)
   expect_true(all(fold_class_counts == 3))
+})
+
+test_that("train_pixel_model CV folds always train for all epochs", {
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 6)
+  constant_architecture <- function(input_shape, n_classes, ...) {
+    keras3::keras_model_sequential(input_shape = input_shape) |>
+      keras3::layer_flatten() |>
+      keras3::layer_dense(
+        units = n_classes,
+        kernel_initializer = "zeros",
+        bias_initializer = "zeros"
+      ) |>
+      keras3::layer_lambda(f = \(x) x * 0) |>
+      keras3::layer_activation(activation = "softmax")
+  }
+
+  # The constant fold models would stop early if their held-out folds were
+  # passed to an early-stopping callback.
+  set_random_seed(42)
+  model <- suppressWarnings(train_pixel_model(
+    landscapes,
+    cv_method = "k-fold",
+    cv_folds = 2,
+    architecture = constant_architecture,
+    epochs = 4,
+    patience = 1,
+    verbose = FALSE
+  ))
+
+  expect_equal(model$performance$fold_epochs, rep(4L, 2))
 })
 
 test_that("train_pixel_model one-hot encodes three habitat values", {
