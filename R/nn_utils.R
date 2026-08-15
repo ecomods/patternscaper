@@ -478,11 +478,16 @@ encode_habitat_raster <- function(landscape_data, habitat_values) {
 #'
 #' @param landscapes List of landscape objects to classify.
 #' @param habitat_values Numeric habitat values fitted during training.
+#' @param action User-facing verb describing the attempted operation.
 #'
 #' @return Invisibly `NULL`.
 #'
 #' @keywords internal
-abort_on_unseen_habitat_values <- function(landscapes, habitat_values) {
+abort_on_unseen_habitat_values <- function(
+  landscapes,
+  habitat_values,
+  action = "classify"
+) {
   unseen <- lapply(landscapes, function(l) {
     setdiff(unique(terra::values(l$data)), habitat_values)
   })
@@ -493,7 +498,7 @@ abort_on_unseen_habitat_values <- function(landscapes, habitat_values) {
       paste0(i, ": ", paste(sort(unseen[[i]]), collapse = ", "))
     }, character(1))
     cli::cli_abort(c(
-      "Cannot classify landscapes with habitat values not seen during training.",
+      "Cannot {action} landscapes with habitat values not seen during training.",
       "x" = "Unknown value{?s} by landscape index: {paste(details, collapse = '; ')}.",
       "i" = "The model was trained with habitat values {.val {habitat_values}}."
     ))
@@ -654,6 +659,159 @@ find_balanced_cv_folds <- function(patterns, cv_folds) {
   return(fold_indices)
 }
 
+#' Create a Stratified Training and Validation Split
+#'
+#' Selects validation landscapes separately within each pattern class. Every
+#' class retains at least one training landscape and contributes at least one
+#' validation landscape.
+#'
+#' @param patterns Character or factor vector of pattern labels.
+#' @param validation_split Requested fraction assigned to validation.
+#'
+#' @return List with integer vectors \code{training} and \code{validation}.
+#'
+#' @keywords internal
+find_stratified_validation_split <- function(patterns, validation_split) {
+  class_counts <- table(patterns)
+  singleton_classes <- names(class_counts[class_counts < 2])
+
+  if (length(singleton_classes) > 0) {
+    cli::cli_abort(c(
+      "Cannot create a validation split because each class needs at least two landscapes.",
+      "x" = "Class{?es} {.val {singleton_classes}} ha{?s/ve} fewer than two landscapes.",
+      "i" = "Add landscapes or supply a separate validation set."
+    ))
+  }
+
+  validation <- integer()
+  for (class_name in names(class_counts)) {
+    class_indices <- which(patterns == class_name)
+    n_validation <- round(length(class_indices) * validation_split)
+    n_validation <- max(1L, min(n_validation, length(class_indices) - 1L))
+    validation <- c(
+      validation,
+      sample(class_indices, size = n_validation, replace = FALSE)
+    )
+  }
+
+  validation <- sort(validation)
+  list(
+    training = setdiff(seq_along(patterns), validation),
+    validation = validation
+  )
+}
+
+#' Validate Landscapes Used for Pixel-Model Validation
+#'
+#' Checks that validation landscapes can be encoded with a fitted pixel model
+#' and that every trained pattern class is represented.
+#'
+#' @param validation_landscapes List of landscape objects.
+#' @param expected_dimensions Integer vector with rows and columns.
+#' @param class_names Character vector of trained pattern classes.
+#' @param habitat_values Numeric vector of habitat values fitted on the training
+#'   landscapes.
+#'
+#' @return Character vector of validation pattern labels.
+#'
+#' @keywords internal
+validate_pixel_validation_landscapes <- function(
+  validation_landscapes,
+  expected_dimensions,
+  class_names,
+  habitat_values
+) {
+  if (is_landscape(validation_landscapes)) {
+    cli::cli_abort(c(
+      "{.arg validation_landscapes} must be a list of landscape objects.",
+      "x" = "A single landscape object was passed."
+    ))
+  }
+  if (!is.list(validation_landscapes) || length(validation_landscapes) == 0) {
+    cli::cli_abort(
+      "validation_landscapes must be a non-empty list of landscape objects"
+    )
+  }
+
+  valid_landscapes <- vapply(
+    validation_landscapes,
+    is_landscape,
+    logical(1)
+  )
+  if (any(!valid_landscapes)) {
+    invalid_indices <- which(!valid_landscapes)
+    cli::cli_abort(c(
+      "All validation elements must be landscape objects.",
+      "x" = "Invalid element(s) at index(es): {paste(invalid_indices, collapse = ', ')}"
+    ))
+  }
+
+  abort_on_multilayer_landscapes(validation_landscapes, "validate on")
+
+  dimensions <- lapply(validation_landscapes, function(l) {
+    c(terra::nrow(l$data), terra::ncol(l$data))
+  })
+  wrong_dimensions <- which(!vapply(
+    dimensions,
+    function(x) identical(as.integer(x), as.integer(expected_dimensions)),
+    logical(1)
+  ))
+  if (length(wrong_dimensions) > 0) {
+    cli::cli_abort(c(
+      "Validation landscapes must have the same dimensions as the training landscapes.",
+      "x" = "Expected {expected_dimensions[1]}x{expected_dimensions[2]} rows x columns.",
+      "x" = "Different dimensions at validation index(es): {paste(wrong_dimensions, collapse = ', ')}."
+    ))
+  }
+
+  validation_labels <- vapply(
+    validation_landscapes,
+    function(l) as.character(l$pattern),
+    character(1)
+  )
+  invalid_labels <- which(
+    is.na(validation_labels) | validation_labels == "unclassified"
+  )
+  if (length(invalid_labels) > 0) {
+    cli::cli_abort(c(
+      "All validation landscapes must have known pattern classes.",
+      "x" = "Invalid label(s) at index(es): {paste(invalid_labels, collapse = ', ')}."
+    ))
+  }
+
+  unknown_classes <- setdiff(unique(validation_labels), class_names)
+  missing_classes <- setdiff(class_names, unique(validation_labels))
+  if (length(unknown_classes) > 0 || length(missing_classes) > 0) {
+    details <- character()
+    if (length(unknown_classes) > 0) {
+      details <- c(
+        details,
+        "x" = "Not present in training: {.val {unknown_classes}}."
+      )
+    }
+    if (length(missing_classes) > 0) {
+      details <- c(
+        details,
+        "x" = "Missing from validation: {.val {missing_classes}}."
+      )
+    }
+    cli::cli_abort(c(
+      "Training and validation data must contain the same pattern classes.",
+      details
+    ))
+  }
+
+  abort_on_na_cells(validation_landscapes, "validate on")
+  check_categorical_values(validation_landscapes, "validate on")
+  abort_on_unseen_habitat_values(
+    validation_landscapes,
+    habitat_values,
+    action = "validate"
+  )
+
+  validation_labels
+}
+
 #' Evaluate cross-validation performance
 #'
 #' Calculates performance metrics from cross-validation results including
@@ -766,7 +924,7 @@ evaluate_cv_performance <- function(
 
   if (length(never_predicted_classes) > 0) {
     cli::cli_warn(
-      "Some classes were never correctly predicted during cross-validation: {.val {never_predicted_classes}}. Results for these classes are unreliable."
+      "Some classes were never correctly predicted during evaluation: {.val {never_predicted_classes}}. Results for these classes are unreliable."
     )
   }
 

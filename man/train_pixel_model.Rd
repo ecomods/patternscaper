@@ -17,6 +17,7 @@ train_pixel_model(
   loss = "categorical_crossentropy",
   optimizer = "adam",
   validation_split = 0,
+  validation_landscapes = NULL,
   callbacks = NULL,
   patience = 15,
   verbose = TRUE
@@ -36,8 +37,9 @@ binary input channel.}
 \item{cv_method}{Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 \itemize{
   \item "k-fold" or "loo": Performs cross-validation and returns performance metrics
-  \item "none": Trains on ALL provided data without validation. Use \code{\link{apply_pixel_model}}
-        with a separate test set to evaluate performance.
+  \item "none": Trains one final model, optionally with separate validation
+        data for early stopping. Use \code{\link{apply_pixel_model}} with an
+        untouched test set for final performance evaluation.
 }}
 
 \item{cv_folds}{Integer. Number of cross-validation folds when cv_method="k-fold" (default: 5).
@@ -72,12 +74,17 @@ Adam is recommended for most cases. See \code{\link[keras3]{optimizer_adam}}.
 Note: Advanced optimizer parameters (e.g., momentum, beta values) are not currently exposed.}
 
 \item{validation_split}{Numeric. Fraction of training data to use as validation set during
-final model training and passed to \code{\link[keras3]{fit}}(0-1, default: 0).
-When > 0, enables monitoring and early stopping on validation loss. Particularly useful when cv_method="none"
-to prevent overfitting. Ignored during CV fold training. Held-out folds are
-used only for evaluation after each fold model has completed training.
-The training data is shuffled before the split, so the validation set is a
-random sample rather than the final landscapes in the order they were supplied.}
+final model training (0-1, default: 0). The split is stratified so every
+pattern class remains in the training data and is also represented in the
+validation data. The realized fraction may differ slightly from the request.
+Use only with \code{cv_method = "none"} and do not combine with
+\code{validation_landscapes}.}
+
+\item{validation_landscapes}{Optional list of independently prepared,
+labelled landscapes used to monitor validation loss during final model
+training. They must have the same dimensions, pattern classes, and numeric
+coding as \code{landscapes}. Use only with
+\code{cv_method = "none"} and \code{validation_split = 0}.}
 
 \item{callbacks}{List. Optional keras callbacks for advanced training control (default: NULL).
 Examples: early stopping, learning rate scheduling, model checkpointing.
@@ -88,9 +95,10 @@ used by default) and related callback functions.}
 
 \item{patience}{Integer. Number of epochs with no improvement before early stopping (default: 15).
 Applied only to final model training, where it monitors validation loss if
-\code{validation_split > 0}. CV folds always train for the full requested
+validation data are supplied. CV folds always train for the full requested
 number of epochs. Only used when \code{callbacks = NULL}. Set to NULL to
-train the final model for the full epoch count without early stopping.
+train the final model for the full epoch count while still recording
+validation metrics.
 Is passed to \code{\link[keras3]{callback_early_stopping}}.}
 
 \item{verbose}{Logical. Show training progress and performance summaries (default: TRUE).
@@ -112,11 +120,12 @@ List containing:
     \item{performance}{Performance metrics. When cv_method != "none", contains
       results from evaluate_cv_performance() including confusion matrix, per-class
       metrics, overall accuracy, and the number of epochs completed by each
-      fold. When cv_method = "none", contains training metadata only (see note
-      field for evaluation instructions).}
+      fold. When cv_method = "none" and validation data are used, contains
+      validation predictions, loss, accuracy, per-class metrics, and stopping
+      metadata. Otherwise it contains training metadata only.}
     \item{training_geometry}{One-row tibble summarising the geometry of the
-      training landscapes (cell dimensions and resolution), recorded for
-      reference.}
+      landscapes used to fit model weights (cell dimensions and resolution),
+      recorded for reference.}
   }
 }
 \description{

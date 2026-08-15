@@ -177,6 +177,41 @@ test_that("find_balanced_cv_folds handles edge cases", {
   expect_equal(length(unique(folds[patterns == "A"])), 2)
 })
 
+test_that("find_stratified_validation_split partitions the complete dataset", {
+  patterns <- c(rep("A", 5), rep("B", 7), rep("C", 4))
+
+  set.seed(123)
+  split <- find_stratified_validation_split(patterns, validation_split = 0.25)
+
+  combined_indices <- sort(c(split$training, split$validation))
+  expect_identical(combined_indices, seq_along(patterns))
+  expect_identical(patterns[combined_indices], patterns)
+  expect_length(intersect(split$training, split$validation), 0)
+  expect_setequal(unique(patterns[split$training]), c("A", "B", "C"))
+  expect_setequal(unique(patterns[split$validation]), c("A", "B", "C"))
+
+  training_counts <- table(patterns[split$training])
+  validation_counts <- table(patterns[split$validation])
+  original_counts <- table(patterns)
+  expect_equal(
+    as.integer(training_counts) + as.integer(validation_counts),
+    as.integer(original_counts)
+  )
+  expect_equal(names(training_counts), names(original_counts))
+  expect_equal(as.integer(validation_counts), c(1L, 2L, 1L))
+  expect_equal(names(validation_counts), c("A", "B", "C"))
+})
+
+test_that("find_stratified_validation_split rejects singleton classes", {
+  expect_error(
+    find_stratified_validation_split(
+      patterns = c("A", "B", "B"),
+      validation_split = 0.2
+    ),
+    "each class needs at least two landscapes"
+  )
+})
+
 test_that("evaluate_cv_performance calculates correct metrics", {
   # Setup test data with known outcomes
   cv_predictions <- list(

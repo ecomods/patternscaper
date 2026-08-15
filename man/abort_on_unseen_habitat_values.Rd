@@ -4,12 +4,14 @@
 \alias{abort_on_unseen_habitat_values}
 \title{Check Habitat Values Against a Fitted Pixel Model}
 \usage{
-abort_on_unseen_habitat_values(landscapes, habitat_values)
+abort_on_unseen_habitat_values(landscapes, habitat_values, action = "classify")
 }
 \arguments{
 \item{landscapes}{List of landscape objects to classify.}
 
 \item{habitat_values}{Numeric habitat values fitted during training.}
+
+\item{action}{User-facing verb describing the attempted operation.}
 }
 \value{
 Invisibly `NULL`.

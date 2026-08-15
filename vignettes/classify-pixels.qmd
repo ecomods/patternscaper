@@ -94,7 +94,9 @@ Experienced Keras users can also supply a custom architecture; see the optional
 section at the end of this guide.
 
 Here, we train the model using 2-fold cross-validation to keep computational time
-low.
+low. Every fold trains for the requested number of epochs, and its held-out
+landscapes are then used to estimate performance. After cross-validation, the
+function trains a fresh final model on all supplied landscapes.
 
 :::{.callout-note}
 ## Low fold accuracy
@@ -138,6 +140,42 @@ Or per class metrics like precision, recall, and F1-score:
 #| label: view-per-class-metrics
 model$performance$per_class_metrics
 ```
+
+### Optional: Use Validation Data for Early Stopping
+
+For a final model without cross-validation, validation landscapes can be used
+to monitor how well the model performs on data that are not used to train the model. With the default callback, training stops when validation loss has not
+improved for `patience` epochs, and the weights from the best epoch are restored.
+
+When enough data are available, create or set aside a separate, labelled
+validation set. This validation set must contain every training pattern class and use the same raster dimensions and habitat codes:
+
+```r
+validation_landscapes <- create_landscapes(
+  n = 30,
+  patterns = c("labyrinth", "random", "clustered")
+)
+
+set_random_seed(123456)
+model <- train_pixel_model(
+  landscapes = training_landscapes,
+  validation_landscapes = validation_landscapes,
+  cv_method = "none",
+  epochs = 100,
+  patience = 15
+)
+```
+
+If the available landscapes cannot support a separate validation set, request
+a stratified split instead. For example, `validation_split = 0.2` assigns about
+20% of every pattern class to validation and fits the model weights with the
+remaining landscapes.
+
+The returned `performance` contains information on the validation loss, accuracy, per-class
+metrics, the selected epoch, and the validation predictions. These results help
+choose the training procedure, but they are not final evidence of model
+performance because the validation data influenced model development. Use
+`apply_pixel_model()` with a separate test set for the final evaluation.
 
 ## Save and Reload the Model
 

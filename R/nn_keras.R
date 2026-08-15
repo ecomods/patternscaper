@@ -16,8 +16,9 @@
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #'   \itemize{
 #'     \item "k-fold" or "loo": Performs cross-validation and returns performance metrics
-#'     \item "none": Trains on ALL provided data without validation. Use \code{\link{apply_pixel_model}}
-#'           with a separate test set to evaluate performance.
+#'     \item "none": Trains one final model, optionally with separate validation
+#'           data for early stopping. Use \code{\link{apply_pixel_model}} with an
+#'           untouched test set for final performance evaluation.
 #'   }
 #' @param cv_folds Integer. Number of cross-validation folds when cv_method="k-fold" (default: 5).
 #'   Note: May be automatically reduced to ensure adequate samples per fold.
@@ -49,16 +50,22 @@
 #'   used by default) and related callback functions.
 #' @param patience Integer. Number of epochs with no improvement before early stopping (default: 15).
 #'   Applied only to final model training, where it monitors validation loss if
-#'   \code{validation_split > 0}. CV folds always train for the full requested
+#'   validation data are supplied. CV folds always train for the full requested
 #'   number of epochs. Only used when \code{callbacks = NULL}. Set to NULL to
-#'   train the final model for the full epoch count without early stopping.
+#'   train the final model for the full epoch count while still recording
+#'   validation metrics.
 #'   Is passed to \code{\link[keras3]{callback_early_stopping}}.
 #' @param validation_split Numeric. Fraction of training data to use as validation set during
-#'   final model training and passed to \code{\link[keras3]{fit}}(0-1, default: 0).
-#'   When > 0, enables monitoring and early stopping on validation loss. Particularly useful when cv_method="none"
-#'   to prevent overfitting. Ignored during CV fold training.
-#'   The training data is shuffled before the split, so the validation set is a
-#'   random sample rather than the final landscapes in the order they were supplied.
+#'   final model training (0-1, default: 0). The split is stratified so every
+#'   pattern class remains in the training data and is also represented in the
+#'   validation data. The realized fraction may differ slightly from the request.
+#'   Use only with \code{cv_method = "none"} and do not combine with
+#'   \code{validation_landscapes}.
+#' @param validation_landscapes Optional list of independently prepared,
+#'   labelled landscapes used to monitor validation loss during final model
+#'   training. They must have the same dimensions, pattern classes, and numeric
+#'   coding as \code{landscapes}. Use only with
+#'   \code{cv_method = "none"} and \code{validation_split = 0}.
 #' @param verbose Logical. Show training progress and performance summaries (default: TRUE).
 #'   When TRUE, displays epoch-by-epoch training/validation metrics during final model training,
 #'   plus CV fold accuracies and final performance summaries. CV fold epoch details are not shown.
@@ -77,11 +84,12 @@
 #'     \item{performance}{Performance metrics. When cv_method != "none", contains
 #'       results from evaluate_cv_performance() including confusion matrix, per-class
 #'       metrics, overall accuracy, and the number of epochs completed by each
-#'       fold. When cv_method = "none", contains training metadata only (see note
-#'       field for evaluation instructions).}
+#'       fold. When cv_method = "none" and validation data are used, contains
+#'       validation predictions, loss, accuracy, per-class metrics, and stopping
+#'       metadata. Otherwise it contains training metadata only.}
 #'     \item{training_geometry}{One-row tibble summarising the geometry of the
-#'       training landscapes (cell dimensions and resolution), recorded for
-#'       reference.}
+#'       landscapes used to fit model weights (cell dimensions and resolution),
+#'       recorded for reference.}
 #'   }
 #' @seealso \code{\link{apply_pixel_model}}
 #' @family neural network training
@@ -123,6 +131,7 @@ train_pixel_model <- function(
   loss = "categorical_crossentropy",
   optimizer = "adam",
   validation_split = 0,
+  validation_landscapes = NULL,
   callbacks = NULL,
   patience = 15,
   verbose = TRUE
@@ -196,6 +205,19 @@ train_pixel_model <- function(
       validation_split >= 1
   ) {
     cli::cli_abort("validation_split must be between 0 and 1")
+  }
+
+  if (!is.null(validation_landscapes) && validation_split > 0) {
+    cli::cli_abort(
+      "Use either validation_landscapes or validation_split, not both"
+    )
+  }
+  has_validation <- !is.null(validation_landscapes) || validation_split > 0
+  if (has_validation && cv_method != "none") {
+    cli::cli_abort(c(
+      "Validation data can only be used when cv_method = \"none\".",
+      "i" = "Cross-validation folds train for a fixed number of epochs."
+    ))
   }
 
   # Validate the architecture and early-stopping parameters
@@ -323,6 +345,8 @@ train_pixel_model <- function(
     ))
   }
 
+  # This order defines the meaning of every model-output column and is reused
+  # for fitting, validation, prediction, and saved model metadata.
   class_names <- sort(unique(training_labels))
   if (length(class_names) < 2) {
     cli::cli_abort(c(
@@ -335,34 +359,96 @@ train_pixel_model <- function(
   abort_on_na_cells(landscapes, "train on")
   check_categorical_values(landscapes, "train on")
 
-  habitat_values <- fit_habitat_values(landscapes)
+  # Separate landscapes used to update model weights from landscapes used only
+  # to monitor validation performance.
+  validation_indices <- integer()
+  fit_landscapes <- landscapes
+  fit_labels <- training_labels
+  validation_source <- NULL
+
+  if (validation_split > 0) {
+    split_indices <- find_stratified_validation_split(
+      training_labels,
+      validation_split
+    )
+    validation_indices <- split_indices$validation
+    fit_landscapes <- landscapes[split_indices$training]
+    fit_labels <- training_labels[split_indices$training]
+    validation_landscapes <- landscapes[validation_indices]
+    validation_source <- "split"
+  } else if (!is.null(validation_landscapes)) {
+    validation_indices <- seq_along(validation_landscapes)
+    validation_source <- "explicit"
+  }
+
+  # Define the input-channel order from the weight-fitting data only. The
+  # validation data must then use the same encoding as the training data.
+  habitat_values <- fit_habitat_values(fit_landscapes)
+
+  if (has_validation) {
+    # Check that validation rasters and labels match the fitted model inputs.
+    validation_labels <- validate_pixel_validation_landscapes(
+      validation_landscapes = validation_landscapes,
+      expected_dimensions = unique_dims[[1]],
+      class_names = class_names,
+      habitat_values = habitat_values
+    )
+  }
 
   # Give every unordered habitat category an independent input channel.
-  training_arrays <- lapply(landscapes, function(l) {
+  training_arrays <- lapply(fit_landscapes, function(l) {
     encode_habitat_raster(l$data, habitat_values)
   })
+
+  if (has_validation) {
+    # Use the same encoding for validation landscapes as for the training landscapes.
+    validation_arrays <- lapply(validation_landscapes, function(l) {
+      encode_habitat_raster(l$data, habitat_values)
+    })
+  }
 
   # Show distribution of landscape types
   if (verbose) {
     cli::cli_h2("Landscape type distribution:")
-    print(table(training_labels))
+    print(table(fit_labels))
+    if (has_validation) {
+      cli::cli_h2("Validation landscape type distribution:")
+      print(table(validation_labels))
+    }
   }
 
   n_classes <- length(class_names)
 
-  # Convert labels to integers and one-hot encode
-  y_int <- as.integer(factor(training_labels, levels = class_names)) - 1
+  # Match pattern labels to the model output order. R factors are one-based,
+  # while Keras class indices are zero-based
+  y_int <- as.integer(factor(fit_labels, levels = class_names)) - 1
   y_data <- keras3::to_categorical(y_int)
 
   # Stack all arrays into one 4D array (samples, height, width, channels)
   x_data <- abind::abind(training_arrays, along = 0)
   input_shape <- c(dim(x_data)[2], dim(x_data)[3], dim(x_data)[4])
 
+  if (has_validation) {
+    # Prepare validation inputs and responses in the same shapes and class
+    # order as the training data. This response encoding is separate from the
+    # categorical raster encoding used for the model inputs.
+    validation_y_int <- as.integer(
+      factor(validation_labels, levels = class_names)
+    ) -
+      1
+    # Stack landscapes into samples x rows x columns x input channels.
+    x_validation <- abind::abind(validation_arrays, along = 0)
+    # Convert the known pattern label into one output column per pattern class.
+    y_validation <- keras3::to_categorical(
+      validation_y_int,
+      num_classes = n_classes
+    )
+  }
+
   # Setup callbacks ---------------------------------------------------------
-  # If user didn't provide callbacks, patience is specified and the user
-  # wants to add a validation split to final model training, add early stopping
-  # This callback will be used for final model training (not CV folds)
-  if (is.null(callbacks) && !is.null(patience) && validation_split > 0) {
+  # Add default early stopping when validation data and patience are available.
+  # User-supplied callbacks take precedence and apply only to the final model.
+  if (is.null(callbacks) && !is.null(patience) && has_validation) {
     callbacks <- list(
       keras3::callback_early_stopping(
         monitor = "val_loss",
@@ -377,7 +463,7 @@ train_pixel_model <- function(
     progress_callback <- keras3::callback_lambda(
       on_epoch_end = function(epoch, logs) {
         # Check if we have validation data
-        if (validation_split > 0) {
+        if (has_validation) {
           cat(sprintf(
             "Epoch %d - loss: %.4f - acc: %.4f - val_loss: %.4f - val_acc: %.4f\n",
             epoch,
@@ -409,7 +495,7 @@ train_pixel_model <- function(
   # Validate and adjust CV parameters based on class distribution
   # May downgrade CV method (k-fold -> LOO) or reduce folds if dataset is small
   cv_params <- validate_cv_params(
-    patterns = training_labels,
+    patterns = fit_labels,
     cv_method = cv_method,
     cv_folds = cv_folds
   )
@@ -418,18 +504,8 @@ train_pixel_model <- function(
   cv_method <- cv_params$cv_method
   cv_folds <- cv_params$cv_folds
 
-  # Shuffle the training data for the final model.
-  # keras3::fit() uses the last portion of the data for validation so we
-  # shuffle it in case a validation split is used to make sure it is balanced.
-  # The CV folds are left in input order because find_balanced_cv_folds()
-  # stratifies them already.
   x_final <- x_data
   y_final <- y_data
-  if (validation_split > 0) {
-    shuffled_order <- sample(nrow(x_data))
-    x_final <- x_data[shuffled_order, , , , drop = FALSE]
-    y_final <- y_data[shuffled_order, , drop = FALSE]
-  }
 
   # Check cross-validation method and parameters -------------------------------
   # Run model with cross validation --------------------------------------------
@@ -600,11 +676,16 @@ train_pixel_model <- function(
         verbose = 0
       )
   } else {
-    # No cross-validation: train on ALL data
     if (verbose) {
-      cli::cli_h2(
-        "Training final model on all data (validation split: {validation_split})"
-      )
+      if (identical(validation_source, "split")) {
+        cli::cli_h2(
+          "Training final model with {length(fit_landscapes)} training and {length(validation_landscapes)} validation landscapes"
+        )
+      } else if (identical(validation_source, "explicit")) {
+        cli::cli_h2("Training final model with separate validation data")
+      } else {
+        cli::cli_h2("Training final model on all data")
+      }
     }
 
     final_model <- create_keras_model(
@@ -621,25 +702,102 @@ train_pixel_model <- function(
       optimizer = optimizer
     )
 
-    history <- final_model |>
-      keras3::fit(
-        x = x_final,
-        y = y_final,
-        epochs = epochs,
-        batch_size = batch_size,
-        validation_split = validation_split,
-        callbacks = callbacks,
-        verbose = 0
+    if (has_validation) {
+      history <- final_model |>
+        keras3::fit(
+          x = x_final,
+          y = y_final,
+          epochs = epochs,
+          batch_size = batch_size,
+          validation_data = list(x_validation, y_validation),
+          callbacks = callbacks,
+          verbose = 0
+        )
+    } else {
+      history <- final_model |>
+        keras3::fit(
+          x = x_final,
+          y = y_final,
+          epochs = epochs,
+          batch_size = batch_size,
+          validation_split = validation_split,
+          callbacks = callbacks,
+          verbose = 0
+        )
+    }
+
+    if (has_validation) {
+      # Score the fitted model on validation data and retain the landscape-level
+      # predictions needed to interpret its overall and per-class performance.
+      validation_evaluation <- final_model |>
+        keras3::evaluate(x_validation, y_validation, verbose = 0)
+      validation_probabilities <- final_model |>
+        predict(x_validation, verbose = 0)
+      colnames(validation_probabilities) <- class_names
+      predicted_indices <- apply(validation_probabilities, 1, which.max)
+
+      validation_results <- tibble::as_tibble(validation_probabilities) |>
+        dplyr::mutate(
+          landscape_id = validation_indices,
+          actual_class = validation_labels,
+          predicted_class = class_names[predicted_indices],
+          score = apply(validation_probabilities, 1, max)
+        ) |>
+        dplyr::relocate(c(
+          landscape_id,
+          actual_class,
+          predicted_class,
+          score
+        ))
+
+      performance <- evaluate_predictions(
+        predictions = validation_results,
+        class_names = class_names,
+        evaluate = "required",
+        verbose = FALSE
+      )
+      performance$cv_folds <- NULL
+      performance$validation_results <- validation_results
+      performance$validation_source <- validation_source
+      performance$n_training_samples <- nrow(x_data)
+      performance$n_validation_samples <- nrow(x_validation)
+      performance$n_classes <- n_classes
+      performance$class_distribution <- table(fit_labels)
+      performance$validation_class_distribution <- table(validation_labels)
+      performance$requested_epochs <- as.integer(epochs)
+      performance$epochs_trained <- length(history$metrics$loss)
+      performance$stopped_early <- performance$epochs_trained < epochs
+      performance$best_epoch <- which.min(history$metrics$val_loss)
+      performance$best_validation_loss <- min(history$metrics$val_loss)
+      performance$last_epoch_validation_loss <- tail(
+        history$metrics$val_loss,
+        1
+      )
+      performance$validation_loss <- validation_evaluation[["loss"]]
+      performance$note <- paste(
+        "Validation performance describes data used during model development.",
+        "Use apply_pixel_model() with a separate test set for final evaluation."
       )
 
-    # No validation metrics available
-    performance <- list(
-      cv_method = "none",
-      n_training_samples = nrow(x_data),
-      n_classes = n_classes,
-      class_distribution = table(training_labels),
-      note = "Model trained on all data. Use apply_pixel_model() to evaluate on test set."
-    )
+      if (verbose) {
+        cli::cli_h2("Validation results")
+        cli::cli_alert_info(
+          "Overall accuracy: {round(performance$accuracy * 100, 2)}%"
+        )
+        cli::cli_h3("Confusion matrix")
+        print(performance$confusion_matrix)
+        cli::cli_h3("Per-class performance")
+        print(performance$per_class_metrics)
+      }
+    } else {
+      performance <- list(
+        cv_method = "none",
+        n_training_samples = nrow(x_data),
+        n_classes = n_classes,
+        class_distribution = table(fit_labels),
+        note = "Model trained on all data. Use apply_pixel_model() to evaluate on test set."
+      )
+    }
   }
 
   # Prepare return object
@@ -652,7 +810,7 @@ train_pixel_model <- function(
     habitat_values = habitat_values,
     architecture = if (built_in_architecture) "multiscale" else "custom",
     performance = performance,
-    training_geometry = summarise_training_geometry(landscapes)
+    training_geometry = summarise_training_geometry(fit_landscapes)
   )
 
   return(result)

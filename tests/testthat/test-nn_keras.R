@@ -113,6 +113,111 @@ test_that("train_pixel_model validates numeric parameters", {
   )
 })
 
+test_that("train_pixel_model validates the validation-data contract", {
+  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+  validation <- helper_create_tiny_training_set(n_per_class = 1)
+
+  expect_error(
+    train_pixel_model(
+      landscapes,
+      cv_method = "none",
+      validation_split = 0.2,
+      validation_landscapes = validation
+    ),
+    "either validation_landscapes or validation_split"
+  )
+  expect_error(
+    train_pixel_model(
+      landscapes,
+      cv_method = "k-fold",
+      validation_landscapes = validation
+    ),
+    "only be used when cv_method"
+  )
+  expect_error(
+    train_pixel_model(
+      landscapes,
+      cv_method = "none",
+      validation_landscapes = list()
+    ),
+    "non-empty list"
+  )
+  expect_error(
+    train_pixel_model(
+      landscapes,
+      cv_method = "none",
+      validation_landscapes = validation[[1]]
+    ),
+    "A single landscape object was passed"
+  )
+
+  missing_class <- validation[
+    vapply(validation, \(x) x$pattern != "sharp", logical(1))
+  ]
+  expect_error(
+    train_pixel_model(
+      landscapes,
+      cv_method = "none",
+      validation_landscapes = missing_class
+    ),
+    "Missing from validation"
+  )
+
+  unknown_class <- validation
+  unknown_class[[1]]$pattern <- "other"
+  expect_error(
+    train_pixel_model(
+      landscapes,
+      cv_method = "none",
+      validation_landscapes = unknown_class
+    ),
+    "Not present in training"
+  )
+
+  wrong_dimensions <- validation
+  wrong_dimensions[[1]] <- create_landscape(
+    validation[[1]]$pattern,
+    width = 40,
+    height = 40
+  )
+  expect_error(
+    train_pixel_model(
+      landscapes,
+      cv_method = "none",
+      validation_landscapes = wrong_dimensions
+    ),
+    "same dimensions as the training landscapes"
+  )
+
+  unseen_habitat <- validation
+  unseen_habitat[[1]] <- landscape(
+    matrix(2, nrow = 50, ncol = 50),
+    pattern = validation[[1]]$pattern
+  )
+  expect_error(
+    train_pixel_model(
+      landscapes,
+      cv_method = "none",
+      validation_landscapes = unseen_habitat
+    ),
+    "habitat values not seen during training"
+  )
+
+  singleton_class <- list(
+    create_landscape("sharp", width = 20, height = 20),
+    create_landscape("random", width = 20, height = 20),
+    create_landscape("random", width = 20, height = 20)
+  )
+  expect_error(
+    train_pixel_model(
+      singleton_class,
+      cv_method = "none",
+      validation_split = 0.2
+    ),
+    "each class needs at least two landscapes"
+  )
+})
+
 test_that("train_pixel_model validates architecture and early-stopping parameters", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 
@@ -323,23 +428,22 @@ test_that("habitat rasters use one channel per fitted numeric value", {
   expect_true(all(missing_class[, , 3] == 0))
 })
 
-test_that("train_pixel_model shuffles only when a validation split is used", {
+test_that("train_pixel_model draws split RNG only when validation is requested", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
-  # keras carves the validation set from the end of the input, so the data is
-  # shuffled first. That draw must not happen at validation_split = 0, where it
-  # would shift the RNG stream and move existing results.
+  # Stratified validation selection uses R's RNG. That draw must not happen at
+  # validation_split = 0, where it would shift existing training results.
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 
   run_and_capture_seed <- function(validation_split) {
     set_random_seed(1)
-    train_pixel_model(
+    suppressWarnings(train_pixel_model(
       landscapes,
       cv_method = "none",
       epochs = 1,
       validation_split = validation_split,
       verbose = FALSE
-    )
+    ))
     get(".Random.seed", envir = .GlobalEnv)
   }
 
@@ -392,12 +496,87 @@ test_that("train_pixel_model works with cv_method='none'", {
   expect_equal(model$habitat_values, c(0, 1))
   expect_equal(model$architecture, "multiscale")
   expect_equal(model$performance$cv_method, "none")
+  expect_false("val_loss" %in% names(model$history$metrics))
+  expect_false("validation_results" %in% names(model$performance))
 
   # Training geometry summary reflects the 50x50 training landscapes
   expect_equal(model$training_geometry$n_row, 50)
   expect_equal(model$training_geometry$n_col, 50)
   expect_equal(model$training_geometry$cell_size_x, 1)
   expect_true(model$training_geometry$homogeneous)
+})
+
+test_that("train_pixel_model uses explicit validation for early stopping", {
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+
+  training <- helper_create_tiny_training_set(n_per_class = 4)
+  validation <- helper_create_tiny_training_set(n_per_class = 2)
+  constant_architecture <- function(input_shape, n_classes, ...) {
+    keras3::keras_model_sequential(input_shape = input_shape) |>
+      keras3::layer_flatten() |>
+      keras3::layer_dense(
+        units = n_classes,
+        kernel_initializer = "zeros",
+        bias_initializer = "zeros"
+      ) |>
+      keras3::layer_lambda(f = \(x) x * 0) |>
+      keras3::layer_activation(activation = "softmax")
+  }
+
+  set_random_seed(42)
+  model <- suppressWarnings(train_pixel_model(
+    landscapes = training,
+    cv_method = "none",
+    validation_landscapes = validation,
+    architecture = constant_architecture,
+    epochs = 6,
+    patience = 1,
+    verbose = FALSE
+  ))
+
+  expect_true("val_loss" %in% names(model$history$metrics))
+  expect_lt(length(model$history$metrics$loss), 6)
+  expect_equal(model$performance$validation_source, "explicit")
+  expect_equal(model$performance$n_training_samples, 12)
+  expect_equal(model$performance$n_validation_samples, 6)
+  expect_true(model$performance$stopped_early)
+  expect_equal(model$performance$best_epoch, 1)
+  expect_equal(nrow(model$performance$validation_results), 6)
+  expect_setequal(
+    model$performance$validation_results$actual_class,
+    model$classes
+  )
+})
+
+test_that("train_pixel_model creates a stratified validation split", {
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 4)
+
+  set_random_seed(42)
+  model <- suppressWarnings(train_pixel_model(
+    landscapes = landscapes,
+    cv_method = "none",
+    validation_split = 0.25,
+    epochs = 2,
+    patience = NULL,
+    verbose = FALSE
+  ))
+
+  expect_equal(length(model$history$metrics$loss), 2)
+  expect_equal(length(model$history$metrics$val_loss), 2)
+  expect_equal(model$performance$validation_source, "split")
+  expect_equal(model$performance$n_training_samples, 9)
+  expect_equal(model$performance$n_validation_samples, 3)
+  expect_false(model$performance$stopped_early)
+  expect_equal(
+    as.integer(model$performance$class_distribution),
+    rep(3L, 3)
+  )
+  expect_equal(
+    as.integer(model$performance$validation_class_distribution),
+    rep(1L, 3)
+  )
 })
 
 test_that("train_pixel_model accepts a custom architecture function", {
