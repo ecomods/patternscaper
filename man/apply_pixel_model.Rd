@@ -10,9 +10,9 @@ apply_pixel_model(landscapes, nn_model, evaluate = "auto", verbose = TRUE)
 \item{landscapes}{Landscape object, or list of landscape objects, to classify.
 Rows and columns are resampled to the model's input dimensions using nearest
 neighbor resampling, which preserves categorical cell values. Each landscape
-must contain exactly one raster layer with categorical/discrete habitat data
+must contain exactly one raster layer with categorical/discrete land-cover data
 represented by numeric whole-number codes. The codes must match those used
-during training. A trained habitat value may be absent, but a new value is
+during training. A trained land-cover code may be absent, but a new code is
 rejected. Text labels, continuous data such as elevation or gradients, and
 NA cells are not supported. A landscape whose aspect ratio differs from the
 training grid is resized anisotropically (stretched), which raises a warning.}

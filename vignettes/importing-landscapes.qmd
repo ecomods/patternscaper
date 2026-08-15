@@ -43,7 +43,7 @@ landscape_raster <- terra::rast(landscape_matrix)
 For example, the values `1`, `2`, and `3` can represent forest, grassland, and
 water. The pixel workflow treats these as names rather than quantities by
 converting each value to a separate binary channel. Training and application
-rasters must use the same code for the same habitat category.
+rasters must use the same code for the same land-cover category.
 
 To convert these to `landscape` objects, use the `landscape()` function.
 The landscape object contains metadata about the landscape, such as its name and pattern.

@@ -14,7 +14,7 @@ the message ("train on", "classify").}
 
 \item{max_distinct}{Integer. Distinct-value count above which the input is
 reported as probably continuous (default: 20). Chosen to sit above any
-habitat classification scheme in practical use and far below the hundreds
+land-cover classification scheme in practical use and far below the hundreds
 or thousands of levels continuous data carries.}
 }
 \value{

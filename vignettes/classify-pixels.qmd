@@ -76,12 +76,12 @@ the cross-validation method `cv_method` are:
 
 For details and further options see the function help of `train_pixel_model()`.
 
-The cell values must be numeric whole-number codes for unordered habitat
+The cell values must be numeric whole-number codes for unordered land-cover
 categories. For example, `0` might represent bare ground and `1` vegetation, or
 `1`, `2`, and `3` might represent forest, grassland, and water. The numerical
 size and order of these codes have no meaning. `train_pixel_model()` converts
-each habitat value into its own binary input channel. A raster with three
-habitat values therefore produces three channels. Text labels are not
+each land-cover code into its own binary input channel. A raster with three
+land-cover categories therefore produces three channels. Text labels are not
 supported.
 
 The built-in architecture, `"multiscale"`, processes the landscapes as raster
@@ -148,7 +148,7 @@ to monitor how well the model performs on data that are not used to train the mo
 improved for `patience` epochs, and the weights from the best epoch are restored.
 
 When enough data are available, create or set aside a separate, labelled
-validation set. This validation set must contain every training pattern class and use the same raster dimensions and habitat codes:
+validation set. This validation set must contain every training pattern class and use the same raster dimensions and land-cover codes:
 
 ```r
 validation_landscapes <- create_landscapes(
@@ -203,7 +203,7 @@ For details on importing own landscapes, see the [importing landscapes vignette]
 
 Application landscapes must contain one raster layer with numeric categorical
 values and have no `NA` cells. They must use the same category codes as the
-training data. A trained habitat category may be absent from a new landscape,
+training data. A trained land-cover category may be absent from a new landscape,
 but a new code that was not present during training causes an error.
 `apply_pixel_model()` resamples rows and columns to the training dimensions with
 nearest-neighbor resampling. It warns when a different aspect ratio means that

@@ -90,7 +90,7 @@ changes the apparent size of landscape structures. Two cautions remain:
 - **Aspect ratio.** Resizing a non-square landscape onto a (square) training grid
   stretches it anisotropically, distorting the pattern. `apply_pixel_model()` warns
   when this happens.
-- **`NA` cells.** They cannot be interpreted as a habitat category. The function
+- **`NA` cells.** They cannot be interpreted as a land-cover category. The function
   raises an error before resizing or prediction rather than passing them to the
   network.
 
@@ -104,7 +104,7 @@ numbers of rows and columns since their arrays are stacked into one tensor.
 `train_pixel_model()` checks this and aborts with a clear message rather than
 letting the stacking fail cryptically.
 
-Habitat categories must be numeric whole-number codes. Training fixes one input
+Land-cover categories must be numeric whole-number codes. Training fixes one input
 channel for each code, and application rasters must use the same codes. A trained
 category may be absent from an application landscape, but a previously unseen
 code cannot be interpreted by the fitted model.
@@ -142,7 +142,7 @@ reshape the data first. Two options:
 
 ::: {.callout-warning}
 Do **not** fill `NA` with `0` to make the raster complete. Zero is bare ground, so
-this fabricates habitat that was never there and changes the very pattern you are
+this fabricates land cover that was never there and changes the very pattern you are
 trying to classify.
 :::
 

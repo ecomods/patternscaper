@@ -68,23 +68,23 @@ test_that("pixel model persistence validates paths and bundle metadata", {
     "Unsupported pixel model bundle format: 99"
   )
 
-  legacy <- file.path(test_root, "legacy")
-  dir.create(legacy)
-  file.create(file.path(legacy, "model.keras"))
+  unsupported_version <- file.path(test_root, "unsupported-version")
+  dir.create(unsupported_version)
+  file.create(file.path(unsupported_version, "model.keras"))
   saveRDS(
-    list(format_version = 1L, metadata = list()),
-    file.path(legacy, "metadata.rds")
+    list(format_version = 2L, metadata = list()),
+    file.path(unsupported_version, "metadata.rds")
   )
   expect_error(
-    load_pixel_model(legacy),
-    "Unsupported pixel model bundle format: 1"
+    load_pixel_model(unsupported_version),
+    "Unsupported pixel model bundle format: 2"
   )
 
   invalid <- file.path(test_root, "invalid")
   dir.create(invalid)
   file.create(file.path(invalid, "model.keras"))
   saveRDS(
-    list(format_version = 2L, metadata = list()),
+    list(format_version = 1L, metadata = list()),
     file.path(invalid, "metadata.rds")
   )
   expect_error(
@@ -132,7 +132,7 @@ test_that("pixel model bundle round trip works in the current process", {
   expect_true(file.exists(file.path(saved_path, "metadata.rds")))
 
   manifest <- readRDS(file.path(saved_path, "metadata.rds"))
-  expect_identical(manifest$format_version, 2L)
+  expect_identical(manifest$format_version, 1L)
   expect_false("model" %in% names(manifest$metadata))
   expect_equal(manifest$metadata$history, nn_model$history)
 
@@ -140,7 +140,7 @@ test_that("pixel model bundle round trip works in the current process", {
   expect_equal(names(reloaded), names(nn_model))
   expect_equal(reloaded$classes, nn_model$classes)
   expect_equal(reloaded$input_shape, nn_model$input_shape)
-  expect_equal(reloaded$habitat_values, nn_model$habitat_values)
+  expect_equal(reloaded$land_cover_values, nn_model$land_cover_values)
   expect_equal(reloaded$history, nn_model$history)
 
   after <- apply_pixel_model(
@@ -178,7 +178,7 @@ test_that("a fresh R process can load and apply a pixel model bundle", {
     history = NULL,
     classes = c("a", "b"),
     input_shape = c(10, 10, 2),
-    habitat_values = c(0, 1),
+    land_cover_values = c(0, 1),
     architecture = "multiscale",
     performance = NULL,
     training_geometry = NULL

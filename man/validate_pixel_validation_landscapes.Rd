@@ -8,7 +8,7 @@ validate_pixel_validation_landscapes(
   validation_landscapes,
   expected_dimensions,
   class_names,
-  habitat_values
+  land_cover_values
 )
 }
 \arguments{
@@ -18,7 +18,7 @@ validate_pixel_validation_landscapes(
 
 \item{class_names}{Character vector of trained pattern classes.}
 
-\item{habitat_values}{Numeric vector of habitat values fitted on the training
+\item{land_cover_values}{Numeric vector of land-cover codes fitted on the training
 landscapes.}
 }
 \value{

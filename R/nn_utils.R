@@ -379,7 +379,7 @@ abort_on_multilayer_landscapes <- function(landscapes, action) {
 #'   the message ("train on", "classify").
 #' @param max_distinct Integer. Distinct-value count above which the input is
 #'   reported as probably continuous (default: 20). Chosen to sit above any
-#'   habitat classification scheme in practical use and far below the hundreds
+#'   land-cover classification scheme in practical use and far below the hundreds
 #'   or thousands of levels continuous data carries.
 #'
 #' @return Invisibly `NULL`. Called for the error and the warning.
@@ -424,7 +424,7 @@ check_categorical_values <- function(landscapes, action, max_distinct = 20) {
   if (length(distinct_values) > max_distinct) {
     cli::cli_warn(c(
       "Landscapes hold {length(distinct_values)} distinct cell values.",
-      "i" = "Categorical habitat data usually has a handful of classes. Make sure your data is valid.",
+      "i" = "Categorical land-cover data usually has a handful of classes. Make sure your data is valid.",
       "i" = "Integer-coded continuous data, for example elevation in whole metres, passes the check but is meaningless to use in the model."
     ))
   }
@@ -432,64 +432,68 @@ check_categorical_values <- function(landscapes, action, max_distinct = 20) {
   invisible(NULL)
 }
 
-#' Fit the Habitat Encoding for a Pixel Model
+#' Fit the Land-Cover Encoding for a Pixel Model
 #'
-#' Finds the numeric habitat values present across the training landscapes and
-#' fixes their order for one-hot encoding.
+#' Finds the numeric land-cover codes present across the training landscapes
+#' and fixes their order for one-hot encoding.
 #'
 #' @param landscapes List of landscape objects.
 #'
-#' @return Sorted numeric vector of habitat values.
+#' @return Sorted numeric vector of land-cover codes.
 #'
 #' @keywords internal
-fit_habitat_values <- function(landscapes) {
+fit_land_cover_values <- function(landscapes) {
   sort(unique(unlist(lapply(
     landscapes,
     function(l) terra::values(l$data)
   ))))
 }
 
-#' One-Hot Encode a Habitat Raster
+#' One-Hot Encode a Land-Cover Raster
 #'
 #' Converts one numeric categorical raster layer into one binary array channel
-#' per fitted habitat value.
+#' per fitted land-cover code.
 #'
 #' @param landscape_data Single-layer SpatRaster.
-#' @param habitat_values Numeric vector fixing the channel order.
+#' @param land_cover_values Numeric vector fixing the channel order.
 #'
-#' @return Numeric array with dimensions rows by columns by habitat channels.
+#' @return Numeric array with dimensions rows by columns by land-cover channels.
 #'
 #' @keywords internal
-encode_habitat_raster <- function(landscape_data, habitat_values) {
+encode_land_cover_raster <- function(landscape_data, land_cover_values) {
   raster_array <- terra::as.array(landscape_data)
   encoded <- array(
     0,
-    dim = c(dim(raster_array)[1], dim(raster_array)[2], length(habitat_values))
+    dim = c(
+      dim(raster_array)[1],
+      dim(raster_array)[2],
+      length(land_cover_values)
+    )
   )
 
-  for (i in seq_along(habitat_values)) {
-    encoded[, , i] <- raster_array[, , 1] == habitat_values[i]
+  for (i in seq_along(land_cover_values)) {
+    encoded[, , i] <- raster_array[, , 1] == land_cover_values[i]
   }
 
   encoded
 }
 
-#' Check Habitat Values Against a Fitted Pixel Model
+#' Check Land-Cover Codes Against a Fitted Pixel Model
 #'
 #' @param landscapes List of landscape objects to classify.
-#' @param habitat_values Numeric habitat values fitted during training.
+#' @param land_cover_values Numeric land-cover codes fitted during training.
 #' @param action User-facing verb describing the attempted operation.
 #'
 #' @return Invisibly `NULL`.
 #'
 #' @keywords internal
-abort_on_unseen_habitat_values <- function(
+abort_on_unseen_land_cover_values <- function(
   landscapes,
-  habitat_values,
+  land_cover_values,
   action = "classify"
 ) {
   unseen <- lapply(landscapes, function(l) {
-    setdiff(unique(terra::values(l$data)), habitat_values)
+    setdiff(unique(terra::values(l$data)), land_cover_values)
   })
   invalid <- which(lengths(unseen) > 0)
 
@@ -498,9 +502,9 @@ abort_on_unseen_habitat_values <- function(
       paste0(i, ": ", paste(sort(unseen[[i]]), collapse = ", "))
     }, character(1))
     cli::cli_abort(c(
-      "Cannot {action} landscapes with habitat values not seen during training.",
+      "Cannot {action} landscapes with land-cover codes not seen during training.",
       "x" = "Unknown value{?s} by landscape index: {paste(details, collapse = '; ')}.",
-      "i" = "The model was trained with habitat values {.val {habitat_values}}."
+      "i" = "The model was trained with land-cover codes {.val {land_cover_values}}."
     ))
   }
 
@@ -709,7 +713,7 @@ find_stratified_validation_split <- function(patterns, validation_split) {
 #' @param validation_landscapes List of landscape objects.
 #' @param expected_dimensions Integer vector with rows and columns.
 #' @param class_names Character vector of trained pattern classes.
-#' @param habitat_values Numeric vector of habitat values fitted on the training
+#' @param land_cover_values Numeric vector of land-cover codes fitted on the training
 #'   landscapes.
 #'
 #' @return Character vector of validation pattern labels.
@@ -719,7 +723,7 @@ validate_pixel_validation_landscapes <- function(
   validation_landscapes,
   expected_dimensions,
   class_names,
-  habitat_values
+  land_cover_values
 ) {
   if (is_landscape(validation_landscapes)) {
     cli::cli_abort(c(
@@ -803,9 +807,9 @@ validate_pixel_validation_landscapes <- function(
 
   abort_on_na_cells(validation_landscapes, "validate on")
   check_categorical_values(validation_landscapes, "validate on")
-  abort_on_unseen_habitat_values(
+  abort_on_unseen_land_cover_values(
     validation_landscapes,
-    habitat_values,
+    land_cover_values,
     action = "validate"
   )
 

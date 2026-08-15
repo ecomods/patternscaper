@@ -6,12 +6,13 @@
 #'
 #' @param landscapes List. List of landscape objects created by \code{\link{create_landscape}} or
 #' \code{\link{create_landscapes}}.
-#' Input landscapes must contain categorical/discrete habitat data represented
-#' by numeric whole-number codes, such as 0/1 for two habitat types or 0/1/2 for
-#' three types. Text labels, continuous data such as elevation or gradients, and
-#' NA cells are not supported. Each landscape must contain exactly one raster
-#' layer and have the same number of rows and columns. At least two labelled
-#' pattern classes are required. Each habitat value is converted to a separate
+#' Input landscapes must contain categorical/discrete land-cover data represented
+#' by numeric whole-number codes, such as 0/1 for two land-cover categories or
+#' 0/1/2 for three categories. Text labels, continuous data such as elevation or
+#' gradients, and NA cells are not supported. Each landscape must contain
+#' exactly one raster layer and have the same number of rows and columns. At
+#' least two labelled
+#' pattern classes are required. Each land-cover code is converted to a separate
 #' binary input channel.
 #' @param cv_method Character. Cross-validation method: "none", "k-fold", "loo" (default: "k-fold").
 #'   \itemize{
@@ -79,7 +80,7 @@
 #'     \item{history}{Training history object from keras3::fit()}
 #'     \item{classes}{Character vector of class names used during training}
 #'     \item{input_shape}{Integer vector of input dimensions (height, width, channels)}
-#'     \item{habitat_values}{Numeric vector of fitted habitat values in input-channel order}
+#'     \item{land_cover_values}{Numeric vector of fitted land-cover codes in input-channel order}
 #'     \item{architecture}{Character, either "multiscale" or "custom"}
 #'     \item{performance}{Performance metrics. When cv_method != "none", contains
 #'       results from evaluate_cv_performance() including confusion matrix, per-class
@@ -383,7 +384,7 @@ train_pixel_model <- function(
 
   # Define the input-channel order from the weight-fitting data only. The
   # validation data must then use the same encoding as the training data.
-  habitat_values <- fit_habitat_values(fit_landscapes)
+  land_cover_values <- fit_land_cover_values(fit_landscapes)
 
   if (has_validation) {
     # Check that validation rasters and labels match the fitted model inputs.
@@ -391,19 +392,19 @@ train_pixel_model <- function(
       validation_landscapes = validation_landscapes,
       expected_dimensions = unique_dims[[1]],
       class_names = class_names,
-      habitat_values = habitat_values
+      land_cover_values = land_cover_values
     )
   }
 
-  # Give every unordered habitat category an independent input channel.
+  # Give every unordered land-cover category an independent input channel.
   training_arrays <- lapply(fit_landscapes, function(l) {
-    encode_habitat_raster(l$data, habitat_values)
+    encode_land_cover_raster(l$data, land_cover_values)
   })
 
   if (has_validation) {
     # Use the same encoding for validation landscapes as for the training landscapes.
     validation_arrays <- lapply(validation_landscapes, function(l) {
-      encode_habitat_raster(l$data, habitat_values)
+      encode_land_cover_raster(l$data, land_cover_values)
     })
   }
 
@@ -807,7 +808,7 @@ train_pixel_model <- function(
     history = history,
     classes = class_names,
     input_shape = input_shape,
-    habitat_values = habitat_values,
+    land_cover_values = land_cover_values,
     architecture = if (built_in_architecture) "multiscale" else "custom",
     performance = performance,
     training_geometry = summarise_training_geometry(fit_landscapes)
@@ -825,9 +826,9 @@ train_pixel_model <- function(
 #' @param landscapes Landscape object, or list of landscape objects, to classify.
 #'   Rows and columns are resampled to the model's input dimensions using nearest
 #'   neighbor resampling, which preserves categorical cell values. Each landscape
-#'   must contain exactly one raster layer with categorical/discrete habitat data
+#'   must contain exactly one raster layer with categorical/discrete land-cover data
 #'   represented by numeric whole-number codes. The codes must match those used
-#'   during training. A trained habitat value may be absent, but a new value is
+#'   during training. A trained land-cover code may be absent, but a new code is
 #'   rejected. Text labels, continuous data such as elevation or gradients, and
 #'   NA cells are not supported. A landscape whose aspect ratio differs from the
 #'   training grid is resized anisotropically (stretched), which raises a warning.
@@ -916,7 +917,7 @@ apply_pixel_model <- function(
           "model",
           "classes",
           "input_shape",
-          "habitat_values"
+          "land_cover_values"
         ) %in%
           names(nn_model)
       )
@@ -930,7 +931,7 @@ apply_pixel_model <- function(
   model <- nn_model$model
   class_names <- nn_model$classes
   input_shape <- nn_model$input_shape
-  habitat_values <- nn_model$habitat_values
+  land_cover_values <- nn_model$land_cover_values
 
   # Expected dimensions from training
   expected_height <- input_shape[1]
@@ -982,7 +983,7 @@ apply_pixel_model <- function(
 
   abort_on_na_cells(landscapes, "classify")
   check_categorical_values(landscapes, "classify")
-  abort_on_unseen_habitat_values(landscapes, habitat_values)
+  abort_on_unseen_land_cover_values(landscapes, land_cover_values)
 
   # Warn on aspect-ratio distortion. Resizing a landscape whose aspect ratio
   # differs from the training grid stretches it anisotropically which is a
@@ -1070,7 +1071,7 @@ apply_pixel_model <- function(
       )
     }
 
-    encode_habitat_raster(landscape_data, habitat_values)
+    encode_land_cover_raster(landscape_data, land_cover_values)
   })
 
   # Stack all arrays into one 4D array (samples, height, width, channels)

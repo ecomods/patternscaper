@@ -189,8 +189,8 @@ test_that("train_pixel_model validates the validation-data contract", {
     "same dimensions as the training landscapes"
   )
 
-  unseen_habitat <- validation
-  unseen_habitat[[1]] <- landscape(
+  unseen_land_cover <- validation
+  unseen_land_cover[[1]] <- landscape(
     matrix(2, nrow = 50, ncol = 50),
     pattern = validation[[1]]$pattern
   )
@@ -198,9 +198,9 @@ test_that("train_pixel_model validates the validation-data contract", {
     train_pixel_model(
       landscapes,
       cv_method = "none",
-      validation_landscapes = unseen_habitat
+      validation_landscapes = unseen_land_cover
     ),
-    "habitat values not seen during training"
+    "land-cover codes not seen during training"
   )
 
   singleton_class <- list(
@@ -405,25 +405,25 @@ test_that("train_pixel_model aborts on continuous cell values", {
   )
 })
 
-test_that("habitat rasters use one channel per fitted numeric value", {
+test_that("land-cover rasters use one channel per fitted numeric code", {
   first <- landscape(
     matrix(c(-5, 10, 50, -5, 50, 10), nrow = 2),
     pattern = "a"
   )
   second <- landscape(matrix(10, nrow = 2, ncol = 3), pattern = "b")
 
-  habitat_values <- fit_habitat_values(list(first, second))
-  encoded <- encode_habitat_raster(first$data, habitat_values)
+  land_cover_values <- fit_land_cover_values(list(first, second))
+  encoded <- encode_land_cover_raster(first$data, land_cover_values)
   raw <- terra::as.array(first$data)[, , 1]
 
-  expect_equal(habitat_values, c(-5, 10, 50))
+  expect_equal(land_cover_values, c(-5, 10, 50))
   expect_equal(dim(encoded), c(2, 3, 3))
-  for (i in seq_along(habitat_values)) {
-    expect_equal(encoded[, , i], 1 * (raw == habitat_values[i]))
+  for (i in seq_along(land_cover_values)) {
+    expect_equal(encoded[, , i], 1 * (raw == land_cover_values[i]))
   }
   expect_equal(apply(encoded, c(1, 2), sum), matrix(1, nrow = 2, ncol = 3))
 
-  missing_class <- encode_habitat_raster(second$data, habitat_values)
+  missing_class <- encode_land_cover_raster(second$data, land_cover_values)
   expect_true(all(missing_class[, , 1] == 0))
   expect_true(all(missing_class[, , 3] == 0))
 })
@@ -485,7 +485,7 @@ test_that("train_pixel_model works with cv_method='none'", {
       "history",
       "classes",
       "input_shape",
-      "habitat_values",
+      "land_cover_values",
       "architecture",
       "performance",
       "training_geometry"
@@ -493,7 +493,7 @@ test_that("train_pixel_model works with cv_method='none'", {
   )
   expect_equal(model$classes, c("diffuse", "random", "sharp"))
   expect_equal(model$input_shape, c(50, 50, 2))
-  expect_equal(model$habitat_values, c(0, 1))
+  expect_equal(model$land_cover_values, c(0, 1))
   expect_equal(model$architecture, "multiscale")
   expect_equal(model$performance$cv_method, "none")
   expect_false("val_loss" %in% names(model$history$metrics))
@@ -707,7 +707,7 @@ test_that("train_pixel_model CV folds always train for all epochs", {
   expect_equal(model$performance$fold_epochs, rep(4L, 2))
 })
 
-test_that("train_pixel_model one-hot encodes three habitat values", {
+test_that("train_pixel_model one-hot encodes three land-cover codes", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
   horizontal <- matrix(rep(c(5, 20, 100, 20), 100), nrow = 20)
@@ -729,7 +729,7 @@ test_that("train_pixel_model one-hot encodes three habitat values", {
     verbose = FALSE
   )
 
-  expect_equal(model$habitat_values, c(5, 20, 100))
+  expect_equal(model$land_cover_values, c(5, 20, 100))
   expect_equal(model$input_shape, c(20, 20, 3))
 })
 
@@ -862,8 +862,10 @@ test_that("apply_pixel_model aborts on continuous cell values", {
   )
 })
 
-test_that("apply_pixel_model rejects habitat values absent during training", {
-  stub_model <- helper_pixel_stub_model(habitat_values = c(5, 20, 100))
+test_that("apply_pixel_model rejects land-cover codes absent during training", {
+  stub_model <- helper_pixel_stub_model(
+    land_cover_values = c(5, 20, 100)
+  )
   application <- landscape(
     matrix(c(5, 20, 200, 5), nrow = 2),
     pattern = "a"
@@ -871,13 +873,13 @@ test_that("apply_pixel_model rejects habitat values absent during training", {
 
   expect_error(
     apply_pixel_model(application, stub_model),
-    "habitat values not seen during training"
+    "land-cover codes not seen during training"
   )
 })
 
 test_that("apply_pixel_model warns on many distinct cell values", {
-  # Whole numbers, so the abort does not fire, but 100 classes is not habitat
-  # data. Stub model + try(): the warning fires before the CNN is used.
+  # Whole numbers pass the guard, but 100 land-cover categories are implausible.
+  # A stub model is sufficient because the warning fires before the CNN is used.
   stub_model <- helper_pixel_stub_model()
   many_valued <- landscape(
     matrix(seq_len(100), nrow = 10, ncol = 10),
