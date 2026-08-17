@@ -873,8 +873,8 @@ evaluate_cv_performance <- function(
   # Add validation at the start of the function
   if (
     !all(
-      sapply(cv_probabilities, is.matrix) |
-        sapply(cv_probabilities, is.data.frame)
+      vapply(cv_probabilities, is.matrix, logical(1)) |
+        vapply(cv_probabilities, is.data.frame, logical(1))
     )
   ) {
     cli::cli_abort("cv_probabilities must contain matrices or data frames")

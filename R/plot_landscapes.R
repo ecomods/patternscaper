@@ -202,9 +202,9 @@ plot_landscapes <- function(
     )
   }
 
-  if (any(!sapply(landscapes, is_landscape))) {
+  if (any(!vapply(landscapes, is_landscape, logical(1)))) {
     # find out which element is not a landscape
-    invalid_indices <- which(!sapply(landscapes, is_landscape))
+    invalid_indices <- which(!vapply(landscapes, is_landscape, logical(1)))
     cli::cli_abort(
       "All elements must be landscape objects. Invalid element(s) at index(es): {paste(invalid_indices, collapse = ', ')}"
     )
