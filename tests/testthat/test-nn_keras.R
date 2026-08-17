@@ -675,6 +675,48 @@ test_that("train_pixel_model works with cv_method='k-fold'", {
   expect_true(all(fold_class_counts == 3))
 })
 
+test_that("train_pixel_model works with cv_method='loo'", {
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+
+  left <- matrix(0, nrow = 10, ncol = 10)
+  left[, 1:5] <- 1
+  right <- matrix(0, nrow = 10, ncol = 10)
+  right[, 6:10] <- 1
+  landscapes <- list(
+    landscape(left, pattern = "a"),
+    landscape(left[10:1, ], pattern = "a"),
+    landscape(right, pattern = "b"),
+    landscape(right[10:1, ], pattern = "b")
+  )
+
+  build_count <- 0
+  minimal_architecture <- function(input_shape, n_classes, ...) {
+    build_count <<- build_count + 1
+    keras3::keras_model_sequential(input_shape = input_shape) |>
+      keras3::layer_flatten() |>
+      keras3::layer_dense(units = n_classes, activation = "softmax")
+  }
+
+  set_random_seed(42)
+  model <- suppressWarnings(train_pixel_model(
+    landscapes,
+    cv_method = "loo",
+    architecture = minimal_architecture,
+    epochs = 1,
+    batch_size = 2,
+    verbose = FALSE
+  ))
+
+  validation <- model$performance$validation_results
+  expect_equal(model$performance$cv_method, "loo")
+  expect_equal(model$performance$cv_folds, 4)
+  expect_equal(model$performance$fold_epochs, rep(1L, 4))
+  expect_equal(validation$fold, 1:4)
+  expect_equal(validation$landscape_id, 1:4)
+  # One fresh model per held-out landscape, plus the returned final model.
+  expect_equal(build_count, 5)
+})
+
 test_that("train_pixel_model CV folds always train for all epochs", {
   skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
 
