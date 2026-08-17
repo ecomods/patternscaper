@@ -151,6 +151,18 @@ test_that("evaluate_metrics works with all ranking methods", {
   }
 })
 
+test_that("Fisher score handles a pattern with one observation", {
+  metrics <- tibble::tibble(
+    metric = "metric_1",
+    pattern = c("a", "b", "b", "c", "c"),
+    value = c(0, 1, 3, 5, 7)
+  )
+
+  result <- rank_by_fisher_score(metrics)$ranking
+
+  expect_equal(result$score, 7.2)
+})
+
 # 3. NA HANDLING TESTS ----
 test_that("evaluate_metrics handles NA values correctly", {
   metrics <- create_test_metrics(n_metrics = 6)

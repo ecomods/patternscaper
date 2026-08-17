@@ -678,7 +678,9 @@ rank_by_fisher_score <- function(metrics) {
           (nrow(group_stats) - 1)
 
         # Within-group variance
-        within_var <- sum((group_stats$n - 1) * (group_stats$sd_val^2)) /
+        within_ss <- (group_stats$n - 1) * (group_stats$sd_val^2)
+        within_ss[group_stats$n == 1] <- 0
+        within_var <- sum(within_ss) /
           (sum(group_stats$n) - nrow(group_stats))
 
         return(between_var / within_var)
