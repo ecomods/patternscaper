@@ -555,6 +555,10 @@ apply_metric_model <- function(
     )
   }
 
+  if (is_landscape(landscapes)) {
+    landscapes <- list(landscapes)
+  }
+
   # Extract required elements from the model
   model <- nn_model$model
   scaling_params <- nn_model$scaling
