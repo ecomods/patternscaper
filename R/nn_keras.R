@@ -253,6 +253,18 @@ train_pixel_model <- function(
     cli::cli_abort("patience must be a single positive integer or NULL")
   }
 
+  if (
+    !is.character(loss) ||
+      length(loss) != 1 ||
+      is.na(loss) ||
+      !nzchar(trimws(loss))
+  ) {
+    cli::cli_abort("loss must be a single non-empty character string")
+  }
+  if (!is.null(callbacks) && !is.list(callbacks)) {
+    cli::cli_abort("callbacks must be a list of Keras callbacks or NULL")
+  }
+
   built_in_architecture <-
     is.character(architecture) &&
     length(architecture) == 1 &&

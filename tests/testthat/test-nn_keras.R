@@ -11,6 +11,12 @@ helper_create_tiny_training_set <- function(n_per_class = 3) {
   )
 }
 
+helper_minimal_pixel_architecture <- function(input_shape, n_classes, ...) {
+  keras3::keras_model_sequential(input_shape = input_shape) |>
+    keras3::layer_flatten() |>
+    keras3::layer_dense(units = n_classes, activation = "softmax")
+}
+
 test_that("train_pixel_model validates cv_method parameter", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 
@@ -273,6 +279,24 @@ test_that("train_pixel_model validates optimizer", {
     expect_error(
       train_pixel_model(landscapes, optimizer = bad),
       'optimizer must be one of: "adam", "sgd", or "rmsprop"'
+    )
+  }
+})
+
+test_that("train_pixel_model validates loss and callbacks", {
+  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+
+  for (bad in list(NA_character_, "", " ", 1, c("loss_a", "loss_b"), NULL)) {
+    expect_error(
+      train_pixel_model(landscapes, loss = bad),
+      "loss must be a single non-empty character string"
+    )
+  }
+
+  for (bad in list("callback", 1, TRUE, function() NULL)) {
+    expect_error(
+      train_pixel_model(landscapes, callbacks = bad),
+      "callbacks must be a list of Keras callbacks or NULL"
     )
   }
 })
@@ -791,6 +815,52 @@ test_that("train_pixel_model accepts different optimizers", {
       verbose = FALSE
     )
   )
+})
+
+test_that("train_pixel_model runs a custom callback", {
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+  completed_epochs <- 0L
+  epoch_counter <- keras3::callback_lambda(
+    on_epoch_end = function(epoch, logs) {
+      completed_epochs <<- completed_epochs + 1L
+    }
+  )
+
+  set_random_seed(42)
+  model <- train_pixel_model(
+    landscapes,
+    cv_method = "none",
+    architecture = helper_minimal_pixel_architecture,
+    epochs = 2,
+    batch_size = 2,
+    callbacks = list(epoch_counter),
+    verbose = FALSE
+  )
+
+  expect_equal(completed_epochs, 2L)
+  expect_equal(length(model$history$metrics$loss), 2)
+})
+
+test_that("train_pixel_model supports categorical focal loss", {
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+
+  landscapes <- helper_create_tiny_training_set(n_per_class = 2)
+
+  set_random_seed(42)
+  model <- train_pixel_model(
+    landscapes,
+    cv_method = "none",
+    architecture = helper_minimal_pixel_architecture,
+    epochs = 1,
+    batch_size = 2,
+    loss = "categorical_focal_crossentropy",
+    verbose = FALSE
+  )
+
+  expect_length(model$history$metrics$loss, 1)
+  expect_true(is.finite(model$history$metrics$loss[[1]]))
 })
 
 test_that("train_pixel_model respects patience parameter", {
