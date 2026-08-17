@@ -5,6 +5,8 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/ecomods/spatPatClassifyR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ecomods/spatPatClassifyR/actions/workflows/R-CMD-check.yaml)
+[![GPL-3.0-or-later](https://img.shields.io/badge/License-GPL%20(%3E%3D%203)-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 <!-- badges: end -->
 
 The `spatPatClassifyR` package provides an automated approach to
