@@ -64,5 +64,17 @@ utils::globalVariables(c(
   "fisher_score",
   "data",
   "kruskal_effsize",
-  "mean_all"
+  "mean_all",
+  "n_row",
+  "n_col",
+  "cell_size_x",
+  "cell_size_y",
+  "n_na",
+  "n_present",
+  "sd_value",
+  "mean_value",
+  "outcome",
+  "name",
+  "selected",
+  "correlated_with"
 ))

@@ -782,7 +782,7 @@ train_pixel_model <- function(
       performance$stopped_early <- performance$epochs_trained < epochs
       performance$best_epoch <- which.min(history$metrics$val_loss)
       performance$best_validation_loss <- min(history$metrics$val_loss)
-      performance$last_epoch_validation_loss <- tail(
+      performance$last_epoch_validation_loss <- utils::tail(
         history$metrics$val_loss,
         1
       )
