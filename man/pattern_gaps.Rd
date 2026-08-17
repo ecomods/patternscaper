@@ -105,8 +105,8 @@ Usage therefore apply to \code{\link{create_landscape}} only. Ranges that
 scale with landscape size are shown for the default 100 by 100.
 \tabular{lll}{
 \strong{Parameter} \tab \strong{Valid} \tab \strong{Sampled} \cr
-\code{n_gaps} \tab 1 or more \tab 5 to 10 \cr
-\code{gap_radius} \tab 1 or more \tab 10 to 20, scales with size \cr
+\code{n_gaps} \tab 1 or more \tab 5 to 9 \cr
+\code{gap_radius} \tab 1 or more \tab 10 to 15, scales with size \cr
 \code{gap_radius_sd} \tab 0 or more \tab 0 to 2, scales with size \cr
 \code{radius_noise_fraction} \tab 0 to 1 \tab 0 to 0.2 \cr
 \code{regular_gaps} \tab TRUE or FALSE \tab TRUE or FALSE \cr

@@ -18,10 +18,8 @@ test_that("everything that names patterns agrees with valid_patterns()", {
 })
 
 # build_default_params_list() feeds sample_landscape_params(), which draws
-# RNG values in list order -- so both the key order AND the literal values
-# below must stay pinned exactly. These are the same values create_landscapes()
-# used before the spec table was introduced (see git history of
-# R/landscape_create.R's former inline default_params_list).
+# RNG values in list order -- so both the key order AND the current literal
+# values below must stay pinned exactly.
 
 test_that("build_default_params_list preserves exact order and values for all 11 patterns", {
   result <- build_default_params_list(width = 100, height = 100)
@@ -60,16 +58,16 @@ test_that("build_default_params_list preserves exact order and values for all 11
       noise_sd = c(0, 1)
     ),
     spots = list(
-      n_spots = c(5, 10),
-      spot_radius = c(10, 20),
+      n_spots = c(5, 9),
+      spot_radius = c(10, 15),
       spot_radius_sd = c(0, 2),
       radius_noise_fraction = c(0, 0.2),
       regular_spots = c(TRUE, FALSE),
       invert_landscape = c(FALSE)
     ),
     gaps = list(
-      n_gaps = c(5, 10),
-      gap_radius = c(10, 20),
+      n_gaps = c(5, 9),
+      gap_radius = c(10, 15),
       gap_radius_sd = c(0, 2),
       radius_noise_fraction = c(0, 0.2),
       regular_gaps = c(TRUE, FALSE)
@@ -110,7 +108,33 @@ test_that("width/height-dependent batch ranges scale correctly", {
   expect_equal(result$fingers$sine_length_mean, c(0.2, 0.5) * 200)
   expect_equal(result$fingers$sine_height_mean, c(0.05, 0.2) * 50)
   expect_equal(result$bands$band_thickness, c(0.02, 0.04) * 50)
-  expect_equal(result$spots$spot_radius, c(0.1, 0.2) * 200)
+  expect_equal(result$spots$spot_radius, c(0.1, 0.15) * 50)
+  expect_equal(result$gaps$gap_radius, c(0.1, 0.15) * 50)
+})
+
+test_that("largest default regular spots and gaps fit without adjustment", {
+  expect_warning(
+    create_landscape(
+      "spots",
+      params = pattern_spots(
+        n_spots = 9,
+        spot_radius = 15,
+        regular_spots = TRUE
+      )
+    ),
+    NA
+  )
+  expect_warning(
+    create_landscape(
+      "gaps",
+      params = pattern_gaps(
+        n_gaps = 9,
+        gap_radius = 15,
+        regular_gaps = TRUE
+      )
+    ),
+    NA
+  )
 })
 
 test_that("get_valid_param_specs still matches build_default_params_list's key set (validation-only params aside)", {

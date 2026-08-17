@@ -319,13 +319,15 @@ landscape_param_specs <- function() {
         type = "integer",
         min = 1,
         max = Inf,
-        batch_range = c(5, 10)
+        batch_range = c(5, 9)
       ),
       spot_radius = list(
         type = "integer",
         min = 1,
         max = Inf,
-        batch_range = function(width, height) c(0.1, 0.2) * width
+        batch_range = function(width, height) {
+          c(0.1, 0.15) * min(width, height)
+        }
       ),
       spot_radius_sd = list(
         type = "numeric",
@@ -347,13 +349,15 @@ landscape_param_specs <- function() {
         type = "integer",
         min = 1,
         max = Inf,
-        batch_range = c(5, 10)
+        batch_range = c(5, 9)
       ),
       gap_radius = list(
         type = "integer",
         min = 1,
         max = Inf,
-        batch_range = function(width, height) c(0.1, 0.2) * width
+        batch_range = function(width, height) {
+          c(0.1, 0.15) * min(width, height)
+        }
       ),
       gap_radius_sd = list(
         type = "numeric",
