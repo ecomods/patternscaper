@@ -25,20 +25,19 @@ vegetation boundary (if not rotated) from the top (0-1, default: 0.5).}
 measured downward from the vegetation boundary (0-1, default: 0.3).}
 
 \item{elongation_x}{Numeric. Horizontal elongation factor for clusters.
-Values > 1 stretch clusters horizontally, creating wider ellipses.
-Values < 1 compress horizontally (default: 1).}
+Values above 1 stretch clusters horizontally; values below 1 compress
+them (default: 1).}
 
 \item{elongation_y}{Numeric. Vertical elongation factor for clusters.
-Values > 1 stretch clusters vertically, creating taller ellipses.
-Values < 1 compress vertically (default: 1).}
+Values above 1 stretch clusters vertically; values below 1 compress
+them (default: 1).}
 }
 \value{
-A named list of the supplied parameters of the class \code{"landscape_params"}.
+A named \code{"landscape_params"} list containing the supplied
+    parameters.
 }
 \description{
-Vegetation clusters scattered into the bare zone. Builds a validated
-parameter list for the \code{"clustered"} pattern, to pass to
-\code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+Vegetation clusters scattered into the bare zone.
 }
 \examples{
 # A single landscape, with fixed values

@@ -9,7 +9,7 @@ set_landscape_pattern(x, pattern)
 \arguments{
 \item{x}{A landscape object.}
 
-\item{pattern}{Character scalar. New pattern label.}
+\item{pattern}{Character. New pattern label to store.}
 }
 \value{
 The landscape object with its updated pattern label.

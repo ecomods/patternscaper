@@ -9,13 +9,13 @@
 \arguments{
 \item{x}{A landscape object created by \code{\link{landscape}}.}
 
-\item{...}{Unused.}
+\item{...}{Must be empty.}
 }
 \value{
 A ggplot2 object.
 }
 \description{
-Plots a landscape raster as a minimal ggplot2 object.
+Plots a landscape object as a ggplot2.
 }
 \details{
 Add ggplot2 layers directly to the result, or use

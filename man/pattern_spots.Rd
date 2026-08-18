@@ -14,37 +14,34 @@ pattern_spots(
 )
 }
 \arguments{
-\item{n_spots}{Integer. Number of circular spots to generate (default: 5).
-For regular placement, this may be automatically reduced if the landscape
-cannot accommodate the requested number with the given \code{spot_radius}.}
+\item{n_spots}{Integer. Number of spots (default: 5). Regular placement may
+reduce this number if the landscape cannot accommodate the requested
+count with the given \code{spot_radius}.}
 
 \item{spot_radius}{Numeric. Mean radius of each spot in pixels (default: 10).
 Must be positive and smaller than landscape dimensions.}
 
-\item{spot_radius_sd}{Numeric. Standard deviation for random variation in spot radius.
-Each spot's radius is sampled from a normal distribution with mean \code{spot_radius}
-and standard deviation \code{spot_radius_sd} (default: 0, no variation).}
+\item{spot_radius_sd}{Numeric. Standard deviation of normally sampled spot
+radii (default: 0, no variation).}
 
-\item{radius_noise_fraction}{Numeric (0 to 1). Proportion of the spot radius
-where gradual edge noise is applied. 0 creates sharp circular edges,
-1 applies probabilistic cell inclusion across the entire radius.
-For example, 0.2 means the outer 20\% of the radius has a gradient transition.
-Works independently of \code{spot_radius_sd} (which varies the overall size,
-while this parameter affects edge sharpness).}
+\item{radius_noise_fraction}{Numeric. Fraction of the spot radius with a
+gradual edge transition (0-1). Zero gives sharp edges; 1 applies
+probabilistic cell inclusion across the full radius. For example, 0.2
+applies the transition to the outer 20\%. This is independent of
+\code{spot_radius_sd}, which varies overall spot size.}
 
-\item{regular_spots}{Logical. If TRUE, spots are arranged on a hexagonal grid
-using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).}
+\item{regular_spots}{Logical. Arrange spots on a hexagonal grid using k-means
+clustering rather than placing them randomly (default: FALSE).}
 
-\item{invert_landscape}{Logical. If TRUE, creates bare patches in vegetated ground
-(equivalent to "gaps" pattern). If FALSE (default), creates vegetated spots in bare ground.}
+\item{invert_landscape}{Logical. Create bare patches in vegetated ground,
+equivalent to the "gaps" pattern (default: FALSE).}
 }
 \value{
-A named list of the supplied parameters of the class \code{"landscape_params"}.
+A named \code{"landscape_params"} list containing the supplied
+    parameters.
 }
 \description{
-Circular vegetation patches on bare ground. Builds a validated parameter
-list for the \code{"spots"} pattern, to pass to
-\code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+Circular vegetation patches on bare ground.
 }
 \examples{
 # A single landscape, with fixed values

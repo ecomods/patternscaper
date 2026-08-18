@@ -7,23 +7,21 @@
 pattern_diffuse(steepness = 0.5, boundary_position = 0.2)
 }
 \arguments{
-\item{steepness}{Numeric. Controls the transition gradient (0-1).
-Lower values (e.g., 0.1) create sharper transitions.
-Higher values (e.g., 0.9) create more gradual, diffuse transitions
-where vegetation grows further below the vegetation boundary (default: 0.5).}
+\item{steepness}{Numeric. Transition gradient (0-1, default: 0.5). Lower
+values create sharper transitions; higher values extend diffuse
+vegetation farther below the boundary.}
 
 \item{boundary_position}{Numeric. Relative position of the horizontal
 vegetation boundary (if not rotated) from the top (0-1, default: 0.2).}
 }
 \value{
-A named list of the supplied parameters of the class \code{"landscape_params"}.
+A named \code{"landscape_params"} list containing the supplied
+    parameters.
 }
 \description{
 A vegetated and a bare zone with a gradual transition between them, where
 the chance of a cell being vegetated decreases with distance from the
-boundary. Builds a validated parameter list for the \code{"diffuse"}
-pattern, to pass to \code{\link{create_landscape}} or
-\code{\link{create_landscapes}}.
+boundary.
 }
 \examples{
 # A single landscape, with fixed values

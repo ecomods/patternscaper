@@ -11,12 +11,11 @@ pattern_sharp(boundary_position = 0.5)
 vegetation boundary (if not rotated) from the top (0-1, default: 0.5).}
 }
 \value{
-A named list of the supplied parameters of the class \code{"landscape_params"}.
+A named \code{"landscape_params"} list containing the supplied
+    parameters.
 }
 \description{
-A vegetated and a bare zone with a sharp boundary between them. Builds a
-validated parameter list for the \code{"sharp"} pattern, to pass to
-\code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+A vegetated and a bare zone separated by a sharp boundary.
 }
 \examples{
 # A single landscape, with a fixed value

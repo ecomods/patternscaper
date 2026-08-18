@@ -10,7 +10,7 @@ knitr:
     comment: '#>'
 ---
 
-This vignette shows how to generate artificial landscapes with different spatial patterns. These landscapes are designed for training and testing spatial pattern classifiers. For details on how to use the generated landscapes for training classifiers, see the [classify-metrics](classify-metrics.html) and [classify-pixels](classify-pixels.html) vignettes.
+Generate artificial landscapes with known spatial patterns. The [classify-metrics](classify-metrics.html) and [classify-pixels](classify-pixels.html) vignettes show how to use the generated landscapes for training and testing classifiers.
 
 ```{r}
 #| label: setup
@@ -22,13 +22,13 @@ set.seed(123456)
 
 ## Overview
 
-Landscape generation uses three kinds of function:
+Landscape generation uses three kinds of functions:
 
-- `create_landscapes()` generates a batch of landscapes for training
-- `create_landscape()` generates a single landscape
-- `pattern_random()`, `pattern_spots()`, ... set the parameters of one pattern
+- `create_landscape()` generates one landscape
+- `create_landscapes()` generates a batch of landscapes
+- `pattern_*()` constructors set pattern-specific parameters
 
-The first two are the entry points. Each pattern has its own parameters, and those are set through the pattern's own constructor, which is passed to `params`:
+Pass a matching `pattern_*()` constructor to `params` or `params_list`:
 
 ```{r}
 #| label: api-shape
@@ -41,18 +41,16 @@ big_spots <- create_landscape(
   params = pattern_spots(n_spots = 8, spot_radius = 12)
 )
 
-plot_landscapes(list(big_spots), show_legend = FALSE)
+plot_landscapes(big_spots, show_legend = FALSE)
 ```
-
-Typing `pattern_` and pressing <kbd>Tab</kbd> lists all 11 patterns, and each constructor's arguments are that pattern's parameters -- so autocomplete works, and `?pattern_spots` documents them.
 
 ## The patterns
 
-Currently there are 11 spatial patterns. This section shows what each one looks like and which parameters shape it.
+The package provides 11 spatial patterns. Each `pattern_*` help page documents the parameters you can set for the corresponding landscape.
 
 ### Control patterns
 
-**random**, **bare** and **dense** all place vegetation at random. They differ only in `veg_prob`, the proportion of vegetated cells: `bare` defaults to 0.1, `random` to 0.5 and `dense` to 0.9. They serve as controls -- landscapes with no spatial structure at all.
+**random**, **bare**, and **dense** place vegetation at random. They differ only in `veg_prob`, the proportion of vegetated cells: `bare` defaults to 0.1, `random` to 0.5, and `dense` to 0.9. These patterns provide control landscapes without a specific spatial structure.
 
 ```{r}
 #| label: control-patterns
@@ -70,8 +68,6 @@ plot_landscapes(
   show_legend = FALSE
 )
 ```
-
-See `?pattern_random`, `?pattern_bare` and `?pattern_dense`.
 
 ### Ecotone patterns
 
@@ -100,8 +96,6 @@ plot_landscapes(
   show_legend = FALSE
 )
 ```
-
-See `?pattern_sharp`.
 
 #### diffuse
 
@@ -132,8 +126,6 @@ plot_landscapes(
 )
 ```
 
-See `?pattern_diffuse`.
-
 #### fingers
 
 Curvy, finger-like extensions of vegetation into the bare zone. Their width is set by `sine_length_mean` and how far they reach by `sine_height_mean`, each with a matching `_sd` for variation between fingers.
@@ -162,8 +154,6 @@ plot_landscapes(
   show_legend = FALSE
 )
 ```
-
-See `?pattern_fingers`.
 
 #### clustered
 
@@ -198,8 +188,6 @@ plot_landscapes(
 )
 ```
 
-See `?pattern_clustered`.
-
 #### bands
 
 Sinusoidal vegetation bands running parallel to the boundary. `band_thickness` and `band_spacing` set their geometry, `amplitude` and `frequency` how strongly they wave.
@@ -228,8 +216,6 @@ plot_landscapes(
   show_legend = FALSE
 )
 ```
-
-See `?pattern_bands`.
 
 ### Patch patterns
 
@@ -272,8 +258,6 @@ plot_landscapes(
 )
 ```
 
-See `?pattern_spots`.
-
 #### gaps
 
 The inverse of spots: circular bare gaps in otherwise vegetated ground. It takes the same parameters, except that inverting is what makes it `gaps`, so that is not adjustable.
@@ -307,8 +291,6 @@ plot_landscapes(
 )
 ```
 
-See `?pattern_gaps`.
-
 #### labyrinth
 
 Maze-like bands of vegetation. `frequency` sets the scale of the maze and `octaves` how much fine detail is layered on top; `veg_threshold` shifts the overall vegetated proportion.
@@ -338,11 +320,9 @@ plot_landscapes(
 )
 ```
 
-See `?pattern_labyrinth`.
-
 ## Creating training landscapes
 
-The quickest way to generate training data is `create_landscapes()`. It generates multiple landscapes balanced across all available patterns, varying their parameters between landscapes.
+The quickest way to generate training data is `create_landscapes()`. The function generates multiple landscapes balanced across all available patterns, varying their parameters between landscapes.
 
 ```{r}
 #| label: create-training-landscapes
@@ -354,9 +334,9 @@ The quickest way to generate training data is `create_landscapes()`. It generate
 landscapes <- create_landscapes(n = 20)
 ```
 
-The `landscapes` are returned as a list of `landscape` objects (see [below](landscape-generation.qmd#the-landscape-object) for more info on the data structure).
+The result is a list of [`landscape` objects](landscape-generation.qmd#the-landscape-object).
 
-They can be visualized using the `plot_landscapes()` function:
+Plot them with `plot_landscapes()`:
 
 ```{r}
 #| label: plot-training-landscapes
@@ -368,11 +348,13 @@ plot_landscapes(landscapes)
 
 By default, landscapes are created in a balanced way, so that each pattern type is represented equally in the generated set.
 
+Inspect the number of generated patterns with `table()`:
+
 ```{r}
 #| label: check-pattern-distribution
 
 # Check how many landscapes of each type were generated
-table(purrr::map_chr(landscapes, ~ .x$pattern))
+table(purrr::map_chr(landscapes, \(x) x$pattern))
 ```
 
 ### Selecting specific patterns
@@ -414,11 +396,9 @@ plot_landscapes(non_square)
 
 ### Landscape rotation
 
-By default, landscapes are rotated by whole-degree angles randomly chosen between 0 and 360 degrees.
-This ensures that classifiers trained on these landscapes are invariant to landscape orientation.
+By default, each rotatable pattern is rotated by a whole-degree angle sampled between 0 and 360. This shows classifiers similar landscapes in different orientations during training and reduces reliance on orientation for the classification.
 
-You can disable random rotation by setting the `rotation` parameter to `0`.
-This parameter can also be used to directly control the range of selected rotation angles. For example, to select only angles between 45 and 90 degrees:
+Set `rotation = 0` to disable rotation, or supply a length-2 range from which angles are sampled. This example uses angles between 45 and 90 degrees:
 
 ```{r}
 #| label: rotation-example
@@ -446,7 +426,7 @@ Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated. The rem
 
 ### Pattern-specific parameters
 
-The `params_list` argument sets parameters per pattern, keyed by pattern name, using the same `pattern_*()` constructors. The difference from `create_landscape()` is that here a parameter may be given as a **range** -- a length-2 vector -- which is sampled once per landscape:
+The `params_list` argument sets parameters by pattern name using the same `pattern_*()` constructors. Unlike `create_landscape()`, a batch parameter can be either a length-2 range to sample the parameter from, or a single value used for all landscapes of that pattern.:
 
 ```{r}
 #| label: custom-parameters
@@ -460,10 +440,10 @@ bigger_spots <- create_landscapes(
   patterns = "spots",
   params_list = list(
     spots = pattern_spots(
-      n_spots = c(10, 20),
-      spot_radius = c(8, 12),
-      spot_radius_sd = 3,
-      regular_spots = FALSE
+      n_spots = c(10, 20), # range for each landscape
+      spot_radius = c(8, 12), # range for each landscape
+      spot_radius_sd = 3, # single value for all landscapes
+      regular_spots = FALSE # single value for all landscapes
     )
   )
 )
@@ -475,16 +455,16 @@ A single value fixes a parameter for every landscape in the batch; a length-2 ve
 
 ## The landscape object
 
-In `patternscaper`, landscapes are stored as lists containing the landscape data and metadata. All landscape generation functions return landscapes in this format and all other functions expect landscapes to be provided in this format.
+In `patternscaper`, landscapes are lists containing raster data and metadata. All landscape generation functions return landscapes in this format and all other functions expect landscapes to be provided in this format.
 
-To learn how to transform your own raster data into this format, see [vignette on importing landscapes](importing-landscapes.html).
+To convert other raster data to this format, see the [importing landscapes vignette](importing-landscapes.html).
 
 Each landscape is stored as a list with the following components:
 
-- data: The landscape object as a `SpatRaster` class
-- pattern: Pattern type (e.g., "spots", "clustered")
-- name: User-defined name
-- params: List of parameters used to generate the landscape
+- `data`: landscape raster as a `SpatRaster`
+- `pattern`: pattern label, such as `"spots"` or `"clustered"`
+- `name`: user-defined name
+- `params`: parameters used to generate the landscape
 
 ```{r}
 #| label: landscape-object-structure
@@ -511,8 +491,8 @@ landscapes_example <- set_landscape_pattern(
 landscapes_example
 ```
 
-## Next Steps
+## Next steps
 
-- See `vignette("landscape-metrics")` for extracting landscape features and finding the most informative metrics
-- See `vignette("classify-metrics")` for training spatial pattern classifiers on the landscape metrics
-- See `vignette("classify-pixels")` for training spatial pattern classifiers on the raw landscape data using Keras
+- `vignette("landscape-metrics")`: extract landscape features and identify informative metrics
+- `vignette("classify-metrics")`: train classifiers on landscape metrics
+- `vignette("classify-pixels")`: train Keras classifiers on raw landscape data

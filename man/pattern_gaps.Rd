@@ -13,39 +13,35 @@ pattern_gaps(
 )
 }
 \arguments{
-\item{n_gaps}{Integer. Number of circular gaps to generate (default: 5).
-For regular placement, this may be automatically reduced if the landscape
-cannot accommodate the requested number with the given \code{gap_radius}.}
+\item{n_gaps}{Integer. Number of gaps (default: 5). Regular placement may
+reduce this number if the landscape cannot accommodate the requested
+count with the given \code{gap_radius}.}
 
 \item{gap_radius}{Numeric. Mean radius of each gap in pixels (default: 10).
 Must be positive and smaller than landscape dimensions.}
 
-\item{gap_radius_sd}{Numeric. Standard deviation for random variation in gap radius.
-Each gap's radius is sampled from a normal distribution with mean \code{gap_radius}
-and standard deviation \code{gap_radius_sd} (default: 0, no variation).}
+\item{gap_radius_sd}{Numeric. Standard deviation of normally sampled gap
+radii (default: 0, no variation).}
 
-\item{radius_noise_fraction}{Numeric (0 to 1). Proportion of the gap radius
-where gradual edge noise is applied. 0 creates sharp circular edges,
-1 applies probabilistic cell inclusion across the entire radius.
-For example, 0.2 means the outer 20\% of the radius has a gradient transition.
-Works independently of \code{gap_radius_sd} (which varies the overall size,
-while this parameter affects edge sharpness).}
+\item{radius_noise_fraction}{Numeric. Fraction of the gap radius with a
+gradual edge transition (0-1). Zero gives sharp edges; 1 applies
+probabilistic cell inclusion across the full radius. For example, 0.2
+applies the transition to the outer 20\%. This is independent of
+\code{gap_radius_sd}, which varies overall gap size.}
 
-\item{regular_gaps}{Logical. If TRUE, gaps are arranged on a hexagonal grid
-using k-means clustering. If FALSE, gaps are placed randomly (default: FALSE).}
+\item{regular_gaps}{Logical. Arrange gaps on a hexagonal grid using k-means
+clustering rather than placing them randomly (default: FALSE).}
 }
 \value{
-A named list of the supplied parameters of the class \code{"landscape_params"}.
+A named \code{"landscape_params"} list containing the supplied
+    parameters.
 }
 \description{
-Circular bare gaps in vegetated ground. Builds a validated parameter list
-for the \code{"gaps"} pattern, to pass to \code{\link{create_landscape}} or
-\code{\link{create_landscapes}}.
+Circular bare gaps in vegetated ground.
 }
 \details{
-This is the inverse of \code{\link{pattern_spots}}. The inversion is what
-distinguishes the two patterns, so unlike \code{\link{pattern_spots}} this
-has no \code{invert_landscape} parameter.
+This is the inverse of \code{\link{pattern_spots}} and therefore has no
+\code{invert_landscape} parameter.
 }
 \examples{
 # A single landscape, with fixed values

@@ -60,14 +60,13 @@ new_landscape_params_unchecked <- function(params, pattern) {
 
 #' Parameters for the Random Pattern
 #'
-#' Vegetation placed at random without spatial structure. Builds a validated
-#' parameter list for the \code{"random"} pattern, to pass to
-#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#' Vegetation is placed independently in each cell, without spatial structure.
 #'
-#' @param veg_prob Numeric. Probability that a cell is vegetated (0-1,
+#' @param veg_prob Numeric. Probability that each cell is vegetated (0-1,
 #'     default: 0.5). Higher values give a denser vegetation cover.
 #'
-#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
+#' @return A named \code{"landscape_params"} list containing the supplied
+#'     parameters.
 #'
 #' @family landscape creation
 #'
@@ -97,14 +96,14 @@ pattern_random <- function(veg_prob = 0.5) {
 
 #' Parameters for the Bare Pattern
 #'
-#' Sparse vegetation placed at random without spatial structure. Builds a
-#' validated parameter list for the \code{"bare"} pattern, to pass to
-#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#' Sparse vegetation is placed independently in each cell, without spatial
+#' structure.
 #'
-#' @param veg_prob Numeric. Probability that a cell is vegetated (0-1,
+#' @param veg_prob Numeric. Probability that each cell is vegetated (0-1,
 #'     default: 0.1). Higher values give a denser vegetation cover.
 #'
-#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
+#' @return A named \code{"landscape_params"} list containing the supplied
+#'     parameters.
 #'
 #' @family landscape creation
 #'
@@ -134,14 +133,14 @@ pattern_bare <- function(veg_prob = 0.1) {
 
 #' Parameters for the Dense Pattern
 #'
-#' Dense vegetation placed at random, without spatial structure. Builds a
-#' validated parameter list for the \code{"dense"} pattern, to pass to
-#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#' Dense vegetation is placed independently in each cell, without spatial
+#' structure.
 #'
-#' @param veg_prob Numeric. Probability that a cell is vegetated (0-1,
+#' @param veg_prob Numeric. Probability that each cell is vegetated (0-1,
 #'     default: 0.9). Higher values give a denser vegetation cover.
 #'
-#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
+#' @return A named \code{"landscape_params"} list containing the supplied
+#'     parameters.
 #'
 #' @family landscape creation
 #'
@@ -171,14 +170,13 @@ pattern_dense <- function(veg_prob = 0.9) {
 
 #' Parameters for the Sharp Pattern
 #'
-#' A vegetated and a bare zone with a sharp boundary between them. Builds a
-#' validated parameter list for the \code{"sharp"} pattern, to pass to
-#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#' A vegetated and a bare zone separated by a sharp boundary.
 #'
 #' @param boundary_position Numeric. Relative position of the horizontal
 #'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
 #'
-#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
+#' @return A named \code{"landscape_params"} list containing the supplied
+#'     parameters.
 #'
 #' @family landscape creation
 #'
@@ -217,18 +215,16 @@ pattern_sharp <- function(boundary_position = 0.5) {
 #'
 #' A vegetated and a bare zone with a gradual transition between them, where
 #' the chance of a cell being vegetated decreases with distance from the
-#' boundary. Builds a validated parameter list for the \code{"diffuse"}
-#' pattern, to pass to \code{\link{create_landscape}} or
-#' \code{\link{create_landscapes}}.
+#' boundary.
 #'
-#' @param steepness Numeric. Controls the transition gradient (0-1).
-#'   Lower values (e.g., 0.1) create sharper transitions.
-#'   Higher values (e.g., 0.9) create more gradual, diffuse transitions
-#'   where vegetation grows further below the vegetation boundary (default: 0.5).
+#' @param steepness Numeric. Transition gradient (0-1, default: 0.5). Lower
+#'     values create sharper transitions; higher values extend diffuse
+#'     vegetation farther below the boundary.
 #' @param boundary_position Numeric. Relative position of the horizontal
 #'     vegetation boundary (if not rotated) from the top (0-1, default: 0.2).
 #'
-#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
+#' @return A named \code{"landscape_params"} list containing the supplied
+#'     parameters.
 #'
 #' @family landscape creation
 #'
@@ -286,25 +282,20 @@ pattern_diffuse <- function(
 #' Parameters for the Fingers Pattern
 #'
 #' Finger-like extensions of vegetation growing into the bare zone.
-#' Builds a validated parameter list for the \code{"fingers"} pattern, to pass
-#' to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 #'
 #' @param boundary_position Numeric. Relative position of the horizontal
 #'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
 #' @param sine_length_mean Numeric. Mean wavelength of sinusoidal curve in pixels.
-#'     Larger values produce longer, more widely spaced bends; smaller values 
-#'     produce shorter, more frequent bends (default: 20).
+#'     Larger values produce longer, more widely spaced bends (default: 20).
 #' @param sine_length_sd Numeric. Standard deviation of wavelength in pixels.
-#'     Larger values increase variation in bend length, producing less 
-#'     regular curves (default: 12).
+#'     Larger values produce less regular curves (default: 12).
 #' @param sine_height_mean Numeric. Mean amplitude of sinusoidal curve in pixels.
-#'     Larger values produce wider, more pronounced bends; 
-#'     smaller values produce flatter, less pronounced bends (default: 5).
+#'     Larger values produce more pronounced bends (default: 5).
 #' @param sine_height_sd Numeric. Standard deviation of amplitude in pixels.
-#'     Larger values increase variation in bend height, producing curves
-#'     with more variable bend widths (default: 5).
+#'     Larger values increase variation in bend height (default: 5).
 #'
-#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
+#' @return A named \code{"landscape_params"} list containing the supplied
+#'     parameters.
 #'
 #' @family landscape creation
 #'
@@ -373,9 +364,7 @@ pattern_fingers <- function(
 
 #' Parameters for the Clustered Pattern
 #'
-#' Vegetation clusters scattered into the bare zone. Builds a validated
-#' parameter list for the \code{"clustered"} pattern, to pass to
-#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#' Vegetation clusters scattered into the bare zone.
 #'
 #' @param boundary_position Numeric. Relative position of the horizontal
 #'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
@@ -384,13 +373,14 @@ pattern_fingers <- function(
 #' @param cluster_zone Numeric. Proportion of height for the cluster zone,
 #'     measured downward from the vegetation boundary (0-1, default: 0.3).
 #' @param elongation_x Numeric. Horizontal elongation factor for clusters.
-#'   Values > 1 stretch clusters horizontally, creating wider ellipses.
-#'   Values < 1 compress horizontally (default: 1).
+#'     Values above 1 stretch clusters horizontally; values below 1 compress
+#'     them (default: 1).
 #' @param elongation_y Numeric. Vertical elongation factor for clusters.
-#'   Values > 1 stretch clusters vertically, creating taller ellipses.
-#'   Values < 1 compress vertically (default: 1).
+#'     Values above 1 stretch clusters vertically; values below 1 compress
+#'     them (default: 1).
 #'
-#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
+#' @return A named \code{"landscape_params"} list containing the supplied
+#'     parameters.
 #'
 #' @family landscape creation
 #'
@@ -463,9 +453,7 @@ pattern_clustered <- function(
 
 #' Parameters for the Bands Pattern
 #'
-#' Sinusoidal vegetation bands running parallel to the boundary. Builds a
-#' validated parameter list for the \code{"bands"} pattern, to pass to
-#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#' Sinusoidal vegetation bands running parallel to the boundary.
 #'
 #' @param boundary_position Numeric. Relative position of the horizontal
 #'     vegetation boundary (if not rotated) from the top (0-1, default: 0.5).
@@ -475,13 +463,15 @@ pattern_clustered <- function(
 #'     and a warning is issued.
 #' @param band_thickness Integer. Thickness of each band in pixels (default: 3).
 #' @param band_spacing Integer. Spacing between bands in pixels (default: 10).
-#' @param frequency Numeric. Frequency of sine wave of the bands (default: 4*pi/100).
-#' @param amplitude Numeric. Amplitude of sine wave of the bands in pixels (default: 5).
-#' @param noise_sd Numeric. Standard deviation for random noise.
-#'     Controls how strongly each band randomly deviates up and down 
-#'     from its baseline along the x-axis (default: 0).
+#' @param frequency Numeric. Frequency of the bands' sine wave (default:
+#'     4*pi/100).
+#' @param amplitude Numeric. Amplitude of the bands' sine wave in pixels
+#'     (default: 5).
+#' @param noise_sd Numeric. Standard deviation of each band's vertical
+#'     deviation from its baseline along the x-axis (default: 0).
 #'
-#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
+#' @return A named \code{"landscape_params"} list containing the supplied
+#'     parameters.
 #'
 #' @family landscape creation
 #'
@@ -558,30 +548,27 @@ pattern_bands <- function(
 
 #' Parameters for the Spots Pattern
 #'
-#' Circular vegetation patches on bare ground. Builds a validated parameter
-#' list for the \code{"spots"} pattern, to pass to
-#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#' Circular vegetation patches on bare ground.
 #'
-#' @param n_spots Integer. Number of circular spots to generate (default: 5).
-#'     For regular placement, this may be automatically reduced if the landscape
-#'     cannot accommodate the requested number with the given \code{spot_radius}.
+#' @param n_spots Integer. Number of spots (default: 5). Regular placement may
+#'     reduce this number if the landscape cannot accommodate the requested
+#'     count with the given \code{spot_radius}.
 #' @param spot_radius Numeric. Mean radius of each spot in pixels (default: 10).
 #'     Must be positive and smaller than landscape dimensions.
-#' @param spot_radius_sd Numeric. Standard deviation for random variation in spot radius.
-#'     Each spot's radius is sampled from a normal distribution with mean \code{spot_radius}
-#'     and standard deviation \code{spot_radius_sd} (default: 0, no variation).
-#' @param radius_noise_fraction Numeric (0 to 1). Proportion of the spot radius
-#'     where gradual edge noise is applied. 0 creates sharp circular edges,
-#'     1 applies probabilistic cell inclusion across the entire radius.
-#'     For example, 0.2 means the outer 20\% of the radius has a gradient transition.
-#'     Works independently of \code{spot_radius_sd} (which varies the overall size,
-#'     while this parameter affects edge sharpness).
-#' @param regular_spots Logical. If TRUE, spots are arranged on a hexagonal grid
-#'     using k-means clustering. If FALSE, spots are placed randomly (default: FALSE).
-#' @param invert_landscape Logical. If TRUE, creates bare patches in vegetated ground
-#'     (equivalent to "gaps" pattern). If FALSE (default), creates vegetated spots in bare ground.
+#' @param spot_radius_sd Numeric. Standard deviation of normally sampled spot
+#'     radii (default: 0, no variation).
+#' @param radius_noise_fraction Numeric. Fraction of the spot radius with a
+#'     gradual edge transition (0-1). Zero gives sharp edges; 1 applies
+#'     probabilistic cell inclusion across the full radius. For example, 0.2
+#'     applies the transition to the outer 20\%. This is independent of
+#'     \code{spot_radius_sd}, which varies overall spot size.
+#' @param regular_spots Logical. Arrange spots on a hexagonal grid using k-means
+#'     clustering rather than placing them randomly (default: FALSE).
+#' @param invert_landscape Logical. Create bare patches in vegetated ground,
+#'     equivalent to the "gaps" pattern (default: FALSE).
 #'
-#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
+#' @return A named \code{"landscape_params"} list containing the supplied
+#'     parameters.
 #'
 #' @family landscape creation
 #'
@@ -651,33 +638,29 @@ pattern_spots <- function(
 
 #' Parameters for the Gaps Pattern
 #'
-#' Circular bare gaps in vegetated ground. Builds a validated parameter list
-#' for the \code{"gaps"} pattern, to pass to \code{\link{create_landscape}} or
-#' \code{\link{create_landscapes}}.
+#' Circular bare gaps in vegetated ground.
 #'
 #' @details
-#' This is the inverse of \code{\link{pattern_spots}}. The inversion is what
-#' distinguishes the two patterns, so unlike \code{\link{pattern_spots}} this
-#' has no \code{invert_landscape} parameter.
+#' This is the inverse of \code{\link{pattern_spots}} and therefore has no
+#' \code{invert_landscape} parameter.
 #'
-#' @param n_gaps Integer. Number of circular gaps to generate (default: 5).
-#'     For regular placement, this may be automatically reduced if the landscape
-#'     cannot accommodate the requested number with the given \code{gap_radius}.
+#' @param n_gaps Integer. Number of gaps (default: 5). Regular placement may
+#'     reduce this number if the landscape cannot accommodate the requested
+#'     count with the given \code{gap_radius}.
 #' @param gap_radius Numeric. Mean radius of each gap in pixels (default: 10).
 #'     Must be positive and smaller than landscape dimensions.
-#' @param gap_radius_sd Numeric. Standard deviation for random variation in gap radius.
-#'     Each gap's radius is sampled from a normal distribution with mean \code{gap_radius}
-#'     and standard deviation \code{gap_radius_sd} (default: 0, no variation).
-#' @param radius_noise_fraction Numeric (0 to 1). Proportion of the gap radius
-#'     where gradual edge noise is applied. 0 creates sharp circular edges,
-#'     1 applies probabilistic cell inclusion across the entire radius.
-#'     For example, 0.2 means the outer 20\% of the radius has a gradient transition.
-#'     Works independently of \code{gap_radius_sd} (which varies the overall size,
-#'     while this parameter affects edge sharpness).
-#' @param regular_gaps Logical. If TRUE, gaps are arranged on a hexagonal grid
-#'     using k-means clustering. If FALSE, gaps are placed randomly (default: FALSE).
+#' @param gap_radius_sd Numeric. Standard deviation of normally sampled gap
+#'     radii (default: 0, no variation).
+#' @param radius_noise_fraction Numeric. Fraction of the gap radius with a
+#'     gradual edge transition (0-1). Zero gives sharp edges; 1 applies
+#'     probabilistic cell inclusion across the full radius. For example, 0.2
+#'     applies the transition to the outer 20\%. This is independent of
+#'     \code{gap_radius_sd}, which varies overall gap size.
+#' @param regular_gaps Logical. Arrange gaps on a hexagonal grid using k-means
+#'     clustering rather than placing them randomly (default: FALSE).
 #'
-#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
+#' @return A named \code{"landscape_params"} list containing the supplied
+#'     parameters.
 #'
 #' @family landscape creation
 #'
@@ -743,34 +726,28 @@ pattern_gaps <- function(
 
 #' Parameters for the Labyrinth Pattern
 #'
-#' Maze-like bands of vegetation, mimicking a Turing pattern. Builds a
-#' validated parameter list for the \code{"labyrinth"} pattern, to pass to
-#' \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+#' Maze-like vegetation bands that mimic a Turing pattern.
 #'
-#' @param frequency Numeric. Controls the spatial scale of the noise pattern.
-#'    Lower values produce broad, smoother bands, whereas higher values produce finer, 
-#'    more maze-like structures (default: 3).
-#' @param veg_threshold Numeric between 0 and 1. Threshold separating vegetated 
-#'    from non-vegetated cells. Values above the threshold are classified as vegetation. 
-#'    Lower values increase the proportion of vegetated cells, 
-#'    whereas higher values decrease it (default: 0.5). 
-#' @param band_fuzziness Numeric between 0 and 1. Probability that an edge
-#'    cell is eroded \emph{after} thresholding. Controls the geometric edge roughness 
-#'    without affecting the underlying noise field.
-#'    At 0, vegetation boundaries are sharp and fully deterministic.
-#'    Small values (roughly 0.05 to 0.1) introduce slight irregularities  
-#'    while largely preserving the topology of the pattern.
-#'    Higher values increasingly erode vegetation edges and may fragment bands.
-#'    Above roughly 0.3, patterns can appear increasingly random rather than 
-#'    maze-like (default: 0.08).
-#' @param octaves Integer >= 1. Number of noise layers (octaves) combined to
-#'    generate the underlying continuous field. 
-#'    A lower value of 1 produces smooth patterns dominated by large-scale structure.
-#'    Two to three octaves add fine-scale variation while preserving a dominant wavelength 
-#'    characteristic of labyrinth (Turing-like) patterns. Higher values introduce
-#'    increasingly fine, fractal-like detail and can obscure the banded structure (default: 2).
+#' @param frequency Numeric. Spatial scale of the noise pattern. Lower values
+#'     produce broad, smooth bands; higher values produce finer, more maze-like
+#'     structures (default: 3).
+#' @param veg_threshold Numeric. Threshold separating vegetated and bare cells
+#'     (0-1, default: 0.5). Values above it become vegetation. Lower thresholds
+#'     increase vegetation cover; higher thresholds reduce it.
+#' @param band_fuzziness Numeric. Probability that an edge cell is eroded after
+#'     thresholding (0-1, default: 0.08). This changes edge roughness without
+#'     changing the underlying noise field. Zero gives deterministic boundaries;
+#'     values around 0.05 to 0.1 add slight irregularities while largely
+#'     preserving topology. Higher values may fragment bands, and values above
+#'     roughly 0.3 can appear increasingly random rather than maze-like.
+#' @param octaves Integer. Number of noise layers combined into the continuous
+#'     field (at least 1, default: 2). One octave emphasizes smooth, large-scale
+#'     structure. Two to three add fine-scale variation while preserving a
+#'     dominant wavelength. Higher values add fractal-like detail that can
+#'     obscure the bands.
 #'
-#' @return A named list of the supplied parameters of the class \code{"landscape_params"}.
+#' @return A named \code{"landscape_params"} list containing the supplied
+#'     parameters.
 #'
 #' @family landscape creation
 #'

@@ -7,16 +7,16 @@
 pattern_bare(veg_prob = 0.1)
 }
 \arguments{
-\item{veg_prob}{Numeric. Probability that a cell is vegetated (0-1,
+\item{veg_prob}{Numeric. Probability that each cell is vegetated (0-1,
 default: 0.1). Higher values give a denser vegetation cover.}
 }
 \value{
-A named list of the supplied parameters of the class \code{"landscape_params"}.
+A named \code{"landscape_params"} list containing the supplied
+    parameters.
 }
 \description{
-Sparse vegetation placed at random without spatial structure. Builds a
-validated parameter list for the \code{"bare"} pattern, to pass to
-\code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+Sparse vegetation is placed independently in each cell, without spatial
+structure.
 }
 \examples{
 # A single landscape, with a fixed value

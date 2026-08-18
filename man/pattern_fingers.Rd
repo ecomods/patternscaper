@@ -17,28 +17,23 @@ pattern_fingers(
 vegetation boundary (if not rotated) from the top (0-1, default: 0.5).}
 
 \item{sine_length_mean}{Numeric. Mean wavelength of sinusoidal curve in pixels.
-Larger values produce longer, more widely spaced bends; smaller values 
-produce shorter, more frequent bends (default: 20).}
+Larger values produce longer, more widely spaced bends (default: 20).}
 
 \item{sine_length_sd}{Numeric. Standard deviation of wavelength in pixels.
-Larger values increase variation in bend length, producing less 
-regular curves (default: 12).}
+Larger values produce less regular curves (default: 12).}
 
 \item{sine_height_mean}{Numeric. Mean amplitude of sinusoidal curve in pixels.
-Larger values produce wider, more pronounced bends; 
-smaller values produce flatter, less pronounced bends (default: 5).}
+Larger values produce more pronounced bends (default: 5).}
 
 \item{sine_height_sd}{Numeric. Standard deviation of amplitude in pixels.
-Larger values increase variation in bend height, producing curves
-with more variable bend widths (default: 5).}
+Larger values increase variation in bend height (default: 5).}
 }
 \value{
-A named list of the supplied parameters of the class \code{"landscape_params"}.
+A named \code{"landscape_params"} list containing the supplied
+    parameters.
 }
 \description{
 Finger-like extensions of vegetation growing into the bare zone.
-Builds a validated parameter list for the \code{"fingers"} pattern, to pass
-to \code{\link{create_landscape}} or \code{\link{create_landscapes}}.
 }
 \examples{
 # A single landscape, with fixed values

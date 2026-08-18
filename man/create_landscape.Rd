@@ -18,33 +18,32 @@ create_landscape(
 Valid patterns are: "random", "bare", "dense", "sharp", "diffuse",
 "fingers", "clustered", "bands", "spots", "gaps", "labyrinth".}
 
-\item{width}{Integer. Width of the landscape in pixels (default: 100).}
+\item{width}{Integer. Landscape width in pixels (default: 100).}
 
-\item{height}{Integer. Height of the landscape in pixels (default: 100).}
+\item{height}{Integer. Landscape height in pixels (default: 100).}
 
-\item{name}{Character. Optional name for the landscape (default: NULL).}
+\item{name}{Character. Optional landscape name (default: NULL).}
 
-\item{params}{Output of the \code{pattern_*()} constructor matching \code{pattern},
-for example \code{\link{pattern_spots}} (default: NULL). Must hold single values
-for each parameter, ranges are only meaningful for \code{\link{create_landscapes}},
-i.e. for creating multiple landscapes.}
+\item{params}{Output of the \code{pattern_*()} constructor matching
+\code{pattern}, such as \code{\link{pattern_spots}} (default: NULL).
+Parameters must be single values; length-2 sampling ranges apply only to
+\code{\link{create_landscapes}}.}
 
-\item{rotation}{Numeric. Angle to rotate the landscape in degrees
-(0-360, default: 0). Only "sharp", "diffuse", "fingers",
-"clustered" and "bands" are rotated. The remaining patterns ignore it,
-are generated without rotation and a warning is given.}
+\item{rotation}{Numeric. Rotation angle in degrees (0-360, default: 0).
+Only "sharp", "diffuse", "fingers", "clustered", and "bands" are
+rotated. Other patterns ignore this argument and issue a warning.}
 }
 \value{
 A \code{\link{landscape}} object, containing:
-  \item{data}{SpatRaster of the generated pattern, with binary values (0 = bare ground, 1 = vegetation)}
-  \item{pattern}{Character string with the pattern type.}
-  \item{params}{List of all input parameters used to generate the landscape}
-  \item{name}{Character string with the landscape name, \code{NA} if none was given}
+  \item{data}{SpatRaster of the generated pattern (0 = bare ground,
+    1 = vegetation).}
+  \item{pattern}{Character pattern name.}
+  \item{params}{Parameters used to generate the landscape.}
+  \item{name}{Character landscape name, or \code{NA} if none was given.}
 }
 \description{
-Creates a single binary landscape with the requested spatial pattern.
-Each pattern name below links to its \code{pattern_*()} constructor, which
-sets that pattern's parameters.
+Generates one binary landscape with the requested spatial pattern. Use the
+matching \code{pattern_*()} constructor to set pattern-specific parameters.
 
 \itemize{
   \item \strong{Control} patterns have no spatial structure and differ only

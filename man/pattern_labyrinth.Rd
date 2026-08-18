@@ -12,39 +12,33 @@ pattern_labyrinth(
 )
 }
 \arguments{
-\item{frequency}{Numeric. Controls the spatial scale of the noise pattern.
-Lower values produce broad, smoother bands, whereas higher values produce finer, 
-more maze-like structures (default: 3).}
+\item{frequency}{Numeric. Spatial scale of the noise pattern. Lower values
+produce broad, smooth bands; higher values produce finer, more maze-like
+structures (default: 3).}
 
-\item{veg_threshold}{Numeric between 0 and 1. Threshold separating vegetated 
-from non-vegetated cells. Values above the threshold are classified as vegetation. 
-Lower values increase the proportion of vegetated cells, 
-whereas higher values decrease it (default: 0.5).}
+\item{veg_threshold}{Numeric. Threshold separating vegetated and bare cells
+(0-1, default: 0.5). Values above it become vegetation. Lower thresholds
+increase vegetation cover; higher thresholds reduce it.}
 
-\item{band_fuzziness}{Numeric between 0 and 1. Probability that an edge
-cell is eroded \emph{after} thresholding. Controls the geometric edge roughness 
-without affecting the underlying noise field.
-At 0, vegetation boundaries are sharp and fully deterministic.
-Small values (roughly 0.05 to 0.1) introduce slight irregularities  
-while largely preserving the topology of the pattern.
-Higher values increasingly erode vegetation edges and may fragment bands.
-Above roughly 0.3, patterns can appear increasingly random rather than 
-maze-like (default: 0.08).}
+\item{band_fuzziness}{Numeric. Probability that an edge cell is eroded after
+thresholding (0-1, default: 0.08). This changes edge roughness without
+changing the underlying noise field. Zero gives deterministic boundaries;
+values around 0.05 to 0.1 add slight irregularities while largely
+preserving topology. Higher values may fragment bands, and values above
+roughly 0.3 can appear increasingly random rather than maze-like.}
 
-\item{octaves}{Integer >= 1. Number of noise layers (octaves) combined to
-generate the underlying continuous field. 
-A lower value of 1 produces smooth patterns dominated by large-scale structure.
-Two to three octaves add fine-scale variation while preserving a dominant wavelength 
-characteristic of labyrinth (Turing-like) patterns. Higher values introduce
-increasingly fine, fractal-like detail and can obscure the banded structure (default: 2).}
+\item{octaves}{Integer. Number of noise layers combined into the continuous
+field (at least 1, default: 2). One octave emphasizes smooth, large-scale
+structure. Two to three add fine-scale variation while preserving a
+dominant wavelength. Higher values add fractal-like detail that can
+obscure the bands.}
 }
 \value{
-A named list of the supplied parameters of the class \code{"landscape_params"}.
+A named \code{"landscape_params"} list containing the supplied
+    parameters.
 }
 \description{
-Maze-like bands of vegetation, mimicking a Turing pattern. Builds a
-validated parameter list for the \code{"labyrinth"} pattern, to pass to
-\code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+Maze-like vegetation bands that mimic a Turing pattern.
 }
 \examples{
 # A single landscape, with fixed values

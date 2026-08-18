@@ -45,10 +45,11 @@ the threshold. Set to 1 to disable correlation filtering.}
 \item{verbose}{Logical. Whether to print detailed messages on excluded metrics
 or just a summary (default: FALSE).}
 
-\item{fill_correlated}{Logical. If `TRUE` (default), fill any gap between the
-number of metrics that pass the correlation filter and `metrics_number`
-with the highest-ranked correlated metrics, and warn. If `FALSE`, return
-only metrics that pass the filter, which may be fewer than requested.}
+\item{fill_correlated}{Logical. If `TRUE` (default), fills any difference
+between the number of metrics that pass the correlation filter and the
+requested `metrics_number` with the highest-ranked correlated metrics,
+and warn. If `FALSE`, returns only uncorrelated metrics,
+which then may be fewer than the requested `metric_number`.}
 }
 \value{
 An object of class `metrics_evaluation`, a list with elements:

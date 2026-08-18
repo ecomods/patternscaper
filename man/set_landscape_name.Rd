@@ -9,7 +9,7 @@ set_landscape_name(x, name)
 \arguments{
 \item{x}{A landscape object.}
 
-\item{name}{Character scalar. New landscape name.}
+\item{name}{Character. New landscape name to store.}
 }
 \value{
 The landscape object with its updated name.

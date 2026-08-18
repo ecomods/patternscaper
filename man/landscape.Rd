@@ -23,7 +23,8 @@ A landscape object containing the data and metadata.
 }
 \description{
 Wraps a matrix or SpatRaster with pattern, name, and generation-parameter
-metadata for use by patternscaper functions.
+metadata into a landscape object that can be used by other patternscaper
+functions.
 }
 \examples{
 # Create from a binary matrix (0 = bare ground, 1 = vegetation)

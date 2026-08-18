@@ -27,21 +27,21 @@ and a warning is issued.}
 
 \item{band_spacing}{Integer. Spacing between bands in pixels (default: 10).}
 
-\item{frequency}{Numeric. Frequency of sine wave of the bands (default: 4*pi/100).}
+\item{frequency}{Numeric. Frequency of the bands' sine wave (default:
+4*pi/100).}
 
-\item{amplitude}{Numeric. Amplitude of sine wave of the bands in pixels (default: 5).}
+\item{amplitude}{Numeric. Amplitude of the bands' sine wave in pixels
+(default: 5).}
 
-\item{noise_sd}{Numeric. Standard deviation for random noise.
-Controls how strongly each band randomly deviates up and down 
-from its baseline along the x-axis (default: 0).}
+\item{noise_sd}{Numeric. Standard deviation of each band's vertical
+deviation from its baseline along the x-axis (default: 0).}
 }
 \value{
-A named list of the supplied parameters of the class \code{"landscape_params"}.
+A named \code{"landscape_params"} list containing the supplied
+    parameters.
 }
 \description{
-Sinusoidal vegetation bands running parallel to the boundary. Builds a
-validated parameter list for the \code{"bands"} pattern, to pass to
-\code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+Sinusoidal vegetation bands running parallel to the boundary.
 }
 \examples{
 # A single landscape, with fixed values

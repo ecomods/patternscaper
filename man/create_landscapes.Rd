@@ -17,53 +17,46 @@ create_landscapes(
 )
 }
 \arguments{
-\item{n}{Integer. Total number of landscapes to create (default: 50).}
+\item{n}{Integer. Number of landscapes to generate (default: 50).}
 
-\item{patterns}{Character vector. Patterns to sample from. Valid patterns are:
-"random", "bare", "dense", "sharp", "diffuse", "fingers", "clustered",
-"bands", "spots", "gaps", "labyrinth" (default: all patterns).}
+\item{patterns}{Character vector. Patterns to sample: "random", "bare",
+"dense", "sharp", "diffuse", "fingers", "clustered", "bands", "spots",
+"gaps", or "labyrinth" (default: all patterns).}
 
-\item{width}{Integer. Width of all landscapes in pixels (default: 100).}
+\item{width}{Integer. Width of each landscape in pixels (default: 100).}
 
-\item{height}{Integer. Height of all landscapes in pixels (default: 100).}
+\item{height}{Integer. Height of each landscape in pixels (default: 100).}
 
 \item{rotation}{Numeric. Angle in degrees (default: \code{c(0, 360)}).
-A single value applies that angle to every landscape. A length-2
-vector gives the lower and upper bounds of a uniform range, drawn for each
-landscape as an integer. Only "sharp", "diffuse",
-"fingers", "clustered" and "bands" are rotated; the remaining patterns
-ignore it.}
+A single value applies to every rotatable landscape. A length-2 vector
+gives the bounds of a uniform range sampled as whole degrees. Only
+"sharp", "diffuse", "fingers", "clustered", and "bands" are rotated;
+other patterns ignore this argument.}
 
-\item{params_list}{Named list. Parameters to sample for each pattern.
-Names must correspond to the pattern names, for example for example
-\code{\link{pattern_spots}} for \code{patterns} = "spots". Each
-element must be the output of the corresponding pattern_*() constructor,
-for example of \code{\link{pattern_spots}}.
-A single value fixes a parameter, whereas a length-2 vector is a range
-from which one value is sampled for each generated landscape of that pattern.
-Patterns omitted from \code{params_list} use their default parameter ranges.
-Default NULL uses the default ranges for all patterns.}
+\item{params_list}{Named list of pattern parameters (default: NULL). Each name
+must match a pattern and each element must come from its \code{pattern_*()}
+constructor, for example \code{list(spots = pattern_spots())}. A single
+value is fixed across the batch; a length-2 vector is sampled once per
+landscape. Omitted patterns use their default sampling ranges.}
 
-\item{pattern_probs}{Numeric vector. Probability that a specific landscape pattern
-is chosen from the list of \code{patterns}. Should be a numeric vector of
-the same length as \code{patterns}. The default value NULL creates equally
-balanced patterns.}
+\item{pattern_probs}{Numeric vector of sampling weights, one per element of
+\code{patterns} (default: NULL). NULL creates balanced pattern counts. A
+vector of the wrong length issues a warning and uses equal weights.}
 
-\item{max_retries}{Integer. Maximum number of retries for failed landscape
-generations (default: 3).}
+\item{max_retries}{Integer. Maximum retries after a failed landscape
+generation (default: 3).}
 }
 \value{
 A named list of \code{\link{landscape}} objects, each as returned by
     \code{\link{create_landscape}}. Landscape names are \code{"<pattern>_<index>"},
     with \code{"_rot<angle>"} appended for rotated landscapes. The list holds
-    fewer than \code{n} landscapes if generation kept failing after
-    \code{max_retries}, which is reported with a warning.
+    fewer than \code{n} landscapes if generation still fails after
+    \code{max_retries}; a warning reports the shortfall.
 }
 \description{
-Creates \code{n} landscapes sampled from the requested patterns and varying
-their parameters between landscapes. This is how training sets can be built.
-Each pattern name below links to its \code{pattern_*()} constructor, which
-sets that pattern's parameters.
+Generates \code{n} binary landscapes from the requested patterns, sampling
+pattern-specific parameters independently for each landscape. This supports
+the construction of training sets.
 
 \itemize{
   \item \strong{Control} patterns have no spatial structure and differ only

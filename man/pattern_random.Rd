@@ -7,16 +7,15 @@
 pattern_random(veg_prob = 0.5)
 }
 \arguments{
-\item{veg_prob}{Numeric. Probability that a cell is vegetated (0-1,
+\item{veg_prob}{Numeric. Probability that each cell is vegetated (0-1,
 default: 0.5). Higher values give a denser vegetation cover.}
 }
 \value{
-A named list of the supplied parameters of the class \code{"landscape_params"}.
+A named \code{"landscape_params"} list containing the supplied
+    parameters.
 }
 \description{
-Vegetation placed at random without spatial structure. Builds a validated
-parameter list for the \code{"random"} pattern, to pass to
-\code{\link{create_landscape}} or \code{\link{create_landscapes}}.
+Vegetation is placed independently in each cell, without spatial structure.
 }
 \examples{
 # A single landscape, with a fixed value
