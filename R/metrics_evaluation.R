@@ -291,7 +291,6 @@ evaluate_metrics <- function(
   verbose = FALSE,
   fill_correlated = TRUE
 ) {
-  # Validate input data
   if (!is.data.frame(metrics) && !tibble::is_tibble(metrics)) {
     cli::cli_abort("metrics must be a data frame or tibble")
   }
@@ -325,7 +324,6 @@ evaluate_metrics <- function(
     cli::cli_abort("metrics_number must be a positive integer")
   }
 
-  # Validate method parameter
   valid_methods <- c(
     "mean_groups",
     "fisher_score",
@@ -337,7 +335,6 @@ evaluate_metrics <- function(
     )
   }
 
-  # Validate correlation_threshold
   if (
     !is.numeric(correlation_threshold) ||
       correlation_threshold < 0 ||
@@ -356,18 +353,15 @@ evaluate_metrics <- function(
     cli::cli_abort("fill_correlated must be TRUE or FALSE")
   }
 
-  # Every metric that goes in should be accounted for at the end, so keep the
-  # full input set and a record of what leaves the pipeline at each step. The
-  # exclusion vectors are initialised here and filled in later
+  # Track each input metric through the pipeline so none disappear silently
+  # The exclusion vectors are populated as metrics leave
   all_metrics <- unique(metrics$metric)
   excluded_user <- character(0)
   excluded_incomplete <- character(0)
 
-  # The unsuffixed abbreviation behind each metric, so the ranking can report
-  # full names. At the class level `metric` carries the class id ("ai_1") and
-  # only `metric_name` holds the bare abbreviation; at the landscape level the
-  # two are identical. `metric_name` is not a required input column, so fall
-  # back to `metric` and let the name lookup warn if it cannot resolve them.
+  # Class-level metric identifiers include the class id, while metric_name holds
+  # the bare abbreviation used to look up full names; at landscape level they
+  # are identical, and metric is the fallback when metric_name is absent
   metric_bases <- if ("metric_name" %in% names(metrics)) {
     as.character(metrics$metric_name[match(all_metrics, metrics$metric)])
   } else {
@@ -385,9 +379,8 @@ evaluate_metrics <- function(
     level = level
   )
 
-  # Exclude metrics if specified
   if (!is.null(exclude_metrics)) {
-    # Only names actually present count as excluded
+    # Record only excluded names that occur in the input
     excluded_user <- intersect(exclude_metrics, all_metrics)
     metrics <- metrics[!metrics$metric %in% exclude_metrics, ]
     if (nrow(metrics) == 0) {
@@ -395,21 +388,14 @@ evaluate_metrics <- function(
     }
   }
 
-  # Exclude metrics that cannot be used for model training, which requires a
-  # complete predictor matrix. There are two ways a metric can be missing:
-  #   - the metric is calculated but undefined, giving an NA value (e.g. iji on
-  #     two-class landscapes)
-  #   - the metric is missing entirely for some landscapes. At the class level
-  #     landscapemetrics returns no row at all for a class that is absent from a
-  #     landscape.
+  # Training requires complete predictors; a metric is incomplete if its value
+  # is NA or if some landscapes have no row for it, as when a class is absent
   if (exclude_incomplete_metrics) {
-    # find metris names with NA values
     na_metrics <- metrics |>
       dplyr::filter(is.na(value)) |>
       dplyr::pull(metric) |>
       unique()
 
-    # find metrics that are not available for all landscapes
     n_landscapes <- dplyr::n_distinct(metrics$landscape_name)
     incomplete_metrics <- metrics |>
       dplyr::summarize(
@@ -455,19 +441,14 @@ evaluate_metrics <- function(
     }
   }
 
-  # Check patterns
   if (length(unique(metrics$pattern)) < 2) {
     cli::cli_abort(
       "At least two different landscape patterns are required for metric evaluation"
     )
   }
 
-  # Remove metrics without usable variation as they cannot be used to
-  # distinguish landscapes. The comparison is against a relative tolerance, not
-  # against zero: a metric that is constant in practice (e.g. total area across
-  # equally sized landscapes) can still have a very small variance like
-  # 1e-34 due to floating-point summation. Such small variance should not
-  # be considered and the metric should be excluded.
+  # Use a relative tolerance to exclude metrics whose apparent variation is
+  # only floating-point residue, such as variance near 1e-34
   excluded_zero_variance <- metrics |>
     dplyr::summarize(
       sd_value = sd(value, na.rm = TRUE),
@@ -484,17 +465,14 @@ evaluate_metrics <- function(
     )
   }
 
-  # Get ranked metrics. The ranking method returns the scores alongside the
-  # metric names; only the names are used for now.
   ranking_result <- rank_metrics_by_method(
     metrics = metrics,
     method = method
   )
   ranked_metrics <- ranking_result$ranking$metric
 
-  # A ranking method can discard metrics it cannot score, so it may return
-  # nothing at all. Fail here rather than further down with a message about
-  # internals the user never called.
+  # A ranking method can discard every metric it cannot score; report that here
+  # rather than failing later inside the selection helpers
   if (length(ranked_metrics) == 0) {
     cli::cli_abort(c(
       "No metrics could be ranked with {.arg method} = {.val {method}}.",
@@ -502,9 +480,8 @@ evaluate_metrics <- function(
     ))
   }
 
-  # Cap the selection only after all exclusions and ranking. Doing this earlier
-  # can leave fewer candidates than requested and make the correlation helper
-  # claim that it is filling slots even though no candidate remains to add.
+  # Cap only after exclusions and ranking so correlation filling sees the true
+  # number of available candidates
   num_metrics <- length(ranked_metrics)
   if (num_metrics < metrics_number) {
     cli::cli_warn(
@@ -513,15 +490,13 @@ evaluate_metrics <- function(
     metrics_number <- num_metrics
   }
 
-  # Verbose output
   if (verbose) {
     cli::cli_alert_info("Ranked metrics ({method}): {.val {ranked_metrics}}")
   }
 
   if (correlation_threshold >= 1) {
-    # No correlation filtering: the top of the ranking is the selection. The
-    # outcomes still have to be recorded, or the census would be half empty on
-    # this path.
+    # Without correlation filtering, record outcomes here to keep the metric
+    # census complete
     available_count <- min(length(ranked_metrics), metrics_number)
     top_metrics <- ranked_metrics[seq_len(available_count)]
     outcomes <- tibble::tibble(
@@ -534,7 +509,6 @@ evaluate_metrics <- function(
       correlated_with = NA_character_
     )
   } else {
-    # Select metrics with low correlation - messages handled inside function
     correlation_result <- select_metrics_correlation(
       metric_ranking = ranked_metrics,
       metrics = metrics,
@@ -547,9 +521,8 @@ evaluate_metrics <- function(
     outcomes <- correlation_result$outcomes
   }
 
-  # Collect what left the pipeline before ranking. The ranker contributes only
-  # for methods that can fail to score a metric; the others return no
-  # `excluded` element at all, which bind_rows() ignores.
+  # Collect pre-ranking outcomes; bind_rows ignores the absent excluded element
+  # from rankers that score every metric
   excluded <- dplyr::bind_rows(
     tibble::tibble(metric = excluded_user, outcome = "excluded_user"),
     tibble::tibble(
