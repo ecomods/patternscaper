@@ -1,12 +1,8 @@
-#' Create a Landscape with a Sharp Vegetation Boundary
-#'
+#' Create a Sharp Vegetation Boundary
 #'
 #' Parameters are documented on \code{\link{pattern_sharp}}.
 #'
-#' @return A landscape object with pattern "sharp" containing:
-#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
-#'   \item{pattern}{Character string "sharp"}
-#'   \item{params}{List of all input parameters used to generate the landscape}
+#' @return A landscape object with pattern \code{"sharp"}.
 #'
 #' @noRd
 create_landscape_sharp <- function(
@@ -20,13 +16,12 @@ create_landscape_sharp <- function(
   validate_boundary_position(boundary_position = boundary_position)
   validate_rotation(rotation = rotation)
 
-  # Calculate width and height of the actual landscape to produce
-  # In case of rotation, the landscape needs to be larger to avoid cropping pattern
+  # Pad rotated landscapes before cropping to avoid clipped corners
   rotation_scale_factor <- 1.5
   height_actual <- ifelse(rotation == 0, height, height * rotation_scale_factor)
   width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
-  # Convert position from proportion to row number
+  # Build the unrotated binary boundary
   boundary_row <- round(height_actual * boundary_position)
 
   # Create the landscape matrix
@@ -47,7 +42,7 @@ create_landscape_sharp <- function(
     )
   }
 
-  # Create and return landscape object
+  # Store the raster and its generation metadata.
   landscape(
     data = mat,
     pattern = "sharp",

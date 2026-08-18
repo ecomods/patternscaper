@@ -1,15 +1,10 @@
-#' Create a landscape with very dense vegetation
+#' Create Dense Random Vegetation
 #'
-#' Creates a landscape with dense vegetation cover using random distribution.
-#' This is a specialized wrapper around \code{\link{create_landscape_random}}
-#' with high vegetation proportions.
+#' Uses the \code{\link{create_landscape_random}} and assigns the \code{"dense"} pattern label.
 #'
 #' Parameters are documented on \code{\link{pattern_dense}}.
 #'
-#' @return A landscape object with pattern "dense" containing
-#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
-#'   \item{pattern}{Character string "dense"}
-#'   \item{params}{List of all input parameters used to generate the landscape}
+#' @return A landscape object with pattern \code{"dense"}.
 #'
 #' @noRd
 create_landscape_dense <- function(

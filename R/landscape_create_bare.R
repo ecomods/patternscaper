@@ -1,15 +1,10 @@
-#' Create a bare landscape with very sparse vegetation
+#' Create Sparse Random Vegetation
 #'
-#' Creates a landscape with sparse vegetation cover using random distribution.
-#' This is a specialized wrapper around \code{\link{create_landscape_random}}
-#' with low vegetation proportions.
+#' Uses the \code{\link{create_landscape_random}} and assigns the \code{"bare"} pattern label.
 #'
 #' Parameters are documented on \code{\link{pattern_bare}}.
 #'
-#' @return A landscape object with pattern "bare" containing.
-#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
-#'   \item{pattern}{Character string "bare"}
-#'   \item{params}{List of all input parameters used to generate the landscape}
+#' @return A landscape object with pattern \code{"bare"}.
 #'
 #' @noRd
 create_landscape_bare <- function(

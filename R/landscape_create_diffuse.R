@@ -1,13 +1,11 @@
-#' Create a Landscape with Diffuse Vegetation Boundary
+#' Create a Diffuse Vegetation Boundary
 #'
-#' Generates a binary landscape with a diffuse vegetation boundary where vegetation probability decreases with distance.
+#' Generates a binary landscape with a diffuse vegetation boundary where
+#' vegetation probability decreases with distance.
 #'
 #' Parameters are documented on \code{\link{pattern_diffuse}}.
 #'
-#' @return A landscape object with pattern "diffuse" containing:
-#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
-#'   \item{pattern}{Character string "diffuse"}
-#'   \item{params}{List of all input parameters used to generate the landscape}
+#' @return A landscape object with pattern \code{"diffuse"}.
 #'
 #' @noRd
 #' @importFrom cli cli_abort
@@ -19,7 +17,7 @@ create_landscape_diffuse <- function(
   steepness = 0.5,
   rotation = 0
 ) {
-  # Validate inputs
+  # Validate inputs.
   validate_dimensions(width = width, height = height)
   validate_boundary_position(boundary_position = boundary_position)
   validate_rotation(rotation = rotation)
@@ -31,8 +29,7 @@ create_landscape_diffuse <- function(
     ))
   }
 
-  # calculate width and height of the actual landscape to produce
-  # in case of rotation, the landscape needs to be larger
+  # Pad rotated landscapes before cropping to avoid clipped corners.
   rotation_scale_factor <- 1.5
   height_actual <- ifelse(rotation == 0, height, height * rotation_scale_factor)
   width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
@@ -49,18 +46,15 @@ create_landscape_diffuse <- function(
     # Ranges from -1 (top of image) to +1 (bottom of image)
     relative_pos <- (i - transition_center) / (height_actual * 0.5)
 
-    # Calculate probability for vegetation cover following a power curve:
-    # - Above vegetation boundary (relative_pos <= 0): prob = 1 (full vegetation cover)
-    # - Below vegetation boundary (relative_pos > 0): prob = 1 - (relative_pos)^steepness
-    #   * Lower steepness (e.g., 0.1): Higher exponent effect = sharper drop-off
-    #   * Higher steepness (e.g., 0.9): Lower exponent effect = gradual transition
+    # Above the boundary, vegetation probability is 1. Below it, a power
+    # curve gives sharper transitions at lower steepness values.
     if (relative_pos <= 0) {
       prob <- 1
     } else {
       prob <- max(0, 1 - (relative_pos)^steepness)
     }
 
-    # Apply probability to each cell in this row
+    # Draw cells independently within each row.
     for (j in 1:width_actual) {
       if (stats::runif(1) < prob) {
         mat[i, j] <- 1
@@ -78,7 +72,7 @@ create_landscape_diffuse <- function(
     )
   }
 
-  # Create and return landscape object
+  # Store the raster and its generation metadata.
   landscape(
     data = mat,
     pattern = "diffuse",

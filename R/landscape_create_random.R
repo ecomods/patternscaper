@@ -1,12 +1,8 @@
-#' Create a Binary Landscape with Randomly Distributed Vegetation
-#'
+#' Create Randomly Distributed Vegetation
 #'
 #' Parameters are documented on \code{\link{pattern_random}}.
 #'
-#' @return A landscape object with random pattern containing:
-#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
-#'   \item{pattern}{Character string "random"}
-#'   \item{params}{List of all input parameters used to generate the landscape}
+#' @return A landscape object with pattern \code{"random"}.
 #'
 #' @noRd
 #' @importFrom stats rbinom
@@ -15,10 +11,9 @@ create_landscape_random <- function(
   height = 100,
   veg_prob = 0.5
 ) {
-  # Validate common parameters
+  # Validate inputs.
   validate_dimensions(width = width, height = height)
 
-  # Validate veg_prob
   if (!is.numeric(veg_prob) || veg_prob < 0 || veg_prob > 1) {
     cli::cli_abort(c(
       "{.arg veg_prob} must be between 0 and 1.",
@@ -33,7 +28,7 @@ create_landscape_random <- function(
     ncol = width
   )
 
-  # Create and return landscape object
+  # Store the raster and its generation metadata.
   landscape(
     data = mat,
     pattern = "random",
