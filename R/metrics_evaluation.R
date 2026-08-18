@@ -48,8 +48,8 @@ new_metrics_evaluation <- function(
   method,
   params
 ) {
-  # Each metric leaves the pipeline exactly once, so the outcome sources must be
-  # disjoint. Overlapping keys would duplicate rows in the join below.
+  # Each metric leaves the pipeline once, so outcome sources must be disjoint
+  # Overlapping keys would duplicate rows in the join below
   all_outcomes <- dplyr::bind_rows(excluded, outcomes)
   if (anyDuplicated(all_outcomes$metric) > 0) {
     duplicated_metrics <- unique(
@@ -90,8 +90,7 @@ new_metrics_evaluation <- function(
     ) |>
     dplyr::arrange(rank, outcome, metric)
 
-  # A metric with no outcome means a pipeline step dropped it without recording
-  # why, which would make the census silently incomplete.
+  # A missing outcome means a pipeline step silently dropped a metric
   if (anyNA(ranking$outcome)) {
     unrecorded <- ranking$metric[is.na(ranking$outcome)]
     cli::cli_abort(c(
@@ -129,8 +128,8 @@ new_metrics_evaluation <- function(
 #' @family metrics
 #' @export
 print.metrics_evaluation <- function(x, ...) {
-  # cat() rather than cli::, so the summary goes to stdout like the package's
-  # other print methods; cli writes to the message stream.
+  # Use cat() so output goes to stdout like other print methods; cli uses the
+  # message stream
   cat(sprintf(
     "Metrics evaluation: %s [%d candidate metrics]\n",
     x$method,
@@ -770,7 +769,6 @@ select_metrics_correlation <- function(
   verbose = FALSE,
   fill_correlated = TRUE
 ) {
-  # Input validation
   if (!is.character(metric_ranking) || length(metric_ranking) == 0) {
     cli::cli_abort(
       "metric_ranking must be a non-empty character vector of metric names"
@@ -781,7 +779,7 @@ select_metrics_correlation <- function(
     cli::cli_abort("metrics_number must be a positive integer")
   }
 
-  # Calculate correlation between metrics
+  # Pairwise correlation matrix for the candidate metrics
   metrics_correlation <- metrics |>
     dplyr::select(landscape_name, metric, value) |>
     tidyr::pivot_wider(
@@ -791,16 +789,15 @@ select_metrics_correlation <- function(
     dplyr::select(-landscape_name) |>
     stats::cor(use = "pairwise.complete.obs")
 
-  # Initialize results. Every ranked metric ends up with an outcome. Metrics the
-  # loop never reaches keep the default, as do metrics missing from the
-  # correlation matrix, which cannot happen for data coming from the ranker.
+  # Default every metric to dropped; metrics not reached by the loop retain this
+  # outcome, including absent correlation rows that the ranker should prevent
   top_metrics <- character(0)
   outcome <- rep("dropped_below_cutoff", length(metric_ranking))
   clashes <- rep(NA_character_, length(metric_ranking))
   names(outcome) <- metric_ranking
   names(clashes) <- metric_ranking
 
-  # Select metrics with low correlation
+  # Select metrics in ranking order while respecting the correlation threshold
   for (current_metric in metric_ranking) {
     if (length(top_metrics) >= metrics_number) {
       break
@@ -811,7 +808,7 @@ select_metrics_correlation <- function(
       next
     }
 
-    # Skip if not in correlation matrix
+    # A metric without a correlation row cannot be assessed
     if (!current_metric %in% rownames(metrics_correlation)) {
       if (verbose) {
         cli::cli_alert_warning(
@@ -870,9 +867,8 @@ select_metrics_correlation <- function(
       filled <- additional_metrics[seq_len(needed_count)]
       outcome[filled] <- "selected_correlation_fill"
 
-      # Appended, so gap-filled metrics land at the end of the selection rather
-      # than at their position in the ranking. `selected` therefore preserves
-      # the order callers have always seen, which is not the ranking order.
+      # Append gap-filled metrics so selected retains its established
+      # caller-facing order rather than ranking order
       top_metrics <- c(top_metrics, filled)
 
       cli::cli_warn(c(

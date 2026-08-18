@@ -120,7 +120,6 @@ plot_metrics <- function(
   point_size = 1,
   point_alpha = 0.7
 ) {
-  # Validate metric_labels
   if (
     !is.character(metric_labels) ||
       length(metric_labels) != 1 ||
@@ -131,7 +130,6 @@ plot_metrics <- function(
     )
   }
 
-  # Validate label_wrap_width
   if (
     !is.null(label_wrap_width) &&
       (!is.numeric(label_wrap_width) ||
@@ -143,16 +141,14 @@ plot_metrics <- function(
     )
   }
 
-  # Validate pattern_order (type only; checked against the data further down)
   if (!is.null(pattern_order) && !is.character(pattern_order)) {
     cli::cli_abort(
       "pattern_order must be a character vector of pattern names"
     )
   }
 
-  # Validate jitter_seed. NA (fresh jitter each render) and NULL (use the
-  # current global stream) both mean something to position_jitter(), so both
-  # are passed through untouched.
+  # NA requests fresh jitter and NULL uses the current RNG stream, so pass both
+  # through to position_jitter()
   if (
     !is.null(jitter_seed) &&
       !(length(jitter_seed) == 1 &&
@@ -163,7 +159,6 @@ plot_metrics <- function(
     )
   }
 
-  # Validate jitter_width (0 disables jitter)
   if (
     !is.numeric(jitter_width) ||
       length(jitter_width) != 1 ||
@@ -175,7 +170,6 @@ plot_metrics <- function(
     )
   }
 
-  # Validate point_size
   if (
     !is.numeric(point_size) ||
       length(point_size) != 1 ||
@@ -187,7 +181,6 @@ plot_metrics <- function(
     )
   }
 
-  # Validate point_alpha
   if (
     !is.numeric(point_alpha) ||
       length(point_alpha) != 1 ||
@@ -200,14 +193,12 @@ plot_metrics <- function(
     )
   }
 
-  # Validate input data
   if (!is.data.frame(metrics)) {
     cli::cli_abort(
       "metrics must be a data frame from calculate_metrics()"
     )
   }
 
-  # Check required columns
   required_cols <- c("level", "pattern", "metric", "value")
   missing_cols <- setdiff(required_cols, names(metrics))
   if (length(missing_cols) > 0) {
@@ -216,7 +207,6 @@ plot_metrics <- function(
     )
   }
 
-  # Validate pattern_order against the patterns actually present in the data
   if (!is.null(pattern_order)) {
     available_patterns <- unique(metrics$pattern)
     missing_patterns <- setdiff(available_patterns, pattern_order)
@@ -253,10 +243,8 @@ plot_metrics <- function(
     cli::cli_warn(
       "The following metrics are not in the data and will be ignored: {.val {invalid_metrics}}"
     )
-    # Remove invalid metrics from selected_metrics
     selected_metrics <- setdiff(selected_metrics, invalid_metrics)
 
-    # Check if any valid metrics remain
     if (length(selected_metrics) == 0) {
       cli::cli_abort(
         "No valid metrics remaining after filtering. Cannot create plot."
@@ -310,7 +298,6 @@ plot_metrics <- function(
     6 # 2 rows x 3 columns
   }
 
-  # Apply metric limit unless force is TRUE
   if (length(selected_metrics) > max_metrics && !force) {
     cli::cli_warn(c(
       "With {n_patterns} pattern{?s}, limiting to {max_metrics} of {length(selected_metrics)} requested metrics for readability.",
@@ -328,9 +315,8 @@ plot_metrics <- function(
     )
   }
 
-  # Prepare plot data. Patterns are ordered alphabetically unless the caller
-  # supplies pattern_order; the first level is drawn at the bottom of the
-  # axis after coord_flip().
+  # coord_flip() draws the first pattern level at the bottom; the default order
+  # is alphabetical
   pattern_levels <- if (!is.null(pattern_order)) {
     pattern_order
   } else {
@@ -343,7 +329,6 @@ plot_metrics <- function(
       pattern = factor(pattern, levels = pattern_levels)
     )
 
-  # Create base plot based on level
   if (level == "landscape") {
     p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = pattern, y = value))
   } else if (level == "class") {
@@ -355,20 +340,14 @@ plot_metrics <- function(
     )
   }
 
-  # Determine facet labeller based on metric_labels. Full metric names can be
-  # considerably longer than abbreviations, so (unless the user supplies
-  # label_wrap_width explicitly) wrap width is approximated from the number
-  # of columns facet_wrap() will actually use (more columns -> less
-  # horizontal room per panel -> narrower wrap width). This is only a rough
-  # approximation since it wraps by character count, not rendered text width.
-  # The constants were chosen so the package's default metric selection
-  # (10 metrics, i.e. a 4-column grid) wraps to at most 2 lines.
+  # Estimate wrap width from the facet columns when the user does not set it
+  # Character count only approximates rendered width; the constants keep the
+  # default four-column grid near two lines
   facet_labeller <- if (metric_labels == "name") {
     wrap_width <- label_wrap_width
     if (is.null(wrap_width)) {
-      # ggplot2:::wrap_dims() takes the *first* element of n2mfrow() as the
-      # column count (it swaps them relative to n2mfrow's own nr/nc naming),
-      # so [1] is deliberate here and matches what facet_wrap() will draw.
+      # ggplot2:::wrap_dims() uses the first n2mfrow() element as its column
+      # count, so [1] matches facet_wrap()
       ncol <- grDevices::n2mfrow(length(selected_metrics))[1]
       wrap_width <- max(15, round(90 / ncol))
     }
@@ -377,7 +356,6 @@ plot_metrics <- function(
     ggplot2::label_value
   }
 
-  # Build complete plot
   p <- p +
     ggplot2::geom_boxplot() +
     ggplot2::geom_jitter(
@@ -400,8 +378,6 @@ plot_metrics <- function(
       x = "Landscape Pattern",
       y = "Metric Value"
     )
-
-  # Adjust theme
 
   p <- p + ggplot2::theme_bw()
 

@@ -90,7 +90,6 @@ plot_classified_landscapes <- function(
     cli::cli_abort("{.arg score_note} must be a single logical value")
   }
 
-  # Check if classification has the required elements
   if (
     !is.data.frame(classification) ||
       !all(
@@ -105,25 +104,20 @@ plot_classified_landscapes <- function(
     ))
   }
 
-  # Validate input landscapes: must be a non-empty list of landscape objects
-  # First check if it's a list at all
   if (!is.list(landscapes)) {
     cli::cli_abort("landscapes must be a list of landscape objects")
   }
 
-  # Then check if it's a single landscape object (not a list of landscapes)
   if (is_landscape(landscapes)) {
     cli::cli_abort(
       "landscapes must be a list of landscape objects, not a single landscape"
     )
   }
 
-  # Then check if list is empty
   if (length(landscapes) == 0) {
     cli::cli_abort("landscapes must contain at least one landscape to plot")
   }
 
-  # Finally check if all elements are landscape objects
   valid_landscapes <- vapply(landscapes, is_landscape, logical(1))
   if (any(!valid_landscapes)) {
     invalid_indices <- which(!valid_landscapes)
@@ -133,8 +127,6 @@ plot_classified_landscapes <- function(
     ))
   }
 
-  # Validate landscape count matches classification results
-  # Warn the user i this is not the case
   if (length(landscapes) != nrow(classification)) {
     cli::cli_warn(c(
       "Length mismatch between landscapes and classification results.",
@@ -144,7 +136,6 @@ plot_classified_landscapes <- function(
     ))
   }
 
-  # Validate all landscape_id values are valid indices
   invalid_ids <- classification$landscape_id[
     classification$landscape_id < 1 |
       classification$landscape_id > length(landscapes)
@@ -158,12 +149,10 @@ plot_classified_landscapes <- function(
     ))
   }
 
-  # If only_misclassified is TRUE, filter to only misclassified landscapes
   if (only_misclassified) {
     classification <- classification |>
-      # A landscape with no prediction is not a misclassification, and without a
-      # known true class one is undefined. Both forms of "true class unknown"
-      # are excluded, matching how apply_*() picks the rows it scores.
+      # Missing predictions are not misclassifications, and misclassification
+      # is undefined without a true class, matching the rows apply_*() scores
       dplyr::filter(
         !is.na(predicted_class) &
           !is.na(actual_class) &
@@ -171,8 +160,6 @@ plot_classified_landscapes <- function(
           predicted_class != actual_class
       )
     if (nrow(classification) == 0) {
-      # If there are no misclassified landscapes, return a placeholder
-      # and inform the user.
       cli::cli_inform(c(
         "i" = "All landscapes classified correctly - nothing to plot.",
         "i" = "Set {.code only_misclassified = FALSE} to plot all landscapes."
@@ -187,15 +174,13 @@ plot_classified_landscapes <- function(
         ) +
         ggplot2::theme_void()
 
-      # Wrapped so the return type is a patchwork object either way. Returns
-      # before the score_note caption, which would make no sense on an empty
-      # plot.
+      # Preserve the patchwork return type; the score caption does not apply to
+      # an empty plot
       return(patchwork::wrap_plots(placeholder))
     }
   }
 
-  # Applied here, after the only_misclassified filter, so the index refers to
-  # the landscapes actually being plotted.
+  # Apply after filtering so the index refers to the landscapes being plotted
   if (!is.null(subset_index)) {
     if (!is.numeric(subset_index) || anyNA(subset_index)) {
       cli::cli_abort(
@@ -218,21 +203,17 @@ plot_classified_landscapes <- function(
     classification <- classification[subset_index, , drop = FALSE]
   }
 
-  # Add plot titles as a column to the validation results
   classification <- classification |>
     dplyr::mutate(
       title = dplyr::case_when(
-        # Landscape could not be classified: apply_metric_model() returns NA
-        # when a required metric was unavailable for it. Must be matched before
-        # the equality branches, which would both give NA and fall through.
-        # Worded as a missing prediction.
+        # Match missing predictions before equality branches where NA falls
+        # through
         is.na(predicted_class) ~ dplyr::if_else(
           is.na(actual_class) | actual_class == "unclassified",
           "No prediction",
           paste0("No prediction<br>Actual: ", actual_class)
         ),
-        # Unlabeled input (true class unknown, i.e. NA or "unclassified"):
-        # show a predicted-only title.
+        # Unknown true classes get a predicted-only title
         is.na(actual_class) | actual_class == "unclassified" ~
           paste0(
             predicted_class,
@@ -264,26 +245,20 @@ plot_classified_landscapes <- function(
       )
     )
 
-  # Subset the landscapes that should be plotted using the index of the landscape
-  # in the validation results
   landscapes_to_plot <- landscapes[classification$landscape_id]
 
-  # Create plots for each landscape
   plots <- plot_landscapes(
     landscapes = landscapes_to_plot,
     titles = classification$title,
     ...
   )
 
-  # One caption for the whole composite rather than a word in every panel
-  # title, which does not scale to a multi-panel figure. The bracketed number
-  # is easily misread as a calibrated probability; see the "Interpreting the
-  # class scores" section of `apply_metric_model()`.
+  # A single caption scales better than repeating the note in every panel and
+  # prevents the bracketed score being read as a calibrated probability
   if (score_note) {
     plots <- plots +
       patchwork::plot_annotation(
         caption = "Number in brackets: score of the predicted class (not a calibrated probability)",
-        # left align caption
         theme = ggplot2::theme(
           plot.caption = ggplot2::element_text(hjust = 0)
         )
