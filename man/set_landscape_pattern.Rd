@@ -2,20 +2,20 @@
 % Please edit documentation in R/landscape_utils.R
 \name{set_landscape_pattern}
 \alias{set_landscape_pattern}
-\title{Set Landscape pattern}
+\title{Set a Landscape Pattern}
 \usage{
 set_landscape_pattern(x, pattern)
 }
 \arguments{
-\item{x}{A landscape object}
+\item{x}{A landscape object.}
 
-\item{pattern}{Character string specifying the new pattern}
+\item{pattern}{Character scalar. New pattern label.}
 }
 \value{
-The landscape object with updated pattern
+The landscape object with its updated pattern label.
 }
 \description{
-Sets the pattern attribute of a landscape object.
+Replaces the pattern label stored in a landscape object.
 }
 \examples{
 # Single landscape

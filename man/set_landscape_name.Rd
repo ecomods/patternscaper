@@ -2,20 +2,20 @@
 % Please edit documentation in R/landscape_utils.R
 \name{set_landscape_name}
 \alias{set_landscape_name}
-\title{Set Landscape Name}
+\title{Set a Landscape Name}
 \usage{
 set_landscape_name(x, name)
 }
 \arguments{
-\item{x}{A landscape object}
+\item{x}{A landscape object.}
 
-\item{name}{Character string specifying the new name}
+\item{name}{Character scalar. New landscape name.}
 }
 \value{
-The landscape object with updated name
+The landscape object with its updated name.
 }
 \description{
-Sets the name attribute of a landscape object.
+Replaces the name stored in a landscape object.
 }
 \examples{
 # Single landscape

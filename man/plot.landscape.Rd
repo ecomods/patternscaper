@@ -2,25 +2,24 @@
 % Please edit documentation in R/landscape_methods.R
 \name{plot.landscape}
 \alias{plot.landscape}
-\title{Plot method for landscape objects}
+\title{Plot a Landscape Object}
 \usage{
 \method{plot}{landscape}(x, ...)
 }
 \arguments{
 \item{x}{A landscape object created by \code{\link{landscape}}.}
 
-\item{...}{Additional arguments passed to ggplot2 functions.}
+\item{...}{Unused.}
 }
 \value{
-A ggplot2 object representing the landscape data.
+A ggplot2 object.
 }
 \description{
-Creates a basic ggplot2 visualization of a landscape object.
+Plots a landscape raster as a minimal ggplot2 object.
 }
 \details{
-This function creates a minimal ggplot2 visualization of the landscape raster data.
-The returned plot can be further customized by adding ggplot2 elements or by using
-the \code{\link{plot_landscapes}} function for higher-level customization.
+Add ggplot2 layers directly to the result, or use
+\code{\link{plot_landscapes}} for titles, legends, and multi-panel layouts.
 }
 \examples{
 # Create a landscape (0 = bare ground, 1 = vegetation)

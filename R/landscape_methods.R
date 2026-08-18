@@ -1,22 +1,12 @@
-#' Print a landscape object
+#' Print a Landscape Object
 #'
-#' Provides a concise summary of a landscape object, including its name,
-#' pattern, dimensions, spatial properties, value range, and parameters.
+#' Prints the landscape's name, pattern, dimensions, spatial properties, value
+#' range, missing-value count, and generation parameters.
 #'
 #' @param x A landscape object created by \code{\link{landscape}}.
-#' @param ... Additional arguments (currently unused).
+#' @param ... Unused.
 #'
 #' @return The input landscape object \code{x}, returned invisibly.
-#'
-#' @details
-#' The print method displays:
-#' \itemize{
-#'   \item Landscape name and pattern
-#'   \item Dimensions (rows × columns and total cells)
-#'   \item Resolution and spatial extent
-#'   \item Value range (min/max) and count of NA values
-#'   \item Parameters used to create the landscape (if available)
-#' }
 #'
 #' @examples
 #' # Create a landscape (0 = bare ground, 1 = vegetation)
@@ -92,19 +82,18 @@ print.landscape <- function(x, ...) {
   invisible(x)
 }
 
-#' Plot method for landscape objects
+#' Plot a Landscape Object
 #'
-#' Creates a basic ggplot2 visualization of a landscape object.
+#' Plots a landscape object as a ggplot2.
 #'
 #' @param x A landscape object created by \code{\link{landscape}}.
-#' @param ... Additional arguments passed to ggplot2 functions.
+#' @param ... Must be empty.
 #'
-#' @return A ggplot2 object representing the landscape data.
+#' @return A ggplot2 object.
 #'
 #' @details
-#' This function creates a minimal ggplot2 visualization of the landscape raster data.
-#' The returned plot can be further customized by adding ggplot2 elements or by using
-#' the \code{\link{plot_landscapes}} function for higher-level customization.
+#' Add ggplot2 layers directly to the result, or use
+#' \code{\link{plot_landscapes}} for titles, legends, and multi-panel layouts.
 #'
 #' @examples
 #' # Create a landscape (0 = bare ground, 1 = vegetation)

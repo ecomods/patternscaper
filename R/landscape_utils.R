@@ -25,13 +25,13 @@ matrix_to_raster <- function(
   return(raster)
 }
 
-#' Set Landscape Name
+#' Set a Landscape Name
 #'
-#' Sets the name attribute of a landscape object.
+#' Replaces the name stored in a landscape object.
 #'
-#' @param x A landscape object
-#' @param name Character string specifying the new name
-#' @return The landscape object with updated name
+#' @param x A landscape object.
+#' @param name Character. New landscape name to store.
+#' @return The landscape object with its updated name.
 #' @examples
 #' # Single landscape
 #' landscape <- create_landscape("sharp", width = 10, height = 10)
@@ -60,13 +60,13 @@ set_landscape_name <- function(x, name) {
   return(x)
 }
 
-#' Set Landscape pattern
+#' Set a Landscape Pattern
 #'
-#' Sets the pattern attribute of a landscape object.
+#' Replaces the pattern label stored in a landscape object.
 #'
-#' @param x A landscape object
-#' @param pattern Character string specifying the new pattern
-#' @return The landscape object with updated pattern
+#' @param x A landscape object.
+#' @param pattern Character. New pattern label to store.
+#' @return The landscape object with its updated pattern label.
 #' @examples
 #' # Single landscape
 #' landscape <- create_landscape("sharp", width = 10, height = 10)

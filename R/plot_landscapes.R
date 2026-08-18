@@ -93,40 +93,34 @@ plot_single_landscape <- function(
 
 #' Plot One or More Landscapes
 #'
-#' Creates a plot of a single landscape, or a grid of multiple landscape
-#' plots.
+#' Plots one landscape or arranges several landscape plots in a grid.
 #'
-#' @param landscapes A single landscape object, or a list of landscape
-#'     objects to plot. E.g. created by \code{\link{create_landscape}} or
-#'     \code{\link{create_landscapes}}.
-#' @param titles Character. Controls the plot titles:
-#'        - "name": uses only the landscape name
-#'        - "pattern": uses only the landscape pattern
-#'        - "both": uses "name (pattern)" format
-#'        - "none": no title
-#'        - A character vector with custom titles for each landscape. If providing
-#'        `subset_index`, ensure titles match the subset length.
-#'        Default is "pattern"
-#' @param show_legend Logical. Whether to show a single combined legend (default: TRUE).
-#' @param legend_title Character. Title for the legend (default: "Value").
-#' @param ncol Integer. Number of columns in the plot grid (default: NULL).
-#' @param max_landscapes Integer. Maximum number of landscapes to plot (default: 36).
-#'     Plotting more than 36 landscapes (6x6 grid) is not recommended.
-#' @param force Logical. Override max_landscapes limit (default: FALSE).
-#' @param subset_index Integer vector. Indices of landscapes to plot.
-#'     Can be used to plot specific landscapes or change plot order (default: NULL).
+#' @param landscapes A landscape object or a list of landscape objects, such as
+#'     those returned by \code{\link{create_landscape}},
+#'     \code{\link{create_landscapes}}, or \code{\link{landscape}}.
+#' @param titles Character. One of "name", "pattern", "both", "none", a single
+#'     custom title, or one custom title per landscape (default:
+#'     "pattern"). A single custom title is repeated with a warning when several
+#'     landscapes are plotted. With \code{subset_index}, a vector of custom
+#'     titles must match the subset length.
+#' @param show_legend Logical. Show one combined legend (default: TRUE).
+#' @param legend_title Character. Legend title (default: "Value").
+#' @param ncol Integer. Number of grid columns (default: NULL).
+#' @param max_landscapes Integer. Maximum number of landscapes shown unless
+#'     \code{force = TRUE} (default: 36).
+#' @param force Logical. Plot more than \code{max_landscapes} landscapes
+#'     (default: FALSE).
+#' @param subset_index Integer vector. Indices of the \code{landscapes} to plot,
+#'      in the requested order (default: NULL for plotting all landscapes).
 #'
 #' @return A patchwork object combining one or more landscape plots.
 #' @details
-#' To add \pkg{ggplot2} elements (themes, scales, etc.) to every panel of the
-#' result, use \code{&} rather than \code{+} (e.g.
-#' \code{plot_landscapes(landscapes) & ggplot2::theme_dark()}): with more than
-#' one landscape, \code{+} only modifies the last panel, while \code{&}
-#' applies to all of them. For a single landscape the two operators happen to
-#' give the same result, but using \code{&} consistently avoids surprises if
-#' more landscapes are added later.
+#' Use \code{&} to add \pkg{ggplot2} elements to every panel, for example
+#' \code{plot_landscapes(landscapes) & ggplot2::theme_dark()}. With multiple
+#' landscapes, \code{+} modifies only the last panel.
 #' @family visualization
-#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}}
+#' @seealso \code{\link{create_landscape}}, \code{\link{create_landscapes}},
+#'     \code{\link{landscape}}
 #' @importFrom patchwork wrap_plots plot_layout
 #' @examples
 #' # Plot a single landscape

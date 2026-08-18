@@ -1,5 +1,5 @@
 ---
-title: "Importing user-defined landscapes"
+title: "Import user-defined landscapes"
 vignette: >
   %\VignetteIndexEntry{importing-landscapes}
   %\VignetteEngine{quarto::html}
@@ -10,12 +10,12 @@ knitr:
     comment: '#>'
 ---
 
-In addition to using landscapes generated with the functions in `patternscaper`, you can also import your own landscapes to use them for training or classification.
-These can be landscapes created manually as matrices or rasters, or landscapes read in from files (e.g. from classified remote sensing images).
+Import matrices or rasters as training or classification data. These can be
+created manually or read from files, such as classified remote-sensing images or model output.
 
-Please note that right now, the pixel workflow supports one raster layer with
-categorical cover classes represented by numeric whole-number codes. Text labels
-are not supported. The codes do not need to start at zero or be consecutive.
+The pixel workflow accepts one raster layer with categorical cover classes
+represented by numeric whole-number codes. Text labels are not supported. The
+codes need not start at zero or be consecutive.
 
 ```{r}
 #| label: setup
@@ -24,7 +24,7 @@ library(patternscaper)
 
 All functions in `patternscaper` expect landscapes to be a `landscape` object or a list of `landscape` objects. You can convert your own landscapes to `landscape` objects using the `landscape()` function.
 
-You can convert landscapes from a matrix or a `SpatRaster` (provided from the
+You can convert landscapes from a matrix or a `SpatRaster` (from the
 [`terra` R package](https://rspatial.github.io/terra/index.html)).
 
 ```{r}
@@ -40,19 +40,18 @@ landscape_matrix <- matrix(
 landscape_raster <- terra::rast(landscape_matrix)
 ```
 
-For example, the values `1`, `2`, and `3` can represent forest, grassland, and
-water. The pixel workflow treats these as names rather than quantities by
+For example, `1`, `2`, and `3` can represent forest, grassland, and water. The
+pixel workflow treats these codes as categories rather than quantities by
 converting each value to a separate binary channel. Training and application
 rasters must use the same code for the same land-cover category.
 
-To convert these to `landscape` objects, use the `landscape()` function.
-The landscape object contains metadata about the landscape, such as its name and pattern.
-By default, the `name` is set to `"unnamed"` and the `pattern` to `"unclassified"`.
-
-You can provide name and pattern when converting the landscape.
+The resulting object stores the raster with its name and pattern metadata. Both
+default to `NA` and can be set during conversion. When printed, missing values
+are shown as `"unnamed"` and `"unclassified"`.
 
 :::{.callout-note}
-Providing a landscape pattern is only necessary if you want to use the landscape for training a model. If you want to classify landscapes without known patterns, you can leave the pattern as `"unclassified"`.
+A known pattern label is needed for model training, but not for classification.
+Leave an unknown pattern as `NA`. `"unclassified"` is also treated as unknown.
 :::
 
 ```{r }
@@ -78,13 +77,11 @@ Printing a landscape object shows its properties:
 landscape_object_matrix
 ```
 
-## Bulk-converting multiple landscapes
+## Convert multiple landscapes
 
-If you have multiple landscapes to convert, you can use use `lapply` or the `pmap` function from the [`purrr` package](https://purrr.tidyverse.org/) to apply the `landscape()` function to each landscape in a list. 
-
-Below you find an example of bulk-converting multiple matrices to landscape objects and
-setting their names and patterns accordingly.
-
+Use `lapply()` or `purrr::pmap()` to convert a
+list of landscapes. `pmap()` is useful when names and patterns are supplied as
+parallel vectors.
 
 ```{r}
 #| label: bulk-convert

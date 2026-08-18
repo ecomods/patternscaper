@@ -16,48 +16,41 @@ plot_landscapes(
 )
 }
 \arguments{
-\item{landscapes}{A single landscape object, or a list of landscape
-objects to plot. E.g. created by \code{\link{create_landscape}} or
+\item{landscapes}{A landscape object or a list of landscape objects, such as
+those returned by \code{\link{create_landscape}} or
 \code{\link{create_landscapes}}.}
 
-\item{titles}{Character. Controls the plot titles:
-- "name": uses only the landscape name
-- "pattern": uses only the landscape pattern
-- "both": uses "name (pattern)" format
-- "none": no title
-- A character vector with custom titles for each landscape. If providing
-`subset_index`, ensure titles match the subset length.
-Default is "pattern"}
+\item{titles}{Character. Either "name", "pattern", "both", "none", one
+custom title, or one custom title per plotted landscape (default:
+"pattern"). A single custom title is repeated with a warning when several
+landscapes are plotted. With \code{subset_index}, a vector of custom
+titles must match the subset length.}
 
-\item{show_legend}{Logical. Whether to show a single combined legend (default: TRUE).}
+\item{show_legend}{Logical. Show one combined legend (default: TRUE).}
 
-\item{legend_title}{Character. Title for the legend (default: "Value").}
+\item{legend_title}{Character. Legend title (default: "Value").}
 
-\item{ncol}{Integer. Number of columns in the plot grid (default: NULL).}
+\item{ncol}{Integer. Number of grid columns (default: NULL).}
 
-\item{max_landscapes}{Integer. Maximum number of landscapes to plot (default: 36).
-Plotting more than 36 landscapes (6x6 grid) is not recommended.}
+\item{max_landscapes}{Integer. Maximum number of landscapes shown unless
+\code{force = TRUE} (default: 36).}
 
-\item{force}{Logical. Override max_landscapes limit (default: FALSE).}
+\item{force}{Logical. Plot more than \code{max_landscapes} landscapes
+(default: FALSE).}
 
-\item{subset_index}{Integer vector. Indices of landscapes to plot.
-Can be used to plot specific landscapes or change plot order (default: NULL).}
+\item{subset_index}{Integer vector. Indices to plot, in the requested order
+(default: NULL for all landscapes).}
 }
 \value{
 A patchwork object combining one or more landscape plots.
 }
 \description{
-Creates a plot of a single landscape, or a grid of multiple landscape
-plots.
+Plots one landscape or arranges several landscape plots in a grid.
 }
 \details{
-To add \pkg{ggplot2} elements (themes, scales, etc.) to every panel of the
-result, use \code{&} rather than \code{+} (e.g.
-\code{plot_landscapes(landscapes) & ggplot2::theme_dark()}): with more than
-one landscape, \code{+} only modifies the last panel, while \code{&}
-applies to all of them. For a single landscape the two operators happen to
-give the same result, but using \code{&} consistently avoids surprises if
-more landscapes are added later.
+Use \code{&} to add \pkg{ggplot2} elements to every panel, for example
+\code{plot_landscapes(landscapes) & ggplot2::theme_dark()}. With multiple
+landscapes, \code{+} modifies only the last panel.
 }
 \examples{
 # Plot a single landscape

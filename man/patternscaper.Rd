@@ -12,7 +12,7 @@ patterns.
 
 The package supports two classification workflows:
 \itemize{
-  \item Pixel-based classification with convolutional neural networks via
+  \item Pixel-based classification with convolutional neural networks using
     \pkg{keras3} (see \code{\link{train_pixel_model}})
   \item Metrics-based classification with landscape metrics from
     \pkg{landscapemetrics} as neural-network inputs (see

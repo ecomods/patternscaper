@@ -2,31 +2,21 @@
 % Please edit documentation in R/landscape_methods.R
 \name{print.landscape}
 \alias{print.landscape}
-\title{Print a landscape object}
+\title{Print a Landscape Object}
 \usage{
 \method{print}{landscape}(x, ...)
 }
 \arguments{
 \item{x}{A landscape object created by \code{\link{landscape}}.}
 
-\item{...}{Additional arguments (currently unused).}
+\item{...}{Unused.}
 }
 \value{
 The input landscape object \code{x}, returned invisibly.
 }
 \description{
-Provides a concise summary of a landscape object, including its name,
-pattern, dimensions, spatial properties, value range, and parameters.
-}
-\details{
-The print method displays:
-\itemize{
-  \item Landscape name and pattern
-  \item Dimensions (rows × columns and total cells)
-  \item Resolution and spatial extent
-  \item Value range (min/max) and count of NA values
-  \item Parameters used to create the landscape (if available)
-}
+Prints the landscape's name, pattern, dimensions, spatial properties, value
+range, missing-value count, and generation parameters.
 }
 \examples{
 # Create a landscape (0 = bare ground, 1 = vegetation)

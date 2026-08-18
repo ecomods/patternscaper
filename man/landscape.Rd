@@ -2,29 +2,28 @@
 % Please edit documentation in R/landscape_class.R
 \name{landscape}
 \alias{landscape}
-\title{Create a landscape object}
+\title{Create a Landscape Object}
 \usage{
 landscape(data, pattern = NA_character_, name = NA_character_, params = NULL)
 }
 \arguments{
-\item{data}{Matrix or SpatRaster containing landscape data}
+\item{data}{Matrix or \code{SpatRaster} containing landscape data.}
 
-\item{pattern}{Character string specifying the landscape pattern if known (default NA).}
+\item{pattern}{Character. Known pattern label, or \code{NA} if unknown
+(default).}
 
-\item{name}{Character string specifying the landscape name to distinguish it from other
-landscapes (default NA).}
+\item{name}{Character. Landscape name, or \code{NA} if unnamed (default).}
 
-\item{params}{List of parameters used to create the landscape. Can be empty but
-will be filled if landscapes are created automatically by the
-\code{\link{create_landscape}} or the \code{\link{create_landscapes}} function.
-Default is NULL.}
+\item{params}{List. Parameters used to generate the landscape (default: NULL).
+\code{\link{create_landscape}} and \code{\link{create_landscapes}} fill
+this automatically.}
 }
 \value{
-A landscape object
+A landscape object containing the data and metadata.
 }
 \description{
-Converts a matrix or SpatRaster into a landscape object that can be used
-with landscape analysis functions.
+Wraps a matrix or SpatRaster with pattern, name, and generation-parameter
+metadata for use by patternscaper functions.
 }
 \examples{
 # Create from a binary matrix (0 = bare ground, 1 = vegetation)

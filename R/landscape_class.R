@@ -26,19 +26,19 @@ new_landscape <- function(
   )
 }
 
-#' Create a landscape object
+#' Create a Landscape Object
 #'
-#' Converts a matrix or SpatRaster into a landscape object that can be used
-#' with landscape analysis functions.
-#' @param data Matrix or SpatRaster containing landscape data
-#' @param pattern Character string specifying the landscape pattern if known (default NA).
-#' @param name Character string specifying the landscape name to distinguish it from other
-#'     landscapes (default NA).
-#' @param params List of parameters used to create the landscape. Can be empty but
-#'     will be filled if landscapes are created automatically by the
-#'     \code{\link{create_landscape}} or the \code{\link{create_landscapes}} function.
-#'     Default is NULL.
-#' @return A landscape object
+#' Wraps a matrix or SpatRaster with pattern, name, and generation-parameter
+#' metadata into a landscape object that can be used by other patternscaper
+#' functions.
+#' @param data Matrix or \code{SpatRaster} containing landscape data.
+#' @param pattern Character. Known pattern label, or \code{NA} if unknown
+#'     (default).
+#' @param name Character. Landscape name, or \code{NA} if unnamed (default).
+#' @param params List. Parameters used to generate the landscape (default: NULL).
+#'     \code{\link{create_landscape}} and \code{\link{create_landscapes}} fill
+#'     this automatically.
+#' @return A landscape object containing the data and metadata.
 #' @examples
 #' # Create from a binary matrix (0 = bare ground, 1 = vegetation)
 #' mat <- matrix(rbinom(100, 1, 0.5), nrow = 10, ncol = 10)
