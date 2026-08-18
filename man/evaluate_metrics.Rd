@@ -11,7 +11,8 @@ evaluate_metrics(
   exclude_incomplete_metrics = TRUE,
   exclude_metrics = NULL,
   correlation_threshold = 0.7,
-  verbose = FALSE
+  verbose = FALSE,
+  fill_correlated = TRUE
 )
 }
 \arguments{
@@ -34,18 +35,29 @@ they appear in the `metric` column (default: NULL). Use
 \code{\link[landscapemetrics]{list_lsm}} to look up what an abbreviation
 stands for.}
 
-\item{correlation_threshold}{Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
-If you do not want to filter based on correlation, set to 1.}
+\item{correlation_threshold}{Numeric. Maximum allowed absolute Pearson
+correlation between selected metrics (default: 0.7). Correlations are
+calculated across all landscapes and pattern types. Candidate metrics are
+considered in ranking order. A candidate passes the filter only if its
+absolute correlation with every already selected metric does not exceed
+the threshold. Set to 1 to disable correlation filtering.}
 
 \item{verbose}{Logical. Whether to print detailed messages on excluded metrics
 or just a summary (default: FALSE).}
+
+\item{fill_correlated}{Logical. If `TRUE` (default), fill any gap between the
+number of metrics that pass the correlation filter and `metrics_number`
+with the highest-ranked correlated metrics, and warn. If `FALSE`, return
+only metrics that pass the filter, which may be fewer than requested.}
 }
 \value{
 An object of class `metrics_evaluation`, a list with elements:
   \describe{
     \item{\code{selected}}{Character vector. Names of metrics that best
-      discriminate between pattern types. Metrics added to fill a correlation
-      gap come last rather than at their rank position.}
+      discriminate between pattern types. With `fill_correlated = TRUE`,
+      metrics added to fill a correlation gap come last rather than at their
+      rank position. With `fill_correlated = FALSE`, the vector may contain
+      fewer than `metrics_number` names.}
     \item{\code{ranking}}{tibble. One row per metric passed in, with its score
       and outcome. See 'The ranking table' below.}
     \item{\code{method}}{Character. The ranking method used.}

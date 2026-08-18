@@ -80,6 +80,12 @@ test_that("evaluate_metrics validates input correctly", {
     evaluate_metrics(valid_metrics, correlation_threshold = 1.5),
     "correlation_threshold must be a numeric value between 0 and 1"
   )
+
+  # Invalid fill_correlated
+  expect_error(
+    evaluate_metrics(valid_metrics, fill_correlated = NA),
+    "fill_correlated must be TRUE or FALSE"
+  )
 })
 
 test_that("evaluate_metrics validates the metrics level", {
@@ -179,13 +185,29 @@ test_that("evaluate_metrics handles NA values correctly", {
   expect_equal(outcome_of(result, "metric_2"), "excluded_incomplete")
   expect_false(any(c("metric_1", "metric_2") %in% result$selected))
 
-  # Should keep NA metrics if specified
-  result_with_na <- evaluate_metrics(
-    metrics,
-    metrics_number = 5,
-    exclude_incomplete_metrics = FALSE
+  # Should keep NA metrics if specified. The two all-NA metrics still cannot be
+  # ranked, so the selection is capped after preprocessing rather than claiming
+  # to fill a correlation gap with an empty set.
+  warnings <- character(0)
+  result_with_na <- withCallingHandlers(
+    evaluate_metrics(
+      metrics,
+      metrics_number = 5,
+      exclude_incomplete_metrics = FALSE
+    ),
+    warning = function(cnd) {
+      warnings <<- c(warnings, conditionMessage(cnd))
+      invokeRestart("muffleWarning")
+    }
   )
   expect_type(result_with_na$selected, "character")
+  expect_length(result_with_na$selected, 4)
+  expect_true(any(grepl(
+    "Only 4 metrics available, returning all instead of requested 5",
+    warnings,
+    fixed = TRUE
+  )))
+  expect_false(any(grepl("Filling", warnings, fixed = TRUE)))
 })
 
 test_that("evaluate_metrics drops metrics that are constant across landscapes", {
@@ -378,7 +400,7 @@ test_that("correlation filtering reduces to uncorrelated metrics if threshold no
   ))
 })
 
-test_that("gap-filled metrics are appended to the end of the selection", {
+test_that("correlation fill can be retained or disabled", {
   # Two correlated pairs: metric_b duplicates metric_a (shifted, so the
   # correlation is 1 but mean_groups differs, since it divides by the group
   # mean), and metric_d duplicates metric_c. Only two metrics can be mutually
@@ -424,6 +446,25 @@ test_that("gap-filled metrics are appended to the end of the selection", {
     result$ranking$correlated_with[result$ranking$metric == "metric_d"],
     "metric_c"
   )
+  expect_true(result$params$fill_correlated)
+
+  expect_warning(
+    strict <- evaluate_metrics(
+      pairs,
+      metrics_number = 3,
+      method = "mean_groups",
+      correlation_threshold = 0.7,
+      fill_correlated = FALSE
+    ),
+    "returning 2 because"
+  )
+
+  expect_identical(strict$selected, c("metric_c", "metric_a"))
+  expect_false(any(
+    as.character(strict$ranking$outcome) == "selected_correlation_fill"
+  ))
+  expect_equal(outcome_of(strict, "metric_d"), "dropped_correlated")
+  expect_false(strict$params$fill_correlated)
 })
 
 # 6. EDGE CASES ----

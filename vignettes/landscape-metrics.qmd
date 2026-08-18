@@ -66,7 +66,11 @@ The package includes different methods to evaluate the calculated landscape metr
 - `fisher_score`: Fisher Score (ratio of between-group to within-group variance). 
 - `kruskal_effsize`: Kruskal-Wallis H test effect sizes. Non-parametric test for differences between groups.
 
-By default, the function excludes metrics with high correlation (above 0.7). This can be adjusted using the `correlation_threshold` argument.
+By default, the function walks through metrics in ranking order and retains a
+candidate only when its absolute Pearson correlation with every already selected
+metric is at most 0.7. Correlations are calculated across all landscapes, pooling
+all pattern types. Change the threshold with `correlation_threshold`; set it to 1
+to disable correlation filtering.
 
 ```{r}
 # Evaluate landscape metrics using Fisher Score
@@ -124,9 +128,11 @@ metric_evaluation$ranking |>
 ```
 
 If fewer uncorrelated metrics exist than you asked for, the remaining slots are
-filled with correlated ones. Those are marked `selected_correlation_fill` and
-appear at the end of `$selected`, so you can always tell which of your selected
-metrics are redundant.
+filled with correlated ones by default. Those are marked
+`selected_correlation_fill` and appear at the end of `$selected`, so you can
+always tell which of your selected metrics are redundant. Set
+`fill_correlated = FALSE` to return only metrics that pass the correlation
+filter; in that case, `$selected` may contain fewer metrics than requested.
 
 To visually compare the top 10 metrics, use the `plot_metrics()` function:
 

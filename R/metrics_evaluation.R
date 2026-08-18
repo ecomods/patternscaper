@@ -185,10 +185,19 @@ print.metrics_evaluation <- function(x, ...) {
 #'     they appear in the `metric` column (default: NULL). Use
 #'     \code{\link[landscapemetrics]{list_lsm}} to look up what an abbreviation
 #'     stands for.
-#' @param correlation_threshold Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
-#'     If you do not want to filter based on correlation, set to 1.
+#' @param correlation_threshold Numeric. Maximum allowed absolute Pearson
+#'     correlation between selected metrics (default: 0.7). Correlations are
+#'     calculated across all landscapes and pattern types. Candidate metrics are
+#'     considered in ranking order. A candidate passes the filter only if its
+#'     absolute correlation with every already selected metric does not exceed
+#'     the threshold. Set to 1 to disable correlation filtering.
 #' @param verbose Logical. Whether to print detailed messages on excluded metrics
 #'     or just a summary (default: FALSE).
+#' @param fill_correlated Logical. If `TRUE` (default), fills any difference
+#'     between the number of metrics that pass the correlation filter and the
+#'     requested `metrics_number` with the highest-ranked correlated metrics,
+#'     and warn. If `FALSE`, returns only uncorrelated metrics,
+#'     which then may be fewer than the requested `metric_number`.
 #'
 #' @section Ranking Methods:
 #' \describe{
@@ -237,8 +246,10 @@ print.metrics_evaluation <- function(x, ...) {
 #' @return An object of class `metrics_evaluation`, a list with elements:
 #'   \describe{
 #'     \item{\code{selected}}{Character vector. Names of metrics that best
-#'       discriminate between pattern types. Metrics added to fill a correlation
-#'       gap come last rather than at their rank position.}
+#'       discriminate between pattern types. With `fill_correlated = TRUE`,
+#'       metrics added to fill a correlation gap come last rather than at their
+#'       rank position. With `fill_correlated = FALSE`, the vector may contain
+#'       fewer than `metrics_number` names.}
 #'     \item{\code{ranking}}{tibble. One row per metric passed in, with its score
 #'       and outcome. See 'The ranking table' below.}
 #'     \item{\code{method}}{Character. The ranking method used.}
@@ -277,7 +288,8 @@ evaluate_metrics <- function(
   exclude_incomplete_metrics = TRUE,
   exclude_metrics = NULL,
   correlation_threshold = 0.7,
-  verbose = FALSE
+  verbose = FALSE,
+  fill_correlated = TRUE
 ) {
   # Validate input data
   if (!is.data.frame(metrics) && !tibble::is_tibble(metrics)) {
@@ -336,6 +348,14 @@ evaluate_metrics <- function(
     )
   }
 
+  if (
+    !is.logical(fill_correlated) ||
+      length(fill_correlated) != 1 ||
+      is.na(fill_correlated)
+  ) {
+    cli::cli_abort("fill_correlated must be TRUE or FALSE")
+  }
+
   # Every metric that goes in should be accounted for at the end, so keep the
   # full input set and a record of what leaves the pipeline at each step. The
   # exclusion vectors are initialised here and filled in later
@@ -359,6 +379,7 @@ evaluate_metrics <- function(
   params <- list(
     metrics_number = metrics_number,
     correlation_threshold = correlation_threshold,
+    fill_correlated = fill_correlated,
     exclude_incomplete_metrics = exclude_incomplete_metrics,
     exclude_metrics = exclude_metrics,
     level = level
@@ -434,15 +455,6 @@ evaluate_metrics <- function(
     }
   }
 
-  # Check if we have enough metrics
-  num_metrics <- length(unique(metrics$metric))
-  if (num_metrics < metrics_number) {
-    cli::cli_warn(
-      "Only {num_metrics} metric{?s} available, returning all instead of requested {metrics_number}"
-    )
-    metrics_number <- num_metrics
-  }
-
   # Check patterns
   if (length(unique(metrics$pattern)) < 2) {
     cli::cli_abort(
@@ -490,6 +502,17 @@ evaluate_metrics <- function(
     ))
   }
 
+  # Cap the selection only after all exclusions and ranking. Doing this earlier
+  # can leave fewer candidates than requested and make the correlation helper
+  # claim that it is filling slots even though no candidate remains to add.
+  num_metrics <- length(ranked_metrics)
+  if (num_metrics < metrics_number) {
+    cli::cli_warn(
+      "Only {num_metrics} metric{?s} available, returning all instead of requested {metrics_number}"
+    )
+    metrics_number <- num_metrics
+  }
+
   # Verbose output
   if (verbose) {
     cli::cli_alert_info("Ranked metrics ({method}): {.val {ranked_metrics}}")
@@ -517,7 +540,8 @@ evaluate_metrics <- function(
       metrics = metrics,
       metrics_number = metrics_number,
       correlation_threshold = correlation_threshold,
-      verbose = verbose
+      verbose = verbose,
+      fill_correlated = fill_correlated
     )
     top_metrics <- correlation_result$selected
     outcomes <- correlation_result$outcomes
@@ -755,8 +779,11 @@ kruskal_effsize <- function(data, formula) {
 #' @param metrics Data frame. The calculated metrics data used to compute correlations.
 #'   Must contain columns 'landscape_name', 'metric', and 'value'.
 #' @param metrics_number Integer. Number of metrics to select.
-#' @param correlation_threshold Numeric. Maximum allowed correlation between selected metrics (default: 0.7).
+#' @param correlation_threshold Numeric. Maximum allowed absolute Pearson
+#'   correlation between selected metrics (default: 0.7).
 #' @param verbose Logical. Whether to print progress messages (default: FALSE).
+#' @param fill_correlated Logical. Whether to fill a shortfall with correlated
+#'   metrics or return only those that pass the correlation filter.
 #'
 #' @return List with `selected` (character vector of selected metric names, in
 #'   selection order) and `outcomes` (tibble with one row per ranked metric,
@@ -767,7 +794,8 @@ select_metrics_correlation <- function(
   metrics,
   metrics_number,
   correlation_threshold = 0.7,
-  verbose = FALSE
+  verbose = FALSE,
+  fill_correlated = TRUE
 ) {
   # Input validation
   if (!is.character(metric_ranking) || length(metric_ranking) == 0) {
@@ -857,28 +885,32 @@ select_metrics_correlation <- function(
     }
   }
 
-  # Fill up with remaining metrics if needed
   if (length(top_metrics) < metrics_number) {
-    # Captured before the fill, since top_metrics grows below
     n_uncorrelated <- length(top_metrics)
 
-    additional_metrics <- setdiff(metric_ranking, top_metrics)
-    needed_count <- min(
-      length(additional_metrics),
-      metrics_number - length(top_metrics)
-    )
-    filled <- additional_metrics[seq_len(needed_count)]
-    outcome[filled] <- "selected_correlation_fill"
+    if (fill_correlated) {
+      additional_metrics <- setdiff(metric_ranking, top_metrics)
+      needed_count <- min(
+        length(additional_metrics),
+        metrics_number - length(top_metrics)
+      )
+      filled <- additional_metrics[seq_len(needed_count)]
+      outcome[filled] <- "selected_correlation_fill"
 
-    # Appended, so gap-filled metrics land at the end of the selection rather
-    # than at their position in the ranking. `selected` therefore preserves the
-    # order callers have always seen, which is not the ranking order.
-    top_metrics <- c(top_metrics, filled)
+      # Appended, so gap-filled metrics land at the end of the selection rather
+      # than at their position in the ranking. `selected` therefore preserves
+      # the order callers have always seen, which is not the ranking order.
+      top_metrics <- c(top_metrics, filled)
 
-    cli::cli_warn(c(
-      "Only {n_uncorrelated} uncorrelated metric{?s} found. Filling to {metrics_number} with correlated metrics.",
-      "i" = "Added: {.val {filled}}"
-    ))
+      cli::cli_warn(c(
+        "Only {n_uncorrelated} uncorrelated metric{?s} found. Filling to {metrics_number} with correlated metrics.",
+        "i" = "Added: {.val {filled}}"
+      ))
+    } else {
+      cli::cli_warn(
+        "Only {n_uncorrelated} uncorrelated metric{?s} found; returning {n_uncorrelated} because {.arg fill_correlated} is {.code FALSE}."
+      )
+    }
   }
 
   list(
