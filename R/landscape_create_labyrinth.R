@@ -1,31 +1,10 @@
-#' Create a Landscape with Labyrinths as in Turing patterns
+#' Create a Landscape with Labyrinths
 #'
 #' Generates a landscape with a labyrinth-like vegetation pattern,
 #'  this mimics Turing patterns.
 #' Parameters are documented on \code{\link{pattern_labyrinth}}.
 #'
-#' @return A landscape object with pattern "labyrinth" containing:
-#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
-#'   \item{pattern}{Character string "labyrinth"}
-#'   \item{params}{List of all input parameters used to generate the landscape}
-#'
-#' @details
-#' The labyrinth pattern is generated using fractal Brownian motion (fBm):
-#'
-#' 1. **Noise generation**: Creates a continuous noise field using multiple
-#'    octaves of Perlin noise with `fbm_perlin()`.
-#'
-#' 2. **Normalization**: Scales noise values to [0, 1] range.
-#'
-#' 3. **Thresholding**: Applies `veg_threshold` to create binary pattern.
-#'    Cells with noise > threshold become vegetation.
-#'
-#' 4. **Fuzzy boundaries**: Adds probabilistic transitions within
-#'    `band_fuzziness` distance of the threshold for natural-looking edges.
-#'
-#'
-#' The combination of `frequency` and `octaves` controls pattern complexity,
-#' while `veg_threshold` determines vegetation proportion.
+#' @return A landscape object with pattern "labyrinth".
 #'
 #' @noRd
 #' @importFrom ambient long_grid gen_perlin
@@ -37,10 +16,10 @@ create_landscape_labyrinth <- function(
   band_fuzziness = 0.08,
   octaves = 2
 ) {
-  # Validate common parameters
+  # Validate inputs
   validate_dimensions(width = width, height = height)
 
-  # Validate frequency
+  # Validate pattern parameters
   if (!is.numeric(frequency) || frequency <= 0) {
     cli::cli_abort(c(
       "{.arg frequency} must be a positive number.",
@@ -48,7 +27,6 @@ create_landscape_labyrinth <- function(
     ))
   }
 
-  # Validate veg_threshold
   if (!is.numeric(veg_threshold) || veg_threshold < 0 || veg_threshold > 1) {
     cli::cli_abort(c(
       "{.arg veg_threshold} must be between 0 and 1.",
@@ -56,10 +34,7 @@ create_landscape_labyrinth <- function(
     ))
   }
 
-  # Validate band_fuzziness
-  if (
-    !is.numeric(band_fuzziness) || band_fuzziness < 0 || band_fuzziness > 1
-  ) {
+  if (!is.numeric(band_fuzziness) || band_fuzziness < 0 || band_fuzziness > 1) {
     cli::cli_abort(c(
       "{.arg band_fuzziness} must be between 0 and 1.",
       "x" = "You supplied {.val {band_fuzziness}}",
@@ -67,7 +42,7 @@ create_landscape_labyrinth <- function(
     ))
   }
 
-  # Validate octaves - must be a positive number
+  # Validate before truncating fractional octave counts
   if (
     !is.numeric(octaves) ||
       length(octaves) != 1 ||
@@ -80,7 +55,6 @@ create_landscape_labyrinth <- function(
     ))
   }
 
-  # Convert to integer (truncates decimals like 2.7 -> 2)
   octaves <- as.integer(octaves)
 
   # Create coordinate grid for noise generation
@@ -113,7 +87,7 @@ create_landscape_labyrinth <- function(
     byrow = TRUE
   )
 
-  # Controlled edge roughness only
+  # Erode vegetation edge cells with the requested probability
   if (band_fuzziness > 0) {
     edge <- mat &
       stats::filter(
@@ -127,7 +101,7 @@ create_landscape_labyrinth <- function(
     mat[which(edge)[jitter]] <- FALSE
   }
 
-  # Create and return landscape object
+  # Store the raster and its generation metadata
   landscape(
     data = mat * 1L,
     pattern = "labyrinth",
@@ -142,21 +116,22 @@ create_landscape_labyrinth <- function(
   )
 }
 
-#' Calculates fractal Perlin noise value for coordinates x,y
+#' Generate Fractal Perlin Noise
 #'
 #' Generates a fractal Brownian motion (fBm) noise value by combining multiple
 #' layers (octaves) of Perlin noise at increasing frequencies and decreasing
 #' amplitudes. Used internally for generating labyrinth structures.
 #'
-#' @param x Numeric. x-coordinate at which to evaluate the noise.
-#' @param y Numeric. y-coordinate at which to evaluate the noise.
-#' @param frequency Numeric. Base frequency for the first octave of Perlin noise.
-#' @param octaves Integer. Number of noise layers to combine. Default: 6.
-#' @param lacunarity Numeric. Multiplier applied to the frequency at each octave. Default: 2.
-#' @param gain Numeric. Multiplier applied to the amplitude at each octave. Default: 0.5.
+#' @param x Numeric vector of x coordinates.
+#' @param y Numeric vector of y coordinates.
+#' @param frequency Numeric. Frequency of the first octave.
+#' @param octaves Integer. Number of noise layers (default: 6).
+#' @param lacunarity Numeric. Frequency multiplier per octave (default: 2).
+#' @param gain Numeric. Amplitude multiplier per octave (default: 0.5).
 #'
-#' @return A combined noise value for coordinate x,y
+#' @return Numeric vector of combined noise values.
 #' @keywords internal
+#' @noRd
 fbm_perlin <- function(
   x,
   y,
@@ -169,10 +144,8 @@ fbm_perlin <- function(
   amplitude <- 1
   current_frequency <- frequency
 
-  # Sum contributions from each octave
-  # Each octave adds detail at a finer scale with reduced amplitude
+  # Accumulate successively finer, lower-amplitude octaves
   for (i in seq_len(octaves)) {
-    # Add this octave's Perlin noise, scaled by current amplitude
     total_noise <- total_noise +
       amplitude *
         ambient::gen_perlin(
@@ -180,8 +153,7 @@ fbm_perlin <- function(
           y = y * current_frequency
         )
 
-    # Increase frequency and decrease amplitude for next octave
-    # Creates self-similar fractal pattern across scales
+    # Increase frequency and reduce amplitude for the next octave
     current_frequency <- current_frequency * lacunarity
     amplitude <- amplitude * gain
   }

@@ -1,20 +1,11 @@
-#' Create a Landscape with Spots Pattern
+#' Create Circular Vegetation Patches
 #'
-#' Generates a binary landscape with circular spots representing either vegetated patches
-#' in bare ground (spots) or bare patches in vegetated ground (when inverted, gaps).
+#' Places circular patches with optional radius variation, fuzzy edges, and
+#' regular spacing. Inversion produces bare gaps in vegetated ground.
 #'
 #' Parameters are documented on \code{\link{pattern_spots}}.
 #'
-#' @details
-#' This function can generate both "spots" and "gaps" patterns depending on \code{invert_landscape}.
-#' For semantic clarity in training data, use \code{create_landscape_gaps()} when you
-#' want bare patches in vegetated ground, which sets \code{invert_landscape = TRUE} by default
-#' and labels the pattern as "gaps".
-#'
-#' @return A landscape object with pattern "spots" containing:
-#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
-#'   \item{pattern}{Character string "spots"}
-#'   \item{params}{List of all input parameters used to generate the landscape}
+#' @return A landscape object with pattern "spots".
 #'
 #' @noRd
 #' @importFrom stats kmeans rnorm runif
@@ -29,11 +20,13 @@ create_landscape_spots <- function(
   invert_landscape = FALSE,
   regular_spots = FALSE
 ) {
-  # Validate common parameters
+  # Validate inputs
   validate_dimensions(width = width, height = height)
 
+  # Coerce counts to whole values before validation
   n_spots <- as.integer(n_spots)
-  # Validate n_spots
+
+  # Validate pattern parameters
   if (!is.numeric(n_spots) || n_spots < 1) {
     cli::cli_abort(c(
       "{.arg n_spots} must be a positive integer.",
@@ -41,7 +34,6 @@ create_landscape_spots <- function(
     ))
   }
 
-  # Validate spot_radius
   if (!is.numeric(spot_radius) || spot_radius <= 0) {
     cli::cli_abort(c(
       "{.arg spot_radius} must be a positive number.",
@@ -57,7 +49,6 @@ create_landscape_spots <- function(
     ))
   }
 
-  # Validate spot_radius_sd
   if (!is.numeric(spot_radius_sd) || spot_radius_sd < 0) {
     cli::cli_abort(c(
       "{.arg spot_radius_sd} must be a non-negative number.",
@@ -65,7 +56,6 @@ create_landscape_spots <- function(
     ))
   }
 
-  # Validate radius_noise_fraction
   if (
     !is.numeric(radius_noise_fraction) ||
       radius_noise_fraction < 0 ||
@@ -77,7 +67,6 @@ create_landscape_spots <- function(
     ))
   }
 
-  # Validate invert_landscape
   if (!is.logical(invert_landscape) || length(invert_landscape) != 1) {
     cli::cli_abort(c(
       "{.arg invert_landscape} must be a single logical value (TRUE or FALSE).",
@@ -85,7 +74,6 @@ create_landscape_spots <- function(
     ))
   }
 
-  # Validate regular_spots
   if (!is.logical(regular_spots) || length(regular_spots) != 1) {
     cli::cli_abort(c(
       "{.arg regular_spots} must be a single logical value (TRUE or FALSE).",
@@ -94,7 +82,7 @@ create_landscape_spots <- function(
   }
 
   if (regular_spots) {
-    # Generate hexagonal grid for regular spot placement
+    # Build a hexagonal grid for regular placement
     spacing <- 2 * spot_radius * 1.1
     n_cols <- ceiling(width / spacing)
     n_rows <- ceiling(height / (sqrt(3) / 2 * spacing))
@@ -115,7 +103,7 @@ create_landscape_spots <- function(
 
     n_available <- nrow(grid_points)
 
-    # Final adjustment if actual grid points differ from estimate
+    # Reduce the request when fewer grid positions fit
     if (n_spots > n_available) {
       cli::cli_warn(c(
         "Regular spot placement requested {n_spots} spots but only ~{n_available} positions fit.",
@@ -124,10 +112,9 @@ create_landscape_spots <- function(
       n_spots <- n_available
     }
 
-    # Use k-means for subset selection
+    # Select a spatially distributed subset with k-means
     if (n_spots < n_available) {
-      # Suppress convergence warnings from kmeans - these are expected
-      # and don't affect quality
+      # Suppress expected convergence warnings that do not affect placement
       km <- suppressWarnings(
         stats::kmeans(grid_points, centers = n_spots, nstart = 5, iter.max = 50)
       )
@@ -136,7 +123,7 @@ create_landscape_spots <- function(
       cluster_centers <- grid_points
     }
   } else {
-    # Generate random cluster centers
+    # Sample random centers
     cluster_centers <- data.frame(
       row = sample(
         round((spot_radius + 1), 0):round((height - spot_radius), 0),
@@ -147,15 +134,14 @@ create_landscape_spots <- function(
     )
   }
 
-  # Prepare landscape
+  # Draw spots into an initially bare landscape
   mat <- matrix(0, nrow = height, ncol = width)
 
-  # Create clusters around centers
   for (i in seq_len(nrow(cluster_centers))) {
     center_row <- cluster_centers$row[i]
     center_col <- cluster_centers$col[i]
 
-    # Apply radius variation
+    # Vary radius between spots
     if (spot_radius_sd > 0) {
       adjusted_radius <- max(
         1,
@@ -165,13 +151,13 @@ create_landscape_spots <- function(
       adjusted_radius <- spot_radius
     }
 
-    # Determine pixel boundaries
+    # Restrict distance calculations to the local bounding box
     row_min <- max(1, floor(center_row - adjusted_radius))
     row_max <- min(height, ceiling(center_row + adjusted_radius))
     col_min <- max(1, floor(center_col - adjusted_radius))
     col_max <- min(width, ceiling(center_col + adjusted_radius))
 
-    # Fill circular spots
+    # Fill the core and sample cells within the fuzzy rim
     for (r in row_min:row_max) {
       for (c in col_min:col_max) {
         dx <- c - center_col
@@ -192,12 +178,12 @@ create_landscape_spots <- function(
     }
   }
 
-  # Invert landscape if specified
+  # Invert vegetation and bare ground for gaps
   if (invert_landscape) {
     mat <- 1 - mat
   }
 
-  # Create and return landscape object
+  # Store the raster and its generation metadata
   landscape(
     data = mat,
     pattern = "spots",
