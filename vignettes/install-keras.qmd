@@ -38,9 +38,10 @@ keras_available()
 
 If this returns `TRUE`, your installation is already working and you can skip the rest of this guide.
 
-## Specify Python Installation
+## Optional: Specify a Python Installation
 
-Before installing Keras, you should specify which Python installation to use.
+`install_keras()` can create and manage its own environment. To use an existing
+Python installation instead, specify it before installing Keras.
 
 **Step 1: Find your Python installations**
 
@@ -96,7 +97,7 @@ keras_available()
 
 ## Test Your Installation
 
-To test if Keras is working correctly, you can run the following simple function:
+Test the installation with a simple Keras operation:
 
 :::{.callout-note}
 The first time you run Keras functions after installation, TensorFlow needs to initialize, which may show some informational messages. Subsequent runs will be fast.

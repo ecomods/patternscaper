@@ -13,7 +13,7 @@ knitr:
 A classifier is trained on landscapes of a particular geometry and then applied to
 new ones. When the application landscapes differ from the training data, the two
 workflows behave differently, and some differences quietly degrade predictions.
-This article explains what can differ, how each workflow responds, and how to
+This vignette explains what can differ, how each workflow responds, and how to
 prepare application data so results stay trustworthy.
 
 ```{r}
@@ -39,15 +39,14 @@ its outline.
 
 ## How each workflow responds
 
-The two workflows react to these axes in almost opposite ways, so the package
-guards each accordingly.
+The workflows respond differently, so the package checks them separately.
 
 | | metric-based | pixel-based |
 |---|---|---|
 | Extent / resolution | metrics computed as-is; **warns** on a substantial mismatch | rows and columns **resampled** onto the training grid; absolute grid size is discarded |
 | Aspect ratio | reflected in the metrics; **warns** on a large change | anisotropic resize distorts the pattern; **warns** |
 | Irregular shape (`NA`) | `NA` treated as outside the landscape; works | `NA` rejected before prediction; **error** |
-| Training set itself | **warns** if training landscapes are not uniform | **requires** identical rows, columns, and layer counts (error otherwise) |
+| Training set itself | **warns** if training landscapes are not uniform | **requires** one layer and identical rows and columns (error otherwise) |
 
 ### Metric-based workflow
 

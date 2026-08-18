@@ -11,7 +11,8 @@ knitr:
     cache: true
 ---
 
-This vignette provides an overview of the workflow to train a neural network on landscape metrics and then use the trained network to classify new landscapes based on the same metrics.
+This vignette shows how to train a neural network on landscape metrics and use
+it to classify new landscapes.
 
 ```{r}
 #| label: setup
@@ -22,19 +23,20 @@ set.seed(123456)
 ```
 
 
-The workflow consists of the following steps:
+The workflow has five steps:
 
-1. Generate training landscapes with known patterns using the `create_landscapes()` function.
-2. Calculate landscape metrics for the training landscapes using the `calculate_metrics()` function.
-3. Select most informative metrics (i.e. metrics that differ the most between landscapes) using the `evaluate_metrics()` function.
-4. Train a neural network using the selected metrics with the `train_metric_model()` function.
-5. Classify new landscapes using the trained neural network with the `apply_metric_model()` function.
+1. Generate labelled training landscapes with known patterns using `create_landscapes()`
+2. Calculate their landscape metrics with `calculate_metrics()`
+3. Select informative metrics with `evaluate_metrics()`
+4. Train a neural network using the selected metrcis with `train_metric_model()`
+5. Classify new landscapes with `apply_metric_model()`
 
 
 ## Step 1: Generate Training Landscapes
 
-You can generate a set of training landscapes with known patterns.
-See [landscape generation vignette](landscape-generation.html) for details on landscape generation and available patterns and options.
+Generate training landscapes with known patterns. The
+[landscape generation vignette](landscape-generation.html) describes all
+available patterns and options.
 
 ```{r}
 #| label: generate-landscapes
@@ -67,17 +69,17 @@ landscape_metrics <- calculate_metrics(
 
 ## Step 3: Evaluate Landscape Metrics
 
-You can use the `evaluate_metrics` function to select the n (e.g. n=10) most informative metrics for classification based on different methods. Here, we use the effect size of a Kruskal-Wallis H test (for more details and other options see [landscape metrics vignette](landscape-metrics.html)).
+Use `evaluate_metrics()` to rank and select a requested number of metrics. There are different ranking methods available (e.g. Kruskal-Wallis H test). The
+[landscape metrics vignette](landscape-metrics.html) describes the other
+methods.
 
 :::{.callout-note}
-Note, that some metrics may return `NA` for some landscapes, and some metrics may not be
-available for all landscapes at all. For example, at the class level, a metric cannot be calculated for a
-class that is absent from a landscape. Also, some metrics may
-have the same value for each landscape (zero variance between the values). By default, these
-metrics are removed before evaluation and the user gets warned about the
-metrics that are removed.
+Some metrics are `NA` or unavailable for particular landscapes. At the class
+level, for example, a metric cannot be calculated for a class absent from a
+landscape. Other metrics may have the same value for all landscapes and therefore no variation. By default,
+`evaluate_metrics()` removes these metrics and reports which were excluded.
 
-It is not recommended to set `exclude_incomplete_metrics = FALSE`, as metrics that are missing for some landscapes cannot be used for training the neural network. They may however be informative and useful for other types of analyses.
+It is recommended to leave `exclude_incomplete_metrics = TRUE` (the default), as metrics that are missing for some landscapes cannot be used for training the neural network. They may however be informative and useful for other types of analyses.
 :::
 
 
@@ -95,11 +97,12 @@ best_10
 
 `evaluate_metrics()` returns the selected names in `$selected` together with the
 full ranking in `$ranking`, which records the score of every metric and what
-happened to the ones that were not selected — see the
+happened to the ones that were not selected. See the
 [landscape metrics vignette](landscape-metrics.html) for how to read it. The
 functions below accept either the object itself or `best_10$selected`.
 
-Alternatively, you can manually select the metrics you want to use for further evaluation. For this, just provide a list of the metric names you are interested in. 
+Alternatively, provide a character vector of metric names to select them
+manually.
 
 You can plot the differences between patterns for the selected metrics using the `plot_metrics` function.
 
@@ -125,7 +128,7 @@ Valid options for the cross-validation method `cv_method` are:
 - `"k-fold"`: k-fold cross-validation with `cv_folds` number of folds
 - `"loo"`: leave-one-out cross-validation
 
-For details and further options see the function help `?train_metric_model()`.
+See `?train_metric_model` for further options.
 
 ```{r}
 #| label: train-model
@@ -178,10 +181,9 @@ Keep the `.rds` file to apply the model in a future R session without retraining
 
 ## Step 5: Classify New Landscapes
 
-Finally, you can create some new test landscapes and classify them using the trained model. In this example, we create 10 new landscapes for testing. 
-
-In reality these could be landscapes read in from files or created in other ways (e.g. outputs of simulation models).
-For details on importing own landscapes, see the [importing landscapes vignette](importing-landscapes.html).
+Create test landscapes and classify them with the trained model. These could
+instead be imported data or output from simulation models; see the
+[importing landscapes vignette](importing-landscapes.html).
 
 ```{r}
 #| label: classify-landscapes
@@ -197,7 +199,10 @@ If test landscapes have been created with `create_landscapes()`, their true patt
 The result always has the same two parts, `$predictions` and `$performance`.
 
 :::{.callout-note}
-Performance is evaluated automatically when the true patterns are known. Landscapes that carry a `pattern` but you don't want to evaluate model performance with them but only classify them can skip evaluation with `evaluate = "none"`. Setting `evaluate = "required"` raises an error instead of quietly returning no performance when the true patterns turn out to be missing in some or all cases.
+Performance is evaluated automatically when true patterns are known. Use
+`evaluate = "none"` to classify without evaluation, even when the landscapes
+carry pattern labels. Use `evaluate = "required"` to raise an error when
+performance cannot be evaluated.
 :::
 
 ```{r}
@@ -236,8 +241,9 @@ And other metrics like accuracy, precision, recall, and F1-score:
 classification$performance$per_class_metrics
 ```
 
-To visualize the classified landscapes along with their true and predicted patterns
-use the function `plot_classified_landscapes`. Correctly classified landscapes are shown in blue, misclassified ones in bold orange. To plot only misclassified landscapes, set `only_misclassified = TRUE`.
+Use `plot_classified_landscapes()` to show landscapes with their true and
+predicted patterns. Correct classifications are blue and misclassifications are
+bold orange. Set `only_misclassified = TRUE` to show only misclassifications.
 
 :::{.callout-note}
 If you classified landscapes where the true patterns are not known, the plot will
