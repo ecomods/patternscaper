@@ -6,7 +6,7 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/ecomods/patternscaper/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ecomods/patternscaper/actions/workflows/R-CMD-check.yaml)
-[![GPL-3.0-or-later](https://img.shields.io/badge/License-GPL%20(%3E%3D%203)-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
+[![GPL-3.0-or-later](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 <!-- badges: end -->
 
 The `patternscaper` package provides an automated approach to
