@@ -11,8 +11,8 @@ metrics_to_wide(metrics, return_only_metrics = FALSE)
 Expected columns include: `metric`, `class`, `value`, `pattern`.
 Must include either `landscape_id` or `landscape_name` for identification.}
 
-\item{return_only_metrics}{Logical. Whether to return only the metrics or
-also the the identification columns in output (default: FALSE).}
+\item{return_only_metrics}{Logical. Whether to return only the metric columns
+or retain the identification columns (default: FALSE).}
 }
 \value{
 A data frame in wide format where each metric becomes a column and each

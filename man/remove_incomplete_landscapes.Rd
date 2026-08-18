@@ -21,7 +21,8 @@ affected metrics and keeps every landscape; \code{"drop_landscapes"}
 removes the affected landscapes and keeps every metric.}
 }
 \value{
-Data frame with incomplete landscapes removed.
+Data frame after resolving incomplete predictors according to
+  \code{na_action}.
 }
 \description{
 Removes missing data in three steps, from least to most consequential.
@@ -29,8 +30,8 @@ First drops any predictor columns that are NA for every landscape (metrics
 that are undefined for the given landscapes carry no information and would
 otherwise remove the entire dataset). Then drops the row-wise counterpart:
 landscapes that are NA for every remaining predictor, which carry no
-information either. Only then removes landscapes that still have NA values in
-some — but not all — remaining predictor columns. Issues warnings listing
+information either. Only then resolves values missing from some, but not all,
+landscapes. Issues warnings listing
 dropped metrics and removed landscapes, and aborts if no usable predictors
 or landscapes remain.
 }

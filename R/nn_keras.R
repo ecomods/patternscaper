@@ -137,12 +137,11 @@ train_pixel_model <- function(
   patience = 15,
   verbose = TRUE
 ) {
-  # Validate verbose parameter
+  # Input validation ----------------------------------------------------------
   if (!is.logical(verbose) || length(verbose) != 1 || is.na(verbose)) {
     cli::cli_abort("verbose must be a single logical value (TRUE or FALSE)")
   }
 
-  # Validate cv_method parameter
   if (
     !is.character(cv_method) ||
       length(cv_method) != 1 ||
@@ -155,10 +154,8 @@ train_pixel_model <- function(
     cli::cli_abort('cv_method must be one of: "none", "k-fold", or "loo"')
   }
 
-  # Validate cv_folds. Checked unconditionally, as in train_metric_model(): an
-  # unusable value must not pass silently just because cv_method happens to
-  # ignore it. Values below 2 leave a fold with no training data, and
-  # non-integers or character values are silently coerced further downstream.
+  # Validate cv_folds even when the method ignores it; downstream code coerces
+  # invalid values, and values below 2 leave a fold without training data
   if (
     !is.numeric(cv_folds) ||
       length(cv_folds) != 1 ||
@@ -169,7 +166,6 @@ train_pixel_model <- function(
     cli::cli_abort("cv_folds must be a single integer >= 2")
   }
 
-  # Validate numeric parameters.
   if (
     !is.numeric(epochs) ||
       length(epochs) != 1 ||
@@ -197,7 +193,6 @@ train_pixel_model <- function(
   ) {
     cli::cli_abort("learning_rate must be between 0 and 1")
   }
-  # validate validation_split
   if (
     !is.numeric(validation_split) ||
       length(validation_split) != 1 ||
@@ -221,7 +216,6 @@ train_pixel_model <- function(
     ))
   }
 
-  # Validate the architecture and early-stopping parameters
   if (
     !is.numeric(dropout_rate) ||
       length(dropout_rate) != 1 ||
@@ -302,15 +296,12 @@ train_pixel_model <- function(
     ))
   }
 
-  # Check if landscapes is empty
   if (length(landscapes) == 0) {
     cli::cli_abort("landscapes must contain at least one landscape object")
   }
 
-  # Check if landscapes is a list of landscape objects
   valid_landscapes <- vapply(landscapes, is_landscape, logical(1))
   if (any(!valid_landscapes)) {
-    # find out which element is not a landscape
     invalid_indices <- which(!valid_landscapes)
     cli::cli_abort(c(
       "All elements must be landscape objects.",
@@ -322,7 +313,7 @@ train_pixel_model <- function(
 
   # Require identical cell dimensions across training landscapes. The CNN input
   # layer is fixed to one shape, so arrays differing in rows or columns cannot be
-  # stacked.
+  # stacked
   dims <- lapply(landscapes, function(l) {
     c(terra::nrow(l$data), terra::ncol(l$data))
   })
@@ -359,7 +350,7 @@ train_pixel_model <- function(
   }
 
   # This order defines the meaning of every model-output column and is reused
-  # for fitting, validation, prediction, and saved model metadata.
+  # for fitting, validation, prediction, and saved model metadata
   class_names <- sort(unique(training_labels))
   if (length(class_names) < 2) {
     cli::cli_abort(c(
@@ -373,7 +364,7 @@ train_pixel_model <- function(
   check_categorical_values(landscapes, "train on")
 
   # Separate landscapes used to update model weights from landscapes used only
-  # to monitor validation performance.
+  # to monitor validation performance
   validation_indices <- integer()
   fit_landscapes <- landscapes
   fit_labels <- training_labels
@@ -395,11 +386,11 @@ train_pixel_model <- function(
   }
 
   # Define the input-channel order from the weight-fitting data only. The
-  # validation data must then use the same encoding as the training data.
+  # validation data must use the same encoding
   land_cover_values <- fit_land_cover_values(fit_landscapes)
 
   if (has_validation) {
-    # Check that validation rasters and labels match the fitted model inputs.
+    # Check that validation rasters and labels match the fitted model inputs
     validation_labels <- validate_pixel_validation_landscapes(
       validation_landscapes = validation_landscapes,
       expected_dimensions = unique_dims[[1]],
@@ -408,19 +399,18 @@ train_pixel_model <- function(
     )
   }
 
-  # Give every unordered land-cover category an independent input channel.
+  # Give every unordered land-cover category an independent input channel
   training_arrays <- lapply(fit_landscapes, function(l) {
     encode_land_cover_raster(l$data, land_cover_values)
   })
 
   if (has_validation) {
-    # Use the same encoding for validation landscapes as for the training landscapes.
+    # Reuse the training encoding for validation landscapes
     validation_arrays <- lapply(validation_landscapes, function(l) {
       encode_land_cover_raster(l$data, land_cover_values)
     })
   }
 
-  # Show distribution of landscape types
   if (verbose) {
     cli::cli_h2("Landscape type distribution:")
     print(table(fit_labels))
@@ -442,25 +432,24 @@ train_pixel_model <- function(
   input_shape <- c(dim(x_data)[2], dim(x_data)[3], dim(x_data)[4])
 
   if (has_validation) {
-    # Prepare validation inputs and responses in the same shapes and class
-    # order as the training data. This response encoding is separate from the
-    # categorical raster encoding used for the model inputs.
+    # Match training shapes and class order; response encoding is separate from
+    # the categorical raster encoding used for model inputs
     validation_y_int <- as.integer(
       factor(validation_labels, levels = class_names)
     ) -
       1
-    # Stack landscapes into samples x rows x columns x input channels.
+    # Stack landscapes into samples x rows x columns x input channels
     x_validation <- abind::abind(validation_arrays, along = 0)
-    # Convert the known pattern label into one output column per pattern class.
+    # Convert labels into one output column per pattern class
     y_validation <- keras3::to_categorical(
       validation_y_int,
       num_classes = n_classes
     )
   }
 
-  # Setup callbacks ---------------------------------------------------------
-  # Add default early stopping when validation data and patience are available.
-  # User-supplied callbacks take precedence and apply only to the final model.
+  # Callbacks -----------------------------------------------------------------
+  # Add default early stopping only with validation data and patience;
+  # user-supplied callbacks take precedence and apply only to the final model
   if (is.null(callbacks) && !is.null(patience) && has_validation) {
     callbacks <- list(
       keras3::callback_early_stopping(
@@ -471,11 +460,9 @@ train_pixel_model <- function(
     )
   }
 
-  # Add a progress callback when verbose = TRUE
   if (verbose) {
     progress_callback <- keras3::callback_lambda(
       on_epoch_end = function(epoch, logs) {
-        # Check if we have validation data
         if (has_validation) {
           cat(sprintf(
             "Epoch %d - loss: %.4f - acc: %.4f - val_loss: %.4f - val_acc: %.4f\n",
@@ -505,30 +492,25 @@ train_pixel_model <- function(
   }
 
   # Cross-validation ----------------------------------------------------------
-  # Validate and adjust CV parameters based on class distribution
-  # May downgrade CV method (k-fold -> LOO) or reduce folds if dataset is small
+  # Small classes may reduce the fold count or downgrade k-fold to LOO
   cv_params <- validate_cv_params(
     patterns = fit_labels,
     cv_method = cv_method,
     cv_folds = cv_folds
   )
 
-  # Update cv_method and cv_folds based on validation
   cv_method <- cv_params$cv_method
   cv_folds <- cv_params$cv_folds
 
   x_final <- x_data
   y_final <- y_data
 
-  # Check cross-validation method and parameters -------------------------------
-  # Run model with cross validation --------------------------------------------
   if (cv_method != "none") {
     if (verbose) {
       cli::cli_h2("Cross-validation ({cv_method}, {cv_folds} folds)")
     }
-    # Create stratified fold assignments ---------------------------------------
     if (cv_method == "loo") {
-      # If method is "loo", each sample is it's own fold
+      # LOO assigns each landscape its own fold
       fold_indices <- seq_len(length(landscapes))
     } else {
       fold_indices <- find_balanced_cv_folds(training_labels, cv_folds)
@@ -559,7 +541,6 @@ train_pixel_model <- function(
         dropout_rate = dropout_rate,
         dense_units = dense_units
       )
-      # Compile the fold model
       fold_model <- compile_keras_model(
         model = fold_model,
         learning_rate = learning_rate,
@@ -568,7 +549,7 @@ train_pixel_model <- function(
       )
 
       # The held-out fold must not influence fitting because it is used to
-      # estimate performance after training.
+      # estimate performance after training
       fold_history <- fold_model |>
         keras3::fit(
           x = x_train,
@@ -578,9 +559,8 @@ train_pixel_model <- function(
           verbose = 0
         )
 
-      # Evaluate the model on the validation fold. Silenced like the fit() call
-      # above: keras would otherwise print a progress bar per fold regardless of
-      # verbose.
+      # Silence evaluation because Keras otherwise prints progress for every
+      # fold regardless of verbose
       evaluation <- fold_model |> keras3::evaluate(x_val, y_val, verbose = 0)
 
       # Store predictions
@@ -597,13 +577,11 @@ train_pixel_model <- function(
       cv_actual[[fold]] <- class_names[y_val_int + 1]
       cv_landscape_ids[[fold]] <- which(val_indices)
 
-      # Store results for this fold
       cv_evaluation[[fold]] <- list(
         evaluation = evaluation,
         epochs_trained = length(fold_history$metrics$loss)
       )
 
-      # Conditional fold accuracy
       if (verbose) {
         cli::cli_alert_success(
           "Fold {fold}/{cv_folds} accuracy: {round(evaluation[['accuracy']], 4)}"
@@ -662,7 +640,7 @@ train_pixel_model <- function(
       )
     }
 
-    # Build final model with all data
+    # Final model on all data --------------------------------------------------
     final_model <- create_keras_model(
       architecture = architecture,
       input_shape = input_shape,
@@ -670,14 +648,12 @@ train_pixel_model <- function(
       dropout_rate = dropout_rate,
       dense_units = dense_units
     )
-    # Compile the fold model
     final_model <- compile_keras_model(
       model = final_model,
       learning_rate = learning_rate,
       loss = loss,
       optimizer = optimizer
     )
-    # Train the fold model
     history <- final_model |>
       keras3::fit(
         x = x_final,
@@ -741,7 +717,7 @@ train_pixel_model <- function(
 
     if (has_validation) {
       # Score the fitted model on validation data and retain the landscape-level
-      # predictions needed to interpret its overall and per-class performance.
+      # predictions needed to interpret overall and per-class performance
       validation_evaluation <- final_model |>
         keras3::evaluate(x_validation, y_validation, verbose = 0)
       validation_probabilities <- final_model |>
@@ -812,8 +788,6 @@ train_pixel_model <- function(
       )
     }
   }
-
-  # Prepare return object
 
   result <- list(
     model = final_model,
@@ -916,7 +890,7 @@ apply_pixel_model <- function(
   evaluate = "auto",
   verbose = TRUE
 ) {
-  # Input validation
+  # Input validation ----------------------------------------------------------
   evaluate <- validate_evaluate_param(evaluate)
   if (!is.logical(verbose) || length(verbose) != 1 || is.na(verbose)) {
     cli::cli_abort("verbose must be a single logical value (TRUE or FALSE)")
@@ -939,24 +913,22 @@ apply_pixel_model <- function(
     )
   }
 
-  # Extract required elements from the model
   model <- nn_model$model
   class_names <- nn_model$classes
   input_shape <- nn_model$input_shape
   land_cover_values <- nn_model$land_cover_values
 
-  # Expected dimensions from training
+  # Model input geometry
   expected_height <- input_shape[1]
   expected_width <- input_shape[2]
 
-  # Validate landscapes structure
   if (!is.list(landscapes) && !is_landscape(landscapes)) {
     cli::cli_abort(
       "'landscapes' must be a landscape object or list of landscapes"
     )
   }
 
-  # If landscapes is a single landscape, wrap it into a list
+  # Normalize a single landscape to the list form used below
   if (is_landscape(landscapes)) {
     landscapes <- list(landscapes)
   }
@@ -967,7 +939,6 @@ apply_pixel_model <- function(
     )
   }
 
-  # Check if landscapes is a list of landscape objects
   valid_landscapes <- vapply(landscapes, is_landscape, logical(1))
   if (any(!valid_landscapes)) {
     invalid_indices <- which(!valid_landscapes)
@@ -979,7 +950,7 @@ apply_pixel_model <- function(
 
   abort_on_multilayer_landscapes(landscapes, "classify")
 
-  # Get the training labels (pattern field of the landscape object) if available
+  # Preserve available landscape metadata in the output
   landscape_pattern <- vapply(
     landscapes,
     function(l) as.character(l$pattern),
@@ -997,10 +968,8 @@ apply_pixel_model <- function(
   check_categorical_values(landscapes, "classify")
   abort_on_unseen_land_cover_values(landscapes, land_cover_values)
 
-  # Warn on aspect-ratio distortion. Resizing a landscape whose aspect ratio
-  # differs from the training grid stretches it anisotropically which is a
-  # geometric distortion of the pattern. (Extent differences alone are fine: the
-  # resize handles them isotropically when the aspect ratio matches.)
+  # Resizing to a different aspect ratio distorts the pattern; extent changes
+  # alone resize isotropically when the aspect ratio matches
   target_aspect <- expected_width / expected_height
   app_aspect <- vapply(
     landscapes,
@@ -1017,8 +986,7 @@ apply_pixel_model <- function(
     ))
   }
 
-  # Convert all landscapes to arrays, resizing if needed
-  # First, check which ones need resizing
+  # Resizing ------------------------------------------------------------------
   resize_info <- lapply(landscapes, function(l) {
     landscape_data <- l$data
     current_height <- terra::nrow(landscape_data)
@@ -1033,7 +1001,6 @@ apply_pixel_model <- function(
     )
   })
 
-  # Print batched resize message
   needs_resize <- vapply(
     resize_info,
     function(x) x$needs_resize,
@@ -1042,7 +1009,6 @@ apply_pixel_model <- function(
   if (any(needs_resize)) {
     n_resize <- sum(needs_resize)
 
-    # Get unique dimension pairs
     unique_dims <- unique(lapply(resize_info[needs_resize], function(x) {
       c(x$current_height, x$current_width)
     }))
@@ -1061,13 +1027,12 @@ apply_pixel_model <- function(
     }
   }
 
-  # Now do the actual conversion/resizing
+  # Encode each landscape after any required resizing
   landscape_arrays <- lapply(seq_along(landscapes), function(i) {
     l <- landscapes[[i]]
     landscape_data <- l$data
 
     if (resize_info[[i]]$needs_resize) {
-      # Create template raster with target dimensions
       template <- terra::rast(
         nrows = expected_height,
         ncols = expected_width,
@@ -1075,7 +1040,7 @@ apply_pixel_model <- function(
         crs = terra::crs(landscape_data)
       )
 
-      # Resample using nearest neighbor to preserve binary values
+      # Nearest-neighbor resampling preserves categorical land-cover values
       landscape_data <- terra::resample(
         landscape_data,
         template,
@@ -1092,7 +1057,6 @@ apply_pixel_model <- function(
   # Get predictions
   pred <- predict(model, landscape_data, verbose = 0)
 
-  # Add classes as column names
   colnames(pred) <- class_names
 
   # Turn into a tibble and add columns for predicted class and its score
@@ -1106,17 +1070,15 @@ apply_pixel_model <- function(
   predicted_class <- colnames(pred)[max_col]
   predictions$predicted_class <- predicted_class
 
-  # Add landscape information
   predictions$landscape_id <- seq_len(nrow(predictions))
 
   if (any(!is.na(landscape_names))) {
     predictions$landscape_name <- landscape_names
   }
 
-  # Always add actual_class column
+  # Keep a stable schema even when every true class is unknown
   predictions$actual_class <- landscape_pattern
 
-  # Reorder columns: landscape info, then actual (if present), then predicted
   predictions <- predictions |>
     dplyr::relocate(c(
       landscape_id,
@@ -1211,7 +1173,6 @@ compile_keras_model <- function(
   loss = "categorical_crossentropy",
   optimizer = "adam"
 ) {
-  # Create optimizer based on type
   opt <- switch(
     tolower(optimizer),
     "adam" = keras3::optimizer_adam(learning_rate = learning_rate),
@@ -1266,7 +1227,7 @@ create_multiscale_model <- function(
     ) |>
     keras3::layer_activation("relu") |>
     keras3::layer_max_pooling_2d(pool_size = c(2, 2)) |>
-    # Additional feature extraction
+    # Refine features after the first pooling stage
     keras3::layer_conv_2d(
       filters = 64,
       kernel_size = c(3, 3),

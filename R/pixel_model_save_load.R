@@ -75,7 +75,7 @@ save_pixel_model <- function(nn_model, path, overwrite = FALSE) {
 
   metadata <- nn_model
   metadata$model <- NULL
-  # Version the bundle structure independently of the trained model.
+  # Version the bundle structure independently of the trained model
   bundle_metadata <- list(
     format_version = 1L,
     metadata = metadata

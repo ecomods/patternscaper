@@ -504,7 +504,7 @@ apply_metric_model <- function(
   evaluate = "auto",
   verbose = TRUE
 ) {
-  # Input validation ---------------------------------------------------------
+  # Input validation ----------------------------------------------------------
   evaluate <- validate_evaluate_param(evaluate)
 
   if (!is.logical(verbose) || length(verbose) != 1) {
@@ -523,7 +523,6 @@ apply_metric_model <- function(
     )
   }
 
-  # Validate landscapes structure
   if (!is.list(landscapes) && !is_landscape(landscapes)) {
     cli::cli_abort(
       "'landscapes' must be a landscape object or list of landscapes"
@@ -552,16 +551,14 @@ apply_metric_model <- function(
     )
   }
 
-  # Calculate the necessary metrics for the input landscape(s)
+  # Application metrics -------------------------------------------------------
   metrics <- calculate_metrics(
     landscapes = landscapes,
     metrics = metrics_to_calculate,
     level = level
   )
 
-  # Warn if the application landscapes differ in geometry from the training data
-  # (extent, resolution or aspect ratio). Skipped when the model stores no
-  # training geometry, e.g. one trained before geometry was recorded.
+  # Skip geometry comparisons for older models without a training summary
   check_geometry(
     dplyr::distinct(
       metrics,
@@ -575,19 +572,17 @@ apply_metric_model <- function(
     verbose = verbose
   )
 
-  # Filter to only features needed by the model
   metrics <- metrics |> dplyr::filter(metric %in% nn_model$features)
 
-  # Convert metrics to wide format with 1 row per landscape
+  # One row per landscape and one predictor per metric
   metrics_wide <- metrics_to_wide(metrics)
 
-  # Prepare predictors -------------------------------------------------------
+  # Predictors ----------------------------------------------------------------
   predictor_names <- setdiff(
     colnames(metrics_wide),
     c("landscape_id", "landscape_name", "pattern")
   )
 
-  # Validate we have all required features
   missing_features <- setdiff(nn_model$features, predictor_names)
 
   if (length(missing_features) > 0) {
@@ -598,15 +593,13 @@ apply_metric_model <- function(
     ))
   }
 
-  # Select only model features in correct order
+  # Preserve the feature order used to train the model
   predictors <- metrics_wide |>
     dplyr::select(dplyr::all_of(nn_model$features))
 
-  # Deal with NA values -------------------------------------------------------
-  # Unlike training, no landscape is be dropped here:
-  # Landscapes whose required metrics could not all be calculated are
-  # kept and returned unclassified instead. Dropping the metric is not an option,
-  # since the network needs exactly the feature set it was trained on.
+  # Incomplete predictors -----------------------------------------------------
+  # Keep incomplete landscapes and return NA predictions; dropping a metric
+  # would change the feature set expected by the model
   incomplete <- rowSums(is.na(predictors)) > 0
 
   if (all(incomplete)) {
@@ -624,21 +617,21 @@ apply_metric_model <- function(
     ))
   }
 
-  # Scale the metrics using the same parameters as during training
+  # Reuse the scaling fitted during training
   predictors_scaled <- scale(
     predictors[!incomplete, , drop = FALSE],
     center = scaling_params$center,
     scale = scaling_params$scale
   )
 
-  # Make predictions ---------------------------------------------------------
+  # Predictions ---------------------------------------------------------------
   pred_raw <- predict(
     model,
     newdata = predictors_scaled
   )
 
   # The predicted class comes from the raw outputs, never from the reported
-  # scores, so the reporting step cannot move a class boundary.
+  # scores, so reporting cannot move a class boundary
   predicted_complete <- class_names[max.col(pred_raw, ties.method = "first")]
 
   # Map the raw outputs onto the probability simplex for reporting
@@ -653,27 +646,24 @@ apply_metric_model <- function(
   )
   pred[!incomplete, ] <- pred_complete
 
-  # Turn into a tibble and add columns for predicted class and its score.
   predictions <- tibble::as_tibble(pred)
 
   score <- rep(NA_real_, nrow(pred))
   predicted_class <- rep(NA_character_, nrow(pred))
 
-  # The reported score is the score of the predicted class, i.e. the row maximum.
+  # Report the score of the predicted class, which is the row maximum
   score[!incomplete] <- apply(pred_complete, 1, max)
   predicted_class[!incomplete] <- predicted_complete
 
   predictions$score <- score
   predictions$predicted_class <- predicted_class
 
-  # Reorder the columns
   predictions <- predictions |>
     dplyr::relocate(c(
       predicted_class,
       score
     ))
 
-  # Add all landscape information available to the output
   landscape_info <- metrics_wide |>
     dplyr::select(
       dplyr::any_of(c("landscape_id", "landscape_name", "pattern"))

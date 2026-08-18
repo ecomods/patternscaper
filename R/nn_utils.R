@@ -85,8 +85,8 @@ set_random_seed <- function(seed) {
 #' @param metrics A data frame containing landscape metrics in long format.
 #'   Expected columns include: `metric`, `class`, `value`, `pattern`.
 #'   Must include either `landscape_id` or `landscape_name` for identification.
-#' @param return_only_metrics Logical. Whether to return only the metrics or
-#'   also the the identification columns in output (default: FALSE).
+#' @param return_only_metrics Logical. Whether to return only the metric columns
+#'   or retain the identification columns (default: FALSE).
 #'
 #' @return A data frame in wide format where each metric becomes a column and each
 #'   row is a landscape. Metric names already include class IDs when applicable
@@ -113,14 +113,13 @@ metrics_to_wide <- function(metrics, return_only_metrics = FALSE) {
       "pattern"
     )))
 
-  # Pivot to wide format
   metrics_wide <- metrics |>
     tidyr::pivot_wider(
       names_from = metric,
       values_from = value
     )
 
-  # Drop ID column unless requested
+  # Return predictors only when requested
   if (return_only_metrics) {
     metrics_wide <- metrics_wide |>
       dplyr::select(-any_of(c("landscape_id", "landscape_name", "pattern")))
@@ -157,7 +156,7 @@ project_simplex <- function(v) {
 
   # Covers NA and NaN, but also Inf: an infinite score makes `running_total`
   # infinite and the threshold test below NaN, which would silently select the
-  # wrong active set rather than fail.
+  # wrong active set rather than fail
   if (any(!is.finite(v))) {
     return(rep(NA_real_, length(v)))
   }
@@ -166,7 +165,7 @@ project_simplex <- function(v) {
   running_total <- cumsum(sorted)
 
   # Number of classes that keep positive mass. The j = 1 term is always
-  # positive, so this is never empty.
+  # positive, so this is never empty
   n_positive <- max(which(
     sorted + (1 - running_total) / seq_along(v) > 0
   ))
@@ -197,7 +196,7 @@ project_simplex_rows <- function(x) {
 
   # Filling a pre-allocated matrix keeps the shape right for any number of rows
   # or classes, including the degenerate ones, without depending on how apply()
-  # or vapply() simplify their result.
+  # or vapply() simplify their result
   projected <- matrix(
     NA_real_,
     nrow = nrow(x),
@@ -472,7 +471,7 @@ encode_land_cover_raster <- function(landscape_data, land_cover_values) {
   )
 
   for (i in seq_along(land_cover_values)) {
-    encoded[, , i] <- raster_array[, , 1] == land_cover_values[i]
+    encoded[,, i] <- raster_array[,, 1] == land_cover_values[i]
   }
 
   encoded
@@ -498,9 +497,13 @@ abort_on_unseen_land_cover_values <- function(
   invalid <- which(lengths(unseen) > 0)
 
   if (length(invalid) > 0) {
-    details <- vapply(invalid, function(i) {
-      paste0(i, ": ", paste(sort(unseen[[i]]), collapse = ", "))
-    }, character(1))
+    details <- vapply(
+      invalid,
+      function(i) {
+        paste0(i, ": ", paste(sort(unseen[[i]]), collapse = ", "))
+      },
+      character(1)
+    )
     cli::cli_abort(c(
       "Cannot {action} landscapes with land-cover codes not seen during training.",
       "x" = "Unknown value{?s} by landscape index: {paste(details, collapse = '; ')}.",
@@ -543,12 +546,11 @@ validate_cv_params <- function(
   n_predictors = NULL,
   min_samples_per_fold = 3
 ) {
-  # Get sample counts
   class_counts <- table(patterns)
   min_class_count <- min(class_counts)
   total_samples <- length(patterns)
 
-  # Class-composition checks run for every cv_method ("none" included)
+  # Report class composition even when cross-validation is disabled
   if (!is.null(n_predictors)) {
     samples_per_predictor <- total_samples / n_predictors
     if (samples_per_predictor < 5) {
@@ -572,7 +574,6 @@ validate_cv_params <- function(
     )
   }
 
-  # Return early for cv_method = "none"
   if (cv_method == "none") {
     return(list(
       cv_method = cv_method,
@@ -584,7 +585,7 @@ validate_cv_params <- function(
 
   # Validate and adjust k-fold parameters
   if (cv_method == "k-fold") {
-    # Calculate maximum suitable folds to maintain min_samples_per_fold
+    # Reduce k as needed to preserve the minimum class count per fold
     max_suitable_folds <- floor(min_class_count / min_samples_per_fold)
 
     # If we can't maintain enough samples even with 2 folds
@@ -602,9 +603,8 @@ validate_cv_params <- function(
     }
   }
 
-  # Validate LOO parameters
   if (cv_method == "loo") {
-    # Check for singleton classes (fatal for LOO)
+    # LOO requires at least two samples per class
     if (any(class_counts == 1)) {
       singleton_classes <- names(class_counts[class_counts == 1])
       cli::cli_abort(
@@ -612,8 +612,7 @@ validate_cv_params <- function(
       )
     }
 
-    # Warn if LOO will be computationally expensive
-    # LOO is reasonable up to ~200 samples for metrics, ~100 for keras
+    # LOO fits one model per sample, so large datasets are expensive
     if (total_samples > 100) {
       cli::cli_alert_info(
         "LOO CV with {total_samples} samples may be slow. Consider k-fold CV instead."
@@ -646,7 +645,7 @@ validate_cv_params <- function(
 find_balanced_cv_folds <- function(patterns, cv_folds) {
   n_samples <- length(patterns)
 
-  # For k-fold: stratified sampling to ensure class balance across folds
+  # Stratify by cycling shuffled fold ids within each class
   fold_indices <- integer(n_samples)
   class_names <- unique(patterns)
 
@@ -755,11 +754,13 @@ validate_pixel_validation_landscapes <- function(
   dimensions <- lapply(validation_landscapes, function(l) {
     c(terra::nrow(l$data), terra::ncol(l$data))
   })
-  wrong_dimensions <- which(!vapply(
-    dimensions,
-    function(x) identical(as.integer(x), as.integer(expected_dimensions)),
-    logical(1)
-  ))
+  wrong_dimensions <- which(
+    !vapply(
+      dimensions,
+      function(x) identical(as.integer(x), as.integer(expected_dimensions)),
+      logical(1)
+    )
+  )
   if (length(wrong_dimensions) > 0) {
     cli::cli_abort(c(
       "Validation landscapes must have the same dimensions as the training landscapes.",
@@ -862,7 +863,6 @@ evaluate_cv_performance <- function(
   verbose = TRUE,
   return_predictions = TRUE
 ) {
-  # Validate inputs
   if (length(cv_predictions) != length(cv_actual)) {
     cli::cli_abort("Length of cv_predictions and cv_actual must be the same")
   }
@@ -870,7 +870,6 @@ evaluate_cv_performance <- function(
     cli::cli_abort("Length of cv_probabilities and cv_actual must be the same")
   }
 
-  # Add validation at the start of the function
   if (
     !all(
       vapply(cv_probabilities, is.matrix, logical(1)) |
@@ -906,7 +905,7 @@ evaluate_cv_performance <- function(
 
   # Get class counts. A class the model knows but that never occurs in
   # cv_actual is absent from this table, so indexing by class_names gives NA
-  # for it rather than a count of 0 landscapes actually seen.
+  # for it rather than a count of 0 landscapes actually seen
   class_counts <- table(unlist(cv_actual))
   class_counts <- stats::setNames(
     as.numeric(class_counts[class_names]),
@@ -938,7 +937,7 @@ evaluate_cv_performance <- function(
     )
   }
 
-  # Calculate overall accuracy over the whole table, so that landscapes with no
+  # Calculate accuracy over the whole table so landscapes with no
   # prediction count against it
   accuracy <- sum(correctly_predicted) / sum(conf_matrix)
 
@@ -998,10 +997,8 @@ evaluate_cv_performance <- function(
     ))
 
   if (verbose) {
-    # Header
     cli::cli_h2("Cross-validation results")
 
-    # CV method info
     cv_label <- ifelse(
       cv_method == "loo",
       "leave-one-out",
@@ -1010,11 +1007,9 @@ evaluate_cv_performance <- function(
     cli::cli_alert_info("Method: {cv_label} cross-validation")
     cli::cli_alert_info("Overall accuracy: {round(accuracy * 100, 2)}%")
 
-    # Confusion matrix
     cli::cli_h3("Confusion matrix")
     print(conf_matrix)
 
-    # Per-class metrics
     cli::cli_h3("Per-class performance")
     print(per_class_metrics)
   }
@@ -1094,7 +1089,7 @@ evaluate_predictions <- function(
     return(NULL)
   }
 
-  # NA and "unclassified" both mean the true class is unknown.
+  # NA and "unclassified" both mean the true class is unknown
   actual_class <- predictions[["actual_class"]]
   scorable <- !is.na(actual_class) & actual_class != "unclassified"
 
@@ -1170,8 +1165,8 @@ evaluate_predictions <- function(
 #' that are undefined for the given landscapes carry no information and would
 #' otherwise remove the entire dataset). Then drops the row-wise counterpart:
 #' landscapes that are NA for every remaining predictor, which carry no
-#' information either. Only then removes landscapes that still have NA values in
-#' some — but not all — remaining predictor columns. Issues warnings listing
+#' information either. Only then resolves values missing from some, but not all,
+#' landscapes. Issues warnings listing
 #' dropped metrics and removed landscapes, and aborts if no usable predictors
 #' or landscapes remain.
 #'
@@ -1182,7 +1177,8 @@ evaluate_predictions <- function(
 #'   affected metrics and keeps every landscape; \code{"drop_landscapes"}
 #'   removes the affected landscapes and keeps every metric.
 #'
-#' @return Data frame with incomplete landscapes removed.
+#' @return Data frame after resolving incomplete predictors according to
+#'   \code{na_action}.
 #'
 #' @keywords internal
 #' @importFrom cli cli_warn cli_abort
@@ -1213,7 +1209,7 @@ remove_incomplete_landscapes <- function(
     predictor_cols <- setdiff(predictor_cols, all_na_cols)
   }
 
-  # If no predictor columns remain there is nothing to train or predict on.
+  # No predictor columns means there is nothing to train or predict on
   if (length(predictor_cols) == 0) {
     cli::cli_abort(c(
       "No landscapes remaining after removing those with incomplete metrics",
@@ -1221,10 +1217,8 @@ remove_incomplete_landscapes <- function(
     ))
   }
 
-  # Drop landscapes that are NA for every remaining predictor: a landscape without a
-  # single usable metric carries no information. Removing them here keeps
-  # a degenerate landscape from deciding what to drop when only some values are
-  # missing..
+  # Landscapes with no usable metric carry no information; remove them before
+  # partially missing values determine which metrics or landscapes to drop
   all_na_rows <- rowSums(is.na(metrics_wide[, predictor_cols, drop = FALSE])) ==
     length(predictor_cols)
 
@@ -1246,10 +1240,10 @@ remove_incomplete_landscapes <- function(
     }
   }
 
-  # What remains are values missing for some but not all landscapes.
+  # What remains are values missing for some but not all landscapes
   # The user decides how to proceed in this case: dropping the metric costs one
   # predictor, dropping the landscapes costs training samples. Report both costs
-  # and let na_action decide.
+  # and let na_action decide
   na_rows <- rowSums(is.na(metrics_wide[, predictor_cols, drop = FALSE])) > 0
   incomplete_cols <- predictor_cols[vapply(
     predictor_cols,
@@ -1291,7 +1285,6 @@ remove_incomplete_landscapes <- function(
 
       metrics_wide <- metrics_wide[!na_rows, ]
 
-      # Check if we have any landscapes left
       if (nrow(metrics_wide) == 0) {
         cli::cli_abort(c(
           "No landscapes remaining after removing those with incomplete metrics",
@@ -1356,7 +1349,7 @@ fit_nn_model <- function(data, hidden, threshold, stepmax) {
   # Failure to converge is only a warning in neuralnet, and the object it
   # returns has no weights. Left alone it looks like a trained model and only
   # fails much later, inside predict(), with a message about non-numeric
-  # arguments to a matrix product. We want to give a more meaningful error here.
+  # arguments to a matrix product, so fail with context here
   if (is.null(model$weights)) {
     cli::cli_abort(c(
       "Neural network training did not converge.",
