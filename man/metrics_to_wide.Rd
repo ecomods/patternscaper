@@ -2,7 +2,7 @@
 % Please edit documentation in R/nn_utils.R
 \name{metrics_to_wide}
 \alias{metrics_to_wide}
-\title{Convert landscape metrics from long to wide format}
+\title{Convert Landscape Metrics from Long to Wide Format}
 \usage{
 metrics_to_wide(metrics, return_only_metrics = FALSE)
 }
@@ -21,7 +21,7 @@ A data frame in wide format where each metric becomes a column and each
   \code{\link{calculate_metrics}}, not here.
 }
 \description{
-This function transforms landscape metrics from a long format to a wide
-format that is needed to train nn models
+Reshapes landscape metrics to one row per landscape and one column per metric
+for neural-network training.
 }
 \keyword{internal}

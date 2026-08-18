@@ -2,17 +2,17 @@
 % Please edit documentation in R/landscape_utils.R
 \name{matrix_to_raster}
 \alias{matrix_to_raster}
-\title{Convert matrix to SpatRaster}
+\title{Convert a Matrix to a SpatRaster}
 \usage{
 matrix_to_raster(x)
 }
 \arguments{
-\item{x}{Matrix; numeric matrix to convert.}
+\item{x}{Numeric matrix to convert.}
 }
 \value{
 A SpatRaster object.
 }
 \description{
-Internal utility function to convert a numeric matrix to a SpatRaster object.
+Converts a numeric matrix to a SpatRaster object.
 }
 \keyword{internal}

@@ -11,14 +11,15 @@ knitr:
     cache: true
 ---
 
-This vignette shows how to classify landscape patterns using a convolutional neural network (Keras backend) trained directly on landscape raster data.
+This vignette shows how to train a convolutional neural network on landscape
+rasters and use it to classify spatial patterns.
 
 ```{r}
 #| label: setup
 library(patternscaper)
 ```
 
-The workflow consists of the following steps:
+The workflow has three steps:
 
 1. Generate training landscapes with known patterns using the `create_landscapes()` function.
 2. Train a neural network on the landscape pixel data using the `train_pixel_model()` function.
@@ -26,9 +27,9 @@ The workflow consists of the following steps:
 
 ## Setup Keras
 
-Models are trained using the R package `keras3`. It requires a working installation of TensorFlow.
-
-You can refer to our [installation guide](install-keras.html) and the official [`keras3` package website](https://keras3.posit.co/) for instructions on how to install Keras and TensorFlow.
+Pixel models use `keras3` with a TensorFlow backend. See the
+[installation guide](install-keras.html) and official
+[`keras3` documentation](https://keras3.posit.co/) for setup instructions.
 
 Use the package's backend check to confirm that `keras3` can reach TensorFlow:
 
@@ -54,8 +55,9 @@ set.seed(123456)
 
 ## Step 1: Generate Training Landscapes
 
-You can generate a set of training landscapes with known patterns.
-See [landscape generation vignette](landscape-generation.html) for details on landscape generation and available patterns and options.
+Generate training landscapes with known patterns. The
+[landscape generation vignette](landscape-generation.html) describes the
+available patterns and options.
 
 ```{r}
 #| label: generate-landscapes
@@ -67,8 +69,8 @@ training_landscapes <- create_landscapes(
 
 ## Step 2: Train Neural Network
 
-The model can be trained with or without cross-validation. Valid methods for 
-the cross-validation method `cv_method` are:
+The model can be trained with or without cross-validation. Valid values of
+`cv_method` are:
 
 - `"none"`: No cross-validation, train on all data.
 - `"k-fold"`: k-fold cross-validation with `cv_folds` number of folds.
@@ -101,8 +103,8 @@ function trains a fresh final model on all supplied landscapes.
 :::{.callout-note}
 ## Low fold accuracy
 
-The function will print fold accuracies during training (see below). If the accuracy is low,
-consider increasing the number of training landscapes or check the function help for other options to improve model performance.
+If fold accuracy is low, increase the number of training landscapes or review
+the tuning options in `?train_pixel_model`.
 :::
 
 ```{r}
@@ -179,9 +181,8 @@ performance because the validation data influenced model development. Use
 
 ## Save and Reload the Model
 
-A pixel model contains both a Keras network and R metadata. Save the complete
-classifier with
-`save_pixel_model()` and reload it with `load_pixel_model()`:
+A pixel model contains a Keras network and R metadata. Save the complete
+classifier with `save_pixel_model()` and reload it with `load_pixel_model()`:
 
 ```{r}
 #| label: save-pixel-model
@@ -192,14 +193,14 @@ model <- load_pixel_model(pixel_model_bundle)
 
 The supplied path is a directory containing `model.keras` and `metadata.rds`.
 Treat the complete directory as one model: move, copy, or archive the directory
-rather than the single files inside it. If a model already exists it cannot be overwritten, unless `overwrite = TRUE` is set.
+rather than individual files. Set `overwrite = TRUE` to replace an existing
+model bundle.
 
 ## Step 3: Classify New Landscapes
 
-Finally, you can create some new test landscapes and classify them using the trained model. In this example, we create 20 new landscapes for testing. 
-
-In reality this could be landscapes read in from files or created in other ways.
-For details on importing own landscapes, see the [importing landscapes vignette](importing-landscapes.html).
+Create test landscapes and classify them with the trained model. These could
+instead be imported data or simulation output; see the
+[importing landscapes vignette](importing-landscapes.html).
 
 Application landscapes must contain one raster layer with numeric categorical
 values and have no `NA` cells. They must use the same category codes as the
@@ -224,7 +225,10 @@ If test landscapes have been created with `create_landscapes()`, their true patt
 The result always has the same two parts, `$predictions` and `$performance`.
 
 :::{.callout-note}
-Performance is evaluated automatically when the true patterns are known. Landscapes that carry a `pattern` but you don't want to evaluate model performance with them but only classify them can skip evaluation with `evaluate = "none"`. Setting `evaluate = "required"` raises an error instead of quietly returning no performance when the true patterns turn out to be missing in some or all cases.
+Performance is evaluated automatically when true patterns are known. Use
+`evaluate = "none"` to classify without evaluation, even when the landscapes
+carry pattern labels. Use `evaluate = "required"` to raise an error when
+performance cannot be evaluated.
 :::
 
 
@@ -272,8 +276,9 @@ And other metrics like accuracy, precision, recall, and F1-score:
 classification$performance$per_class_metrics
 ```
 
-To visualize the classified landscapes along with their true and predicted patterns
-use the function `plot_classified_landscapes`. Correctly classified landscapes are shown in blue, misclassified ones in bold orange. To plot only misclassified landscapes, set `only_misclassified = TRUE`.
+Use `plot_classified_landscapes()` to show landscapes with their true and
+predicted patterns. Correct classifications are blue and misclassifications are
+bold orange. Set `only_misclassified = TRUE` to show only misclassifications.
 
 :::{.callout-note}
 If you classified landscapes where the true patterns are not known, the plot will
@@ -322,6 +327,6 @@ custom_model <- train_pixel_model(
 ```
 
 The final layer must contain one softmax output for each pattern class. The
-`n_classes` argument supplies this number automatically. The built-in architecture
-is recommended unless the user is comfortable designing and evaluating neural
+`n_classes` argument supplies this number automatically. Use the built-in
+architecture unless you are comfortable designing and evaluating neural
 networks.

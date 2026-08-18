@@ -17,7 +17,7 @@ create_landscape_diffuse <- function(
   steepness = 0.5,
   rotation = 0
 ) {
-  # Validate inputs.
+  # Validate inputs
   validate_dimensions(width = width, height = height)
   validate_boundary_position(boundary_position = boundary_position)
   validate_rotation(rotation = rotation)
@@ -29,7 +29,7 @@ create_landscape_diffuse <- function(
     ))
   }
 
-  # Pad rotated landscapes before cropping to avoid clipped corners.
+  # Pad rotated landscapes before cropping to avoid clipped corners
   rotation_scale_factor <- 1.5
   height_actual <- ifelse(rotation == 0, height, height * rotation_scale_factor)
   width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
@@ -47,14 +47,14 @@ create_landscape_diffuse <- function(
     relative_pos <- (i - transition_center) / (height_actual * 0.5)
 
     # Above the boundary, vegetation probability is 1. Below it, a power
-    # curve gives sharper transitions at lower steepness values.
+    # curve gives sharper transitions at lower steepness values
     if (relative_pos <= 0) {
       prob <- 1
     } else {
       prob <- max(0, 1 - (relative_pos)^steepness)
     }
 
-    # Draw cells independently within each row.
+    # Draw cells independently within each row
     for (j in 1:width_actual) {
       if (stats::runif(1) < prob) {
         mat[i, j] <- 1
@@ -72,7 +72,7 @@ create_landscape_diffuse <- function(
     )
   }
 
-  # Store the raster and its generation metadata.
+  # Store the raster and its generation metadata
   landscape(
     data = mat,
     pattern = "diffuse",

@@ -42,7 +42,7 @@ create_landscape_sharp <- function(
     )
   }
 
-  # Store the raster and its generation metadata.
+  # Store the raster and its generation metadata
   landscape(
     data = mat,
     pattern = "sharp",

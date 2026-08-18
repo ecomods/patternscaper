@@ -7,27 +7,26 @@
 rotate_and_crop_matrix(mat, rotation, target_width, target_height)
 }
 \arguments{
-\item{mat}{A matrix representing the landscape to be rotated and cropped.}
+\item{mat}{Landscape matrix to rotate and crop.}
 
-\item{rotation}{Numeric value specifying the rotation angle (in degrees).}
+\item{rotation}{Numeric rotation angle in degrees.}
 
-\item{target_width}{Integer specifying the desired number of columns in the output.}
+\item{target_width}{Integer. Number of columns in the output.}
 
-\item{target_height}{Integer specifying the desired number of rows in the output.}
+\item{target_height}{Integer. Number of rows in the output.}
 }
 \value{
 A matrix with \code{target_height} rows and \code{target_width} columns,
-  rotated and cropped from the input landscape, with missing values filled.
+  rotated and cropped from the input landscape.
 }
 \description{
-Rotates a given landscape matrix by a specified angle and crops the rotated
-matrix to the target dimensions, centering the crop. Any missing values
-after cropping are filled using nearest neighbor interpolation and binarized.
+Rotates a landscape matrix, takes a centered crop of the requested size,
+fills missing values by linear interpolation, and restores binary values.
 }
 \details{
 The function uses \code{omnibus::rotateMatrix} for rotation and
-  centers the crop on the rotated matrix. Missing values after cropping are
-  filled using the \code{fill_and_binarize_matrix} function.
+  \code{fill_and_binarize_matrix} to fill missing values and binarize the
+  result.
 }
 \seealso{
 \code{\link[omnibus]{rotateMatrix}}, \code{fill_and_binarize_matrix}

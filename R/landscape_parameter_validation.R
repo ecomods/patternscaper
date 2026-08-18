@@ -70,7 +70,7 @@ validate_rotation <- function(rotation, allow_range = FALSE) {
     ))
   }
 
-  # Check values before length so an invalid angle is reported directly.
+  # Check values before length so an invalid angle is reported directly
   if (!allow_range) {
     if (length(rotation) != 1) {
       cli::cli_abort(c(
@@ -518,7 +518,7 @@ validate_params_list <- function(params_list, patterns) {
     }
 
     # Use the constructor tag to catch a parameter list filed under the wrong
-    # pattern before validating it against unrelated specifications.
+    # pattern before validating it against unrelated specifications
     if (inherits(pattern_params, "landscape_params")) {
       params_pattern <- attr(pattern_params, "pattern")
 
@@ -584,7 +584,7 @@ validate_params_list <- function(params_list, patterns) {
 validate_sampled_params <- function(sampled_params, pattern) {
   pattern_specs <- get_valid_param_specs()[[pattern]]
 
-  # Exclude direct create_landscape() arguments, which have no pattern spec.
+  # Exclude direct create_landscape() arguments, which have no pattern spec
   fixed <- c("width", "height", "rotation")
 
   for (param_name in setdiff(names(sampled_params), fixed)) {

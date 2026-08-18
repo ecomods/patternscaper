@@ -30,14 +30,17 @@ This vignette shows how to calculate landscape metrics from `landscape` objects 
 
 ## Calculating Landscape Metrics
 
-Landscape metrics can be calculated using the `calculate_metrics()` function. By default, this function computes all landscape metrics available in the [`landscapemetrics` package](https://r-spatialecology.github.io/landscapemetrics/). Users can also specify a subset of metrics to calculate by providing a vector of metric names. To find available metric names, use:
+By default, `calculate_metrics()` computes all available metrics from the
+[`landscapemetrics` package](https://r-spatialecology.github.io/landscapemetrics/).
+Use `landscapemetrics::list_lsm()` to find metric names:
 
 ```{r}
 # Select either the landscape-level or class-level metrics
 landscapemetrics::list_lsm(level = "landscape")
 ```
 
-Metrics can be calculated on the landscape level (one metric for the entire landscape) or on the class level (one metric per land cover class in the landscape).
+Metrics can be calculated at the landscape level (one value for the entire
+landscape) or class level (one value per land-cover class).
 
 ```{r}
 # Calculate all landscape-level metrics for the sample landscapes
@@ -165,7 +168,7 @@ plot_metrics(
 
 Long names are wrapped over several lines. The width is chosen from the number
 of panel columns, which works for most selections, but it counts characters
-rather than measuring the rendered text — so if your labels look cramped or too
+rather than measuring the rendered text. If your labels look cramped or too
 sparse at your figure size, set `label_wrap_width` yourself:
 
 ```{r}

@@ -23,7 +23,7 @@
 #' @importFrom terra res ext values
 #' @export
 print.landscape <- function(x, ...) {
-  # Get basic properties of the landscape
+  # Display labels
   name_str <- if (is.na(x$name)) "unnamed" else paste0('"', x$name, '"')
   pattern_str <- if (is.na(x$pattern)) {
     "unclassified"
@@ -31,11 +31,10 @@ print.landscape <- function(x, ...) {
     paste0("pattern: ", x$pattern)
   }
 
-  # Print header
   cat("Landscape:", name_str, "[", pattern_str, "]\n")
   cat("-----------------------------------------\n")
 
-  # Extract raster information
+  # Raster summary
   dims <- dim(x$data)
   res <- terra::res(x$data)
   ext <- terra::ext(x$data)
@@ -69,16 +68,14 @@ print.landscape <- function(x, ...) {
   }
   cat("\n")
 
-  # Print parameters if available
+  # Generation parameters
   if (!is.null(x$params) && length(x$params) > 0) {
-    # Format parameters as a compact string
     params_str <- paste(names(x$params), "=", x$params, collapse = ", ")
     cat("Parameters:", params_str, "\n")
   } else {
     cat("Parameters: none\n")
   }
 
-  # Return object invisibly
   invisible(x)
 }
 
@@ -112,32 +109,29 @@ print.landscape <- function(x, ...) {
 #' @importFrom ggplot2 ggplot aes geom_raster coord_equal theme_minimal element_blank
 #' @export
 plot.landscape <- function(x, ...) {
-  # Validate input
   if (!is_landscape(x)) {
     cli::cli_abort("'x' must be a landscape object")
   }
 
-  # Convert raster to data frame for plotting
+  # Convert raster cells to plotting data
   df <- terra::as.data.frame(x$data, xy = TRUE)
   names(df)[3] <- "value" # Rename the value column
 
-  # Determine if data is categorical/discrete
+  # Treat small integer sets as categorical
   unique_values <- unique(df$value[!is.na(df$value)])
   is_discrete <- length(unique_values) < 10 &&
     all(unique_values == round(unique_values))
 
-  # If the values are discrete, convert to factor
   if (is_discrete) {
-    # Always use sorted numeric values as factor levels for consistency
+    # Keep factor levels in numeric order
     df$value <- factor(df$value, levels = sort(unique_values))
   }
 
-  # Create base plot
+  # Base plot
   p <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y, fill = value)) +
     ggplot2::geom_raster() +
     ggplot2::coord_equal(expand = FALSE) +
     theme_landscape()
 
-  # Return the ggplot object
   return(p)
 }

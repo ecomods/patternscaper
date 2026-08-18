@@ -830,7 +830,7 @@ pattern_labyrinth <- function(
 rd_param_ranges <- function(pattern) {
   specs <- landscape_param_specs()[[pattern]]
 
-  # Report dimension-dependent ranges for the default landscape size.
+  # Report dimension-dependent ranges for the default landscape size
   width <- 100
   height <- 100
 

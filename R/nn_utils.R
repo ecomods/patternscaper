@@ -77,10 +77,10 @@ set_random_seed <- function(seed) {
   invisible(NULL)
 }
 
-#' Convert landscape metrics from long to wide format
+#' Convert Landscape Metrics from Long to Wide Format
 #'
-#' This function transforms landscape metrics from a long format to a wide
-#' format that is needed to train nn models
+#' Reshapes landscape metrics to one row per landscape and one column per metric
+#' for neural-network training.
 #'
 #' @param metrics A data frame containing landscape metrics in long format.
 #'   Expected columns include: `metric`, `class`, `value`, `pattern`.
@@ -96,14 +96,12 @@ set_random_seed <- function(seed) {
 #' @importFrom dplyr mutate select
 #' @importFrom tidyr pivot_wider
 metrics_to_wide <- function(metrics, return_only_metrics = FALSE) {
-  # Determine which ID column to use (prefer landscape_id over landscape_name)
   if (!any(c("landscape_id", "landscape_name") %in% colnames(metrics))) {
     cli::cli_abort(
       "Metrics must contain either 'landscape_id' or 'landscape_name' column"
     )
   }
 
-  # Build metric names with class ID when not at landscape level
   metrics <- metrics |>
     dplyr::select(dplyr::any_of(c(
       "landscape_id",
@@ -1190,7 +1188,7 @@ remove_incomplete_landscapes <- function(
   # Drop predictor columns that are NA for every landscape. These metrics are
   # undefined for the given landscapes (e.g. iji or rpr for two-class
   # landscapes) and carry no information. If left in place they would flag
-  # every landscape as incomplete and remove the entire dataset.
+  # every landscape as incomplete and remove the entire dataset
   all_na_cols <- predictor_cols[vapply(
     predictor_cols,
     function(col) all(is.na(metrics_wide[[col]])),

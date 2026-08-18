@@ -2,30 +2,27 @@
 % Please edit documentation in R/landscape_utils.R
 \name{fill_and_binarize_matrix}
 \alias{fill_and_binarize_matrix}
-\title{Fill NA Values in a Matrix Using Linear Interpolation}
+\title{Fill Missing Matrix Values by Linear Interpolation}
 \usage{
 fill_and_binarize_matrix(mat, binarize = TRUE)
 }
 \arguments{
-\item{mat}{A numeric matrix containing NA values to be filled.}
+\item{mat}{Numeric matrix containing missing values.}
 
-\item{binarize}{Logical. If TRUE (default), the output matrix will be binarized,
-with values < 0.5 set to 0 and values >= 0.5 set to 1. If FALSE, the
-interpolated values are returned as is.}
+\item{binarize}{Logical. Whether to set values below 0.5 to 0 and values at
+least 0.5 to 1 (default: TRUE).}
 }
 \value{
-A numeric matrix with NA values filled using linear interpolation.
-  If \code{binarize = TRUE}, the matrix will contain only 0s and 1s.
+A numeric matrix with missing values filled. If
+  \code{binarize = TRUE}, it contains only 0 and 1.
 }
 \description{
-This function fills NA values in a matrix by applying linear interpolation
-row-wise and then column-wise using \code{zoo::na.approx}. Optionally, the
-function can binarize the resulting matrix based on a threshold of 0.5.
+Applies \code{zoo::na.approx} across rows and then columns. The result can
+optionally be binarized at a threshold of 0.5.
 }
 \details{
 The function applies \code{zoo::na.approx} with \code{rule = 2} to
-  ensure that NA values at the edges are filled with the nearest non-NA value.
-  Interpolation is performed first row-wise, then column-wise to fill all
-  remaining NAs. If any NAs remain after both passes, they are filled with 0.
+  extend edge values. Missing values remaining after both passes are set to
+  0.
 }
 \keyword{internal}

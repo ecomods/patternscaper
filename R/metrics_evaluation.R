@@ -163,12 +163,10 @@ print.metrics_evaluation <- function(x, ...) {
 
 #' Evaluate Landscape Metrics
 #'
-#' Identifies the metrics most suitable for discriminating between different pattern types
-#' based on a specified selection method. The choice of method affects the ranking:
+#' Ranks metrics by how well they distinguish pattern types. The method affects
+#' the ranking:
 #' parametric methods assume linear relationships and normally distributed residuals,
 #' while non-parametric methods are more robust to outliers and deviations from normality.
-#' This function is useful for selecting informative metrics to train the
-#' metric-based neural network.
 #'
 #' @param metrics tibble. Metrics from calculate_metrics().
 #' @param metrics_number Integer. Number of top metrics to return (default: 10).

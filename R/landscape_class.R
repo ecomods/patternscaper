@@ -67,27 +67,24 @@ landscape <- function(
   name = NA_character_,
   params = NULL
 ) {
-  # Validate data type
+  # Validate inputs
   if (!is.matrix(data) && !inherits(data, "SpatRaster")) {
     cli::cli_abort("'data' must be a matrix or SpatRaster")
   }
 
-  # Validate pattern
   if (!is.na(pattern) && !is.character(pattern)) {
     cli::cli_abort("'pattern' must be a character string or NA")
   }
 
-  # Validate name
   if (!is.na(name) && !is.character(name)) {
     cli::cli_abort("'name' must be a character string or NA")
   }
 
-  # Validate params
   if (!is.null(params) && !is.list(params)) {
     cli::cli_abort("'params' must be a list or NULL")
   }
 
-  # Convert matrix to SpatRaster if needed
+  # Store all landscape data as a SpatRaster
   if (is.matrix(data)) {
     data <- matrix_to_raster(data)
   }

@@ -1,40 +1,20 @@
-# Plot a Single Landscape (internal)
+# Plot one landscape for plot_landscapes()
 #
-# Create a customizable plot of a single landscape object with options for
-# titles, legends, and display preferences. Used internally by
-# \code{\link{plot_landscapes}} to render each landscape in the grid; not
-# exported since \code{plot_landscapes()} also accepts a single landscape
-# directly.
-#
-# @param landscape A landscape object to plot.
-# @param title Character. Controls the plot title:
-#        - "name": uses only the landscape name
-#        - "pattern": uses only the landscape pattern
-#        - "both": uses "name (pattern)" format
-#        - "none": no title
-#        - Any other string: used as-is as a custom title
-#        Default: "pattern"
-# @param show_legend Logical. Whether to show legend (default: TRUE).
-# @param legend_title Character. Title for the legend (default: "Value").
-#
-# @return ggplot object. Plot of the landscape.
-# @keywords internal
-# @noRd
+# `title` accepts "name", "pattern", "both", "none", or a custom string
 plot_single_landscape <- function(
   landscape,
   title = "pattern",
   show_legend = TRUE,
   legend_title = "Value"
 ) {
-  # Validate landscape is a landscape object
+  # Validate input
   if (!is_landscape(landscape)) {
     cli::cli_abort("'landscape' must be a landscape object")
   }
 
-  # Generate the base plot using plot.landscape
   p <- plot(landscape)
 
-  # Build the title based on the options
+  # Resolve the requested title
   plot_title <- switch(
     title,
     name = if (!is.na(landscape$name)) landscape$name else "Unnamed landscape",
@@ -53,12 +33,11 @@ plot_single_landscape <- function(
     title # Use custom title as provided if not one of the special keywords
   )
 
-  # Check if data is discrete by examining the plot's fill scale
+  # Match the fill scale to categorical or continuous values
   is_discrete <- is.factor(p$data$value)
 
-  # Update plot with appropriate scale and customizations
   if (is_discrete) {
-    # Define standard palette for discrete data
+    # Standard categorical palette
     standard_palette <- c(
       "#E5E59F",
       "#005C29",
@@ -80,7 +59,6 @@ plot_single_landscape <- function(
       ggplot2::scale_fill_viridis_c(name = legend_title)
   }
 
-  # Add title and legend customization
   p <- p +
     ggplot2::labs(title = plot_title, fill = legend_title) +
     ggplot2::theme(
@@ -171,22 +149,18 @@ plot_landscapes <- function(
   max_landscapes = 36,
   subset_index = NULL
 ) {
-  # Allow a single landscape object to be passed directly, without wrapping
-  # it in a list
+  # Normalize a single landscape to the list form used below
   if (is_landscape(landscapes)) {
     landscapes <- list(landscapes)
   }
 
   # Validate inputs
-
-  # First validate that input is a list
   if (!is.list(landscapes)) {
     cli::cli_abort(
       "landscapes must be a landscape object or a list of landscape objects"
     )
   }
 
-  # Then check if list is empty
   if (length(landscapes) == 0) {
     cli::cli_abort(
       "landscapes must contain at least one landscape to plot"
@@ -213,7 +187,7 @@ plot_landscapes <- function(
     )
   }
 
-  # Subset the landscape list if subset_index is provided
+  # Apply the subset before validating title count
   if (!is.null(subset_index)) {
     landscapes <- landscapes[subset_index]
   }
@@ -225,7 +199,7 @@ plot_landscapes <- function(
     )
   }
 
-  # Limit oversized grids to keep the result readable
+  # Limit oversized grids
   if (length(landscapes) > max_landscapes) {
     cli::cli_warn(
       "Showing the first {max_landscapes} of {length(landscapes)} landscapes. Increase {.arg max_landscapes} to show more, or use {.arg subset_index} to select landscapes."
@@ -233,9 +207,8 @@ plot_landscapes <- function(
     landscapes <- landscapes[1:max_landscapes]
   }
 
-  # Generate title strings to pass to plot_single_landscape for each landscape
+  # Resolve one title per landscape
   if (length(titles) == 1) {
-    # check that titles is one of the special keywords
     if (
       length(landscapes) > 1 &&
         !titles %in% c("name", "pattern", "both", "none")
@@ -247,10 +220,9 @@ plot_landscapes <- function(
     titles <- rep(titles, length(landscapes))
   }
 
-  # Create a list of plots
+  # Build the panels
   plot_list <- list()
   for (i in seq_along(landscapes)) {
-    # Pass all plotting decisions to plot_single_landscape
     plot_list[[i]] <- plot_single_landscape(
       landscape = landscapes[[i]],
       title = titles[i],
@@ -259,10 +231,9 @@ plot_landscapes <- function(
     )
   }
 
-  # Combine all plots using patchwork
+  # Combine panels and collect a shared legend when requested
   combined_plot <- patchwork::wrap_plots(plot_list, ncol = ncol)
 
-  # Use patchwork to collect legend if it's shown
   if (show_legend && length(landscapes) > 1) {
     combined_plot <- combined_plot +
       patchwork::plot_layout(guides = "collect")

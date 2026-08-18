@@ -1,8 +1,8 @@
-#' Convert matrix to SpatRaster
+#' Convert a Matrix to a SpatRaster
 #'
-#' Internal utility function to convert a numeric matrix to a SpatRaster object.
+#' Converts a numeric matrix to a SpatRaster object.
 #'
-#' @param x Matrix; numeric matrix to convert.
+#' @param x Numeric matrix to convert.
 #'
 #' @return A SpatRaster object.
 #'
@@ -19,7 +19,6 @@ matrix_to_raster <- function(
     cli::cli_abort("Matrix must contain numeric values")
   }
 
-  # Convert matrix to SpatRaster
   raster <- terra::rast(x)
 
   return(raster)
@@ -97,21 +96,20 @@ set_landscape_pattern <- function(x, pattern) {
 
 #' Rotate and Crop a Landscape Matrix
 #'
-#' Rotates a given landscape matrix by a specified angle and crops the rotated
-#' matrix to the target dimensions, centering the crop. Any missing values
-#' after cropping are filled using nearest neighbor interpolation and binarized.
+#' Rotates a landscape matrix, takes a centered crop of the requested size,
+#' fills missing values by linear interpolation, and restores binary values.
 #'
-#' @param mat A matrix representing the landscape to be rotated and cropped.
-#' @param rotation Numeric value specifying the rotation angle (in degrees).
-#' @param target_width Integer specifying the desired number of columns in the output.
-#' @param target_height Integer specifying the desired number of rows in the output.
+#' @param mat Landscape matrix to rotate and crop.
+#' @param rotation Numeric rotation angle in degrees.
+#' @param target_width Integer. Number of columns in the output.
+#' @param target_height Integer. Number of rows in the output.
 #'
 #' @return A matrix with \code{target_height} rows and \code{target_width} columns,
-#'   rotated and cropped from the input landscape, with missing values filled.
+#'   rotated and cropped from the input landscape.
 #'
 #' @details The function uses \code{omnibus::rotateMatrix} for rotation and
-#'   centers the crop on the rotated matrix. Missing values after cropping are
-#'   filled using the \code{fill_and_binarize_matrix} function.
+#'   \code{fill_and_binarize_matrix} to fill missing values and binarize the
+#'   result.
 #'
 #' @seealso \code{\link[omnibus]{rotateMatrix}}, \code{fill_and_binarize_matrix}
 #' @keywords internal
@@ -121,14 +119,13 @@ rotate_and_crop_matrix <- function(
   target_width,
   target_height
 ) {
-  # Rotate matrix
+  # Rotate before taking the centered crop
   mat <- omnibus::rotateMatrix(mat, rotation)
 
-  # Get dimensions of rotated matrix
   rotated_nrow <- nrow(mat)
   rotated_ncol <- ncol(mat)
 
-  # Calculate the indices to crop the center
+  # Centered crop bounds
   start_row <- ceiling((rotated_nrow - target_height) / 2) + 1
   end_row <- start_row + target_height - 1
 
@@ -138,49 +135,46 @@ rotate_and_crop_matrix <- function(
   # Crop the rotated matrix to the target size (take the center)
   mat <- mat[start_row:end_row, start_col:end_col]
 
-  # Fill missing values with nearest neighbor interpolation
+  # Interpolate missing cells and restore binary values
   mat <- fill_and_binarize_matrix(mat, binarize = TRUE)
 
   return(mat)
 }
 
-#' Fill NA Values in a Matrix Using Linear Interpolation
+#' Fill Missing Matrix Values by Linear Interpolation
 #'
-#' This function fills NA values in a matrix by applying linear interpolation
-#' row-wise and then column-wise using \code{zoo::na.approx}. Optionally, the
-#' function can binarize the resulting matrix based on a threshold of 0.5.
+#' Applies \code{zoo::na.approx} across rows and then columns. The result can
+#' optionally be binarized at a threshold of 0.5.
 #'
-#' @param mat A numeric matrix containing NA values to be filled.
-#' @param binarize Logical. If TRUE (default), the output matrix will be binarized,
-#'   with values < 0.5 set to 0 and values >= 0.5 set to 1. If FALSE, the
-#'   interpolated values are returned as is.
+#' @param mat Numeric matrix containing missing values.
+#' @param binarize Logical. Whether to set values below 0.5 to 0 and values at
+#'   least 0.5 to 1 (default: TRUE).
 #'
-#' @return A numeric matrix with NA values filled using linear interpolation.
-#'   If \code{binarize = TRUE}, the matrix will contain only 0s and 1s.
+#' @return A numeric matrix with missing values filled. If
+#'   \code{binarize = TRUE}, it contains only 0 and 1.
 #'
 #' @details The function applies \code{zoo::na.approx} with \code{rule = 2} to
-#'   ensure that NA values at the edges are filled with the nearest non-NA value.
-#'   Interpolation is performed first row-wise, then column-wise to fill all
-#'   remaining NAs. If any NAs remain after both passes, they are filled with 0.
+#'   extend edge values. Missing values remaining after both passes are set to
+#'   0.
 #'
 #' @keywords internal
 fill_and_binarize_matrix <- function(mat, binarize = TRUE) {
-  # Check if the input is a matrix
+  # Validate input
   if (!is.matrix(mat)) {
     cli::cli_abort("mat must be a matrix, but is of class: {class(mat)}")
   }
 
-  # Apply na.approx row by row
+  # Interpolate rows
   for (i in seq_len(nrow(mat))) {
     mat[i, ] <- zoo::na.approx(mat[i, ], na.rm = FALSE, rule = 2)
   }
 
-  # Apply na.approx column by column to catch remaining NAs
+  # Interpolate columns to catch remaining missing values
   for (j in seq_len(ncol(mat))) {
     mat[, j] <- zoo::na.approx(mat[, j], na.rm = FALSE, rule = 2)
   }
 
-  # Fill any remaining NAs (e.g., entire corners) with 0
+  # Fill values that remain missing after both passes
   mat[is.na(mat)] <- 0
 
   if (binarize) {

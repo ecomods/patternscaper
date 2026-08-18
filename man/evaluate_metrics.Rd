@@ -68,12 +68,10 @@ An object of class `metrics_evaluation`, a list with elements:
   this object directly, so it can be passed straight on.
 }
 \description{
-Identifies the metrics most suitable for discriminating between different pattern types
-based on a specified selection method. The choice of method affects the ranking:
+Ranks metrics by how well they distinguish pattern types. The method affects
+the ranking:
 parametric methods assume linear relationships and normally distributed residuals,
 while non-parametric methods are more robust to outliers and deviations from normality.
-This function is useful for selecting informative metrics to train the
-metric-based neural network.
 }
 \section{Ranking Methods}{
 

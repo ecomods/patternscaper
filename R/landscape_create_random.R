@@ -11,7 +11,7 @@ create_landscape_random <- function(
   height = 100,
   veg_prob = 0.5
 ) {
-  # Validate inputs.
+  # Validate inputs
   validate_dimensions(width = width, height = height)
 
   if (!is.numeric(veg_prob) || veg_prob < 0 || veg_prob > 1) {
@@ -28,7 +28,7 @@ create_landscape_random <- function(
     ncol = width
   )
 
-  # Store the raster and its generation metadata.
+  # Store the raster and its generation metadata
   landscape(
     data = mat,
     pattern = "random",
