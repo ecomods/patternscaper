@@ -11,16 +11,13 @@ Authors@R: c(
     comment = c(ORCID = "0000-0001-6920-136X"))
   )
 Description: Generates artificial binary landscapes with defined spatial
-    patterns and classifies landscapes by their pattern using neural
-    networks. Two complementary approaches are provided: a pixel-based
-    convolutional neural network that is trained on the raster directly
-    (via the 'keras3' package), and a metrics-based classifier that first
-    summarises each landscape with landscape metrics (via the
-    'landscapemetrics' package) and uses these metrics to train a neural network (via the 'neuralnet' package). The package covers the
-    full workflow from landscape generation and metric calculation through
-    model training, cross-validation, and application to new landscapes,
-    with plotting utilities for landscapes, metrics, and classification
-    results.
+    patterns and classifies landscapes by pattern using neural networks. The
+    pixel-based workflow trains a convolutional neural network directly on
+    raster cells with 'keras3'. The metrics-based workflow calculates landscape
+    metrics with 'landscapemetrics' and trains a neural network with 'neuralnet'.
+    The package supports landscape generation, metric calculation and selection,
+    model training, cross-validation, application to new landscapes, and
+    visualization of landscapes, metrics, and classification results.
 URL: https://ecomods.github.io/patternscaper/,
     https://github.com/ecomods/patternscaper/
 BugReports: https://github.com/ecomods/patternscaper/issues

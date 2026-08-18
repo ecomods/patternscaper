@@ -9,32 +9,25 @@
 [![GPL-3.0-or-later](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 <!-- badges: end -->
 
-The `patternscaper` package provides an automated approach to
-classifying spatial vegetation patterns into user-defined pattern types.
-It does so by training a neural network on multiple reference landscapes
-with known pattern types. Two alternative neural network approaches are
-implemented: (i) a multi-layered neural network, which is trained on
-landscape metrics and (ii) a convolutional neural network trained on the
-pixel data itself. Once trained, the neural network can be applied to
-new landscapes with unknown spatial patterns. It returns a relative
-score for each available pattern type. These scores are non-negative and
-sum to one, but they are not calibrated probabilities that a
-classification is correct.
+`patternscaper` classifies spatial vegetation patterns into user-defined
+classes using neural networks trained on reference landscapes with known
+patterns. It supports two workflows: a multilayer neural network trained
+on landscape metrics and a convolutional neural network trained directly
+on raster cells. Trained models can then be used to classify new
+landscapes.
 
-In the initial publication of the `patternscaper` package, two use cases
-are demonstrated: different pattern types in ecotones and different
-pattern types in self-organized landscapes. In both use cases we show
-the performance of both neural network approaches dependent on input
-configurations. For the self-organized landscapes, we additionally
-demonstrate the application of neural networks trained with artificial
-landscapes on real-world photographs.
+In the companion paper, we demonstrate both workflows for ecotone and
+self-organized vegetation patterns, and evaluate the model performance
+across different parameter settings. We also demonstrate that a model
+trained on artificial landscapes can be applied to classify real
+landscapes from remote sensing imagery.
 
 <img src="man/figures/workflow.png" alt="Diagram showing the patternscaper workflow in two phases: (1) Training phase where training landscapes are fed into a neural network using either landscape metrics or pixel information, and (2) Application phase where new artificial or real landscapes are classified by the trained neural network to predict the most likely landscape pattern class." width="100%" />
 
 ## Installation
 
-You can install the development version of patternscaper from
-[GitHub](https://github.com/ecomods/patternscaper) with:
+Install the development version of patternscaper from
+[GitHub](https://github.com/ecomods/patternscaper):
 
 ``` r
 # install.packages("pak")
@@ -43,30 +36,27 @@ pak::pak("ecomods/patternscaper")
 
 ## Get started
 
-After successful installation, get started by following the detailed
-workflow description in: [Get
+See [Get
 started](https://ecomods.github.io/patternscaper/articles/patternscaper.html)
+for the classification workflow.
 
 ## Citation
 
-To cite `patternscaper` in publications, please use:
+To cite `patternscaper`, use:
 
 Baldauf, S., Tietjen, B., & Berger, U. (2025). patternscaper: An R
 package for classifying spatial landscape patterns using neural
 networks. *Methods in Ecology and Evolution*. In review.
 
-To get a BibTex entry for citing, please use
-`citation("patternscaper")`.
+Run `citation("patternscaper")` for the BibTeX entry.
 
 ## Contributing
 
-Please see our [contributing
-guide](https://ecomods.github.io/patternscaper/CONTRIBUTING.html) for
-details on how to get involved.
+See the [contributing
+guide](https://ecomods.github.io/patternscaper/CONTRIBUTING.html) to get
+involved.
 
 ## Code of Conduct
 
-Please note that the patternscaper project is released with a
-[Contributor Code of
+Contributions are governed by the project [Code of
 Conduct](https://ecomods.github.io/patternscaper/CODE_OF_CONDUCT.html).
-By contributing to this project, you agree to abide by its terms.

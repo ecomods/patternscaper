@@ -1,18 +1,17 @@
 #' patternscaper: Classify Spatial Landscape Patterns Using Neural Networks
 #'
 #' @description
-#' Classification of spatial landscape patterns using neural networks.
-#' The package provides tools for generating artificial landscapes with
-#' different spatial patterns, calculating landscape metrics, and training
-#' neural network classifiers.
+#' Generates artificial landscapes with defined spatial patterns, calculates
+#' landscape metrics, and trains neural networks to classify landscape
+#' patterns.
 #'
-#' Two classification approaches are supported:
+#' The package supports two classification workflows:
 #' \itemize{
-#'   \item **Pixel-based classification** using convolutional neural networks
-#'     via \pkg{keras3} (see \code{\link{train_pixel_model}})
-#'   \item **Metrics-based classification** using landscape metrics computed
-#'     with \pkg{landscapemetrics} as input features
-#'     for a neural network (see \code{\link{train_metric_model}})
+#'   \item Pixel-based classification with convolutional neural networks using
+#'     \pkg{keras3} (see \code{\link{train_pixel_model}})
+#'   \item Metrics-based classification with landscape metrics from
+#'     \pkg{landscapemetrics} as neural-network inputs (see
+#'     \code{\link{train_metric_model}})
 #' }
 #'
 #' @section Typical workflow:
