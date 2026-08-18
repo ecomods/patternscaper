@@ -1,16 +1,11 @@
-#' Create a Landscape with Clustered Features
+#' Create Vegetation Clusters Below a Boundary
 #'
-#' Generates a binary landscape with clustered features below a vegetation
-#' boundary. Features are arranged in clusters within a cluster zone that
-#' extends below the boundary. Clusters can be elongated in x or y directions
-#' to create elliptical patterns.
+#' Places circular or elliptical clusters within a zone below a sharp
+#' vegetation boundary.
 #'
 #' Parameters are documented on \code{\link{pattern_clustered}}.
 #'
-#' @return A landscape object with pattern "clustered" containing:
-#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
-#'   \item{pattern}{Character string "clustered"}
-#'   \item{params}{List of all input parameters used to generate the landscape}
+#' @return A landscape object with pattern "clustered".
 #'
 #' @noRd
 #' @importFrom stats runif
@@ -27,13 +22,12 @@ create_landscape_clustered <- function(
   elongation_y = 1,
   rotation = 0
 ) {
-  # Input validation
+  # Validate inputs
   validate_dimensions(width = width, height = height)
   validate_boundary_position(boundary_position = boundary_position)
   validate_rotation(rotation = rotation)
 
-  # n_clusters must be a positive integer
-  # Validate before conversion
+  # Validate before truncating fractional cluster counts
   if (
     !is.numeric(n_clusters) ||
       length(n_clusters) != 1 ||
@@ -81,13 +75,12 @@ create_landscape_clustered <- function(
     ))
   }
 
-  # Scale factor for rotated landscapes: 1.5x provides sufficient padding
-  # to prevent clipping of rotated content
+  # Pad rotated landscapes before cropping to avoid clipped corners
   rotation_scale_factor <- 1.5
   height_actual <- ifelse(rotation == 0, height, height * rotation_scale_factor)
   width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
-  # Ensure cluster zone is large enough for clusters
+  # Ensure the cluster zone can contain the full vertical cluster extent
   min_cluster_zone <- 2 * cluster_radius * max(elongation_y, 1)
   if (cluster_zone * height_actual < min_cluster_zone) {
     cli::cli_abort(c(
@@ -97,7 +90,7 @@ create_landscape_clustered <- function(
     ))
   }
 
-  # Get base landscape with sharp vegetation boundary
+  # Start from a sharp vegetation boundary
   base_landscape <- create_landscape_sharp(
     width = width_actual,
     height = height_actual,
@@ -105,13 +98,12 @@ create_landscape_clustered <- function(
     rotation = 0
   )
 
-  # Extract matrix from landscape object
   mat <- terra::as.matrix(base_landscape$data, wide = TRUE)
 
   # Define cluster zone boundaries
   boundary_row <- round(height_actual * boundary_position)
 
-  # For rotated landscapes, use inner portion to avoid edge artifacts after crop
+  # Keep centers in the inner two-thirds so cropping removes edge artifacts
   rotation_safe_margin <- 1 / 6
 
   if (rotation != 0) {
@@ -130,7 +122,7 @@ create_landscape_clustered <- function(
     boundary_row + floor(max_row * cluster_zone)
   )
 
-  # Validate that cluster centers can be placed within cluster zone
+  # Check that cluster centers fit inside the available zone
   sample_row_start <- boundary_row + cluster_radius + 1
   sample_row_end <- floor(cluster_zone_end - cluster_radius)
 
@@ -150,7 +142,7 @@ create_landscape_clustered <- function(
     ))
   }
 
-  # Generate random cluster centers within safe boundaries
+  # Sample cluster centers within safe bounds
   cluster_centers <- data.frame(
     row = sample(
       sample_row_start:sample_row_end,
@@ -164,12 +156,12 @@ create_landscape_clustered <- function(
     )
   )
 
-  # Create clusters around centers
+  # Draw elliptical clusters with occupancy decreasing from each center
   for (i in seq_len(nrow(cluster_centers))) {
     center_row <- cluster_centers$row[i]
     center_col <- cluster_centers$col[i]
 
-    # Define cluster boundaries (accounting for elongation)
+    # Limit work to the elongated bounding box
     row_min <- max(1, center_row - cluster_radius * elongation_y)
     row_max <- min(
       height_actual,
@@ -181,15 +173,14 @@ create_landscape_clustered <- function(
       center_col + cluster_radius * elongation_x
     )
 
-    # Fill in cluster with decreasing probability based on distance from center
     for (r in floor(row_min):ceiling(row_max)) {
       for (c in floor(col_min):ceiling(col_max)) {
-        # Calculate adjusted distance for elliptical shape
+        # Scale coordinates to define the ellipse
         dx <- (c - center_col) / elongation_x
         dy <- (r - center_row) / elongation_y
         dist <- sqrt(dx^2 + dy^2)
 
-        # Probability decreases with distance
+        # Use a quadratic radial probability within the cluster radius
         if (dist <= cluster_radius) {
           prob <- 1 - (dist / cluster_radius)^2
           if (stats::runif(1) < prob) {
@@ -210,7 +201,7 @@ create_landscape_clustered <- function(
     )
   }
 
-  # Create and return landscape object
+  # Store the raster and its generation metadata
   landscape(
     data = mat,
     pattern = "clustered",

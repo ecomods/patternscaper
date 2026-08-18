@@ -1,13 +1,10 @@
-#' Create a Landscape with Sine Wave Bands
+#' Create Sinusoidal Vegetation Bands
 #'
-#' Generates a binary landscape with parallel sine-wave bands.
+#' Adds parallel sine-wave bands below a vegetated boundary.
 #'
 #' Parameters are documented on \code{\link{pattern_bands}}.
 #'
-#' @return A landscape object with pattern "bands" containing:
-#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
-#'   \item{pattern}{Character string "bands"}
-#'   \item{params}{List of all input parameters used to generate the landscape}
+#' @return A landscape object with pattern "bands".
 #'
 #' @noRd
 #' @importFrom stats rnorm
@@ -23,12 +20,12 @@ create_landscape_bands <- function(
   noise_sd = 0,
   rotation = 0
 ) {
-  # Validate common parameters
+  # Validate inputs
   validate_dimensions(width = width, height = height)
   validate_rotation(rotation = rotation)
   validate_boundary_position(boundary_position = boundary_position)
 
-  # Validate band_zone
+  # Validate pattern parameters
   if (!is.numeric(band_zone) || band_zone < 0 || band_zone > 1) {
     cli::cli_abort(c(
       "{.arg band_zone} must be between 0 and 1.",
@@ -36,7 +33,6 @@ create_landscape_bands <- function(
     ))
   }
 
-  # Validate band_thickness
   if (!is.numeric(band_thickness) || band_thickness <= 0) {
     cli::cli_abort(c(
       "{.arg band_thickness} must be a positive number.",
@@ -44,7 +40,6 @@ create_landscape_bands <- function(
     ))
   }
 
-  # Validate band_spacing
   if (!is.numeric(band_spacing) || band_spacing <= 0) {
     cli::cli_abort(c(
       "{.arg band_spacing} must be a positive number.",
@@ -52,7 +47,6 @@ create_landscape_bands <- function(
     ))
   }
 
-  # Validate frequency
   if (!is.numeric(frequency) || frequency < 0) {
     cli::cli_abort(c(
       "{.arg frequency} must be a non-negative number.",
@@ -60,7 +54,6 @@ create_landscape_bands <- function(
     ))
   }
 
-  # Validate amplitude
   if (!is.numeric(amplitude) || amplitude < 0) {
     cli::cli_abort(c(
       "{.arg amplitude} must be a non-negative number.",
@@ -68,7 +61,6 @@ create_landscape_bands <- function(
     ))
   }
 
-  # Validate noise_sd
   if (!is.numeric(noise_sd) || noise_sd < 0) {
     cli::cli_abort(c(
       "{.arg noise_sd} must be a non-negative number.",
@@ -76,7 +68,7 @@ create_landscape_bands <- function(
     ))
   }
 
-  # Calculate dimensions based on rotation
+  # Pad rotated landscapes before cropping to avoid clipped corners
   height_actual <- ifelse(rotation == 0, height, height * 1.5)
   width_actual <- ifelse(rotation == 0, width, width * 1.5)
 
@@ -90,7 +82,7 @@ create_landscape_bands <- function(
   base_boundary <- round(height_actual * boundary_position + base_sine)
   base_boundary <- pmin(pmax(base_boundary, 1), height_actual)
 
-  # Fill all cells above the boundary with vegetation (1)
+  # Fill the area above the boundary
   for (x in seq_len(width_actual)) {
     y <- base_boundary[x]
     mat[seq_len(y), x] <- 1
@@ -106,7 +98,7 @@ create_landscape_bands <- function(
   # Calculate number of bands that can fit
   num_bands <- floor(band_zone_height / band_spacing)
 
-  # Warn if no bands can be drawn because the spacing is too large
+  # Report when the requested spacing leaves no room for a band
   if (num_bands == 0) {
     cli::cli_warn(c(
       "No bands can fit in available space.",
@@ -118,8 +110,8 @@ create_landscape_bands <- function(
 
   band_offsets <- seq(band_spacing, by = band_spacing, length.out = num_bands)
 
+  # Draw each band with independent vertical noise
   for (offset in band_offsets) {
-    # Generate new noise just for this band
     band_noise <- stats::rnorm(width_actual, mean = 0, sd = noise_sd)
 
     for (x in seq_len(width_actual)) {
@@ -147,7 +139,7 @@ create_landscape_bands <- function(
     )
   }
 
-  # Create and return landscape object
+  # Store the raster and its generation metadata
   landscape(
     data = mat,
     pattern = "bands",

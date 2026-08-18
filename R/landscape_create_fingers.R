@@ -1,15 +1,11 @@
-#' Create a Landscape with a Finger-like Vegetation Boundary
+#' Create a Finger-like Vegetation Boundary
 #'
-#' Generates a binary landscape with a curvy, finger-like vegetation boundary
-#' following a sine wave pattern with random length and amplitude for each wave
-#' segment.
+#' Builds a sine-wave boundary whose wavelength and amplitude vary smoothly
+#' across columns.
 #'
 #' Parameters are documented on \code{\link{pattern_fingers}}.
 #'
-#' @return A landscape object with pattern "fingers" containing:
-#'   \item{data}{SpatRaster with binary values (0 = bare ground, 1 = vegetation)}
-#'   \item{pattern}{Character string "fingers"}
-#'   \item{params}{List of all input parameters used to generate the landscape}
+#' @return A landscape object with pattern "fingers".
 #'
 #' @noRd
 #' @importFrom cli cli_warn cli_abort
@@ -28,57 +24,52 @@ create_landscape_fingers <- function(
   validate_boundary_position(boundary_position = boundary_position)
   validate_rotation(rotation = rotation)
 
-  # Validate sine_length
+  # Validate pattern parameters
   if (!is.numeric(sine_length_mean) || sine_length_mean <= 0) {
     cli::cli_abort("{.arg sine_length_mean} must be a positive numeric value.")
   }
 
-  # Validate sine_height
   if (!is.numeric(sine_height_mean) || sine_height_mean < 0) {
     cli::cli_abort(
       "{.arg sine_height_mean} must be a non-negative numeric value."
     )
   }
 
-  # Validate sine_length_sd
   if (!is.numeric(sine_length_sd) || sine_length_sd < 0) {
     cli::cli_abort(
       "{.arg sine_length_sd} must be a non-negative numeric value."
     )
   }
 
-  # Validate sine_height_sd
   if (!is.numeric(sine_height_sd) || sine_height_sd < 0) {
     cli::cli_abort(
       "{.arg sine_height_sd} must be a non-negative numeric value."
     )
   }
 
-  # Warn if sine_height_mean is large relative to landscape height
+  # Flag amplitudes likely to dominate the landscape height
   if (sine_height_mean > height * 0.5) {
     cli::cli_warn(
       "{.arg sine_height_mean} ({sine_height_mean}) is large relative to {.arg height} ({height}). This may create unexpected patterns."
     )
   }
 
-  # calculate width and height of the actual landscape to produce
-  # in case of rotation, the landscape needs to be larger
+  # Pad rotated landscapes before cropping to avoid clipped corners
   rotation_scale_factor <- 1.5
   height_actual <- ifelse(rotation == 0, height, height * rotation_scale_factor)
   width_actual <- ifelse(rotation == 0, width, width * rotation_scale_factor)
 
-  # Convert position from proportion to row number
+  # Build the initial horizontal boundary
   boundary_row <- round(height_actual * boundary_position)
 
   # Create the landscape matrix
   mat <- matrix(0, nrow = height_actual, ncol = width_actual)
 
-  # Fill in other vegetation area (1) based on boundary position
   if (boundary_row > 0) {
     mat[1:boundary_row, ] <- 1
   }
 
-  # slightly shifting curves
+  # Sample smooth wavelength and amplitude trends across columns
   x_seq <- 1:width_actual
 
   # random trends
@@ -89,10 +80,8 @@ create_landscape_fingers <- function(
     # For small landscapes, use larger span to ensure stable loess fit
     n_points <- length(x)
     if (n_points < 50) {
-      # Use larger span for small landscapes (at least 0.3)
       adjusted_span <- max(0.3, 15 / n_points)
     } else {
-      # Use requested span for larger landscapes
       adjusted_span <- smooth_span
     }
 
@@ -104,16 +93,14 @@ create_landscape_fingers <- function(
   sine_length_vec <- noise_smooth(x_seq, sine_length_mean, sine_length_sd)
   sine_height_vec <- noise_smooth(x_seq, sine_height_mean, sine_height_sd)
 
-  # Produce sine wave with varying wavelength and amplitude
+  # Trace the boundary with varying wavelength and amplitude
   phase <- 0
   for (j in x_seq) {
     current_length <- sine_length_vec[j]
     current_height <- sine_height_vec[j]
 
-    # Increment phase based on current wavelength
-    # Normalize to prevent accumulation issues
     phase <- phase + (2 * pi / current_length)
-    phase <- phase %% (2 * pi) # Keep phase bounded
+    phase <- phase %% (2 * pi) # Keep phase bounded to limit accumulation
 
     y_sine <- boundary_row + sin(phase) * current_height
 
@@ -132,7 +119,7 @@ create_landscape_fingers <- function(
     )
   }
 
-  # Create and return landscape object
+  # Store the raster and its generation metadata
   landscape(
     data = mat,
     pattern = "fingers",
