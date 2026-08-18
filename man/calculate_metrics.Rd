@@ -17,8 +17,8 @@ element with a SpatRaster, plus \code{name} and \code{pattern} metadata.}
 \code{\link[landscapemetrics]{list_lsm}} to look up the available
 abbreviations and the full metric name each one stands for.}
 
-\item{level}{Character. Level(s) of metrics to calculate:"class", "landscape"
-(default: "landscape").}
+\item{level}{Character. Metric level to calculate: "class" or "landscape"
+(default).}
 }
 \value{
 A tibble with the following columns:

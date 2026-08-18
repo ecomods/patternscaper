@@ -15,7 +15,7 @@ calculate_single_metric(landscapes, function_name)
 tibble. Results from the metric calculation including any warnings.
 }
 \description{
-Internal function to calculate a specific landscape metric for a single landscape.
-This function handles both plain SpatRaster lists and lists with metadata structure.
+Calculates a specific metric for each landscape object and captures any
+warnings.
 }
 \keyword{internal}

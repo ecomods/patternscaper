@@ -1,7 +1,7 @@
 #' Calculate a Single Landscape Metric
 #'
-#' Internal function to calculate a specific landscape metric for a single landscape.
-#' This function handles both plain SpatRaster lists and lists with metadata structure.
+#' Calculates a specific metric for each landscape object and captures any
+#' warnings.
 #'
 #' @param landscapes A list of landscape objects
 #' @param function_name Character. The name of the landscapemetrics function to call.
@@ -11,7 +11,6 @@
 #' @importFrom dplyr mutate
 #' @importFrom utils getFromNamespace
 calculate_single_metric <- function(landscapes, function_name) {
-  # Get the function from landscapemetrics namespace
   func <- getFromNamespace(function_name, "landscapemetrics")
   purrr::map_dfr(
     seq_along(landscapes),
@@ -19,7 +18,7 @@ calculate_single_metric <- function(landscapes, function_name) {
       current <- landscapes[[i]]$data
       warnings_captured <- character(0)
 
-      # Use withCallingHandlers to capture warnings
+      # Capture warnings so they can be returned with the metric values
       result <- withCallingHandlers(
         {
           func(current)
@@ -30,7 +29,6 @@ calculate_single_metric <- function(landscapes, function_name) {
         }
       )
 
-      # Add landscape name, type, and any warnings to the result
       result |>
         dplyr::mutate(
           landscape_id = i,
@@ -60,8 +58,8 @@ calculate_single_metric <- function(landscapes, function_name) {
 #'   (default: NULL for all available metrics at the specified level). Use
 #'   \code{\link[landscapemetrics]{list_lsm}} to look up the available
 #'   abbreviations and the full metric name each one stands for.
-#' @param level Character. Level(s) of metrics to calculate:"class", "landscape"
-#'   (default: "landscape").
+#' @param level Character. Metric level to calculate: "class" or "landscape"
+#'   (default).
 #'
 #' @return A tibble with the following columns:
 #'   \describe{
@@ -122,24 +120,18 @@ calculate_metrics <- function(
   metrics = NULL,
   level = "landscape"
 ) {
-  # Validate inputs
-
-  # If landscapes is a single landscape, wrap it into a list
+  # Normalize a single landscape to the list form used below
   if (is_landscape(landscapes)) {
-    # Wrap single landscape into a list
     landscapes <- list(landscapes)
   }
 
-  # Check if landscapes is a list of landscape objects
   if (any(!vapply(landscapes, is_landscape, logical(1)))) {
-    # find out which element is not a landscape
     invalid_indices <- which(!vapply(landscapes, is_landscape, logical(1)))
     cli::cli_abort(
       "All elements must be landscape objects. Invalid element(s) at index(es): {paste(invalid_indices, collapse = ', ')}"
     )
   }
 
-  # Check if level parameter is valid
   valid_levels <- c("class", "landscape")
   if (!all(level %in% valid_levels) || length(level) != 1) {
     cli::cli_abort(
@@ -147,12 +139,9 @@ calculate_metrics <- function(
     )
   }
 
-  # Check if metrics parameter is valid
   available_metrics <- landscapemetrics::list_lsm(level = level)
 
-  # Filter metrics if specified
   if (!is.null(metrics)) {
-    # Check if all requested metrics exist
     invalid_metrics <- metrics[!metrics %in% available_metrics$metric]
     if (length(invalid_metrics) > 0) {
       cli::cli_warn(
@@ -160,7 +149,6 @@ calculate_metrics <- function(
       )
     }
 
-    # Filter available metrics to only those requested
     available_metrics <- available_metrics[
       available_metrics$metric %in% metrics,
     ]
@@ -191,12 +179,10 @@ calculate_metrics <- function(
       )
     )
 
-  # Remove unused id column (this is only interesting for the patch level
-  # which the package does not support)
+  # The id column is used only for unsupported patch-level metrics
   all_results <- all_results |>
     select(-id)
 
-  # Reorganize columns for better readability
   all_results <- all_results |>
     dplyr::relocate(
       landscape_id,
@@ -211,11 +197,8 @@ calculate_metrics <- function(
       warnings
     )
 
-  # Attach per-landscape geometry (dimensions, resolution, NA count) so it travels
-  # with the metrics. It survives a write_csv()/read_csv() round-trip, unlike an
-  # attribute, so a user who caches the metrics can still get geometry-mismatch
-  # checks at model training and application. metrics_to_wide() selects an explicit
-  # column set, so these never enter the model predictors.
+  # Keep geometry with the metrics across CSV round trips so models can check
+  # application geometry; metrics_to_wide() excludes it from the predictors
   geometry <- landscapes_geometry(landscapes) |>
     dplyr::mutate(landscape_id = dplyr::row_number()) |>
     dplyr::select(
@@ -294,13 +277,13 @@ lookup_metric_names <- function(metric, base_metric, level, warn = TRUE) {
 
   # The aggregation statistic, from the abbreviation's trailing token. These
   # three are the only ones landscapemetrics uses, and every metric carrying
-  # one shares its name with the other two of its triple.
+  # one shares its name with the other two of its triple
   statistic <- c(cv = "CV", mn = "mean", sd = "SD")[
     sub("^.*_", "", base_metric)
   ]
 
-  # Whatever follows the base abbreviation is the class id. Empty at the
-  # landscape level, where metric and base_metric are identical.
+  # Whatever follows the base abbreviation is the class id, and it is empty at
+  # the landscape level where metric and base_metric are identical
   class_id <- substring(metric, nchar(base_metric) + 2)
 
   qualifier <- mapply(
