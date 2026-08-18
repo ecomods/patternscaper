@@ -176,7 +176,7 @@ check_geometry <- function(
 
   n <- nrow(application)
 
-  # Physical extent = cells x resolution, per axis.
+  # Physical extent = cells x resolution, per axis
   extent_ratio_x <- (application$n_col * application$cell_size_x) /
     (training$n_col * training$cell_size_x)
   extent_ratio_y <- (application$n_row * application$cell_size_y) /
@@ -193,7 +193,7 @@ check_geometry <- function(
     ))
   }
 
-  # Cell resolution.
+  # Cell resolution
   cell_off <- abs(application$cell_size_x - training$cell_size_x) /
     training$cell_size_x >
     0.01 |
@@ -215,7 +215,7 @@ check_geometry <- function(
     }
   }
 
-  # Aspect ratio (secondary).
+  # Aspect ratio (secondary)
   aspect_ratio <- (application$n_col / application$n_row) /
     (training$n_col / training$n_row)
   aspect_off <- abs(log(aspect_ratio)) > log(1 + tolerance)
