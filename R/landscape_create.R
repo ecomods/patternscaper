@@ -86,8 +86,6 @@ create_landscape <- function(
   params = NULL,
   rotation = 0
 ) {
-  # Checked before arg_match(), which reports only the first element when
-  # several are given. missing() is left to arg_match(), which names it.
   if (!missing(pattern) && length(pattern) != 1) {
     cli::cli_abort(c(
       "{.arg pattern} must be a single pattern name.",
@@ -98,17 +96,14 @@ create_landscape <- function(
 
   matched <- rlang::arg_match(pattern, values = valid_patterns())
 
-  # Validate the name parameter
   if (!is.null(name)) {
     if (!is.character(name) || length(name) != 1) {
       cli::cli_abort("'name' must be a single character string or NULL")
     }
   }
 
-  # Validate the rotation parameter
   validate_rotation(rotation)
 
-  # Select the generator for the pattern
   generator <- switch(
     matched,
     random = create_landscape_random,
@@ -126,8 +121,8 @@ create_landscape <- function(
 
   pattern_params <- resolve_pattern_params(params, matched)
 
-  # Rotation is a transform applied after generation, so it is an argument here
-  # rather than a pattern parameter -- and only some generators apply it
+  # Rotation is applied after generation, not stored as a pattern parameter.
+  # Only supported generators receive it.
   if (!missing(rotation) && matched %in% rotatable_patterns()) {
     pattern_params$rotation <- rotation
   } else if (!missing(rotation) && rotation != 0) {
@@ -142,7 +137,6 @@ create_landscape <- function(
     c(list(width = width, height = height), pattern_params)
   )
 
-  # Set the name if provided
   if (!is.null(name)) {
     landscape <- set_landscape_name(landscape, name)
   }
@@ -253,7 +247,6 @@ create_landscapes <- function(
   pattern_probs = NULL,
   max_retries = 3
 ) {
-  # Validate inputs
   if (!is.numeric(n) || length(n) != 1) {
     cli::cli_abort("'n' must be a single numeric value")
   }
@@ -264,13 +257,10 @@ create_landscapes <- function(
     cli::cli_abort("'n' must be a positive integer")
   }
 
-  # Validate width and height
   validate_dimensions(width, height)
 
-  # Validate rotation angles
   validate_rotation(rotation, allow_range = TRUE)
 
-  # Reject unknown pattern names
   unknown_patterns <- setdiff(patterns, valid_patterns())
 
   if (length(unknown_patterns) > 0) {
@@ -280,7 +270,6 @@ create_landscapes <- function(
     ))
   }
 
-  # Create full default parameter list
   default_params_list <- build_default_params_list(width, height)
 
   # If user provided params, validate and merge with defaults
@@ -316,8 +305,6 @@ create_landscapes <- function(
   # Initialize pre-allocated results list
   all_landscapes <- vector("list", n)
 
-  # Define which parameters should be integers so they are not treated
-  # as numeric
   integer_params <- get_integer_param_names()
 
   # Determine how to distribute landscape patterns
@@ -330,13 +317,12 @@ create_landscapes <- function(
     # Create balanced distribution
     sampled_patterns <- rep(patterns, each = landscapes_per_pattern)
 
-    # Distribute extras deterministically to first N patterns
+    # Assign any remainder deterministically, then shuffle the generation order
     if (extras > 0) {
       extra_patterns <- patterns[1:extras]
       sampled_patterns <- c(sampled_patterns, extra_patterns)
     }
 
-    # Shuffle the patterns to avoid patterns
     sampled_patterns <- sample(sampled_patterns)
   } else {
     if (length(pattern_probs) != length(patterns)) {
@@ -353,7 +339,6 @@ create_landscapes <- function(
     )
   }
 
-  # Define which patterns support rotation
   patterns_with_rotation <- rotatable_patterns()
 
   # Generate each landscape
@@ -362,9 +347,8 @@ create_landscapes <- function(
     landscape <- NULL
     retry_count <- 0
 
-    # Retry loop
     while (is.null(landscape) && retry_count <= max_retries) {
-      # Sample parameters (new sample each retry)
+      # Each retry draws a fresh parameter set.
       sampled_params <- sample_landscape_params(
         params_list[[pattern]],
         integer_params,
@@ -372,7 +356,6 @@ create_landscapes <- function(
         height
       )
 
-      # Handle rotation for patterns that support it
       if (pattern %in% patterns_with_rotation) {
         if (length(rotation) == 1) {
           current_rotation <- rotation
@@ -390,7 +373,6 @@ create_landscapes <- function(
       # instead of being retried and silently dropped from the batch.
       validate_sampled_params(sampled_params, pattern)
 
-      # Attempt to create landscape
       landscape <- try_create_landscape(
         pattern,
         sampled_params,
@@ -398,7 +380,6 @@ create_landscapes <- function(
         current_rotation
       )
 
-      # Handle failure
       if (is.null(landscape)) {
         if (retry_count < max_retries) {
           cli::cli_alert_info(
@@ -509,16 +490,11 @@ sample_landscape_params <- function(
     } else if (length(param_range) == 1) {
       sampled_params[[param_name]] <- param_range
     } else if (param_name %in% integer_params) {
-      # Draw an integer step within the range. Round the ranges first so we
-      # are sure to get integers. Index the candidate vector explicitly so
-      # a collapsed range (single value) is not reinterpreted by sample()'s
-      # "sample(n) means sample.int(n)" rule.
       lower <- ceiling(param_range[1])
       upper <- floor(param_range[2])
 
       if (lower > upper) {
-        # Range narrower than 1 with no whole number inside it; round to
-        # the closest one instead of passing from > to to seq().
+        # A out-of-bounds integer falls back to its rounded midpoint
         int_values <- round(mean(param_range))
       } else {
         int_values <- seq(from = lower, to = upper, by = 1)
@@ -535,7 +511,6 @@ sample_landscape_params <- function(
     }
   }
 
-  # Add common parameters
   sampled_params$width <- width
   sampled_params$height <- height
 
@@ -558,9 +533,8 @@ sample_landscape_params <- function(
 try_create_landscape <- function(pattern, params, index, rotation) {
   tryCatch(
     {
-      # width/height/rotation are arguments of create_landscape(); everything
-      # else is a pattern parameter. Values come from sample_landscape_params()
-      # and are already known valid, so they skip the constructor's checks.
+      # Dimensions and rotation are direct arguments. Sampled pattern values
+      # are already validated, so they bypass the public constructors.
       fixed <- c("width", "height", "rotation")
 
       args <- list(
@@ -573,15 +547,14 @@ try_create_landscape <- function(pattern, params, index, rotation) {
         )
       )
 
-      # Only rotatable patterns carry a rotation, and create_landscape() tests
-      # missing(rotation) -- so pass it through only when it is actually set
+      # Pass rotation only when set because create_landscape() distinguishes a
+      # missing argument from rotation = 0.
       if (!is.null(params$rotation)) {
         args$rotation <- params$rotation
       }
 
       landscape <- do.call(create_landscape, args)
 
-      # Set descriptive name
       landscape_name <- paste0(
         pattern,
         "_",
