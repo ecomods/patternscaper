@@ -11,17 +11,16 @@ plot_landscapes(
   legend_title = "Value",
   ncol = NULL,
   max_landscapes = 36,
-  force = FALSE,
   subset_index = NULL
 )
 }
 \arguments{
 \item{landscapes}{A landscape object or a list of landscape objects, such as
-those returned by \code{\link{create_landscape}} or
-\code{\link{create_landscapes}}.}
+those returned by \code{\link{create_landscape}},
+\code{\link{create_landscapes}}, or \code{\link{landscape}}.}
 
-\item{titles}{Character. Either "name", "pattern", "both", "none", one
-custom title, or one custom title per plotted landscape (default:
+\item{titles}{Character. One of "name", "pattern", "both", "none", a single
+custom title, or one custom title per landscape (default:
 "pattern"). A single custom title is repeated with a warning when several
 landscapes are plotted. With \code{subset_index}, a vector of custom
 titles must match the subset length.}
@@ -32,14 +31,11 @@ titles must match the subset length.}
 
 \item{ncol}{Integer. Number of grid columns (default: NULL).}
 
-\item{max_landscapes}{Integer. Maximum number of landscapes shown unless
-\code{force = TRUE} (default: 36).}
+\item{max_landscapes}{Positive integer. Maximum number of landscapes shown
+(default: 36). Use \code{Inf} to show all landscapes.}
 
-\item{force}{Logical. Plot more than \code{max_landscapes} landscapes
-(default: FALSE).}
-
-\item{subset_index}{Integer vector. Indices to plot, in the requested order
-(default: NULL for all landscapes).}
+\item{subset_index}{Integer vector. Indices of the \code{landscapes} to plot,
+in the requested order (default: NULL for plotting all landscapes).}
 }
 \value{
 A patchwork object combining one or more landscape plots.
@@ -95,7 +91,8 @@ plot_landscapes(many_landscapes,
                 ncol = 2)            # In 2x2 grid
 }
 \seealso{
-\code{\link{create_landscape}}, \code{\link{create_landscapes}}
+\code{\link{create_landscape}}, \code{\link{create_landscapes}},
+    \code{\link{landscape}}
 
 Other visualization:
 \code{\link[=plot_classified_landscapes]{plot_classified_landscapes()}},

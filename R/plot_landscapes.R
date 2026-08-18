@@ -106,10 +106,8 @@ plot_single_landscape <- function(
 #' @param show_legend Logical. Show one combined legend (default: TRUE).
 #' @param legend_title Character. Legend title (default: "Value").
 #' @param ncol Integer. Number of grid columns (default: NULL).
-#' @param max_landscapes Integer. Maximum number of landscapes shown unless
-#'     \code{force = TRUE} (default: 36).
-#' @param force Logical. Plot more than \code{max_landscapes} landscapes
-#'     (default: FALSE).
+#' @param max_landscapes Positive integer. Maximum number of landscapes shown
+#'     (default: 36). Use \code{Inf} to show all landscapes.
 #' @param subset_index Integer vector. Indices of the \code{landscapes} to plot,
 #'      in the requested order (default: NULL for plotting all landscapes).
 #'
@@ -171,7 +169,6 @@ plot_landscapes <- function(
   legend_title = "Value",
   ncol = NULL,
   max_landscapes = 36,
-  force = FALSE,
   subset_index = NULL
 ) {
   # Allow a single landscape object to be passed directly, without wrapping
@@ -204,6 +201,18 @@ plot_landscapes <- function(
     )
   }
 
+  if (
+    !is.numeric(max_landscapes) ||
+      length(max_landscapes) != 1 ||
+      is.na(max_landscapes) ||
+      max_landscapes <= 0 ||
+      (!is.infinite(max_landscapes) && max_landscapes != floor(max_landscapes))
+  ) {
+    cli::cli_abort(
+      "{.arg max_landscapes} must be a positive integer or {.code Inf}"
+    )
+  }
+
   # Subset the landscape list if subset_index is provided
   if (!is.null(subset_index)) {
     landscapes <- landscapes[subset_index]
@@ -216,10 +225,10 @@ plot_landscapes <- function(
     )
   }
 
-  # If number of landscapes exceeds max_landscapes, limit it (only if force is FALSE)
-  if (length(landscapes) > max_landscapes && !force) {
+  # Limit oversized grids to keep the result readable
+  if (length(landscapes) > max_landscapes) {
     cli::cli_warn(
-      "Number of landscapes ({length(landscapes)}) exceeds maximum ({max_landscapes}). Showing first {max_landscapes}. Use {.code force = TRUE} to override or {.arg subset_index} to select a subset of landscapes to plot."
+      "Showing the first {max_landscapes} of {length(landscapes)} landscapes. Increase {.arg max_landscapes} to show more, or use {.arg subset_index} to select landscapes."
     )
     landscapes <- landscapes[1:max_landscapes]
   }

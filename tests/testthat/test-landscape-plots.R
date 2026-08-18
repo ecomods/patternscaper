@@ -160,13 +160,28 @@ test_that("plot_landscapes respects max_landscapes", {
   # Test max_landscapes warning and output
   expect_warning(
     p <- plot_landscapes(landscapes, max_landscapes = 5),
-    "Number of landscapes .* exceeds maximum"
+    "Showing the first 5 of 10 landscapes"
   )
   expect_true(grepl("5 patches", capture_output(str(p))))
 
-  # Test force override
-  p2 <- plot_landscapes(landscapes, max_landscapes = 5, force = TRUE)
+  # Inf removes the limit
+  p2 <- expect_no_warning(
+    plot_landscapes(landscapes, max_landscapes = Inf)
+  )
   expect_true(grepl("10 patches", capture_output(str(p2))))
+})
+
+test_that("plot_landscapes validates max_landscapes", {
+  landscape <- create_landscape("sharp", width = 10, height = 10)
+
+  expect_error(
+    plot_landscapes(landscape, max_landscapes = 0),
+    "must be a positive integer or `Inf`"
+  )
+  expect_error(
+    plot_landscapes(landscape, max_landscapes = 1.5),
+    "must be a positive integer or `Inf`"
+  )
 })
 
 test_that("plot_landscapes handles subset_index", {
