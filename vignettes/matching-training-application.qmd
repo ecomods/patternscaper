@@ -18,7 +18,7 @@ prepare application data so results stay trustworthy.
 
 ```{r}
 #| label: setup
-library(spatPatClassifyR)
+library(patternscaper)
 ```
 
 ## Four ways data can differ

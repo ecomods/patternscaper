@@ -24,7 +24,7 @@ and the pixel-based functions cannot run. The metrics-based workflow
 (\code{\link{train_metric_model}}) is unaffected. To set up the
 backend, point \pkg{reticulate} at a suitable Python and run
 \code{keras3::install_keras()}, which
-\code{vignette("install-keras", package = "spatPatClassifyR")} walks
+\code{vignette("install-keras", package = "patternscaper")} walks
 through.
 }
 \examples{

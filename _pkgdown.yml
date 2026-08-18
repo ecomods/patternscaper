@@ -1,4 +1,4 @@
-url: https://ecomods.github.io/spatPatClassifyR/
+url: https://ecomods.github.io/patternscaper/
 template:
   bootstrap: 5
   light-switch: true
@@ -6,7 +6,7 @@ template:
 reference:
 - title: Package overview
   contents:
-  - spatPatClassifyR
+  - patternscaper
 
 - title: Landscape creation
   desc: Functions for generating artificial landscapes with different spatial patterns

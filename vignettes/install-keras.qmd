@@ -19,11 +19,11 @@ provide this guide to help you with the installation.
 
 The setup requires the installation of the [`keras3` package](https://keras3.posit.co/) and the [`reticulate` package](https://rstudio.github.io/reticulate/), which provides an interface to Python from R.
 
-The `keras3` package is installed together with `spatPatClassifyR`, and `reticulate` comes with it as a dependency of `keras3`, so you only need to load them:
+The `keras3` package is installed together with `patternscaper`, and `reticulate` comes with it as a dependency of `keras3`, so you only need to load them:
 
 ```{r}
 #| label: load-packages
-library(spatPatClassifyR)
+library(patternscaper)
 library(keras3)
 library(reticulate)
 ```

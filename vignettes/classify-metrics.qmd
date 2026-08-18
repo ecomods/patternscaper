@@ -15,7 +15,7 @@ This vignette provides an overview of the workflow to train a neural network on 
 
 ```{r}
 #| label: setup
-library(spatPatClassifyR)
+library(patternscaper)
 
 # Set seed for reproducibility
 set.seed(123456)

@@ -13,7 +13,7 @@ knitr:
 
 ```{r}
 #| label: setup
-library(spatPatClassifyR)
+library(patternscaper)
 
 set.seed(123456)
 

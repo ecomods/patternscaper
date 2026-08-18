@@ -15,7 +15,7 @@ This vignette shows how to generate artificial landscapes with different spatial
 ```{r}
 #| label: setup
 
-library(spatPatClassifyR)
+library(patternscaper)
 # Set seed for reproducibility
 set.seed(123456)
 ```
@@ -475,7 +475,7 @@ A single value fixes a parameter for every landscape in the batch; a length-2 ve
 
 ## The landscape object
 
-In `spatPatClassifyR`, landscapes are stored as lists containing the landscape data and metadata. All landscape generation functions return landscapes in this format and all other functions expect landscapes to be provided in this format.
+In `patternscaper`, landscapes are stored as lists containing the landscape data and metadata. All landscape generation functions return landscapes in this format and all other functions expect landscapes to be provided in this format.
 
 To learn how to transform your own raster data into this format, see [vignette on importing landscapes](importing-landscapes.html).
 

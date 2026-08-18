@@ -1,71 +1,72 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# spatPatClassifyR
+# patternscaper
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/ecomods/spatPatClassifyR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ecomods/spatPatClassifyR/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/ecomods/patternscaper/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ecomods/patternscaper/actions/workflows/R-CMD-check.yaml)
 [![GPL-3.0-or-later](https://img.shields.io/badge/License-GPL%20(%3E%3D%203)-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 <!-- badges: end -->
 
-The `spatPatClassifyR` package provides an automated approach to
+The `patternscaper` package provides an automated approach to
 classifying spatial vegetation patterns into user-defined pattern types.
 It does so by training a neural network on multiple reference landscapes
 with known pattern types. Two alternative neural network approaches are
 implemented: (i) a multi-layered neural network, which is trained on
 landscape metrics and (ii) a convolutional neural network trained on the
 pixel data itself. Once trained, the neural network can be applied to
-new landscapes with unknown spatial patterns. In doing so, it estimates
-the likelihood for each possible pattern type, allowing users to assess
-the confidence of the classification.
+new landscapes with unknown spatial patterns. It returns a relative
+score for each available pattern type. These scores are non-negative and
+sum to one, but they are not calibrated probabilities that a
+classification is correct.
 
-In the initial publication of the `spatPatClassifyR` package, two use
-cases are demonstrated: different pattern types in ecotones and
-different pattern types in self-organized landscapes. In both use cases
-we show the performance of both neural network approaches dependent on
-input configurations. For the self-organized landscapes, we additionally
+In the initial publication of the `patternscaper` package, two use cases
+are demonstrated: different pattern types in ecotones and different
+pattern types in self-organized landscapes. In both use cases we show
+the performance of both neural network approaches dependent on input
+configurations. For the self-organized landscapes, we additionally
 demonstrate the application of neural networks trained with artificial
 landscapes on real-world photographs.
 
-<img src="man/figures/workflow.png" alt="Diagram showing the spatPatClassifyR workflow in two phases: (1) Training phase where training landscapes are fed into a neural network using either landscape metrics or pixel information, and (2) Application phase where new artificial or real landscapes are classified by the trained neural network to predict the most likely landscape pattern class." width="100%" />
+<img src="man/figures/workflow.png" alt="Diagram showing the patternscaper workflow in two phases: (1) Training phase where training landscapes are fed into a neural network using either landscape metrics or pixel information, and (2) Application phase where new artificial or real landscapes are classified by the trained neural network to predict the most likely landscape pattern class." width="100%" />
 
 ## Installation
 
-You can install the development version of spatPatClassifyR from
-[GitHub](https://github.com/ecomods/spatPatClassifyR) with:
+You can install the development version of patternscaper from
+[GitHub](https://github.com/ecomods/patternscaper) with:
 
 ``` r
 # install.packages("pak")
-pak::pak("ecomods/spatPatClassifyR")
+pak::pak("ecomods/patternscaper")
 ```
 
 ## Get started
 
 After successful installation, get started by following the detailed
 workflow description in: [Get
-started](https://ecomods.github.io/spatPatClassifyR/articles/spatPatClassifyR.html)
+started](https://ecomods.github.io/patternscaper/articles/patternscaper.html)
 
 ## Citation
 
-To cite `spatPatClassifyR` in publications, please use:
+To cite `patternscaper` in publications, please use:
 
-Baldauf, S., Tietjen, B., & Berger, U. (2025). spatPatClassifyR: An R
+Baldauf, S., Tietjen, B., & Berger, U. (2025). patternscaper: An R
 package for classifying spatial landscape patterns using neural
 networks. *Methods in Ecology and Evolution*. In review.
 
 To get a BibTex entry for citing, please use
-`citation("spatPatClassifyR")`.
+`citation("patternscaper")`.
 
 ## Contributing
 
 Please see our [contributing
-guide](https://ecomods.github.io/spatPatClassifyR/CONTRIBUTING.html) for
+guide](https://ecomods.github.io/patternscaper/CONTRIBUTING.html) for
 details on how to get involved.
 
 ## Code of Conduct
 
-Please note that the spatPatClassifyR project is released with a
+Please note that the patternscaper project is released with a
 [Contributor Code of
-Conduct](https://ecomods.github.io/spatPatClassifyR/CODE_OF_CONDUCT.html).
+Conduct](https://ecomods.github.io/patternscaper/CODE_OF_CONDUCT.html).
 By contributing to this project, you agree to abide by its terms.

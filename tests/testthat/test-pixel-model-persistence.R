@@ -209,7 +209,7 @@ test_that("a fresh R process can load and apply a pixel model bundle", {
   actual <- callr::r(
     function(package_path, bundle_path, cells) {
       package_env <- if (is.null(package_path)) {
-        asNamespace("spatPatClassifyR")
+        asNamespace("patternscaper")
       } else {
         pkgload::load_all(package_path, quiet = TRUE)$env
       }

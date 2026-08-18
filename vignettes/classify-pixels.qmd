@@ -15,7 +15,7 @@ This vignette shows how to classify landscape patterns using a convolutional neu
 
 ```{r}
 #| label: setup
-library(spatPatClassifyR)
+library(patternscaper)
 ```
 
 The workflow consists of the following steps:

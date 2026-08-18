@@ -1,4 +1,4 @@
-#' spatPatClassifyR: Classify Spatial Landscape Patterns Using Neural Networks
+#' patternscaper: Classify Spatial Landscape Patterns Using Neural Networks
 #'
 #' @description
 #' Classification of spatial landscape patterns using neural networks.
@@ -29,11 +29,11 @@
 #' }
 #'
 #' @references
-#' Baldauf, S., Tietjen, B., & Berger, U. (2025). spatPatClassifyR: An R
+#' Baldauf, S., Tietjen, B., & Berger, U. (2025). patternscaper: An R
 #' package for classifying spatial landscape patterns using neural networks.
 #' *Methods in Ecology and Evolution*. In review.
 #'
-#' @name spatPatClassifyR
+#' @name patternscaper
 "_PACKAGE"
 
 utils::globalVariables(c(

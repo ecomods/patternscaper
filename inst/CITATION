@@ -1,6 +1,6 @@
 bibentry(
   bibtype  = "Article",
-  title    = "spatPatClassifyR: An R package for classifying spatial landscape patterns using neural networks",
+  title    = "patternscaper: An R package for classifying spatial landscape patterns using neural networks",
   author   = c(
     person("Selina", "Baldauf"),
     person("Britta", "Tietjen"),

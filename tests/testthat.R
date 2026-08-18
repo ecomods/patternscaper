@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(spatPatClassifyR)
+library(patternscaper)
 
-test_check("spatPatClassifyR")
+test_check("patternscaper")

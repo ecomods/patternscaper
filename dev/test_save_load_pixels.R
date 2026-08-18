@@ -1,4 +1,4 @@
-library(spatPatClassifyR)
+library(patternscaper)
 
 # Train and save a model --------------------------------------------------------
 # Small, fast training run. 3 classes, few landscapes, few epochs.
