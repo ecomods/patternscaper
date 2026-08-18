@@ -103,7 +103,7 @@ train_metric_model <- function(
   na_action = "drop_metrics",
   verbose = TRUE
 ) {
-  # Validate input parameters -------------------------------------------------
+  # Input validation ----------------------------------------------------------
   if (!is.logical(verbose) || length(verbose) != 1) {
     cli::cli_abort("verbose must be a single logical value (TRUE or FALSE)")
   }
@@ -138,7 +138,6 @@ train_metric_model <- function(
     cli::cli_abort("cv_folds must be a single integer >= 2")
   }
 
-  # Validate columns of metrics
   needed_columns <- c(
     "landscape_id",
     "landscape_name",
@@ -157,20 +156,17 @@ train_metric_model <- function(
     ))
   }
 
-  # Validate cv_method parameter
   cv_method <- tolower(cv_method)
   if (!cv_method %in% c("none", "k-fold", "loo")) {
     cli::cli_abort('cv_method must be one of: "none", "k-fold", or "loo"')
   }
 
-  # Validate na_action parameter
   if (!na_action %in% c("drop_metrics", "drop_landscapes")) {
     cli::cli_abort(
       'na_action must be one of: "drop_metrics" or "drop_landscapes"'
     )
   }
 
-  # Subset selected metrics if provided
   metrics_selected <- selected_metric_names(metrics_selected)
   if (!is.null(metrics_selected)) {
     missing_metrics <- setdiff(metrics_selected, unique(metrics$metric))
@@ -183,10 +179,10 @@ train_metric_model <- function(
     metrics <- metrics |> dplyr::filter(metric %in% metrics_selected)
   }
 
-  # Convert metrics to wide format with 1 row per landscape
+  # One row per landscape and one predictor per metric
   metrics_wide <- metrics_to_wide(metrics)
 
-  # Deal with NA values -------------------------------------------------------
+  # Incomplete metrics --------------------------------------------------------
   predictor_cols <- setdiff(
     colnames(metrics_wide),
     c("landscape_id", "landscape_name", "pattern")
@@ -199,8 +195,7 @@ train_metric_model <- function(
     na_action = na_action
   )
 
-  # Losing a whole pattern leaves the network with nothing to learn that class
-  # from. Stop here if this happens.
+  # Losing a whole pattern leaves the network with no examples of that class
   patterns_lost <- setdiff(patterns_before, unique(metrics_wide$pattern))
   if (length(patterns_lost) > 0) {
     cli::cli_abort(c(
@@ -210,12 +205,9 @@ train_metric_model <- function(
     ))
   }
 
-  # Summarise the training geometry from the columns calculate_metrics
-  # attaches (NULL if the metrics table does not contain the geometry info),
-  # using only the landscapes that survived NA-dropping above.
-  # Warn if the training landscapes differ in extent or
-  # resolution: scale-dependent metrics (e.g. area, edge, patch counts) then
-  # conflate pattern with landscape size.
+  # Summarize geometry only for landscapes retained above; old or hand-built
+  # metric tables may not contain geometry columns
+  # Unequal extent or resolution confounds scale-dependent metrics with pattern
   training_metrics <- if ("landscape_id" %in% colnames(metrics)) {
     dplyr::filter(metrics, landscape_id %in% metrics_wide$landscape_id)
   } else {
@@ -230,7 +222,7 @@ train_metric_model <- function(
     ))
   }
 
-  # Normalize the predictor variables (remove landscape columns)
+  # Prepare and scale predictors ----------------------------------------------
   predictors <- metrics_wide |>
     dplyr::select(
       -dplyr::any_of(c(
@@ -239,10 +231,8 @@ train_metric_model <- function(
         "pattern"
       ))
     )
-  # Store scaling parameters for future use
-  # This will be used to scale new data before prediction. Predictors without
-  # usable variation are guarded here so they cannot produce NaN or enormous
-  # z-scores (see scaling_stats()).
+  # Reuse these parameters for prediction; scaling_stats() guards predictors
+  # without usable variation against NaN or extreme z-scores
   scaling_params <- scaling_stats(predictors)
 
   predictors_scaled <- scale(
@@ -251,10 +241,8 @@ train_metric_model <- function(
     scale = scaling_params$scale
   )
 
-  # Combine the scaled predictors with the target variable
-  # Explicitly set factor levels in alphabetical order for consistency. This
-  # order must match the neuralnet output columns, which follow the
-  # alphabetical order of model.matrix()'s columns
+  # Alphabetical factor levels match neuralnet output columns, which follow the
+  # response columns from model.matrix()
   class_names <- sort(unique(metrics_wide$pattern))
 
   training_data <- data.frame(
@@ -263,7 +251,6 @@ train_metric_model <- function(
   )
 
   # Cross-validation ----------------------------------------------------------
-  # Validate and adjust CV parameters
   cv_params <- validate_cv_params(
     patterns = training_data$pattern,
     cv_method = cv_method,
@@ -271,34 +258,28 @@ train_metric_model <- function(
     n_predictors = ncol(training_data) - 1
   )
 
-  # Update cv_method and cv_folds based on validation
   cv_method <- cv_params$cv_method
   cv_folds <- cv_params$cv_folds
 
-  # Run model with cross validation --------------------------------------------
   if (cv_method != "none") {
-    # Create stratified fold assignments ---------------------------------------
     if (cv_method == "loo") {
-      # If method is "loo", each sample is its own fold
+      # LOO assigns each landscape its own fold
       fold_indices <- seq_len(nrow(training_data))
     } else {
       fold_indices <- find_balanced_cv_folds(training_data$pattern, cv_folds)
     }
 
-    # Initialize storage for CV results of each fold
     cv_predictions <- list()
     cv_probabilities <- list()
     cv_actual <- list()
     cv_landscape_ids <- list()
 
-    # Perform k-fold cross-validation or loo by looping over each fold
     for (fold in 1:cv_folds) {
-      # Split data into training and validation
       train_indices <- fold_indices != fold
       val_indices <- fold_indices == fold
 
-      # Scale within the fold: fit center/scale on the training rows only and
-      # apply them to the validation rows (avoids validation->training leakage)
+      # Fit scaling on training rows and apply it to validation rows to prevent
+      # validation-to-training leakage
       fold_scaled <- scale_fold(
         predictors[train_indices, , drop = FALSE],
         predictors[val_indices, , drop = FALSE]
@@ -312,7 +293,6 @@ train_metric_model <- function(
         pattern = training_data$pattern[val_indices]
       )
 
-      # Train model on training data
       fold_model <- fit_nn_model(
         data = train_data,
         hidden = hidden_layers,
@@ -320,7 +300,6 @@ train_metric_model <- function(
         stepmax = stepmax
       )
 
-      # Predict on validation data
       probs_raw <- predict(
         fold_model,
         newdata = val_data[,
@@ -329,25 +308,22 @@ train_metric_model <- function(
         ]
       )
 
-      # Add class names as column names. Output units follow the alphabetical
-      # order of the response levels, which is how class_names is built.
+      # Output units follow the alphabetical response levels used by class_names
       colnames(probs_raw) <- class_names
 
       # The predicted class comes from the raw outputs, never from the reported
-      # scores below, so the reporting step cannot move a class boundary.
+      # scores below, so reporting cannot move a class boundary
       predictions <- class_names[max.col(probs_raw, ties.method = "first")]
 
       # Map the raw outputs onto the probability simplex for reporting
       probs <- project_simplex_rows(probs_raw)
 
-      # Store results for this fold
       cv_predictions[[fold]] <- predictions
       cv_probabilities[[fold]] <- probs
       cv_actual[[fold]] <- val_data$pattern
       cv_landscape_ids[[fold]] <- metrics_wide$landscape_id[val_indices]
     }
 
-    # Evaluate cv performance -------------------------------------------------
     performance <- evaluate_cv_performance(
       cv_predictions = cv_predictions,
       cv_probabilities = cv_probabilities,
@@ -360,7 +336,7 @@ train_metric_model <- function(
     )
   }
 
-  # Train final model on all data
+  # Fit the final model to all landscapes
   final_model <- fit_nn_model(
     data = training_data,
     hidden = hidden_layers,
@@ -368,7 +344,6 @@ train_metric_model <- function(
     stepmax = stepmax
   )
 
-  # Prepare return object
   result <- list(
     model = final_model,
     features = colnames(predictors),
