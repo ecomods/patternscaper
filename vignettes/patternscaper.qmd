@@ -11,7 +11,7 @@ knitr:
     cache: true
 ---
 
-`patternscaper` supports two supervised classification workflows. The metric-based workflow uses landscape metrics as features and the pixel-based workflow uses a convolutional neural network (CNN) to classify patterns directly from raster-cell values.
+`patternscaper` supports two supervised classification approaches. The metric-based approach uses landscape metrics as features and the pixel-based approach uses a convolutional neural network (CNN) to classify patterns directly from raster-cell values.
 
 ## The classification workflow
 
@@ -19,14 +19,14 @@ The classification workflow has six steps:
 
 1. **Define the pattern classes** to distinguish. The classification is supervised, so the classes are chosen by the user and should be guided by the research question.
 2. **Prepare training landscapes** with known patterns. Use artificial landscapes created with  `create_landscapes()` or `create_landscape()`, or wrap empirical rasters or matrices with `landscape()`.
-3. **Choose a workflow**: the *metric-based* approach (interpretable and effective with relatively few training landscapes) or the *pixel-based* approach (uses the raw pixel information from the landscapes but typically needs more training data). For guidance on which workflow to choose, see [below](#choosing-a-classification-workflow).
-4. **Calculate and select landscape metrics** (metric-based workflow only) with `calculate_metrics()` and `evaluate_metrics()`.
+3. **Choose an approach**: the *metric-based* approach (interpretable and effective with relatively few training landscapes) or the *pixel-based* approach (uses the raw pixel information from the landscapes but typically needs more training data). For guidance on which approach to choose, see [below](#choosing-a-classification-approach).
+4. **Calculate and select landscape metrics** (metric-based approach only) with `calculate_metrics()` and `evaluate_metrics()`.
 5. **Train a classifier** on the selected metrics with `train_metric_model()`, or on raster cells with `train_pixel_model()`. Cross-validation can be used during training.
 6. **Classify new landscapes** with `apply_metric_model()` or `apply_pixel_model()`, and inspect the results with `plot_classified_landscapes()`.
 
 The paper's supplementary information discusses parameter choice and workflow configuration.
 
-The diagram below summarizes these steps and how the two workflows relate.
+The diagram below summarizes these steps and how the two approaches relate.
 
 ```{=html}
 <style>
@@ -44,29 +44,29 @@ The diagram below summarizes these steps and how the two workflows relate.
 ```
 
 ::: {.workflow-card}
-![The **patternscaper** workflow. Steps shown in grey are shared by both workflows; the cyan lane shows the metric-based approach and the orange lane the pixel-based approach. User decisions have a dashed outline, and arrows are labelled with the object type passed between functions.](img/workflow.drawio.png){#fig-workflow fig-alt="Flowchart of the patternscaper classification workflow, showing the shared landscape-generation steps, the metric-based lane (calculate metrics, evaluate metrics, train, apply) and the pixel-based lane (train, apply), and the function used at each step."}
+![The **patternscaper** workflow. Steps shown in grey are shared by both approaches; the cyan lane shows the metric-based approach and the orange lane the pixel-based approach. User decisions have a dashed outline, and arrows are labelled with the object type passed between functions.](img/workflow.drawio.png){#fig-workflow fig-alt="Flowchart of the patternscaper classification workflow, showing the shared landscape-generation steps, the metric-based lane (calculate metrics, evaluate metrics, train, apply) and the pixel-based lane (train, apply), and the function used at each step."}
 :::
 
-### Choosing a classification workflow
+### Choosing a classification approach
 
-Choose the workflow according to the study objective.
+Choose the approach according to the study objective.
 
-Use the metric-based workflow if
+Use the metric-based approach if
 
 - ecological interpretability is important
 - the number of training landscapes is limited
 - you want to identify which landscape characteristics distinguish pattern types
 
-Use the pixel-based workflow if
+Use the pixel-based approach if
 
 - a sufficiently large training dataset is available
 - the complete spatial configuration should be used for classification
 
-When computationally feasible, we recommend applying both workflows, as agreement between the two approaches increases confidence in the classification, whereas discrepancies may provide insights into the strengths and limitations of the selected representation. 
+When computationally feasible, we recommend applying both approaches, as agreement between them increases confidence in the classification, whereas discrepancies may provide insights into the strengths and limitations of the selected representation.
 
 ## Quick example
 
-This is the shortest metric-based workflow. The [full guide](classify-metrics.html) covers metric selection, cross-validation, and plotting.
+This is the shortest complete example of the metric-based approach. The [full guide](classify-metrics.html) covers metric selection, cross-validation, and plotting.
 
 ```{r}
 #| label: quick-example
@@ -106,12 +106,12 @@ apply_metric_model(new_landscapes, model, evaluate = "none")$predictions
 
 Workflow guides:
 
-- [Classify with landscape metrics](classify-metrics.html) shows the complete metric-based workflow
-- [Classify with pixels (CNN)](classify-pixels.html) shows the pixel-based workflow
+- [Classify with landscape metrics](classify-metrics.html) shows how to use the metric-based approach
+- [Classify with pixels (CNN)](classify-pixels.html) shows how to use the pixel-based approach
 
 Topic guides:
 
 - [Generate landscapes](landscape-generation.html)
 - [Calculate landscape metrics](landscape-metrics.html)
 - [Import your own landscapes](importing-landscapes.html)
-- [Install Keras](install-keras.html) for the pixel-based workflow
+- [Install Keras](install-keras.html) for the pixel-based approach
