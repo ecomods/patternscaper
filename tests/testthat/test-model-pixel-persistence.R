@@ -107,7 +107,7 @@ test_that("pixel model bundle round trip works in the current process", {
     landscape(right[c(20, 1:19), ], pattern = "b", name = "b2")
   )
   set_random_seed(42)
-  nn_model <- train_pixel_model(
+  pixel_model <- train_pixel_model(
     training_landscapes,
     cv_method = "none",
     epochs = 1,
@@ -118,14 +118,14 @@ test_that("pixel model bundle round trip works in the current process", {
   application <- training_landscapes[[1]]
   before <- apply_pixel_model(
     application,
-    nn_model,
+    pixel_model,
     evaluate = "none",
     verbose = FALSE
   )$predictions
 
   bundle_path <- tempfile("pixel-model-")
   on.exit(unlink(bundle_path, recursive = TRUE), add = TRUE)
-  saved_path <- save_pixel_model(nn_model, bundle_path)
+  saved_path <- save_pixel_model(pixel_model, bundle_path)
 
   expect_true(dir.exists(saved_path))
   expect_true(file.exists(file.path(saved_path, "model.keras")))
@@ -134,14 +134,14 @@ test_that("pixel model bundle round trip works in the current process", {
   manifest <- readRDS(file.path(saved_path, "metadata.rds"))
   expect_identical(manifest$format_version, 1L)
   expect_false("model" %in% names(manifest$metadata))
-  expect_equal(manifest$metadata$history, nn_model$history)
+  expect_equal(manifest$metadata$history, pixel_model$history)
 
   reloaded <- load_pixel_model(bundle_path)
-  expect_equal(names(reloaded), names(nn_model))
-  expect_equal(reloaded$classes, nn_model$classes)
-  expect_equal(reloaded$input_shape, nn_model$input_shape)
-  expect_equal(reloaded$land_cover_values, nn_model$land_cover_values)
-  expect_equal(reloaded$history, nn_model$history)
+  expect_equal(names(reloaded), names(pixel_model))
+  expect_equal(reloaded$classes, pixel_model$classes)
+  expect_equal(reloaded$input_shape, pixel_model$input_shape)
+  expect_equal(reloaded$land_cover_values, pixel_model$land_cover_values)
+  expect_equal(reloaded$history, pixel_model$history)
 
   after <- apply_pixel_model(
     application,
@@ -152,11 +152,11 @@ test_that("pixel model bundle round trip works in the current process", {
   expect_equal(after, before, tolerance = 1e-7)
 
   expect_error(
-    save_pixel_model(nn_model, bundle_path),
+    save_pixel_model(pixel_model, bundle_path),
     "already exists"
   )
   expect_no_error(
-    save_pixel_model(nn_model, bundle_path, overwrite = TRUE)
+    save_pixel_model(pixel_model, bundle_path, overwrite = TRUE)
   )
 })
 
@@ -173,7 +173,7 @@ test_that("a fresh R process can load and apply a pixel model bundle", {
     dropout_rate = 0.3,
     dense_units = 8
   )
-  nn_model <- list(
+  pixel_model <- list(
     model = keras_model,
     history = NULL,
     classes = c("a", "b"),
@@ -187,14 +187,14 @@ test_that("a fresh R process can load and apply a pixel model bundle", {
   application <- landscape(matrix(cells, nrow = 10), pattern = "a")
   expected <- apply_pixel_model(
     application,
-    nn_model,
+    pixel_model,
     evaluate = "none",
     verbose = FALSE
   )$predictions
 
   bundle_path <- tempfile("pixel-model-")
   on.exit(unlink(bundle_path, recursive = TRUE), add = TRUE)
-  save_pixel_model(nn_model, bundle_path)
+  save_pixel_model(pixel_model, bundle_path)
 
   package_path <- testthat::test_path("..", "..")
   if (file.exists(file.path(package_path, "DESCRIPTION"))) {

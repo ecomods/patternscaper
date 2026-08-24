@@ -818,7 +818,7 @@ train_pixel_model <- function(
 #'   rejected. Text labels, continuous data such as elevation or gradients, and
 #'   NA cells are not supported. A landscape whose aspect ratio differs from the
 #'   training grid is resized anisotropically (stretched), which raises a warning.
-#' @param nn_model List. CNN model object from \code{\link{train_pixel_model}}.
+#' @param model List. CNN model object from \code{\link{train_pixel_model}}.
 #' @param evaluate Character. Whether to evaluate the predictions against the
 #'   true known classes of the landscapes: \code{"auto"} (default) evaluates when true
 #'   classes are available and classifies only otherwise, \code{"required"}
@@ -877,7 +877,7 @@ train_pixel_model <- function(
 #' )
 #' results <- apply_pixel_model(
 #'   landscapes = test_landscapes,
-#'   nn_model = final_model
+#'   model = final_model
 #' )
 #' results$predictions
 #' results$performance
@@ -886,7 +886,7 @@ train_pixel_model <- function(
 #' @export
 apply_pixel_model <- function(
   landscapes,
-  nn_model,
+  model,
   evaluate = "auto",
   verbose = TRUE
 ) {
@@ -897,7 +897,7 @@ apply_pixel_model <- function(
   }
 
   if (
-    !is.list(nn_model) ||
+    !is.list(model) ||
       !all(
         c(
           "model",
@@ -905,18 +905,18 @@ apply_pixel_model <- function(
           "input_shape",
           "land_cover_values"
         ) %in%
-          names(nn_model)
+          names(model)
       )
   ) {
     cli::cli_abort(
-      "'nn_model' must be a trained model from train_pixel_model()"
+      "'model' must be a trained model from train_pixel_model()"
     )
   }
 
-  model <- nn_model$model
-  class_names <- nn_model$classes
-  input_shape <- nn_model$input_shape
-  land_cover_values <- nn_model$land_cover_values
+  keras_model <- model$model
+  class_names <- model$classes
+  input_shape <- model$input_shape
+  land_cover_values <- model$land_cover_values
 
   # Model input geometry
   expected_height <- input_shape[1]
@@ -1055,7 +1055,7 @@ apply_pixel_model <- function(
   landscape_data <- abind::abind(landscape_arrays, along = 0)
 
   # Get predictions
-  pred <- predict(model, landscape_data, verbose = 0)
+  pred <- predict(keras_model, landscape_data, verbose = 0)
 
   colnames(pred) <- class_names
 

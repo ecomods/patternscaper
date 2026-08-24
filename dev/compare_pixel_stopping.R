@@ -142,7 +142,7 @@ for (use_case_name in names(use_cases)) {
       # evaluated only after training and are not used to choose the method.
       test_results <- apply_pixel_model(
         landscapes = use_case$test,
-        nn_model = model,
+        model = model,
         verbose = FALSE
       )
 

@@ -6,7 +6,7 @@
 #' the fitted land-cover codes. Move or archive the complete folder rather than
 #' the single files inside it.
 #'
-#' @param nn_model List. Trained pixel model returned by
+#' @param model List. Trained pixel model returned by
 #'   \code{\link{train_pixel_model}}.
 #' @param path Character. Directory in which to save the complete model bundle.
 #'   The path must not end in \file{.keras} or \file{.rds}; those files are
@@ -38,10 +38,10 @@
 #' reloaded_model <- load_pixel_model(model_bundle)
 #' # Clean up the temporary bundle created for this example.
 #' unlink(model_bundle, recursive = TRUE)
-save_pixel_model <- function(nn_model, path, overwrite = FALSE) {
+save_pixel_model <- function(model, path, overwrite = FALSE) {
   path <- validate_pixel_model_bundle_path(path)
   validate_pixel_model_overwrite(overwrite)
-  validate_pixel_model_wrapper(nn_model)
+  validate_pixel_model_wrapper(model)
 
   if (file.exists(path) && !dir.exists(path)) {
     cli::cli_abort(c(
@@ -68,12 +68,12 @@ save_pixel_model <- function(nn_model, path, overwrite = FALSE) {
 
   bundle_paths <- pixel_model_bundle_paths(path)
   keras3::save_model(
-    nn_model$model,
+    model$model,
     bundle_paths$model,
     overwrite = overwrite
   )
 
-  metadata <- nn_model
+  metadata <- model
   metadata$model <- NULL
   # Version the bundle structure independently of the trained model
   bundle_metadata <- list(
@@ -165,15 +165,15 @@ validate_pixel_model_overwrite <- function(overwrite) {
   }
 }
 
-validate_pixel_model_wrapper <- function(nn_model) {
+validate_pixel_model_wrapper <- function(model) {
   required <- c("model", "classes", "input_shape", "land_cover_values")
   if (
-    !is.list(nn_model) ||
-      !all(required %in% names(nn_model)) ||
-      is.null(nn_model$model)
+    !is.list(model) ||
+      !all(required %in% names(model)) ||
+      is.null(model$model)
   ) {
     cli::cli_abort(
-      "{.arg nn_model} must be a trained model from {.fn train_pixel_model}."
+      "{.arg model} must be a trained model from {.fn train_pixel_model}."
     )
   }
 }

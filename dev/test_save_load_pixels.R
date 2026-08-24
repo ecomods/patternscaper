@@ -29,7 +29,7 @@ test_landscapes <- create_landscapes(
 
 results <- apply_pixel_model(
   landscapes = test_landscapes,
-  nn_model = reloaded
+  model = reloaded
 )
 
 unlink(model_bundle, recursive = TRUE)

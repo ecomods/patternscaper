@@ -366,7 +366,7 @@ train_metric_model <- function(
 #'
 #' @param landscapes Landscape object (single) or list of landscape objects to classify.
 #'   Landscapes must have valid raster data that can be analyzed by landscapemetrics.
-#' @param nn_model List. Trained model object returned from train_metric_model().
+#' @param model List. Trained model object returned from train_metric_model().
 #'   Must contain elements: model, scaling, classes, features, and features_level.
 #' @param evaluate Character. Whether to evaluate the predictions against the
 #'   true known classes of the landscapes: \code{"auto"} (default) evaluates when true
@@ -500,7 +500,7 @@ train_metric_model <- function(
 #' @importFrom stats predict
 apply_metric_model <- function(
   landscapes,
-  nn_model,
+  model,
   evaluate = "auto",
   verbose = TRUE
 ) {
@@ -512,14 +512,14 @@ apply_metric_model <- function(
   }
 
   if (
-    !is.list(nn_model) ||
+    !is.list(model) ||
       !all(
         c("model", "scaling", "classes", "features", "features_level") %in%
-          names(nn_model)
+          names(model)
       )
   ) {
     cli::cli_abort(
-      "'nn_model' must be a trained model from train_metric_model()"
+      "'model' must be a trained model from train_metric_model()"
     )
   }
 
@@ -534,20 +534,20 @@ apply_metric_model <- function(
   }
 
   # Extract required elements from the model
-  model <- nn_model$model
-  scaling_params <- nn_model$scaling
-  class_names <- nn_model$classes
-  level <- nn_model$features_level
+  fitted_model <- model$model
+  scaling_params <- model$scaling
+  class_names <- model$classes
+  level <- model$features_level
 
   # Determine metrics to calculate based on level
   if (level == "landscape") {
-    metrics_to_calculate <- nn_model$features
+    metrics_to_calculate <- model$features
   } else if (level == "class") {
     # Remove the last part after last underscore
-    metrics_to_calculate <- gsub("_[^_]+$", "", nn_model$features)
+    metrics_to_calculate <- gsub("_[^_]+$", "", model$features)
   } else {
     cli::cli_abort(
-      "Unsupported features_level '{level}' in nn_model"
+      "Unsupported features_level '{level}' in model"
     )
   }
 
@@ -568,11 +568,11 @@ apply_metric_model <- function(
       cell_size_x,
       cell_size_y
     ),
-    nn_model$training_geometry,
+    model$training_geometry,
     verbose = verbose
   )
 
-  metrics <- metrics |> dplyr::filter(metric %in% nn_model$features)
+  metrics <- metrics |> dplyr::filter(metric %in% model$features)
 
   # One row per landscape and one predictor per metric
   metrics_wide <- metrics_to_wide(metrics)
@@ -583,19 +583,19 @@ apply_metric_model <- function(
     c("landscape_id", "landscape_name", "pattern")
   )
 
-  missing_features <- setdiff(nn_model$features, predictor_names)
+  missing_features <- setdiff(model$features, predictor_names)
 
   if (length(missing_features) > 0) {
     cli::cli_abort(c(
       "Input landscapes missing required metrics",
       "x" = "Missing: {.val {missing_features}}",
-      "i" = "Model requires: {.val {nn_model$features}}"
+      "i" = "Model requires: {.val {model$features}}"
     ))
   }
 
   # Preserve the feature order used to train the model
   predictors <- metrics_wide |>
-    dplyr::select(dplyr::all_of(nn_model$features))
+    dplyr::select(dplyr::all_of(model$features))
 
   # Incomplete predictors -----------------------------------------------------
   # Keep incomplete landscapes and return NA predictions; dropping a metric
@@ -605,7 +605,7 @@ apply_metric_model <- function(
   if (all(incomplete)) {
     cli::cli_abort(c(
       "No input landscape has all the metrics the model requires",
-      "i" = "Model requires: {.val {nn_model$features}}"
+      "i" = "Model requires: {.val {model$features}}"
     ))
   }
 
@@ -626,7 +626,7 @@ apply_metric_model <- function(
 
   # Predictions ---------------------------------------------------------------
   pred_raw <- predict(
-    model,
+    fitted_model,
     newdata = predictors_scaled
   )
 

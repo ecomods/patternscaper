@@ -887,7 +887,7 @@ test_that("apply_pixel_model validates model structure", {
   expect_error(
     apply_pixel_model(
       landscapes = list(),
-      nn_model = list(wrong = "structure")
+      model = list(wrong = "structure")
     ),
     "must be a trained model from train_pixel_model"
   )
@@ -932,7 +932,7 @@ test_that("apply_pixel_model validates landscapes input", {
   expect_error(
     apply_pixel_model(
       landscapes = "not_a_landscape",
-      nn_model = model
+      model = model
     ),
     "must be a landscape object or list"
   )
@@ -940,7 +940,7 @@ test_that("apply_pixel_model validates landscapes input", {
   expect_error(
     apply_pixel_model(
       landscapes = list("not", "landscapes"),
-      nn_model = model
+      model = model
     ),
     "All elements must be landscape objects"
   )
@@ -1085,7 +1085,7 @@ test_that("apply_pixel_model returns predictions for single landscape", {
   # Single landscape
   result <- apply_pixel_model(
     landscapes = landscapes[[1]],
-    nn_model = model,
+    model = model,
     evaluate = "none"
   )$predictions
 
@@ -1120,7 +1120,7 @@ test_that("apply_pixel_model returns predictions for multiple landscapes", {
 
   result <- apply_pixel_model(
     landscapes = landscapes[1:5],
-    nn_model = model,
+    model = model,
     evaluate = "none"
   )$predictions
 
@@ -1144,7 +1144,7 @@ test_that("apply_pixel_model returns performance when requested", {
   result <- suppressWarnings(
     apply_pixel_model(
       landscapes = landscapes,
-      nn_model = model,
+      model = model,
       verbose = FALSE
     )
   )
@@ -1176,7 +1176,7 @@ test_that("apply_pixel_model handles mixed valid/NA classes", {
   result <- suppressWarnings(
     apply_pixel_model(
       landscapes = test_landscapes,
-      nn_model = model,
+      model = model,
       verbose = FALSE
     )
   )
@@ -1213,7 +1213,7 @@ test_that("apply_pixel_model returns NULL performance for all invalid classes", 
   expect_warning(
     result <- apply_pixel_model(
       landscapes = test_landscapes,
-      nn_model = model,
+      model = model,
       verbose = FALSE
     ),
     NA
@@ -1227,7 +1227,7 @@ test_that("apply_pixel_model returns NULL performance for all invalid classes", 
   expect_error(
     apply_pixel_model(
       landscapes = test_landscapes,
-      nn_model = model,
+      model = model,
       evaluate = "required",
       verbose = FALSE
     ),
@@ -1254,7 +1254,7 @@ test_that("apply_pixel_model warns about unknown classes", {
   expect_warning(
     result <- apply_pixel_model(
       landscapes = test_landscapes,
-      nn_model = model,
+      model = model,
       verbose = FALSE
     ),
     "classes not seen during training"
@@ -1269,7 +1269,7 @@ test_that("apply_pixel_model warns about unknown classes", {
   expect_error(
     apply_pixel_model(
       landscapes = test_landscapes,
-      nn_model = model,
+      model = model,
       evaluate = "required",
       verbose = FALSE
     ),
@@ -1280,7 +1280,7 @@ test_that("apply_pixel_model warns about unknown classes", {
   expect_warning(
     apply_pixel_model(
       landscapes = test_landscapes,
-      nn_model = model,
+      model = model,
       evaluate = "none",
       verbose = FALSE
     ),
@@ -1309,7 +1309,7 @@ test_that("apply_pixel_model handles resizing correctly", {
 
   result <- apply_pixel_model(
     landscapes = small_landscape,
-    nn_model = model,
+    model = model,
     evaluate = "none",
     verbose = FALSE
   )$predictions

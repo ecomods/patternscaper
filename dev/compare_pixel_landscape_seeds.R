@@ -133,7 +133,7 @@ for (use_case_name in names(use_cases)) {
 
     fixed_test_results <- apply_pixel_model(
       landscapes = fixed_test,
-      nn_model = model,
+      model = model,
       verbose = FALSE
     )
 
@@ -199,7 +199,7 @@ for (use_case_name in names(use_cases)) {
 
         seeded_test_results <- apply_pixel_model(
           landscapes = test_landscapes,
-          nn_model = model,
+          model = model,
           verbose = FALSE
         )
         seeded_test_performance <- seeded_test_results$performance

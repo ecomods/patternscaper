@@ -171,7 +171,7 @@ for (training_seed in training_seeds) {
 
     test_result <- apply_pixel_model(
       landscapes = test_landscapes,
-      nn_model = model,
+      model = model,
       evaluate = "required",
       verbose = FALSE
     )

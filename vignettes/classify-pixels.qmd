@@ -237,7 +237,7 @@ performance cannot be evaluated.
 #| output: false
 classification <- apply_pixel_model(
   landscapes = test_landscapes,
-  nn_model = model
+  model = model
 )
 ```
 

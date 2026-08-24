@@ -212,7 +212,7 @@ performance cannot be evaluated.
 # Classify test landscapes using the trained model
 classification <- apply_metric_model(
   landscapes = test_landscapes,
-  nn_model = model
+  model = model
 )
 ```
 

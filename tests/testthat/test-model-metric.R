@@ -644,7 +644,7 @@ test_that("apply_metric_model return shape does not depend on the data", {
   }
 })
 
-test_that("apply_metric_model validates nn_model structure", {
+test_that("apply_metric_model validates model structure", {
   # Create landscapes on-demand
   minimal_landscapes <- create_fixture_landscapes("minimal")
 
@@ -653,7 +653,7 @@ test_that("apply_metric_model validates nn_model structure", {
       minimal_landscapes,
       list(model = "not a model")
     ),
-    "'nn_model' must be a trained model from train_metric_model()"
+    "'model' must be a trained model from train_metric_model()"
   )
 
   expect_error(
@@ -661,7 +661,7 @@ test_that("apply_metric_model validates nn_model structure", {
       minimal_landscapes,
       "not a list"
     ),
-    "'nn_model' must be a trained model from train_metric_model()"
+    "'model' must be a trained model from train_metric_model()"
   )
 })
 
