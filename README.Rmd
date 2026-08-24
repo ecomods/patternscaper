@@ -24,11 +24,12 @@ knitr::opts_chunk$set(
 ## Overview
 
 `patternscaper` classifies spatial vegetation patterns in categorical raster landscapes into ecologically meaningful, user-defined pattern types. It provides a reproducible alternative to visual classification or the manual interpretation of multiple landscape metrics. It can be used to compare landscape structure across space or time, monitor ecosystem change, evaluate spatial simulation outputs, and analyze classified remote-sensing data.
-Users define the pattern classes according to their research question and provide representative, labelled training landscapes. These landscapes can be generated with patternscaper or imported from ecological simulation outputs or other categorical raster data. Artificial landscapes are particularly useful when labelled empirical training data are scarce because their classes are known by construction and their variation can be controlled.
 
-The package provides two complementary workflows. The metric-based workflow calculates established landscape metrics using the [`landscapemetrics` R package](https://r-spatialecology.github.io/landscapemetrics/index.html), selects informative metrics, and trains a neural network classifier on them. The pixel-based workflow trains a convolutional neural network directly on categorical raster cells without prior feature selection. Both workflows support landscape preparation, model training and evaluation, classification of new landscapes, and visualization of the results.
+Users define the pattern classes according to their research question and provide representative, labeled training landscapes. These landscapes can be generated with `patternscaper` or imported from ecological simulation outputs or other categorical raster data. Artificial landscapes are particularly useful when labeled empirical training data are scarce because their classes are known by construction and their variation can be controlled.
 
-```{r, fig.width=8, fig.height=6, echo=FALSE, fig.cap="Overview of the patternscaper workflow. Classifiers are trained using either the metric-based or pixel-based approach and applied to new artificial or empirical landscapes.", fig.alt="Diagram showing the patternscaper workflow in two phases: (1) Training phase where training landscapes are fed into a neural network using either landscape metrics or pixel information, and (2) Application phase where new artificial or real landscapes are classified by the trained neural network to predict the most likely landscape pattern class."}
+The package provides two complementary approaches. The metric-based approach calculates established landscape metrics using the [`landscapemetrics` R package](https://r-spatialecology.github.io/landscapemetrics/index.html), selects informative metrics, and trains a neural network classifier on them. The pixel-based approach trains a convolutional neural network directly on categorical raster cells without prior feature selection. Both approaches support landscape preparation, model training and evaluation, classification of new landscapes, and visualization of the results.
+
+```{r, fig.width=8, fig.height=6, echo=FALSE, fig.cap="Overview of the patternscaper workflow. Classifiers are trained using either the metric-based or pixel-based approach and applied to new artificial or empirical landscapes.", fig.alt="Diagram showing the patternscaper workflow in two phases: (1) Training phase where training landscapes are fed into a neural network using either landscape metrics or pixel information, and (2) Application phase where new artificial or real landscapes are classified by the trained neural network to predict the landscape pattern class."}
 knitr::include_graphics("man/figures/workflow.png")
 ```
 
@@ -43,7 +44,9 @@ pak::pak("ecomods/patternscaper")
 
 ## Get started
 
-See [Get started](https://ecomods.github.io/patternscaper/articles/patternscaper.html) for the classification workflow.
+Follow [Get started](https://ecomods.github.io/patternscaper/articles/patternscaper.html) for an overview of the complete classification workflow and a short runnable example. Depending on your starting point, you can also check out how to:
+- [Generate artificial landscapes](https://ecomods.github.io/patternscaper/articles/generate_landscapes.html) for labeled training or test data
+- [Import your own landscapes](https://ecomods.github.io/patternscaper/articles/import_landscapes.html) from categorical raster data or matrices
 
 
 ## Citation
