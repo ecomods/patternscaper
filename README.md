@@ -11,13 +11,12 @@
 
 ## Overview
 
-`patternscaper` classifies spatial vegetation patterns in categorical
-raster landscapes into ecologically meaningful, user-defined pattern
-types. It provides a reproducible alternative to visual classification
-or the manual interpretation of multiple landscape metrics. It can be
-used to compare landscape structure across space or time, monitor
-ecosystem change, evaluate spatial simulation outputs, and analyze
-classified remote-sensing data.
+`patternscaper` classifies spatial vegetation patterns into ecologically
+meaningful, user-defined pattern types. It provides a reproducible
+alternative to visual classification or the manual interpretation of
+multiple landscape metrics. It can be used to compare landscape
+structure across space or time, monitor ecosystem change, evaluate
+spatial simulation outputs, and analyze classified remote-sensing data.
 
 Users define the pattern classes according to their research question
 and provide representative, labeled training landscapes. These
@@ -66,11 +65,14 @@ Follow [Get
 started](https://ecomods.github.io/patternscaper/articles/patternscaper.html)
 for an overview of the complete classification workflow and a short
 runnable example. Depending on your starting point, you can also check
-out how to: - [Generate artificial
-landscapes](https://ecomods.github.io/patternscaper/articles/generate_landscapes.html)
-for labeled training or test data - [Import your own
-landscapes](https://ecomods.github.io/patternscaper/articles/import_landscapes.html)
-from categorical raster data or matrices
+out how to:
+
+- [Generate artificial
+  landscapes](https://ecomods.github.io/patternscaper/articles/landscape-generation.html)
+  for labeled training or test data
+- [Import your own
+  landscapes](https://ecomods.github.io/patternscaper/articles/importing-landscapes.html)
+  from categorical raster data or matrices
 
 ## Citation
 
