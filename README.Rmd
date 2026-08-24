@@ -13,7 +13,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-# patternscaper
+# patternscaper <a href="https://ecomods.github.io/patternscaper/"><img src="man/figures/logo.png" align="right" height="138" alt="patternscaper website" /></a>
+
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/ecomods/patternscaper/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ecomods/patternscaper/actions/workflows/R-CMD-check.yaml)

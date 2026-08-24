@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# patternscaper
+# patternscaper <a href="https://ecomods.github.io/patternscaper/"><img src="man/figures/logo.png" align="right" height="138" alt="patternscaper website" /></a>
 
 <!-- badges: start -->
 
