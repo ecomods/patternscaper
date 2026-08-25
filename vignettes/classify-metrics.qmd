@@ -1,7 +1,7 @@
 ---
-title: "Classify landscapes using landscape metrics"
+title: "Classify landscapes with landscape metrics"
 vignette: >
-  %\VignetteIndexEntry{classify-metrics}
+  %\VignetteIndexEntry{Classify landscapes with landscape metrics}
   %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
 knitr:
@@ -11,50 +11,67 @@ knitr:
     cache: true
 ---
 
-This vignette shows how to train a neural network on landscape metrics and use
-it to classify new landscapes.
+This guide shows how to train a classifier on landscape metrics and apply it to
+previously unseen landscapes. The selected metrics describe landscape
+composition and spatial configuration, so they can also provide insight into
+which landscape characteristics distinguish the pattern classes. The workflow
+uses a feed-forward neural network from the `neuralnet` package.
+
+The example extends the metric-based quick example in
+[Get started with patternscaper](patternscaper.html) by distinguishing three
+ecotone patterns: sharp, clustered, and bands.
 
 ```{r}
 #| label: setup
 library(patternscaper)
 
-# Set seed for reproducibility
+# Set seed for reproducible example
 set.seed(123456)
 ```
 
+## Overview
 
-The workflow has five steps:
+The metric-based workflow has five steps:
 
-1. Generate labelled training landscapes with known patterns using `create_landscapes()`
+1. Prepare labelled training landscapes with known patterns
 2. Calculate their landscape metrics with `calculate_metrics()`
 3. Select informative metrics with `evaluate_metrics()`
-4. Train a neural network using the selected metrcis with `train_metric_model()`
-5. Classify new landscapes with `apply_metric_model()`
+4. Train the final classifier with `train_metric_model()`
+5. Classify new landscapes with `apply_metric_model()` and evaluate the predictions when their true patterns are known
 
 
-## Step 1: Generate Training Landscapes
+## Step 1: Create training landscapes
 
-Generate training landscapes with known patterns. The
-[landscape generation vignette](landscape-generation.html) describes all
-available patterns and options.
+Create training landscapes with known patterns. The
+[artificial landscape guide](landscape-generation.html) explains how to create
+training batches, and the [pattern gallery](pattern-gallery.html) shows the
+available patterns and their parameters. Alternatively, import your own raster
+or matrix data as described in [Import user-defined landscapes](importing-landscapes.html).
 
 ```{r}
 #| label: generate-landscapes
-# Generate 100 training landscapes of 3 patterns
-landscapes <- create_landscapes(
+# Generate 100 training landscapes from 3 ecotone patterns
+training_landscapes <- create_landscapes(
   n = 100,
-  patterns = c("labyrinth", "random", "clustered")
+  patterns = c("sharp", "clustered", "bands")
 )
 ```
 
-## Step 2: Calculate Landscape Metrics
+Training landscapes should represent the pattern classes and the variation
+expected in the application data.
 
-Next, you can calculate landscape metrics for the training landscapes. 
-Landscape metrics are calculated using the metrics and functions from the [`landscapemetrics`](https://r-spatialecology.github.io/landscapemetrics/) package.
-They can be calculated on the class level (i.e. for each land cover class separately) or on the landscape level (i.e. for the whole landscape).
-For details, see [landscape metrics vignette](landscape-metrics.html).
+## Step 2: Calculate landscape metrics
 
-In this example, we calculate metrics on the landscape level.
+Next, calculate landscape metrics for the training landscapes. The `calculate_metrics()` function internally uses the functions provided by the
+[`landscapemetrics`](https://r-spatialecology.github.io/landscapemetrics/)
+package. Metrics can be calculated at the landscape or at the class level. At the landscape level, each metric summarizes the complete landscape, while at the class level, each metric is calculated separately for every land-cover
+class.
+
+Landscape-level metrics are suitable for the three ecotone classes in this
+example. However, if patterns differ mainly by exchanging land-cover values, such as spots
+and gaps or bare and dense landscapes, class-level metrics are more suitable because
+landscape-level metrics may not be able to distinguish them. For more details, see
+[Calculate and evaluate landscape metrics](landscape-metrics.html).
 
 
 ```{r}
@@ -62,110 +79,101 @@ In this example, we calculate metrics on the landscape level.
 #| message: false
 # Calculate landscape metrics on the landscape level
 landscape_metrics <- calculate_metrics(
-  landscapes,
+  training_landscapes,
   level = "landscape"
 )
 ```
 
-## Step 3: Evaluate Landscape Metrics
+## Step 3: Evaluate landscape metrics
 
-Use `evaluate_metrics()` to rank and select a requested number of metrics. There are different ranking methods available (e.g. Kruskal-Wallis H test). The
-[landscape metrics vignette](landscape-metrics.html) describes the other
-methods.
+Use `evaluate_metrics()` to rank metrics by how well they distinguish the
+training patterns and select a number of informative metrics. This example uses the default
+Kruskal-Wallis effect-size method to get the ten most informative metrics. The function reduces redundancy by filtering out highly correlated metrics. If too few metrics
+pass the correlation filter, the highest-ranked correlated candidates are added
+to reach the requested number of metrics. See
+[Calculate and evaluate landscape metrics](landscape-metrics.html) for the
+other ranking methods and details of the selection process.
 
 :::{.callout-note}
-Some metrics are `NA` or unavailable for particular landscapes. At the class
-level, for example, a metric cannot be calculated for a class absent from a
-landscape. Other metrics may have the same value for all landscapes and therefore no variation. By default,
-`evaluate_metrics()` removes these metrics and reports which were excluded.
+## Incomplete metrics
 
-It is recommended to leave `exclude_incomplete_metrics = TRUE` (the default), as metrics that are missing for some landscapes cannot be used for training the neural network. They may however be informative and useful for other types of analyses.
+By default, `evaluate_metrics()` excludes incomplete metrics that are not
+available for every landscape and zero-variation metrics that have the same
+value across landscapes. Incomplete metrics cannot be passed directly to the
+neural network because every predictor needs a value for every training
+landscape. Zero-variation metrics provide no information for distinguishing
+pattern types. Leave `exclude_incomplete_metrics = TRUE` for model training.
+Excluded metrics are still recorded and reported to the user but are not
+selected for training.
 :::
 
 
 ```{r}
 #| label: evaluate-metrics
-best_10 <- evaluate_metrics(
+metric_selection <- evaluate_metrics(
   metrics = landscape_metrics,
   method = "kruskal_effsize",
   metrics_number = 10,
   verbose = FALSE
 )
 
-best_10
+metric_selection
 ```
 
-`evaluate_metrics()` returns the selected names in `$selected` together with the
-full ranking in `$ranking`, which records the score of every metric and what
+`evaluate_metrics()` returns the selected metric names in `$selected` together with the
+ranking information in `$ranking`, which records the score of every metric and what
 happened to the ones that were not selected. See the
 [landscape metrics vignette](landscape-metrics.html) for how to read it. The
-functions below accept either the object itself or `best_10$selected`.
+functions below accept either the object `metric_selection` itself or the names of the selected metrics `metric_selection$selected`.
 
 Alternatively, provide a character vector of metric names to select them
 manually.
 
-You can plot the differences between patterns for the selected metrics using the `plot_metrics` function.
+Use `plot_metrics()` to compare the selected metric distributions among the
+pattern classes.
 
 ```{r}
 #| label: plot-metrics
 #| fig-width: 8
 #| fig-height: 6
-#| fig-cap: "Boxplots show the distribution of the selected landscape metrics across different spatial patterns. Each point represents one training landscape and each panel is one of the selected metrics."
-# Plot selected metrics
+#| fig-alt: "Ten panels of boxplots and points comparing selected landscape metrics among sharp, clustered, and bands ecotone classes"
+#| fig-cap: "Distributions of selected metrics across sharp, clustered, and bands ecotone classes. Each point is one training landscape."
 plot_metrics(
   metrics = landscape_metrics,
-  selected_metrics = best_10
+  selected_metrics = metric_selection,
+  metric_labels = "name"
 )
 ```
 
-## Step 4: Train Neural Network
+## Step 4: Train the final model
 
-The model can now be trained using the selected metrics from step 3.
-Training can be done with or without cross-validation.
-Valid options for the cross-validation method `cv_method` are:
+`train_metric_model()` fits a feed-forward neural network using the selected
+metrics from step 3 as predictors. Before training, it centers and scales the
+metrics because their units and ranges can differ widely. The model stores these
+transformations so they can be applied to new landscapes in the same way.
 
-- `"none"`: no cross-validation
-- `"k-fold"`: k-fold cross-validation with `cv_folds` number of folds
-- `"loo"`: leave-one-out cross-validation
+Here, the final model is trained on all training landscapes without
+cross-validation. Its performance will be evaluated on independent test
+landscapes in step 5. Make sure to reset R's random-number generator immediately before
+training so the result does not depend on random draws made by earlier steps.
 
-See `?train_metric_model` for further options.
+See `?train_metric_model` for architecture and training options.
 
 ```{r}
 #| label: train-model
-# Train neural network with k-fold cross-validation (3 folds)
+# Reset the seed immediately before training
+set.seed(123456)
+
+# Train the final model on all training landscapes
 model <- train_metric_model(
   metrics = landscape_metrics,
-  metrics_selected = best_10,
-  cv_method = "k-fold",
-  cv_folds = 3,
+  metrics_selected = metric_selection,
+  cv_method = "none",
   verbose = FALSE
 )
 ```
 
-To check the model performance, you can look at the confusion matrix from cross-validation:
-
-```{r}
-#| label: view-confusion-matrix
-# Confusion matrix from cross-validation
-model$performance$confusion_matrix
-```
-
-You can also check other performance metrics like overall accuracy:
-
-```{r}
-#| label: view-overall-accuracy
-# Overall accuracy
-model$performance$accuracy
-```
-
-Or per class metrics like precision, recall, and F1-score:
-
-```{r}
-#| label: view-per-class-metrics
-model$performance$per_class_metrics
-```
-
-## Save and Reload the Model
+### Save and reload the model
 
 A metric model is an ordinary R object. Save and reload it with the base R
 functions `saveRDS()` and `readRDS()`:
@@ -179,30 +187,60 @@ model <- readRDS(metric_model_file)
 
 Keep the `.rds` file to apply the model in a future R session without retraining.
 
-## Step 5: Classify New Landscapes
+## Step 5: Classify new landscapes
 
-Create test landscapes and classify them with the trained model. These could
-instead be imported data or output from simulation models; see the
-[importing landscapes vignette](importing-landscapes.html).
+Use `apply_metric_model()` to classify landscapes that were not used for metric
+selection or training. These landscapes can serve two roles:
+
+- *Labelled test landscapes* have known patterns and can be used to evaluate model
+  performance
+- *Application landscapes* have unknown patterns and can be
+  classified with the fitted model
+
+The function call is the same in both cases. This example uses a labelled,
+independent test set so that both the predictions and model performance can be
+inspected. Application landscapes could instead be imported data or output from
+simulation models (see
+[Import user-defined landscapes](importing-landscapes.html)).
+
+:::{.callout-note}
+
+## Landscape geometry
+
+Training and application landscapes should have comparable extent, resolution,
+and aspect ratio because a mismatched geometry can produce substantially different
+metric values.
+`apply_metric_model()` warns when it detects a substantial mismatch. See
+[Matching training and application data](matching-training-application.html)
+for details.
+
+:::
 
 ```{r}
 #| label: classify-landscapes
-# Create 10 new test landscapes using the same patterns as for training
+# Use a separate seed for independent test landscapes
+set.seed(654321)
+
+# Create 30 test landscapes, 10 from each training pattern
 test_landscapes <- create_landscapes(
-  n = 10,
-  patterns = c("labyrinth", "random", "clustered")
+  n = 30,
+  patterns = c("sharp", "clustered", "bands")
 )
 ```
 
-If test landscapes have been created with `create_landscapes()`, their true patterns are known. Therefore they can be used to evaluate classification performance.
-
-The result always has the same two parts, `$predictions` and `$performance`.
+`apply_metric_model()` automatically calculates the metrics required by the model and applies
+the centering and scaling stored during training. Because these artificial test
+landscapes retain their true pattern labels, the default `evaluate = "auto"`
+also evaluates the predictions. The same function call applies to unknown
+landscapes, but no performance evaluation is returned.
 
 :::{.callout-note}
-Performance is evaluated automatically when true patterns are known. Use
-`evaluate = "none"` to classify without evaluation, even when the landscapes
-carry pattern labels. Use `evaluate = "required"` to raise an error when
-performance cannot be evaluated.
+## Optional performance evaluation
+
+Performance is evaluated automatically when the input landscapes have known
+pattern labels. Use `evaluate = "none"` to classify without evaluation, even
+when the landscapes are labelled. Use `evaluate = "required"` to raise an error
+when performance cannot be evaluated.
 :::
 
 ```{r}
@@ -212,12 +250,15 @@ performance cannot be evaluated.
 # Classify test landscapes using the trained model
 classification <- apply_metric_model(
   landscapes = test_landscapes,
-  model = model
+  model = model,
+  verbose = FALSE
 )
 ```
 
-You can look at the predicted patterns for each test landscape individually and
-compare actual and predicted classes:
+The result always contains a prediction table you can access with `$predictions`. This table lists the predicted pattern class, the predicted-class score, and one score for every class the
+model learned. If available from the input data, it also gives the actual pattern label. `$performance` contains the evaluation results for labelled
+landscapes and is `NULL` when the true patterns are unknown or evaluation is
+disabled.
 
 ```{r}
 #| label: view-predictions-2
@@ -225,25 +266,28 @@ compare actual and predicted classes:
 classification$predictions
 ```
 
-You can also look at performance summaries like confusion matrix:
+The per-class scores are non-negative and sum to one, but they are not
+calibrated probabilities. The `score` column contains the largest per-class
+score for each landscape. You can compare the per-class scores within a row to
+assess how decisive the model was: one dominant score indicates stronger
+support for one class, while similar scores indicate ambiguity. A score of 0.8
+does not mean that the prediction has an 80% probability of being correct.
+
+For labelled test landscapes, use the performance results to inspect the
+confusion matrix, overall model accuracy, and class-specific precision, recall, and
+F1-score:
 
 ```{r}
-#| label: view-performance-2
-# Performance summary
+#| label: view-test-performance
 classification$performance$confusion_matrix
-```
-
-And other metrics like accuracy, precision, recall, and F1-score:
-
-```{r}
-#| label: view-per-class-metrics-2
-# Other performance metrics
+classification$performance$accuracy
 classification$performance$per_class_metrics
 ```
 
 Use `plot_classified_landscapes()` to show landscapes with their true and
 predicted patterns. Correct classifications are blue and misclassifications are
-bold orange. Set `only_misclassified = TRUE` to show only misclassifications.
+bold orange. The example shows 12 of the 30 test landscapes to keep the figure
+readable. Set `only_misclassified = TRUE` to inspect only misclassifications.
 
 :::{.callout-note}
 If you classified landscapes where the true patterns are not known, the plot will
@@ -254,10 +298,59 @@ show the landscape and the predicted pattern only.
 #| label: plot-classified-landscapes
 #| fig-width: 8
 #| fig-height: 6
-# Visualize true and predicted patterns
-
+#| fig-alt: "Twelve test landscapes labelled with their actual and predicted ecotone pattern classes"
+#| fig-cap: "Classification results for 12 independent test landscapes. Blue labels indicate correct predictions and bold orange labels indicate misclassifications."
 plot_classified_landscapes(
   classification = classification$predictions,
-  landscapes = test_landscapes
+  landscapes = test_landscapes,
+  subset_index = 1:12,
+  ncol = 4
 )
 ```
+
+## Optional: Estimate performance with cross-validation
+
+The independent test set above evaluates the final classifier on new, labelled
+landscapes. Cross-validation serves a different purpose: it assesses how
+consistently a model classifies held-out subsets of the training data. This can
+help when comparing model settings.
+
+Cross-validation can also provide an estimate of model performance when too few
+labelled landscapes are available for an independent test. Because the metrics
+were selected using the full training set before cross-validation, the held-out
+folds are not fully independent. The cross-validation results therefore assess
+model fitting with the selected metrics, not the complete metric-selection and
+training workflow.
+
+The following code runs five-fold cross-validation and prints the resulting
+performance summaries.
+
+```{r}
+#| label: optional-cross-validation
+# Reset the seed immediately before cross-validation
+set.seed(123456)
+
+cv_model <- train_metric_model(
+  metrics = landscape_metrics,
+  metrics_selected = metric_selection,
+  cv_method = "k-fold",
+  cv_folds = 5,
+  verbose = FALSE
+)
+
+cv_model$performance$confusion_matrix
+cv_model$performance$accuracy
+cv_model$performance$per_class_metrics
+```
+
+The performance summaries combine the held-out predictions from all folds.
+Each landscape is classified once by a model that was not trained on that
+landscape. The confusion matrix contains these pooled predictions, and the
+accuracy and per-class metrics are calculated from that matrix. After cross-validation, the returned final model is
+trained on all training landscapes.
+
+For small or unbalanced training sets, `train_metric_model()` may reduce the
+number of folds or switch to leave-one-out cross-validation. You can also
+request leave-one-out cross-validation directly with `cv_method = "loo"`, which
+trains one model per landscape and is therefore only feasible for very small
+datasets. See `?train_metric_model` for more details.
