@@ -280,8 +280,8 @@ plot_landscapes(
       "gaps",
       name = "ragged edges",
       params = pattern_gaps(
-        n_spots = 12,
-        spot_radius = 8,
+        n_gaps = 12,
+        gap_radius = 8,
         radius_noise_fraction = 0.4
       )
     )
