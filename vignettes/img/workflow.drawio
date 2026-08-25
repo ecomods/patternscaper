@@ -16,21 +16,11 @@
         <mxCell id="dv_jw7yRudBVRWTTir6D-22" edge="1" parent="1" source="B" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;dashed=1;strokeColor=#57534e;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=#3f3f46;labelBackgroundColor=#fcfcfb;endArrow=classic;" target="dv_jw7yRudBVRWTTir6D-11">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="dv_jw7yRudBVRWTTir6D-40" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;strokeColor=#57534e;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=#3f3f46;labelBackgroundColor=#fcfcfb;endArrow=classic;" target="dv_jw7yRudBVRWTTir6D-37">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="140" y="170" />
-              <mxPoint x="140" y="1090" />
-            </Array>
-            <mxPoint x="349.97000000000025" y="170" as="sourcePoint" />
-            <mxPoint x="354.97000000000025" y="1090" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="dv_jw7yRudBVRWTTir6D-41" edge="1" parent="1" source="B" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;dashed=1;strokeColor=#57534e;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=#3f3f46;labelBackgroundColor=#fcfcfb;endArrow=classic;" target="dv_jw7yRudBVRWTTir6D-37">
+        <mxCell id="dv_jw7yRudBVRWTTir6D-41" edge="1" parent="1" source="B" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;strokeColor=#57534e;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=#3f3f46;labelBackgroundColor=#fcfcfb;endArrow=classic;" target="dv_jw7yRudBVRWTTir6D-37">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="740" y="170" />
-              <mxPoint x="740" y="1090" />
+              <mxPoint x="740" y="1005" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -45,7 +35,7 @@
         <mxCell id="B" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#efedeb;strokeColor=#57534e;fontColor=#0b0b0b;" value="Generate or import landscapes&lt;br&gt;&lt;span style=&quot;font-family: monospace; font-size: 11px;&quot;&gt;create_landscapes()&amp;nbsp;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-family: monospace; font-size: 11px;&quot;&gt;create_landscape()&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-family: monospace; font-size: 11px;&quot;&gt;&amp;nbsp;landscape()&lt;/span&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="200" x="340" y="140" as="geometry" />
         </mxCell>
-        <mxCell id="D" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#57534e;dashed=1;fontColor=#0b0b0b;" value="Choose workflow" vertex="1">
+        <mxCell id="D" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#57534e;dashed=1;fontColor=#0b0b0b;" value="Choose approach" vertex="1">
           <mxGeometry height="90" width="160" x="360" y="300" as="geometry" />
         </mxCell>
         <mxCell id="M1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5efef;strokeColor=#008B8B;fontColor=#0b0b0b;" value="Calculate metrics&lt;br&gt;&lt;span style=&quot;font-family: monospace; font-size: 11px;&quot;&gt;calculate_metrics()&lt;/span&gt;" vertex="1">
@@ -115,13 +105,13 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="dv_jw7yRudBVRWTTir6D-38" edge="1" parent="1" source="dv_jw7yRudBVRWTTir6D-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;dashed=1;strokeColor=#57534e;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=#3f3f46;labelBackgroundColor=#fcfcfb;endArrow=classic;" target="dv_jw7yRudBVRWTTir6D-37">
+        <mxCell id="dv_jw7yRudBVRWTTir6D-38" edge="1" parent="1" source="dv_jw7yRudBVRWTTir6D-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;dashed=1;strokeColor=#57534e;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=#3f3f46;labelBackgroundColor=#fcfcfb;endArrow=classic;" target="dv_jw7yRudBVRWTTir6D-37">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="dv_jw7yRudBVRWTTir6D-5" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=default;align=center;verticalAlign=middle;rounded=0;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;" value="prediction table" vertex="1">
           <mxGeometry height="30" width="90" x="400" y="990" as="geometry" />
         </mxCell>
-        <mxCell id="dv_jw7yRudBVRWTTir6D-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#efedeb;strokeColor=#57534e;fontColor=#0b0b0b;" value="Plot landscpaes&lt;br&gt;&lt;span style=&quot;font-family: monospace; font-size: 11px;&quot;&gt;plot_landscapes()&lt;/span&gt;" vertex="1">
+        <mxCell id="dv_jw7yRudBVRWTTir6D-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#efedeb;strokeColor=#57534e;fontColor=#0b0b0b;" value="Plot landscapes&lt;br&gt;&lt;span style=&quot;font-family: monospace; font-size: 11px;&quot;&gt;plot_landscapes()&lt;/span&gt;" vertex="1">
           <mxGeometry height="60" width="200" x="770" y="140" as="geometry" />
         </mxCell>
         <mxCell id="dv_jw7yRudBVRWTTir6D-26" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=#FFFFFF;align=center;verticalAlign=middle;rounded=0;labelBackgroundColor=none;fontFamily=Helvetica;fontSize=12;fontColor=default;" value="trained model" vertex="1">
@@ -145,17 +135,14 @@
         <mxCell id="dv_jw7yRudBVRWTTir6D-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=#FFFFFF;align=center;verticalAlign=middle;rounded=0;labelBackgroundColor=none;fontFamily=Helvetica;fontSize=12;fontColor=default;" value="trained model" vertex="1">
           <mxGeometry height="30" width="90" x="555" y="745" as="geometry" />
         </mxCell>
-        <mxCell id="dv_jw7yRudBVRWTTir6D-35" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=light-dark(#fff8f2, #ededed);align=center;verticalAlign=middle;rounded=0;labelBackgroundColor=none;fontFamily=Helvetica;fontSize=16;fontColor=#ED4D11;labelBorderColor=none;fontStyle=1;opacity=0;" value="Pixel-based workflow" vertex="1">
+        <mxCell id="dv_jw7yRudBVRWTTir6D-35" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=light-dark(#fff8f2, #ededed);align=center;verticalAlign=middle;rounded=0;labelBackgroundColor=none;fontFamily=Helvetica;fontSize=16;fontColor=#ED4D11;labelBorderColor=none;fontStyle=1;opacity=0;" value="Pixel-based approach" vertex="1">
           <mxGeometry height="30" width="170" x="101" y="631" as="geometry" />
         </mxCell>
-        <mxCell id="dv_jw7yRudBVRWTTir6D-36" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;labelBackgroundColor=none;fontFamily=Helvetica;fontSize=16;fontColor=#008B8B;labelBorderColor=none;fontStyle=1" value="Metrics-based workflow" vertex="1">
+        <mxCell id="dv_jw7yRudBVRWTTir6D-36" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;labelBackgroundColor=none;fontFamily=Helvetica;fontSize=16;fontColor=#008B8B;labelBorderColor=none;fontStyle=1" value="Metric-based approach" vertex="1">
           <mxGeometry height="30" width="190" x="800" y="390" as="geometry" />
         </mxCell>
         <mxCell id="dv_jw7yRudBVRWTTir6D-37" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#efedeb;strokeColor=#57534e;fontColor=#0b0b0b;" value="Plot classification results&lt;br&gt;&lt;span style=&quot;font-family: monospace; font-size: 11px;&quot;&gt;plot_classified_landscapes()&lt;/span&gt;" vertex="1">
-          <mxGeometry height="60" width="200" x="345" y="1060" as="geometry" />
-        </mxCell>
-        <mxCell id="dv_jw7yRudBVRWTTir6D-43" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=#FFFFFF;align=center;verticalAlign=middle;rounded=0;labelBackgroundColor=none;fontFamily=Helvetica;fontSize=12;fontColor=default;" value="trained model" vertex="1">
-          <mxGeometry height="30" width="90" x="555" y="855" as="geometry" />
+          <mxGeometry height="60" width="200" x="770" y="975" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
