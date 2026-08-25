@@ -3,6 +3,9 @@
 # Run without arguments for a lazy site refresh:
 #   Rscript dev/preview_site.R
 #
+# Rebuild only the homepage:
+#   Rscript dev/preview_site.R home
+#
 # Pass an article name to rebuild only that article:
 #   Rscript dev/preview_site.R patternscaper
 
@@ -22,7 +25,9 @@ if (!requireNamespace("patternscaper", quietly = TRUE)) {
 
 override <- list(destination = destination)
 
-if (length(args) == 0L) {
+if (length(args) > 1L) {
+  cli::cli_abort("Supply at most one page name.")
+} else if (length(args) == 0L) {
   pkgdown::build_site(
     lazy = TRUE,
     override = override,
@@ -32,7 +37,13 @@ if (length(args) == 0L) {
     install = FALSE,
     quiet = FALSE
   )
-} else if (length(args) == 1L) {
+} else if (identical(args[[1]], "home")) {
+  pkgdown::build_home(
+    override = override,
+    preview = FALSE,
+    quiet = FALSE
+  )
+} else {
   pkgdown::build_article(
     args[[1]],
     lazy = FALSE,
@@ -40,8 +51,6 @@ if (length(args) == 0L) {
     override = override,
     quiet = FALSE
   )
-} else {
-  cli::cli_abort("Supply at most one article name.")
 }
 
 pkgdown::preview_site(path = destination_path, preview = TRUE)
