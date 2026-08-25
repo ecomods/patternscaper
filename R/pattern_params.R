@@ -217,9 +217,10 @@ pattern_sharp <- function(boundary_position = 0.5) {
 #' the chance of a cell being vegetated decreases with distance from the
 #' boundary.
 #'
-#' @param steepness Numeric. Transition gradient (0-1, default: 0.5). Lower
-#'     values create sharper transitions; higher values extend diffuse
-#'     vegetation farther below the boundary.
+#' @param steepness Numeric. Shape of the vegetation-probability decline below
+#'     the boundary (0-1, default: 0.5). Values near 0 produce a sparse, abrupt
+#'     transition; values near 1 produce a denser, more gradual transition. The
+#'     potential extent of the transition remains unchanged.
 #' @param boundary_position Numeric. Relative position of the horizontal
 #'     vegetation boundary (if not rotated) from the top (0-1, default: 0.2).
 #'

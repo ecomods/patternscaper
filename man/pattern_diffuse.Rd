@@ -7,9 +7,10 @@
 pattern_diffuse(steepness = 0.5, boundary_position = 0.2)
 }
 \arguments{
-\item{steepness}{Numeric. Transition gradient (0-1, default: 0.5). Lower
-values create sharper transitions; higher values extend diffuse
-vegetation farther below the boundary.}
+\item{steepness}{Numeric. Shape of the vegetation-probability decline below
+the boundary (0-1, default: 0.5). Values near 0 produce a sparse, abrupt
+transition; values near 1 produce a denser, more gradual transition. The
+potential extent of the transition remains unchanged.}
 
 \item{boundary_position}{Numeric. Relative position of the horizontal
 vegetation boundary (if not rotated) from the top (0-1, default: 0.2).}
