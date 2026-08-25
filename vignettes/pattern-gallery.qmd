@@ -10,7 +10,7 @@ knitr:
     comment: '#>'
 ---
 
-An overview of the 11 spatial patterns available for artificial landscapes, organized into control, ecotone, and patch patterns. The examples show how selected parameters affect their appearance. To see all parameters for a specific pattern, open the corresponding help page, for example `?pattern_spots`.
+This gallery provides an overview of the 11 spatial patterns available for artificial landscapes, organized into control, ecotone, and patch patterns. The examples show how selected parameters affect their appearance. To see all parameters for a specific pattern, open the corresponding help page, for example `?pattern_spots`.
 
 See [Create artificial landscapes](landscape-generation.html) for instructions on generating individual landscapes and training batches.
 
@@ -44,7 +44,7 @@ list(bare, random, dense) |>
 
 ## Ecotone patterns
 
-Ecotone patterns have a vegetated zone and a bare zone and a transition between them. In an unrotated landscape, the parameter `boundary_position` gives the relative position of this transition measured from the top. It applies to all five ecotone patterns.
+Ecotone patterns have a vegetated zone and a bare zone with a transition between them. In an unrotated landscape, the parameter `boundary_position` gives the relative position of this transition measured from the top. It applies to all five ecotone patterns.
 
 ### Sharp
 
@@ -72,7 +72,7 @@ list(
 
 ### Diffuse
 
-A transition where vegetation probability decreases with distance below the boundary. `steepness` controls how quickly that probability drops: values near 0 produce a sparse, abrupt transition, while values near 1 produce a denser, more gradual transition.
+A transition where vegetation probability decreases with distance below the boundary. `steepness` controls how quickly that probability drops: values near 0 produce a sparse, abrupt transition, while values near 1 produce a denser, more gradual transition. The potential extent of the transition remains unchanged.
 
 ```{r}
 #| label: pattern-diffuse
@@ -107,13 +107,13 @@ Curved, finger-like extensions of vegetation into the bare zone. The parameter `
 #| label: pattern-fingers
 #| fig-width: 8
 #| fig-height: 3
-#| fig-alt: "Three finger landscapes: default, long pronounced bends, and short pronounced bends"
+#| fig-alt: "Three finger landscapes: default, widely spaced long fingers, and closely spaced long fingers"
 
 list(
   create_landscape("fingers", name = "default"),
   create_landscape(
     "fingers",
-    name = "long, pronounced bends",
+    name = "widely spaced, long fingers",
     params = pattern_fingers(
       sine_length_mean = 40,
       sine_height_mean = 12
@@ -121,7 +121,7 @@ list(
   ),
   create_landscape(
     "fingers",
-    name = "short, pronounced bends",
+    name = "closely spaced, long fingers",
     params = pattern_fingers(
       sine_length_mean = 10,
       sine_height_mean = 15,
@@ -170,7 +170,7 @@ list(
 
 ### Bands
 
-Sinusoidal vegetation bands parallel to the vegetation boundary. The parameters `band_thickness` and `band_spacing` control their geometry (how thick they are and how wide apart), `amplitude` sets the wave height, and `frequency` the amount of waves.
+Sinusoidal vegetation bands parallel to the vegetation boundary. `band_thickness` sets band thickness, `band_spacing` the distance between bands, `amplitude` their wave height, and `frequency` how often their waves repeat across the landscape.
 
 ```{r}
 #| label: pattern-bands
@@ -188,7 +188,7 @@ list(
   create_landscape(
     "bands",
     name = "high, frequent waves",
-    params = pattern_bands(amplitude = 15, frequency = 0.15)
+    params = pattern_bands(amplitude = 15, frequency = 0.25)
   )
 ) |>
   plot_landscapes(
@@ -254,7 +254,7 @@ list(
   create_landscape(
     "gaps",
     name = "few, large",
-    params = pattern_gaps(n_gaps = 5, gap_radius = 15)
+    params = pattern_gaps(n_gaps = 3, gap_radius = 15)
   ),
   create_landscape(
     "gaps",
@@ -274,7 +274,7 @@ list(
 
 ### Labyrinth
 
-Maze-like bands of vegetation. The parameter `frequency` controls the scale of the maze, `octaves` how much fine detail is layered on top, and `veg_threshold` sets the overall vegetated area.
+Maze-like bands of vegetation. The parameter `frequency` controls their dominant spatial scale, with higher values producing finer structures. The parameter `octaves` controls how much fine-scale detail is added, and lower `veg_threshold` values increase vegetation cover.
 
 ```{r}
 #| label: pattern-labyrinth
