@@ -1,7 +1,7 @@
 ---
-title: "Create landscapes with different spatial patterns"
+title: "Create artificial landscapes"
 vignette: >
-  %\VignetteIndexEntry{landscape-generation}
+  %\VignetteIndexEntry{Create artificial landscapes}
   %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
 knitr:
@@ -10,7 +10,7 @@ knitr:
     comment: '#>'
 ---
 
-Create artificial landscapes with known spatial patterns. The [metric-based classification guide](classify-metrics.html) and [pixel-based classification guide](classify-pixels.html) show how to use the created landscapes for training and testing classifiers.
+Generate single artificial landscapes or batches with known spatial patterns for training and testing classifiers. If you are new to the package, begin with [Get started](patternscaper.html) for an overview of the complete classification workflow.
 
 ```{r}
 #| label: setup
@@ -51,17 +51,16 @@ The package provides 11 spatial patterns in three groups: control, ecotone, and 
 
 The quickest way to generate training data is `create_landscapes()`. It generates multiple landscapes, distributes them as evenly as possible across the selected patterns, and varies their parameters between landscapes.
 
+The following example creates only 20 landscapes to keep the guide quick to run. For training the actual classifiers, the data set should be larger.
+
 ```{r}
 #| label: create-training-landscapes
-#| fig-width: 8
-#| fig-height: 6
-#| fig-alt: "Grid showing 20 randomly generated landscapes with different spatial patterns"
 
 # Create 20 landscapes distributed across all pattern types
 landscapes <- create_landscapes(n = 20)
 ```
 
-The result is a list of [`landscape` objects](#the-landscape-object).
+The result is a list of [`landscape` objects](#landscape-objects).
 
 Plot them with `plot_landscapes()`:
 
@@ -124,7 +123,7 @@ plot_landscapes(non_square)
 
 ### Landscape rotation
 
-By default, each rotatable pattern is rotated by a whole-degree angle sampled between 0 and 360. This shows classifiers similar landscapes in different orientations during training and reduces reliance on orientation for the classification.
+By default, each rotatable pattern is rotated by a whole-degree angle sampled between 0 and 360. This exposes classifiers to similar landscapes in different orientations during training and helps prevent them from relying on orientation.
 
 Set `rotation = 0` to disable rotation, or supply a length-2 range from which angles are sampled. This example uses angles between 45 and 90 degrees:
 
@@ -181,43 +180,18 @@ plot_landscapes(bigger_spots)
 
 A single value fixes a parameter for every landscape in the batch; a length-2 vector is a range. Above, `n_spots` and `spot_radius` vary between landscapes, while `spot_radius_sd` and `regular_spots` are the same throughout. Patterns left out of `params_list` fall back to their default sampling ranges, which are listed on each constructor's help page.
 
-## The landscape object
+## Landscape objects
 
-In `patternscaper`, landscapes are lists containing raster data and metadata. All landscape generation functions return landscapes in this format and all other functions expect landscapes to be provided in this format.
+`create_landscape()` returns one `landscape` object, while `create_landscapes()` returns a list of them. Downstream package functions accept these objects directly.
 
-To convert other raster data to this format, see the [importing landscapes vignette](importing-landscapes.html).
-
-Each landscape is stored as a list with the following components:
+Each landscape contains:
 
 - `data`: landscape raster as a `SpatRaster`
 - `pattern`: pattern label, such as `"spots"` or `"clustered"`
 - `name`: user-defined name
 - `params`: parameters used to generate the landscape
 
-```{r}
-#| label: landscape-object-structure
-
-landscape_example <- create_landscape("spots", name = "Example")
-str(landscape_example)
-```
-
-### Modifying landscape metadata
-
-Users can modify landscape metadata using the helper functions `set_landscape_pattern()` and `set_landscape_name()`. For example, to change the pattern label or name of existing landscapes:
-
-```{r}
-#| label: modify-metadata
-
-landscapes_example <- set_landscape_name(
-  landscape_example,
-  "New Landscape Name"
-)
-landscapes_example <- set_landscape_pattern(
-  landscapes_example,
-  "ecotone"
-)
-landscapes_example
-```
+To convert your own matrices or rasters to this format, see [Import user-defined landscapes](importing-landscapes.html).
 
 ## Next steps
 

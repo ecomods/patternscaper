@@ -77,6 +77,21 @@ Printing a landscape object shows its properties:
 landscape_object_matrix
 ```
 
+## Update landscape metadata
+
+Names and known pattern labels can also be updated after conversion with
+`set_landscape_name()` and `set_landscape_pattern()`:
+
+```{r}
+#| label: update-metadata
+landscape_object_matrix <- landscape_object_matrix |>
+  set_landscape_name("Landscape 1") |>
+  set_landscape_pattern("pattern_a")
+```
+
+These functions change only the stored metadata. They do not alter the raster
+cells.
+
 ## Convert multiple landscapes
 
 Use `lapply()` or `purrr::pmap()` to convert a
