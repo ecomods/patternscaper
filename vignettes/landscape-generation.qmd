@@ -10,7 +10,7 @@ knitr:
     comment: '#>'
 ---
 
-Generate single artificial landscapes or batches with known spatial patterns for training and testing classifiers. If you are new to the package, begin with [Get started](patternscaper.html) for an overview of the complete classification workflow.
+Create single artificial landscapes or landscape batches with known spatial patterns for training and testing classifiers. If you are new to the package, begin with [Get started](patternscaper.html) for an overview of the complete classification workflow.
 
 ```{r}
 #| label: setup
@@ -21,16 +21,40 @@ set.seed(123456)
 
 ## Overview
 
-Landscape generation uses three kinds of functions:
+Landscape creation uses three kinds of functions:
 
-- `create_landscape()` generates one landscape
-- `create_landscapes()` generates a batch of landscapes
+- `create_landscape()` creates one landscape
+- `create_landscapes()` creates a batch of landscapes
 - `pattern_*()` constructors set pattern-specific parameters
 
-Pass a matching `pattern_*()` constructor to `params` or `params_list`:
+In these names, `*` is replaced by the corresponding pattern name.
+
+## Choose a pattern
+
+The package provides 11 spatial patterns in three groups: control, ecotone, and patch patterns. See the [pattern gallery](pattern-gallery.html) to compare them and explore their parameters.
+
+## Create individual landscapes
+
+To create a single landscape using default parameter settings, call
+`create_landscape()` with the name of the pattern:
 
 ```{r}
-#| label: api-shape
+#| label: default-landscape
+#| fig-width: 4
+#| fig-height: 3
+#| fig-alt: "A spots landscape created with default parameters"
+
+default_spots <- create_landscape("spots")
+
+# Plot the landscape
+plot_landscapes(default_spots, show_legend = FALSE)
+```
+
+Pass a matching `pattern_*()` constructor to `params` to modify the default
+parameters (see [pattern gallery](pattern-gallery.html) for all patterns and parameters):
+
+```{r}
+#| label: custom-landscape
 #| fig-width: 4
 #| fig-height: 3
 #| fig-alt: "A single spots landscape with 8 large spots"
@@ -43,13 +67,10 @@ big_spots <- create_landscape(
 plot_landscapes(big_spots, show_legend = FALSE)
 ```
 
-## Choose a pattern
 
-The package provides 11 spatial patterns in three groups: control, ecotone, and patch patterns. See the [pattern gallery](pattern-gallery.html) to compare them and explore their parameters.
+## Create training landscapes
 
-## Creating training landscapes
-
-The quickest way to generate training data is `create_landscapes()`. It generates multiple landscapes, distributes them as evenly as possible across the selected patterns, and varies their parameters between landscapes.
+The quickest way to create training data is `create_landscapes()`. It creates multiple landscapes, distributes them as evenly as possible across the selected patterns, and varies their parameters between landscapes.
 
 The following example creates only 20 landscapes to keep the guide quick to run. For training the actual classifiers, the data set should be larger.
 
@@ -84,9 +105,9 @@ Inspect the number of generated patterns with `table()`:
 table(purrr::map_chr(landscapes, \(x) x$pattern))
 ```
 
-### Selecting specific patterns
+### Select specific patterns
 
-Specific patterns can be selected to create only a subset of patterns using the `patterns` argument. For example, to create landscapes with only labyrinth, spots, and clustered patterns:
+You can select only specific patterns using the `patterns` argument. For example, to create landscapes with only labyrinth, spots, and clustered patterns:
 
 ```{r}
 #| label: specific-patterns
@@ -149,40 +170,42 @@ defined_angles <- create_landscapes(
 plot_landscapes(c(no_rotation, defined_angles))
 ```
 
-Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated. The remaining patterns ignore `rotation`, since a batch can mix rotatable and non-rotatable patterns.
+Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated. The remaining patterns ignore `rotation`.
 
 ### Pattern-specific parameters
 
-The `params_list` argument sets parameters by pattern name using the same `pattern_*()` constructors. Unlike `create_landscape()`, a batch parameter can be either a length-2 range to sample the parameter from or a single value used for all landscapes of that pattern:
+The `params_list` argument sets pattern-specific parameters or parameter ranges using the `pattern_*()` constructors.
+In `create_landscapes()`, a batch parameter can be either a length-2 range to sample the parameter from or a single value used for all landscapes of that pattern. Patterns left out of `params_list` fall back to their default sampling ranges, which are listed on each constructor's help page.
 
 ```{r}
 #| label: custom-parameters
 #| message: false
 #| fig-width: 8
 #| fig-height: 6
-#| fig-alt: "Grid showing landscapes with many large spots of varying size"
+#| fig-alt: "Grid of spots and sharp landscapes with varied pattern-specific parameters"
 
-bigger_spots <- create_landscapes(
+changed_parameters <- create_landscapes(
   n = 12,
-  patterns = "spots",
+  patterns = c("spots", "sharp"),
   params_list = list(
     spots = pattern_spots(
       n_spots = c(10, 20), # range for each landscape
       spot_radius = c(8, 12), # range for each landscape
       spot_radius_sd = 3, # single value for all landscapes
       regular_spots = FALSE # single value for all landscapes
+    ),
+    sharp = pattern_sharp(
+      boundary_position = c(0.2, 0.7)
     )
   )
 )
 
-plot_landscapes(bigger_spots)
+plot_landscapes(changed_parameters)
 ```
-
-A single value fixes a parameter for every landscape in the batch; a length-2 vector is a range. Above, `n_spots` and `spot_radius` vary between landscapes, while `spot_radius_sd` and `regular_spots` are the same throughout. Patterns left out of `params_list` fall back to their default sampling ranges, which are listed on each constructor's help page.
 
 ## Landscape objects
 
-`create_landscape()` returns one `landscape` object, while `create_landscapes()` returns a list of them. Downstream package functions accept these objects directly.
+`create_landscape()` returns one `landscape` object and `create_landscapes()` returns a list of them. Downstream functions that work with landscapes accept these objects directly.
 
 Each landscape contains:
 
