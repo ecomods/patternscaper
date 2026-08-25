@@ -1,5 +1,5 @@
 ---
-title: "Generate landscapes with different spatial patterns"
+title: "Create landscapes with different spatial patterns"
 vignette: >
   %\VignetteIndexEntry{landscape-generation}
   %\VignetteEngine{quarto::html}
@@ -10,11 +10,10 @@ knitr:
     comment: '#>'
 ---
 
-Generate artificial landscapes with known spatial patterns. The [classify-metrics](classify-metrics.html) and [classify-pixels](classify-pixels.html) vignettes show how to use the generated landscapes for training and testing classifiers.
+Create artificial landscapes with known spatial patterns. The [classify-metrics](classify-metrics.html) and [classify-pixels](classify-pixels.html) vignettes show how to use the created landscapes for training and testing classifiers.
 
 ```{r}
 #| label: setup
-
 library(patternscaper)
 # Set seed for reproducibility
 set.seed(123456)
@@ -128,26 +127,32 @@ plot_landscapes(
 
 #### fingers
 
-Curvy, finger-like extensions of vegetation into the bare zone. Their width is set by `sine_length_mean` and how far they reach by `sine_height_mean`, each with a matching `_sd` for variation between fingers.
+Curving, finger-like extensions of vegetation into the bare zone. The parameter `sine_length_mean` controls the average wavelength of the curves (larger values result in longer, more widely spaced bends). The parameter `sine_height_mean` controls the average finger amplitude (larger values result in more pronounced bends). The corresponding `*_sd` parameters control the variation between fingers.
 
 ```{r}
 #| label: pattern-fingers
 #| fig-width: 8
 #| fig-height: 3
-#| fig-alt: "Three finger landscapes: default, broad fingers, and narrow tall fingers"
+#| fig-alt: "Three finger landscapes: default, long pronounced bends, and short pronounced bends"
 
 plot_landscapes(
   list(
     create_landscape("fingers", name = "default"),
     create_landscape(
       "fingers",
-      name = "broad, far-reaching",
-      params = pattern_fingers(sine_length_mean = 40, sine_height_mean = 12)
+      name = "long, pronounced bends",
+      params = pattern_fingers(
+        sine_length_mean = 40,
+        sine_height_mean = 12
+      )
     ),
     create_landscape(
       "fingers",
-      name = "narrow, tall",
-      params = pattern_fingers(sine_length_mean = 10, sine_height_mean = 15)
+      name = "short, pronounced bends",
+      params = pattern_fingers(
+        sine_length_mean = 10,
+        sine_height_mean = 15
+      )
     )
   ),
   titles = "name",
@@ -190,13 +195,13 @@ plot_landscapes(
 
 #### bands
 
-Sinusoidal vegetation bands running parallel to the boundary. `band_thickness` and `band_spacing` set their geometry, `amplitude` and `frequency` how strongly they wave.
+Sinusoidal vegetation bands running parallel to the boundary. `band_thickness` and `band_spacing` set their geometry, `amplitude` sets the height of their waves, and `frequency` sets how often they wave.
 
 ```{r}
 #| label: pattern-bands
 #| fig-width: 8
 #| fig-height: 3
-#| fig-alt: "Three banded landscapes: default, thick widely spaced bands, and strongly waved bands"
+#| fig-alt: "Three banded landscapes: default, thick widely spaced bands, and bands with high, frequent waves"
 
 plot_landscapes(
   list(
@@ -208,7 +213,7 @@ plot_landscapes(
     ),
     create_landscape(
       "bands",
-      name = "strongly waved",
+      name = "high, frequent waves",
       params = pattern_bands(amplitude = 15, frequency = 0.15)
     )
   ),
@@ -238,7 +243,7 @@ plot_landscapes(
       "spots",
       name = "fewer, larger, variable",
       params = pattern_spots(
-        n_spots = 8,
+        n_spots = 3,
         spot_radius = 12,
         spot_radius_sd = 3
       )
@@ -260,7 +265,7 @@ plot_landscapes(
 
 #### gaps
 
-The inverse of spots: circular bare gaps in otherwise vegetated ground. It takes the same parameters, except that inverting is what makes it `gaps`, so that is not adjustable.
+The inverse of spots: circular bare gaps in otherwise vegetated ground. It takes parameters analogous to those for spots, with names such as `n_gaps` and `gap_radius`.
 
 ```{r}
 #| label: pattern-gaps
@@ -299,7 +304,7 @@ Maze-like bands of vegetation. `frequency` sets the scale of the maze and `octav
 #| label: pattern-labyrinth
 #| fig-width: 8
 #| fig-height: 3
-#| fig-alt: "Three labyrinth landscapes: default, a finer maze, and a sparser maze"
+#| fig-alt: "Three labyrinth landscapes: default, a finer maze, and a labyrinth with greater vegetation cover"
 
 plot_landscapes(
   list(
@@ -311,7 +316,7 @@ plot_landscapes(
     ),
     create_landscape(
       "labyrinth",
-      name = "veg_threshold = 0.35",
+      name = "greater vegetation cover",
       params = pattern_labyrinth(veg_threshold = 0.35)
     )
   ),
@@ -322,7 +327,7 @@ plot_landscapes(
 
 ## Creating training landscapes
 
-The quickest way to generate training data is `create_landscapes()`. The function generates multiple landscapes balanced across all available patterns, varying their parameters between landscapes.
+The quickest way to generate training data is `create_landscapes()`. It generates multiple landscapes, distributes them as evenly as possible across the selected patterns, and varies their parameters between landscapes.
 
 ```{r}
 #| label: create-training-landscapes
@@ -330,11 +335,11 @@ The quickest way to generate training data is `create_landscapes()`. The functio
 #| fig-height: 6
 #| fig-alt: "Grid showing 20 randomly generated landscapes with different spatial patterns"
 
-# Create 20 landscapes balanced across all pattern types
+# Create 20 landscapes distributed across all pattern types
 landscapes <- create_landscapes(n = 20)
 ```
 
-The result is a list of [`landscape` objects](landscape-generation.qmd#the-landscape-object).
+The result is a list of [`landscape` objects](#the-landscape-object).
 
 Plot them with `plot_landscapes()`:
 
@@ -342,11 +347,12 @@ Plot them with `plot_landscapes()`:
 #| label: plot-training-landscapes
 #| fig-width: 8
 #| fig-height: 6
+#| fig-alt: "Grid of 20 landscapes distributed across the 11 available spatial patterns"
 # Plot all landscapes
 plot_landscapes(landscapes)
 ```
 
-By default, landscapes are created in a balanced way, so that each pattern type is represented equally in the generated set.
+By default, landscapes are distributed as evenly as possible across the selected pattern types. When the number of landscapes is not divisible by the number of patterns, some patterns occur once more than others.
 
 Inspect the number of generated patterns with `table()`:
 
@@ -405,7 +411,7 @@ Set `rotation = 0` to disable rotation, or supply a length-2 range from which an
 #| message: false
 #| fig-width: 8
 #| fig-height: 3
-#| fig-alt: "Landscapes showing the same pattern rotated at different angles"
+#| fig-alt: "Three unrotated clustered, sharp, and banded landscapes followed by three clustered landscapes rotated between 45 and 90 degrees"
 
 no_rotation <- create_landscapes(
   n = 3,
@@ -426,7 +432,7 @@ Only "sharp", "diffuse", "fingers", "clustered" and "bands" are rotated. The rem
 
 ### Pattern-specific parameters
 
-The `params_list` argument sets parameters by pattern name using the same `pattern_*()` constructors. Unlike `create_landscape()`, a batch parameter can be either a length-2 range to sample the parameter from, or a single value used for all landscapes of that pattern.:
+The `params_list` argument sets parameters by pattern name using the same `pattern_*()` constructors. Unlike `create_landscape()`, a batch parameter can be either a length-2 range to sample the parameter from or a single value used for all landscapes of that pattern:
 
 ```{r}
 #| label: custom-parameters
@@ -493,6 +499,6 @@ landscapes_example
 
 ## Next steps
 
-- `vignette("landscape-metrics")`: extract landscape features and identify informative metrics
-- `vignette("classify-metrics")`: train classifiers on landscape metrics
-- `vignette("classify-pixels")`: train Keras classifiers on raw landscape data
+- [Calculate landscape metrics](landscape-metrics.html): Extract landscape features and identify informative metrics
+- [Classify with landscape metrics](classify-metrics.html): Train classifiers on landscape metrics
+- [Classify with pixels](classify-pixels.html): Train Keras classifiers on raster-cell values
