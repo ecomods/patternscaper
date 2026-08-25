@@ -46,3 +46,9 @@ dev/*_files/
 dev/*.html
 
 /.quarto/
+
+# Local pkgdown preview output
+/_site-preview/
+
+# Draw-io files
+vignettes/img/.$workflow.drawio.bkp
