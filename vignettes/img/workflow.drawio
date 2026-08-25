@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="patternscaper workflow" id="workflow">
-    <mxGraphModel dx="2054" dy="1201" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="1250" math="0" shadow="0">
+    <mxGraphModel dx="963" dy="1481" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="1250" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -10,7 +10,7 @@
         <mxCell id="laneMET" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1fafa;strokeColor=#008B8B;fontColor=#008B8B;fontStyle=1;verticalAlign=top;align=right;fontSize=17;" value="" vertex="1">
           <mxGeometry height="500" width="510" x="480" y="390" as="geometry" />
         </mxCell>
-        <mxCell id="A" parent="1" style="rounded=1;arcSize=40;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#57534e;dashed=1;fontColor=#0b0b0b;" value="Define pattern classes" vertex="1">
+        <mxCell id="A" parent="1" style="rounded=1;arcSize=40;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#57534e;dashed=1;fontColor=#0b0b0b;" value="Define pattern types" vertex="1">
           <mxGeometry height="60" width="200" x="340" y="40" as="geometry" />
         </mxCell>
         <mxCell id="dv_jw7yRudBVRWTTir6D-22" edge="1" parent="1" source="B" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;dashed=1;strokeColor=#57534e;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=#3f3f46;labelBackgroundColor=#fcfcfb;endArrow=classic;" target="dv_jw7yRudBVRWTTir6D-11">
@@ -29,6 +29,14 @@
             <Array as="points">
               <mxPoint x="140" y="170" />
               <mxPoint x="140" y="825" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2H_GCM9Jgmo6-wm_tt6Q-3" edge="1" parent="1" source="B" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;strokeColor=#57534e;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=#3f3f46;labelBackgroundColor=#fcfcfb;endArrow=classic;" target="dv_jw7yRudBVRWTTir6D-37">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="210" />
+              <mxPoint x="870" y="210" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -119,6 +127,9 @@
         </mxCell>
         <mxCell id="dv_jw7yRudBVRWTTir6D-28" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=#FFFFFF;align=center;verticalAlign=middle;rounded=0;labelBackgroundColor=none;fontFamily=Helvetica;fontSize=12;fontColor=default;" value="selected metrics" vertex="1">
           <mxGeometry height="30" width="90" x="555" y="625" as="geometry" />
+        </mxCell>
+        <mxCell id="2H_GCM9Jgmo6-wm_tt6Q-4" edge="1" parent="1" source="dv_jw7yRudBVRWTTir6D-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;dashed=1;strokeColor=#57534e;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=#3f3f46;labelBackgroundColor=#fcfcfb;endArrow=classic;" target="M3">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="dv_jw7yRudBVRWTTir6D-29" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=#FFFFFF;align=center;verticalAlign=middle;rounded=0;labelBackgroundColor=none;fontFamily=Helvetica;fontSize=12;fontColor=default;" value="metric table" vertex="1">
           <mxGeometry height="30" width="90" x="555" y="495" as="geometry" />
