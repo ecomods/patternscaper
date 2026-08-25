@@ -163,10 +163,9 @@ print.metrics_evaluation <- function(x, ...) {
 
 #' Evaluate Landscape Metrics
 #'
-#' Ranks metrics by how well they distinguish pattern types. The method affects
-#' the ranking:
-#' parametric methods assume linear relationships and normally distributed residuals,
-#' while non-parametric methods are more robust to outliers and deviations from normality.
+#' Ranks metrics by how well they distinguish pattern types. Each method
+#' emphasizes a different aspect of separation among patterns and has different
+#' sensitivities to distribution, within-pattern variation, and outliers.
 #'
 #' @param metrics tibble. Metrics from calculate_metrics().
 #' @param metrics_number Integer. Number of top metrics to return (default: 10).
@@ -197,15 +196,21 @@ print.metrics_evaluation <- function(x, ...) {
 #'     which then may be fewer than the requested `metric_number`.
 #'
 #' @section Ranking Methods:
+#' Within each method, higher scores indicate stronger separation. Score values
+#' use different scales and should not be compared across methods.
+#'
 #' \describe{
 #'   \item{\code{mean_groups}}{Mean Differences. Calculates relative differences between
-#'     pattern-specific means and overall mean, then sums across patterns. Higher scores
-#'     indicate better discrimination between pattern types.}
+#'     pattern-specific means and the overall mean, then sums across patterns. It does not
+#'     account for within-pattern spread and works most reliably when within-pattern
+#'     variation is low relative to differences between patterns.}
 #'   \item{\code{fisher_score}}{Fisher Score (ratio of between-group to within-group variance).
-#'     Higher scores indicate better separation between pattern types. Assumes normally
-#'     distributed data within groups.}
-#'   \item{\code{kruskal_effsize}}{Kruskal-Wallis H test effect sizes. Non-parametric test for differences
-#'     between groups. Higher effect sizes indicate better discrimination between pattern types.}
+#'     Assumes approximately normally distributed values within patterns and is sensitive
+#'     to outliers.}
+#'   \item{\code{kruskal_effsize}}{Kruskal-Wallis H test effect sizes (default).
+#'     Uses ranks, so it is robust to outliers and does not require normally distributed
+#'     values. It does not describe the magnitude of differences on the original metric
+#'     scale.}
 #' }
 #'
 #' @section The ranking table:

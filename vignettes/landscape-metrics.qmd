@@ -11,8 +11,17 @@ knitr:
     cache: true
 ---
 
+This guide shows how to calculate landscape metrics from `landscape` objects,
+rank metrics by how well they distinguish known spatial patterns, and visualize
+their distributions.
+
+## Setup
+
+Create a small set of labelled landscapes for the examples in this guide.
+
 ```{r}
 #| label: setup
+#| cache: false
 library(patternscaper)
 
 set.seed(123456)
@@ -26,152 +35,220 @@ sample_landscapes <- create_landscapes(
 )
 ```
 
-This vignette shows how to calculate landscape metrics from `landscape` objects and how to find metrics that are informative for distinguishing different spatial patterns.
+## Calculate landscape metrics
 
-## Calculating Landscape Metrics
+`calculate_metrics()` uses the
+[`landscapemetrics` package](https://r-spatialecology.github.io/landscapemetrics/)
+and calculates metrics at the landscape or class level:
 
-By default, `calculate_metrics()` computes all available metrics from the
-[`landscapemetrics` package](https://r-spatialecology.github.io/landscapemetrics/).
-Use `landscapemetrics::list_lsm()` to find metric names:
+- *Landscape-level* metrics summarize the complete landscape. They
+  produce one value per landscape and metric.
+- *Class-level* metrics summarize each land-cover class separately. They produce
+  one value per landscape, metric, and land-cover class that is present.
+
+Use landscape-level metrics to describe the complete landscape. Class-level
+metrics can help distinguish patterns that differ mainly in which land-cover
+class forms the pattern, such as spots and gaps.
+
+Use `landscapemetrics::list_lsm()` to look up the available metric
+abbreviations, names, and types at either level:
 
 ```{r}
-# Select either the landscape-level or class-level metrics
-landscapemetrics::list_lsm(level = "landscape")
+#| label: list-metrics
+# List available landscape-level metrics
+landscapemetrics::list_lsm(level = "landscape") |>
+  dplyr::select(metric, name, type)
 ```
 
-Metrics can be calculated at the landscape level (one value for the entire
-landscape) or class level (one value per land-cover class).
+By default (`metrics = NULL`), `calculate_metrics()` calculates every available
+metric at the requested level:
 
 ```{r}
-# Calculate all landscape-level metrics for the sample landscapes
+#| label: calculate-landscape-metrics
+#| message: false
+# Calculate all landscape-level metrics
 landscape_metrics <- calculate_metrics(
   sample_landscapes,
   level = "landscape"
 )
 ```
 
-To calculate selected metrics, provide a vector of valid metric names to the `metrics` argument. Find available metric names using `landscapemetrics::list_lsm()` as shown above.
+To calculate only specific metrics, you can pass their abbreviations to `metrics`.
+This works at either level.
 
 ```{r}
-# Calculate all class-level metrics for the sample landscapes
-class_metrics <- calculate_metrics(
+#| label: calculate-selected-metrics
+#| eval: false
+# Calculate selected landscape-level metrics
+landscape_specific_metrics <- calculate_metrics(
   sample_landscapes,
-  level = "class",
-  metrics = c("ai", "area_cv", "cai_cv") # Define a subset of metrics to calculate
+  level = "landscape",
+  metrics = c("ai", "area_cv", "cai_cv")
 )
 ```
 
-## Finding Informative Metrics
-
-The package includes different methods to evaluate the calculated landscape metrics and find those that are most informative for distinguishing different spatial patterns. The general function to evaluate landscape metrics is `evaluate_metrics()`. It supports different methods for metric evaluation:
-
-- `mean_groups`: Calculates relative differences between pattern-specific means and overall mean, then sums across patterns.
-- `fisher_score`: Fisher Score (ratio of between-group to within-group variance). 
-- `kruskal_effsize`: Kruskal-Wallis H test effect sizes. Non-parametric test for differences between groups.
-
-By default, the function walks through metrics in ranking order and retains a
-candidate only when its absolute Pearson correlation with every already selected
-metric is at most 0.7. Correlations are calculated across all landscapes, pooling
-all pattern types. Change the threshold with `correlation_threshold`; set it to 1
-to disable correlation filtering.
+In the resulting table, each row contains one metric result. The main columns identify the landscape, pattern, metric, calculated value, and any warning from `landscapemetrics`:
 
 ```{r}
-# Evaluate landscape metrics using Fisher Score
+#| label: inspect-landscape-metrics
+landscape_metrics |>
+  dplyr::select(
+    landscape_id,
+    landscape_name,
+    pattern,
+    metric,
+    value,
+    warnings
+  )
+```
+
+In class-level results below, the `class` column stores the land-cover code. `metric_name` contains
+the original metric abbreviation, while `metric` appends the class code to
+give each result a unique identifier:
+
+```{r}
+#| label: calculate-class-metrics
+#| message: false
+# Calculate all class-level metrics
+class_metrics <- calculate_metrics(
+  sample_landscapes,
+  level = "class"
+)
+
+class_metrics |>
+  dplyr::select(
+    landscape_id,
+    pattern,
+    class,
+    metric_name,
+    metric,
+    value
+  )
+```
+
+If a land-cover class is absent, its class-level metrics have no result row.
+These incomplete metrics cannot be used directly as model predictors because
+they do not provide one value per landscape.
+
+:::{.callout-note}
+## Comparable landscape geometry
+
+Many landscape metrics change with raster extent, resolution, or shape. Use
+comparable geometry where possible, or choose metrics that are robust to the
+differences in your data. Metric models warn about substantial differences in
+extent, resolution, or aspect ratio, but not about irregular shapes represented
+by missing cells. See [Matching training and application
+data](matching-training-application.html) for details.
+:::
+
+## Find informative metrics
+
+Use `evaluate_metrics()` to rank metrics by how well they distinguish labelled
+pattern classes in the supplied landscapes.
+
+Three ranking methods are available:
+
+- `kruskal_effsize` (default) uses ranks and is robust to outliers. It does not
+  describe the size of differences on the original metric scale.
+- `fisher_score` compares between- and within-pattern variance. It assumes
+  approximately normally distributed values within patterns and is sensitive
+  to outliers.
+- `mean_groups` compares pattern means with the overall mean. It does
+  not account for variation within patterns.
+
+By default, `evaluate_metrics()` excludes incomplete and zero-variation
+metrics because they cannot be used in model training.
+
+After ranking, metrics are selected in rank order. A metric is skipped when its
+absolute Pearson correlation with an already selected metric exceeds the
+`correlation_threshold` (default 0.7). Correlations are calculated across all
+landscapes and pattern classes. Setting `correlation_threshold` to 1 disables
+correlation filtering.
+If too few metrics pass the correlation filter, the highest-ranked
+correlated metrics are added to reach `metrics_number`. They are marked
+`selected_correlation_fill` and placed at the end of the selected metrics. Set
+`fill_correlated = FALSE` to return only uncorrelated metrics (which then may be fewer than
+requested).
+
+The example below produces expected warnings about excluded metrics and
+correlated metrics being added. They explain how the selection changed; they do
+not indicate a failure.
+
+```{r}
+#| label: evaluate-metrics
+# Evaluate metrics using the default Kruskal-Wallis effect-size method
 metric_evaluation <- evaluate_metrics(
-  landscape_metrics,
-  method = "fisher_score",
-  metrics_number = 10, # Select top 10 informative metrics
+  metrics = landscape_metrics,
+  method = "kruskal_effsize",
+  metrics_number = 10,
   correlation_threshold = 0.7
 )
 
 metric_evaluation
 ```
 
-The selected metric names are in `$selected`, ready to pass on to
-`plot_metrics()` or `train_metric_model()`. You can also pass the whole object
-to either function.
+The selected metric names are stored in `$selected`.
 
 ```{r}
+#| label: view-selected-metrics
 metric_evaluation$selected
 ```
 
-### Inspecting the ranking
-
-Selection discards a lot of detail: which metrics scored well but lost out to a
-correlated partner, which never made it into the ranking at all, and how large
-the differences between the top metrics actually were. `$ranking` keeps all of
-it, with one row for every metric you passed in:
+The `$ranking` table contains the score and selection outcome for every input
+metric:
 
 ```{r}
+#| label: inspect-metric-ranking
 metric_evaluation$ranking
 ```
 
-The `name` column spells out what each abbreviation stands for, so you do not
-have to look them up separately. Many metrics summarise a value across all
-patches and come as a `_cv`/`_mn`/`_sd` triple that `landscapemetrics` gives a
-single name, so the statistic is added in brackets to keep them apart:
-`area_mn` is `Patch area (mean)`. For class-level metrics the class is added
-too, for example `Patch area (mean, class 1)`.
+The `name` column gives the full metric name including class information for class-level metrics.
 
-The `outcome` column records what happened to each candidate. Metrics with an
-`excluded_` outcome never reached the ranking, so they have no score or rank:
+The `outcome` column records whether a metric was selected, removed by the
+correlation filter, or excluded before ranking. Excluded metrics have no score
+or rank:
 
 ```{r}
+#| label: summarize-ranking-outcomes
 dplyr::count(metric_evaluation$ranking, outcome)
 ```
 
-This is what to look at when a selection surprises you. For example, to see the
-metrics that were dropped for being too similar to an already selected one, and
-what they clashed with:
+You can check which metrics were removed by the correlation filter and what they were
+correlated with:
 
 ```{r}
+#| label: inspect-correlated-metrics
 metric_evaluation$ranking |>
   dplyr::filter(outcome == "dropped_correlated") |>
   dplyr::select(metric, score, correlated_with)
 ```
 
-If fewer uncorrelated metrics exist than you asked for, the remaining slots are
-filled with correlated ones by default. Those are marked
-`selected_correlation_fill` and appear at the end of `$selected`, so you can
-always tell which of your selected metrics are redundant. Set
-`fill_correlated = FALSE` to return only metrics that pass the correlation
-filter; in that case, `$selected` may contain fewer metrics than requested.
+## Visualize metric distributions
 
-To visually compare the top 10 metrics, use the `plot_metrics()` function:
+Use `plot_metrics()` to compare the ten selected metrics. Panel labels use
+metric abbreviations by default. Set `metric_labels = "name"` to show full names
+from `landscapemetrics::list_lsm()`. `jitter_seed` fixes the jittered point
+positions so the figure is reproduced exactly:
 
 ```{r}
-#| fig-alt: "Boxplots showing the distribution of the top 10 informative landscape metrics across different spatial patterns"
-#| fig-cap: "Distribution of the top 10 informative landscape metrics across different spatial patterns. Each dot is a landscape, the boxplots show the distribution of metric values for each spatial pattern."
-#| fig-width: 8
-#| fig-height: 6
-plot_metrics(
-  landscape_metrics,
-  selected_metrics = metric_evaluation
-)
-```
-
-The panel labels are the metric abbreviations, which are compact but not very
-readable unless you already know them. Set `metric_labels = "name"` to label the
-panels with the full metric names from `landscapemetrics::list_lsm()` instead:
-
-```{r}
-#| fig-alt: "The same boxplots, with panels labelled by full metric names instead of abbreviations"
-#| fig-cap: "The same metrics, labelled with their full names. Useful for plots that go into a talk or a paper, where the abbreviations would need explaining."
+#| label: plot-metrics
+#| fig-alt: "Boxplots of ten selected landscape metrics with full metric names"
+#| fig-cap: "The selected landscape metrics labelled with their full names."
 #| fig-width: 8
 #| fig-height: 6
 plot_metrics(
   landscape_metrics,
   selected_metrics = metric_evaluation,
-  metric_labels = "name"
+  metric_labels = "name",
+  jitter_seed = 42
 )
 ```
 
-Long names are wrapped over several lines. The width is chosen from the number
-of panel columns, which works for most selections, but it counts characters
-rather than measuring the rendered text. If your labels look cramped or too
-sparse at your figure size, set `label_wrap_width` yourself:
+Long names wrap automatically. Set `label_wrap_width` if the labels look too
+wide or too narrow for the figure size:
 
 ```{r}
+#| label: customize-label-wrapping
 #| eval: false
 plot_metrics(
   landscape_metrics,
@@ -181,5 +258,7 @@ plot_metrics(
 )
 ```
 
-For class-level metrics the class is appended to the name, for example
-`Aggregation index (class 1)`, so the two classes stay distinguishable.
+## Next steps
+
+Continue with [Classify landscapes with landscape metrics](classify-metrics.html)
+to train and evaluate a classifier and apply it to new landscapes.
