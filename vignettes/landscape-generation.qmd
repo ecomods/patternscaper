@@ -10,7 +10,7 @@ knitr:
     comment: '#>'
 ---
 
-Create artificial landscapes with known spatial patterns. The [classify-metrics](classify-metrics.html) and [classify-pixels](classify-pixels.html) vignettes show how to use the created landscapes for training and testing classifiers.
+Create artificial landscapes with known spatial patterns. The [metric-based classification guide](classify-metrics.html) and [pixel-based classification guide](classify-pixels.html) show how to use the created landscapes for training and testing classifiers.
 
 ```{r}
 #| label: setup
@@ -384,13 +384,13 @@ plot_landscapes(landscapes)
 
 ### Landscape size
 
-To modify the size (number of pixels in x- and y-direction) of all generated landscapes, use the `width` and `height` arguments. By default, landscapes are created with a size of 100x100 pixels.
+To modify the size (number of pixels in x- and y-direction) of all generated landscapes, use the `width` and `height` arguments. By default, landscapes are created with a size of 100 x 100 pixels.
 
 ```{r}
 #| label: custom-size
 #| fig-width: 8
 #| fig-height: 2
-#| fig-alt: "Three non-square landscapes of 50x20 pixels"
+#| fig-alt: "Three non-square landscapes of 50 x 20 pixels"
 non_square <- create_landscapes(
   n = 3,
   width = 50,

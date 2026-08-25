@@ -38,11 +38,12 @@ The paper's supplementary information discusses parameter choice and workflow co
   text-align: center;
 }
 .workflow-card img { max-width: 100%; height: auto; }
+.workflow-card figcaption { color: #212529; }
 </style>
 ```
 
 ::: {.workflow-card}
-![Flowchart of the **patternscaper** workflows and how they relate. Steps shown in grey are shared by both workflows; Teal-colored steps belong to the metric-based and orange steps to the pixel-based approach. User decisions have a dashed outline, and arrows are labelled with the object type passed between functions.](img/workflow.drawio.png){#fig-workflow fig-alt="Flowchart of the patternscaper classification workflow, showing the shared landscape-generation steps, the metric-based approach (calculate metrics, evaluate metrics, train, apply) and the pixel-based approach (train, apply), and the function used at each step."}
+![Flowchart of the **patternscaper** workflows and how they relate. Steps shown in grey are shared by both workflows; teal steps belong to the metric-based and orange steps to the pixel-based approach. User decisions have a dashed outline, and arrows are labelled with the object type passed between functions.](img/workflow.drawio.png){fig-alt="Flowchart of the patternscaper classification workflow, showing the shared landscape-generation steps, the metric-based approach (calculate metrics, evaluate metrics, train, apply) and the pixel-based approach (train, apply), and the function used at each step."}
 :::
 
 ### Choosing a classification workflow
@@ -96,7 +97,11 @@ new_landscapes <- create_landscapes(
   n = 10,
   patterns = c("labyrinth", "random", "clustered")
 )
-classification_results <- apply_metric_model(new_landscapes, model)
+classification_results <- apply_metric_model(
+  new_landscapes,
+  model,
+  verbose = FALSE
+)
 
 # Check the predictions the model made
 classification_results$predictions
