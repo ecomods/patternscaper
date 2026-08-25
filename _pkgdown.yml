@@ -81,6 +81,8 @@ navbar:
       menu:
       - text: "Generate landscapes"
         href: articles/landscape-generation.html
+      - text: "Pattern gallery"
+        href: articles/pattern-gallery.html
       - text: "Classify with metrics"
         href: articles/classify-metrics.html
       - text: "Classify with pixels"
