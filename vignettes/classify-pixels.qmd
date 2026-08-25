@@ -9,9 +9,6 @@ knitr:
     collapse: true
     comment: '#>'
     cache: true
-    R.options:
-      tibble.print_max: 10
-      tibble.print_min: 10
 ---
 
 This guide shows how to train a classifier on categorical landscape rasters and
