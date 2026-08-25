@@ -10,22 +10,20 @@ knitr:
     comment: '#>'
 ---
 
-Compare the spatial patterns available for artificial landscapes. See [Create artificial landscapes](landscape-generation.html) for instructions on generating individual landscapes and training batches.
+An overview of the 11 spatial patterns available for artificial landscapes, organized into control, ecotone, and patch patterns. The examples show how selected parameters affect their appearance. To see all parameters for a specific pattern, open the corresponding help page, for example `?pattern_spots`.
+
+See [Create artificial landscapes](landscape-generation.html) for instructions on generating individual landscapes and training batches.
 
 ```{r}
 #| label: setup
 library(patternscaper)
-# Set seed for reproducibility
+# Set seed for reproducible examples
 set.seed(123456)
 ```
 
-## The patterns
+## Control patterns
 
-The package provides 11 spatial patterns. Each `pattern_*` help page documents the parameters you can set for the corresponding landscape.
-
-### Control patterns
-
-**random**, **bare**, and **dense** place vegetation at random. They differ only in `veg_prob`, the proportion of vegetated cells: `bare` defaults to 0.1, `random` to 0.5, and `dense` to 0.9. These patterns provide control landscapes without a specific spatial structure.
+The patterns **bare**, **random**, and **dense** place vegetation at random. They differ only in `veg_prob`, the probability that each cell is vegetated: `bare` defaults to 0.1, `random` to 0.5, and `dense` to 0.9. These patterns provide control landscapes without a specific spatial structure.
 
 ```{r}
 #| label: control-patterns
@@ -37,18 +35,18 @@ bare <- create_landscape("bare", name = "bare (veg_prob 0.1)")
 random <- create_landscape("random", name = "random (veg_prob 0.5)")
 dense <- create_landscape("dense", name = "dense (veg_prob 0.9)")
 
-plot_landscapes(
-  list(bare, random, dense),
-  titles = "name",
-  show_legend = FALSE
-)
+list(bare, random, dense) |>
+  plot_landscapes(
+    titles = "name",
+    show_legend = FALSE
+  )
 ```
 
-### Ecotone patterns
+## Ecotone patterns
 
-Ecotone patterns have a vegetated zone and a bare zone separated by a transition. `boundary_position` places that transition in all five.
+Ecotone patterns have a vegetated zone and a bare zone and a transition between them. In an unrotated landscape, the parameter `boundary_position` gives the relative position of this transition measured from the top. It applies to all five ecotone patterns.
 
-#### sharp
+### Sharp
 
 An abrupt boundary, with `boundary_position` as its only parameter.
 
@@ -56,54 +54,54 @@ An abrupt boundary, with `boundary_position` as its only parameter.
 #| label: pattern-sharp
 #| fig-width: 8
 #| fig-height: 3
-#| fig-alt: "Two sharp-boundary landscapes: default and a low boundary"
+#| fig-alt: "Two sharp-boundary landscapes: default and boundary position 0.3"
 
-plot_landscapes(
-  list(
-    create_landscape("sharp", name = "default"),
-    create_landscape(
-      "sharp",
-      name = "boundary_position = 0.3",
-      params = pattern_sharp(boundary_position = 0.3)
-    )
-  ),
-  titles = "name",
-  show_legend = FALSE
-)
+list(
+  create_landscape("sharp", name = "default"),
+  create_landscape(
+    "sharp",
+    name = "boundary_position = 0.3",
+    params = pattern_sharp(boundary_position = 0.3)
+  )
+) |>
+  plot_landscapes(
+    titles = "name",
+    show_legend = FALSE
+  )
 ```
 
-#### diffuse
+### Diffuse
 
-A gradual transition, where the chance of a cell being vegetated falls off with distance from the boundary. `steepness` runs from 0 to 1 and sets how wide that transition zone is: **higher** values spread it over more of the landscape.
+A transition where vegetation probability decreases with distance below the boundary. `steepness` controls how quickly that probability drops: values near 0 produce a sparse, abrupt transition, while values near 1 produce a denser, more gradual transition.
 
 ```{r}
 #| label: pattern-diffuse
 #| fig-width: 8
 #| fig-height: 3
-#| fig-alt: "Three diffuse-boundary landscapes with increasingly wide transition zones"
+#| fig-alt: "Three diffuse-boundary landscapes with increasingly dense transition zones"
 
-plot_landscapes(
-  list(
-    create_landscape(
-      "diffuse",
-      name = "steepness = 0.1 (narrow)",
-      params = pattern_diffuse(steepness = 0.1)
-    ),
-    create_landscape("diffuse", name = "default (0.5)"),
-    create_landscape(
-      "diffuse",
-      name = "steepness = 1 (broad)",
-      params = pattern_diffuse(steepness = 1)
-    )
+list(
+  create_landscape(
+    "diffuse",
+    name = "steepness = 0.1 (sparse)",
+    params = pattern_diffuse(steepness = 0.1)
   ),
-  titles = "name",
-  show_legend = FALSE
-)
+  create_landscape("diffuse", name = "default (0.5)"),
+  create_landscape(
+    "diffuse",
+    name = "steepness = 1 (dense)",
+    params = pattern_diffuse(steepness = 1)
+  )
+) |>
+  plot_landscapes(
+    titles = "name",
+    show_legend = FALSE
+  )
 ```
 
-#### fingers
+### Fingers
 
-Curving, finger-like extensions of vegetation into the bare zone. The parameter `sine_length_mean` controls the average wavelength of the curves (larger values result in longer, more widely spaced bends). The parameter `sine_height_mean` controls the average finger amplitude (larger values result in more pronounced bends). The corresponding `*_sd` parameters control the variation between fingers.
+Curved, finger-like extensions of vegetation into the bare zone. The parameter `sine_length_mean` controls the average wavelength of the curves (larger values result in more widely spaced fingers). The parameter `sine_height_mean` controls the average finger amplitude (larger values result in longer fingers). The corresponding `*_sd` parameters control the variation between fingers.
 
 ```{r}
 #| label: pattern-fingers
@@ -111,34 +109,35 @@ Curving, finger-like extensions of vegetation into the bare zone. The parameter 
 #| fig-height: 3
 #| fig-alt: "Three finger landscapes: default, long pronounced bends, and short pronounced bends"
 
-plot_landscapes(
-  list(
-    create_landscape("fingers", name = "default"),
-    create_landscape(
-      "fingers",
-      name = "long, pronounced bends",
-      params = pattern_fingers(
-        sine_length_mean = 40,
-        sine_height_mean = 12
-      )
-    ),
-    create_landscape(
-      "fingers",
-      name = "short, pronounced bends",
-      params = pattern_fingers(
-        sine_length_mean = 10,
-        sine_height_mean = 15
-      )
+list(
+  create_landscape("fingers", name = "default"),
+  create_landscape(
+    "fingers",
+    name = "long, pronounced bends",
+    params = pattern_fingers(
+      sine_length_mean = 40,
+      sine_height_mean = 12
     )
   ),
-  titles = "name",
-  show_legend = FALSE
-)
+  create_landscape(
+    "fingers",
+    name = "short, pronounced bends",
+    params = pattern_fingers(
+      sine_length_mean = 10,
+      sine_height_mean = 15,
+      sine_height_sd = 3
+    )
+  )
+) |>
+  plot_landscapes(
+    titles = "name",
+    show_legend = FALSE
+  )
 ```
 
-#### clustered
+### Clustered
 
-Vegetation clusters scattered above the boundary. `n_clusters` and `cluster_radius` set how many and how big, `cluster_zone` how far into the bare zone they reach, and `elongation_x` / `elongation_y` stretch them along one axis.
+Vegetation clusters scattered below the vegetation boundary in the bare zone. `n_clusters` and `cluster_radius` set cluster number and size, `cluster_zone` controls how far into the bare zone they can occur, and `elongation_x` and `elongation_y` stretch them along either axis.
 
 ```{r}
 #| label: pattern-clustered
@@ -146,32 +145,32 @@ Vegetation clusters scattered above the boundary. `n_clusters` and `cluster_radi
 #| fig-height: 3
 #| fig-alt: "Three clustered landscapes: default, few large clusters, and many small elongated clusters"
 
-plot_landscapes(
-  list(
-    create_landscape("clustered", name = "default"),
-    create_landscape(
-      "clustered",
-      name = "few, large",
-      params = pattern_clustered(n_clusters = 5, cluster_radius = 10)
-    ),
-    create_landscape(
-      "clustered",
-      name = "many, small, elongated",
-      params = pattern_clustered(
-        n_clusters = 20,
-        cluster_radius = 3,
-        elongation_x = 3
-      )
-    )
+list(
+  create_landscape("clustered", name = "default"),
+  create_landscape(
+    "clustered",
+    name = "few, large",
+    params = pattern_clustered(n_clusters = 5, cluster_radius = 10)
   ),
-  titles = "name",
-  show_legend = FALSE
-)
+  create_landscape(
+    "clustered",
+    name = "many, small, elongated",
+    params = pattern_clustered(
+      n_clusters = 20,
+      cluster_radius = 3,
+      elongation_x = 3
+    )
+  )
+) |>
+  plot_landscapes(
+    titles = "name",
+    show_legend = FALSE
+  )
 ```
 
-#### bands
+### Bands
 
-Sinusoidal vegetation bands running parallel to the boundary. `band_thickness` and `band_spacing` set their geometry, `amplitude` sets the height of their waves, and `frequency` sets how often they wave.
+Sinusoidal vegetation bands parallel to the vegetation boundary. The parameters `band_thickness` and `band_spacing` control their geometry (how thick they are and how wide apart), `amplitude` sets the wave height, and `frequency` the amount of waves.
 
 ```{r}
 #| label: pattern-bands
@@ -179,32 +178,32 @@ Sinusoidal vegetation bands running parallel to the boundary. `band_thickness` a
 #| fig-height: 3
 #| fig-alt: "Three banded landscapes: default, thick widely spaced bands, and bands with high, frequent waves"
 
-plot_landscapes(
-  list(
-    create_landscape("bands", name = "default"),
-    create_landscape(
-      "bands",
-      name = "thick, widely spaced",
-      params = pattern_bands(band_thickness = 6, band_spacing = 20)
-    ),
-    create_landscape(
-      "bands",
-      name = "high, frequent waves",
-      params = pattern_bands(amplitude = 15, frequency = 0.15)
-    )
+list(
+  create_landscape("bands", name = "default"),
+  create_landscape(
+    "bands",
+    name = "thick, widely spaced",
+    params = pattern_bands(band_thickness = 6, band_spacing = 20)
   ),
-  titles = "name",
-  show_legend = FALSE
-)
+  create_landscape(
+    "bands",
+    name = "high, frequent waves",
+    params = pattern_bands(amplitude = 15, frequency = 0.15)
+  )
+) |>
+  plot_landscapes(
+    titles = "name",
+    show_legend = FALSE
+  )
 ```
 
-### Patch patterns
+## Patch patterns
 
-Self-organized patterns, without a boundary between two zones.
+Patch patterns are self-organized patterns without a boundary between two zones.
 
-#### spots
+### Spots
 
-Circular vegetation patches on bare ground. `n_spots` and `spot_radius` set the count and size, `spot_radius_sd` varies the size between spots, `radius_noise_fraction` roughens their edges, and `regular_spots = TRUE` places them on a grid instead of at random.
+Circular vegetation patches on bare ground. `n_spots` and `spot_radius` set the count and size, `spot_radius_sd` varies the size between spots, `radius_noise_fraction` makes the spot edges rough, and `regular_spots = TRUE` places them on a grid instead of at random.
 
 ```{r}
 #| label: pattern-spots
@@ -212,34 +211,35 @@ Circular vegetation patches on bare ground. `n_spots` and `spot_radius` set the 
 #| fig-height: 3
 #| fig-alt: "Three spot landscapes: default, fewer larger variable spots, and a regular grid"
 
-plot_landscapes(
-  list(
-    create_landscape("spots", name = "default"),
-    create_landscape(
-      "spots",
-      name = "fewer, larger, variable",
-      params = pattern_spots(
-        n_spots = 3,
-        spot_radius = 12,
-        spot_radius_sd = 3
-      )
-    ),
-    create_landscape(
-      "spots",
-      name = "regular grid",
-      params = pattern_spots(
-        n_spots = 9,
-        spot_radius = 8,
-        regular_spots = TRUE
-      )
+list(
+  create_landscape("spots", name = "default"),
+  create_landscape(
+    "spots",
+    name = "fewer, larger, variable",
+    params = pattern_spots(
+      n_spots = 3,
+      spot_radius = 12,
+      spot_radius_sd = 3,
+      radius_noise_fraction = 0.2
     )
   ),
-  titles = "name",
-  show_legend = FALSE
-)
+  create_landscape(
+    "spots",
+    name = "regular grid",
+    params = pattern_spots(
+      n_spots = 9,
+      spot_radius = 8,
+      regular_spots = TRUE
+    )
+  )
+) |>
+  plot_landscapes(
+    titles = "name",
+    show_legend = FALSE
+  )
 ```
 
-#### gaps
+### Gaps
 
 The inverse of spots: circular bare gaps in otherwise vegetated ground. It takes parameters analogous to those for spots, with names such as `n_gaps` and `gap_radius`.
 
@@ -249,32 +249,32 @@ The inverse of spots: circular bare gaps in otherwise vegetated ground. It takes
 #| fig-height: 3
 #| fig-alt: "Three gap landscapes: default, few large gaps, and many gaps with ragged edges"
 
-plot_landscapes(
-  list(
-    create_landscape("gaps", name = "default"),
-    create_landscape(
-      "gaps",
-      name = "few, large",
-      params = pattern_gaps(n_gaps = 5, gap_radius = 15)
-    ),
-    create_landscape(
-      "gaps",
-      name = "ragged edges",
-      params = pattern_gaps(
-        n_gaps = 12,
-        gap_radius = 8,
-        radius_noise_fraction = 0.4
-      )
-    )
+list(
+  create_landscape("gaps", name = "default"),
+  create_landscape(
+    "gaps",
+    name = "few, large",
+    params = pattern_gaps(n_gaps = 5, gap_radius = 15)
   ),
-  titles = "name",
-  show_legend = FALSE
-)
+  create_landscape(
+    "gaps",
+    name = "ragged edges",
+    params = pattern_gaps(
+      n_gaps = 12,
+      gap_radius = 8,
+      radius_noise_fraction = 0.4
+    )
+  )
+) |>
+  plot_landscapes(
+    titles = "name",
+    show_legend = FALSE
+  )
 ```
 
-#### labyrinth
+### Labyrinth
 
-Maze-like bands of vegetation. `frequency` sets the scale of the maze and `octaves` how much fine detail is layered on top; `veg_threshold` shifts the overall vegetated proportion.
+Maze-like bands of vegetation. The parameter `frequency` controls the scale of the maze, `octaves` how much fine detail is layered on top, and `veg_threshold` sets the overall vegetated area.
 
 ```{r}
 #| label: pattern-labyrinth
@@ -282,22 +282,25 @@ Maze-like bands of vegetation. `frequency` sets the scale of the maze and `octav
 #| fig-height: 3
 #| fig-alt: "Three labyrinth landscapes: default, a finer maze, and a labyrinth with greater vegetation cover"
 
-plot_landscapes(
-  list(
-    create_landscape("labyrinth", name = "default"),
-    create_landscape(
-      "labyrinth",
-      name = "finer, more detailed",
-      params = pattern_labyrinth(frequency = 6, octaves = 3)
-    ),
-    create_landscape(
-      "labyrinth",
-      name = "greater vegetation cover",
-      params = pattern_labyrinth(veg_threshold = 0.35)
-    )
+list(
+  create_landscape("labyrinth", name = "default"),
+  create_landscape(
+    "labyrinth",
+    name = "finer, more detailed",
+    params = pattern_labyrinth(frequency = 6, octaves = 3)
   ),
-  titles = "name",
-  show_legend = FALSE
-)
+  create_landscape(
+    "labyrinth",
+    name = "greater vegetation cover",
+    params = pattern_labyrinth(veg_threshold = 0.35)
+  )
+) |>
+  plot_landscapes(
+    titles = "name",
+    show_legend = FALSE
+  )
 ```
 
+## Next steps
+
+- [Create artificial landscapes](landscape-generation.html): Select patterns and generate individual landscapes or training batches
