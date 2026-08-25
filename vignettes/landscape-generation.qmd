@@ -15,7 +15,7 @@ Create single artificial landscapes or landscape batches with known spatial patt
 ```{r}
 #| label: setup
 library(patternscaper)
-# Set seed for reproducibility
+# Set once for reproducible examples
 set.seed(123456)
 ```
 
@@ -215,6 +215,45 @@ Each landscape contains:
 - `params`: parameters used to generate the landscape
 
 To convert your own matrices or rasters to this format, see [Import user-defined landscapes](importing-landscapes.html).
+
+## Customize landscape plots
+
+`plot_landscapes()` accepts either one landscape or a list of landscapes. Use its arguments to control titles, legends, the number of columns, and which landscapes are shown.
+
+See `?plot_landscapes` for all available arguments.
+
+```{r}
+#| label: plot-layout
+#| fig-width: 8
+#| fig-height: 5
+#| fig-alt: "Eight spot and sharp landscapes arranged in four columns"
+
+landscape_plot <- plot_landscapes(
+  changed_parameters,
+  titles = "pattern",
+  show_legend = FALSE,
+  ncol = 4,
+  max_landscapes = 8
+)
+landscape_plot
+```
+
+The function returns a [patchwork object](https://patchwork.data-imaginist.com/), which combines several `ggplot2` plots. Use `&` to add the same `ggplot2` layer to every panel. With multiple landscapes, `+` modifies only the last panel. Here, a vertical sampling transect is added at `x = 50`.
+
+```{r}
+#| label: add-transect
+#| fig-width: 8
+#| fig-height: 5
+#| fig-alt: "Eight spot and sharp landscapes, each crossed by an orange dashed vertical transect"
+
+landscape_plot &
+  ggplot2::geom_vline(
+    xintercept = 50,
+    color = "#D55E00",
+    linetype = "dashed",
+    linewidth = 0.6
+  )
+```
 
 ## Next steps
 
