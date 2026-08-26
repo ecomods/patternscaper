@@ -637,7 +637,7 @@ apply_metric_model <- function(
   # Map the raw outputs onto the probability simplex for reporting
   pred_complete <- project_simplex_rows(pred_raw)
 
-  # Expand back to one row per input landscape, leaving unclassified rows NA
+  # Expand back to one row per input landscape, leaving missing predictions NA
   pred <- matrix(
     NA_real_,
     nrow = nrow(metrics_wide),

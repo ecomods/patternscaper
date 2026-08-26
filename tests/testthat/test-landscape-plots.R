@@ -26,6 +26,16 @@ test_that("plot_landscapes creates correct title for a single landscape", {
   l$name <- "Test Landscape"
   p5 <- plot_landscapes(l, titles = "both")
   expect_equal(p5$labels$title, "Test Landscape (sharp)")
+
+  l$pattern <- NA_character_
+  p6 <- plot_landscapes(l, titles = "pattern")
+  expect_equal(p6$labels$title, "<unknown pattern>")
+  p7 <- plot_landscapes(l, titles = "both")
+  expect_equal(p7$labels$title, "Test Landscape (<unknown pattern>)")
+
+  l$pattern <- "unclassified"
+  p8 <- plot_landscapes(l, titles = "pattern")
+  expect_equal(p8$labels$title, "unclassified")
 })
 
 test_that("plot_landscapes handles legend options for a single landscape", {

@@ -40,9 +40,11 @@ test_that("print.landscape handles missing name and pattern", {
   # Capture output
   output <- capture_output(print(l))
 
-  # Check fallback text
-  expect_match(output, "Landscape: unnamed")
-  expect_match(output, "unclassified")
+  # Check explicit placeholders for missing metadata
+  expect_match(
+    output,
+    "Landscape: <unnamed> \\[pattern: <unknown pattern>\\]"
+  )
 })
 
 test_that("print.landscape shows parameters correctly", {

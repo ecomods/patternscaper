@@ -21,12 +21,12 @@ plot_single_landscape <- function(
     pattern = if (!is.na(landscape$pattern)) {
       landscape$pattern
     } else {
-      "Unclassified landscape"
+      "<unknown pattern>"
     },
     both = paste0(
       if (!is.na(landscape$name)) landscape$name else "Unnamed landscape",
       " (",
-      if (!is.na(landscape$pattern)) landscape$pattern else "unclassified",
+      if (!is.na(landscape$pattern)) landscape$pattern else "<unknown pattern>",
       ")"
     ),
     none = NULL, # No title

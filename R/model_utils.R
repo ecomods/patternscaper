@@ -772,9 +772,7 @@ validate_pixel_validation_landscapes <- function(
     function(l) as.character(l$pattern),
     character(1)
   )
-  invalid_labels <- which(
-    is.na(validation_labels) | validation_labels == "unclassified"
-  )
+  invalid_labels <- which(is.na(validation_labels))
   if (length(invalid_labels) > 0) {
     cli::cli_abort(c(
       "All validation landscapes must have known pattern classes.",
@@ -1087,9 +1085,8 @@ evaluate_predictions <- function(
     return(NULL)
   }
 
-  # NA and "unclassified" both mean the true class is unknown
   actual_class <- predictions[["actual_class"]]
-  scorable <- !is.na(actual_class) & actual_class != "unclassified"
+  scorable <- !is.na(actual_class)
 
   if (!any(scorable)) {
     if (evaluate == "required") {

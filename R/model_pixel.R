@@ -338,11 +338,9 @@ train_pixel_model <- function(
     character(1)
   )
 
-  # Check if all training labels are neither NA nor unclassified
-  if (any(is.na(training_labels) | training_labels == "unclassified")) {
-    bad_patterns <- which(
-      is.na(training_labels) | training_labels == "unclassified"
-    )
+  # Require a known pattern class for every training landscape
+  if (any(is.na(training_labels))) {
+    bad_patterns <- which(is.na(training_labels))
     cli::cli_abort(c(
       "All training labels must be classified.",
       "x" = "Invalid label(s) at index(es): {paste(bad_patterns, collapse = ', ')}"

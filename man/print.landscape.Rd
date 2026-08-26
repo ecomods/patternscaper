@@ -16,7 +16,9 @@ The input landscape object \code{x}, returned invisibly.
 }
 \description{
 Prints the landscape's name, pattern, dimensions, spatial properties, value
-range, missing-value count, and generation parameters.
+range, missing-value count, and generation parameters. Missing name and
+pattern metadata are displayed as \code{<unnamed>} and
+\code{<unknown pattern>}; the stored values remain \code{NA}.
 }
 \examples{
 # Create a landscape (0 = bare ground, 1 = vegetation)

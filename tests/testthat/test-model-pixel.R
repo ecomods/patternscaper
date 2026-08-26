@@ -347,13 +347,46 @@ test_that("train_pixel_model rejects a non-list landscapes argument clearly", {
   )
 })
 
-test_that("train_pixel_model rejects unclassified landscapes", {
+test_that("train_pixel_model rejects missing pattern labels", {
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
   landscapes[[1]]$pattern <- NA
 
   expect_error(
     train_pixel_model(landscapes, cv_method = "none"),
     "All training labels must be classified"
+  )
+})
+
+test_that("train_pixel_model treats unclassified as an ordinary label", {
+  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+
+  relabel_sharp <- function(landscapes) {
+    lapply(landscapes, \(x) {
+      if (identical(x$pattern, "sharp")) {
+        x$pattern <- "unclassified"
+      }
+      x
+    })
+  }
+
+  landscapes <- relabel_sharp(helper_create_tiny_training_set(n_per_class = 2))
+  validation <- relabel_sharp(helper_create_tiny_training_set(n_per_class = 1))
+
+  set_random_seed(42)
+  model <- train_pixel_model(
+    landscapes,
+    cv_method = "none",
+    validation_landscapes = validation,
+    epochs = 1,
+    batch_size = 2,
+    architecture = helper_minimal_pixel_architecture,
+    verbose = FALSE
+  )
+
+  expect_contains(model$classes, "unclassified")
+  expect_contains(
+    model$performance$validation_results$actual_class,
+    "unclassified"
   )
 })
 
@@ -1171,7 +1204,7 @@ test_that("apply_pixel_model handles mixed valid/NA classes", {
   # Set some to NA
   test_landscapes <- landscapes[1:6]
   test_landscapes[[2]]$pattern <- NA
-  test_landscapes[[4]]$pattern <- "unclassified"
+  test_landscapes[[4]]$pattern <- NA
 
   result <- suppressWarnings(
     apply_pixel_model(

@@ -1,7 +1,9 @@
 #' Print a Landscape Object
 #'
 #' Prints the landscape's name, pattern, dimensions, spatial properties, value
-#' range, missing-value count, and generation parameters.
+#' range, missing-value count, and generation parameters. Missing name and
+#' pattern metadata are displayed as \code{<unnamed>} and
+#' \code{<unknown pattern>}; the stored values remain \code{NA}.
 #'
 #' @param x A landscape object created by \code{\link{landscape}}.
 #' @param ... Unused.
@@ -24,14 +26,14 @@
 #' @export
 print.landscape <- function(x, ...) {
   # Display labels
-  name_str <- if (is.na(x$name)) "unnamed" else paste0('"', x$name, '"')
+  name_str <- if (is.na(x$name)) "<unnamed>" else paste0('"', x$name, '"')
   pattern_str <- if (is.na(x$pattern)) {
-    "unclassified"
+    "<unknown pattern>"
   } else {
-    paste0("pattern: ", x$pattern)
+    x$pattern
   }
 
-  cat("Landscape:", name_str, "[", pattern_str, "]\n")
+  cat("Landscape: ", name_str, " [pattern: ", pattern_str, "]\n", sep = "")
   cat("-----------------------------------------\n")
 
   # Raster summary

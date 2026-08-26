@@ -608,7 +608,7 @@ test_that("apply_metric_model return shape does not depend on the data", {
 
   labelled <- minimal_landscapes
   unlabelled <- lapply(minimal_landscapes, \(l) {
-    l$pattern <- "unclassified"
+    l$pattern <- NA_character_
     l
   })
 
@@ -824,7 +824,7 @@ test_that("apply_metric_model returns NULL performance when classes unknown", {
 
   # Remove pattern from landscapes to simulate unknown classes
   for (i in seq_along(minimal_landscapes)) {
-    minimal_landscapes[[i]]$pattern <- "unclassified"
+    minimal_landscapes[[i]]$pattern <- NA_character_
   }
 
   # The return shape does not depend on whether anything could be scored
@@ -968,10 +968,10 @@ test_that("apply_metric_model returns unclassifiable landscapes as NA", {
   expect_equal(nrow(result), 4)
   expect_true("new_full" %in% result$landscape_name)
 
-  unclassified <- result[result$landscape_name == "new_full", ]
-  expect_true(is.na(unclassified$predicted_class))
-  expect_true(is.na(unclassified$score))
-  expect_true(all(is.na(unclassified[, model$classes])))
+  not_predicted <- result[result$landscape_name == "new_full", ]
+  expect_true(is.na(not_predicted$predicted_class))
+  expect_true(is.na(not_predicted$score))
+  expect_true(all(is.na(not_predicted[, model$classes])))
 
   # The other landscapes are classified normally
   classified <- result[result$landscape_name != "new_full", ]

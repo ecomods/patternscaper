@@ -156,7 +156,6 @@ plot_classified_landscapes <- function(
       dplyr::filter(
         !is.na(predicted_class) &
           !is.na(actual_class) &
-          actual_class != "unclassified" &
           predicted_class != actual_class
       )
     if (nrow(classification) == 0) {
@@ -209,12 +208,12 @@ plot_classified_landscapes <- function(
         # Match missing predictions before equality branches where NA falls
         # through
         is.na(predicted_class) ~ dplyr::if_else(
-          is.na(actual_class) | actual_class == "unclassified",
+          is.na(actual_class),
           "No prediction",
           paste0("No prediction<br>Actual: ", actual_class)
         ),
         # Unknown true classes get a predicted-only title
-        is.na(actual_class) | actual_class == "unclassified" ~
+        is.na(actual_class) ~
           paste0(
             predicted_class,
             " (",

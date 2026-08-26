@@ -537,6 +537,22 @@ test_that("evaluate_cv_performance handles LOO correctly", {
   expect_equal(result$cv_folds, 3)
 })
 
+test_that("pixel validation treats unclassified as an ordinary label", {
+  validation_landscapes <- list(
+    landscape(matrix(c(0, 1, 1, 0), 2, 2), pattern = "a"),
+    landscape(matrix(c(1, 0, 0, 1), 2, 2), pattern = "unclassified")
+  )
+
+  labels <- validate_pixel_validation_landscapes(
+    validation_landscapes = validation_landscapes,
+    expected_dimensions = c(2, 2),
+    class_names = c("a", "unclassified"),
+    land_cover_values = c(0, 1)
+  )
+
+  expect_identical(labels, c("a", "unclassified"))
+})
+
 # Tests for validate_cv_params() --------------------------------------------
 
 test_that("validate_cv_params returns correct structure for cv_method = 'none'", {
@@ -953,8 +969,8 @@ test_that("landscapes with no prediction count as wrong, not as excluded", {
   # 3 of 4 correct, NOT 3 of 3
   expect_equal(perf$accuracy, 0.75)
 
-  # The unclassified landscape is visible in the table rather than dropped, so
-  # the headline accuracy stays derivable from the confusion matrix
+  # The landscape with no prediction stays visible in the table, so headline
+  # accuracy remains derivable from the confusion matrix
   expect_true("no prediction" %in% rownames(perf$confusion_matrix))
   expect_equal(sum(perf$confusion_matrix), 4)
   expect_equal(
@@ -1030,20 +1046,20 @@ test_that("evaluate_predictions refuses the whole batch on an unseen class", {
   )
 })
 
-test_that("evaluate_predictions skips rows with no ground truth", {
-  class_names <- c("a", "b")
+test_that("evaluate_predictions skips only rows with no ground truth", {
+  class_names <- c("a", "b", "unclassified")
   predictions <- tibble::tibble(
     landscape_id = 1:4,
     actual_class = c("a", "b", NA, "unclassified"),
-    predicted_class = c("a", "b", "a", "b"),
+    predicted_class = c("a", "b", "a", "unclassified"),
     a = c(0.9, 0.1, 0.8, 0.2),
-    b = c(0.1, 0.9, 0.2, 0.8)
+    b = c(0.1, 0.9, 0.2, 0.1),
+    unclassified = c(0, 0, 0, 0.7)
   )
 
   perf <- evaluate_predictions(predictions, class_names, verbose = FALSE)
 
-  # Only the two labelled landscapes are scored; the unlabelled ones have no
-  # correct answer to miss, so leaving them out biases nothing
-  expect_equal(sum(perf$confusion_matrix), 2)
+  # NA is skipped, while the literal "unclassified" is scored as a class
+  expect_equal(sum(perf$confusion_matrix), 3)
   expect_equal(perf$accuracy, 1)
 })
