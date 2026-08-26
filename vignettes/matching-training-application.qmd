@@ -10,178 +10,107 @@ knitr:
     comment: '#>'
 ---
 
-A classifier is trained on landscapes of a particular geometry and then applied to
-new ones. When the application landscapes differ from the training data, the two
-workflows behave differently, and some differences quietly degrade predictions.
-This vignette explains what can differ, how each workflow responds, and how to
-prepare application data so results stay trustworthy.
+A classifier is trained on landscapes with a particular geometry and then applied
+to new ones. When the application landscapes differ from the training data, the
+two workflows behave differently, and some of these differences can affect
+predictions. This guide explains which differences matter, what the package
+checks, and what you need to check or prepare.
+
+You can use this guide after converting raster or matrix data to `landscape`
+objects as described in
+[Import user-defined landscapes](importing-landscapes.html). Check the landscape
+geometry before training or applying a classifier with the
+[metric-based](classify-metrics.html) or
+[pixel-based](classify-pixels.html) workflow.
 
 ```{r}
 #| label: setup
 library(patternscaper)
 ```
 
-## Four ways data can differ
+## Landscape geometry
 
-"Different" is not one thing. Training and application landscapes can disagree on
-four independent axes, and they matter to different degrees:
+When comparing training and application landscapes, consider:
 
-| Axis | Meaning | Example |
+| Property | Meaning | Example |
 |---|---|---|
-| **Extent** | size of the area, in cells | train 100 × 100, apply 200 × 200 |
-| **Resolution (grain)** | ground size of one cell | train on 1 m cells, apply to 30 m imagery |
-| **Aspect ratio** | shape of the rectangle | train 100 × 100, apply 200 × 80 |
-| **Shape** | rectangular vs. irregular outline | apply to a clipped, non-rectangular map section |
+| **Extent** | width and height of the area covered | train on 100 × 100 cells, apply to 200 × 200 cells at the same resolution |
+| **Resolution** | ground size represented by one cell | train on 1 m cells, apply to 30 m cells |
+| **Aspect ratio** | ratio of columns to rows | train on 100 × 100 cells, apply to 200 × 80 cells |
+| **Shape** | rectangular or irregular study-area outline | apply to a clipped catchment boundary |
 
-The package generates landscapes as rectangular rasters, so an *irregular* study
-area (a catchment, a park boundary) arrives as a rectangle with `NA` cells outside
-its outline.
+A raster grid is rectangular. An irregular study area is therefore usually
+represented by `NA` cells outside its boundary. Landscapes generated with
+`create_landscape()` or `create_landscapes()` are complete rectangles without
+such a mask.
 
-## How each workflow responds
+## Metric-based workflow
 
-The workflows respond differently, so the package checks them separately.
+`calculate_metrics()` records the geometry of each landscape, and `train_metric_model()` stores a summary of this recorded training geometry in the model. When you later call `apply_metric_model()`, it compares the application landscapes against that summary and warns when:
 
-| | metric-based | pixel-based |
-|---|---|---|
-| Extent / resolution | metrics computed as-is; **warns** on a substantial mismatch | rows and columns **resampled** onto the training grid; absolute grid size is discarded |
-| Aspect ratio | reflected in the metrics; **warns** on a large change | anisotropic resize distorts the pattern; **warns** |
-| Irregular shape (`NA`) | `NA` treated as outside the landscape; works | `NA` rejected before prediction; **error** |
-| Training set itself | **warns** if training landscapes are not uniform | **requires** one layer and identical rows and columns (error otherwise) |
+- the width or height of the extent differs by more than 25%
+- cell resolution differs by more than 1%
+- aspect ratio differs by more than 25%
 
-### Metric-based workflow
+These warnings hint at potential problems but do not determine whether a
+prediction is reliable. If a model was trained from a manually created metrics
+table without geometry columns, these checks are skipped and the function reports
+this.
 
-`calculate_metrics()` records each landscape's geometry, and `train_metric_model()`
-stores a summary of the training geometry in the model. When you later call
-`apply_metric_model()`, it compares the application landscapes against that summary
-and warns if they differ substantially in extent, resolution, or aspect ratio:
+Whether a mismatch affects predictions also depends on which metrics the model
+uses. Raw area and count metrics, and some shape metrics, can change strongly with
+spatial extent. Density metrics and normalized composition or configuration
+metrics can be less sensitive. However, no metric is guaranteed to be robust to
+changes in geometry.
 
-```
-! 3/6 application landscapes differ from the training extent by more than 25%.
-i Scale-dependent metrics (area, edge, patch counts) change with extent, so
-  predictions for these landscapes may be unreliable.
-```
+Because `evaluate_metrics()` ranks metrics by their ability to distinguish
+patterns and does not assess robustness to geometry, calculate the selected
+metrics for labelled landscapes with the expected extents, resolutions, and
+shapes. Compare their values within each pattern class and evaluate the fitted
+model on these landscapes before applying it to unlabelled data.
 
-Whether a mismatch actually hurts depends on **which metrics the model uses**.
-Area-, edge-, and count-based metrics (total area, patch density, edge density,
-mean patch area) scale strongly with extent; normalised configuration metrics
-(aggregation index, contagion, cohesion, Shannon diversity) are largely
-scale-invariant. A model built on scale-invariant metrics tolerates size
-differences well; one built on scale-dependent metrics does not.
+The same concern also applies to the training data. `train_metric_model()` warns when training dimensions or resolution vary between landscapes, because scale-dependent metrics may then conflate the pattern with the landscape geometry.
 
-::: {.callout-tip}
-If you expect your application landscapes to differ in size from the training
-landscapes, prefer scale-invariant metrics when selecting features with
-`evaluate_metrics()`.
-:::
+## Pixel-based workflow
 
-The same logic applies to the *training* set: if your training landscapes are not
-all the same size, `train_metric_model()` warns, because scale-dependent metrics
-then conflate the pattern with the landscape's size.
+The CNN has fixed input dimensions. When an application raster has a different number of rows or columns, `apply_pixel_model()` resamples it to the training
+dimensions using nearest-neighbour resampling. The CNN only looks at the cell array, not the spatial extent or resolution of the raster. The package therefore does not
+check whether training and application data represent comparable ecological scales.
 
-### Pixel-based workflow
+The automatic resizing of application landscapes does not make the CNN independent of scale. Predictions can still change when resizing changes the size or shape of the landscape structures. Before resizing, `apply_pixel_model()` performs two geometry-related checks:
 
-The CNN has a fixed input size, so `apply_pixel_model()` **resamples** every
-application landscape onto the training grid. This lets the function accept
-different row and column counts by discarding the absolute grid size. It does not
-make the CNN scale-invariant, and predictions can still change when resampling
-changes the apparent size of landscape structures. Two cautions remain:
+1. **Aspect ratio**: If the ratio of columns to rows differs from the training grid by more than 10%, resizing stretches the raster anisotropically and `apply_pixel_model()` warns about this.
+2. **`NA` cells**: They cannot be interpreted as a land-cover category. Therefore, the function raises an error and you have to correct the landscapes.
 
-- **Aspect ratio.** Resizing a non-square landscape onto a (square) training grid
-  stretches it anisotropically, distorting the pattern. `apply_pixel_model()` warns
-  when this happens.
-- **`NA` cells.** They cannot be interpreted as a land-cover category. The function
-  raises an error before resizing or prediction rather than passing them to the
-  network.
-
-```
-x Cannot classify landscapes that contain NA cells.
-```
-
-The training side is stricter still: the pixel workflow accepts one categorical
-raster layer per landscape, and all training landscapes must have the same
-numbers of rows and columns since their arrays are stacked into one tensor.
-`train_pixel_model()` checks this and aborts with a clear message rather than
-letting the stacking fail cryptically.
+For training, the pixel workflow requires one categorical raster layer per landscape, identical numbers of rows and columns in all landscapes, and no `NA` cells. Otherwise the function raises an error. However, it does not check whether otherwise matching training rasters have the same spatial resolution.
 
 Land-cover categories must be numeric whole-number codes. Training fixes one input
-channel for each code, and application rasters must use the same codes. A trained
-category may be absent from an application landscape, but a previously unseen
-code cannot be interpreted by the fitted model.
+channel for each code. An application raster may omit a trained code but cannot
+introduce a code not seen during training.
 
-## Preparing application data
+Both workflows require each code to represent the same land-cover type in both training and application data.
 
-### Keep the training set uniform
+## Prepare application data
 
-Generate training landscapes at a single width, height, and layer count.
-`create_landscapes()` does this by default; if you assemble training data yourself,
-make all three dimensions consistent.
+### Match the resolution
 
-### Different size, same shape
+Landscapes generated by `patternscaper` have dimensionless resolution 1. Decide
+what one cell represents and use a comparable ecological grain in the training
+and application data. For metric models, raster resolution must also use
+comparable spatial units.
 
-The pixel workflow resamples automatically, but check that the structures remain
-meaningfully comparable after rescaling. The metric workflow is suitable when the
-selected metrics are scale-invariant (see above).
+If categorical rasters must be resampled, use a method appropriate for
+categorical data, such as nearest-neighbour resampling. Upsampling does not add
+spatial detail.
 
-### Different resolution (grain)
+### Handle missing cells
 
-A model trained on synthetic 1 m landscapes is not directly comparable to 30 m
-imagery: a "patch" means something different at each grain. Resample the
-application data to the training grain, or retrain on data at the target grain,
-before classifying.
+Metric models can be applied to irregular areas represented by `NA`, but the
+package does not compare the shapes of the missing-cell masks. Test the model on
+labelled landscapes with similar outlines.
 
-### Irregular (non-rectangular) study areas
-
-An irregular area arrives as a rectangle with `NA` outside its boundary. The metric
-workflow handles this directly. The pixel workflow cannot (it errors on `NA`), so
-reshape the data first. Two options:
-
-1. **Crop** to the largest rectangle that fits inside the study area.
-2. **Tile** the area into complete, training-sized windows and classify each,
-   giving a spatial map of pattern types.
-
-::: {.callout-warning}
-Do **not** fill `NA` with `0` to make the raster complete. Zero is bare ground, so
-this fabricates land cover that was never there and changes the very pattern you are
-trying to classify.
-:::
-
-A simple crop to the largest centred square, so a later resize is not distorting:
-
-```{r}
-#| label: crop-to-square
-#| fig-width: 8
-#| fig-height: 4
-# A non-square landscape (e.g. a wide map section)
-wide <- create_landscape("sharp", width = 150, height = 90, name = "original")
-
-# Crop to the largest centred square
-raster <- wide$data
-side <- min(terra::nrow(raster), terra::ncol(raster))
-col_off <- floor((terra::ncol(raster) - side) / 2)
-row_off <- floor((terra::nrow(raster) - side) / 2)
-cropped <- terra::crop(
-  raster,
-  terra::ext(col_off, col_off + side, row_off, row_off + side)
-)
-
-square <- landscape(
-  terra::as.matrix(cropped, wide = TRUE),
-  name = "cropped",
-  pattern = wide$pattern
-)
-
-plot_landscapes(list(wide, square), show_legend = FALSE)
-```
-
-The cropped landscape now matches the training aspect ratio, so
-`apply_pixel_model()` resizes it without distortion.
-
-## In short
-
-- The metric workflow is sensitive to **extent and resolution** (via scale-dependent
-  metrics) but handles **irregular shapes**; it warns on geometry mismatch.
-- The pixel workflow accepts different row and column counts by **resampling** but
-  does not preserve absolute scale. It needs **rectangular, `NA`-free,
-  same-aspect** data to avoid errors or geometric distortion.
-- Keep training landscapes uniform, choose scale-appropriate metrics, and crop or
-  tile irregular areas. Never fill `NA` with `0`.
+Pixel models reject `NA`. If missing cells lie outside the study boundary, crop
+an `NA`-free rectangle with the training aspect ratio or divide the area into
+complete windows. Small gaps inside the study area may instead be imputed, for
+example with nearest-neighbour filling for categorical data. Do not fill cells
+outside the study boundary with a land-cover code.
