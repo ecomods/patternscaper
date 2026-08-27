@@ -217,18 +217,18 @@ evaluation results for labelled landscapes and is `NULL` otherwise.
 # Predicted patterns
 classification$predictions
 #> # A tibble: 30 × 8
-#>    landscape_id landscape_name     actual_class predicted_class score     bands
-#>           <int> <chr>              <chr>        <chr>           <dbl>     <dbl>
-#>  1            1 bands_1_rot64      bands        bands           0.999 0.999    
-#>  2            2 clustered_2_rot146 clustered    clustered       1.000 0.0000737
-#>  3            3 clustered_3_rot318 clustered    sharp           0.554 0.0000388
-#>  4            4 sharp_4_rot20      sharp        sharp           0.974 0.00113  
-#>  5            5 sharp_5_rot126     sharp        sharp           0.999 0.0000780
-#>  6            6 clustered_6_rot168 clustered    clustered       0.999 0.000560 
-#>  7            7 bands_7_rot42      bands        bands           0.706 0.706    
-#>  8            8 bands_8_rot241     bands        bands           0.972 0.972    
-#>  9            9 bands_9_rot105     bands        bands           1.000 1.000    
-#> 10           10 bands_10_rot311    bands        bands           0.992 0.992    
+#>    landscape_id landscape_name     actual_class predicted_class score      bands
+#>           <int> <chr>              <chr>        <chr>           <dbl>      <dbl>
+#>  1            1 bands_1_rot64      bands        bands           0.985 0.985     
+#>  2            2 clustered_2_rot146 clustered    clustered       1.000 0.000187  
+#>  3            3 clustered_3_rot318 clustered    clustered       0.966 0.0197    
+#>  4            4 sharp_4_rot20      sharp        sharp           1.000 0.00000241
+#>  5            5 sharp_5_rot126     sharp        sharp           1.000 0.00000107
+#>  6            6 clustered_6_rot168 clustered    clustered       1.000 0.000106  
+#>  7            7 bands_7_rot42      bands        bands           0.823 0.823     
+#>  8            8 bands_8_rot241     bands        bands           1.000 1.000     
+#>  9            9 bands_9_rot105     bands        bands           1     1         
+#> 10           10 bands_10_rot311    bands        bands           1.000 1.000     
 #> # ℹ 20 more rows
 #> # ℹ 2 more variables: clustered <dbl>, sharp <dbl>
 ```
@@ -250,18 +250,18 @@ recall, and F1-score:
 classification$performance$confusion_matrix
 #>            Actual
 #> Predicted   bands clustered sharp
-#>   bands         8         0     0
-#>   clustered     2         6     0
-#>   sharp         0         4    10
+#>   bands        10         1     0
+#>   clustered     0         8     0
+#>   sharp         0         1    10
 classification$performance$accuracy
-#> [1] 0.8
+#> [1] 0.9333333
 classification$performance$per_class_metrics
 #> # A tibble: 3 × 5
 #>   class     count recall precision f1_score
 #>   <chr>     <dbl>  <dbl>     <dbl>    <dbl>
-#> 1 bands        10    0.8      1        0.89
-#> 2 clustered    10    0.6      0.75     0.67
-#> 3 sharp        10    1        0.71     0.83
+#> 1 bands        10    1        0.91     0.95
+#> 2 clustered    10    0.8      1        0.89
+#> 3 sharp        10    1        0.91     0.95
 ```
 
 Use

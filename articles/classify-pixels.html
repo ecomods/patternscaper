@@ -216,18 +216,18 @@
 <code class="sourceCode R"><span><span class="co"># Predicted patterns</span></span>
 <span><span class="va">classification</span><span class="op">$</span><span class="va">predictions</span></span>
 <span><span class="co">#&gt; # A tibble: 30 × 8</span></span>
-<span><span class="co">#&gt;    landscape_id landscape_name     actual_class predicted_class score     bands</span></span>
-<span><span class="co">#&gt;           &lt;int&gt; &lt;chr&gt;              &lt;chr&gt;        &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1            1 bands_1_rot64      bands        bands           0.999 0.999    </span></span>
-<span><span class="co">#&gt;  2            2 clustered_2_rot146 clustered    clustered       1.000 0.0000737</span></span>
-<span><span class="co">#&gt;  3            3 clustered_3_rot318 clustered    sharp           0.554 0.0000388</span></span>
-<span><span class="co">#&gt;  4            4 sharp_4_rot20      sharp        sharp           0.974 0.00113  </span></span>
-<span><span class="co">#&gt;  5            5 sharp_5_rot126     sharp        sharp           0.999 0.0000780</span></span>
-<span><span class="co">#&gt;  6            6 clustered_6_rot168 clustered    clustered       0.999 0.000560 </span></span>
-<span><span class="co">#&gt;  7            7 bands_7_rot42      bands        bands           0.706 0.706    </span></span>
-<span><span class="co">#&gt;  8            8 bands_8_rot241     bands        bands           0.972 0.972    </span></span>
-<span><span class="co">#&gt;  9            9 bands_9_rot105     bands        bands           1.000 1.000    </span></span>
-<span><span class="co">#&gt; 10           10 bands_10_rot311    bands        bands           0.992 0.992    </span></span>
+<span><span class="co">#&gt;    landscape_id landscape_name     actual_class predicted_class score      bands</span></span>
+<span><span class="co">#&gt;           &lt;int&gt; &lt;chr&gt;              &lt;chr&gt;        &lt;chr&gt;           &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1            1 bands_1_rot64      bands        bands           0.985 0.985     </span></span>
+<span><span class="co">#&gt;  2            2 clustered_2_rot146 clustered    clustered       1.000 0.000187  </span></span>
+<span><span class="co">#&gt;  3            3 clustered_3_rot318 clustered    clustered       0.966 0.0197    </span></span>
+<span><span class="co">#&gt;  4            4 sharp_4_rot20      sharp        sharp           1.000 0.00000241</span></span>
+<span><span class="co">#&gt;  5            5 sharp_5_rot126     sharp        sharp           1.000 0.00000107</span></span>
+<span><span class="co">#&gt;  6            6 clustered_6_rot168 clustered    clustered       1.000 0.000106  </span></span>
+<span><span class="co">#&gt;  7            7 bands_7_rot42      bands        bands           0.823 0.823     </span></span>
+<span><span class="co">#&gt;  8            8 bands_8_rot241     bands        bands           1.000 1.000     </span></span>
+<span><span class="co">#&gt;  9            9 bands_9_rot105     bands        bands           1     1         </span></span>
+<span><span class="co">#&gt; 10           10 bands_10_rot311    bands        bands           1.000 1.000     </span></span>
 <span><span class="co">#&gt; # ℹ 20 more rows</span></span>
 <span><span class="co">#&gt; # ℹ 2 more variables: clustered &lt;dbl&gt;, sharp &lt;dbl&gt;</span></span></code></pre></div>
 </div>
@@ -238,18 +238,18 @@
 <code class="sourceCode R"><span><span class="va">classification</span><span class="op">$</span><span class="va">performance</span><span class="op">$</span><span class="va">confusion_matrix</span></span>
 <span><span class="co">#&gt;            Actual</span></span>
 <span><span class="co">#&gt; Predicted   bands clustered sharp</span></span>
-<span><span class="co">#&gt;   bands         8         0     0</span></span>
-<span><span class="co">#&gt;   clustered     2         6     0</span></span>
-<span><span class="co">#&gt;   sharp         0         4    10</span></span>
+<span><span class="co">#&gt;   bands        10         1     0</span></span>
+<span><span class="co">#&gt;   clustered     0         8     0</span></span>
+<span><span class="co">#&gt;   sharp         0         1    10</span></span>
 <span><span class="va">classification</span><span class="op">$</span><span class="va">performance</span><span class="op">$</span><span class="va">accuracy</span></span>
-<span><span class="co">#&gt; [1] 0.8</span></span>
+<span><span class="co">#&gt; [1] 0.9333333</span></span>
 <span><span class="va">classification</span><span class="op">$</span><span class="va">performance</span><span class="op">$</span><span class="va">per_class_metrics</span></span>
 <span><span class="co">#&gt; # A tibble: 3 × 5</span></span>
 <span><span class="co">#&gt;   class     count recall precision f1_score</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 bands        10    0.8      1        0.89</span></span>
-<span><span class="co">#&gt; 2 clustered    10    0.6      0.75     0.67</span></span>
-<span><span class="co">#&gt; 3 sharp        10    1        0.71     0.83</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 bands        10    1        0.91     0.95</span></span>
+<span><span class="co">#&gt; 2 clustered    10    0.8      1        0.89</span></span>
+<span><span class="co">#&gt; 3 sharp        10    1        0.91     0.95</span></span></code></pre></div>
 </div>
 <p>Use <code><a href="../reference/plot_classified_landscapes.html">plot_classified_landscapes()</a></code> to show landscapes with their true and predicted patterns. Correct classifications are blue and misclassifications are bold orange. The example shows 12 of the 30 test landscapes to keep the figure readable. Set <code>only_misclassified = TRUE</code> to show only misclassifications.</p>
 <div>
