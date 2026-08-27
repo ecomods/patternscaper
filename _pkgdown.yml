@@ -102,7 +102,7 @@ navbar:
       - text: Classification workflows
       - text: "Classify with landscape metrics"
         href: articles/classify-metrics.html
-      - text: "Classify with raster cells"
+      - text: "Classify with pixels"
         href: articles/classify-pixels.html
       - text: "-------"
       - text: Prepare landscapes
