@@ -156,4 +156,4 @@ plot_landscapes(landscape_objects)
 Continue with the guide for one of the classification workflows:
 
 - [Classify landscapes with landscape metrics](classify-metrics.html)
-- [Classify landscapes using raster cells](classify-pixels.html)
+- [Classify landscapes with pixels](classify-pixels.html)

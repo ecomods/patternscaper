@@ -95,4 +95,4 @@ Below you can find some guidelines on preparing and matching training and applic
 Continue with the guide for your classification workflow:
 
 - [Classify landscapes with landscape metrics](classify-metrics.html)
-- [Classify landscapes using raster cells](classify-pixels.html)
+- [Classify landscapes with pixels](classify-pixels.html)

@@ -107,4 +107,4 @@ reticulate::py_config()
 ```
 
 Once verification succeeds, continue with
-[Classify landscapes using raster cells](classify-pixels.html).
+[Classify landscapes with pixels](classify-pixels.html).
