@@ -27,7 +27,7 @@ and other R operations advance R's random-number stream. Minor variations may
 still occur across different hardware and software configurations.
 }
 \examples{
-\dontshow{if (keras_available()) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("reticulate", quietly = TRUE) && reticulate::virtualenv_exists("r-keras")) withAutoprint(\{ # examplesIf}
 # Generate reproducible training data
 set.seed(42)
 landscapes <- create_landscapes(n = 6, patterns = c("sharp", "random"))
@@ -39,7 +39,6 @@ model <- train_pixel_model(landscapes, cv_method = "none", epochs = 5)
 }
 \seealso{
 Other neural network training:
-\code{\link[=keras_available]{keras_available()}},
 \code{\link[=save_pixel_model]{save_pixel_model()}},
 \code{\link[=train_metric_model]{train_metric_model()}},
 \code{\link[=train_pixel_model]{train_pixel_model()}}

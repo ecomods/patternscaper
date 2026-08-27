@@ -37,18 +37,21 @@ The workflow has three steps:
 
 ### Set up Keras
 
-Pixel models use `keras3` with a TensorFlow backend. See the
-[installation guide](install-keras.html) and official
-[`keras3` documentation](https://keras3.posit.co/) for setup instructions.
+Pixel models use `keras3` with a TensorFlow backend. Complete the
+[installation guide](install-keras.html) before starting this workflow.
 
-Use the package's backend check to confirm that `keras3` can reach TensorFlow:
+In a fresh R session, initialize Keras and verify which backend it is using:
 
 ```{r}
 #| label: test-keras
-keras_available()
+keras3::config_backend()
+#> [1] "tensorflow"
 ```
 
-This must return `TRUE` before the pixel workflow can run.
+This must return `"tensorflow"` before the pixel workflow can run. The call
+initializes Keras and Python, so it is an active verification that your setup works correctly. If it returns another backend or raises an error,
+return to the Keras installation guide and look at `reticulate::py_config()` in the
+failed session.
 
 ### Set seeds for reproducibility
 

@@ -135,7 +135,7 @@ landscapes from their raster cell values. By default, the function uses the
 built-in multiscale CNN architecture.
 }
 \examples{
-\dontshow{if (keras_available()) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("reticulate", quietly = TRUE) && reticulate::virtualenv_exists("r-keras")) withAutoprint(\{ # examplesIf}
 # Create training data. Kept small so the example runs quickly; real
 # training needs many more landscapes and epochs, see the vignette
 # "Classify landscapes using Keras on landscape rasters".
@@ -164,7 +164,6 @@ final_model <- train_pixel_model(
 \code{\link{apply_pixel_model}}
 
 Other neural network training:
-\code{\link[=keras_available]{keras_available()}},
 \code{\link[=save_pixel_model]{save_pixel_model()}},
 \code{\link[=set_random_seed]{set_random_seed()}},
 \code{\link[=train_metric_model]{train_metric_model()}}

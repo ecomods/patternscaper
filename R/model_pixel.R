@@ -96,7 +96,7 @@
 #' @family neural network training
 #' @export
 #' @importFrom utils flush.console
-#' @examplesIf keras_available()
+#' @examplesIf requireNamespace("reticulate", quietly = TRUE) && reticulate::virtualenv_exists("r-keras")
 #' # Create training data. Kept small so the example runs quickly; real
 #' # training needs many more landscapes and epochs, see the vignette
 #' # "Classify landscapes using Keras on landscape rasters".
@@ -852,7 +852,7 @@ train_pixel_model <- function(
 #'       when no landscape has a known true class, or when some landscape's true
 #'       known class was never seen during training.}
 #'   }
-#' @examplesIf keras_available()
+#' @examplesIf requireNamespace("reticulate", quietly = TRUE) && reticulate::virtualenv_exists("r-keras")
 #' # Create training data. Kept small so the example runs quickly; real
 #' # training needs many more landscapes and epochs, see the vignette
 #' # "Classify landscapes using Keras on landscape rasters".

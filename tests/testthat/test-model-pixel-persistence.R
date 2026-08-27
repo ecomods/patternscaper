@@ -94,7 +94,7 @@ test_that("pixel model persistence validates paths and bundle metadata", {
 })
 
 test_that("pixel model bundle round trip works in the current process", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   left <- matrix(0, nrow = 20, ncol = 20)
   left[, 1:10] <- 1
@@ -161,7 +161,7 @@ test_that("pixel model bundle round trip works in the current process", {
 })
 
 test_that("a fresh R process can load and apply a pixel model bundle", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
   skip_if_not_installed("callr")
   skip_if_not_installed("pkgload")
 

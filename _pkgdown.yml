@@ -53,7 +53,6 @@ reference:
   - train_metric_model
   - train_pixel_model
   - set_random_seed
-  - keras_available
 
 - title: Neural network application
   desc: Apply trained classifiers to new landscapes
@@ -93,5 +92,5 @@ navbar:
         href: articles/matching-training-application.html
       - text: "Calculate Landscape metrics"
         href: articles/landscape-metrics.html
-      - text: "Installing Keras"
+      - text: "Set up Keras"
         href: articles/install-keras.html

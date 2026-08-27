@@ -28,7 +28,7 @@ the fitted land-cover codes. Move or archive the complete folder rather than
 the single files inside it.
 }
 \examples{
-\dontshow{if (keras_available()) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("reticulate", quietly = TRUE) && reticulate::virtualenv_exists("r-keras")) withAutoprint(\{ # examplesIf}
 training_landscapes <- create_landscapes(
   n = 6,
   patterns = c("sharp", "random"),
@@ -54,7 +54,6 @@ unlink(model_bundle, recursive = TRUE)
 \code{\link{load_pixel_model}}, \code{\link{train_pixel_model}}
 
 Other neural network training:
-\code{\link[=keras_available]{keras_available()}},
 \code{\link[=set_random_seed]{set_random_seed()}},
 \code{\link[=train_metric_model]{train_metric_model()}},
 \code{\link[=train_pixel_model]{train_pixel_model()}}

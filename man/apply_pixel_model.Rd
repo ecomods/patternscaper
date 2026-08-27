@@ -63,7 +63,7 @@ spatial patterns. Automatically resamples input landscapes to match the
 model's expected dimensions.
 }
 \examples{
-\dontshow{if (keras_available()) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("reticulate", quietly = TRUE) && reticulate::virtualenv_exists("r-keras")) withAutoprint(\{ # examplesIf}
 # Create training data. Kept small so the example runs quickly; real
 # training needs many more landscapes and epochs, see the vignette
 # "Classify landscapes using Keras on landscape rasters".

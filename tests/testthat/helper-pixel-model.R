@@ -10,3 +10,11 @@ helper_pixel_stub_model <- function(
     land_cover_values = land_cover_values
   )
 }
+
+skip_if_no_keras <- function() {
+  testthat::skip_if_not(
+    requireNamespace("reticulate", quietly = TRUE) &&
+      reticulate::virtualenv_exists("r-keras"),
+    "The r-keras test environment is unavailable"
+  )
+}

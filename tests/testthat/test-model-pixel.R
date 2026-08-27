@@ -358,7 +358,7 @@ test_that("train_pixel_model rejects missing pattern labels", {
 })
 
 test_that("train_pixel_model treats unclassified as an ordinary label", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   relabel_sharp <- function(landscapes) {
     lapply(landscapes, \(x) {
@@ -486,7 +486,7 @@ test_that("land-cover rasters use one channel per fitted numeric code", {
 })
 
 test_that("train_pixel_model draws split RNG only when validation is requested", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   # Stratified validation selection uses R's RNG. That draw must not happen at
   # validation_split = 0, where it would shift existing training results.
@@ -521,7 +521,7 @@ test_that("train_pixel_model aborts on landscapes with NA cells", {
 })
 
 test_that("train_pixel_model works with cv_method='none'", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
 
@@ -564,7 +564,7 @@ test_that("train_pixel_model works with cv_method='none'", {
 })
 
 test_that("train_pixel_model uses explicit validation for early stopping", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   training <- helper_create_tiny_training_set(n_per_class = 4)
   validation <- helper_create_tiny_training_set(n_per_class = 2)
@@ -606,7 +606,7 @@ test_that("train_pixel_model uses explicit validation for early stopping", {
 })
 
 test_that("train_pixel_model creates a stratified validation split", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 4)
 
@@ -637,7 +637,7 @@ test_that("train_pixel_model creates a stratified validation split", {
 })
 
 test_that("train_pixel_model accepts a custom architecture function", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 6)
   build_count <- 0
@@ -678,7 +678,7 @@ test_that("train_pixel_model accepts a custom architecture function", {
 })
 
 test_that("custom architecture functions must return a Keras model", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   expect_error(
     create_keras_model(
@@ -691,7 +691,7 @@ test_that("custom architecture functions must return a Keras model", {
 })
 
 test_that("train_pixel_model works with cv_method='k-fold'", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   # 9 per class is the smallest set that keeps cv_folds = 3: validate_cv_params()
   # requires floor(min_class_count / 3) >= cv_folds, and anything less silently
@@ -733,7 +733,7 @@ test_that("train_pixel_model works with cv_method='k-fold'", {
 })
 
 test_that("train_pixel_model works with cv_method='loo'", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   left <- matrix(0, nrow = 10, ncol = 10)
   left[, 1:5] <- 1
@@ -775,7 +775,7 @@ test_that("train_pixel_model works with cv_method='loo'", {
 })
 
 test_that("train_pixel_model CV folds always train for all epochs", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 6)
   constant_architecture <- function(input_shape, n_classes, ...) {
@@ -807,7 +807,7 @@ test_that("train_pixel_model CV folds always train for all epochs", {
 })
 
 test_that("train_pixel_model one-hot encodes three land-cover codes", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   horizontal <- matrix(rep(c(5, 20, 100, 20), 100), nrow = 20)
   vertical <- t(horizontal)
@@ -834,7 +834,7 @@ test_that("train_pixel_model one-hot encodes three land-cover codes", {
 
 
 test_that("train_pixel_model accepts different optimizers", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
 
@@ -851,7 +851,7 @@ test_that("train_pixel_model accepts different optimizers", {
 })
 
 test_that("train_pixel_model runs a custom callback", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
   completed_epochs <- 0L
@@ -877,7 +877,7 @@ test_that("train_pixel_model runs a custom callback", {
 })
 
 test_that("train_pixel_model supports categorical focal loss", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
 
@@ -897,7 +897,7 @@ test_that("train_pixel_model supports categorical focal loss", {
 })
 
 test_that("train_pixel_model respects patience parameter", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
 
@@ -951,7 +951,7 @@ test_that("apply_pixel_model validates verbose", {
 })
 
 test_that("apply_pixel_model validates landscapes input", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 2)
   set_random_seed(42)
@@ -1104,7 +1104,7 @@ test_that("apply_pixel_model does not warn when aspect ratio matches", {
 })
 
 test_that("apply_pixel_model returns predictions for single landscape", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   set_random_seed(42)
@@ -1140,7 +1140,7 @@ test_that("apply_pixel_model returns predictions for single landscape", {
 })
 
 test_that("apply_pixel_model returns predictions for multiple landscapes", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   set_random_seed(42)
@@ -1163,7 +1163,7 @@ test_that("apply_pixel_model returns predictions for multiple landscapes", {
 })
 
 test_that("apply_pixel_model returns performance when requested", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   set_random_seed(42)
@@ -1190,7 +1190,7 @@ test_that("apply_pixel_model returns performance when requested", {
 })
 
 test_that("apply_pixel_model handles mixed valid/NA classes", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   set_random_seed(42)
@@ -1224,7 +1224,7 @@ test_that("apply_pixel_model handles mixed valid/NA classes", {
 })
 
 test_that("apply_pixel_model returns NULL performance for all invalid classes", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   set_random_seed(42)
@@ -1269,7 +1269,7 @@ test_that("apply_pixel_model returns NULL performance for all invalid classes", 
 })
 
 test_that("apply_pixel_model warns about unknown classes", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   set_random_seed(42)
@@ -1322,7 +1322,7 @@ test_that("apply_pixel_model warns about unknown classes", {
 })
 
 test_that("apply_pixel_model handles resizing correctly", {
-  skip_if_not(keras_available(), "Keras TensorFlow backend unavailable")
+  skip_if_no_keras()
 
   landscapes <- helper_create_tiny_training_set(n_per_class = 3)
   set_random_seed(42)

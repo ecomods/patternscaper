@@ -898,34 +898,6 @@ test_that("fit_nn_model aborts when neuralnet fails to converge", {
   )
 })
 
-# keras_available ------------------------------------------------------------
-
-test_that("keras_available accepts tensorflow but not the other backends", {
-  local_mocked_bindings(
-    config_backend = function(...) "tensorflow",
-    .package = "keras3"
-  )
-  expect_true(keras_available())
-
-  # keras3 also runs on jax and torch, which the pixel workflow is not tested
-  # against and which can give different numbers
-  for (backend in c("jax", "torch")) {
-    local_mocked_bindings(
-      config_backend = function(...) backend,
-      .package = "keras3"
-    )
-    expect_false(keras_available(), info = backend)
-  }
-})
-
-test_that("keras_available returns FALSE rather than erroring with no backend", {
-  local_mocked_bindings(
-    config_backend = function(...) stop("no python here"),
-    .package = "keras3"
-  )
-  expect_false(keras_available())
-})
-
 # evaluate / scoring helpers --------------------------------------------------
 
 test_that("validate_evaluate_param accepts the three levels, case-insensitively", {

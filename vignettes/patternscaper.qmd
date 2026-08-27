@@ -124,4 +124,4 @@ Topic guides:
 - [Create landscapes](landscape-generation.html): Generate artificial landscapes with known patterns
 - [Import your own landscapes](importing-landscapes.html): Convert your own rasters or matrices to the package's landscape format
 - [Calculate landscape metrics](landscape-metrics.html): Calculate and inspect landscape metrics
-- [Install Keras](install-keras.html): Set up the software required for the pixel-based workflow
+- [Set up Keras](install-keras.html): Install the software required for the pixel-based workflow

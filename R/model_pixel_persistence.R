@@ -18,7 +18,7 @@
 #' @seealso \code{\link{load_pixel_model}}, \code{\link{train_pixel_model}}
 #' @family neural network training
 #' @export
-#' @examplesIf keras_available()
+#' @examplesIf requireNamespace("reticulate", quietly = TRUE) && reticulate::virtualenv_exists("r-keras")
 #' training_landscapes <- create_landscapes(
 #'   n = 6,
 #'   patterns = c("sharp", "random"),

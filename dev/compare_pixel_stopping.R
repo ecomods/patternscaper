@@ -10,7 +10,7 @@
 devtools::load_all(quiet = TRUE)
 library(dplyr)
 
-if (!keras_available()) {
+if (!identical(keras3::config_backend(), "tensorflow")) {
   cli::cli_abort("A working Keras TensorFlow backend is required.")
 }
 
