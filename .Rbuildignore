@@ -3,7 +3,6 @@
 ^tools$
 ^LICENSE\.md$
 ^\.github$
-^vignettes/articles$
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
@@ -11,12 +10,9 @@
 ^vignettes/\.quarto$
 ^vignettes/.*_files$
 ^vignettes/.*_cache$
-^vignettes/articles/\.quarto$
-^vignettes/articles/.*_files$
 ^README\.Rmd$
 \.drawio$
 ^tests/testthat/_problems$
-^CLAUDE\.md$
 ^AGENTS\.(md|txt)$
 ^\.quarto$
 ^tests/testthat/Rplots\.pdf$
