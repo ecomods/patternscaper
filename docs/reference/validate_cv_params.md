@@ -39,8 +39,9 @@ validate_cv_params(
 
 - min_samples_per_fold:
 
-  Integer. Minimum samples per class per fold for k-fold CV (default:
-  3).
+  Integer. Minimum samples per class per fold for k-fold CV, and the
+  count below which a class is reported as small for any CV method
+  (default: 3).
 
 ## Value
 

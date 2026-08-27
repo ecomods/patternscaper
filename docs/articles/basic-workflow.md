@@ -52,7 +52,7 @@ the training landscapes.
 
 If you want to know more about the generation of specific landscapes,
 check out the [Landscape
-Generation](https://ecomods.github.io/spatPatClassifyR/articles/landscape-generation.md)
+Generation](https://ecomods.github.io/patternscaper/articles/landscape-generation.md)
 vignette.
 
 By default, the `generate_training_landscapes()` function generates
@@ -95,7 +95,7 @@ metrics based. Here, we use the default method, which selects the
 metrics with the highest variance across all landscapes. If you want to
 learn more details about the different methods, check out the [landscape
 metrics
-vignette](https://ecomods.github.io/spatPatClassifyR/articles/landscape-metrics.md).
+vignette](https://ecomods.github.io/patternscaper/articles/landscape-metrics.md).
 
 ``` r
 
@@ -121,7 +121,7 @@ landscapes.
 Now we’ll train a neural network model using our filtered metrics.
 
 The
-[`train_nn_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_metrics.md)
+[`train_nn_metrics()`](https://ecomods.github.io/patternscaper/reference/train_nn_metrics.md)
 function trains a neural network model with cross-validation. We can
 optionally specify the metrics to use with the `metrics_selected`
 argument. Also, we can specify the cross validation method (kfold or

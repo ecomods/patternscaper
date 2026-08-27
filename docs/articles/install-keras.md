@@ -1,117 +1,113 @@
-# Install Keras and TensorFlow for R
+# Set up Keras and TensorFlow
 
-The workflow to classify landscapes directly from raster data using
-neural networks (see
-[vignette](https://ecomods.github.io/spatPatClassifyR/articles/classify-pixels.md))
-requires `keras3` and its correct configuration.
+The pixel-based workflow uses `keras3` with a TensorFlow backend.
+Installing `patternscaper` also installs the R package `keras3`, but the
+Python environment and TensorFlow backend need a separate setup step.
 
-In our experience, it can be a bit tricky to set up correctly, therefore
-we provide this guide to help you with the installation.
+This guide covers only what is needed to run the [pixel-based
+workflow](https://ecomods.github.io/patternscaper/articles/classify-pixels.md).
+For platform-specific options, including GPU support, see the official
+[`keras3` installation
+reference](https://keras3.posit.co/reference/install_keras.html).
 
-The setup requires the installation of the [`keras3`
-package](https://keras3.posit.co/) and the [`reticulate`
-package](https://rstudio.github.io/reticulate/), which provides an
-interface to Python from R.
+## Standard setup
 
-Both packages are installed alongside the `spatPatClassifyR` package, so
-you only need to load them:
+Start a fresh R session, then run:
 
 ``` r
 
-library(keras3)
-library(reticulate)
+keras3::install_keras(backend = "tensorflow")
 ```
 
-First, you can check if you already have the keras and tensorflow
-modules installed using:
+This creates a Python virtual environment named `r-keras` and installs
+Keras, TensorFlow, and their Python dependencies. The download and
+installation can take several minutes.
+
+When the installation finished, restart R.
+
+## Verify the backend
+
+In the fresh R session, load `patternscaper` and then ask Keras which
+backend it is using:
 
 ``` r
 
-reticulate::py_module_available("keras") &&
-  reticulate::py_module_available("tensorflow")
+library(patternscaper)
+keras3::config_backend()
+#> [1] "tensorflow"
 ```
 
-If this returns `TRUE`, your installation is already working and you can
-skip the rest of this guide.
+The result of this call should be `"tensorflow"`. This step is an active
+verification because `config_backend()` initializes Keras and Python,
+and `reticulate` resolves declared Python requirements as part of that
+process.
 
-## Specify Python Installation
+Tensorflow may print other messages into the console in that step. But
+as long as `config_backend()` returns `"tensorflow"`, the step was
+successful.
 
-Before installing Keras, you should specify which Python installation to
-use.
+## Alternative: Set Python explicitly
 
-**Step 1: Find your Python installations**
-
-Open a terminal (Command Prompt on Windows, Terminal on macOS/Linux) and
-run:
-
-``` bash
-where python    # Windows
-which python    # macOS/Linux
-```
-
-This will list all Python installations on your system.
-
-**Step 2: Tell reticulate which Python to use**
-
-Choose Python **3.10 or 3.11** (recommended for TensorFlow
-compatibility) and specify it:
-
-``` r
-
-# Replace this path with your actual Python 3.10 or 3.11 installation
-reticulate::use_python(
-  "C:/Users/YourName/AppData/Local/Programs/Python/Python310/python.exe",
-  required = TRUE
-)
-
-# Verify reticulate found your Python
-reticulate::py_discover_config()
-```
-
-This should display your Python installation details, not `NULL`.
+The standard setup lets `keras3` choose a compatible Python installation
+automatically. If the setup fails, or if you want to use a particular
+Python installation, you can select it manually before running the Keras
+installer. Do this in a new R session before loading `patternscaper` or
+`keras3`.
 
 > **Warning**
 >
-> **Avoid Python 3.13+** as TensorFlow does not fully support these
-> newer versions yet. Use Python 3.10 or 3.11.
+> **Check compatibility before selecting Python manually.** Supported
+> Python versions depend on the current `keras3` installer and
+> TensorFlow release. If you do not require a particular Python
+> installation, use the standard setup and let `keras3` select one.
 
-## Install Keras and TensorFlow
+First, locate the path of your desired Python executable. You can also
+find your Python installation from the terminal:
 
-Now install Keras using the
-[`install_keras()`](https://keras3.posit.co/reference/install_keras.html)
-function from the `keras3` package:
+``` bash
+where python    # Windows
+which python    # macOS or Linux
+```
+
+In your R session, set the Python path:
 
 ``` r
 
-install_keras()
+# Replace the path with your actual Python installation
+reticulate::use_python(
+  "C:/path/to/python.exe",
+  required = TRUE
+)
+# Verify it worked
+# Should print your python installation not NULL
+reticulate::py_discover_config()
+# Install tensorflow
+keras3::install_keras(backend = "tensorflow")
 ```
 
-This will take a while (5-15 minutes) and will install all necessary
-components in a virtual environment.
+Restart R after the installation finished, then repeat the [backend
+verification](#verify-the-backend). Python compatibility changes over
+time, so check the current [TensorFlow installation
+guide](https://www.tensorflow.org/install/pip) before selecting a
+version yourself. See the official [`reticulate` Python selection
+reference](https://rstudio.github.io/reticulate/reference/use_python.html)
+for other selection methods.
 
-Now, check again if the installation was successful:
+## Getting more help
+
+If backend verification still fails after trying the standard setup or,
+if needed, the explicit Python setup, consult the official [Keras
+installation guide](https://keras.io/getting_started/) and the [`keras3`
+installation
+reference](https://keras3.posit.co/reference/install_keras.html) for
+current setup instructions.
+
+It can also be helpful to inspect your current python configuration:
 
 ``` r
 
-reticulate::py_module_available("keras") &&
-  reticulate::py_module_available("tensorflow")
+reticulate::py_config()
 ```
 
-## Test Your Installation
-
-To test if Keras is working correctly, you can run the following simple
-function:
-
-> **Note**
->
-> The first time you run Keras functions after installation, TensorFlow
-> needs to initialize, which may show some informational messages.
-> Subsequent runs will be fast.
-
-``` r
-
-keras3::to_categorical(0)
-```
-
-If this prints a matrix without errors, your Keras installation is
-working correctly.
+Once verification succeeds, continue with [Classify landscapes with
+pixels](https://ecomods.github.io/patternscaper/articles/classify-pixels.md).

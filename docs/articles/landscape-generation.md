@@ -1,108 +1,116 @@
-# Generate landscapes with different spatial patterns
+# Create artificial landscapes
 
-This vignette shows how to generate artificial landscapes with different
-spatial patterns. These landscapes are designed for training and testing
-spatial pattern classifiers. For details on how to use the generated
-landscapes for training classifiers, see the
-[classify-metrics](https://ecomods.github.io/spatPatClassifyR/articles/classify-metrics.md)
-and
-[classify-pixels](https://ecomods.github.io/spatPatClassifyR/articles/classify-pixels.md)
-vignettes.
+Create single artificial landscapes or landscape batches with known
+spatial patterns for training and testing classifiers. If you are new to
+the package, begin with [Get
+started](https://ecomods.github.io/patternscaper/articles/patternscaper.md)
+for an overview of the complete classification workflow.
 
 ``` r
 
-library(spatPatClassifyR)
-# Set seed for reproducibility
+library(patternscaper)
+# Set once for reproducible examples
 set.seed(123456)
 ```
 
 ## Overview
 
-You can:
+Landscape creation uses three kinds of functions:
 
-- Generate batches of training landscapes with
-  [`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
-- Create individual landscapes with custom parameters using
-  [`create_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md)
-- Visualize an individual landscape with
-  [`plot_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape.md)
-- Visualize multiple landscapes in a grid with
-  [`plot_landscape_list()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape_list.md)
+- [`create_landscape()`](https://ecomods.github.io/patternscaper/reference/create_landscape.md)
+  creates one landscape
+- [`create_landscapes()`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md)
+  creates a batch of landscapes
+- `pattern_*()` constructors set pattern-specific parameters
 
-### Available patterns
+In these names, `*` is replaced by the corresponding pattern name.
 
-Currently, there are 11 different spatial patterns available:
+## Choose a pattern
 
-#### Control patterns
+The package provides 11 spatial patterns in three groups: control,
+ecotone, and patch patterns. See the [pattern
+gallery](https://ecomods.github.io/patternscaper/articles/pattern-gallery.md)
+to compare them and explore their parameters.
 
-- **random**: Randomly distributed vegetation
-- **bare**: No/minimal vegetation (control)
-- **dense**: Complete/maximal vegetation cover (control)
+## Create individual landscapes
 
-![Three landscapes showing control patterns: random, bare, and
-dense](landscape-generation_files/figure-html/control-patterns-1.png)
-
-#### Ecotone patterns
-
-- **sharp**: Sharp boundary
-- **diffuse**: Gradual transition
-- **fingers**: Curvy, finger-like extensions
-- **clustered**: Vegetation clusters above a treeline
-- **bands**: Sinusoidal vegetation bands
-
-![Five landscapes showing ecotone patterns: sharp, diffuse, fingers,
-clustered, and
-bands](landscape-generation_files/figure-html/ecotone-patterns-1.png)
-
-#### Patch patterns
-
-- **spots**: Circular vegetation patches
-- **gaps**: Circular vegetation gaps
-- **labyrinth**: Maze-like vegetation patterns
-
-![Three landscapes showing patch patterns: spots, gaps, and
-labyrinth](landscape-generation_files/figure-html/patch-patterns-1.png)
-
-For detailed parameter descriptions and examples of each pattern type,
-see
-[`?create_landscape`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md).
-
-## Creating Multiple Training Landscapes
-
-The quickest way to generate training data is with
-[`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md).
-It generates multiple landscapes balanced across all available patterns.
+To create a single landscape using default parameter settings, call
+[`create_landscape()`](https://ecomods.github.io/patternscaper/reference/create_landscape.md)
+with the name of the pattern:
 
 ``` r
 
-# Create 20 landscapes balanced across all pattern types
+default_spots <- create_landscape("spots")
+
+# Plot the landscape
+plot_landscapes(default_spots, show_legend = FALSE)
+```
+
+![A spots landscape created with default
+parameters](landscape-generation_files/figure-html/default-landscape-1.png)
+
+Pass a matching `pattern_*()` constructor to `params` to modify the
+default parameters (see [pattern
+gallery](https://ecomods.github.io/patternscaper/articles/pattern-gallery.md)
+for all patterns and parameters):
+
+``` r
+
+big_spots <- create_landscape(
+  "spots",
+  params = pattern_spots(n_spots = 8, spot_radius = 12)
+)
+
+plot_landscapes(big_spots, show_legend = FALSE)
+```
+
+![A single spots landscape with 8 large
+spots](landscape-generation_files/figure-html/custom-landscape-1.png)
+
+## Create training landscapes
+
+The quickest way to create training data is
+[`create_landscapes()`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md).
+It creates multiple landscapes, distributes them as evenly as possible
+across the selected patterns, and varies their parameters between
+landscapes.
+
+The following example creates only 20 landscapes to keep the guide quick
+to run. For training the actual classifiers, the data set should be
+larger.
+
+``` r
+
+# Create 20 landscapes distributed across all pattern types
 landscapes <- create_landscapes(n = 20)
 #> ✔ Successfully generated all 20 training landscapes
 ```
 
-The `landscapes` are returned as a list of `landscape` objects (see
-[below](https://ecomods.github.io/spatPatClassifyR/articles/landscape-generation.qmd#landscape-object-structure)
-for more info on the data structure).
+The result is a list of [`landscape` objects](#landscape-objects).
 
-They can be visualized using the
-[`plot_landscape_list()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape_list.md)
-function:
+Plot them with
+[`plot_landscapes()`](https://ecomods.github.io/patternscaper/reference/plot_landscapes.md):
 
 ``` r
 
 # Plot all landscapes
-plot_landscape_list(landscapes)
+plot_landscapes(landscapes)
 ```
 
-![](landscape-generation_files/figure-html/plot-training-landscapes-1.png)
+![Grid of 20 landscapes distributed across the 11 available spatial
+patterns](landscape-generation_files/figure-html/plot-training-landscapes-1.png)
 
-By default, landscapes are created in a balanced way, so that each
-pattern type is represented equally in the generated set.
+By default, landscapes are distributed as evenly as possible across the
+selected pattern types. When the number of landscapes is not divisible
+by the number of patterns, some patterns occur once more than others.
+
+Inspect the number of generated patterns with
+[`table()`](https://rdrr.io/r/base/table.html):
 
 ``` r
 
 # Check how many landscapes of each type were generated
-table(purrr::map_chr(landscapes, ~ .x$pattern))
+table(purrr::map_chr(landscapes, \(x) x$pattern))
 #> 
 #>     bands      bare clustered     dense   diffuse   fingers      gaps labyrinth 
 #>         2         2         2         2         2         2         1         1 
@@ -110,11 +118,11 @@ table(purrr::map_chr(landscapes, ~ .x$pattern))
 #>         2         2         2
 ```
 
-### Selecting Specific Patterns
+### Select specific patterns
 
-Specific patterns can be selected to create only a subset of patterns
-using the `patterns` argument. For example, to create landscapes with
-only labyrinth, spots, and clustered patterns:
+You can select only specific patterns using the `patterns` argument. For
+example, to create landscapes with only labyrinth, spots, and clustered
+patterns:
 
 ``` r
 
@@ -125,19 +133,17 @@ landscapes <- create_landscapes(
 )
 #> ✔ Successfully generated all 12 training landscapes
 
-plot_landscape_list(landscapes)
+plot_landscapes(landscapes)
 ```
 
 ![Grid showing landscapes with only labyrinth, spots, and clustered
 patterns](landscape-generation_files/figure-html/specific-patterns-1.png)
 
-### Control landscape parameters
-
-#### Landscape size
+### Landscape size
 
 To modify the size (number of pixels in x- and y-direction) of all
-generated landscapes, use the `ncol` and `nrow` arguments. By default,
-landscapes are created with a size of 100x100 pixels.
+generated landscapes, use the `width` and `height` arguments. By
+default, landscapes are created with a size of 100 x 100 pixels.
 
 ``` r
 
@@ -148,22 +154,22 @@ non_square <- create_landscapes(
 )
 #> ✔ Successfully generated all 3 training landscapes
 # Plot landscapes with custom size
-plot_landscape_list(non_square)
+plot_landscapes(non_square)
 ```
 
-![Three landscapes showing different sizes: 50x20
+![Three non-square landscapes of 50 x 20
 pixels](landscape-generation_files/figure-html/custom-size-1.png)
 
-#### Landscape rotation
+### Landscape rotation
 
-By default, landscapes are rotated by angles randomly chosen between 0
-and 360 degrees. This ensures that classifiers trained on these
-landscapes are invariant to landscape orientation.
+By default, each rotatable pattern is rotated by a whole-degree angle
+sampled between 0 and 360. This exposes classifiers to similar
+landscapes in different orientations during training and helps prevent
+them from relying on orientation.
 
-You can disable random rotation by setting the `rotation` parameter to
-`0`. This parameter can also be used to directly control the range of
-selected rotation angles. For example, to select only angles between 0
-and 90 degrees:
+Set `rotation = 0` to disable rotation, or supply a length-2 range from
+which angles are sampled. This example uses angles between 45 and 90
+degrees:
 
 ``` r
 
@@ -179,238 +185,126 @@ defined_angles <- create_landscapes(
   rotation = c(45, 90)
 )
 
-plot_landscape_list(c(no_rotation, defined_angles))
+plot_landscapes(c(no_rotation, defined_angles))
 ```
 
-![Landscapes showing the same pattern rotated at different
-angles](landscape-generation_files/figure-html/rotation-example-1.png)
+![Three unrotated clustered, sharp, and banded landscapes followed by
+three clustered landscapes rotated between 45 and 90
+degrees](landscape-generation_files/figure-html/rotation-example-1.png)
 
-#### Pattern-specific parameters
+Only “sharp”, “diffuse”, “fingers”, “clustered” and “bands” are rotated.
+The remaining patterns ignore `rotation`.
 
-You can modify default parameters for all generated landscapes of a
-specific pattern by passing a list of parameter values to the
-`params_list` argument. For example, to create landscapes with more
-spots of larger size:
+### Pattern-specific parameters
+
+The `params_list` argument sets pattern-specific parameters or parameter
+ranges using the `pattern_*()` constructors. In
+[`create_landscapes()`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md),
+a batch parameter can be either a length-2 range to sample the parameter
+from or a single value used for all landscapes of that pattern. Patterns
+left out of `params_list` fall back to their default sampling ranges,
+which are listed on each constructor’s help page.
 
 ``` r
 
-# Custom parameters for spot patterns
-pattern_params <- list(
-  spots = list(
-    n_spots = 15,
-    spot_radius = 10,
-    spot_radius_sd = 3
+changed_parameters <- create_landscapes(
+  n = 12,
+  patterns = c("spots", "sharp"),
+  params_list = list(
+    spots = pattern_spots(
+      n_spots = c(10, 20), # range for each landscape
+      spot_radius = c(8, 12), # range for each landscape
+      spot_radius_sd = 3, # single value for all landscapes
+      regular_spots = FALSE # single value for all landscapes
+    ),
+    sharp = pattern_sharp(
+      boundary_position = c(0.2, 0.7)
+    )
   )
 )
-bigger_spots <- create_landscapes(
-  n = 12,
-  patterns = "spots",
-  params_list = pattern_params
-)
 
-plot_landscape_list(bigger_spots)
+plot_landscapes(changed_parameters)
 ```
 
-![Grid showing landscapes with many large
-spots](landscape-generation_files/figure-html/custom-parameters-1.png)
+![Grid of spots and sharp landscapes with varied pattern-specific
+parameters](landscape-generation_files/figure-html/custom-parameters-1.png)
 
-To check parameter names and default values for each pattern type, see
-the function help
-[`create_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md).
+## Landscape objects
 
-## Creating Single Landscapes
+[`create_landscape()`](https://ecomods.github.io/patternscaper/reference/create_landscape.md)
+returns one `landscape` object and
+[`create_landscapes()`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md)
+returns a list of them. Downstream functions that work with landscapes
+accept these objects directly.
 
-To create single landscapes of all patterns with specific parameters,
-use the
-[`create_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md)
-function. Check the help page
-[`?create_landscape`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md)
-for a full list of available parameters for each pattern type.
+Each landscape contains:
 
-### Spot Patterns
+- `data`: landscape raster as a `SpatRaster`
+- `pattern`: pattern label, such as `"spots"` or `"clustered"`
+- `name`: user-defined name
+- `params`: parameters used to generate the landscape
+
+To convert your own matrices or rasters to this format, see [Import
+user-defined
+landscapes](https://ecomods.github.io/patternscaper/articles/importing-landscapes.md).
+
+## Customize landscape plots
+
+[`plot_landscapes()`](https://ecomods.github.io/patternscaper/reference/plot_landscapes.md)
+accepts either one landscape or a list of landscapes. Use its arguments
+to control titles, legends, the number of columns, and which landscapes
+are shown.
+
+See
+[`?plot_landscapes`](https://ecomods.github.io/patternscaper/reference/plot_landscapes.md)
+for all available arguments.
 
 ``` r
 
-# Default spots
-spots_default <- create_landscape("spots", name = "Default")
-
-# More spots with size variation
-spots_many <- create_landscape(
-  "spots",
-  name = "Many variable spots",
-  n_spots = 15,
-  spot_radius = 8,
-  spot_radius_sd = 2
+landscape_plot <- plot_landscapes(
+  changed_parameters,
+  titles = "pattern",
+  show_legend = FALSE,
+  ncol = 4,
+  max_landscapes = 8
 )
-
-# Regular grid of spots
-spots_regular <- create_landscape(
-  "spots",
-  name = "Regular grid",
-  n_spots = 15,
-  spot_radius = 20,
-  spot_radius_sd = 0,
-  regular_spots = TRUE
-)
-#> Warning: Regular spot placement requested 15 spots but only ~6 positions fit.
-#> ℹ  Adjusting to maximum feasible spots. Consider decreasing `spot_radius`.
-
-plot_landscape_list(
-  list(spots_default, spots_many, spots_regular),
-  titles = "name"
-)
+#> Warning: Showing the first 8 of 12 landscapes. Increase `max_landscapes` to show more,
+#> or use `subset_index` to select landscapes.
+landscape_plot
 ```
 
-![Three landscapes showing spot patterns with different numbers and
-sizes of vegetation
-patches](landscape-generation_files/figure-html/spot-patterns-examples-1.png)
+![Eight spot and sharp landscapes arranged in four
+columns](landscape-generation_files/figure-html/plot-layout-1.png)
 
-### Clustered Patterns
+The function returns a [patchwork
+object](https://patchwork.data-imaginist.com/), which combines several
+`ggplot2` plots. Use `&` to add the same `ggplot2` layer to every panel.
+With multiple landscapes, `+` modifies only the last panel. Here, a
+vertical sampling transect is added at `x = 50`.
 
 ``` r
 
-# Few large clusters
-clustered_large <- create_landscape(
-  "clustered",
-  name = "Few large clusters",
-  n_clusters = 5,
-  cluster_radius = 12,
-  scatter_zone_prop = 0.5
-)
-
-# Many small clusters
-clustered_small <- create_landscape(
-  "clustered",
-  name = "Many small clusters",
-  n_clusters = 30,
-  cluster_radius = 2,
-  scatter_zone_prop = 0.6
-)
-
-# Elongated clusters
-clustered_horizontal <- create_landscape(
-  "clustered",
-  name = "Horizontal clusters",
-  n_clusters = 15,
-  cluster_radius = 5,
-  elongation_x = 3,
-  elongation_y = 1,
-  scatter_zone_prop = 0.4
-)
-
-plot_landscape_list(
-  list(
-    clustered_large,
-    clustered_small,
-    clustered_horizontal
-  ),
-  titles = "name"
-)
+landscape_plot &
+  ggplot2::geom_vline(
+    xintercept = 50,
+    color = "#D55E00",
+    linetype = "dashed",
+    linewidth = 0.6
+  )
 ```
 
-![Three landscapes showing clustered vegetation with different cluster
-sizes and
-numbers](landscape-generation_files/figure-html/clustered-patterns-examples-1.png)
+![Eight spot and sharp landscapes, each crossed by an orange dashed
+vertical
+transect](landscape-generation_files/figure-html/add-transect-1.png)
 
-### Labyrinth Patterns
+## Next steps
 
-``` r
-
-# Default labyrinth
-labyrinth_default <- create_landscape("labyrinth", name = "Default")
-
-# Higher frequency with multiple octaves
-labyrinth_complex <- create_landscape(
-  "labyrinth",
-  name = "Complex",
-  frequency = 8,
-  octaves = 3,
-  band_fuzziness = 0.05
-)
-
-plot_landscape_list(list(labyrinth_default, labyrinth_complex), titles = "name")
-```
-
-![Two landscapes showing labyrinth-like vegetation patterns with
-different
-frequencies](landscape-generation_files/figure-html/labyrinth-patterns-examples-1.png)
-
-## The landscape Object
-
-In `spatPatClassifyR`, landscapes are stored as lists containing the
-landscape data and metadata. All landscape generation functions return
-landscapes in this format and all other functions expect landscapes to
-be provided in this format.
-
-To learn how to transform your own raster data into this format, see
-[vignette on importing
-landscapes](https://ecomods.github.io/spatPatClassifyR/articles/importing-landscapes.md).
-
-Each landscape is stored as a list with the following components:
-
-- data: The landscape object as a `SpatRaster` class
-- pattern: Pattern type (e.g., “spots”, “clustered”)
-- name: User-defined name
-- params: List of parameters used to generate the landscape
-
-``` r
-
-landscape_example <- create_landscape("spots", name = "Example")
-str(landscape_example)
-#> List of 4
-#>  $ data   :S4 class 'SpatRaster' [package "terra"]
-#>  $ pattern: chr "spots"
-#>  $ name   : chr "Example"
-#>  $ params :List of 8
-#>   ..$ width                : num 100
-#>   ..$ height               : num 100
-#>   ..$ invert_landscape     : logi FALSE
-#>   ..$ n_spots              : int 15
-#>   ..$ spot_radius          : num 5
-#>   ..$ spot_radius_sd       : num 0
-#>   ..$ radius_noise_fraction: num 0
-#>   ..$ regular_spots        : logi FALSE
-#>  - attr(*, "class")= chr "landscape"
-```
-
-#### Modifying Landscape Metadata
-
-Users can modify landscape metadata using the helper functions
-[`set_landscape_pattern()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_pattern.md)
-and
-[`set_landscape_name()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_name.md).
-For example, to change the pattern label or name of existing landscapes:
-
-``` r
-
-landscapes_example <- set_landscape_name(
-  landscape_example,
-  "New Landscape Name"
-)
-landscapes_example <- set_landscape_pattern(
-  landscapes_example,
-  "custom_pattern"
-)
-landscapes_example
-#> Landscape: "New Landscape Name" [ pattern: custom_pattern ]
-#> -----------------------------------------
-#> Dimensions: 100x100 (10000 cells)
-#> Resolution: 1.0x1.0
-#> Extent    : xmin=0.0, xmax=100.0, ymin=0.0, ymax=100.0
-#> Values    : min=0.0, max=1.0
-#> Parameters: width = 100, height = 100, invert_landscape = FALSE, n_spots = 15, spot_radius = 5, spot_radius_sd = 0, radius_noise_fraction = 0, regular_spots = FALSE
-```
-
-## Next Steps
-
-- See
-  [`vignette("landscape-metrics")`](https://ecomods.github.io/spatPatClassifyR/articles/landscape-metrics.md)
-  for extracting landscape features and finding the most informative
-  metrics
-- See
-  [`vignette("classify-metrics")`](https://ecomods.github.io/spatPatClassifyR/articles/classify-metrics.md)
-  for training spatial pattern classifiers on the landscape metrics
-- See
-  [`vignette("classify-pixels")`](https://ecomods.github.io/spatPatClassifyR/articles/classify-pixels.md)
-  for training spatial pattern classifiers on the raw landscape data
-  using Keras
+- [Calculate landscape
+  metrics](https://ecomods.github.io/patternscaper/articles/landscape-metrics.md):
+  Extract landscape features and identify informative metrics
+- [Classify with landscape
+  metrics](https://ecomods.github.io/patternscaper/articles/classify-metrics.md):
+  Train classifiers on landscape metrics
+- [Classify with
+  pixels](https://ecomods.github.io/patternscaper/articles/classify-pixels.md):
+  Train Keras classifiers on raster-cell values

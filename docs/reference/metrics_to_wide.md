@@ -1,7 +1,7 @@
-# Convert landscape metrics from long to wide format
+# Convert Landscape Metrics from Long to Wide Format
 
-This function transforms landscape metrics from a long format to a wide
-format that is needed to train nn models
+Reshapes landscape metrics to one row per landscape and one column per
+metric for neural-network training.
 
 ## Usage
 
@@ -20,11 +20,14 @@ metrics_to_wide(metrics, return_only_metrics = FALSE)
 
 - return_only_metrics:
 
-  Logical. Whether to return only the metrics or also the the
-  identification columns in output (default: FALSE).
+  Logical. Whether to return only the metric columns or retain the
+  identification columns (default: FALSE).
 
 ## Value
 
 A data frame in wide format where each metric becomes a column and each
-row is a landscape. Metric names are modified to include class IDs when
-applicable (format: \`metric_class_id\`).
+row is a landscape. Metric names already include class IDs when
+applicable (format: \`metric_class_id\`); that folding is done upstream
+in
+[`calculate_metrics`](https://ecomods.github.io/patternscaper/reference/calculate_metrics.md),
+not here.

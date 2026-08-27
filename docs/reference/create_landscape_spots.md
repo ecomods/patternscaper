@@ -86,25 +86,25 @@ A landscape object with pattern "spots" containing:
 
 This function can generate both "spots" and "gaps" patterns depending on
 `invert_landscape`. For semantic clarity in training data, use
-[`create_landscape_gaps`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_gaps.md)
+[`create_landscape_gaps`](https://ecomods.github.io/patternscaper/reference/create_landscape_gaps.md)
 when you want bare patches in vegetated ground, which sets
 `invert_landscape = TRUE` by default and labels the pattern as "gaps".
 
 ## See also
 
 Other landscape creation:
-[`create_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md),
-[`create_landscape_bands()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bands.md),
-[`create_landscape_bare()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bare.md),
-[`create_landscape_clustered()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_clustered.md),
-[`create_landscape_dense()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_dense.md),
-[`create_landscape_diffuse()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse.md),
-[`create_landscape_fingers()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_fingers.md),
-[`create_landscape_gaps()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_gaps.md),
-[`create_landscape_labyrinth()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_labyrinth.md),
-[`create_landscape_random()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_random.md),
-[`create_landscape_sharp()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp.md),
-[`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
+[`create_landscape()`](https://ecomods.github.io/patternscaper/reference/create_landscape.md),
+[`create_landscape_bands()`](https://ecomods.github.io/patternscaper/reference/create_landscape_bands.md),
+[`create_landscape_bare()`](https://ecomods.github.io/patternscaper/reference/create_landscape_bare.md),
+[`create_landscape_clustered()`](https://ecomods.github.io/patternscaper/reference/create_landscape_clustered.md),
+[`create_landscape_dense()`](https://ecomods.github.io/patternscaper/reference/create_landscape_dense.md),
+[`create_landscape_diffuse()`](https://ecomods.github.io/patternscaper/reference/create_landscape_diffuse.md),
+[`create_landscape_fingers()`](https://ecomods.github.io/patternscaper/reference/create_landscape_fingers.md),
+[`create_landscape_gaps()`](https://ecomods.github.io/patternscaper/reference/create_landscape_gaps.md),
+[`create_landscape_labyrinth()`](https://ecomods.github.io/patternscaper/reference/create_landscape_labyrinth.md),
+[`create_landscape_random()`](https://ecomods.github.io/patternscaper/reference/create_landscape_random.md),
+[`create_landscape_sharp()`](https://ecomods.github.io/patternscaper/reference/create_landscape_sharp.md),
+[`create_landscapes()`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md)
 
 ## Examples
 

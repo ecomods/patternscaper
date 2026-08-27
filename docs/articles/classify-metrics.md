@@ -1,301 +1,367 @@
-# Classify landscapes using landscape metrics
+# Classify landscapes with landscape metrics
 
-This vignette provides an overview of the workflow to train a neural
-network on landscape metrics and then use the trained network to
-classify new landscapes based on the same metrics.
+This guide shows how to train a classifier on landscape metrics and
+apply it to previously unseen landscapes. The selected metrics describe
+landscape composition and spatial configuration, so they can also
+provide insight into which landscape characteristics distinguish the
+pattern classes. The workflow uses a feed-forward neural network from
+the `neuralnet` package.
+
+The example extends the metric-based quick example in [Get started with
+patternscaper](https://ecomods.github.io/patternscaper/articles/patternscaper.md)
+by distinguishing three ecotone patterns: sharp, clustered, and bands.
 
 ``` r
 
-library(spatPatClassifyR)
+library(patternscaper)
 
-# Set seed for reproducibility
+# Set seed for reproducible example
 set.seed(123456)
 ```
 
-The workflow consists of the following steps:
+## Overview
 
-1.  Generate training landscapes with known patterns using the
-    [`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
-    function.
-2.  Calculate landscape metrics for the training landscapes using the
-    [`calculate_landscape_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/calculate_landscape_metrics.md)
-    function.
-3.  Select most informative metrics (i.e. metrics that differ the most
-    between landscapes) using the
-    [`evaluate_landscape_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/evaluate_landscape_metrics.md)
-    function.
-4.  Train a neural network using the selected metrics with the
-    [`train_nn_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_metrics.md)
-    function.
-5.  Classify new landscapes using the trained neural network with the
-    [`apply_nn_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_metrics.md)
-    function.
+The metric-based workflow has five steps:
 
-## Step 1: Generate Training Landscapes
+1.  Prepare labelled training landscapes with known patterns
+2.  Calculate their landscape metrics with
+    [`calculate_metrics()`](https://ecomods.github.io/patternscaper/reference/calculate_metrics.md)
+3.  Select informative metrics with
+    [`evaluate_metrics()`](https://ecomods.github.io/patternscaper/reference/evaluate_metrics.md)
+4.  Train the final classifier with
+    [`train_metric_model()`](https://ecomods.github.io/patternscaper/reference/train_metric_model.md)
+5.  Classify new landscapes with
+    [`apply_metric_model()`](https://ecomods.github.io/patternscaper/reference/apply_metric_model.md)
+    and evaluate the predictions when their true patterns are known
 
-You can generate a set of training landscapes with known patterns. See
-[landscape generation
-vignette](https://ecomods.github.io/spatPatClassifyR/articles/landscape-generation.md)
-for details on landscape generation and available patterns and options.
+## Step 1: Create training landscapes
+
+Create training landscapes with known patterns. The [artificial
+landscape
+guide](https://ecomods.github.io/patternscaper/articles/landscape-generation.md)
+explains how to create training batches, and the [pattern
+gallery](https://ecomods.github.io/patternscaper/articles/pattern-gallery.md)
+shows the available patterns and their parameters. Alternatively, import
+your own raster or matrix data as described in [Import user-defined
+landscapes](https://ecomods.github.io/patternscaper/articles/importing-landscapes.md).
 
 ``` r
 
-# Generate 100 training landscapes of 3 patterns
-landscapes <- create_landscapes(
+# Generate 100 training landscapes from 3 ecotone patterns
+training_landscapes <- create_landscapes(
   n = 100,
-  patterns = c("labyrinth", "random", "clustered")
+  patterns = c("sharp", "clustered", "bands")
 )
-#> ✔ Successfully generated all 100 training landscapes
+#> v Successfully generated all 100 training landscapes
 ```
 
-## Step 2: Calculate Landscape Metrics
+Training landscapes should represent the pattern classes and the
+variation expected in the application data.
 
-Next, you can calculate landscape metrics for the training landscapes.
-Landscape metrics are calculated using the metrics and functions from
-the
+## Step 2: Calculate landscape metrics
+
+Next, calculate landscape metrics for the training landscapes. The
+[`calculate_metrics()`](https://ecomods.github.io/patternscaper/reference/calculate_metrics.md)
+function internally uses the functions provided by the
 [`landscapemetrics`](https://r-spatialecology.github.io/landscapemetrics/)
-package. They can be calculated on the class level (i.e. for each land
-cover class separately) or on the landscape level (i.e. for the whole
-landscape). For details, see [landscape metrics
-vignette](https://ecomods.github.io/spatPatClassifyR/articles/landscape-metrics.md).
+package. Metrics can be calculated at the landscape or at the class
+level. At the landscape level, each metric summarizes the complete
+landscape, while at the class level, each metric is calculated
+separately for every land-cover class.
 
-In this example, we calculate metrics on the landscape level.
+Landscape-level metrics are suitable for the three ecotone classes in
+this example. However, if patterns differ mainly by exchanging
+land-cover values, such as spots and gaps or bare and dense landscapes,
+class-level metrics are more suitable because landscape-level metrics
+may not be able to distinguish them. For more details, see [Calculate
+and evaluate landscape
+metrics](https://ecomods.github.io/patternscaper/articles/landscape-metrics.md).
 
 ``` r
 
 # Calculate landscape metrics on the landscape level
-landscape_metrics <- calculate_landscape_metrics(
-  landscapes,
+landscape_metrics <- calculate_metrics(
+  training_landscapes,
   level = "landscape"
 )
 ```
 
-## Step 3: Evaluate Landscape Metrics
+## Step 3: Evaluate landscape metrics
 
-You can use the `evaluate_landscape_metrics` function to select the n
-(e.g. n=10) most informative metrics for classification based on
-different methods. Here, we use the effect size of a Kruskal-Wallis H
-test (for more details and other options see [landscape metrics
-vignette](https://ecomods.github.io/spatPatClassifyR/articles/landscape-metrics.md)).
+Use
+[`evaluate_metrics()`](https://ecomods.github.io/patternscaper/reference/evaluate_metrics.md)
+to rank metrics by how well they distinguish the training patterns and
+select a number of informative metrics. This example uses the default
+Kruskal-Wallis effect-size method to get the ten most informative
+metrics. The function reduces redundancy by filtering out highly
+correlated metrics. If too few metrics pass the correlation filter, the
+highest-ranked correlated candidates are added to reach the requested
+number of metrics. See [Calculate and evaluate landscape
+metrics](https://ecomods.github.io/patternscaper/articles/landscape-metrics.md)
+for the other ranking methods and details of the selection process.
 
-> **Note**
+> **Incomplete metrics**
 >
-> Note, that some metrics may return `NA` for some landscapes. Also,
-> some metrics may have the same value for each landscape (zero variance
-> between the values). By default, these metrics are removed before
-> evaluation and the user gets warned about the metrics that are
-> removed.
->
-> It is not recommended to set `exclude_na = FALSE`, as metrics with
-> `NA` values cannot be used for training the neural network. They may
-> however be informative and useful for other types of analyses.
+> By default,
+> [`evaluate_metrics()`](https://ecomods.github.io/patternscaper/reference/evaluate_metrics.md)
+> excludes incomplete metrics that are not available for every landscape
+> and zero-variation metrics that have the same value across landscapes.
+> Incomplete metrics cannot be passed directly to the neural network
+> because every predictor needs a value for every training landscape.
+> Zero-variation metrics provide no information for distinguishing
+> pattern types. Leave `exclude_incomplete_metrics = TRUE` for model
+> training. Excluded metrics are still recorded and reported to the user
+> but are not selected for training.
 
 ``` r
 
-best_10 <- evaluate_landscape_metrics(
+metric_selection <- evaluate_metrics(
   metrics = landscape_metrics,
   method = "kruskal_effsize",
   metrics_number = 10,
   verbose = FALSE
 )
-#> Warning: Excluded 600 rows containing 6 metrics with NA values. Metrics removed:
-#> "enn_cv", "enn_mn", "enn_sd", "iji", "pafrac", and "rpr" Use
-#> `exclude_NA_metrics = FALSE` to retain (not recommended for model training)
-#> Warning: Excluded 1 metrics with zero variance: "pr"
+#> Warning: Excluded 6 metrics with missing values (600 rows removed).
+#> x NA value for at least one landscape: "enn_cv", "enn_mn", "enn_sd", "iji",
+#>   "pafrac", and "rpr"
+#> i Use `exclude_incomplete_metrics = FALSE` to retain them (not recommended for
+#>   model training).
+#> Warning: Excluded 3 metrics with no variation across landscapes: "pr", "prd",
+#> and "ta"
+#> Warning: Only 9 uncorrelated metrics found. Filling to 10 with correlated metrics.
+#> i Added: "cai_cv"
+
+metric_selection
+#> Metrics evaluation: kruskal_effsize [66 candidate metrics]
+#> -----------------------------------------
+#> Selected (10): para_mn, circle_mn, tca, dcore_mn, cai_sd, para_cv, mutinf, core_sd, circle_cv, cai_cv
+#> 
+#> Outcomes:
+#>   selected                   9
+#>   selected_correlation_fill  1
+#>   dropped_correlated         47
+#>   excluded_incomplete        6
+#>   excluded_zero_variance     3
+#> 
+#> Use $ranking for scores and per-metric outcomes.
 ```
 
-Alternatively, you can manually select the metrics you want to use for
-further evaluation. For this, just provide a list of the metric names
-you are interested in.
+[`evaluate_metrics()`](https://ecomods.github.io/patternscaper/reference/evaluate_metrics.md)
+returns the selected metric names in `$selected` together with the
+ranking information in `$ranking`, which records the score of every
+metric and what happened to the ones that were not selected. See the
+[landscape metrics
+vignette](https://ecomods.github.io/patternscaper/articles/landscape-metrics.md)
+for how to read it. The functions below accept either the object
+`metric_selection` itself or the names of the selected metrics
+`metric_selection$selected`.
 
-You can plot the differences between patterns for the selected metrics
-using the `plot_metrics` function.
+Alternatively, provide a character vector of metric names to select them
+manually.
+
+Use
+[`plot_metrics()`](https://ecomods.github.io/patternscaper/reference/plot_metrics.md)
+to compare the selected metric distributions among the pattern classes.
 
 ``` r
 
-# Plot selected metrics
 plot_metrics(
   metrics = landscape_metrics,
-  selected_metrics = best_10
+  selected_metrics = metric_selection,
+  metric_labels = "name"
 )
 ```
 
-![](classify-metrics_files/figure-html/plot-metrics-1.png)
+![Ten panels of boxplots and points comparing selected landscape metrics
+among sharp, clustered, and bands ecotone
+classes](classify-metrics_files/figure-html/plot-metrics-1.png)
 
-Boxplots show the distribution of the selected landscape metrics across
-different spatial patterns. Each point represents one training landscape
-and each panel is one of the selected metrics.
+Distributions of selected metrics across sharp, clustered, and bands
+ecotone classes. Each point is one training landscape.
 
-## Step 4: Train Neural Network
+## Step 4: Train the final model
 
-The model can now be trained using the selected metrics from step 3.
-Training can be done with or without cross-validation. Valid options for
-the cross-validation method `cv_method` are:
+[`train_metric_model()`](https://ecomods.github.io/patternscaper/reference/train_metric_model.md)
+fits a feed-forward neural network using the selected metrics from step
+3 as predictors. Before training, it centers and scales the metrics
+because their units and ranges can differ widely. The model stores these
+transformations so they can be applied to new landscapes in the same
+way.
 
-- `"none"`: no cross-validation
-- `"k-fold"`: k-fold cross-validation with `cv_folds` number of folds
-- `"loo"`: leave-one-out cross-validation
+Here, the final model is trained on all training landscapes without
+cross-validation. Its performance will be evaluated on independent test
+landscapes in step 5. Make sure to reset R’s random-number generator
+immediately before training so the result does not depend on random
+draws made by earlier steps.
 
-For details and further options see the function help
-`?train_nn_metrics()`.
+See
+[`?train_metric_model`](https://ecomods.github.io/patternscaper/reference/train_metric_model.md)
+for architecture and training options.
 
 ``` r
 
-# Train neural network with k-fold cross-validation (3 folds)
-model <- train_nn_metrics(
+# Reset the seed immediately before training
+set.seed(123456)
+
+# Train the final model on all training landscapes
+model <- train_metric_model(
   metrics = landscape_metrics,
-  metrics_selected = best_10,
-  cv_method = "k-fold",
-  cv_folds = 3,
+  metrics_selected = metric_selection,
+  cv_method = "none",
   verbose = FALSE
 )
 ```
 
-To check the model performance, you can look at the confusion matrix
-from cross-validation:
+### Save and reload the model
+
+A metric model is an ordinary R object. Save and reload it with the base
+R functions [`saveRDS()`](https://rdrr.io/r/base/readRDS.html) and
+[`readRDS()`](https://rdrr.io/r/base/readRDS.html):
 
 ``` r
 
-# Confusion matrix from cross-validation
-model$performance$confusion_matrix
-#>            Actual
-#> Predicted   clustered labyrinth random
-#>   clustered        29         3      0
-#>   labyrinth         4        31      0
-#>   random            0         0     33
+metric_model_file <- tempfile(fileext = ".rds")
+saveRDS(model, metric_model_file)
+model <- readRDS(metric_model_file)
 ```
 
-You can also check other performance metrics like overall accuracy:
+Keep the `.rds` file to apply the model in a future R session without
+retraining.
 
-``` r
+## Step 5: Classify new landscapes
 
-# Overall accuracy
-model$performance$accuracy
-#> [1] 0.93
-```
+Use
+[`apply_metric_model()`](https://ecomods.github.io/patternscaper/reference/apply_metric_model.md)
+to classify landscapes that were not used for metric selection or
+training. These landscapes can serve two roles:
 
-Or per class metrics like precision, recall, and F1-score:
+- *Labelled test landscapes* have known patterns and can be used to
+  evaluate model performance
+- *Application landscapes* have unknown patterns and can be classified
+  with the fitted model
 
-``` r
+The function call is the same in both cases. This example uses a
+labelled, independent test set so that both the predictions and model
+performance can be inspected. Application landscapes could instead be
+imported data or output from simulation models (see [Import user-defined
+landscapes](https://ecomods.github.io/patternscaper/articles/importing-landscapes.md)).
 
-model$performance$per_class_metrics
-#> # A tibble: 3 × 5
-#>   class     count recall precision f1_score
-#>   <chr>     <int>  <dbl>     <dbl>    <dbl>
-#> 1 clustered    33   0.88      0.91     0.89
-#> 2 labyrinth    34   0.91      0.89     0.9 
-#> 3 random       33   1         1        1
-```
-
-## Step 5: Classify New Landscapes
-
-Finally, you can create some new test landscapes and classify them using
-the trained model. In this example, we create 10 new landscapes for
-testing.
-
-In reality these could be landscapes read in from files or created in
-other ways (e.g. outputs of simulation models). For details on importing
-own landscapes, see the [importing landscapes
-vignette](https://ecomods.github.io/spatPatClassifyR/articles/importing-landscapes.md).
-
-``` r
-
-# Create 10 new test landscapes using the same patterns as for training
-test_landscapes <- create_landscapes(
-  n = 10,
-  patterns = c("labyrinth", "random", "clustered")
-)
-#> ✔ Successfully generated all 10 training landscapes
-```
-
-If test landscapes have been created with
-[`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md),
-their true patterns are known. Therefore they can be used to evaluate
-classification performance.
-
-> **Note**
+> **Landscape geometry**
 >
-> To get additional performance metrics, set `return_performance = TRUE`
-> when applying the model. This only works if true patterns are known.
-> If true patterns are not known, set `return_performance = FALSE`
-> (default).
+> Training and application landscapes should have comparable extent,
+> resolution, and aspect ratio because a mismatched geometry can produce
+> substantially different metric values.
+> [`apply_metric_model()`](https://ecomods.github.io/patternscaper/reference/apply_metric_model.md)
+> warns when it detects a substantial mismatch. See [Matching training
+> and application
+> data](https://ecomods.github.io/patternscaper/articles/matching-training-application.md)
+> for details.
+
+``` r
+
+# Use a separate seed for independent test landscapes
+set.seed(654321)
+
+# Create 30 test landscapes, 10 from each training pattern
+test_landscapes <- create_landscapes(
+  n = 30,
+  patterns = c("sharp", "clustered", "bands")
+)
+#> v Successfully generated all 30 training landscapes
+```
+
+[`apply_metric_model()`](https://ecomods.github.io/patternscaper/reference/apply_metric_model.md)
+automatically calculates the metrics required by the model and applies
+the centering and scaling stored during training. Because these
+artificial test landscapes retain their true pattern labels, the default
+`evaluate = "auto"` also evaluates the predictions. The same function
+call applies to unknown landscapes, but no performance evaluation is
+returned.
+
+> **Optional performance evaluation**
+>
+> Performance is evaluated automatically when the input landscapes have
+> known pattern labels. Use `evaluate = "none"` to classify without
+> evaluation, even when the landscapes are labelled. Use
+> `evaluate = "required"` to raise an error when performance cannot be
+> evaluated.
 
 ``` r
 
 # Classify test landscapes using the trained model
-classification <- apply_nn_metrics(
+classification <- apply_metric_model(
   landscapes = test_landscapes,
-  nn_model = model,
-  return_performance = TRUE
+  model = model,
+  verbose = FALSE
 )
-#>            Actual
-#> Predicted   clustered labyrinth random
-#>   clustered         3         0      0
-#>   labyrinth         0         4      0
-#>   random            0         0      3
-#> # A tibble: 3 × 5
-#>   class     count recall precision f1_score
-#>   <chr>     <int>  <dbl>     <dbl>    <dbl>
-#> 1 clustered     3      1         1        1
-#> 2 labyrinth     4      1         1        1
-#> 3 random        3      1         1        1
 ```
 
-You can look at the predicted patterns for each test landscape
-individually and compare actual and predicted classes:
+The result always contains a prediction table you can access with
+`$predictions`. This table lists the predicted pattern class, the
+predicted-class score, and one score for every class the model learned.
+If available from the input data, it also gives the actual pattern
+label. `$performance` contains the evaluation results for labelled
+landscapes and is `NULL` when the true patterns are unknown or
+evaluation is disabled.
 
 ``` r
 
 # Predicted patterns
 classification$predictions
-#> # A tibble: 10 × 8
-#>    landscape_id landscape_name actual_class predicted_class confidence clustered
-#>           <int> <chr>          <chr>        <chr>                <dbl>     <dbl>
-#>  1            1 clustered_1_r… clustered    clustered            0.577     0.577
-#>  2            2 random_2       random       random               0.576     0.212
-#>  3            3 clustered_3_r… clustered    clustered            0.577     0.577
-#>  4            4 random_4       random       random               0.577     0.211
-#>  5            5 labyrinth_5    labyrinth    labyrinth            0.537     0.253
-#>  6            6 random_6       random       random               0.576     0.212
-#>  7            7 labyrinth_7    labyrinth    labyrinth            0.535     0.242
-#>  8            8 clustered_8_r… clustered    clustered            0.577     0.577
-#>  9            9 labyrinth_9    labyrinth    labyrinth            0.568     0.218
-#> 10           10 labyrinth_10   labyrinth    labyrinth            0.490     0.275
-#> # ℹ 2 more variables: labyrinth <dbl>, random <dbl>
+#> # A tibble: 30 x 8
+#>    landscape_id landscape_name     actual_class predicted_class score bands
+#>           <int> <chr>              <chr>        <chr>           <dbl> <dbl>
+#>  1            1 clustered_1_rot162 clustered    clustered       1     0    
+#>  2            2 bands_2_rot92      bands        bands           0.997 0.997
+#>  3            3 bands_3_rot14      bands        bands           0.998 0.998
+#>  4            4 sharp_4_rot160     sharp        sharp           1     0    
+#>  5            5 clustered_5_rot267 clustered    clustered       0.990 0    
+#>  6            6 bands_6_rot173     bands        bands           0.999 0.999
+#>  7            7 sharp_7_rot166     sharp        sharp           1     0    
+#>  8            8 sharp_8_rot196     sharp        sharp           1     0    
+#>  9            9 clustered_9_rot54  clustered    clustered       0.999 0    
+#> 10           10 clustered_10_rot79 clustered    clustered       0.967 0    
+#> # i 20 more rows
+#> # i 2 more variables: clustered <dbl>, sharp <dbl>
 ```
 
-You can also look at performance summaries like confusion matrix:
+The per-class scores are non-negative and sum to one, but they are not
+calibrated probabilities. The `score` column contains the largest
+per-class score for each landscape. You can compare the per-class scores
+within a row to assess how decisive the model was: one dominant score
+indicates stronger support for one class, while similar scores indicate
+ambiguity. A score of 0.8 does not mean that the prediction has an 80%
+probability of being correct.
+
+For labelled test landscapes, use the performance results to inspect the
+confusion matrix, overall model accuracy, and class-specific precision,
+recall, and F1-score:
 
 ``` r
 
-# Performance summary
 classification$performance$confusion_matrix
 #>            Actual
-#> Predicted   clustered labyrinth random
-#>   clustered         3         0      0
-#>   labyrinth         0         4      0
-#>   random            0         0      3
-```
-
-And other metrics like accuracy, precision, recall, and F1-score:
-
-``` r
-
-# Other performance metrics
+#> Predicted   bands clustered sharp
+#>   bands        10         0     0
+#>   clustered     0        10     0
+#>   sharp         0         0    10
+classification$performance$accuracy
+#> [1] 1
 classification$performance$per_class_metrics
-#> # A tibble: 3 × 5
+#> # A tibble: 3 x 5
 #>   class     count recall precision f1_score
-#>   <chr>     <int>  <dbl>     <dbl>    <dbl>
-#> 1 clustered     3      1         1        1
-#> 2 labyrinth     4      1         1        1
-#> 3 random        3      1         1        1
+#>   <chr>     <dbl>  <dbl>     <dbl>    <dbl>
+#> 1 bands        10      1         1        1
+#> 2 clustered    10      1         1        1
+#> 3 sharp        10      1         1        1
 ```
 
-To visualize the classified landscapes along with their true and
-predicted patterns use the function `plot_classified_landscapes`.
-Correctly classified landscapes are shown in green, misclassified ones
-in red. To plot only misclassified landscapes, set
-`only_misclassified = TRUE`.
+Use
+[`plot_classified_landscapes()`](https://ecomods.github.io/patternscaper/reference/plot_classified_landscapes.md)
+to show landscapes with their true and predicted patterns. Correct
+classifications are blue and misclassifications are bold orange. The
+example shows 12 of the 30 test landscapes to keep the figure readable.
+Set `only_misclassified = TRUE` to inspect only misclassifications.
 
 > **Note**
 >
@@ -304,12 +370,82 @@ in red. To plot only misclassified landscapes, set
 
 ``` r
 
-# Visualize true and predicted patterns
-
 plot_classified_landscapes(
   classification = classification$predictions,
-  landscapes = test_landscapes
+  landscapes = test_landscapes,
+  subset_index = 1:12,
+  ncol = 4
 )
 ```
 
-![](classify-metrics_files/figure-html/plot-classified-landscapes-1.png)
+![Twelve test landscapes labelled with their actual and predicted
+ecotone pattern
+classes](classify-metrics_files/figure-html/plot-classified-landscapes-1.png)
+
+Classification results for 12 independent test landscapes. Blue labels
+indicate correct predictions and bold orange labels indicate
+misclassifications.
+
+## Optional: Estimate performance with cross-validation
+
+The independent test set above evaluates the final classifier on new,
+labelled landscapes. Cross-validation serves a different purpose: it
+assesses how consistently a model classifies held-out subsets of the
+training data. This can help when comparing model settings.
+
+Cross-validation can also provide an estimate of model performance when
+too few labelled landscapes are available for an independent test.
+Because the metrics were selected using the full training set before
+cross-validation, the held-out folds are not fully independent. The
+cross-validation results therefore assess model fitting with the
+selected metrics, not the complete metric-selection and training
+workflow.
+
+The following code runs five-fold cross-validation and prints the
+resulting performance summaries.
+
+``` r
+
+# Reset the seed immediately before cross-validation
+set.seed(123456)
+
+cv_model <- train_metric_model(
+  metrics = landscape_metrics,
+  metrics_selected = metric_selection,
+  cv_method = "k-fold",
+  cv_folds = 5,
+  verbose = FALSE
+)
+
+cv_model$performance$confusion_matrix
+#>            Actual
+#> Predicted   bands clustered sharp
+#>   bands        33         0     0
+#>   clustered     0        33     0
+#>   sharp         0         0    34
+cv_model$performance$accuracy
+#> [1] 1
+cv_model$performance$per_class_metrics
+#> # A tibble: 3 x 5
+#>   class     count recall precision f1_score
+#>   <chr>     <dbl>  <dbl>     <dbl>    <dbl>
+#> 1 bands        33      1         1        1
+#> 2 clustered    33      1         1        1
+#> 3 sharp        34      1         1        1
+```
+
+The performance summaries combine the held-out predictions from all
+folds. Each landscape is classified once by a model that was not trained
+on that landscape. The confusion matrix contains these pooled
+predictions, and the accuracy and per-class metrics are calculated from
+that matrix. After cross-validation, the returned final model is trained
+on all training landscapes.
+
+For small or unbalanced training sets,
+[`train_metric_model()`](https://ecomods.github.io/patternscaper/reference/train_metric_model.md)
+may reduce the number of folds or switch to leave-one-out
+cross-validation. You can also request leave-one-out cross-validation
+directly with `cv_method = "loo"`, which trains one model per landscape
+and is therefore only feasible for very small datasets. See
+[`?train_metric_model`](https://ecomods.github.io/patternscaper/reference/train_metric_model.md)
+for more details.

@@ -75,7 +75,9 @@ List with performance metrics:
 
 - per_class_metrics:
 
-  Tibble with per-class recall, precision, and F1 scores
+  Tibble with per-class recall, precision, and F1 scores. A class the
+  model knows but that does not occur in the evaluation data gets NA
+  throughout its row.
 
 - cv_method:
 
@@ -87,7 +89,8 @@ List with performance metrics:
 
 - class_counts:
 
-  Sample counts per class (integer vector)
+  Sample counts per class (integer vector). NA for a class the model
+  knows but that does not occur in the evaluation data.
 
 - validation_results:
 

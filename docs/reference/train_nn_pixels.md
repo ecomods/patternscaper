@@ -34,9 +34,9 @@ train_nn_pixels(
 - landscapes:
 
   List. List of landscape objects created by
-  [`create_landscape`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md)
+  [`create_landscape`](https://ecomods.github.io/patternscaper/reference/create_landscape.md)
   or
-  [`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md).
+  [`create_landscapes`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md).
   \*\*Note\*\*: Input landscapes must contain categorical/discrete
   habitat data (e.g., 0/1 for two habitat types, or 0/1/2 for three
   types). Continuous data (e.g., elevation, gradients) is not supported.
@@ -52,7 +52,7 @@ train_nn_pixels(
     metrics
 
   - "none": Trains on ALL provided data without validation. Use
-    [`apply_nn_pixels`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_pixels.md)
+    [`apply_nn_pixels`](https://ecomods.github.io/patternscaper/reference/apply_nn_pixels.md)
     with a separate test set to evaluate performance.
 
 - cv_folds:
@@ -190,11 +190,11 @@ List containing:
 
 ## See also
 
-[`apply_nn_pixels`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_pixels.md)
+[`apply_nn_pixels`](https://ecomods.github.io/patternscaper/reference/apply_nn_pixels.md)
 
 Other neural network training:
-[`set_random_seed()`](https://ecomods.github.io/spatPatClassifyR/reference/set_random_seed.md),
-[`train_nn_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_metrics.md)
+[`set_random_seed()`](https://ecomods.github.io/patternscaper/reference/set_random_seed.md),
+[`train_nn_metrics()`](https://ecomods.github.io/patternscaper/reference/train_nn_metrics.md)
 
 ## Examples
 

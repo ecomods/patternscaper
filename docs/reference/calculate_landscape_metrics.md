@@ -16,9 +16,9 @@ calculate_landscape_metrics(landscapes, metrics = NULL, level = "landscape")
 - landscapes:
 
   A single landscape object (created with
-  [`create_landscape`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md))
+  [`create_landscape`](https://ecomods.github.io/patternscaper/reference/create_landscape.md))
   or a list of landscape objects (e.g. created with
-  [`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)).
+  [`create_landscapes`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md)).
   Each landscape object should contain a `data` element with a
   SpatRaster, plus `name` and `pattern` metadata.
 
@@ -82,10 +82,10 @@ metrics. \*Ecography\*, 42(10), 1648-1657.
 
 ## See also
 
-[`plot_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/plot_metrics.md)
+[`plot_metrics`](https://ecomods.github.io/patternscaper/reference/plot_metrics.md)
 
 Other metrics:
-[`evaluate_landscape_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/evaluate_landscape_metrics.md)
+[`evaluate_landscape_metrics()`](https://ecomods.github.io/patternscaper/reference/evaluate_landscape_metrics.md)
 
 ## Examples
 

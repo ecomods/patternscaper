@@ -105,12 +105,12 @@ List containing:
 
 ## See also
 
-[`apply_nn_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_metrics.md),
-[`evaluate_landscape_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/evaluate_landscape_metrics.md)
+[`apply_nn_metrics`](https://ecomods.github.io/patternscaper/reference/apply_nn_metrics.md),
+[`evaluate_landscape_metrics`](https://ecomods.github.io/patternscaper/reference/evaluate_landscape_metrics.md)
 
 Other neural network training:
-[`set_random_seed()`](https://ecomods.github.io/spatPatClassifyR/reference/set_random_seed.md),
-[`train_nn_pixels()`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_pixels.md)
+[`set_random_seed()`](https://ecomods.github.io/patternscaper/reference/set_random_seed.md),
+[`train_nn_pixels()`](https://ecomods.github.io/patternscaper/reference/train_nn_pixels.md)
 
 ## Examples
 

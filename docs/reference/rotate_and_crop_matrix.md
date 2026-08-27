@@ -1,9 +1,8 @@
 # Rotate and Crop a Landscape Matrix
 
-Rotates a given landscape matrix by a specified angle and crops the
-rotated matrix to the target dimensions, centering the crop. Any missing
-values after cropping are filled using nearest neighbor interpolation
-and binarized.
+Rotates a landscape matrix, takes a centered crop of the requested size,
+fills missing values by linear interpolation, and restores binary
+values.
 
 ## Usage
 
@@ -15,31 +14,31 @@ rotate_and_crop_matrix(mat, rotation, target_width, target_height)
 
 - mat:
 
-  A matrix representing the landscape to be rotated and cropped.
+  Landscape matrix to rotate and crop.
 
 - rotation:
 
-  Numeric value specifying the rotation angle (in degrees).
+  Numeric rotation angle in degrees.
 
 - target_width:
 
-  Integer specifying the desired number of columns in the output.
+  Integer. Number of columns in the output.
 
 - target_height:
 
-  Integer specifying the desired number of rows in the output.
+  Integer. Number of rows in the output.
 
 ## Value
 
 A matrix with `target_height` rows and `target_width` columns, rotated
-and cropped from the input landscape, with missing values filled.
+and cropped from the input landscape.
 
 ## Details
 
 The function uses
 [`omnibus::rotateMatrix`](https://adamlilith.github.io/omnibus/reference/rotateMatrix.html)
-for rotation and centers the crop on the rotated matrix. Missing values
-after cropping are filled using the `fill_and_binarize_matrix` function.
+for rotation and `fill_and_binarize_matrix` to fill missing values and
+binarize the result.
 
 ## See also
 

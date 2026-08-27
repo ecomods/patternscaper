@@ -1,6 +1,6 @@
-# Contributing to spatPatClassifyR
+# Contributing to patternscaper
 
-This outlines how to propose a change to spatPatClassifyR.
+This outlines how to propose a change to patternscaper.
 
 ## Fixing typos
 
@@ -26,7 +26,7 @@ advice.
 
 - Fork the package and clone onto your computer. If you haven’t done
   this before, we recommend using
-  `usethis::create_from_github("ecomods/spatPatClassifyR", fork = TRUE)`.
+  `usethis::create_from_github("ecomods/patternscaper", fork = TRUE)`.
 
 - Install all development dependencies with
   [`devtools::install_dev_deps()`](https://devtools.r-lib.org/reference/install_deps.html),
@@ -62,7 +62,7 @@ advice.
 
 ## Code of Conduct
 
-Please note that the spatPatClassifyR project is released with a
+Please note that the patternscaper project is released with a
 [Contributor Code of
-Conduct](https://ecomods.github.io/spatPatClassifyR/CODE_OF_CONDUCT.md).
-By contributing to this project you agree to abide by its terms.
+Conduct](https://ecomods.github.io/patternscaper/CODE_OF_CONDUCT.md). By
+contributing to this project you agree to abide by its terms.

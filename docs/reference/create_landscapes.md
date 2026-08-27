@@ -1,7 +1,35 @@
 # Create Multiple Landscapes
 
-Create a series of landscape models with variations. Creates a total of
-n landscapes distributed across different landscape patterns.
+Generates `n` binary landscapes from the requested patterns, sampling
+pattern-specific parameters independently for each landscape. This
+supports the construction of training sets.
+
+- **Control** patterns have no spatial structure and differ only in
+  vegetation cover:
+  [`"bare"`](https://ecomods.github.io/patternscaper/reference/pattern_bare.md),
+  [`"random"`](https://ecomods.github.io/patternscaper/reference/pattern_random.md),
+  [`"dense"`](https://ecomods.github.io/patternscaper/reference/pattern_dense.md).
+
+- **Ecotone** patterns have a vegetated and a bare zone separated by a
+  transition:
+  [`"sharp"`](https://ecomods.github.io/patternscaper/reference/pattern_sharp.md)
+  (abrupt),
+  [`"diffuse"`](https://ecomods.github.io/patternscaper/reference/pattern_diffuse.md)
+  (gradual),
+  [`"fingers"`](https://ecomods.github.io/patternscaper/reference/pattern_fingers.md)
+  (finger-like extensions),
+  [`"clustered"`](https://ecomods.github.io/patternscaper/reference/pattern_clustered.md)
+  (scattered clusters),
+  [`"bands"`](https://ecomods.github.io/patternscaper/reference/pattern_bands.md)
+  (sinusoidal bands).
+
+- **Patch** patterns are self-organized, without a boundary:
+  [`"spots"`](https://ecomods.github.io/patternscaper/reference/pattern_spots.md)
+  (vegetation patches),
+  [`"gaps"`](https://ecomods.github.io/patternscaper/reference/pattern_gaps.md)
+  (bare gaps),
+  [`"labyrinth"`](https://ecomods.github.io/patternscaper/reference/pattern_labyrinth.md)
+  (maze-like bands).
 
 ## Usage
 
@@ -12,7 +40,7 @@ create_landscapes(
     "bands", "spots", "gaps", "labyrinth"),
   width = 100,
   height = 100,
-  rotation = 0:360,
+  rotation = c(0, 360),
   params_list = NULL,
   pattern_probs = NULL,
   max_retries = 3
@@ -23,68 +51,81 @@ create_landscapes(
 
 - n:
 
-  Integer. Total number of landscapes to create (default: 50).
+  Integer. Number of landscapes to generate (default: 50).
 
 - patterns:
 
-  Character vector. patterns of landscapes to sample from (default: all
-  patterns).
+  Character vector. Patterns to sample: "random", "bare", "dense",
+  "sharp", "diffuse", "fingers", "clustered", "bands", "spots", "gaps",
+  or "labyrinth" (default: all patterns).
 
 - width:
 
-  Integer. Width of all landscapes in pixels (default: 100).
+  Integer. Width of each landscape in pixels (default: 100).
 
 - height:
 
-  Integer. Height of all landscapes in pixels (default: 100).
+  Integer. Height of each landscape in pixels (default: 100).
 
 - rotation:
 
-  Numeric vector. Rotation angles in degrees (default: c(0, 45, 90,
-  135)).
+  Numeric. Angle in degrees (default: `c(0, 360)`). A single value
+  applies to every rotatable landscape. A length-2 vector gives the
+  bounds of a uniform range sampled as whole degrees. Only "sharp",
+  "diffuse", "fingers", "clustered", and "bands" are rotated; other
+  patterns ignore this argument.
 
 - params_list:
 
-  List. List of parameter ranges or single values for the parameters of
-  each landscape pattern (default: NULL). The names and default
-  parameter ranges for the different patterns can be found in the
-  documentation of
-  [`create_landscape`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md).
+  Named list of pattern parameters (default: NULL). Each name must match
+  a pattern and each element must come from its `pattern_*()`
+  constructor, for example `list(spots = pattern_spots())`. A single
+  value is fixed across the batch; a length-2 vector is sampled once per
+  landscape. Omitted patterns use their default sampling ranges.
 
 - pattern_probs:
 
-  Numeric vector. Probability that a specific landscape pattern is
-  chosen from the list of patterns. Should be a numeric vector of the
-  same length as 'patterns'. The default value NULL creates equally
-  balanced patterns.
+  Numeric vector of sampling weights, one per element of `patterns`
+  (default: NULL). NULL creates balanced pattern counts. A vector of the
+  wrong length issues a warning and uses equal weights.
 
 - max_retries:
 
-  Integer. Maximum number of retries for failed landscape generations
-  (default: 3).
+  Integer. Maximum retries after a failed landscape generation (default:
+  3).
 
 ## Value
 
-A named list of landscape objects. Names indicate the pattern and
-optional rotation.
+A named list of
+[`landscape`](https://ecomods.github.io/patternscaper/reference/landscape.md)
+objects, each as returned by
+[`create_landscape`](https://ecomods.github.io/patternscaper/reference/create_landscape.md).
+Landscape names are `"<pattern>_<index>"`, with `"_rot<angle>"` appended
+for rotated landscapes. The list holds fewer than `n` landscapes if
+generation still fails after `max_retries`; a warning reports the
+shortfall.
 
 ## See also
 
-[`plot_landscape_list`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape_list.md)
+[`landscape`](https://ecomods.github.io/patternscaper/reference/landscape.md)
+to wrap an existing raster, for example a real map, into the same object
+type;
+[`plot_landscapes`](https://ecomods.github.io/patternscaper/reference/plot_landscapes.md)
+to plot the result.
 
 Other landscape creation:
-[`create_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md),
-[`create_landscape_bands()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bands.md),
-[`create_landscape_bare()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_bare.md),
-[`create_landscape_clustered()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_clustered.md),
-[`create_landscape_dense()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_dense.md),
-[`create_landscape_diffuse()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_diffuse.md),
-[`create_landscape_fingers()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_fingers.md),
-[`create_landscape_gaps()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_gaps.md),
-[`create_landscape_labyrinth()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_labyrinth.md),
-[`create_landscape_random()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_random.md),
-[`create_landscape_sharp()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_sharp.md),
-[`create_landscape_spots()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape_spots.md)
+[`create_landscape()`](https://ecomods.github.io/patternscaper/reference/create_landscape.md),
+[`pattern_bands()`](https://ecomods.github.io/patternscaper/reference/pattern_bands.md),
+[`pattern_bare()`](https://ecomods.github.io/patternscaper/reference/pattern_bare.md),
+[`pattern_clustered()`](https://ecomods.github.io/patternscaper/reference/pattern_clustered.md),
+[`pattern_dense()`](https://ecomods.github.io/patternscaper/reference/pattern_dense.md),
+[`pattern_diffuse()`](https://ecomods.github.io/patternscaper/reference/pattern_diffuse.md),
+[`pattern_fingers()`](https://ecomods.github.io/patternscaper/reference/pattern_fingers.md),
+[`pattern_gaps()`](https://ecomods.github.io/patternscaper/reference/pattern_gaps.md),
+[`pattern_labyrinth()`](https://ecomods.github.io/patternscaper/reference/pattern_labyrinth.md),
+[`pattern_random()`](https://ecomods.github.io/patternscaper/reference/pattern_random.md),
+[`pattern_sharp()`](https://ecomods.github.io/patternscaper/reference/pattern_sharp.md),
+[`pattern_spots()`](https://ecomods.github.io/patternscaper/reference/pattern_spots.md)
 
 ## Examples
 
@@ -95,46 +136,39 @@ landscapes <- create_landscapes(n = 20)
 
 # Access a landscape
 landscapes[[1]]
-#> Landscape: "fingers_1_rot263" [ pattern: fingers ]
+#> Landscape: "labyrinth_1" [pattern: labyrinth]
 #> -----------------------------------------
 #> Dimensions: 100x100 (10000 cells)
 #> Resolution: 1.0x1.0
 #> Extent    : xmin=0.0, xmax=100.0, ymin=0.0, ymax=100.0
 #> Values    : min=0.0, max=1.0
-#> Parameters: width = 100, height = 100, boundary_position = 0.308938690577634, sine_length_mean = 22.120583623182, sine_length_sd = 46.8808206822723, sine_height_mean = 10.546226123115, sine_height_sd = 15.6450144061819, random_spots = c(0, 0), rotation = 263 
+#> Parameters: width = 100, height = 100, frequency = 2.5324141185265, veg_threshold = 0.53248633723706, band_fuzziness = 0.0728278112923726, octaves = 2 
 
 # Check the pattern
 landscapes[[1]]$pattern
-#> [1] "fingers"
+#> [1] "labyrinth"
 
 # Get all landscape patterns
-sapply(landscapes, function(x) x$pattern)
-#>   fingers_1_rot263 clustered_2_rot235   diffuse_3_rot109            dense_4 
-#>          "fingers"        "clustered"          "diffuse"            "dense" 
-#>             bare_5            spots_6           random_7            spots_8 
-#>             "bare"            "spots"           "random"            "spots" 
-#>             bare_9     sharp_10_rot51       labyrinth_11  diffuse_12_rot351 
-#>             "bare"            "sharp"        "labyrinth"          "diffuse" 
-#>    bands_13_rot335            gaps_14 clustered_15_rot54           dense_16 
-#>            "bands"             "gaps"        "clustered"            "dense" 
-#>          random_17     sharp_18_rot83  fingers_19_rot341    bands_20_rot133 
-#>           "random"            "sharp"          "fingers"            "bands" 
+sapply(landscapes, \(x) x$pattern)
+#>         labyrinth_1              bare_2             dense_3             spots_4 
+#>         "labyrinth"              "bare"             "dense"             "spots" 
+#>    fingers_5_rot239            random_6       bands_7_rot43             dense_8 
+#>           "fingers"            "random"             "bands"             "dense" 
+#>   clustered_9_rot86 clustered_10_rot257     sharp_11_rot308      bands_12_rot34 
+#>         "clustered"         "clustered"             "sharp"             "bands" 
+#>           random_13   diffuse_14_rot155            spots_15   diffuse_16_rot201 
+#>            "random"           "diffuse"             "spots"           "diffuse" 
+#>      sharp_17_rot10             bare_18             gaps_19   fingers_20_rot250 
+#>             "sharp"              "bare"              "gaps"           "fingers" 
 
-# Custom parameters for spot patterns and sharp vegetation boundary
-# Can be given as a range (min, max) or a single value.
-pattern_params <- list(
-  spots = list(
-    n_spots = 15,
-    spot_radius = 10,
-    spot_radius_sd = 3
-  ),
-  sharp = list(
-    boundary_position = c(0.4,0.6)
-))
+# Custom parameters, as a single value or as a range sampled per landscape
 landscapes_custom <- create_landscapes(
   n = 12,
- patterns = c("spots", "sharp"),
- params_list = pattern_params
+  patterns = c("spots", "sharp"),
+  params_list = list(
+    spots = pattern_spots(n_spots = 15, spot_radius = c(8, 12)),
+    sharp = pattern_sharp(boundary_position = c(0.4, 0.6))
+  )
 )
 #> ✔ Successfully generated all 12 training landscapes
 ```

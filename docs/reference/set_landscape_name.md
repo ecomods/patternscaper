@@ -1,6 +1,6 @@
-# Set Landscape Name
+# Set a Landscape Name
 
-Sets the name attribute of a landscape object.
+Replaces the name stored in a landscape object.
 
 ## Usage
 
@@ -12,23 +12,23 @@ set_landscape_name(x, name)
 
 - x:
 
-  A landscape object
+  A landscape object.
 
 - name:
 
-  Character string specifying the new name
+  Character. New landscape name to store.
 
 ## Value
 
-The landscape object with updated name
+The landscape object with its updated name.
 
 ## See also
 
 Other landscape objects:
-[`landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/landscape.md),
-[`plot.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot.landscape.md),
-[`print.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/print.landscape.md),
-[`set_landscape_pattern()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_pattern.md)
+[`landscape()`](https://ecomods.github.io/patternscaper/reference/landscape.md),
+[`plot.landscape()`](https://ecomods.github.io/patternscaper/reference/plot.landscape.md),
+[`print.landscape()`](https://ecomods.github.io/patternscaper/reference/print.landscape.md),
+[`set_landscape_pattern()`](https://ecomods.github.io/patternscaper/reference/set_landscape_pattern.md)
 
 ## Examples
 
@@ -46,5 +46,8 @@ names_vec <- c("alpine", "subalpine")
 landscapes <- purrr::map2(landscapes, names_vec, set_landscape_name)
 
 # Multiple landscapes with base R
-landscapes <- mapply(set_landscape_name, landscapes, names_vec, SIMPLIFY = FALSE)
+landscapes <- mapply(
+  set_landscape_name, landscapes, names_vec,
+  SIMPLIFY = FALSE
+)
 ```

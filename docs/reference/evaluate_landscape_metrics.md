@@ -99,10 +99,10 @@ pattern types.
 
 ## See also
 
-[`train_nn_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_metrics.md)
+[`train_nn_metrics`](https://ecomods.github.io/patternscaper/reference/train_nn_metrics.md)
 
 Other metrics:
-[`calculate_landscape_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/calculate_landscape_metrics.md)
+[`calculate_landscape_metrics()`](https://ecomods.github.io/patternscaper/reference/calculate_landscape_metrics.md)
 
 ## Examples
 

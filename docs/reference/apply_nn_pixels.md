@@ -30,7 +30,7 @@ apply_nn_pixels(
 - nn_model:
 
   List. CNN model object from
-  [`train_nn_pixels`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_pixels.md).
+  [`train_nn_pixels`](https://ecomods.github.io/patternscaper/reference/train_nn_pixels.md).
 
 - return_performance:
 
@@ -82,11 +82,11 @@ containing:
 
 ## See also
 
-[`train_nn_pixels`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_pixels.md),
-[`plot_classified_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/plot_classified_landscapes.md)
+[`train_nn_pixels`](https://ecomods.github.io/patternscaper/reference/train_nn_pixels.md),
+[`plot_classified_landscapes`](https://ecomods.github.io/patternscaper/reference/plot_classified_landscapes.md)
 
 Other neural network application:
-[`apply_nn_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_metrics.md)
+[`apply_nn_metrics()`](https://ecomods.github.io/patternscaper/reference/apply_nn_metrics.md)
 
 ## Examples
 

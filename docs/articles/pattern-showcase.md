@@ -123,5 +123,5 @@ examples\]
 ## Generating Training Landscapes
 
 How to use
-[`create_training_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_training_landscapes.md)
+[`create_training_landscapes()`](https://ecomods.github.io/patternscaper/reference/create_training_landscapes.md)
 for multiple patterns with variation.

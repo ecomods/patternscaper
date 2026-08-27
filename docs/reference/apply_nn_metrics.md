@@ -71,11 +71,11 @@ containing:
 
 ## See also
 
-[`train_nn_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_metrics.md),
-[`plot_classified_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/plot_classified_landscapes.md)
+[`train_nn_metrics`](https://ecomods.github.io/patternscaper/reference/train_nn_metrics.md),
+[`plot_classified_landscapes`](https://ecomods.github.io/patternscaper/reference/plot_classified_landscapes.md)
 
 Other neural network application:
-[`apply_nn_pixels()`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_pixels.md)
+[`apply_nn_pixels()`](https://ecomods.github.io/patternscaper/reference/apply_nn_pixels.md)
 
 ## Examples
 

@@ -10,13 +10,13 @@ Please refer to the respective vignettes for detailed guides on each
 workflow:
 
 - [Classify landscapes using landscape
-  metrics](https://ecomods.github.io/spatPatClassifyR/articles/classify-metrics.qmd)
+  metrics](https://ecomods.github.io/patternscaper/articles/classify-metrics.qmd)
 - [Classify landscapes using Keras on landscape
-  rasters](https://ecomods.github.io/spatPatClassifyR/articles/classify-pixels.qmd)
+  rasters](https://ecomods.github.io/patternscaper/articles/classify-pixels.qmd)
 
 There are also more detailed vignettes on specific topics:
 
 - [Importing user-defined
-  landscapes](https://ecomods.github.io/spatPatClassifyR/articles/importing-landscapes.qmd)
+  landscapes](https://ecomods.github.io/patternscaper/articles/importing-landscapes.qmd)
 - [Landscape
-  generation](https://ecomods.github.io/spatPatClassifyR/articles/landscape-generation.qmd)
+  generation](https://ecomods.github.io/patternscaper/articles/landscape-generation.qmd)

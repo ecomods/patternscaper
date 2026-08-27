@@ -1,264 +1,274 @@
-# Classify landscapes using Keras on landscape rasters
+# Classify landscapes with pixels
 
-This vignette shows how to classify landscape patterns using a
-convolutional neural network (Keras backend) trained directly on
-landscape raster data.
+This guide shows how to train a classifier on categorical landscape
+rasters and use it to classify new landscapes. The pixel-based workflow
+uses a convolutional neural network (CNN) from the `keras3` package to
+learn directly from raster-cell values.
+
+The example uses the same three ecotone patterns as the quick example in
+[Get started with
+patternscaper](https://ecomods.github.io/patternscaper/articles/patternscaper.md):
+sharp, clustered, and bands.
 
 ``` r
 
-library(spatPatClassifyR)
+library(patternscaper)
 ```
 
-The workflow consists of the following steps:
+## Overview
 
-1.  Generate training landscapes with known patterns using the
-    [`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
-    function.
-2.  Train a neural network on the landscape pixel data using the
-    [`train_nn_pixels()`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_pixels.md)
-    function.
-3.  Classify new landscapes using the trained model with the
-    [`apply_nn_pixels()`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_pixels.md)
-    function.
+The workflow has three steps:
 
-## Setup Keras
+1.  Prepare labelled training landscapes with known patterns
+2.  Train the classifier on the landscape pixel data with
+    [`train_pixel_model()`](https://ecomods.github.io/patternscaper/reference/train_pixel_model.md)
+3.  Classify new landscapes with
+    [`apply_pixel_model()`](https://ecomods.github.io/patternscaper/reference/apply_pixel_model.md)
+    and evaluate the predictions when their true patterns are known
 
-Models are trained using the R package `keras3`. It requires a working
-installation of TensorFlow.
+## Before you begin
 
-You can refer to our [installation
-guide](https://ecomods.github.io/spatPatClassifyR/articles/install-keras.md)
-and the official [`keras3` package website](https://keras3.posit.co/)
-for instructions on how to install Keras and TensorFlow.
+### Set up Keras
 
-To quickly test if your setup is working, you can run the following
-simple function from the `keras3` package:
+Pixel models use `keras3` with a TensorFlow backend. Complete the
+[installation
+guide](https://ecomods.github.io/patternscaper/articles/install-keras.md)
+before starting this workflow.
+
+In a fresh R session, initialize Keras and verify which backend it is
+using:
 
 ``` r
 
-keras3::to_categorical(0)
-#>      [,1]
-#> [1,]    1
+keras3::config_backend()
+#> [1] "tensorflow"
+#> [1] "tensorflow"
 ```
 
-If the function does not return an error, your Keras installation is
-working correctly.
+This must return `"tensorflow"` before the pixel workflow can run. The
+call initializes Keras and Python, so it is an active verification that
+your setup works correctly. If it returns another backend or raises an
+error, return to the Keras installation guide and look at
+[`reticulate::py_config()`](https://rstudio.github.io/reticulate/reference/py_config.html)
+in the failed session.
 
-## Set seed for reproducibility
+### Set seeds for reproducibility
 
-Keras models do not use R’s random number generator (RNG). Therefore, it
-is not enough to set a seed with
-[`set.seed()`](https://rdrr.io/r/base/Random.html). To set both a seed
-for R and for Keras RNG, you can use the
-[`set_random_seed()`](https://ecomods.github.io/spatPatClassifyR/reference/set_random_seed.md)
-function from `spatPatClassifyR`.
+Use [`set.seed()`](https://rdrr.io/r/base/Random.html) before generating
+landscape datasets and
+[`set_random_seed()`](https://ecomods.github.io/patternscaper/reference/set_random_seed.md)
+immediately before each model fit. The first resets only R’s random
+number generator (RNG), while the second resets both R’s and Keras’ RNG.
+Exact results can still vary slightly across hardware and software
+configurations.
+
+## Step 1: Create training landscapes
+
+Create training landscapes with known patterns. The [artificial
+landscape
+guide](https://ecomods.github.io/patternscaper/articles/landscape-generation.md)
+explains how to create training batches, and the [pattern
+gallery](https://ecomods.github.io/patternscaper/articles/pattern-gallery.md)
+shows the available patterns and their parameters. Alternatively, import
+your own raster or matrix data as described in [Import user-defined
+landscapes](https://ecomods.github.io/patternscaper/articles/importing-landscapes.md).
+See [Matching training and application
+data](https://ecomods.github.io/patternscaper/articles/matching-training-application.md)
+for pixel-model input requirements.
 
 ``` r
 
-set_random_seed(123456)
-```
-
-## Step 1: Generate Training Landscapes
-
-You can generate a set of training landscapes with known patterns. See
-[landscape generation
-vignette](https://ecomods.github.io/spatPatClassifyR/articles/landscape-generation.md)
-for details on landscape generation and available patterns and options.
-
-``` r
-
+set.seed(1)
+# Generate 100 training landscapes from 3 ecotone patterns
 training_landscapes <- create_landscapes(
   n = 100,
-  patterns = c("labyrinth", "random", "clustered")
+  patterns = c("sharp", "clustered", "bands")
 )
-#> ✔ Successfully generated all 100 training landscapes
+#> v Successfully generated all 100 training landscapes
 ```
 
-## Step 2: Train Neural Network
+Training landscapes should represent the pattern classes, variation, and
+ecological scale expected in the application data.
 
-The model can be trained with or without cross-validation. Valid methods
-for the cross-validation method `cv_method` are:
+## Step 2: Train the model
 
-- `"none"`: No cross-validation, train on all data.
-- `"k-fold"`: k-fold cross-validation with `cv_folds` number of folds.
-- `"loo"`: leave-one-out cross-validation.
+[`train_pixel_model()`](https://ecomods.github.io/patternscaper/reference/train_pixel_model.md)
+treats the numeric land-cover codes as unordered categories and converts
+each code into its own binary input channel.
 
-For details and further options see the function help of
-[`train_nn_pixels()`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_pixels.md).
+The default `"multiscale"` CNN learns spatial features at different
+neighbourhood sizes. You can adjust settings such as the number of
+epochs, batch size, learning rate, and dropout. See
+[`?train_pixel_model`](https://ecomods.github.io/patternscaper/reference/train_pixel_model.md)
+for details. If you are familiar with Keras, you can also supply a
+custom architecture (see the [custom architecture
+section](#optional-use-a-custom-model-architecture)).
 
-The underlying model uses a multiscale convolutional neural network
-(CNN) architecture that processes the landscapes as 2D pixel arrays. The
-model layers multiple convolutional layers with different kernel sizes
-(3 x 3 and 5 x 5) to capture both fine-scale details and broader spatial
-patterns. The architecture consists of paired convolutional layers,
-followed by pooling to reduce dimensionality and a final dense layer for
-the classification. The user can specify various parameters for training
-the model, such as the learning rate, the number of epochs and patience,
-but also for validating the model, such as the cross-validation method
-(k-fold or leave-one-out) and the proportion of validation data.
-
-Here, we train the model using 2-fold cross-validation to keep
-computational time low.
-
-> **Low fold accuracy**
->
-> The function will print fold accuracies during training (see below).
-> If the accuracy is low, consider increasing the number of training
-> landscapes or check the function help for other options to improve
-> model performance.
+Here, we train one model on all training landscapes for 20 epochs. Model
+training also supports [early
+stopping](#optional-stop-training-early-with-validation-data) and
+[cross-validation](#optional-estimate-performance-with-cross-validation).
 
 ``` r
 
-model <- train_nn_pixels(
+set_random_seed(2)
+model <- train_pixel_model(
   landscapes = training_landscapes,
-  cv_method = "k-fold",
-  cv_folds = 2,
+  cv_method = "none",
+  epochs = 20,
   verbose = FALSE
 )
 ```
 
-To check the model performance, we can look at the confusion matrix from
-cross-validation:
+### Save and reload the model
+
+A pixel model combines a trained Keras network with R metadata. Save and
+reload the complete classifier with
+[`save_pixel_model()`](https://ecomods.github.io/patternscaper/reference/save_pixel_model.md)
+and
+[`load_pixel_model()`](https://ecomods.github.io/patternscaper/reference/load_pixel_model.md):
 
 ``` r
 
-# Confusion matrix from cross-validation
-model$performance$confusion_matrix
-#>            Actual
-#> Predicted   clustered labyrinth random
-#>   clustered        27         6      0
-#>   labyrinth         6        27      0
-#>   random            0         1     33
+pixel_model_bundle <- tempfile("pixel-model-")
+save_pixel_model(model, pixel_model_bundle)
+model <- load_pixel_model(pixel_model_bundle)
 ```
 
-You can also check other performance metrics like overall accuracy:
+The model directory contains `model.keras` and `metadata.rds`. Keep the
+complete directory to apply the model in a future R session without
+retraining. Set `overwrite = TRUE` to replace an existing model bundle.
 
-``` r
+## Step 3: Classify new landscapes
 
-# Overall accuracy
-model$performance$accuracy
-#> [1] 0.87
-```
+Use
+[`apply_pixel_model()`](https://ecomods.github.io/patternscaper/reference/apply_pixel_model.md)
+to classify landscapes that were not used for training. These landscapes
+can serve two roles:
 
-Or per class metrics like precision, recall, and F1-score:
+- *Labelled test landscapes* have known patterns and can be used to
+  evaluate model performance
+- *Application landscapes* have unknown patterns and can be classified
+  with the fitted model
 
-``` r
+The function call is the same in both cases. This example uses a
+labelled, independent test set so that both the predictions and model
+performance can be inspected. Application landscapes could instead be
+imported data or simulation output; see [Import user-defined
+landscapes](https://ecomods.github.io/patternscaper/articles/importing-landscapes.md).
 
-model$performance$per_class_metrics
-#> # A tibble: 3 × 5
-#>   class     count recall precision f1_score
-#>   <chr>     <int>  <dbl>     <dbl>    <dbl>
-#> 1 clustered    33   0.82      0.82     0.82
-#> 2 labyrinth    34   0.79      0.82     0.81
-#> 3 random       33   1         0.97     0.99
-```
-
-## Step 3: Classify New Landscapes
-
-Finally, you can create some new test landscapes and classify them using
-the trained model. In this example, we create 20 new landscapes for
-testing.
-
-In reality this could be landscapes read in from files or created in
-other ways. For details on importing own landscapes, see the [importing
-landscapes
-vignette](https://ecomods.github.io/spatPatClassifyR/articles/importing-landscapes.md).
-
-``` r
-
-test_landscapes <- create_landscapes(
-  n = 20,
-  patterns = c("labyrinth", "random", "clustered")
-)
-#> ✔ Successfully generated all 20 training landscapes
-```
-
-If test landscapes have been created with
-[`create_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md),
-their true patterns are known. Therefore they can be used to evaluate
-classification performance.
-
-> **Note**
+> **Pixel-model inputs**
 >
-> To get additional performance metrics, set `return_performance = TRUE`
-> when applying the model. This only works if true patterns are known.
-> If true patterns are not known, set `return_performance = FALSE`
-> (default).
+> Application landscapes must contain one categorical raster layer with
+> no `NA` cells. They may omit land-cover codes used during training,
+> but cannot introduce new ones.
+> [`apply_pixel_model()`](https://ecomods.github.io/patternscaper/reference/apply_pixel_model.md)
+> resizes rasters to the training dimensions and warns when a different
+> aspect ratio would stretch the pattern. Training and application
+> landscapes should also represent comparable ecological extents and
+> resolutions. See [Matching training and application
+> data](https://ecomods.github.io/patternscaper/articles/matching-training-application.md)
+> for details.
 
 ``` r
 
-classification <- apply_nn_pixels(
+# Use a separate seed for independent test landscapes
+set.seed(4)
+
+# Create 30 test landscapes, 10 from each training pattern
+test_landscapes <- create_landscapes(
+  n = 30,
+  patterns = c("sharp", "clustered", "bands")
+)
+#> v Successfully generated all 30 training landscapes
+```
+
+Because these artificial test landscapes retain their true pattern
+labels, the default `evaluate = "auto"` also evaluates the predictions.
+The same function call applies to landscapes with unknown patterns, but
+no performance evaluation is returned.
+
+> **Optional performance evaluation**
+>
+> Performance is evaluated automatically when true patterns are known.
+> Use `evaluate = "none"` to classify without evaluation, even when the
+> landscapes carry pattern labels. Use `evaluate = "required"` to raise
+> an error when performance cannot be evaluated.
+
+``` r
+
+# Classify test landscapes using the trained model
+classification <- apply_pixel_model(
   landscapes = test_landscapes,
-  nn_model = model,
-  return_performance = TRUE
+  model = model,
+  verbose = FALSE
 )
 ```
 
-You can look at the predicted patterns for each test landscape
-individually and compare actual and predicted classes:
+The result always contains a prediction table in `$predictions`. It
+lists the predicted pattern class, the predicted-class score, and one
+score for every class the model learned. If available from the input
+data, it also gives the actual pattern label. `$performance` contains
+evaluation results for labelled landscapes and is `NULL` otherwise.
 
 ``` r
 
 # Predicted patterns
 classification$predictions
-#> # A tibble: 20 × 8
-#>    landscape_id landscape_name actual_class predicted_class confidence clustered
-#>           <int> <chr>          <chr>        <chr>                <dbl>     <dbl>
-#>  1            1 random_1       random       random               1.000 1.17 e- 9
-#>  2            2 labyrinth_2    labyrinth    labyrinth            1.000 1.89 e- 5
-#>  3            3 random_3       random       random               1     6.91 e-13
-#>  4            4 random_4       random       random               1     8.03 e-19
-#>  5            5 random_5       random       random               1     5.63 e-18
-#>  6            6 random_6       random       random               1     1.86 e-16
-#>  7            7 random_7       random       random               1.000 9.30 e-11
-#>  8            8 clustered_8_r… clustered    clustered            0.993 9.93 e- 1
-#>  9            9 labyrinth_9    labyrinth    labyrinth            1.000 5.76 e- 6
-#> 10           10 clustered_10_… clustered    clustered            0.974 9.74 e- 1
-#> 11           11 clustered_11_… clustered    clustered            1.000 1.000e+ 0
-#> 12           12 labyrinth_12   labyrinth    labyrinth            0.999 7.10 e- 4
-#> 13           13 labyrinth_13   labyrinth    labyrinth            1.000 5.52 e- 5
-#> 14           14 labyrinth_14   labyrinth    labyrinth            1.000 6.92 e- 7
-#> 15           15 labyrinth_15   labyrinth    clustered            0.926 9.26 e- 1
-#> 16           16 labyrinth_16   labyrinth    labyrinth            1.000 5.84 e- 7
-#> 17           17 clustered_17_… clustered    clustered            1.000 1.000e+ 0
-#> 18           18 clustered_18_… clustered    clustered            1.000 1.000e+ 0
-#> 19           19 clustered_19_… clustered    clustered            1.000 1.000e+ 0
-#> 20           20 random_20      random       random               1     1.50 e-15
-#> # ℹ 2 more variables: labyrinth <dbl>, random <dbl>
+#> # A tibble: 30 x 8
+#>    landscape_id landscape_name     actual_class predicted_class score     bands
+#>           <int> <chr>              <chr>        <chr>           <dbl>     <dbl>
+#>  1            1 bands_1_rot64      bands        bands           0.928 0.928    
+#>  2            2 clustered_2_rot146 clustered    clustered       1.000 0.0000195
+#>  3            3 clustered_3_rot318 clustered    clustered       0.947 0.00208  
+#>  4            4 sharp_4_rot20      sharp        sharp           0.993 0.000109 
+#>  5            5 sharp_5_rot126     sharp        sharp           0.999 0.0000134
+#>  6            6 clustered_6_rot168 clustered    clustered       1.000 0.0000190
+#>  7            7 bands_7_rot42      bands        bands           0.972 0.972    
+#>  8            8 bands_8_rot241     bands        bands           1.000 1.000    
+#>  9            9 bands_9_rot105     bands        bands           1     1        
+#> 10           10 bands_10_rot311    bands        bands           1.000 1.000    
+#> # i 20 more rows
+#> # i 2 more variables: clustered <dbl>, sharp <dbl>
 ```
 
-You can also look at performance summaries like confusion matrix:
+The per-class scores are non-negative and sum to one, but they are not
+calibrated probabilities. The `score` column contains the largest
+per-class score for each landscape. Compare the per-class scores within
+a row to assess how decisive the model was: one dominant score indicates
+stronger support for one class, while similar scores indicate ambiguity.
+A score of 0.8 does not mean that the prediction has an 80% probability
+of being correct.
+
+For labelled test landscapes, use the performance results to inspect the
+confusion matrix, overall model accuracy, and class-specific precision,
+recall, and F1-score:
 
 ``` r
 
-# Performance summary
 classification$performance$confusion_matrix
 #>            Actual
-#> Predicted   clustered labyrinth random
-#>   clustered         6         1      0
-#>   labyrinth         0         6      0
-#>   random            0         0      7
-```
-
-And other metrics like accuracy, precision, recall, and F1-score:
-
-``` r
-
-# Other performance metrics
+#> Predicted   bands clustered sharp
+#>   bands        10         0     0
+#>   clustered     0         8     0
+#>   sharp         0         2    10
+classification$performance$accuracy
+#> [1] 0.9333333
 classification$performance$per_class_metrics
-#> # A tibble: 3 × 5
+#> # A tibble: 3 x 5
 #>   class     count recall precision f1_score
-#>   <chr>     <int>  <dbl>     <dbl>    <dbl>
-#> 1 clustered     6   1         0.86     0.92
-#> 2 labyrinth     7   0.86      1        0.92
-#> 3 random        7   1         1        1
+#>   <chr>     <dbl>  <dbl>     <dbl>    <dbl>
+#> 1 bands        10    1        1        1   
+#> 2 clustered    10    0.8      1        0.89
+#> 3 sharp        10    1        0.83     0.91
 ```
 
-To visualize the classified landscapes along with their true and
-predicted patterns use the function `plot_classified_landscapes`.
-Correctly classified landscapes are shown in green, misclassified ones
-in red. To plot only misclassified landscapes, set
-`only_misclassified = TRUE`.
+Use
+[`plot_classified_landscapes()`](https://ecomods.github.io/patternscaper/reference/plot_classified_landscapes.md)
+to show landscapes with their true and predicted patterns. Correct
+classifications are blue and misclassifications are bold orange. The
+example shows 12 of the 30 test landscapes to keep the figure readable.
+Set `only_misclassified = TRUE` to show only misclassifications.
 
 > **Note**
 >
@@ -268,11 +278,143 @@ in red. To plot only misclassified landscapes, set
 ``` r
 
 # Visualize true and predicted patterns
-
 plot_classified_landscapes(
   classification = classification$predictions,
-  landscapes = test_landscapes
+  landscapes = test_landscapes,
+  subset_index = 1:12,
+  ncol = 4
 )
 ```
 
-![](classify-pixels_files/figure-html/plot-classified-landscapes-1.png)
+![Twelve test landscapes labelled with their actual and predicted
+ecotone pattern
+classes](classify-pixels_files/figure-html/plot-classified-landscapes-1.png)
+
+Classification results for 12 independent test landscapes. Blue labels
+indicate correct predictions and bold orange labels indicate
+misclassifications.
+
+## Optional: Stop training early with validation data
+
+You can use validation data to stop training when validation loss no
+longer improves. The default callback stops after `patience` epochs
+without improvement and then restores the model weights from the best
+epoch. This option requires `cv_method = "none"`.
+
+Early stopping can reduce overfitting to the training data, but the
+validation set must be large enough and representative of the data the
+model will later classify. It must contain every training pattern class
+and use the same raster dimensions and land-cover codes. Here, we create
+a separate set of artificial validation landscapes.
+
+``` r
+
+# Create validation landscapes
+set.seed(3)
+validation_landscapes <- create_landscapes(
+  n = 30,
+  patterns = c("sharp", "clustered", "bands")
+)
+
+# Train with early stopping based on validation loss
+set_random_seed(2)
+early_stopped_model <- train_pixel_model(
+  landscapes = training_landscapes,
+  validation_landscapes = validation_landscapes,
+  cv_method = "none",
+  epochs = 100,
+  patience = 15,
+  verbose = FALSE
+)
+```
+
+If a separate validation set is not available, `validation_split = 0.2`
+creates a stratified split from the training landscapes. Validation
+results can guide model development, but they do not replace evaluation
+on an untouched test set.
+
+## Optional: Estimate performance with cross-validation
+
+The independent test set above evaluates the final classifier on new,
+labelled landscapes. Cross-validation serves a different purpose: it
+assesses how consistently a model classifies held-out subsets of the
+training data. This can help when comparing model settings.
+
+Cross-validation can also estimate model performance when too few
+labelled landscapes are available for an independent test. If it is used
+to choose model settings, its results are not a final independent
+evaluation.
+
+The following code runs five-fold cross-validation. It is not executed
+when this guide is rendered because pixel-model training is
+computationally expensive.
+
+``` r
+
+# Reset both random-number generators immediately before cross-validation
+set_random_seed(2)
+cv_model <- train_pixel_model(
+  landscapes = training_landscapes,
+  cv_method = "k-fold",
+  cv_folds = 5,
+  epochs = 20,
+  verbose = FALSE
+)
+
+cv_model$performance$confusion_matrix
+cv_model$performance$accuracy
+cv_model$performance$per_class_metrics
+```
+
+The summaries combine the held-out predictions from all folds. Each
+landscape is classified once by a model that was not trained on that
+landscape. After cross-validation, the returned final model is trained
+on all training landscapes.
+
+Cross-validation folds run for the full number of epochs and cannot use
+validation data. For small or unbalanced training sets,
+[`train_pixel_model()`](https://ecomods.github.io/patternscaper/reference/train_pixel_model.md)
+may reduce the number of folds or switch to leave-one-out
+cross-validation. Leave-one-out trains one model per landscape and is
+only practical for very small datasets. See
+[`?train_pixel_model`](https://ecomods.github.io/patternscaper/reference/train_pixel_model.md)
+for details.
+
+## Optional: Use a custom model architecture
+
+If you are familiar with Keras, you can pass a model-building function
+to the `architecture` parameter. The function must accept the four
+arguments shown below and return a new, uncompiled Keras model.
+[`train_pixel_model()`](https://ecomods.github.io/patternscaper/reference/train_pixel_model.md)
+then compiles and trains it.
+
+``` r
+
+shallow_cnn <- function(input_shape, n_classes, dropout_rate, dense_units) {
+  keras3::keras_model_sequential(input_shape = input_shape) |>
+    keras3::layer_conv_2d(
+      filters = 32,
+      kernel_size = c(3, 3),
+      activation = "relu"
+    ) |>
+    keras3::layer_max_pooling_2d() |>
+    keras3::layer_flatten() |>
+    keras3::layer_dropout(rate = dropout_rate) |>
+    keras3::layer_dense(units = dense_units, activation = "relu") |>
+    keras3::layer_dense(units = n_classes, activation = "softmax")
+}
+
+set_random_seed(2)
+custom_model <- train_pixel_model(
+  landscapes = training_landscapes,
+  architecture = shallow_cnn,
+  cv_method = "none",
+  epochs = 20,
+  verbose = FALSE
+)
+```
+
+The final layer must contain one softmax output for each pattern class.
+The `n_classes` argument supplies this number automatically. Use the
+built-in architecture unless you are comfortable designing and
+evaluating neural networks.

@@ -1,6 +1,6 @@
-# Plot method for landscape objects
+# Plot a Landscape Object
 
-Creates a basic ggplot2 visualization of a landscape object.
+Plots a landscape object as a ggplot2.
 
 ## Usage
 
@@ -14,38 +14,36 @@ plot(x, ...)
 - x:
 
   A landscape object created by
-  [`landscape`](https://ecomods.github.io/spatPatClassifyR/reference/landscape.md).
+  [`landscape`](https://ecomods.github.io/patternscaper/reference/landscape.md).
 
 - ...:
 
-  Additional arguments passed to ggplot2 functions.
+  Must be empty.
 
 ## Value
 
-A ggplot2 object representing the landscape data.
+A ggplot2 object.
 
 ## Details
 
-This function creates a minimal ggplot2 visualization of the landscape
-raster data. The returned plot can be further customized by adding
-ggplot2 elements or by using the
-[`plot_landscape`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape.md)
-function for higher-level customization.
+Add ggplot2 layers directly to the result, or use
+[`plot_landscapes`](https://ecomods.github.io/patternscaper/reference/plot_landscapes.md)
+for titles, legends, and multi-panel layouts.
 
 ## See also
 
 Other landscape objects:
-[`landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/landscape.md),
-[`print.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/print.landscape.md),
-[`set_landscape_name()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_name.md),
-[`set_landscape_pattern()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_pattern.md)
+[`landscape()`](https://ecomods.github.io/patternscaper/reference/landscape.md),
+[`print.landscape()`](https://ecomods.github.io/patternscaper/reference/print.landscape.md),
+[`set_landscape_name()`](https://ecomods.github.io/patternscaper/reference/set_landscape_name.md),
+[`set_landscape_pattern()`](https://ecomods.github.io/patternscaper/reference/set_landscape_pattern.md)
 
 ## Examples
 
 ``` r
-# Create a landscape
-mat <- matrix(1:100, 10, 10)
-l <- landscape(mat, pattern = "test", name = "example")
+# Create a landscape (0 = bare ground, 1 = vegetation)
+mat <- matrix(rbinom(100, 1, 0.5), 10, 10)
+l <- landscape(mat, pattern = "random", name = "example")
 
 # Get basic plot
 p <- plot(l)

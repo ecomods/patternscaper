@@ -10,8 +10,7 @@ compile_keras_model(
   model,
   learning_rate = 0.001,
   loss = "categorical_crossentropy",
-  optimizer = "adam",
-  metrics = c("accuracy")
+  optimizer = "adam"
 )
 ```
 
@@ -32,10 +31,6 @@ compile_keras_model(
 - optimizer:
 
   Character. Optimizer name: "adam", "sgd", "rmsprop" (default: "adam").
-
-- metrics:
-
-  Character vector. Metrics to track (default: c("accuracy")).
 
 ## Value
 

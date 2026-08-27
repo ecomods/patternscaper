@@ -9,34 +9,34 @@ Two classification approaches are supported:
 
 - \*\*Pixel-based classification\*\* using convolutional neural networks
   via keras3 (see
-  [`train_nn_pixels`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_pixels.md))
+  [`train_nn_pixels`](https://ecomods.github.io/patternscaper/reference/train_nn_pixels.md))
 
 - \*\*Metrics-based classification\*\* using landscape metrics computed
   with landscapemetrics as input features for a neural network (see
-  [`train_nn_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_metrics.md))
+  [`train_nn_metrics`](https://ecomods.github.io/patternscaper/reference/train_nn_metrics.md))
 
 ## Typical workflow
 
 1.  Generate training landscapes with
-    [`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
+    [`create_landscapes`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md)
 
 2.  Optionally calculate and evaluate landscape metrics with
-    [`calculate_landscape_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/calculate_landscape_metrics.md)
+    [`calculate_landscape_metrics`](https://ecomods.github.io/patternscaper/reference/calculate_landscape_metrics.md)
     and
-    [`evaluate_landscape_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/evaluate_landscape_metrics.md)
+    [`evaluate_landscape_metrics`](https://ecomods.github.io/patternscaper/reference/evaluate_landscape_metrics.md)
 
 3.  Train a classifier with
-    [`train_nn_pixels`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_pixels.md)
+    [`train_nn_pixels`](https://ecomods.github.io/patternscaper/reference/train_nn_pixels.md)
     or
-    [`train_nn_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/train_nn_metrics.md)
+    [`train_nn_metrics`](https://ecomods.github.io/patternscaper/reference/train_nn_metrics.md)
 
 4.  Apply the trained model to new landscapes with
-    [`apply_nn_pixels`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_pixels.md)
+    [`apply_nn_pixels`](https://ecomods.github.io/patternscaper/reference/apply_nn_pixels.md)
     or
-    [`apply_nn_metrics`](https://ecomods.github.io/spatPatClassifyR/reference/apply_nn_metrics.md)
+    [`apply_nn_metrics`](https://ecomods.github.io/patternscaper/reference/apply_nn_metrics.md)
 
 5.  Visualize results with
-    [`plot_classified_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/plot_classified_landscapes.md)
+    [`plot_classified_landscapes`](https://ecomods.github.io/patternscaper/reference/plot_classified_landscapes.md)
 
 ## References
 

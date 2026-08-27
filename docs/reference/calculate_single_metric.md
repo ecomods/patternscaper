@@ -1,8 +1,7 @@
 # Calculate a Single Landscape Metric
 
-Internal function to calculate a specific landscape metric for a single
-landscape. This function handles both plain SpatRaster lists and lists
-with metadata structure.
+Calculates a specific metric for each landscape object and captures any
+warnings.
 
 ## Usage
 

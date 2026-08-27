@@ -1,7 +1,8 @@
-# Create a landscape object
+# Create a Landscape Object
 
-Converts a matrix or SpatRaster into a landscape object that can be used
-with landscape analysis functions.
+Wraps a matrix or SpatRaster with pattern, name, and
+generation-parameter metadata into a landscape object that can be used
+by other patternscaper functions.
 
 ## Usage
 
@@ -13,47 +14,44 @@ landscape(data, pattern = NA_character_, name = NA_character_, params = NULL)
 
 - data:
 
-  Matrix or SpatRaster containing landscape data
+  Matrix or `SpatRaster` containing landscape data.
 
 - pattern:
 
-  Character string specifying the landscape pattern if known (default
-  NA).
+  Character. Known pattern label, or `NA` if unknown (default).
 
 - name:
 
-  Character string specifying the landscape name to distinguish it from
-  other landscapes (default NA).
+  Character. Landscape name, or `NA` if unnamed (default).
 
 - params:
 
-  List of parameters used to create the landscape. Can be empty but will
-  be filled if landscapes are created automatically by the
-  [`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
-  or the
-  [`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
-  function. Default is NULL.
+  List. Parameters used to generate the landscape (default: NULL).
+  [`create_landscape`](https://ecomods.github.io/patternscaper/reference/create_landscape.md)
+  and
+  [`create_landscapes`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md)
+  fill this automatically.
 
 ## Value
 
-A landscape object
+A landscape object containing the data and metadata.
 
 ## See also
 
-[`create_landscape`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscape.md),
-[`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
+[`create_landscape`](https://ecomods.github.io/patternscaper/reference/create_landscape.md),
+[`create_landscapes`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md)
 
 Other landscape objects:
-[`plot.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot.landscape.md),
-[`print.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/print.landscape.md),
-[`set_landscape_name()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_name.md),
-[`set_landscape_pattern()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_pattern.md)
+[`plot.landscape()`](https://ecomods.github.io/patternscaper/reference/plot.landscape.md),
+[`print.landscape()`](https://ecomods.github.io/patternscaper/reference/print.landscape.md),
+[`set_landscape_name()`](https://ecomods.github.io/patternscaper/reference/set_landscape_name.md),
+[`set_landscape_pattern()`](https://ecomods.github.io/patternscaper/reference/set_landscape_pattern.md)
 
 ## Examples
 
 ``` r
-# Create from a matrix
-mat <- matrix(runif(100), nrow = 10, ncol = 10)
+# Create from a binary matrix (0 = bare ground, 1 = vegetation)
+mat <- matrix(rbinom(100, 1, 0.5), nrow = 10, ncol = 10)
 l <- landscape(mat)
 
 # Create with pattern and name

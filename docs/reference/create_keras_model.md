@@ -18,7 +18,7 @@ create_keras_model(
 
 - architecture:
 
-  Character. Architecture type.
+  Either "multiscale" or a model-building function.
 
 - input_shape:
 

@@ -22,7 +22,7 @@ plot_landscape_list(
 - landscapes:
 
   List. List of landscape objects to plot. E.g. created by
-  [`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md).
+  [`create_landscapes`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md).
 
 - titles:
 
@@ -64,12 +64,12 @@ A ggplot object combining all landscape plots in a grid.
 
 ## See also
 
-[`create_landscapes`](https://ecomods.github.io/spatPatClassifyR/reference/create_landscapes.md)
+[`create_landscapes`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md)
 
 Other visualization:
-[`plot_classified_landscapes()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_classified_landscapes.md),
-[`plot_landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_landscape.md),
-[`plot_metrics()`](https://ecomods.github.io/spatPatClassifyR/reference/plot_metrics.md)
+[`plot_classified_landscapes()`](https://ecomods.github.io/patternscaper/reference/plot_classified_landscapes.md),
+[`plot_landscape()`](https://ecomods.github.io/patternscaper/reference/plot_landscape.md),
+[`plot_metrics()`](https://ecomods.github.io/patternscaper/reference/plot_metrics.md)
 
 ## Examples
 

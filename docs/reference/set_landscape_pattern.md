@@ -1,6 +1,6 @@
-# Set Landscape pattern
+# Set a Landscape Pattern
 
-Sets the pattern attribute of a landscape object.
+Replaces the pattern label stored in a landscape object.
 
 ## Usage
 
@@ -12,23 +12,23 @@ set_landscape_pattern(x, pattern)
 
 - x:
 
-  A landscape object
+  A landscape object.
 
 - pattern:
 
-  Character string specifying the new pattern
+  Character. New pattern label to store.
 
 ## Value
 
-The landscape object with updated pattern
+The landscape object with its updated pattern label.
 
 ## See also
 
 Other landscape objects:
-[`landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/landscape.md),
-[`plot.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/plot.landscape.md),
-[`print.landscape()`](https://ecomods.github.io/spatPatClassifyR/reference/print.landscape.md),
-[`set_landscape_name()`](https://ecomods.github.io/spatPatClassifyR/reference/set_landscape_name.md)
+[`landscape()`](https://ecomods.github.io/patternscaper/reference/landscape.md),
+[`plot.landscape()`](https://ecomods.github.io/patternscaper/reference/plot.landscape.md),
+[`print.landscape()`](https://ecomods.github.io/patternscaper/reference/print.landscape.md),
+[`set_landscape_name()`](https://ecomods.github.io/patternscaper/reference/set_landscape_name.md)
 
 ## Examples
 
@@ -46,5 +46,8 @@ patterns_vec <- c("sharp_treeline", "random_pattern")
 landscapes <- purrr::map2(landscapes, patterns_vec, set_landscape_pattern)
 
 # Multiple landscapes with base R
-landscapes <- mapply(set_landscape_pattern, landscapes, patterns_vec, SIMPLIFY = FALSE)
+landscapes <- mapply(
+  set_landscape_pattern, landscapes, patterns_vec,
+  SIMPLIFY = FALSE
+)
 ```

@@ -12,14 +12,14 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/ecomods/spatPatClassifyR/blob/HEAD/inst/CITATION)
+[`inst/CITATION`](https://github.com/ecomods/patternscaper/blob/HEAD/inst/CITATION)
 
-Baldauf S, Tietjen B, Berger U (2025). “spatPatClassifyR: An R package
-for classifying spatial landscape patterns using neural networks.”
-*Methods in Ecology and Evolution*. In review.
+Baldauf S, Tietjen B, Berger U (2025). “patternscaper: An R package for
+classifying spatial landscape patterns using neural networks.” *Methods
+in Ecology and Evolution*. In review.
 
     @Article{,
-      title = {spatPatClassifyR: An R package for classifying spatial landscape patterns using neural networks},
+      title = {patternscaper: An R package for classifying spatial landscape patterns using neural networks},
       author = {Selina Baldauf and Britta Tietjen and Uta Berger},
       journal = {Methods in Ecology and Evolution},
       year = {2025},
