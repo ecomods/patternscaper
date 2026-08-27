@@ -35,7 +35,7 @@ The package supports two classification workflows:
 }
 
 \references{
-Baldauf, S., Tietjen, B., & Berger, U. (2025). patternscaper: An R
+Tietjen, B., Baldauf, S., & Berger, U. (2026). patternscaper: An R
 package for classifying spatial landscape patterns using neural networks.
 *Methods in Ecology and Evolution*. In review.
 }

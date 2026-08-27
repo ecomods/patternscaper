@@ -74,17 +74,17 @@ reference:
   - plot_metrics
 
 articles:
-- title: Classification workflows
-  contents:
-  - classify-metrics
-  - classify-pixels
-
 - title: Prepare landscapes
   contents:
   - landscape-generation
   - pattern-gallery
   - importing-landscapes
   - matching-training-application
+
+- title: Classification workflows
+  contents:
+  - classify-metrics
+  - classify-pixels
 
 - title: Supporting guides
   contents:
@@ -99,12 +99,6 @@ navbar:
     articles:
       text: Guides
       menu:
-      - text: Classification workflows
-      - text: "Classify with landscape metrics"
-        href: articles/classify-metrics.html
-      - text: "Classify with pixels"
-        href: articles/classify-pixels.html
-      - text: "-------"
       - text: Prepare landscapes
       - text: "Create artificial landscapes"
         href: articles/landscape-generation.html
@@ -114,6 +108,12 @@ navbar:
         href: articles/importing-landscapes.html
       - text: "Match training and application landscapes"
         href: articles/matching-training-application.html
+      - text: "-------"
+      - text: Classification workflows
+      - text: "Classify with landscape metrics"
+        href: articles/classify-metrics.html
+      - text: "Classify with pixels"
+        href: articles/classify-pixels.html
       - text: "-------"
       - text: Supporting guides
       - text: "Calculate and evaluate landscape metrics"

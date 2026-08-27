@@ -2,11 +2,11 @@ bibentry(
   bibtype  = "Article",
   title    = "patternscaper: An R package for classifying spatial landscape patterns using neural networks",
   author   = c(
-    person("Selina", "Baldauf"),
     person("Britta", "Tietjen"),
+    person("Selina", "Baldauf"),
     person("Uta", "Berger")
   ),
   journal  = "Methods in Ecology and Evolution",
-  year     = "2025",
+  year     = "2026",
   note     = "In review"
 )

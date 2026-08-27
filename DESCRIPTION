@@ -3,10 +3,10 @@ Type: Package
 Title: Classify Spatial Landscape Patterns Using Neural Networks
 Version: 0.1.0
 Authors@R: c(
-    person("Selina", "Baldauf", , "selina.baldauf@fu-berlin.de", role = c("aut", "cre"),
-    comment = c(ORCID = "0000-0002-3393-725X")),
     person("Britta", "Tietjen", , "britta.tietjen@fu-berlin.de", role = c("aut"),
     comment = c(ORCID = "0000-0003-4767-6406")),
+    person("Selina", "Baldauf", , "selina.baldauf@fu-berlin.de", role = c("aut", "cre"),
+    comment = c(ORCID = "0000-0002-3393-725X")),
     person("Uta", "Berger", , "uta.berger@tu-dresden.de", role = c("aut"),
     comment = c(ORCID = "0000-0001-6920-136X"))
   )
