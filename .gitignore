@@ -7,10 +7,6 @@
 .httr-oauth
 inst/doc
 models/
-# Heavy binary artifacts from dev/ scratch scripts (keep the .R scripts, not the model outputs)
-dev/*.keras
-dev/*.h5
-dev/*.hdf5
 /docs/
 tests/testthat/*.pdf
 # testthat failing-test repro artifacts (auto-generated, transient)
@@ -40,15 +36,7 @@ inst/analyses/data/systematic_tests/*/*/*.rds
 # Cached vignette chunk results (knitr cache)
 vignettes/*_cache/
 
-# Rendered output from dev/ scratch quarto docs (keep the .qmd, not the render)
-dev/*_cache/
-dev/*_files/
-dev/*.html
-
 /.quarto/
-
-# Local pkgdown preview output
-/_site-preview/
 
 # Draw-io files
 vignettes/img/.$workflow.drawio.bkp

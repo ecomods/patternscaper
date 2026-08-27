@@ -6,11 +6,11 @@
 # compares the pixel workflow with a tolerance that absorbs TensorFlow
 # installation differences.
 #
-# Run from the PACKAGE ROOT:  source("dev/golden/capture.R")
+# Run from the PACKAGE ROOT:  source("tools/regression/capture.R")
 
-source("dev/golden/run_golden.R")
+source("tools/regression/run_golden.R")
 
 reference <- run_golden()
-saveRDS(reference, "dev/golden/reference.rds")
+saveRDS(reference, "tools/regression/reference.rds")
 
-cli::cli_alert_success("Saved golden reference to dev/golden/reference.rds")
+cli::cli_alert_success("Saved golden reference to tools/regression/reference.rds")

@@ -1,7 +1,7 @@
 # Compare the current code against the frozen golden reference.
 #
 # Run from the PACKAGE ROOT:
-#   source("dev/golden/check.R")
+#   source("tools/regression/check.R")
 #
 # Both workflows are compared with a tolerance, just at different magnitudes,
 # because neither is bit-reproducible. What IS stable in both -- selected metric
@@ -9,7 +9,7 @@
 # integer, so it is effectively exact regardless of the tolerance (a real change
 # there differs by a whole label or count, not by a fraction).
 
-source("dev/golden/run_golden.R")
+source("tools/regression/run_golden.R")
 
 pixel_values <- c("pix_accuracy", "pix_confusion", "pix_predictions")
 
@@ -24,7 +24,7 @@ pixel_tolerance <- 1e-5
 # and metric selection / class labels / counts are compared categorically anyway.
 metrics_tolerance <- 1e-8
 
-reference <- readRDS("dev/golden/reference.rds")
+reference <- readRDS("tools/regression/reference.rds")
 current <- run_golden()
 
 metrics_values <- setdiff(names(reference), pixel_values)

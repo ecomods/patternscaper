@@ -1,3 +1,0 @@
-use_case,n_seeds,mean_test_accuracy,sd_test_accuracy,minimum_test_accuracy,maximum_test_accuracy
-ecotones,10,0.783,0.037133393177689655,0.74,0.84
-self_organized,10,0.858,0.041311822359545794,0.78,0.91

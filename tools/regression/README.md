@@ -31,13 +31,13 @@ needed for the classification harness).
 
 1. **Freeze the baseline** (once, on the known-good `revision-baseline`):
    ```r
-   source("dev/golden/capture.R")
-   source("dev/golden/capture_landscapes.R")
+   source("tools/regression/capture.R")
+   source("tools/regression/capture_landscapes.R")
    ```
 2. **After a refactor**, verify nothing changed:
    ```r
-   source("dev/golden/check.R")
-   source("dev/golden/check_landscapes.R")
+   source("tools/regression/check.R")
+   source("tools/regression/check_landscapes.R")
    ```
    - Behaviour-preserving change → "results are identical" / "matches the
      reference exactly".

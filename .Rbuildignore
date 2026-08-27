@@ -1,6 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^dev$
+^tools$
 ^LICENSE\.md$
 ^\.github$
 ^vignettes/articles$

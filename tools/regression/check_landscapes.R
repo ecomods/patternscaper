@@ -2,7 +2,7 @@
 # reference, for all 11 patterns.
 #
 # Run from the PACKAGE ROOT:
-#   source("dev/golden/check_landscapes.R")
+#   source("tools/regression/check_landscapes.R")
 #
 # Unlike check.R (classification results, compared with a tolerance because
 # neither workflow is bit-reproducible), landscape generation is pure
@@ -10,9 +10,9 @@
 # so this comparison is EXACT. Any diff here means generated landscapes
 # actually changed, not numerical noise.
 
-source("dev/golden/run_golden_landscapes.R")
+source("tools/regression/run_golden_landscapes.R")
 
-reference <- readRDS("dev/golden/reference_landscapes.rds")
+reference <- readRDS("tools/regression/reference_landscapes.rds")
 current <- run_golden_landscapes()
 
 diff <- waldo::compare(
