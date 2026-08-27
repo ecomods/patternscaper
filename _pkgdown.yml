@@ -73,24 +73,53 @@ reference:
   - plot_classified_landscapes
   - plot_metrics
 
+articles:
+- title: Classification workflows
+  contents:
+  - classify-metrics
+  - classify-pixels
+
+- title: Prepare landscapes
+  contents:
+  - landscape-generation
+  - pattern-gallery
+  - importing-landscapes
+  - matching-training-application
+
+- title: Supporting guides
+  contents:
+  - landscape-metrics
+  - install-keras
+
 navbar:
+  structure:
+    left: [intro, articles, reference, news]
+    right: [search, github, lightswitch]
   components:
     articles:
-      text: Articles
+      text: Guides
       menu:
-      - text: "Generate landscapes"
+      - text: Classification workflows
+      - text: "Classify with landscape metrics"
+        href: articles/classify-metrics.html
+      - text: "Classify with raster cells"
+        href: articles/classify-pixels.html
+      - text: "-------"
+      - text: Prepare landscapes
+      - text: "Create artificial landscapes"
         href: articles/landscape-generation.html
       - text: "Pattern gallery"
         href: articles/pattern-gallery.html
-      - text: "Classify with metrics"
-        href: articles/classify-metrics.html
-      - text: "Classify with pixels"
-        href: articles/classify-pixels.html
-      - text: "User-defined landscapes"
+      - text: "Import user-defined landscapes"
         href: articles/importing-landscapes.html
-      - text: "Matching training and application data"
+      - text: "Match training and application landscapes"
         href: articles/matching-training-application.html
-      - text: "Calculate Landscape metrics"
+      - text: "-------"
+      - text: Supporting guides
+      - text: "Calculate and evaluate landscape metrics"
         href: articles/landscape-metrics.html
-      - text: "Set up Keras"
+      - text: "Set up Keras and TensorFlow"
         href: articles/install-keras.html
+      - text: "-------"
+      - text: "All guides"
+        href: articles/index.html
