@@ -109,7 +109,9 @@ classification_results$predictions
 
 # Because artificial landscapes keep their true pattern labels, apply_metric_model()
 # also evaluates the predictions
-classification_results$performance
+classification_results$performance$confusion_matrix
+classification_results$performance$accuracy
+classification_results$performance$per_class_metrics
 ```
 
 ## Next steps
