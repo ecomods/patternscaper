@@ -368,7 +368,8 @@ custom_model <- train_pixel_model(
 )
 ```
 
-The final layer must contain one softmax output for each pattern class. The
-`n_classes` argument supplies this number automatically. Use the built-in
-architecture unless you are comfortable designing and evaluating neural
-networks.
+The model must have exactly one two-dimensional output, with one output unit for
+each pattern class. The `n_classes` argument supplies this number automatically.
+The final layer must explicitly configure a softmax activation, either directly
+or through `layer_activation("softmax")`. Use the built-in architecture unless you are comfortable designing and
+evaluating neural networks.

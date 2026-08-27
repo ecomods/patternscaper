@@ -56,7 +56,9 @@ Note: May be automatically reduced to ensure adequate samples per fold.}
 a model-building function. A custom function must accept the arguments
 \code{input_shape}, \code{n_classes}, \code{dropout_rate}, and
 \code{dense_units}, and return a new uncompiled Keras model each time it is
-called.}
+called. The model must have one two-dimensional output with
+\code{n_classes} units and an explicitly configured softmax activation in
+its final layer.}
 
 \item{dropout_rate}{Numeric. Dropout rate for regularization (0-1, default: 0.3).
 Higher values reduce overfitting but may decrease model capacity. Applied between

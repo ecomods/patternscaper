@@ -690,6 +690,99 @@ test_that("custom architecture functions must return a Keras model", {
   )
 })
 
+test_that("custom architectures must satisfy the output contract", {
+  skip_if_no_keras()
+
+  wrong_width_architecture <- function(output_units) {
+    \(input_shape, ...) {
+      keras3::keras_model_sequential(input_shape = input_shape) |>
+        keras3::layer_flatten() |>
+        keras3::layer_dense(units = output_units, activation = "softmax")
+    }
+  }
+
+  expect_error(
+    create_keras_model(
+      architecture = wrong_width_architecture(2),
+      input_shape = c(10, 10, 1),
+      n_classes = 3
+    ),
+    "Expected 3 output units but found 2"
+  )
+  expect_error(
+    create_keras_model(
+      architecture = wrong_width_architecture(4),
+      input_shape = c(10, 10, 1),
+      n_classes = 3
+    ),
+    "Expected 3 output units but found 4"
+  )
+
+  multiple_output_architecture <- function(input_shape, n_classes, ...) {
+    input <- keras3::layer_input(shape = input_shape)
+    features <- input |> keras3::layer_flatten()
+    keras3::keras_model(
+      inputs = input,
+      outputs = list(
+        features |>
+          keras3::layer_dense(units = n_classes, activation = "softmax"),
+        features |>
+          keras3::layer_dense(units = n_classes, activation = "softmax")
+      )
+    )
+  }
+  expect_error(
+    create_keras_model(
+      architecture = multiple_output_architecture,
+      input_shape = c(10, 10, 1),
+      n_classes = 3
+    ),
+    "must have exactly one output"
+  )
+
+  non_matrix_architecture <- function(input_shape, ...) {
+    keras3::keras_model_sequential(input_shape = input_shape) |>
+      keras3::layer_activation(activation = "softmax")
+  }
+  expect_error(
+    create_keras_model(
+      architecture = non_matrix_architecture,
+      input_shape = c(10, 10, 1),
+      n_classes = 3
+    ),
+    "must have a two-dimensional output"
+  )
+
+  sigmoid_architecture <- function(input_shape, n_classes, ...) {
+    keras3::keras_model_sequential(input_shape = input_shape) |>
+      keras3::layer_flatten() |>
+      keras3::layer_dense(units = n_classes, activation = "sigmoid")
+  }
+  expect_error(
+    create_keras_model(
+      architecture = sigmoid_architecture,
+      input_shape = c(10, 10, 1),
+      n_classes = 3
+    ),
+    "final layer must use a softmax activation"
+  )
+
+  separate_softmax_architecture <- function(input_shape, n_classes, ...) {
+    keras3::keras_model_sequential(input_shape = input_shape) |>
+      keras3::layer_flatten() |>
+      keras3::layer_dense(units = n_classes) |>
+      keras3::layer_activation(activation = "softmax")
+  }
+  expect_s3_class(
+    create_keras_model(
+      architecture = separate_softmax_architecture,
+      input_shape = c(10, 10, 1),
+      n_classes = 3
+    ),
+    "keras.src.models.model.Model"
+  )
+})
+
 test_that("train_pixel_model works with cv_method='k-fold'", {
   skip_if_no_keras()
 

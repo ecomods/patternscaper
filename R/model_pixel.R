@@ -30,7 +30,9 @@
 #'   a model-building function. A custom function must accept the arguments
 #'   \code{input_shape}, \code{n_classes}, \code{dropout_rate}, and
 #'   \code{dense_units}, and return a new uncompiled Keras model each time it is
-#'   called.
+#'   called. The model must have one two-dimensional output with
+#'   \code{n_classes} units and an explicitly configured softmax activation in
+#'   its final layer.
 #' @param dropout_rate Numeric. Dropout rate for regularization (0-1, default: 0.3).
 #'  Higher values reduce overfitting but may decrease model capacity. Applied between
 #'  convolutional and dense layers.
@@ -1150,7 +1152,48 @@ create_keras_model <- function(
     )
   }
 
+  if (is.function(architecture)) {
+    validate_keras_output_contract(model, n_classes)
+  }
+
   return(model)
+}
+
+validate_keras_output_contract <- function(model, n_classes) {
+  if (length(model$outputs) != 1L) {
+    cli::cli_abort(
+      "The custom architecture must have exactly one output."
+    )
+  }
+
+  output_shape <- model$output_shape
+  if (length(output_shape) != 2L || is.null(output_shape[[2]])) {
+    cli::cli_abort(
+      "The custom architecture must have a two-dimensional output with a known class dimension."
+    )
+  }
+
+  output_units <- as.integer(output_shape[[2]])
+  if (!identical(output_units, as.integer(n_classes))) {
+    cli::cli_abort(c(
+      "The custom architecture must return one output unit per pattern class.",
+      "x" = "Expected {n_classes} output units but found {output_units}."
+    ))
+  }
+
+  final_layer <- model$get_layer(index = -1L)
+  activation <- tryCatch(
+    final_layer$get_config()$activation,
+    error = \(cnd) NULL
+  )
+  if (!identical(activation, "softmax")) {
+    cli::cli_abort(c(
+      "The custom architecture's final layer must use a softmax activation.",
+      "i" = "Use a final dense layer with {.code activation = \"softmax\"} or a separate {.fn keras3::layer_activation} layer."
+    ))
+  }
+
+  invisible(model)
 }
 
 #' Compile Keras Model
