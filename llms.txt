@@ -1,0 +1,231 @@
+# patternscaper
+
+## Overview
+
+`patternscaper` classifies spatial vegetation patterns into ecologically
+meaningful, user-defined pattern types. It provides a reproducible
+alternative to visual classification or the manual interpretation of
+multiple landscape metrics. It can be used to compare landscape
+structure across space or time, monitor ecosystem change, evaluate
+spatial simulation outputs, and analyze classified remote-sensing data.
+
+Users define the pattern classes according to their research question
+and provide representative, labeled training landscapes. These
+landscapes can be generated with `patternscaper` or imported from
+ecological simulation outputs or other categorical raster data.
+Artificial landscapes are particularly useful when labeled empirical
+training data are scarce because their classes are known by construction
+and their variation can be controlled.
+
+The package provides two complementary approaches. The metric-based
+approach calculates established landscape metrics using the
+[`landscapemetrics` R
+package](https://r-spatialecology.github.io/landscapemetrics/index.html),
+selects informative metrics, and trains a neural network classifier on
+them. The pixel-based approach trains a convolutional neural network
+directly on categorical raster cells without prior feature selection.
+Both approaches support landscape preparation, model training and
+evaluation, classification of new landscapes, and visualization of the
+results.
+
+![Diagram showing the patternscaper workflow in two phases: (1) Training
+phase where training landscapes are fed into a neural network using
+either landscape metrics or pixel information, and (2) Application phase
+where new artificial or real landscapes are classified by the trained
+neural network to predict the landscape pattern
+class.](reference/figures/workflow.png)
+
+Overview of the patternscaper workflow. Classifiers are trained using
+either the metric-based or pixel-based approach and applied to new
+artificial or empirical landscapes.
+
+## Installation
+
+Install the development version of patternscaper from
+[GitHub](https://github.com/ecomods/patternscaper):
+
+``` r
+
+# install.packages("pak")
+pak::pak("ecomods/patternscaper")
+```
+
+## Get started
+
+Follow [Get
+started](https://ecomods.github.io/patternscaper/articles/patternscaper.html)
+for an overview of the complete classification workflow and a short
+runnable example. Depending on your starting point, you can also check
+out how to:
+
+- [Generate artificial
+  landscapes](https://ecomods.github.io/patternscaper/articles/landscape-generation.html)
+  for labeled training or test data
+- [Import your own
+  landscapes](https://ecomods.github.io/patternscaper/articles/importing-landscapes.html)
+  from categorical raster data or matrices
+
+## Citation
+
+To cite `patternscaper`, use:
+
+Tietjen, B., Baldauf, S., & Berger, U. (2026). patternscaper: An R
+package for classifying spatial landscape patterns using neural
+networks. *Methods in Ecology and Evolution*. In review.
+
+Run `citation("patternscaper")` for the BibTeX entry.
+
+## Contributing
+
+See the [contributing
+guide](https://ecomods.github.io/patternscaper/CONTRIBUTING.html) to get
+involved.
+
+## Code of Conduct
+
+Contributions are governed by the project [Code of
+Conduct](https://ecomods.github.io/patternscaper/CODE_OF_CONDUCT.html).
+
+# Package index
+
+## Package overview
+
+- [`patternscaper-package`](https://ecomods.github.io/patternscaper/reference/patternscaper.md)
+  [`patternscaper`](https://ecomods.github.io/patternscaper/reference/patternscaper.md)
+  : patternscaper: Classify Spatial Landscape Patterns Using Neural
+  Networks
+
+## Landscape creation
+
+Functions for generating artificial landscapes with different spatial
+patterns
+
+- [`create_landscape()`](https://ecomods.github.io/patternscaper/reference/create_landscape.md)
+  : Create a Single Landscape
+- [`create_landscapes()`](https://ecomods.github.io/patternscaper/reference/create_landscapes.md)
+  : Create Multiple Landscapes
+
+## Pattern parameters
+
+One constructor per pattern, holding that pattern’s parameters. Pass the
+result to create_landscape(params = …) or create_landscapes(params_list
+= …).
+
+- [`pattern_random()`](https://ecomods.github.io/patternscaper/reference/pattern_random.md)
+  : Parameters for the Random Pattern
+- [`pattern_bare()`](https://ecomods.github.io/patternscaper/reference/pattern_bare.md)
+  : Parameters for the Bare Pattern
+- [`pattern_dense()`](https://ecomods.github.io/patternscaper/reference/pattern_dense.md)
+  : Parameters for the Dense Pattern
+- [`pattern_sharp()`](https://ecomods.github.io/patternscaper/reference/pattern_sharp.md)
+  : Parameters for the Sharp Pattern
+- [`pattern_diffuse()`](https://ecomods.github.io/patternscaper/reference/pattern_diffuse.md)
+  : Parameters for the Diffuse Pattern
+- [`pattern_fingers()`](https://ecomods.github.io/patternscaper/reference/pattern_fingers.md)
+  : Parameters for the Fingers Pattern
+- [`pattern_clustered()`](https://ecomods.github.io/patternscaper/reference/pattern_clustered.md)
+  : Parameters for the Clustered Pattern
+- [`pattern_bands()`](https://ecomods.github.io/patternscaper/reference/pattern_bands.md)
+  : Parameters for the Bands Pattern
+- [`pattern_spots()`](https://ecomods.github.io/patternscaper/reference/pattern_spots.md)
+  : Parameters for the Spots Pattern
+- [`pattern_gaps()`](https://ecomods.github.io/patternscaper/reference/pattern_gaps.md)
+  : Parameters for the Gaps Pattern
+- [`pattern_labyrinth()`](https://ecomods.github.io/patternscaper/reference/pattern_labyrinth.md)
+  : Parameters for the Labyrinth Pattern
+
+## Landscape objects
+
+Functions for creating and manipulating landscape objects
+
+- [`landscape()`](https://ecomods.github.io/patternscaper/reference/landscape.md)
+  : Create a Landscape Object
+- [`plot(`*`<landscape>`*`)`](https://ecomods.github.io/patternscaper/reference/plot.landscape.md)
+  : Plot a Landscape Object
+- [`print(`*`<landscape>`*`)`](https://ecomods.github.io/patternscaper/reference/print.landscape.md)
+  : Print a Landscape Object
+- [`set_landscape_name()`](https://ecomods.github.io/patternscaper/reference/set_landscape_name.md)
+  : Set a Landscape Name
+- [`set_landscape_pattern()`](https://ecomods.github.io/patternscaper/reference/set_landscape_pattern.md)
+  : Set a Landscape Pattern
+
+## Landscape metrics
+
+Calculate and evaluate landscape metrics
+
+- [`calculate_metrics()`](https://ecomods.github.io/patternscaper/reference/calculate_metrics.md)
+  : Calculate Landscape Metrics
+- [`evaluate_metrics()`](https://ecomods.github.io/patternscaper/reference/evaluate_metrics.md)
+  : Evaluate Landscape Metrics
+- [`print(`*`<metrics_evaluation>`*`)`](https://ecomods.github.io/patternscaper/reference/print.metrics_evaluation.md)
+  : Print a metrics evaluation
+
+## Neural network training
+
+Train neural network classifiers
+
+- [`train_metric_model()`](https://ecomods.github.io/patternscaper/reference/train_metric_model.md)
+  : Train a Multi-Layer Neural Network for Landscape Pattern
+  Classification
+- [`train_pixel_model()`](https://ecomods.github.io/patternscaper/reference/train_pixel_model.md)
+  : Train a Convolutional Neural Network for Landscape Pattern
+  Classification
+- [`set_random_seed()`](https://ecomods.github.io/patternscaper/reference/set_random_seed.md)
+  : Set Random Seeds for Neural Network Training
+
+## Neural network application
+
+Apply trained classifiers to new landscapes
+
+- [`apply_metric_model()`](https://ecomods.github.io/patternscaper/reference/apply_metric_model.md)
+  : Apply Neural Network for Landscape Pattern Classification Based on
+  their Landscape Metrics
+- [`apply_pixel_model()`](https://ecomods.github.io/patternscaper/reference/apply_pixel_model.md)
+  : Apply a Keras CNN Model for Landscape Pattern Classification
+
+## Model persistence
+
+Save and reload trained classifiers
+
+- [`save_pixel_model()`](https://ecomods.github.io/patternscaper/reference/save_pixel_model.md)
+  : Save a Trained Pixel Model
+- [`load_pixel_model()`](https://ecomods.github.io/patternscaper/reference/load_pixel_model.md)
+  : Load a Trained Pixel Model
+
+## Visualization
+
+Plot landscapes, metrics, and classification results
+
+- [`plot_landscapes()`](https://ecomods.github.io/patternscaper/reference/plot_landscapes.md)
+  : Plot One or More Landscapes
+- [`plot_classified_landscapes()`](https://ecomods.github.io/patternscaper/reference/plot_classified_landscapes.md)
+  : Plot Neural Network Classification Landscapes
+- [`plot_metrics()`](https://ecomods.github.io/patternscaper/reference/plot_metrics.md)
+  : Plot Landscape Metrics
+
+# Articles
+
+### Prepare landscapes
+
+- [Create artificial
+  landscapes](https://ecomods.github.io/patternscaper/articles/landscape-generation.md):
+- [Pattern
+  gallery](https://ecomods.github.io/patternscaper/articles/pattern-gallery.md):
+- [Import user-defined
+  landscapes](https://ecomods.github.io/patternscaper/articles/importing-landscapes.md):
+- [Match training and application
+  landscapes](https://ecomods.github.io/patternscaper/articles/matching-training-application.md):
+
+### Classification workflows
+
+- [Classify landscapes with landscape
+  metrics](https://ecomods.github.io/patternscaper/articles/classify-metrics.md):
+- [Classify landscapes with
+  pixels](https://ecomods.github.io/patternscaper/articles/classify-pixels.md):
+
+### Supporting guides
+
+- [Calculate and evaluate landscape
+  metrics](https://ecomods.github.io/patternscaper/articles/landscape-metrics.md):
+- [Set up Keras and
+  TensorFlow](https://ecomods.github.io/patternscaper/articles/install-keras.md):
