@@ -11,7 +11,7 @@ models/
 dev/*.keras
 dev/*.h5
 dev/*.hdf5
-docs/obsidian_files/
+/docs/
 tests/testthat/*.pdf
 # testthat failing-test repro artifacts (auto-generated, transient)
 tests/testthat/_problems/
