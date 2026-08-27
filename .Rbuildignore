@@ -17,5 +17,6 @@
 \.drawio$
 ^tests/testthat/_problems$
 ^CLAUDE\.md$
+^AGENTS\.(md|txt)$
 ^\.quarto$
 ^tests/testthat/Rplots\.pdf$

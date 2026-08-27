@@ -3,6 +3,9 @@
 # Run without arguments for a lazy site refresh:
 #   Rscript dev/preview_site.R
 #
+# Rebuild the complete preview from a clean destination:
+#   Rscript dev/preview_site.R clean
+#
 # Rebuild only the homepage:
 #   Rscript dev/preview_site.R home
 #
@@ -36,6 +39,13 @@ if (length(args) > 1L) {
     new_process = FALSE,
     install = FALSE,
     quiet = FALSE
+  )
+} else if (identical(args[[1]], "clean")) {
+  pkgdown::build_site_github_pages(
+    dest_dir = destination,
+    clean = TRUE,
+    install = FALSE,
+    new_process = FALSE
   )
 } else if (identical(args[[1]], "home")) {
   pkgdown::build_home(
