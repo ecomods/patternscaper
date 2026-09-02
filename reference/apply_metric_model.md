@@ -168,8 +168,10 @@ train_landscapes <- create_landscapes(
 )
 #> ✔ Successfully generated all 18 training landscapes
 metrics <- calculate_metrics(train_landscapes, level = "landscape")
-#>  ■■■■■■■■■■■■■                     39% |  ETA:  4s
-#>  ■■■■■■■■■■■■■■■■■■■               61% |  ETA:  4s
+#>  ■■■■■■■■■                         26% |  ETA:  8s
+#>  ■■■■■■■■■■■■■                     41% |  ETA:  8s
+#>  ■■■■■■■■■■■■■■■■■                 53% |  ETA:  9s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■           73% |  ETA:  4s
 # find the best 5 metrics for classification
 best_5 <- evaluate_metrics(metrics, metrics_number = 5)
 #> Warning: Excluded 6 metrics with missing values (108 rows removed).

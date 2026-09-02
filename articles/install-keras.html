@@ -98,61 +98,58 @@
 
     <p>The pixel-based workflow uses <code>keras3</code> with a TensorFlow backend. Installing <code>patternscaper</code> also installs the R package <code>keras3</code>, but the Python environment and TensorFlow backend need a separate setup step.</p>
 <p>This guide covers only what is needed to run the <a href="classify-pixels.html">pixel-based workflow</a>. For platform-specific options, including GPU support, see the official <a href="https://keras3.posit.co/reference/install_keras.html" class="external-link"><code>keras3</code> installation reference</a>.</p>
-<section class="level2"><h2 id="standard-setup">Standard setup<a class="anchor" aria-label="anchor" href="#standard-setup"></a>
+<section class="level2"><h2 id="choose-python-3-12">Choose Python 3.12<a class="anchor" aria-label="anchor" href="#choose-python-3-12"></a>
 </h2>
-<p>Start a fresh R session, then run:</p>
+<p><code>patternscaper</code> currently recommends Python 3.12 for the pixel-based workflow. Other Python versions can remain installed, but the <code>r-keras</code> environment should use Python 3.12.</p>
+<p>Start a fresh R session and check whether <code>reticulate</code> can find an existing Python 3.12 installation:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">keras3</span><span class="fu">::</span><span class="fu"><a href="https://keras3.posit.co/reference/install_keras.html" class="external-link">install_keras</a></span><span class="op">(</span>backend <span class="op">=</span> <span class="st">"tensorflow"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/virtualenv-tools.html" class="external-link">virtualenv_starter</a></span><span class="op">(</span></span>
+<span>  version <span class="op">=</span> <span class="st">"3.12"</span>,</span>
+<span>  all <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
-<p>This creates a Python virtual environment named <code>r-keras</code> and installs Keras, TensorFlow, and their Python dependencies. The download and installation can take several minutes.</p>
+<p>If this prints at least one Python installation, continue to <a href="#install-keras-and-tensorflow">Install Keras and TensorFlow</a>. If it returns an empty result, install the latest Python 3.12 patch release:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/install_python.html" class="external-link">install_python</a></span><span class="op">(</span><span class="st">"3.12:latest"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<p>This installation is separate from other Python versions already on the computer. If Python 3.12 is installed in a non-standard location but is not found, see the official <a href="https://rstudio.github.io/reticulate/reference/use_python.html" class="external-link"><code>reticulate</code> Python selection reference</a>.</p>
+</section><section class="level2"><h2 id="install-keras-and-tensorflow">Install Keras and TensorFlow<a class="anchor" aria-label="anchor" href="#install-keras-and-tensorflow"></a>
+</h2>
+<p>In the same fresh R session, run:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">keras3</span><span class="fu">::</span><span class="fu"><a href="https://keras3.posit.co/reference/install_keras.html" class="external-link">install_keras</a></span><span class="op">(</span></span>
+<span>  backend <span class="op">=</span> <span class="st">"tensorflow"</span>,</span>
+<span>  python_version <span class="op">=</span> <span class="st">"3.12"</span>,</span>
+<span>  restart_session <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_install.html" class="external-link">py_install</a></span><span class="op">(</span></span>
+<span>  packages <span class="op">=</span> <span class="st">"numpy&lt;2"</span>,</span>
+<span>  envname <span class="op">=</span> <span class="st">"r-keras"</span>,</span>
+<span>  pip <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<p>The Keras installer creates a Python virtual environment named <code>r-keras</code> and installs Keras, TensorFlow, and the required Python dependencies. <code>py_install</code> installs a NumPy version compatible with the current <code>keras3</code> requirements. The download and installation can take several minutes.</p>
 <p>When the installation finished, restart R.</p>
 </section><section class="level2"><h2 id="verify-the-backend">Verify the backend<a class="anchor" aria-label="anchor" href="#verify-the-backend"></a>
 </h2>
 <p>In the fresh R session, load <code>patternscaper</code> and then ask Keras which backend it is using:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ecomods.github.io/patternscaper/">patternscaper</a></span><span class="op">)</span></span>
 <span><span class="fu">keras3</span><span class="fu">::</span><span class="fu"><a href="https://keras3.posit.co/reference/config_backend.html" class="external-link">config_backend</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "tensorflow"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "tensorflow"</span></span>
+<span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_config.html" class="external-link">py_config</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
-<p>The result of this call should be <code>"tensorflow"</code>. This step is an active verification because <code>config_backend()</code> initializes Keras and Python, and <code>reticulate</code> resolves declared Python requirements as part of that process.</p>
-<p>Tensorflow may print other messages into the console in that step. But as long as <code>config_backend()</code> returns <code>"tensorflow"</code>, the step was successful.</p>
-</section><section class="level2"><h2 id="alternative-set-python-explicitly">Alternative: Set Python explicitly<a class="anchor" aria-label="anchor" href="#alternative-set-python-explicitly"></a>
-</h2>
-<p>The standard setup lets <code>keras3</code> choose a compatible Python installation automatically. If the setup fails, or if you want to use a particular Python installation, you can select it manually before running the Keras installer. Do this in a new R session before loading <code>patternscaper</code> or <code>keras3</code>.</p>
-<div>
-<blockquote>
-<p><strong>Warning</strong></p>
-<p><strong>Check compatibility before selecting Python manually.</strong> Supported Python versions depend on the current <code>keras3</code> installer and TensorFlow release. If you do not require a particular Python installation, use the standard setup and let <code>keras3</code> select one.</p>
-</blockquote>
-</div>
-<p>First, locate the path of your desired Python executable. You can also find your Python installation from the terminal:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">where</span> python    <span class="co"># Windows</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span> python    <span class="co"># macOS or Linux</span></span></code></pre></div>
-<p>In your R session, set the Python path:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Replace the path with your actual Python installation</span></span>
-<span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/use_python.html" class="external-link">use_python</a></span><span class="op">(</span></span>
-<span>  <span class="st">"C:/path/to/python.exe"</span>,</span>
-<span>  required <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co"># Verify it worked</span></span>
-<span><span class="co"># Should print your python installation not NULL</span></span>
-<span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_discover_config.html" class="external-link">py_discover_config</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co"># Install tensorflow</span></span>
-<span><span class="fu">keras3</span><span class="fu">::</span><span class="fu"><a href="https://keras3.posit.co/reference/install_keras.html" class="external-link">install_keras</a></span><span class="op">(</span>backend <span class="op">=</span> <span class="st">"tensorflow"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<p>Restart R after the installation finished, then repeat the <a href="#verify-the-backend">backend verification</a>. Python compatibility changes over time, so check the current <a href="https://www.tensorflow.org/install/pip" class="external-link">TensorFlow installation guide</a> before selecting a version yourself. See the official <a href="https://rstudio.github.io/reticulate/reference/use_python.html" class="external-link"><code>reticulate</code> Python selection reference</a> for other selection methods.</p>
+<p><code>config_backend()</code> should return <code>"tensorflow"</code>. The Python configuration should point to the <code>r-keras</code> virtual environment, report Python 3.12 and a NumPy version below 2, and produce no warning about unsatisfied requirements declared through <code>py_require()</code>.</p>
+<p>TensorFlow may print informational oneDNN messages during this step which do not indicate installation failure.</p>
 </section><section class="level2"><h2 id="getting-more-help">Getting more help<a class="anchor" aria-label="anchor" href="#getting-more-help"></a>
 </h2>
-<p>If backend verification still fails after trying the standard setup or, if needed, the explicit Python setup, consult the official <a href="https://keras.io/getting_started/" class="external-link">Keras installation guide</a> and the <a href="https://keras3.posit.co/reference/install_keras.html" class="external-link"><code>keras3</code> installation reference</a> for current setup instructions.</p>
-<p>It can also be helpful to inspect your current python configuration:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_config.html" class="external-link">py_config</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-</div>
+<p>If backend verification still fails, consult the official <a href="https://keras.io/getting_started/" class="external-link">Keras installation guide</a> and the <a href="https://keras3.posit.co/reference/install_keras.html" class="external-link"><code>keras3</code> installation reference</a> for current setup instructions.</p>
+<p>Python compatibility changes over time so consult the current <a href="https://www.tensorflow.org/install/pip" class="external-link">TensorFlow installation guide</a> before selecting a different Python version.</p>
 <p>Once verification succeeds, continue with <a href="classify-pixels.html">Classify landscapes with pixels</a>.</p>
 </section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {

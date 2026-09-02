@@ -39,7 +39,8 @@ Other metrics:
 landscapes <- create_landscapes(n = 10, patterns = c("spots", "random"))
 #> ✔ Successfully generated all 10 training landscapes
 metrics <- calculate_metrics(landscapes, level = "landscape")
-#>  ■■■■■■■■■■■                       35% |  ETA:  3s
+#>  ■■■■■■■■■■■■■■■                   45% |  ETA:  4s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■        85% |  ETA:  1s
 evaluate_metrics(metrics, metrics_number = 5)
 #> Warning: Excluded 6 metrics with missing values (60 rows removed).
 #> ✖ NA value for at least one landscape: "enn_cv", "enn_mn", "enn_sd", "iji",
