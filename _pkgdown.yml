@@ -2,6 +2,8 @@ url: https://ecomods.github.io/patternscaper/
 template:
   bootstrap: 5
   light-switch: true
+  params:
+    google_site_verification: "WSiL3Q05SKjJhyutNW57dIrgpTvooUef8m_KhcOqINk"
 
 reference:
 - title: Package overview
