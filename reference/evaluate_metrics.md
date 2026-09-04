@@ -202,8 +202,8 @@ metrics <- calculate_metrics(
   landscapes,
   level = "landscape"
 )
-#>  ■■■■■■■■■■■■■                     41% |  ETA:  5s
-#>  ■■■■■■■■■■■■■■■■■■■■■             68% |  ETA:  3s
+#>  ■■■■■■■■■■■■■■                    42% |  ETA:  4s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■        82% |  ETA:  1s
 evaluation <- evaluate_metrics(
   metrics = metrics,
   metrics_number = 5

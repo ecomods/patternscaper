@@ -142,10 +142,10 @@ landscapes <- create_landscapes(
 
 # Calculate landscape metrics
 metrics <- calculate_metrics(landscapes, level = "landscape")
-#>  ■■■■■■■■■■■                       33% |  ETA:  8s
-#>  ■■■■■■■■■■■■■■■                   47% |  ETA:  8s
-#>  ■■■■■■■■■■■■■■■■■■                58% |  ETA:  7s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■        85% |  ETA:  2s
+#>  ■■■■■■■■■■                        30% |  ETA:  7s
+#>  ■■■■■■■■■■■■■■                    42% |  ETA:  8s
+#>  ■■■■■■■■■■■■■■■■■                 53% |  ETA:  8s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■        82% |  ETA:  3s
 
 # Find the best 5 metrics for classification
 best_5 <- evaluate_metrics(metrics, metrics_number = 5)
